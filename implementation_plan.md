@@ -5725,3 +5725,8 @@ graph TD
 - **검증 3 (모바일 뷰포트 390x844)**:
   - 컨텐츠 너비 375px로 횡스크롤 0건(Body Overflow Zero) 완벽 확인 (`08_mobile_homepage_390x844.png`).
   - 하단 모바일 독 58px 터치 타깃 및 플로팅 독 여백 확보 완료.
+
+## v2026.11.19.39 — User-authorized Production promotion, scoped security mitigation and release blockers
+- Latest main SHA f488088bf50eb4659f59782dc0300a9c3bc74c69 baseline Spring 237/237 executed with 38 security/false-data fails. Separate security branch corrected fake ledger, wallet and member identity, pension, dopamine, synthetic enterprise/KDIC/SWF and non-verified APIs, support failure handling and test H2 media fixture; full Java 243/243 GREEN, bootJar GREEN.
+- Production Nginx scoped wallet/pension privacy hotfix actually LIVE: 4 private wallet route aliases HTTP401, wallet summary client actor header stripped, pension funded claim HTTP401 and write denial HTTP503. No production app/DB or frontend change; public edge 10/10 negative tests.
+- Read-only isolated Spring candidate 127.0.0.1:4674 21/21 API checks; **does not** satisfy official Test exact merged SHA/session+ledger, 180 pages including admin five complete acceptance passes, merged Gemini UI PR #3301, rollback/release identity gates. Thus entire frontend/Java Production promotion remains HOLD until fixed. [QA report](docs/qa/2026-11-19-spring-safety-and-frontend-release-v39.md).

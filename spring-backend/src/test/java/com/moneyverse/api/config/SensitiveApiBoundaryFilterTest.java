@@ -31,6 +31,7 @@ class SensitiveApiBoundaryFilterTest {
         for (String path : new String[]{
                 "/api/v1/support/threads", "/api/support/threads", "/api/v1/chat/conversations",
                 "/api/chat/conversations", "/api/wallet/overview", "/api/wallet/balance",
+                "/api/v1/wallet/overview", "/api/v1/wallet/balance", "/api/wallet", "/api/v1/wallet",
                 "/api/bonds/my-holdings", "/api/v1/seo/status/admin", "/seo/status", "/api/v1/audit/frontend-errors"}) {
             var req = new MockHttpServletRequest("GET", path);
             req.addHeader("X-User-Id", UUID.randomUUID().toString());

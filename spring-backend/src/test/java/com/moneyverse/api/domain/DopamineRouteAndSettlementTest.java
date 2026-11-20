@@ -48,7 +48,7 @@ class DopamineRouteAndSettlementTest {
         session.setUserId(UUID.fromString("5f7b8b44-e4aa-40b8-b93a-800ec0151d20"));
         when(auth.resolveSession(any(HttpServletRequest.class))).thenReturn(Optional.of(session));
 
-        DopamineController controller = new DopamineController();
+        DopamineController controller = new DopamineController(auth);
         ResponseStatusException error = assertThrows(ResponseStatusException.class,
                 () -> controller.spinDailyRoulette(mock(HttpServletRequest.class)));
         assertEquals(HttpStatus.SERVICE_UNAVAILABLE, error.getStatusCode());
@@ -61,7 +61,7 @@ class DopamineRouteAndSettlementTest {
         session.setUserId(UUID.fromString("5f7b8b44-e4aa-40b8-b93a-800ec0151d20"));
         when(auth.resolveSession(any(HttpServletRequest.class))).thenReturn(Optional.of(session));
 
-        DopamineController controller = new DopamineController();
+        DopamineController controller = new DopamineController(auth);
         ResponseStatusException error = assertThrows(ResponseStatusException.class,
                 () -> controller.getDopamineStatus(mock(HttpServletRequest.class)));
         assertEquals(HttpStatus.SERVICE_UNAVAILABLE, error.getStatusCode());
@@ -74,7 +74,7 @@ class DopamineRouteAndSettlementTest {
         session.setUserId(UUID.fromString("5f7b8b44-e4aa-40b8-b93a-800ec0151d20"));
         when(auth.resolveSession(any(HttpServletRequest.class))).thenReturn(Optional.of(session));
 
-        DopamineController controller = new DopamineController();
+        DopamineController controller = new DopamineController(auth);
         ResponseStatusException error = assertThrows(ResponseStatusException.class,
                 () -> controller.getStreakBonus(mock(HttpServletRequest.class)));
         assertEquals(HttpStatus.SERVICE_UNAVAILABLE, error.getStatusCode());
@@ -84,7 +84,7 @@ class DopamineRouteAndSettlementTest {
     void anonymousSpinRequiresSession() {
         UserAuthService auth = mock(UserAuthService.class);
         when(auth.resolveSession(any(HttpServletRequest.class))).thenReturn(Optional.empty());
-        DopamineController controller = new DopamineController();
+        DopamineController controller = new DopamineController(auth);
         ResponseStatusException error = assertThrows(ResponseStatusException.class,
                 () -> controller.spinDailyRoulette(mock(HttpServletRequest.class)));
         assertEquals(HttpStatus.UNAUTHORIZED, error.getStatusCode());
