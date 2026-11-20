@@ -188,6 +188,9 @@ jobs:
           node-version: 24
           cache: pnpm
 
+      - name: Verify creator ACL boundaries in disposable PostgreSQL
+        run: bash packages/database/test/ledger-default-acl-v349.pg.sh
+
       - run: pnpm install --frozen-lockfile
 
       - name: Remove any build output
