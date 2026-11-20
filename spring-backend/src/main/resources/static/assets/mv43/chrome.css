@@ -54,3 +54,12 @@
 
 .brand{min-width:44px;min-height:44px}
 .auth-main .auth-links a{min-width:44px;justify-content:center;padding:6px 4px}
+
+/* Long localized titles must not push sign-in controls outside narrow headers. */
+@media(max-width:359px){
+  .topbar{flex-wrap:wrap}
+  .topbar .top-spacer{display:none}
+  .topbar h1{flex:1 1 calc(100% - 64px);max-width:none;white-space:normal;overflow-wrap:anywhere}
+  .topbar .lang-control{margin-left:auto}
+  .topbar .auth-actions{flex-shrink:0}
+}
