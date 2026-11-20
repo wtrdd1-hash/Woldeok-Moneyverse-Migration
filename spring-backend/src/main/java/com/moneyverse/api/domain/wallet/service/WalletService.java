@@ -33,11 +33,11 @@ public class WalletService {
 
         BigDecimal cashBalance = BigDecimal.ZERO;
         BigDecimal bankBalance = BigDecimal.ZERO;
-        boolean verifiedAccountFound = false;
+        Set<String> verifiedAccountTypes = new HashSet<>();
 
         try {
             String sql = """
-                SELECT a.account_type, COALESCE(b.available_amount, 0) AS amount
+                SELECT a.account_type, b.available_amount AS amount
                 FROM accounts a
                 LEFT JOIN account_balances b ON a.id = b.account_id
                 WHERE a.owner_user_id = ?
@@ -50,7 +50,7 @@ public class WalletService {
                 Object reportedAmount = r.get("amount");
                 if (reportedAmount == null) throw new IllegalStateException("missing balance proof");
                 BigDecimal amount = new BigDecimal(String.valueOf(reportedAmount));
-                verifiedAccountFound = true;
+                if (!verifiedAccountTypes.add(type)) throw new IllegalStateException("duplicate wallet account type");
                 if ("USER_CASH".equals(type)) cashBalance = amount;
                 else bankBalance = amount;
             }
@@ -58,7 +58,7 @@ public class WalletService {
             log.warn("[WalletService] Authoritative wallet balance query unavailable");
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "wallet balance source unavailable", e);
         }
-        if (!verifiedAccountFound) {
+        if (!verifiedAccountTypes.containsAll(Set.of("USER_CASH", "USER_BANK"))) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "wallet ownership/balance not verified");
         }
 

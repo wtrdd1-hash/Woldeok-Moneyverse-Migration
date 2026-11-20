@@ -36,6 +36,16 @@ DO $$ BEGIN
  END IF;
 END $$;
 SQL
+# Creator defaults cannot be changed by a merely named, unauthorized migrator.
+if refused="$( { printf '%s\n' 'SET ROLE moneyverse_migrator;'; cat "$ROOT/packages/database/migrations/349-ledger-app-default-acl-repair.sql"; } | sql 2>&1)"; then
+  echo 'FAIL: unauthorized executor unexpectedly changed creator defaults' >&2
+  exit 1
+fi
+if ! grep -Eq 'permission denied|must be (member|owner)' <<<"$refused"; then
+  echo 'FAIL: unauthorized executor did not fail on the expected privilege boundary' >&2
+  exit 1
+fi
+# This operator already owns both creator roles; no membership is granted to unblock DDL.
 sql -f - < "$ROOT/packages/database/migrations/349-ledger-app-default-acl-repair.sql"
 sql <<'SQL'
 CREATE TABLE public.future_postgres_ledger_acl (id bigint);
