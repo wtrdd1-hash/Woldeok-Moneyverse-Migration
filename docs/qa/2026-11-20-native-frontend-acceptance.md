@@ -1,5 +1,8 @@
 # Native frontend implementation and acceptance ledger — 2026-11-20
 
+> Current scope: reviewed incremental implementation at173e7255c7. Local fresh Spring479/Node270 passed; functional commit173e7255c7 GitHub CI44714457273 passed all4 jobs, with9 actual PostgreSQL cases and0 failures/errors/skips. Later documentation checkpoints do not change that implementation. Production HOLD. Use the latest checkpoint and OPEN findings below; earlier source totals are historical.
+
+
 This page describes the November18 Spring MVC/Thymeleaf frontend migration. It is an implementation/QA ledger, not a statement that every existing page or production feature works.
 
 - Task PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3311
@@ -98,3 +101,18 @@ This entry supersedes earlier per-slice totals only for the current isolated can
 | Deployment | HOLD: exact-source public TestHTTP403; no production rollout |
 | Remaining | Authenticated member/admin QA, remaining legacy pages, full linguistic/accessibility/200% checks, global cross-navigation drafts and simultaneous concurrency OPEN |
 Earlier slice totals remain historical. Only the rows above describe this checkpoint; source code completion does not imply release acceptance.
+
+## Current OPEN findings after reviewed implementation
+| ID | Priority | Area | Evidence and remaining work |
+|---|---|---|---|
+| UI-STOCK-NATIVE | P1 | /stocks | Source review of PublicStocksReadOnlyPage.java: hand-built HTML, EN/KO only, separate styles/help anchor; lacks the shared native five-language shell. Preserve verified read-only market/canonical prices while migrating; real trading/chart parity is not certified. Source-backed unavailable response also needs native error-state acceptance. |
+| UI-GLOBAL-DRAFT | P1 | Cross-page messaging | In-page locale/focus changes retain memory-only drafts, but full-navigation global open-panel/private-draft retention remains unimplemented. No disk/localStorage workaround permitted. |
+| QA-MEMBER-ADMIN | P1 | Member/admin | Guest240 geometry cases and HTTP/service tests do not certify actual authenticated layouts, administrator step-up or real financial/message delivery.35 admin directory links do not certify35 workflows. |
+| QA-TEST-ACCESS | P1 | Test/release | Required public Test returns403; latest status after-fix browser rerun additionally lacks the external SSH preview tunnel. No direct production promotion. |
+| UI-LEGACY-PAGES | P1 | Remaining route families | Public tool hub links17 destinations; only2 calculator implementations are native verified in this slice.15 other tool destinations, other legacy/captured account/economy/game/community/admin screens need individual inventory and native functional acceptance. |
+| UI-COPY-ACCEPTANCE | P2 | Public copy and all5 locales | Public tools/status still show technical Spring/QA terminology inherited from the prior slice. Human linguistic review, unnatural words/typos and product wording decisions remain; no blanket translation certification. |
+| QA-A11Y-ALL | P2 | Full-site accessibility | Narrow menu/modal Escape/focus checks passed; actual200% zoom, complete keyboard/screenreader/reducedmotion/mobile-keyboard matrix remains OPEN. |
+| QA-CONCURRENCY | P2 | Support/DM mutations | Actual PostgreSQL9 cases cover sequential replay/ownership/contracts, not simultaneous production concurrency. |
+
+### Final functional-code CI evidence
+Functional SHA173e7255c753abd20523a914e6c68c16e826ecb3: CI44714457273 completed success for classify,policy,spring-web-check,runtime-check. Read log result: {"nativePostgresMessaging":{"tests":9,"failures":0,"errors":0,"skipped":0}}. Candidate build44714447977 was still building the frontend image when checked; build/Test/production acceptance is not asserted. This subsequent checkpoint modifies only these QA/worklog documents;479/270 test counts belong to the unchanged reviewed implementation. Production HOLD and all OPEN rows remain applicable.
