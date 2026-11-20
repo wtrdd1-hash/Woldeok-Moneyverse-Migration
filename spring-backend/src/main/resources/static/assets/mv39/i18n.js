@@ -422,6 +422,9 @@
     publicOpenTool_kimchi_premium_calculator:["Open Crypto price spread calculator", "김치 프리미엄 계산기 화면으로 이동", "暗号資産価格差計算機を開く", "打开加密资产价差计算器", "Mở Máy tính chênh lệch giá tiền mã hóa"],
     publicOpenTool_crypto_apy_calculator:["Open Crypto APY calculator", "암호화폐 APY 계산기 화면으로 이동", "暗号資産APY計算機を開く", "打开加密资产 APY 计算器", "Mở Máy tính APY tiền mã hóa"],
     publicOpenTool_farming_calculator:["Open Virtual farming ROI calculator", "가상 채굴 ROI 계산기 화면으로 이동", "仮想採掘ROI計算機を開く", "打开虚拟挖矿 ROI 计算器", "Mở Máy tính ROI khai thác ảo"],
+    navigationMain:["Main navigation", "주 메뉴", "メインナビゲーション", "主导航", "Điều hướng chính"],
+    navigationMobile:["Mobile navigation", "모바일 메뉴", "モバイルナビゲーション", "移动导航", "Điều hướng di động"],
+    supportChannels:["Support channels", "문의 채널", "サポート窓口", "支持渠道", "Kênh hỗ trợ"]
   };
   const supports = code => SUPPORTED.includes(code);
   const storage = {

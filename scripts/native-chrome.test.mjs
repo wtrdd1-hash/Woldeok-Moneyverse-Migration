@@ -77,3 +77,26 @@ test('shared mobile navigation and locale selection work without the home render
   ids['language-selector'].value='ko';ids['language-selector'].dispatchEvent(new Event('change'));
   assert.equal(chosen,'ko');
 });
+
+test('shared aria labels follow locale changes while an expanded menu retains its close label',()=>{
+  const window=new EventTarget(); let language='ko';
+  window.MV39Locale={tx:key=>language+':'+key,preference:()=>language,setPreference:()=>{}};
+  class Element extends EventTarget {
+    constructor(key){super();this.dataset={i18nAria:key};this.attributes={};this.hidden=true;this.open=false;this.isConnected=true;}
+    setAttribute(key,value){this.attributes[key]=value;}
+    focus(){}
+    querySelectorAll(){return [];}
+  }
+  const ids=Object.fromEntries(['mv-support-launcher','mv-support-panel','mv-support-close','mobile-menu-toggle','mobile-menu-close','drawer-backdrop','mobile-menu','language-selector'].map(id=>[id,new Element(id==='mobile-menu-toggle'?'menu':'close')]));
+  const navigation=new Element('navigationMain');
+  const aria=[ids['mobile-menu-toggle'],ids['mobile-menu-close'],navigation];
+  const document={readyState:'complete',activeElement:null,getElementById:id=>ids[id]||null,
+    addEventListener:()=>{},querySelectorAll:selector=>selector==='[data-i18n-aria]'?aria:[]};
+  runInNewContext(source('static/assets/mv43/chrome.js'),{document,window});
+  assert.equal(navigation.attributes['aria-label'],'ko:navigationMain');
+  ids['mobile-menu-toggle'].dispatchEvent(new Event('click'));
+  language='ja';window.dispatchEvent(new Event('mv39-language-change'));
+  assert.equal(navigation.attributes['aria-label'],'ja:navigationMain');
+  assert.equal(ids['mobile-menu-toggle'].attributes['aria-label'],'ja:close');
+  assert.equal(ids['mobile-menu-close'].attributes['aria-label'],'ja:close');
+});

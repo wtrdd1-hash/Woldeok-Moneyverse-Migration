@@ -47,3 +47,7 @@
 .auth-main .auth-fields>label{font-weight:600;margin-top:8px}
 
 .auth-main .auth-consent a,.auth-main .auth-help-link{display:inline-flex;align-items:center;min-height:44px;min-width:44px;padding:8px 4px}
+
+/* Text actions need the same touch area as the surrounding native controls. */
+.inline-link,.foot-links a,.auth-link{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;max-width:100%;padding:6px 4px;overflow-wrap:anywhere}
+.foot-links{align-items:center;flex-wrap:wrap}

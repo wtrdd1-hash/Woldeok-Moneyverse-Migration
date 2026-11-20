@@ -2875,5 +2875,26 @@
     "仮想採掘ROI計算機を開く",
     "打开虚拟挖矿 ROI 计算器",
     "Mở Máy tính ROI khai thác ảo"
+  ],
+  "navigationMain": [
+    "Main navigation",
+    "주 메뉴",
+    "メインナビゲーション",
+    "主导航",
+    "Điều hướng chính"
+  ],
+  "navigationMobile": [
+    "Mobile navigation",
+    "모바일 메뉴",
+    "モバイルナビゲーション",
+    "移动导航",
+    "Điều hướng di động"
+  ],
+  "supportChannels": [
+    "Support channels",
+    "문의 채널",
+    "サポート窓口",
+    "支持渠道",
+    "Kênh hỗ trợ"
   ]
 }

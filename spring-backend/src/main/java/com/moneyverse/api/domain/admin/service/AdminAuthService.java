@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,8 +19,6 @@ public class AdminAuthService {
 
     private static final Logger log = LoggerFactory.getLogger(AdminAuthService.class);
 
-    @Value("${moneyverse.security.internal-token:8e5f2a1b9c3d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f}")
-    private String internalToken;
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -52,30 +49,8 @@ public class AdminAuthService {
     }
 
     public boolean isAuthorizedAdmin(HttpServletRequest request) {
-        if (request == null) return false;
-
-        // 1. x-internal-token
-        String internalHeader = request.getHeader("x-internal-token");
-        if (internalHeader != null && !internalHeader.isBlank() && internalHeader.equals(internalToken)) {
-            return true;
-        }
-
-        // 2. Authorization: Bearer internal token
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7).trim();
-            if (!token.isBlank() && token.equals(internalToken)) {
-                return true;
-            }
-        }
-
-        // 3. Session cookie verification via database
-        String sessionToken = extractSessionToken(request);
-        if (sessionToken != null) {
-            return verifyDatabaseSession(sessionToken);
-        }
-
-        return false;
+        // Network transport credentials cannot identify an audited human administrator.
+        return request != null && resolveVerifiedAdminActor(request).isPresent();
     }
 
     /** A valid, unexpired database session AND current DB-backed admin role are both required.
