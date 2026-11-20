@@ -131,9 +131,14 @@
   };
   function readCookie() {
     const found = (root.document && root.document.cookie || '').split(';').map(s=>s.trim()).find(s=>s.startsWith(COOKIE_KEY+'='));
-    return found ? decodeURIComponent(found.slice(COOKIE_KEY.length+1)) : null;
+    if (!found) return null;
+    try { return decodeURIComponent(found.slice(COOKIE_KEY.length+1)); }
+    catch { return null; }
   }
-  function detectBrowser() {
+  function detectBrowser(preferServer = true) {
+    const serverLanguage = root.document && root.document.documentElement
+      && root.document.documentElement.dataset && root.document.documentElement.dataset.uiLanguage;
+    if (preferServer && supports(serverLanguage)) return serverLanguage;
     const nav = root.navigator || {};
     const langs = (nav.languages && nav.languages.length ? nav.languages : [nav.language || 'en']);
     for (const value of langs) {
@@ -145,14 +150,20 @@
   let preference = storage.read() || readCookie() || 'auto';
   if (preference !== 'auto' && !supports(preference)) preference='auto';
   let current = preference === 'auto' ? detectBrowser() : preference;
+  const missingKeys = new Set();
   function tx(key) {
     const entries = dictionary[key];
-    return entries ? entries[CODE_INDEX[current]] || entries[0] : key;
+    if (entries) return entries[CODE_INDEX[current]] || entries[0];
+    if (!missingKeys.has(key)) {
+      missingKeys.add(key);
+      console.warn('[i18n] Missing catalog translation; English fallback shown');
+    }
+    return 'Translation unavailable';
   }
   function setPreference(value) {
     const next = value === 'auto' || supports(value) ? value : 'auto';
     preference = next;
-    current = next === 'auto' ? detectBrowser() : next;
+    current = next === 'auto' ? detectBrowser(false) : next;
     storage.put(next);
     if (root.document) {
       // The legacy app and Spring frontend share a compatible manual preference cookie.
