@@ -25,4 +25,23 @@ class StatusSourceTruthIntegrationTest {
         mvc.perform(get("/status").header("RSC","1").header("Accept","text/x-component"))
                 .andExpect(status().isNotAcceptable());
     }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings={"en","ko","ja","zh","vi"})
+    void unavailableStatusRetainsLocalizedNativeNavigationAndHonestHttp503(String language) throws Exception {
+        String html=mvc.perform(get("/status").header("Accept-Language",language))
+            .andExpect(status().isServiceUnavailable())
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header().string("Cache-Control","no-store"))
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header().string("Content-Language",language))
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().contentTypeCompatibleWith("text/html"))
+            .andReturn().getResponse().getContentAsString();
+        org.junit.jupiter.api.Assertions.assertTrue(html.contains("lang=\""+language+"\""));
+        org.junit.jupiter.api.Assertions.assertTrue(html.contains("id=\"mv-support-launcher\""));
+        org.junit.jupiter.api.Assertions.assertTrue(html.contains("data-i18n=\"unavailable\""));
+        org.junit.jupiter.api.Assertions.assertFalse(html.contains("Whitelabel Error Page"));
+        org.junit.jupiter.api.Assertions.assertFalse(html.contains("state-operational"));
+        org.junit.jupiter.api.Assertions.assertFalse(html.contains("STATUS_SOURCE_UNAVAILABLE"));
+        org.junit.jupiter.api.Assertions.assertFalse(html.contains("data-public-count=\"0\""));
+        org.junit.jupiter.api.Assertions.assertFalse(html.contains("data-i18n=\"publicText59\""));
+    }
 }

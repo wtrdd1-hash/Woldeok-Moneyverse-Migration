@@ -42,6 +42,12 @@
       if(document.querySelectorAll)document.querySelectorAll('[data-i18n]').forEach(element=>{
         element.textContent=locale.tx(element.dataset.i18n);
       });
+      if(document.querySelectorAll)document.querySelectorAll('[data-i18n-aria]').forEach(element=>{
+        element.setAttribute('aria-label',locale.tx(element.dataset.i18nAria));
+      });
+      if(menuToggle)menuToggle.setAttribute('aria-label',locale.tx(drawer&&!drawer.hidden?'close':'menu'));
+      const pageHeading=document.querySelector&&document.querySelector('.topbar h1[data-i18n]');
+      if(pageHeading)document.title=locale.tx(pageHeading.dataset.i18n)+' · W Moneyverse';
       launcher.setAttribute('aria-label', locale.tx('support'));
       close.setAttribute('aria-label', locale.tx('close'));
       panel.querySelectorAll('[data-i18n]').forEach(element => {

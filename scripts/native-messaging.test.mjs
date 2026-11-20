@@ -1,0 +1,521 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync,existsSync} from 'node:fs';
+import {runInNewContext} from 'node:vm';
+const base=new URL('../spring-backend/src/main/resources/',import.meta.url);
+const owner='00000000-0000-0000-0000-000000000101',peer='00000000-0000-0000-0000-000000000102',id='00000000-0000-0000-0000-000000000103',key='00000000-0000-0000-0000-000000000104',messageId='00000000-0000-0000-0000-000000000105',date='2026-11-20T01:23:45Z';
+function core(){const path=new URL('static/assets/mv43/messaging-core.js',base);assert.ok(existsSync(path),'native messaging core must replace capture-only behavior');const window={};runInNewContext(readFileSync(path,'utf8'),{window,Intl,AbortController});return window.MV43Messaging;}
+const session=()=>({ok:true,signedIn:true,csrfToken:'raw-proof',user:{id:owner}});
+const response=(value,status=200,responseOwner=owner)=>({ok:status<400,status,json:async()=>value,headers:new Headers({'content-type':'application/json',...(responseOwner===null?{}:{'X-MV-Owner':responseOwner})})});
+const thread=()=>({id,userId:owner,subject:'Question',status:'open',createdAt:date,updatedAt:date,lastMessageAt:date});
+const reply=()=>({id:messageId,threadId:id,senderUserId:owner,senderKind:'user',body:'Hello\nWorld',createdAt:date});
+const chat=()=>({id:messageId,conversationId:id,senderUserId:owner,body:'Hello',sequence:'9007199254740993',createdAt:date});
+function client(api,post,extra={}){return api.createClient({owner:()=>owner,uuid:()=>key,fetch:async(url,o)=>url==='/api/auth/session'?response(session()):post(url,o),...extra});}
+test('Unicode limits match server codepoints, ASCII edge trim, no truncation, NUL, surrogates or chat controls',()=>{
+ const api=core();assert.equal(api.text('😀'.repeat(1000),1000,false).length,2000);
+ for(const value of ['😀'.repeat(1001),'\0','\ud800','\udc00','  ','\n'])assert.throws(()=>api.text(value,1000,false));
+ assert.equal(api.text(' \nHello\n ',1000,false),'\nHello\n');
+ assert.throws(()=>api.text('Hello\n',1000,true));assert.throws(()=>api.text('a\u0085b',1000,true));
+ assert.equal(api.text('　x　',1000,false),'　x　');
+ assert.throws(()=>api.text('x'.repeat(121),120,false));
+ assert.throws(()=>api.text('\u001c',1000,false));assert.equal(api.text('\u00a0',1000,false),'\u00a0');assert.equal(api.text('\ufeff',1000,false),'\ufeff');
+});
+test('actual owner-scoped list and history DTOs retain exact bigint sequence and reject foreign malformed data',()=>{
+ const api=core();assert.equal(api.threads({ok:true,threads:[thread()],totalCount:1},owner)[0].id,id);
+ assert.throws(()=>api.threads({ok:true,threads:[{...thread(),userId:peer}],totalCount:1},owner));
+ const conversation={id,peerUserId:peer,peerNickname:'<img src=x>',lastMessage:'hello',unreadCount:2,updatedAt:date};
+ assert.equal(api.conversations({ok:true,conversations:[conversation],totalUnread:2},owner)[0].peerNickname,'<img src=x>');
+ assert.equal(api.messages({ok:true,messages:[chat()]},'chat',id,owner)[0].sequence,'9007199254740993');
+ for(const bad of [9007199254740992,'0','01','9223372036854775808'])assert.throws(()=>api.messages({ok:true,messages:[{...chat(),sequence:bad}]},'chat',id,owner));
+ assert.throws(()=>api.messages({ok:true,messages:[{...reply(),threadId:peer}]},'support',id,owner));
+ assert.throws(()=>api.messages({ok:true,messages:[{...chat(),senderUserId:key}]},'chat',id,owner,peer));
+ assert.throws(()=>api.threads({ok:false,threads:[],totalCount:0},owner));
+ const summary=api.summary({ok:true,total:100,open:40,waitingUser:30,resolved:30});assert.equal(summary.total,100);
+ assert.throws(()=>api.summary({ok:true,total:1,open:1,waitingUser:1,resolved:0}));
+});
+test('all mutation routes use exact reviewed request envelopes and canonical receipts with fresh CSRF',async()=>{
+ const api=core(),calls=[];
+ const c=client(api,async(url,o)=>{calls.push({url,o});return response(url.endsWith('/threads')?{ok:true,thread:thread()}:{ok:true,message:url.includes('/chat/')?chat():reply()});});
+ assert.equal((await c.submit({kind:'thread',subject:'Question',body:'Hello\nWorld'})).id,id);
+ assert.equal((await c.submit({kind:'reply',target:id,body:'Hello\nWorld'})).id,messageId);
+ assert.equal((await c.submit({kind:'chat',target:id,body:'Hello'})).sequence,'9007199254740993');
+ assert.deepEqual(calls.map(x=>x.url),['/api/v1/support/threads','/api/v1/support/threads/'+id+'/messages','/api/v1/chat/conversations/'+id+'/messages']);
+ for(const {o} of calls){assert.equal(o.headers['X-CSRF-Token'],'raw-proof');assert.equal(o.headers['Idempotency-Key'],key);assert.equal(JSON.parse(o.body).idempotencyKey,key);assert.equal(o.credentials,'same-origin');}
+ assert.equal(JSON.parse(calls[0].o.body).subject,'Question');assert.equal(c.hasPending(),false);
+});
+test('unknown, missing and foreign receipts retain original intent and stable key; never show false delivery',async()=>{
+ const api=core();
+ for(const payload of [{ok:true},{ok:true,message:{...chat(),senderUserId:peer}},{ok:true,message:{...chat(),body:'changed'}},{ok:true,message:{...chat(),conversationId:peer}},{ok:true,message:{...chat(),createdAt:null}}]){
+  const c=client(api,async()=>response(payload));await assert.rejects(c.submit({kind:'chat',target:id,body:'Hello'}),/unconfirmed/);assert.equal(c.hasPending(),true);
+ }
+ let attempt=0;const sent=[];
+ const c=client(api,async(url,o)=>{sent.push(JSON.parse(o.body));if(++attempt===1)throw Error('network');return response({ok:true,message:chat()});});
+ const fields={kind:'chat',target:id,body:'Hello'};
+ await assert.rejects(c.submit(fields),/unconfirmed/);
+ await assert.rejects(c.submit({...fields,body:'changed'}),/pending_intent/);
+ await assert.rejects(c.submit({...fields,target:peer}),/pending_intent/);
+ await c.submit(fields);assert.equal(sent.length,2);assert.equal(sent[0].idempotencyKey,sent[1].idempotencyKey);
+});
+test('double submit posts once and stale owner/clear completion cannot be delivered',async()=>{
+ const api=core();let finish,calls=0;
+ const c=client(api,()=>{calls++;return new Promise(r=>finish=r);});
+ const fields={kind:'chat',target:id,body:'Hello'},first=c.submit(fields);
+ await new Promise(r=>setImmediate(r));await assert.rejects(c.submit(fields),/in_flight/);
+ assert.equal(calls,1);c.clear();finish(response({ok:true,message:chat()}));await assert.rejects(first,/account_changed/);assert.equal(c.hasPending(),false);
+});
+test('session bootstrap refreshes before mutations and owner transition refuses POST',async()=>{
+ const api=core();let posts=0,active=owner;
+ const c=client(api,async()=>{posts++;return response({ok:true,message:chat()});},{owner:()=>active,fetch:async(url,o)=>{
+  if(url==='/api/auth/session')return response({...session(),user:{id:peer}});
+  posts++;return response({ok:true,message:chat()});
+ }});
+ await assert.rejects(c.submit({kind:'chat',target:id,body:'Hello'}),/account_changed/);assert.equal(posts,0);assert.equal(c.hasPending(),false);
+ const noProof=client(api,async()=>{posts++;},{fetch:async()=>response({...session(),csrfToken:''})});
+ await assert.rejects(noProof.submit({kind:'chat',target:id,body:'Hello'}),/csrf_required/);assert.equal(posts,0);
+});
+test('independent read generations abort and suppress stale completions',async()=>{
+ const api=core(),pending=[];
+ const reader=api.createReader({fetch:(url,o)=>new Promise(resolve=>pending.push({resolve,o}))});
+ const first=reader.get('/first');const second=reader.get('/second');
+ assert.equal(pending[0].o.signal.aborted,true);
+ pending[1].resolve(response({ok:true,threads:[]}));assert.equal((await second).ok,true);
+ pending[0].resolve(response({private:'old'}));await assert.rejects(first,/stale/);
+ const third=reader.get('/third');reader.clear();pending[2].resolve(response({private:'cleared'}));await assert.rejects(third,/stale/);
+});
+test('Korea date boundaries and bounded local title/status/order filters do not imply all-time search',()=>{
+ const api=core(),rows=[{...thread(),id:key,lastMessageAt:'2026-11-19T15:00:00Z'},{...thread(),lastMessageAt:'2026-11-20T15:00:00Z'}];
+ assert.equal(api.filterThreads(rows,{from:'2026-11-20',to:'2026-11-20'})[0].id,key);
+ assert.throws(()=>api.filterThreads(rows,{from:'2026-11-20',to:''}));
+ assert.throws(()=>api.filterThreads(rows,{from:'2024-01-01',to:'2026-11-20'}));
+ assert.equal(api.filterThreads(rows,{q:'Question',sort:'oldest'})[0].id,key);
+});
+test('source privacy constraints, scoped catalogs and no native UTF16 body maxlength',()=>{
+ const js=readFileSync(new URL('static/assets/mv43/messaging.js',base),'utf8');
+ assert.doesNotMatch(js,/innerHTML|insertAdjacentHTML|localStorage|sessionStorage|console\.|X-User-Id|x-actor-user-id|setInterval/);
+ assert.match(js,/textContent/);assert.match(js,/mv39-language-change/);assert.match(js,/pagehide/);assert.match(js,/visibilitychange/);
+ for(const name of ['support','chat']){
+  const published=[];
+ const html=readFileSync(new URL('templates/mv43/'+name+'.html',base),'utf8');assert.doesNotMatch(html,/maxlength="1000"/);assert.match(html,/pageHeader/);
+ }
+ const catalog=JSON.parse(readFileSync(new URL('ui/mv43-copy.json',base),'utf8'));for(const [key,values] of Object.entries(catalog).filter(([key])=>key.startsWith('msg')))assert.equal(values.length,5);
+});
+
+function harness(kind='support',fetcher,query='',shared=false) {
+ const published=[],html=readFileSync(new URL('templates/mv43/'+kind+'.html',base),'utf8');
+ const sharedHtml=shared?readFileSync(new URL('templates/shared/chrome.html',base),'utf8'):'';
+ const nodes=new Map(),allNodes=[],events={},executed=[];
+ class Node {
+  constructor(tag='div'){this.tagName=tag.toUpperCase();this.value='';this.children=[];this.listeners={};this.dataset={};this.disabled=false;this.hidden=false;this.attributes={};this.textContent='';this.className='';this.parentElement=null;this.isConnected=true;}
+  set textContent(value){this._text=value;published.push(value);}get textContent(){return this._text;}
+  get classList(){return {contains:name=>this.className.split(/\s+/).includes(name),
+   toggle:(name,on)=>{const classes=new Set(this.className.split(/\s+/).filter(Boolean));if(on)classes.add(name);else classes.delete(name);this.className=[...classes].join(' ');},
+   add:name=>this.classList.toggle(name,true),remove:name=>this.classList.toggle(name,false)};}
+  addEventListener(type,fn){(this.listeners[type]??=[]).push(fn);}
+  async fire(type){for(const fn of this.listeners[type]||[])await fn({preventDefault(){},persisted:false,target:this});}
+  append(...children){for(const child of children){child.parentElement=this;this.children.push(child);}}appendChild(child){this.append(child);return child;}
+  replaceChildren(...children){for(const child of this.children)child.isConnected=false;this.children=[];this.append(...children);this.textContent='';}
+  setAttribute(k,v){this.attributes[k]=v;}getAttribute(k){return this.attributes[k]??null;}
+  closest(selector){if(selector.startsWith('.')&&this.classList.contains(selector.slice(1)))return this;return this.parentElement?.closest(selector)||null;}
+  querySelectorAll(selector){return this.children.flatMap(child=>[...(selector==='a'?child.tagName==='A':selector==='[data-i18n]'?Boolean(child.dataset.i18n):false)?[child]:[],...child.querySelectorAll(selector)]);}
+  focus(){this.focused=true;document.activeElement=this;}remove(){this.isConnected=false;}click(){return this.fire('click');}
+  showModal(){this.open=true;}close(){this.open=false;this.fire('close');}
+ }
+ const tree=new Node('root'),stack=[tree],voids=new Set(['area','base','br','col','embed','hr','img','input','link','meta','param','source','track','wbr']);
+ for(const match of (html+sharedHtml).matchAll(/<(\/?)([a-z0-9:-]+)\b([^>]*)>/g)){
+  const [,closing,tag,attrs]=match;if(closing){const index=stack.map(node=>node.tagName.toLowerCase()).lastIndexOf(tag);if(index>0)stack.length=index;continue;}
+  const node=new Node(tag);for(const attr of attrs.matchAll(/([a-zA-Z0-9:-]+)="([^"]*)"/g)){
+   const [,name,value]=attr;node.setAttribute(name,value);if(name==='id'){node.id=value;nodes.set(value,node);}if(name==='class')node.className=value;
+   if(name.startsWith('data-'))node.dataset[name.slice(5).replace(/-([a-z])/g,(_,char)=>char.toUpperCase())]=value;
+  }
+  node.disabled=/\bdisabled\b/.test(attrs);stack.at(-1).append(node);allNodes.push(node);
+  if(!voids.has(tag)&&!attrs.endsWith('/'))stack.push(node);
+ }
+ nodes.get('messaging-root').dataset.kind=kind;
+ const document={getElementById:id=>nodes.get(id)||null,createElement:tag=>new Node(tag),body:tree,hidden:false,readyState:'complete',cookie:'',
+  documentElement:{dataset:{uiLanguage:'en'}},querySelectorAll:selector=>selector==='[data-i18n]'?allNodes.filter(node=>node.isConnected&&node.dataset.i18n):[],
+  addEventListener:(name,fn)=>(events[name]??=[]).push(fn)};
+ const window={MV43Messaging:core(),MV39Locale:{tx:k=>language+':'+k,current:()=>language,preference:()=>language},
+  document,navigator:{languages:['en']},localStorage:{getItem:()=>null,setItem(){}},crypto:{randomUUID:()=>key},
+  dispatchEvent:event=>{for(const fn of events[event.type]||[])fn(event);},
+  location:{search:query,assign(){}},addEventListener:(name,fn)=>(events[name]??=[]).push(fn)};
+ let language='en';
+ const downloads=[];
+ class DownloadURL extends URL {static createObjectURL(blob){downloads.push(blob);return 'blob:test';}static revokeObjectURL(){}}
+ const calls=[],defaultFetch=async(url)=>{
+  if(url==='/api/auth/session')return response(session());
+  if(url==='/api/v1/support/threads')return response({ok:true,threads:[thread()],totalCount:1});
+  if(url==='/api/v1/support/threads/summary')return response({ok:true,total:1,open:1,waitingUser:0,resolved:0});
+  if(url.includes('/messages'))return response({ok:true,messages:[{...reply(),body:'<img src=x onerror=alert(1)>'}]});
+  return response({},503);
+ };
+ const fetch=async(url,o)=>{calls.push({url,o});return fetcher?fetcher(url,o,defaultFetch):defaultFetch(url,o);};
+ const context={window,document,fetch,Intl,Event,URL:DownloadURL,URLSearchParams,Blob,AbortController};
+ function execute(path){executed.push(path);runInNewContext(readFileSync(new URL('static/assets/'+path,base),'utf8'),context);}
+ if(shared){execute('mv39/i18n.js');execute('mv43/messaging-core.js');}
+ execute('mv43/messaging.js');if(shared)execute('mv43/chrome.js');
+ const flush=async()=>{for(let i=0;i<8;i++)await new Promise(r=>setImmediate(r));};
+ return {nodes,calls,downloads,published,flush,executed,tx:key=>window.MV39Locale.tx(key),language:async code=>{
+  if(shared)window.MV39Locale.setPreference(code);
+  else{language=code;for(const fn of events['mv39-language-change']||[])await fn();}
+ },
+  emit:async name=>{for(const fn of events[name]||[])await fn({persisted:false});},document};
+}
+
+test('binding uses real owner list before private history; safe text, language retention and pagehide clearing',async()=>{
+ const h=harness();await h.flush();
+ assert.ok(h.calls.find(x=>x.url==='/api/v1/support/threads'));
+ assert.ok(h.calls.find(x=>x.url==='/api/v1/support/threads/'+id+'/messages'));
+ const field=h.nodes.get('support-body');field.value='Draft 😀';h.nodes.get('support-subject').value='Subject';
+ await h.language('ko');assert.equal(field.value,'Draft 😀');assert.equal(h.nodes.get('support-subject').value,'Subject');
+ const flatten=node=>[node.textContent,...node.children.flatMap(flatten)];
+ assert.ok(flatten(h.nodes.get('message-history')).includes('<img src=x onerror=alert(1)>'));
+ assert.equal(h.calls.filter(x=>x.o?.method==='POST').length,0);
+ await h.emit('pagehide');assert.equal(field.value,'');assert.equal(h.nodes.get('support-subject').value,'');
+ assert.equal(h.nodes.get('message-history').children.length,0);assert.equal(h.nodes.get('messaging-private').hidden,true);
+});
+test('binding pending retry locks altered inputs and locale changes preserve the same key/body',async()=>{
+ let tries=0;const posts=[];
+ const h=harness('support',async(url,o,fallback)=>{
+  if(o?.method==='POST'){posts.push(JSON.parse(o.body));if(++tries===1)throw Error('offline');return response({ok:true,thread:thread()});}
+  return fallback(url,o);
+ });
+ await h.flush();h.nodes.get('support-subject').value='Question';h.nodes.get('support-body').value='Hello\nWorld';
+ await h.nodes.get('new-thread-form').fire('submit');await h.flush();
+ assert.equal(h.nodes.get('support-body').value,'Hello\nWorld');assert.equal(h.nodes.get('support-body').disabled,true);
+ await h.language('ja');assert.equal(h.nodes.get('support-body').value,'Hello\nWorld');
+ await h.nodes.get('new-thread-form').fire('submit');await h.flush();
+ assert.equal(posts.length,2);assert.equal(posts[0].idempotencyKey,posts[1].idempotencyKey);assert.equal(posts[0].body,posts[1].body);
+ assert.equal(h.nodes.get('support-body').value,'');
+});
+test('binding changed account clears drafts and suppresses delayed old-account history',async()=>{
+ let active=owner,finish;
+ const h=harness('support',async(url,o,fallback)=>{
+  if(url==='/api/auth/session')return response({...session(),user:{id:active}});
+  if(url.includes('/messages'))return new Promise(r=>finish=r);
+  if(url==='/api/v1/support/threads')return response({ok:true,threads:active===owner?[thread()]:[],totalCount:active===owner?1:0});
+  return fallback(url,o);
+ });
+ await h.flush();h.nodes.get('support-body').value='Secret draft';active=peer;await h.emit('focus');await h.flush();
+ finish(response({ok:true,messages:[reply()]}));await h.flush();
+ assert.equal(h.nodes.get('support-body').value,'');assert.ok(h.nodes.get('message-history').children.every(node=>node.tagName!=='ARTICLE'));
+ assert.equal(h.calls.filter(x=>x.o?.method==='POST').length,0);
+});
+
+test('binding same-owner refresh retains reply draft and restores uncertain retry readiness',async()=>{
+ let tries=0;const posts=[];
+ const h=harness('support',async(url,o,fallback)=>{
+  if(o?.method==='POST'){posts.push(JSON.parse(o.body));if(++tries===1)throw Error('offline');return response({ok:true,message:reply()});}
+  return fallback(url,o);
+ });
+ await h.flush();h.nodes.get('message-body').value='Hello\nWorld';
+ await h.emit('focus');await h.flush();assert.equal(h.nodes.get('message-body').value,'Hello\nWorld');
+ await h.nodes.get('message-form').fire('submit');await h.flush();assert.equal(h.nodes.get('message-body').disabled,true);
+ await h.emit('focus');await h.flush();assert.equal(h.nodes.get('message-body').value,'Hello\nWorld');
+ assert.equal(h.nodes.get('message-send').disabled,false);
+ await h.nodes.get('message-form').fire('submit');await h.flush();assert.equal(posts.length,2);assert.equal(posts[0].idempotencyKey,posts[1].idempotencyKey);
+});
+test('binding focus during successful submission cannot leave delivered body available for a new-key duplicate',async()=>{
+ let finish;const h=harness('support',async(url,o,fallback)=>{
+  if(o?.method==='POST')return new Promise(resolve=>finish=resolve);
+  return fallback(url,o);
+ });
+ await h.flush();h.nodes.get('message-body').value='Hello\nWorld';
+ const sent=h.nodes.get('message-form').fire('submit');await h.flush();
+ await h.emit('focus');await h.flush();finish(response({ok:true,message:reply()}));await sent;await h.flush();
+ assert.equal(h.nodes.get('message-body').value,'');assert.equal(h.calls.filter(x=>x.o?.method==='POST').length,1);
+});
+
+test('binding existing DM source, forged selection refusal, exact sequence display and unavailable actions',async()=>{
+ const fixture=async(url,o,fallback)=>{
+  if(url==='/api/v1/chat/conversations')return response({ok:true,conversations:[{id,peerUserId:peer,peerNickname:'Peer <script>',unreadCount:3,updatedAt:date}],totalUnread:3});
+  if(url.includes('/messages'))return response({ok:true,messages:[chat()]});
+  return fallback(url,o);
+ };
+ const h=harness('chat',fixture,'?conversationId='+id);await h.flush();
+ const flatten=node=>[node.textContent,...node.children.flatMap(flatten)];
+ assert.ok(flatten(h.nodes.get('message-history')).includes('en:msgSequence: 9007199254740993'));
+ for(const id of ['chat-new','chat-archived','chat-archive','chat-mute','chat-block','chat-unblock','chat-report','chat-upload'])assert.equal(h.nodes.get(id).disabled,true);
+ h.nodes.get('message-body').value='Draft 😀';
+ for(const code of ['en','ko','ja','zh','vi']){await h.language(code);assert.equal(h.nodes.get('message-body').value,'Draft 😀');}
+ const forged=harness('chat',fixture,'?conversationId='+peer);await forged.flush();
+ assert.equal(forged.calls.filter(x=>x.url.includes('/messages')).length,0);
+ assert.equal(h.calls.filter(x=>x.o?.method==='POST').length,0);
+});
+test('CSV quotes and prefixes every untrusted cell including leading whitespace/control formulas',async()=>{
+ const body=' \t=HYPERLINK("x")\n+cmd',subject=' \r=1+1';
+ const h=harness('support',async(url,o,fallback)=>{
+  if(url==='/api/v1/support/threads')return response({ok:true,threads:[{...thread(),subject}],totalCount:1});
+  if(url.includes('/messages'))return response({ok:true,messages:[{...reply(),body}]});
+  return fallback(url,o);
+ });
+ await h.flush();await h.nodes.get('support-export-csv').fire('click');
+ assert.equal(h.downloads.length,1);
+ const output=await h.downloads[0].text();
+ assert.ok(output.includes('"\' '+String.fromCharCode(13)+'=1+1"'));assert.ok(output.includes('"\' \\t=HYPERLINK(""x"")\\n+cmd"'.replaceAll('\\r','\r').replaceAll('\\t','\t').replaceAll('\\n','\n')));
+});
+
+test('binding preserves original query filters locally without sending private search text to source API',async()=>{
+ const h=harness('support',undefined,'?q=Question&status=open&sort=oldest&from=2026-11-20&to=2026-11-20&thread='+id);await h.flush();
+ for(const [id,value] of [['support-search','Question'],['support-status','open'],['support-order','oldest'],['support-date-from','2026-11-20'],['support-date-to','2026-11-20']])assert.equal(h.nodes.get(id).value,value);
+ assert.ok(h.calls.every(x=>!x.url.includes('q=')&&!x.url.includes('Question')));
+});
+test('verified support transcript is chronologically ordered with deterministic same-time IDs',()=>{
+ const api=core(),rows=api.messages({ok:true,messages:[{...reply(),id:messageId,createdAt:'2026-11-21T01:00:00Z'},{...reply(),id:key,createdAt:date}]},'support',id,owner);
+ assert.equal(rows[0].id,key);
+});
+
+test('reader requires exact server response owner; missing malformed and foreign headers fail closed including ABA',async()=>{
+ const api=core();
+ for(const stamp of [null,'malformed',peer]){
+  const reader=api.createReader({fetch:async()=>response({ok:true,conversations:[]},200,stamp)});
+  await assert.rejects(reader.get('/api/v1/chat/conversations',owner),/source|account_changed/);
+ }
+ const reader=api.createReader({fetch:async()=>response({ok:true,conversations:[]},200,owner)});
+ assert.equal((await reader.get('/api/v1/chat/conversations',owner)).ok,true);
+});
+test('NBSP support subject remains valid in canonical creation receipt and subsequent owner list',async()=>{
+ const api=core(),nbsp='\u00a0',item={...thread(),subject:nbsp};
+ assert.equal(api.text(nbsp,120,false),nbsp);
+ const c=client(api,async()=>response({ok:true,thread:item}));
+ assert.equal((await c.submit({kind:'thread',subject:nbsp,body:'Hello'})).subject,nbsp);
+ assert.equal(c.hasPending(),false);
+ assert.equal(api.threads({ok:true,threads:[item],totalCount:1},owner)[0].subject,nbsp);
+});
+const dm=(nickname='Secret B')=>({id,peerUserId:key,peerNickname:nickname,lastMessage:'Private preview B',unreadCount:1,updatedAt:date});
+test('ownerless list stamped B cannot publish in A even after A→B→A cookies',async()=>{
+ let active=owner,finishList;
+ const h=harness('chat',async(url,o,fallback)=>{
+  if(url==='/api/auth/session')return response({...session(),user:{id:active}});
+  if(url==='/api/v1/chat/conversations')return new Promise(resolve=>finishList=resolve);
+  return fallback(url,o);
+ });
+ await h.flush();active=peer;
+ const b=response({ok:true,conversations:[dm()],totalUnread:1},200,peer);
+ active=owner;finishList(b);await h.flush();
+ assert.ok(!h.published.includes('Secret B'));assert.ok(!h.published.includes('Private preview B'));
+ assert.equal(h.nodes.get('messaging-private').hidden,true);
+});
+test('list owner header alone is insufficient: post-read session transition suppresses publication',async()=>{
+ let active=owner,finishList;
+ const h=harness('chat',async(url,o,fallback)=>{
+  if(url==='/api/auth/session')return response({...session(),user:{id:active}});
+  if(url==='/api/v1/chat/conversations')return new Promise(resolve=>finishList=resolve);
+  return fallback(url,o);
+ });
+ await h.flush();active=peer;finishList(response({ok:true,conversations:[dm('Private A')],totalUnread:1},200,owner));await h.flush();
+ assert.ok(!h.published.includes('Private A'));assert.equal(h.nodes.get('messaging-private').hidden,true);
+});
+test('deferred session reproof keeps correctly stamped list hidden until owner is proven',async()=>{
+ let sessions=0,finishProof;
+ const h=harness('chat',async(url,o,fallback)=>{
+  if(url==='/api/auth/session'){
+   if(++sessions===1)return response(session());
+   return new Promise(resolve=>finishProof=resolve);
+  }
+  if(url==='/api/v1/chat/conversations')return response({ok:true,conversations:[dm('Waiting A')],totalUnread:1},200,owner);
+  return fallback(url,o);
+ });
+ await h.flush();assert.equal(h.nodes.get('messaging-private').hidden,true);
+ assert.ok(!h.published.includes('Waiting A'));assert.equal(typeof finishProof,'function');
+ finishProof(response({...session(),user:{id:peer}}));await h.flush();
+ assert.ok(!h.published.includes('Waiting A'));
+});
+test('history requires original response owner and fresh session before any private text publication',async()=>{
+ for(const scenario of ['foreign-header-ABA','session-changed']){
+  let active=owner,finishHistory;
+  const h=harness('chat',async(url,o,fallback)=>{
+   if(url==='/api/auth/session')return response({...session(),user:{id:active}});
+   if(url==='/api/v1/chat/conversations')return response({ok:true,conversations:[dm('Known A')],totalUnread:1},200,owner);
+   if(url.includes('/messages'))return new Promise(resolve=>finishHistory=resolve);
+   return fallback(url,o);
+  },'?conversationId='+id);
+  await h.flush();assert.equal(typeof finishHistory,'function');active=peer;
+  const stamp=scenario==='foreign-header-ABA'?peer:owner;
+  if(scenario==='foreign-header-ABA')active=owner;
+  finishHistory(response({ok:true,messages:[{...chat(),body:'Wrong private history'}]},200,stamp));await h.flush();
+  assert.ok(!h.published.includes('Wrong private history'));assert.equal(h.nodes.get('messaging-private').hidden,true);
+ }
+});
+test('deferred summary cannot publish under another owner after list reproof',async()=>{
+ let active=owner,finishSummary;
+ const h=harness('support',async(url,o,fallback)=>{
+  if(url==='/api/auth/session')return response({...session(),user:{id:active}});
+  if(url==='/api/v1/support/threads/summary')return new Promise(resolve=>finishSummary=resolve);
+  return fallback(url,o);
+ });
+ await h.flush();active=peer;
+ finishSummary(response({ok:true,total:17,open:17,waitingUser:0,resolved:0},200,owner));await h.flush();
+ assert.ok(!h.published.some(value=>typeof value==='string'&&value.includes('msgOpen: 17')));
+ assert.equal(h.nodes.get('messaging-private').hidden,true);
+});
+test('verified send receipt cannot return after awaited reload changes to another owner',async()=>{
+ let afterSend=false,proofs=0,finishReloadProof;
+ const h=harness('support',async(url,o,fallback)=>{
+  if(o?.method==='POST'){afterSend=true;return response({ok:true,message:reply()});}
+  if(url==='/api/auth/session'&&afterSend){
+   if(++proofs===1)return response(session());
+   if(proofs===2)return new Promise(resolve=>finishReloadProof=resolve);
+   return response({...session(),user:{id:peer}});
+  }
+  if(url==='/api/v1/support/threads'&&afterSend)return response({ok:true,threads:[],totalCount:0},200,peer);
+  if(url==='/api/v1/support/threads/summary'&&afterSend)return response({ok:true,total:0,open:0,waitingUser:0,resolved:0},200,peer);
+  return fallback(url,o);
+ });
+ await h.flush();h.nodes.get('message-body').value='Hello\nWorld';
+ const sending=h.nodes.get('message-form').fire('submit');await h.flush();
+ assert.equal(typeof finishReloadProof,'function');finishReloadProof(response({...session(),user:{id:peer}}));
+ await sending;await h.flush();
+ assert.ok(!h.nodes.get('messaging-result').textContent.includes(messageId));
+ assert.equal(h.nodes.get('message-body').value,'');
+});
+
+test('actual template-order locale/messaging/chrome scripts preserve ready state, selected subject and drafts in five languages',async()=>{
+ const h=harness('support',undefined,'',true);await h.flush();
+ assert.deepEqual(h.executed,['mv39/i18n.js','mv43/messaging-core.js','mv43/messaging.js','mv43/chrome.js']);
+ const html=readFileSync(new URL('templates/mv43/support.html',base),'utf8');
+ assert.ok(html.indexOf('/messaging.js')<html.indexOf('shared/chrome :: commonHead'));
+ h.nodes.get('support-subject').value='Unsent subject';h.nodes.get('support-body').value='Draft 😀';h.nodes.get('message-body').value='Reply draft';
+ for(const code of ['en','ko','ja','zh','vi']){
+  await h.language(code);
+  assert.equal(h.nodes.get('messaging-status').textContent,h.tx('msgReady'),code+': ready state');
+  assert.equal(h.nodes.get('message-heading').textContent,'Question',code+': selected source subject');
+  assert.equal(h.nodes.get('support-body').value,'Draft 😀');assert.equal(h.nodes.get('message-body').value,'Reply draft');
+  assert.equal(h.nodes.get('support-subject').value,'Unsent subject');
+ }
+ assert.equal(h.calls.filter(call=>call.o?.method==='POST').length,0);
+});
+test('actual chrome localization preserves unknown same-key retry and verified receipt without sending on locale changes',async()=>{
+ let tries=0;const posts=[];
+ const h=harness('support',async(url,o,fallback)=>{
+  if(o?.method==='POST'){posts.push(JSON.parse(o.body));if(++tries===1)throw Error('network');return response({ok:true,message:reply()});}
+  return fallback(url,o);
+ },'',true);
+ await h.flush();h.nodes.get('message-body').value='Hello\nWorld';
+ await h.nodes.get('message-form').fire('submit');await h.flush();
+ for(const code of ['en','ko','ja','zh','vi']){
+  await h.language(code);assert.equal(h.nodes.get('message-send').textContent,h.tx('msgRetry'),code+': unknown retry');
+  assert.equal(h.nodes.get('message-body').disabled,true);assert.equal(h.nodes.get('message-body').value,'Hello\nWorld');
+  assert.equal(h.nodes.get('messaging-result').textContent,h.tx('msgUnknown'));
+  assert.equal(h.nodes.get('message-heading').textContent,'Question');
+ }
+ assert.equal(posts.length,1);
+ await h.nodes.get('message-form').fire('submit');await h.flush();
+ assert.equal(posts.length,2);assert.equal(posts[0].idempotencyKey,posts[1].idempotencyKey);assert.equal(posts[0].body,posts[1].body);
+ for(const code of ['en','ko','ja','zh','vi']){
+  await h.language(code);
+  assert.ok(h.nodes.get('messaging-result').textContent.startsWith(h.tx('msgSent')));
+  assert.ok(h.nodes.get('messaging-result').textContent.includes(messageId));
+  assert.equal(h.nodes.get('message-body').value,'');assert.equal(h.nodes.get('message-send').textContent,h.tx('msgSend'));
+  assert.equal(h.nodes.get('message-heading').textContent,'Question');assert.equal(posts.length,2);
+ }
+});
+test('actual chrome integration preserves new-thread unknown retry label and key across five locales',async()=>{
+ let tries=0;const posts=[];
+ const h=harness('support',async(url,o,fallback)=>{
+  if(o?.method==='POST'){posts.push(JSON.parse(o.body));if(++tries===1)throw Error('network');return response({ok:true,thread:thread()});}
+  return fallback(url,o);
+ },'',true);
+ await h.flush();h.nodes.get('support-subject').value='Question';h.nodes.get('support-body').value='Hello\nWorld';
+ await h.nodes.get('new-thread-form').fire('submit');await h.flush();
+ for(const code of ['en','ko','ja','zh','vi']){
+  await h.language(code);assert.equal(h.nodes.get('support-start').textContent,h.tx('msgRetry'));
+  assert.equal(h.nodes.get('support-subject').value,'Question');assert.equal(h.nodes.get('support-body').value,'Hello\nWorld');
+ }
+ await h.nodes.get('new-thread-form').fire('submit');await h.flush();
+ assert.equal(posts.length,2);assert.equal(posts[0].idempotencyKey,posts[1].idempotencyKey);
+});
+test('actual shared account contract uses established classes and resets member row on logout and owner transition',async()=>{
+ const name='Very long private member name '.repeat(12);let active=owner;
+ const h=harness('support',async(url,o,fallback)=>{
+  if(url==='/api/auth/session')return response({...session(),user:{id:active,displayName:active===owner?name:'New owner'}});
+  if(url==='/api/v1/auth/logout')return response({ok:true});
+  if(url==='/api/v1/support/threads'&&active!==owner)return response({ok:true,threads:[],totalCount:0},200,active);
+  if(url==='/api/v1/support/threads/summary'&&active!==owner)return response({ok:true,total:0,open:0,waitingUser:0,resolved:0},200,active);
+  return fallback(url,o);
+ },'',true);
+ await h.flush();const controls=h.nodes.get('auth-actions'),topbar=controls.closest('.topbar');
+ assert.ok(topbar.classList.contains('member-authenticated'));assert.equal(controls.children.length,2);
+ const [profile,logout]=controls.children;
+ assert.equal(profile.textContent,name);assert.ok(profile.classList.contains('auth-link'));assert.ok(profile.classList.contains('auth-profile'));
+ assert.ok(logout.classList.contains('auth-logout'));assert.equal(profile.title,h.tx('account'));
+ for(const code of ['en','ko','ja','zh','vi']){await h.language(code);assert.equal(controls.children.length,2);assert.equal(controls.children[0].textContent,name);}
+ active=peer;await h.emit('focus');await h.flush();assert.equal(controls.children[0].textContent,'New owner');
+ assert.equal(controls.children.length,2);assert.ok(topbar.classList.contains('member-authenticated'));
+ await controls.children[1].fire('click');await h.flush();
+ assert.equal(controls.children.length,1);assert.equal(controls.children[0].href,'/login?next=%2Fsupport');
+ assert.ok(controls.children[0].classList.contains('auth-link'));assert.equal(topbar.classList.contains('member-authenticated'),false);
+ assert.equal(h.calls.filter(call=>call.url==='/api/v1/auth/logout').length,1);
+});
+
+test('actual chat/chrome script integration preserves selected peer and unknown retry owner/key in all five locales',async()=>{
+ let tries=0;const posts=[];
+ const h=harness('chat',async(url,o,fallback)=>{
+  if(o?.method==='POST'){posts.push(JSON.parse(o.body));if(++tries===1)throw Error('network');return response({ok:true,message:chat()});}
+  if(url==='/api/v1/chat/conversations')return response({ok:true,conversations:[{id,peerUserId:peer,peerNickname:'Source peer 名',unreadCount:2,updatedAt:date}],totalUnread:2});
+  if(url.includes('/messages'))return response({ok:true,messages:[chat()]});
+  return fallback(url,o);
+ },'?conversationId='+id,true);
+ await h.flush();h.nodes.get('message-body').value='Hello';
+ await h.nodes.get('message-form').fire('submit');await h.flush();
+ for(const code of ['en','ko','ja','zh','vi']){
+  await h.language(code);assert.equal(h.nodes.get('messaging-status').textContent,h.tx('msgReady'));
+  assert.equal(h.nodes.get('message-heading').textContent,'Source peer 名');assert.equal(h.nodes.get('message-send').textContent,h.tx('msgRetry'));
+  assert.equal(h.nodes.get('message-body').value,'Hello');assert.equal(h.nodes.get('message-body').disabled,true);
+ }
+ assert.equal(posts.length,1);
+ await h.nodes.get('message-form').fire('submit');await h.flush();
+ assert.equal(posts.length,2);assert.equal(posts[0].idempotencyKey,posts[1].idempotencyKey);
+ assert.equal(posts[0].body,posts[1].body);assert.ok(h.nodes.get('messaging-result').textContent.includes(messageId));
+});
+
+test('actual chrome localization preserves in-flight labels and cannot imply receipt before response',async()=>{
+ let finish;const h=harness('support',async(url,o,fallback)=>{
+  if(o?.method==='POST')return new Promise(resolve=>finish=resolve);
+  return fallback(url,o);
+ },'',true);
+ await h.flush();h.nodes.get('message-body').value='Hello\nWorld';
+ const sending=h.nodes.get('message-form').fire('submit');await h.flush();
+ for(const code of ['en','ko','ja','zh','vi']){
+  await h.language(code);assert.equal(h.nodes.get('message-send').textContent,h.tx('msgSending'));
+  assert.equal(h.nodes.get('message-send').disabled,true);assert.equal(h.nodes.get('message-body').value,'Hello\nWorld');
+  assert.equal(h.nodes.get('message-heading').textContent,'Question');
+  assert.ok(!h.nodes.get('messaging-result').textContent.includes(messageId));
+ }
+ assert.equal(h.calls.filter(call=>call.o?.method==='POST').length,1);
+ finish(response({ok:true,message:reply()}));await sending;await h.flush();
+ assert.ok(h.nodes.get('messaging-result').textContent.includes(messageId));
+});
+
+test('shared five-locale data refresh remains distinct from stable mutation retry and never posts automatically',async()=>{
+ let tries=0;const posts=[];
+ const h=harness('support',async(url,o,fallback)=>{
+  if(o?.method==='POST'){posts.push(JSON.parse(o.body));if(++tries===1)throw Error('network');return response({ok:true,message:reply()});}
+  return fallback(url,o);
+ },'',true);
+ await h.flush();h.nodes.get('message-body').value='Hello\nWorld';await h.nodes.get('message-form').fire('submit');await h.flush();
+ await h.nodes.get('messaging-refresh').fire('click');await h.flush();
+ for(const code of ['en','ko','ja','zh','vi']){
+  await h.language(code);assert.equal(h.nodes.get('messaging-refresh').textContent,h.tx('refresh'));
+  assert.equal(h.nodes.get('message-send').textContent,h.tx('msgRetry'));assert.equal(h.nodes.get('message-body').value,'Hello\nWorld');
+ }
+ assert.equal(posts.length,1);
+ await h.nodes.get('message-form').fire('submit');await h.flush();
+ assert.equal(posts.length,2);assert.equal(posts[0].idempotencyKey,posts[1].idempotencyKey);
+});
+test('disabled action guidance uses five localized functional explanations without engineering review terms',async()=>{
+ const expected=[
+  'These actions are currently unavailable. Select an existing conversation to view its history or send a reply.',
+  '현재 이 기능들은 사용할 수 없습니다. 기존 대화를 선택하면 내역을 확인하거나 답장할 수 있습니다.',
+  '現在これらの操作は利用できません。既存の会話を選択すると履歴の確認や返信ができます。',
+  '这些操作暂不可用。请选择已有对话查看记录或回复。',
+  'Các thao tác này hiện chưa khả dụng. Chọn cuộc trò chuyện hiện có để xem lịch sử hoặc trả lời.'
+ ];
+ const h=harness('chat',async(url,o,fallback)=>{
+  if(url==='/api/v1/chat/conversations')return response({ok:true,conversations:[],totalUnread:0});return fallback(url,o);
+ },'',true);await h.flush();
+ for(const [index,code] of ['en','ko','ja','zh','vi'].entries()){
+  await h.language(code);assert.equal(h.nodes.get('messaging-unavailable').textContent,expected[index]);
+ }
+ const catalog=JSON.parse(readFileSync(new URL('ui/mv43-copy.json',base),'utf8'));
+ assert.deepEqual(catalog.msgMissing,expected);assert.equal(h.calls.filter(call=>call.o?.method==='POST').length,0);
+});

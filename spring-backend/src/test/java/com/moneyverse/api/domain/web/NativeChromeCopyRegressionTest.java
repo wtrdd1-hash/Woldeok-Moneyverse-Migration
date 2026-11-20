@@ -36,4 +36,23 @@ class NativeChromeCopyRegressionTest {
             .andExpect(status().isOk())
             .andExpect(content().string(containsString("data-i18n=\"authRegisterPassword\">비밀번호 (8자 이상)</label>")));
     }
+
+    @ParameterizedTest
+    @CsvSource({
+        "en,Menu,Close,Terms,Privacy,Skip to main content",
+        "ko,메뉴,닫기,이용약관,개인정보처리방침,본문으로 건너뛰기",
+        "ja,メニュー,閉じる,利用規約,プライバシー,本文へスキップ",
+        "zh,菜单,关闭,服务条款,隐私政策,跳转到主要内容",
+        "vi,Trình đơn,Đóng,Điều khoản,Quyền riêng tư,Chuyển đến nội dung chính"
+    })
+    void sharedNavigationAndFooterUseTheNegotiatedLanguage(
+            String language, String menu, String close, String terms, String privacy, String skip) throws Exception {
+        String html = mvc.perform(get("/").header("Accept-Language", language))
+            .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        org.junit.jupiter.api.Assertions.assertTrue(html.contains("data-i18n-aria=\"menu\"") && html.contains("aria-label=\"" + menu + "\""));
+        org.junit.jupiter.api.Assertions.assertTrue(html.contains("data-i18n-aria=\"close\"") && html.contains("aria-label=\"" + close + "\""));
+        org.junit.jupiter.api.Assertions.assertTrue(html.contains("data-i18n=\"authTermsLink\">" + terms + "</a>"));
+        org.junit.jupiter.api.Assertions.assertTrue(html.contains("data-i18n=\"authPrivacyLink\">" + privacy + "</a>"));
+        org.junit.jupiter.api.Assertions.assertTrue(html.contains("data-i18n=\"authSkip\">" + skip + "</a>"));
+    }
 }

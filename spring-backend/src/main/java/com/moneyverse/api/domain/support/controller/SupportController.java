@@ -22,11 +22,13 @@ public class SupportController {
     @GetMapping("/threads")
     public ResponseEntity<ThreadListResponse> listThreads(HttpServletRequest request,
             @RequestParam(value="status",required=false) String status) {
-        return ResponseEntity.ok(supportService.listThreads(guard.actor(request),status));
+        UUID actor=guard.actor(request);
+        return ownerRead(actor,supportService.listThreads(actor,status));
     }
     @GetMapping("/threads/summary")
     public ResponseEntity<ThreadSummaryResponse> summary(HttpServletRequest request) {
-        return ResponseEntity.ok(supportService.summary(guard.actor(request)));
+        UUID actor=guard.actor(request);
+        return ownerRead(actor,supportService.summary(actor));
     }
     @PostMapping("/threads")
     public ResponseEntity<ThreadCreateResponse> createThread(HttpServletRequest request,@RequestBody NewThreadRequest body) {
@@ -36,7 +38,8 @@ public class SupportController {
     }
     @GetMapping("/threads/{id}/messages")
     public ResponseEntity<MessageListResponse> listMessages(HttpServletRequest request,@PathVariable("id") UUID id) {
-        return ResponseEntity.ok(supportService.listMessages(guard.actor(request),id));
+        UUID actor=guard.actor(request);
+        return ownerRead(actor,supportService.listMessages(actor,id));
     }
     @PostMapping("/threads/{id}/messages")
     public ResponseEntity<MessageCreateResponse> addMessage(HttpServletRequest request,@PathVariable("id") UUID id,
@@ -44,5 +47,10 @@ public class SupportController {
         UUID actor=guard.verifiedMutationActor(request);
         MessageContract.matchingKey(body.idempotencyKey(),request.getHeader("Idempotency-Key"));
         return ResponseEntity.ok(supportService.addMessage(actor,id,body));
+    }
+    // Bind ownerless read DTOs to the exact verified actor, including across cookie races.
+    private static <T> ResponseEntity<T> ownerRead(UUID actor,T body) {
+        return ResponseEntity.ok().header("X-MV-Owner",actor.toString())
+            .header("Cache-Control","private, no-store").header("Vary","Cookie").body(body);
     }
 }

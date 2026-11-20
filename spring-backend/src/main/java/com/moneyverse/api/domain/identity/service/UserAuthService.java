@@ -420,57 +420,11 @@ public class UserAuthService {
     /**
      * Registers a new user with email and password.
      */
-    @Transactional
     public LoginResult register(String rawEmail, String rawPassword, String displayName, HttpServletResponse response) {
-        String email = normalizeEmail(rawEmail);
-        String emailH = sha256(email);
-
-        // Check duplicate
-        Integer count = jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM auth_local_credentials WHERE email_hash = ?",
-            Integer.class,
-            emailH
-        );
-        if (count != null && count > 0) {
-            throw new IllegalStateException("email already registered");
-        }
-
-        UUID userId = UUID.randomUUID();
-        Instant now = Instant.now();
-        String encodedPassword = passwordEncoder.encode(rawPassword);
-
-        // 1. Insert into users
-        String insertUser = "INSERT INTO users (id, status, created_at) VALUES (?, 'active'::user_status, ?)";
-        jdbcTemplate.update(insertUser, userId, Timestamp.from(now));
-
-        // 2. Insert into member_profiles
-        String insertProfile = "INSERT INTO member_profiles (user_id, display_name, visibility, field_visibility, updated_at) VALUES (?, ?, 'public'::profile_visibility, '{}'::jsonb, ?)";
-        jdbcTemplate.update(insertProfile, userId, displayName, Timestamp.from(now));
-
-        // 3. Insert into auth_local_credentials
-        String insertCred = """
-            INSERT INTO auth_local_credentials (user_id, email, email_hash, password_verifier, verified_at, changed_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-            """;
-        jdbcTemplate.update(insertCred, userId, email, emailH, encodedPassword, Timestamp.from(now), Timestamp.from(now));
-
-        // 4. Initialize basic cash account
-        try {
-            UUID accountId = UUID.randomUUID();
-            jdbcTemplate.update(
-                "INSERT INTO accounts (id, account_type, owner_user_id, currency, status, allow_negative, created_at) VALUES (?, 'USER_CASH'::account_type, ?, 'WLD', 'active'::account_status, false, ?)",
-                accountId, userId, Timestamp.from(now)
-            );
-            jdbcTemplate.update(
-                "INSERT INTO account_balances (account_id, available_amount, updated_at) VALUES (?, 1000000, ?)",
-                accountId, Timestamp.from(now)
-            );
-        } catch (Exception e) {
-            log.debug("[UserAuthService] account setup: {}", e.getMessage());
-        }
-
-        // 5. Create active session
-        return login(email, rawPassword, response);
+        // Consent/age persistence and canonical funded registration must precede account creation.
+        throw new org.springframework.web.server.ResponseStatusException(
+            org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,
+            "LOCAL_REGISTRATION_CONTRACT_UNAVAILABLE");
     }
 
     /**

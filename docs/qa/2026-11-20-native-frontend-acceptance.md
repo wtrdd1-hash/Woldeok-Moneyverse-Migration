@@ -1,5 +1,8 @@
 # Native frontend implementation and acceptance ledger — 2026-11-20
 
+> Current scope: reviewed incremental implementation at173e7255c7. Local fresh Spring479/Node270 passed; functional commit173e7255c7 GitHub CI44714457273 passed all4 jobs, with9 actual PostgreSQL cases and0 failures/errors/skips. Later documentation checkpoints do not change that implementation. Production HOLD. Use the latest checkpoint and OPEN findings below; earlier source totals are historical.
+
+
 This page describes the November18 Spring MVC/Thymeleaf frontend migration. It is an implementation/QA ledger, not a statement that every existing page or production feature works.
 
 - Task PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3311
@@ -67,3 +70,49 @@ The pre-migration source inventory contained290 static HTML files covering147 co
 - [ ] Complete all browser/locale/responsive/admin/mutation acceptance rows.
 - [ ] Fresh whole-branch review and current-main integration.
 - [ ] Exact-source Test, session continuity/rollback and documented production release.
+
+## Current integrated checkpoint —2026-11-20 owner safety continuation
+This entry supersedes earlier per-slice totals only for the current isolated candidate; it is not full-site acceptance.
+| Gate | Evidence/state |
+|---|---|
+| Current-main integration | Main9635262fb2 plus reviewed messaging3fe753fc43; administrator network-credential shortcut removed; previous11 deleted admin regressions restored |
+| Ordinary Spring | Fresh clean469 tests/84 suites,0 failures/errors/skips, bootJar successful; unchanged source fingerprint cdae0616cc1f025c88872ee2ad1669e11b6989eb2be97f5aa0f27aba14d7f1bc |
+| Node |262 passed,0 failed/cancelled/skipped; native, admin, money, release, security guards |
+| Messaging source review | Scoped round1/5 APPROVED,3 findings addressed,0 open source findings; owner-stamped reads and post-send epoch checked |
+| Actual browser | Prior source8746:40 home locale/width cases no overflow/FAB overlap;7 link targets below44px and untranslated shared labels found. Candidate remediation implemented; rerun pending |
+| Actual PostgreSQL | Ancestor7cb CI44689405118 had9 passed/0 skips; latest-source CI pending |
+| Test/release | Public Test HTTP403 rechecked; production HOLD |
+| Remaining acceptance | Authenticated member/admin flows, full-page linguistic review,200%/keyboard/reduced motion, simultaneous concurrency, global cross-navigation drafts, remaining legacy pages OPEN |
+
+### Actual browser refinement — source4e10ee6f04
+- Home/login:80cases (2routepaths×5locales×8widths), no undersized44px controls, no overflow/FAB-bottomnavoverlap, correct localized titles,56px launcher. Checkbox targets measured using their associated clickable labels.
+- Tools/calculators/compound/stock:160cases, no undersized targets/overflow. All checks guest on isolatedH2; unavailable stock/board data is not a live-source failure claim.
+- Status source unavailable: actual Whitelabel503/no shell found and repaired after5logicalRED SSR failures;11focusedGREEN including truthpolicy. Actual after-fix status geometry and integrated whole-branch review pending.
+- Source8f0 whole-branch review2Important open, assigned original messaging implementer round2/5: shared generic localization overwrites dynamic state, and authenticated messaging header bypasses shared sizing/mobile classes.2minor labels/copy also assigned; rootbrand/helpwidth/titleminor addressed and browserverified.
+
+## Current authoritative checkpoint — reviewed integrated candidate
+| Gate | Current evidence |
+|---|---|
+| Source review | Messaging round2/5 approved0a64b35a46,2 Important plus M1/M3 resolved; root follow-up approved0 Critical/Important; patchd5e374b0b8fd |
+| Fresh ordinary verification | Spring479/84suites0failures/errors/skips +bootJar; Node2700failed/cancelled/skipped; source fingerprint8a0e75106ef6 stable before/after |
+| Actual PostgreSQL |8f0 CI44702880854 success, read9tests0failures/errors/skips; final-commit CI pending |
+| Actual guest browser |240 locale/width cases6routepaths at4e10; not authenticated or delivery proof |
+| Source-unavailable/status | Native503 shell/unknown/no invented0counts;5RED→11focusedGREEN and source review approved; latest actual-browser rerun OPEN due external SSH transport refusal |
+| Deployment | HOLD: exact-source public TestHTTP403; no production rollout |
+| Remaining | Authenticated member/admin QA, remaining legacy pages, full linguistic/accessibility/200% checks, global cross-navigation drafts and simultaneous concurrency OPEN |
+Earlier slice totals remain historical. Only the rows above describe this checkpoint; source code completion does not imply release acceptance.
+
+## Current OPEN findings after reviewed implementation
+| ID | Priority | Area | Evidence and remaining work |
+|---|---|---|---|
+| UI-STOCK-NATIVE | P1 | /stocks | Source review of PublicStocksReadOnlyPage.java: hand-built HTML, EN/KO only, separate styles/help anchor; lacks the shared native five-language shell. Preserve verified read-only market/canonical prices while migrating; real trading/chart parity is not certified. Source-backed unavailable response also needs native error-state acceptance. |
+| UI-GLOBAL-DRAFT | P1 | Cross-page messaging | In-page locale/focus changes retain memory-only drafts, but full-navigation global open-panel/private-draft retention remains unimplemented. No disk/localStorage workaround permitted. |
+| QA-MEMBER-ADMIN | P1 | Member/admin | Guest240 geometry cases and HTTP/service tests do not certify actual authenticated layouts, administrator step-up or real financial/message delivery.35 admin directory links do not certify35 workflows. |
+| QA-TEST-ACCESS | P1 | Test/release | Required public Test returns403; latest status after-fix browser rerun additionally lacks the external SSH preview tunnel. No direct production promotion. |
+| UI-LEGACY-PAGES | P1 | Remaining route families | Public tool hub links17 destinations; only2 calculator implementations are native verified in this slice.15 other tool destinations, other legacy/captured account/economy/game/community/admin screens need individual inventory and native functional acceptance. |
+| UI-COPY-ACCEPTANCE | P2 | Public copy and all5 locales | Public tools/status still show technical Spring/QA terminology inherited from the prior slice. Human linguistic review, unnatural words/typos and product wording decisions remain; no blanket translation certification. |
+| QA-A11Y-ALL | P2 | Full-site accessibility | Narrow menu/modal Escape/focus checks passed; actual200% zoom, complete keyboard/screenreader/reducedmotion/mobile-keyboard matrix remains OPEN. |
+| QA-CONCURRENCY | P2 | Support/DM mutations | Actual PostgreSQL9 cases cover sequential replay/ownership/contracts, not simultaneous production concurrency. |
+
+### Final functional-code CI evidence
+Functional SHA173e7255c753abd20523a914e6c68c16e826ecb3: CI44714457273 completed success for classify,policy,spring-web-check,runtime-check. Read log result: {"nativePostgresMessaging":{"tests":9,"failures":0,"errors":0,"skipped":0}}. Candidate build44714447977 was still building the frontend image when checked; build/Test/production acceptance is not asserted. This subsequent checkpoint modifies only these QA/worklog documents;479/270 test counts belong to the unchanged reviewed implementation. Production HOLD and all OPEN rows remain applicable.

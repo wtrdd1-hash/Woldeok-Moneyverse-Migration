@@ -322,3 +322,256 @@ The independent task review found an administrator-close legacy-cookie identity 
 - [ ] Legacy global access widget must not send unverifiable commands, fabricate receipts or claim encryption. Preserve a single56px access launcher with honest links until receipt-backed native messaging UI is integrated.
 - [ ] Run fresh isolated gates and independent review; record remaining broader admin step-up/operation acceptance gaps. No live switches, shared DB/grants or production service changes.
 - Actual home browser matrix passed40 width/locale cases for overflow/FAB overlap. Seven undersized link targets and shared untranslated control labels remain open while these higher-priority regressions are repaired.
+
+## Messaging owner-response binding ruling — before fix round1
+- Independent page-task review406ab5fc1f found stale-owner private reads, restoration of a previous owner's receipt after awaited reload, and Java/JavaScript NBSP subject mismatch. All3 Important findings enter the original implementer's fix loop.
+- Ruling: a session check alone cannot prove an ownerless read DTO belongs to the same account if cookies change between requests. Permit the narrow API-file exception: SupportController and ChatController add X-MV-Owner response metadata derived only from MemberApiGuard's verified actor, with private/no-store and Cookie variation. Anonymous/denied responses contain no owner metadata. No request-identity header or authorization override is introduced.
+- Client must validate that response owner and re-establish session after private reads before publication; suppress/reset on change, including delayed/ABA account transitions. Capture original owner/private epoch across post-send reload before restoring a receipt. Missing/mismatching response metadata is unavailable, never assumed owned. Cost: an older server/proxy that omits this additive response header fails closed until exact-source rollout.
+- This exception changes response metadata only, not session/CSRF/RBAC/SQL/functions/grants. Add real HTTP owner-header binding regressions plus deferred client account-transition cases, and preserve the Java-compatible stored-subject predicate.
+
+## Worktree collision and isolated continuation — before work
+- External commits0b11ddc9db andf553a18c8b appeared in the active shared task worktree while local verification was running; PR3311 was separately merged asmain88b70b90d7. Those commits are preserved. f553 removed the two new administrator regression classes and restored the pre-existing token-only isAuthorizedAdmin shortcut while retaining the guarded controller and safe access widget.
+- An EOF full run and subsequent UP-TO-DATE retry are not valid evidence for452 cases. A clean rerun passed441 after those11 regression cases had disappeared. Root did not claim that as the repaired452-case suite. The exact cause of the EOF is not established; source/test mutation during verification is independently observed in reflog/diff.
+- Continued from latest observed main88b70 in a new uniquely named isolated worktree/branch fix/nov18-ui-owner-safety-20261120-8f449f. The previous worktree is no longer modified by this executor. Restored both regression classes from the recorded0b11 snapshot and retained the7-case widget regression; no evidence is silenced to make a gate green.
+- [ ] Observe remaining shortcut failures against this fixed baseline, repair only unscoped authority, verify all452 expected ordinary cases on a stable source snapshot. Keep private messaging review fixes and actual browser44px/localization work pending integration.
+
+### Owner safety continuation — in progress
+- Unique worktree based on main 88b70b90d7ee0049c1f75e1e68507caf3d261517 preserves concurrent commits and branding. Restored 11 admin regression cases removed by a concurrent commit; focused baseline reproduced 2 failures (network-token header and bearer authorizing a human administrator).
+- Removed the unscoped transport credential authority and unused default credential field. Administrator authorization now requires an active database session and current database-backed role. Machine-token-only admin access is deliberately refused. High-risk controls remain unavailable until a verified native step-up bridge exists. No database grants, migrations or balances changed.
+
+### Native click targets and shared localization — in progress
+- Actual browser source8746 home matrix (5 locales × 8 widths) found seven link targets below44px and English shared menu/skip/footer strings in Korean. Browser assertion failed on7 targets; no claim of full accessibility acceptance. Add negotiated SSR and runtime-menu-language regressions before remediation. Preserve original approved Korean copy via existing catalog keys.
+- Messaging scoped review round1/5 approved3fe753fc43:3 addressed,0 open source findings. Response stamps, post-read session proof, post-send owner epoch and Java blank predicate reviewed; authenticated browser/global drafts/Test remain open.
+
+### Owner safety checkpoint — in progress
+- Focused admin11 cases GREEN after2 logical failures; shared-copy14 cases GREEN after5 locale failures, Node chrome/assets8 GREEN after1 runtime failure. Intermediate duplicate comma in catalog append caused syntax failure and was corrected; no failed run counted as pass. Browser44px rerun and full integrated gates pending.
+- Main advanced88b70b90→9635262fb2: official icon assets/implementation documentation only; preserve and integrate. Child messaging fix3fe753fc43 independently approved (all3 findings addressed). Production HOLD, no deployment.
+
+## Native member messaging pages — before work
+- [x] Read full actual AGENTS, approved authority/plan/brief, original support/chat pages/forms/room controls, actual Spring controllers/services/DTOs/MessageContract, native wallet/auth/session/locale/chrome/test patterns.
+- [x] Isolated approved base8746cd5131dd4e74a901bd033bb310e03c5c38af. Original dirty checkout untouched. Fetched origin/main now a9b1070d1091191c5fe2b68b2759f24762be780a; parent notified of advancement before implementation.
+- [x] Inventory: member-only /support and /chat plus /, .html, /index.html aliases; selected thread/conversationId/peer query values must resolve from verified owner lists. No original dynamic page path. Original transcript/{id} and /text routes are separate exports, not private page aliases.
+- [x] Support controls: new subject/body/start; status, title search, sort, inclusive Korea-time last-message date range max366 days; selection, recent100 summary, CSV/TXT downloads, reply/send. Spring list caps50 from latest100; keep local display filters with explicit latest50 disclosure and sample100 summary. Export only loaded verified max500 messages, safely escaped.
+- [x] Chat controls: existing conversations/search/select/back/refresh/history/send; new DM/user search, archived view/archive, mute, block/unblock, report and image upload have no reviewed Spring endpoints and remain visibly disabled with explanation. No automatic peer creation, staff private-DM browse or optimistic unread updates.
+- [ ] Real rendered HTTP and independently authored client-core/binding regressions RED.
+- [ ] Native implementation, focused GREEN/full Spring test+bootJar/Node/security/release, self-review and scoped checkpoint.
+- No backend/auth/SQL/schema/grants or production changes. Global cross-navigation drafts, authenticated browser and exact-source public Test403/release acceptance remain OPEN; production HOLD.
+
+## Native member messaging pages — in progress
+- [x] HTTP logical RED:10 tests,10 failures (captured routes lack native templates/privacy/member redirects/controls/Flight refusal). Command: test --tests '*NativeMessagingWebTest' with test profile/loopback/task temp media; /tmp/native-messaging-http-red.log.
+- [x] Client RED:9 cases fail the explicit missing-native-core assertion; source-constraint case fails on absent binding file. No old client was represented as verified. Implementing independently hand-authored real DTO fixtures and async receipt/session state.
+- Parent confirms fixed base pending root integration, local sample filtering with KST boundaries and formula-safe CSV export. No main integration in this child.
+
+- [x] First focused HTTP GREEN:10 tests,0 failures/errors/skips. Initial binding run9 passed/3 failed traced to VM inventory omitting h3 tag digits; corrected harness, not product assertions. Account-change test now asserts no private article after transition while allowing safe empty-state text.
+- [x] Self-inspection added2 logical RED focus-race cases (12 passed/2 failed): same-owner refresh erased reply draft; a shared read generation suppressed a verified mutation result and could leave a delivered body available. Separate private-owner generation from read epochs and restore history without resetting same-target drafts.
+
+- [x] Added existing-DM/forged-selection/five-language draft/exact-bigint binding and actual Blob CSV formula-safety checks. Java-vs-JavaScript whitespace test exposed real U+001C blank mismatch (RED), corrected to Java whitespace set; ASCII-only edge trim remains exact. CSV assertion initially tested literal backslash-r rather than fixture carriage return, corrected that test expectation.
+
+- [x] Focused messaging GREEN16/16 Node cases,0 failures/skips. Broader Node run exposed catalog insertion-order parity (client keys prepended vs server appended); existing parity compares serialized ordered dictionaries. Moved only new messaging entries to matching append position; no parity exemption.
+- [ ] Full Spring/bootJar and expanded Node final gates, scoped checkpoint and independent parent review.
+
+- [x] Clean full Spring rerun451 tests,0 failures/errors/skips, bootJar successful exit0. Prior wrapper printed BUILD SUCCESSFUL but had a shell exit quoting error; rerun used a readable shell script with correct status propagation and final JUnit totals.
+- [x] Final source review found original query-filter initialization and source-independent chronological transcript ordering missing. Added2 logical RED regressions before scoped fix. Query search stays local and is never included in source fetch URLs.
+
+## Native member messaging pages — implementation checkpoint
+- [x] Native member-only support/chat aliases, singular shared chrome, five locale catalogs and exact reviewed DTO/receipt/session/CSRF paths implemented.18 executable messaging cases pass;10 real rendered HTTP cases pass.
+- [x] Prior full Spring451/0 failures/errors/skips and Node244/244 passed. Final query/ordering corrections have focused18/18 evidence; rerunning whole gates after final asset generation before completion report.
+- [x] Source review verified all9 existing-template changes are asset-query SHA256 digests only; all preexisting locale keys/values unchanged. No shared chrome/backend API/security/SQL/schema/grant/runtime or original dirty-checkout modifications.
+- [ ] Independent parent review and final exact-source full gates. Browser geometry/authenticated-browser/source-success acceptance and global cross-navigation memory-only draft shell remain OPEN. Production HOLD; no main integration/deployment.
+
+## Native member messaging pages — finished implementation candidate
+- [x] Final exact-source Spring command (test profile, loopback, task temporary media): ./gradlew test bootJar --offline --no-daemon -Dorg.gradle.workers.max=1. **451 tests,0 failures/errors/skips; bootJar BUILD SUCCESSFUL**. Actual full run54s after final source checkpoint; /tmp/native-messaging-final.log. Shell wrapper had a trailing-CR error after reporting all gate exits0; independent Python subprocess confirmation then returned **Spring exit0**, tasks up-to-date7s, with identical final JUnit totals. No test failure was hidden.
+- [x] Final expanded Node command: node --test scripts/native-*.test.mjs scripts/admin-tools.test.mjs scripts/mv39-money.test.mjs scripts/release/*.test.mjs scripts/security/*.test.mjs. **246 passed,0 failed/cancelled/skipped**, including18 messaging cases. Clean-process logs /tmp/native-messaging-node-final-clean.log and /tmp/native-messaging-spring-final-clean.log. git diff --check exit0; asset generator changed0 final references.
+- [x] Correction to initial shorthand RED entry: original client run was9 total failures (8 explicit missing-core assertions plus1 absent-binding source check), not9 core failures plus another. Subsequent executable binding RED8 pass/4 fail; logical focus regressions12 pass/2 fail; Java blank semantics14 pass/2 fail including a corrected CSV test literal; query/chronology16 pass/2 fail; final18/18 GREEN. HTTP10 logical RED→10 GREEN.
+- [x] Scoped source self-review checks actual DTO interfaces; UUID targets come only from verified owner lists; receipts bind exact owner/target/body/subject/date and bigint sequence. Unknown intents cannot change content/key, double submits post once, same-owner focus preserves retry/draft, changed-owner/stale reads cannot display prior text. CSV quotes and apostrophe-prefixes all cells including whitespace/control-leading formulas.
+- [x] Source checkpoint32ea9618139493594e183fea8fd22382b8f405bd published while implementation review/full validation were in progress; final evidence checkpoint follows on the same ordinary task branch. Original dirty checkout untouched. Main refreshed unchanged at a9b1070d1091191c5fe2b68b2759f24762be780a during final gates; parent explicitly owns safe current-main integration.
+- [ ] Independent parent spec/code review, authenticated browser layout/44px/computed geometry/five-language linguistic acceptance, global cross-navigation memory-only drafts, simultaneous live concurrency and exact-source public Test/release remain OPEN. Parent requested browser inspection after safe integration. Existing9 real Java/PostgreSQL service cases passed in separate ancestor CI7cb9890d95; not rerun or claimed as local H2 evidence here.
+- Deployment state: **not merged to main, not deployed; production HOLD**. Native-page implementation with tested source/receipt state is not global messaging completion. Missing Spring DM/open/read/archive/mute/block/report/upload actions remain visibly unavailable; no backend API/auth/SQL/schema/grant/role/production changes.
+
+## Review round1 — authorized owner-binding correction
+Ruling before implementation: session reproof alone cannot bind an ownerless DTO when cookies switch A→B→A. Narrow approved exception to prior UI-only API scope: SupportController and ChatController may add X-MV-Owner RESPONSE headers solely from the MemberApiGuard session-derived actor on successful private GET responses, with private/no-store and Vary: Cookie. Anonymous/denied/error responses must carry no owner header. No incoming identity header/override, service/SQL/RBAC/CSRF/auth change.
+The client must validate that exact response-owner header equals the originally active owner, then reprove session after each list/history/summary read before publishing. Missing/malformed/foreign owner headers fail closed; older servers/proxies without the header remain unavailable until coordinated same-source rollout. Deferred A→B and A→B→A cases must never publish wrong-owner lists/history.
+Review also requires original-owner/privateEpoch recheck after post-send load, and one shared exact Java blank predicate for NBSP support subjects in input and stored source.
+- [x] Read independent review and verified all3 Important findings against actual source/guard/DTOs.
+- [ ] Add HTTP response-owner/no-owner-on-denial and deferred/ABA client regressions; observe RED.
+- [ ] Minimal scoped fixes; focused/full gates; publish fix and report for scoped re-review.
+No unsafe-current-main merge, real user messages, browser acceptance or release claim.
+
+## Native messaging review round1 — in progress
+- [x] Independently authored26-case Node RED:18 pass/8 fail,0 skips. All8 new cases fail logically before fixes: response-owner validation, NBSP receipt/list, foreign-list ABA, post-list transition, deferred proof, history transition, summary transition, post-send owner receipt.
+- [x] Implemented authorized header-only read exception in Support/Chat controllers: successful GET result uses the exact guard actor for source and X-MV-Owner, private/no-store and VaryCookie. Builder runs only after service success, so denial has no owner stamp; no incoming-header/auth/service/SQL change.
+- [ ] Focused/full verification and remaining receipt/NBSP findings; scoped re-review pending.
+
+- [x] HTTP RED12 cases,11 pass/1 logical fail for missing response-owner stamp; anonymous/denied absence already passes.
+- [x] Read privacy correction GREEN for all deferred/ABA header+session list/history/summary cases. Reproduced post-send finding again with internally consistent B-owned summary fixture (otherwise unrelated header refusal could clear and mask a restored receipt):24 pass/2 fail (receipt/NBSP).
+- [x] Receipt correction captures original owner and private epoch and rechecks both after awaited reload before restoring anything. Stored support subjects now share exact Java blank predicate with input without trimming/re-normalizing valid NBSP source.
+
+- Investigation correction: the first HTTP positive case incorrectly supplied a foreign X-User-Id and was rightly403 at existing SensitiveApiBoundaryFilter before reaching the controller. That initial RED did not yet prove missing owner stamps. Corrected positive setup to send only untrusted incoming X-MV-Owner (must not be echoed), explicitly retain forged actor-header403/no-owner tests for every alias, and all service-denied aliases403/no-owner. No filter/auth override was changed.
+- Repeating missing-header RED with original HEAD controllers temporarily restored in this task worktree, then restoring scoped fix in finally. Post-send test now explicitly defers the reload session response, rather than relying only on immediate synthetic proof ordering.
+
+- [x] True HTTP header RED observed: response X-MV-Owner expected actor, was null with original controllers. Restored fix; covering24 run exposed test first-header assumption: boundary filter already writes Cache-Control:no-store and CORS Vary headers, while controller adds private,no-store and Cookie as additional effective field values. Corrected assertions to require private/no-store/Cookie across all actual header values, preserving effective HTTP semantics and without changing existing filters.
+
+## Native messaging review round1 — finished fix candidate
+- [x] Addressed3 Important findings in the same task: read responses bind exact guard actor with X-MV-Owner plus independent post-read session proof; post-send continuation rechecks original owner/private epoch after awaited reload; input/stored support subject use one exact Java blank predicate.
+- [x] True missing-owner-header RED12 tests/1 failure (actor header expected, null observed); covering GREEN **24 tests,0 failures/errors/skips**, including12 NativeMessagingWebTest and existing6 boundary/6 reply tests. All12 API read aliases test successful owner/private-cache/VaryCookie, anonymous refusal, forged actor403/no-owner, and denied-service403/no-owner.
+- [x] Node review regression26 cases:18 pass/8 logical RED before fixes; final **26 passed,0 failed/cancelled/skipped**. Real Headers fixtures and text-publication instrumentation cover missing/malformed/foreign stamps, A→B and ABA list/history races, deferred session proof and summary, explicit delayed post-send account switch, and NBSP creation receipt/list.
+- [x] Final entire isolated Spring test+bootJar: **453 tests,0 failures/errors/skips; BUILD SUCCESSFUL in55s, exit0**. Final expanded Node **254 passed,0 failed/cancelled/skipped, exit0**. git diff --check exit0; final asset generator changed0 references. Commands:
+  - MONEYVERSE_STORAGE_PATH=/tmp/native-messaging-review1-media-20261120 SPRING_PROFILES_ACTIVE=test SERVER_ADDRESS=127.0.0.1 ./gradlew test bootJar --offline --no-daemon -Dorg.gradle.workers.max=1
+  - Focused same environment: ./gradlew test --tests '*NativeMessagingWebTest' --tests '*MessagingHttpBoundaryTest' --tests '*SupportReplyContractTest' --offline --no-daemon -Dorg.gradle.workers.max=1
+  - node --test scripts/native-*.test.mjs scripts/admin-tools.test.mjs scripts/mv39-money.test.mjs scripts/release/*.test.mjs scripts/security/*.test.mjs
+- Evidence: /tmp/native-messaging-review1-header-red.log, /tmp/native-messaging-review1-http-green.log, /tmp/native-messaging-review1-node-red.log, /tmp/native-messaging-review1-receipt-red.log, /tmp/native-messaging-review1-node-green.log, /tmp/native-messaging-review1-spring-full.log, /tmp/native-messaging-review1-node-full.log. Initial HTTP positive fixture403 and multi-value-header assertion failures were diagnosed and recorded above; no gate bypass.
+- [x] Approved API exception stays response-header-only in Support/Chat controllers; actor is the same verified guard value passed to service, builder runs after service success. No incoming identity override, auth/filter/service/SQL/RBAC/CSRF changes. Two messaging-template changes are generated asset digests only. Old servers/proxies missing X-MV-Owner fail closed until coordinated same-source rollout.
+- [x] Refetched main advanced to88b70b90d7ee0049c1f75e1e68507caf3d261517; parent notified and owns safe integration. Child remains fixed base8746; original dirty checkout untouched.
+- [ ] Scoped independent re-review pending (round1/5,3 addressed,0 known open source findings). Browser/geometry/authenticated success, global cross-navigation drafts, simultaneous live concurrency and exact-source public Test/release remain OPEN. Ordinary453 excludes separately tagged9 actual PostgreSQL cases, previously passed at ancestor CI7cb; no local DB claim. No real messages, main merge or deployment; production HOLD.
+
+### Reviewed messaging integration — in progress
+- Main squash of PR3311 removed common ancestry, causing duplicate add/add conflicts in a direct merge. Kept current main source plus the exact reviewed8746..3fe753fc43 messaging delta, with child ancestry retained in the merge.
+- Shared catalogs preserve all current keys plus60 reviewed messaging keys. Existing native templates retain current shared localization; asset versions regenerated. No authentication, CSRF, SQL or database change beyond reviewed private-read response metadata.
+- Round1/5 scoped review approved all3 findings at3fe753fc43;0 open source findings. Full integration and browser gates remain pending.
+
+### Integrated owner-safety verification checkpoint — in progress
+- Fresh isolated clean test/bootJar rerun:469 tests across84 suites,0 failures/errors/skips; Node262 pass,0 failures/cancelled/skipped. Source fingerprint before/after identical cdae0616cc1f025c88872ee2ad1669e11b6989eb2be97f5aa0f27aba14d7f1bc. No UP-TO-DATE output counted as a fresh test run.
+- Commands: SPRING_PROFILES_ACTIVE=test SERVER_ADDRESS=127.0.0.1 MONEYVERSE_STORAGE_PATH=/tmp/nov20-owner-safety-test-media ./gradlew clean test bootJar --offline --no-daemon --rerun-tasks -Dorg.gradle.workers.max=1; node --test scripts/native-*.test.mjs scripts/admin-tools.test.mjs scripts/mv39-money.test.mjs scripts/release/*.test.mjs scripts/security/*.test.mjs. Evidence /tmp/nov20-owner-safety-full-java.log and /tmp/nov20-owner-safety-full-node.log.
+- Focused logical RED→GREEN: admin11/2fail→11pass; shared server copy14/5fail→14pass; runtime language regression1fail→pass. Seven actual-browser short-link failures still await after-fix geometry rerun. Gradle/dependency and unavailable scratch stock-source warnings remain; H2 is not PostgreSQL delivery evidence.
+- Public Test /api/version rechecked HTTP403. Actual9-case PostgreSQL CI must rerun on this integrated source; whole-branch review, authenticated browser,200%/keyboard/reduced motion, global cross-navigation drafts and production release remain OPEN. No production rollout or member financial/message mutation performed.
+
+### Actual browser and whole-branch review — in progress
+- Source8f0df95ff9 actual home40cases: original7 undersized inline/footer links resolved, all5 shared locale samples correct, no document overflow/FAB overlap. New sidebar brand39px height at desktop widths remains below44px.
+- Actual login40cases: EN/Chinese account-help login anchor42.5/30px width despite44px height; no document overflow. JP→KO changes body/header while document.title remainsJP. Added dynamic-title behavioral regression before remediation.
+- Actual mobile menu opens, translates while open, Escape closes and restores toggle focus; support modal Escape restores launcher focus. These narrow checks are not whole-site keyboard acceptance.
+- Whole-branch reviewer reproduced shared chrome overwriting messaging ready/selectedsubject/retry labels on locale change; source also omits established member-auth sizing/classes. Original messaging implementer dispatched fix round2/5 with covering actual combined-script regressions. Current source findings OPEN pending fix/review.
+
+### Whole-branch review ledger
+- Reviewed8f0df95ff9 verdict With fixes:0 Critical,2 Important. I1 shared generic localization overwrites component-owned ready/heading/retry text; I2 messaging authenticated header bypasses established shared44px/mobile-name classes. Original implementer fix round2/5 in progress; covering tests must load actual scripts in actual order.
+- Minor deferred: top messaging refresh uses a retry label while only reloading; msgMissing exposes implementation/review terminology. Both remain tracked for final triage, not silently discarded.
+- Minor observed by root and being fixed: desktop39px brand, narrow login-help links, auth document title stale after locale change. Runtime-title logical RED reproduced before patch; apply only current pageHeader translation key and minimum target sizes. No user/product wording rewritten.
+
+### Native status unavailable-state repair — before work / in progress
+- Actual browser4e10 source: tools/calculators/compound/stock160locale-width cases no smalltargets/overflow. /status shows Whitelabel503, no title/navigation/FAB under expected scratch source failure. Existing test asserted503 only and missed HTML degradation.
+- TDD5locale native503 HTML/header/unknown/unavailable regressions added. Preserve actual503 and unknownstate, do not invent source rows or change status JSON/API/SQL.
+
+### Status and shared control checkpoint — in progress
+- Status logicalRED7 tests/5failures→focusedGREEN11 tests/0fail/error/skip including truth policy. Native HTML preserves HTTP503/unknown state, localized unavailable message and full common shell; JSON API unchanged; no fabricated observation.
+- Actual guest browser source4e10: home/login80cases alltargets>=44px, nooverflow/FAB-bottomnavoverlap, dynamic titlecorrect,56px launcher. Tools/calculators/compound/stock160cases no smalltargets/overflow. Separate source-unavailable/status1failure led to this repair; after-fix browser pending.
+- Local evidence implementation-audit/nov20-native-home-login-80case-browser.json and nov20-native-public-browser-before-status-fix.json. These are guest layout checks on isolatedH2, not authenticated/member delivery or financial acceptance.
+
+## Native messaging review round2 — before work
+- [x] Verified whole-branch integration finding against actual source: messaging.js loads before shared chrome.js, and chrome localize later rewrites every data-i18n node. Component-owned ready state, selected subject and retry labels still carry static translation keys.
+- [x] Verified second Important finding against established mv39 app.js renderAuthControls/site.css: account/profile/logout classes and topbar.member-authenticated select44px sizing, long-name ellipsis and <=480px second-row wrapping; messaging's bare anchors/custom logout omit that contract.
+- [ ] Add actual locale/core/messaging/chrome scripts in template order on one shared DOM with real template data-i18n/fragment IDs. Observe RED for ready/selected heading/retry plus account classes/transition contract.
+- [ ] Remove only shared-localizer ownership from messaging-rendered dynamic nodes while preserving initial escaped SSR fallback; reuse established account classes and member-authenticated toggle, no shared chrome/CSS changes.
+- [ ] Focused Node/HTTP, appropriate full gates, report and checkpoint for scoped re-review. Fixed child base retained; no blind main merge or parent-root edit.
+Browser geometry, global cross-navigation drafts, authenticated delivery and Test/release remain OPEN.
+
+## Review round2 — minor triage authorized before changes
+- Parent separately assigned M1: use existing localized refresh label for data reload, distinct from retrying the retained mutation.
+- Parent separately assigned M3: replace this task's newly introduced engineering/review-status explanation with truthful functional-unavailability guidance in all5 locales. This is not a rewording of carried-over original Korean product copy.
+- M2 shared brand/auth-help/title fixes and source-unavailable public status error UI remain parent/separate-slice owned; no shared or public edits here.
+
+## Native messaging review round2 — in progress
+- [x] Actual4-script integration RED:34 cases,26 pass/8 logical failures,0 skips, covering ready/selected source heading, unknown reply/new-thread/chat retry, in-flight label/no early receipt, established account class/transition, refresh distinction and newly approved functional copy.
+- Initial new test DOM tokenizer omitted digits in data-i18n attribute names; corrected that harness before observing real cross-component failures. No product implementation preceded logical RED.
+- [x] Rendered SSR RED:5 locales,5 failures/0 errors/skips for competing static data-i18n on messaging-owned nodes. Kept localized th:text fallback.
+- [x] Removed7 conflicting static attrs only; shared locale/chrome remain unchanged. Account/login/logout reuse existing auth-link/auth-profile/auth-logout and topbar.member-authenticated; verified long names remain full text with shared CSS handling ellipsis/wrapping.
+- [x] Separately authorized minor M1 uses existing refresh translation for reload; M3 newly introduced message now explains functional availability in5 languages without engineering/review terms. Pending disabled behavior remains unchanged.
+- [ ] Focused/full gates and scoped re-review. Actual browser320/390px geometry remains parent acceptance; DOM/class/source contracts do not claim computed geometry.
+
+## Native messaging review round2 — finished fix candidate
+- [x] Addressed I1: removed only7 static data-i18n attrs from messaging-owned status/selected-heading/new-thread-send/reply-send nodes. Kept all localized escaped th:text SSR fallbacks. Shared chrome/script order/localization engine unchanged; component remains the sole dynamic label owner.
+- [x] Addressed I2: account/login controls use established auth-link/auth-profile/auth-logout, localized account title and topbar.member-authenticated toggle. Actual shared DOM tests cover long verified names, all5 locales, exactly2 member controls, owner change, logout/guest row reset and one logout call. This applies existing44px/truncation/mobile-row CSS contracts; it does not certify measured320/390px geometry.
+- [x] Parent separately authorized and resolved M1: data reload now uses existing refresh label and never posts the retained mutation; actual retry remains a distinct same-key action. M3: this task's newly introduced functional-unavailability guidance translated in5 locales; no Spring/review/deployment jargon and no fake enabled action. M2 root-owned shared brand/auth-help/title work and separate public-source503 UI untouched.
+- [x] Real integration TDD: actual i18n.js → messaging-core.js → messaging.js → chrome.js on one DOM built from actual native/shared templates and data-i18n attributes. **34 cases:26 pass/8 logical RED →34 GREEN**,0 skips. An initial harness tokenizer omitted digits in data-i18n; corrected before accepting RED evidence. Ready/source heading, unknown/in-flight/verified receipts, support new-thread/reply/DM retries, unsent fields, same owner/key and account transitions covered in all5 locales. No actual message was sent.
+- [x] RenderedSSR RED5 locales/5 failures before markup fix; covering GREEN **29 Spring tests,0 failures/errors/skips** (17 native page+6 existing boundary+6 existing reply). Initial localized labels remain valid until scripts start.
+- [x] Final entire isolated Spring test+bootJar **458 tests,0 failures/errors/skips; BUILD SUCCESSFUL in1m, exit0**. Full Node UI/security/release **262 passed,0 failed/cancelled/skipped, exit0**. Asset generator final0 changed references; git diff --check exit0. Existing Gradle/dependency warnings remain.
+- Commands:
+  - MONEYVERSE_STORAGE_PATH=/tmp/native-messaging-review2-media-20261120 SPRING_PROFILES_ACTIVE=test SERVER_ADDRESS=127.0.0.1 ./gradlew test bootJar --offline --no-daemon -Dorg.gradle.workers.max=1
+  - Same environment focused: ./gradlew test --tests '*NativeMessagingWebTest' --tests '*MessagingHttpBoundaryTest' --tests '*SupportReplyContractTest' --offline --no-daemon -Dorg.gradle.workers.max=1
+  - node --test scripts/native-*.test.mjs scripts/admin-tools.test.mjs scripts/mv39-money.test.mjs scripts/release/*.test.mjs scripts/security/*.test.mjs
+- Logs: /tmp/native-messaging-review2-node-red.log, /tmp/native-messaging-review2-node-green.log, /tmp/native-messaging-review2-http-red.log, /tmp/native-messaging-review2-http-green.log, /tmp/native-messaging-review2-node-full.log and /tmp/native-messaging-review2-spring-full.log.
+- [x] Scope reviewed: no shared chrome/CSS, controller/API/auth/owner/CSRF/receipt/core/service/SQL or runtime change. Only allowed msgMissing catalog values changed;9 existing other-template changes are generated asset-query digests. Original dirty checkout untouched; no parent-root writes.
+- [x] Refetched main9635262fb22b07c1dca5dd9ab855371d5635be86, parent notified. Child retains approved fixed history3fe753fc43; root owns integration, no blind main merge.
+- [ ] Scoped independent re-review pending, round2/5:2 Important addressed, M1/M3 resolved; M2 parent-owned. Browser geometry/accessibility/human linguistic acceptance, authenticated real delivery, global cross-navigation drafts, simultaneous PostgreSQL concurrency and exact-source Test/release remain OPEN. Ordinary458 excludes separately tagged9 PostgreSQL cases. No main merge/deployment; production HOLD.
+
+- Actual85b status shell restored, but unavailable data rendered0sources/no registeredsource copy. Those are unproven absence claims under read failure; extend5locale regressions to suppress counts/no-source copy only while sourceUnavailable. Preserve empty successful response behavior.
+
+- Messaging fix round2/5 independently APPROVED0a64b35a46:2Important addressed,0open; M1/M3resolved. Integration keeps localized shared chrome plus component-owned dynamic labels; existing-template conflicts were asset-digest-only and regenerated.
+
+### Finished implementation checkpoint — release HOLD
+- [x] Reviewed messaging round2/5:2 Important and assigned M1/M3 minors addressed at0a64b35a46, scoped review APPROVED. Root follow-up source review APPROVED,0 new Critical/Important; patch SHA256d5e374b0b8fdf82416a0c290dd250ffb224f3d9d3530e858e8c1e1616484624d. Root title/44px/status-source truth changes covered; child JS/tests/catalog values preserved through integration.
+- [x] Fresh clean final Spring479 tests/84 suites,0 failures/errors/skips plus bootJar; Node270 passes,0 failed/cancelled/skipped. Before/after fingerprint8a0e75106ef6a1ce2d3d0ab23813ad45bd815abb29f2e89ecdbd64597df10de7 identical. Logs /tmp/nov20-owner-final-java.log, /tmp/nov20-owner-final-node.log; machine result /tmp/nov20-owner-final-result.json. Actual combined messaging/chrome regression included in integrated Node run.
+- [x] Earlier candidate8f0 CI44702880854 all4 jobs successful; read actual9-case PostgreSQL summary:9 tests,0 failures/errors/skips. Final commit CI remains pending; no earlier source certification substituted for final-source CI.
+- [x] Actual guest browser240 locale/width combinations on source4e10 across6 routepaths: home/login80 plus tools/calculators/compound/stock160, no undersized targets/document overflow; home/login also correct title and56px FAB without bottom-nav overlap. Not authenticated flow or delivery certification.
+- [x] Status source failure reproduced as Whitelabel503; initial native-shell repair then exposed unproven0/absent-registration claims, corrected after5 logical RED→11focusedGREEN. Latest source returns503/unknown/unavailable without invented counts, JSON unchanged; actual latest after-fix status browser remains OPEN.
+- [ ] Exact-source public Test stillHTTP403; external SSH transport currently refused while MiniPC SSH service is active and connected MiniPC tool remains usable. No SSH/network/service restart or public exposure performed. This blocks another local browser tunnel; do not invent after-fix browser proof.
+- [ ] Authenticated member/admin/browser, remaining legacy pages/linguistic review,200%zoom/full keyboard/reducedmotion, global cross-navigation private drafts, simultaneous concurrency and final-source Test/release validation remain OPEN. This is a reviewed implementation checkpoint, not all-site or production acceptance. Production HOLD, no deployment; no real member messages or financial mutations performed.
+
+### Remaining-scope documentation checkpoint
+- Current OPEN table added to QA ledger: public stocks remains EN/KO hand-built read-only HTML outside shared shell; global cross-navigation drafts, authenticated/admin flows,15 other legacy tools/other route families, technical public copy, full accessibility/linguistic and simultaneous concurrency acceptance remain open. These are observed source/coverage gaps, not newly claimed production failures.
+- Final functional candidate173e7255c7 still undergoing GitHub checks; only documentation modified afterward. Do not attribute final-code CI evidence to a later docs-only SHA without stating the distinction.
+
+### Finished reviewed-code and documentation checkpoint
+- Functional173e7255c7 CI44714457273 completed success (classify,policy,spring-web-check,runtime-check). Independently read actual PostgreSQL log9 tests/0 failures/errors/skips; no skipped tests counted as passing.
+- Local fresh Spring479/Node270/bootJar and three source review stages remain the implementation evidence. This checkpoint changes only QA/worklog documents, verified by exact changed-path list and git diff --check; no redundant runtime tests claimed for a documentation-only edit.
+- Build Test Candidate44714447977 still building frontend at last check; public Test403 and authenticated/browser/full-route gates remain OPEN. Implementation is on task branch/PR3319, not a production release or all-site certification. No production deployment or branch deletion; retain branches while integration/acceptance is unfinished.
+- Current source-gap table now explicitly includes public stocks EN/KO/nonshared-shell and other remaining feature/page families. Next scope must preserve read-only market/canonical money and handle unavailable data honestly; no inferred trade/graph parity.
+
+## Approved Production transition continuation — before work / in progress
+- User authorizes resolving promotion gates and switching to the implemented native frontend. Execute the new native-frontend-production-cutover plan in the same task worktree/branch; existing main9635262fb2 and PR3319 retained, foreign original checkout untouched.
+- Read current release guide and observed host facts; historical K8s and Nov10 runtime records are not current public-runtime proof. No deployment mutation yet.
+- Read-only independent audits confirm deliberate Test loopback ACL (public403), unverified old build identity, inactive official Test pair and older private Spring canary. Preserve Test privacy while preparing authenticated exact-source verification.
+- Unwaived financial blockers: direct app DML on ledger_transactions/postings, one recent member-owned USER_CASH1,000,000WLD opening without postings; migration346 manual checksum and salary body/searchpath drift. Keep accepted-existing-DML exceptions separate. No member identifiers/credentials recorded; no silent balance/checksum edit or waiver.
+- [ ] Build-bound identity/quiescent candidate; [ ] protected isolated Test; [ ] financial/provenance resolution; [ ] exact-main integration/zero-downtime cutover; [ ] observed Production acceptance.
+
+### Production blocker root cause — in progress
+- Source trace found the local registration prototype directly inserts USER_CASH available_amount1,000,000 without ledger posting, using the same Instant for user/account/balance. This matches the unexplained opening and is a repeatable new-account integrity defect, beyond a merely suspected test fixture.
+- Add fail-closed registration regression before patch; native UI already marks registration unavailable pending persisted consent/age/canonical funding contract. Do not write a synthetic ledger event or silently alter the existing member balance. Financial acceptance remains BLOCKED until historical integrity/provenance is legitimately resolved.
+
+- Task1 identity/scheduling GREEN14 focused cases after9logicalRED: packaged source identity and explicit scheduling suppression work; default scheduling retained. Registration2logicalRED→GREEN and native auth UI checks passed. No deployment claim yet.
+- Test CORS needs process-scoped trusted origin: add2logical regression assertions before code so authenticated Test POSTs work without permitting Test-origin credential access to Production. Private Test ingress operator gate remains required.
+
+- Registration service2RED→GREEN; HTTP aliases then reproduced generic exception handler converting intended503 to500 (4tests/2fail), now map only explicit503 to sanitized unavailable/no-store with no cookie or JDBC interaction. No other auth result contract changed.
+- Safe empty registration requests at actual loopback Production origin returned400 before the proposed exact-path hold; public Python request was independently403 Cloudflare1010, not proof that application path is safe. No valid Production signup or balance creation was attempted. Review the bounded Nginx prevention separately before changing host configuration.
+- Consistent private Production dump215,397,410bytes SHA256efdc9441a522b90f7605efb4898c29d19226c1b9189d8c2a2811cf8727a3733a and passwordless-role archive completed; isolated internal-network/loopback-only restore is in progress. No Production SQL writes or traffic changes.
+
+### Review remediation — in progress
+- Fresh whole delta review requested changes: SecurityConfig uninjected field broke45 existing standalone CSRF tests; preserve the exact canonical Production default at declaration while retaining strict explicit-config validation. No test deleted/softened.
+- Actual Spring transaction-proxy reproduction failed instead of503 on unavailable connection; remove Transactional only from the now-always-unavailable registration method. Login/session transactions remain unchanged.
+- Additional packaged-identity test proved runtime spring.info.build.location could substitute forged BuildProperties (expected503, got200). Identity now reads literal classpath build-info directly, never configurable project-info bean; real Properties parsing tested via test-only Resource fixtures. Both proxy and metadata logicalRED observed before fix.
+- Isolated internal-network/loopback-only Production restore completed, zero role/data restore errors, no Production database modification. Scoped live signup edge hold applied after independent review; origin emptyPOST and publicGET503, home/login200, Testanonymous403. First immediate reload probe raced old workers and was rolled back; condition-based generation retry passed. No full frontend promotion yet.
+
+- Review fix63 covering cases had1 remaining failure: older CORS-allowed localhost raw-proof denial now stopped at the framework's plaintext403, so the existing JSON guard check could not run. Preserve the exact pre-existing Production CORS origins (no expansion) and keep configured Test exclusive; retain all45 tests and the same-origin raw-proof guard. Scoped policy ruling recorded in plan.
+
+- Review remediation focused65 tests GREEN: all45 original session/CSRF cases retained, real transactional-proxy unavailable-DB hold works without JDBC, fixed-classpath identity rejects external Spring build-info override. Extra identity/proxy2 logicalRED were independently observed before remediation.
+- Test operator probe adds optional private, no-follow, Unix-permission-checked scoped credential file; fixed Test origin/read-only paths/redirect:error, never Production.6logicalRED→13GREEN with existing public-edge checks unchanged; no financial/source/noindex criterion waived.
+- Private Production restore completed under internal Docker network and loopback-only publication. No Production SQL writes. Existing member1M and historical migration346 remain unresolved and are not silently changed.
+
+### Production prerequisite checkpoint — reviewed, in progress
+- Initial full regression was NOT a pass:513 Spring cases,45 failures. Fixed programmatic SecurityConfig initialization while retaining the exact old Production CORS allowlist; configured Test stays origin-exclusive. All45 existing CSRF regressions remain unchanged.
+- Added real transaction-proxy regression: registration previously connected to JDBC before returning the safety hold. Removed only register transaction interception;503 now precedes all JDBC.
+- Replaced configurable BuildProperties identity lookup with the literal packaged classpath resource. An external build-info override regression first produced forged200 (RED); fixed implementation ignores it.
+- Fresh clean full validation:515 Spring cases across91 suites,0 failures/errors/skips, bootJar successful;276 Node cases,0 failures/skips. Source fingerprint before/after aff57bdff8eeb7e36863f6d914bbbbe3f159e046ab99971645c9a2ca67726cd1 matched.
+- Independent source re-review APPROVED; original P1/P2 addressed. Reviewer independently verified13 operator-probe cases. No financial/release gate waiver follows from this approval.
+- Optional Test operator probe sends credentials only to fixed Test GET/HEAD paths, refuses redirects/other origins, and reads a purpose-bound owner-private no-follow file. Existing public treasury/source/noindex acceptance criteria are unchanged.
+- Private Production backup restore completed on a newly owned isolated loopback PostgreSQL generation. This proves restore completion, not financial correctness. Production database remains unchanged.
+- Reviewed exact local-registration API edge hold is active in Production (503/private-no-store). Home/login remain200. Anonymous Test access remains403. No frontend traffic transition has occurred.
+- Still BLOCKED: unexplained1,000,000WLD opening, app ledger DML, manual346 provenance/definition drift, exact-source protected Test and authenticated continuity.
+
+### CI policy fixture follow-up
+- New CI correctly rejected a dummy credential-shaped URI in the CORS negative fixture before runtime jobs started. This was a test placeholder, not an operational credential. Replaced it with the scanner documented USER:PASSWORD@HOST placeholder form, preserving the same userinfo rejection case. The security guard is unchanged.
+- Fresh repository scan passed;6 security-policy tests and17 focused CORS cases passed0skips. The failed CI is retained as failure; a new exact-source CI is required.
+
+### User-prioritized presentation cutover — before work
+The owner explicitly deferred backend issues and requested the new frontend first. Accordingly, do not promote owned APIs, alter Production DB/grants/migrations or execute the approved projection repair in this phase. Prior financial approval remains recorded for the later reviewed repair; no correction SQL review approval has been issued.
+- [ ] Add a DB-free presentation startup mode using only existing pure native page controllers/resources and build identity, with all API/auth mutation/socket/bot/scheduling components absent.
+- [ ] Prove isolation with a real application-context/HTTP regression, then verify locale, calculator input and route negatives. Default backend startup remains compatible.
+- [ ] Route exact public home/tool hub/two calculator pages only; version-isolate the3 changed shared assets. Preserve current API/auth/socket/financial/admin routes and signup hold byte-for-byte.
+- [ ] Protected Test/browser evidence, source/process identity, exact-main artifact and independent review precede a reversible public presentation-only switch.
+This phase is a partial public presentation release, not whole-site/full-backend acceptance. The financial and migration346 provenance findings remain open.
+
+### DB-free presentation checkpoint — in progress
+- First actual-context RED: the existing full application created a datasource. Added an explicit-import presentation runtime outside the backend component scan, excluding DataSource/JDBC/JPA and importing only the existing pure public pages, locales, fixed packaged build identity and classpath assets.
+- Independent real HTTP review found denied HTML requests created JSESSIONID. Added explicit STATELESS/request-cache disable;3 logical RED regressions became GREEN, plus an actual embedded-Tomcat no-cookie regression.
+- Fresh clean validation:542 Spring cases across92 suites,0 failures/errors/skips; bootJar successful;276 Node cases,0 failures/skips. Source fingerprint c4377f36b87c673a809646d5f20f99caf561a8ed1cbc05121b3e8ad9de9bcdd3 remained stable. Independent revised source review APPROVED and separately repeated actual HTTP negatives without cookies.
+- Frontend identity is explicitly public-presentation-only; this mode does not expose backend version/API/session/member/admin paths. No DB credential/environment file is required.
+- Exact route proposal covers home/index,tools,calculators and the two native calculators only. Three changed shared asset paths require matching version-query routing; all legacy/unknown versions retain their old origin. All API/auth/socket/financial/admin paths and registration holds remain unchanged.
+- Public Test and final exact-main artifact/route/browser checks remain pending. No frontend Production switch and no Production database correction has occurred.

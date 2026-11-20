@@ -38,8 +38,17 @@ public class StatusSourceTruthController {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,"NEXT_RSC_NOT_SUPPORTED_BY_SPRING");
         String language=locale.resolvePublic(request);
         boolean ko="ko".equals(language);
-        StatusSourceTruthPolicy.StatusResponse status=service.publicStatus();
-        List<StatusSourceTruthPolicy.StatusRow> rows=status.status();
+        List<StatusSourceTruthPolicy.StatusRow> rows;
+        boolean sourceUnavailable=false;
+        try {
+            rows=service.publicStatus().status();
+        } catch (ResponseStatusException failure) {
+            if(failure.getStatusCode().value()!=HttpStatus.SERVICE_UNAVAILABLE.value()) throw failure;
+            // Keep the status page usable without turning a failed source into a healthy observation.
+            response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
+            rows=List.of();
+            sourceUnavailable=true;
+        }
         String overall=StatusSourceTruthPolicy.overall(rows.stream().map(StatusSourceTruthPolicy.StatusRow::state).toList());
         response.setHeader("Cache-Control","no-store");
         response.setHeader("X-Robots-Tag","noindex,nofollow");
@@ -57,6 +66,7 @@ public class StatusSourceTruthController {
         model.addAttribute("publicTitleKey","publicStatusTitle");
         model.addAttribute("pageTitle",locale.labels(language).get("publicStatusTitle"));
         model.addAttribute("calculatorPath","/status");
+        model.addAttribute("sourceUnavailable",sourceUnavailable);
         model.addAttribute("rows",rows);
         model.addAttribute("overall",overall);
         model.addAttribute("staleCount",rows.stream().filter(r->!"fresh".equals(r.freshnessState())).count());

@@ -1,7 +1,7 @@
-<!doctype html><html xmlns:th="http://www.thymeleaf.org"><head><th:block th:fragment="commonHead"><link rel="stylesheet" href="/assets/mv43/chrome.css?v=f1323bd62c16b8ef77d3aa9d765c4fb4178c397cf271e70498e560fe78862b7f"><script src="/assets/mv43/chrome.js?v=342d37487ce3a26ef4a7c3b082485dfe55ec5d225dc201d81ff92a66dfffb03b" defer></script></th:block></head><body>
-  <aside th:fragment="sidebar" class="sidebar" aria-label="Main navigation">
+<!doctype html><html xmlns:th="http://www.thymeleaf.org"><head><th:block th:fragment="commonHead"><link rel="stylesheet" href="/assets/mv43/chrome.css?v=85bff83f4fd419099b3abb337f6925471366e8225ba00d792f891ec3edfafbe6"><script src="/assets/mv43/chrome.js?v=d9f8a8987e748f00460eebfd7cab3ed5e07ddd75090569f9dcde64f0bb857a55" defer></script></th:block></head><body>
+  <aside th:fragment="sidebar" class="sidebar" aria-label="Main navigation" data-i18n-aria="navigationMain" th:attr="aria-label=${uiCopy['navigationMain']}">
     <a href="/" class="brand"><span class="brand-mark">W</span><span>W Moneyverse</span></a>
-    <nav class="side-links" aria-label="Primary navigation">
+    <nav class="side-links" aria-label="Primary navigation" data-i18n-aria="navigationMain" th:attr="aria-label=${uiCopy['navigationMain']}">
       <a class="nav-link" href="/" th:attr="aria-current=${uiPageKey == 'home' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">⌂</span><span data-i18n="home" th:text="${uiCopy['home']}">My assets</span></a>
 <a class="nav-link" href="/wallet" th:attr="aria-current=${uiPageKey == 'wallet' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">▣</span><span data-i18n="wallet" th:text="${uiCopy['wallet']}">Wallet</span></a>
 <a class="nav-link" href="/stocks" th:attr="aria-current=${uiPageKey == 'stocks' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">↗</span><span data-i18n="stocks" th:text="${uiCopy['stocks']}">Invest</span></a>
@@ -14,12 +14,12 @@
     <div class="side-bottom"><span class="side-helper" data-i18n="allRights" th:text="${uiCopy['allRights']}">Virtual WLD is not legal tender.</span></div>
   </aside>
       <header th:fragment="pageHeader" class="topbar">
-        <button id="mobile-menu-toggle" class="menu-toggle" type="button" aria-label="Open menu" aria-controls="mobile-menu" aria-expanded="false">☰</button>
+        <button id="mobile-menu-toggle" class="menu-toggle" type="button" aria-label="Open menu" data-i18n-aria="menu" th:attr="aria-label=${uiCopy['menu']}" aria-controls="mobile-menu" aria-expanded="false">☰</button>
         <h1 th:attr="data-i18n=${uiPageKey != null ? uiPageKey : 'home'}" th:text="${uiCopy[uiPageKey != null ? uiPageKey : 'home']}">My assets</h1>
         <div class="top-spacer"></div>
         <label class="lang-control" for="language-selector"><span aria-hidden="true">◎</span><span class="sr-only" data-i18n="selectLanguage" th:text="${uiCopy['selectLanguage']}">Choose language</span>
-          <select id="language-selector" aria-label="Choose language">
-            <option value="auto">Auto · Browser</option>
+          <select id="language-selector" aria-label="Choose language" data-i18n-aria="selectLanguage" th:attr="aria-label=${uiCopy['selectLanguage']}">
+            <option value="auto" data-i18n="auto" th:text="${uiCopy['auto']}">Auto (browser)</option>
             <option value="en">English</option>
             <option value="ko">한국어</option>
             <option value="ja">日本語</option>
@@ -30,13 +30,13 @@
         <div class="auth-actions" id="auth-actions"><a href="/login" class="auth-link" data-i18n="login" th:text="${uiCopy['login']}">Log in</a></div>
       </header>
       <footer th:fragment="footer" class="footer"><span data-i18n="allRights" th:text="${uiCopy['allRights']}">Virtual WLD is not legal tender.</span>
-        <span class="foot-links"><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/support" data-i18n="support" th:text="${uiCopy['support']}">Support</a></span></footer>
+        <span class="foot-links"><a href="/terms" data-i18n="authTermsLink" th:text="${uiCopy['authTermsLink']}">Terms</a><a href="/privacy" data-i18n="authPrivacyLink" th:text="${uiCopy['authPrivacyLink']}">Privacy</a><a href="/support" data-i18n="support" th:text="${uiCopy['support']}">Support</a></span></footer>
 <th:block th:fragment="mobileNavigation">
 <div id="drawer-backdrop" class="drawer-backdrop" hidden></div>
-<aside id="mobile-menu" class="drawer" hidden aria-label="Mobile navigation">
+<aside id="mobile-menu" class="drawer" hidden aria-label="Mobile navigation" data-i18n-aria="navigationMobile" th:attr="aria-label=${uiCopy['navigationMobile']}">
   <div class="drawer-header"><a href="/" class="brand"><span class="brand-mark">W</span><span>W Moneyverse</span></a>
-    <button type="button" id="mobile-menu-close" class="drawer-close" aria-label="Close menu">×</button></div>
-  <nav class="side-links" aria-label="Mobile primary navigation"><a class="nav-link" href="/" th:attr="aria-current=${uiPageKey == 'home' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">⌂</span><span data-i18n="home" th:text="${uiCopy['home']}">My assets</span></a>
+    <button type="button" id="mobile-menu-close" class="drawer-close" aria-label="Close menu" data-i18n-aria="close" th:attr="aria-label=${uiCopy['close']}">×</button></div>
+  <nav class="side-links" aria-label="Mobile primary navigation" data-i18n-aria="navigationMobile" th:attr="aria-label=${uiCopy['navigationMobile']}"><a class="nav-link" href="/" th:attr="aria-current=${uiPageKey == 'home' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">⌂</span><span data-i18n="home" th:text="${uiCopy['home']}">My assets</span></a>
 <a class="nav-link" href="/wallet" th:attr="aria-current=${uiPageKey == 'wallet' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">▣</span><span data-i18n="wallet" th:text="${uiCopy['wallet']}">Wallet</span></a>
 <a class="nav-link" href="/stocks" th:attr="aria-current=${uiPageKey == 'stocks' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">↗</span><span data-i18n="stocks" th:text="${uiCopy['stocks']}">Invest</span></a>
 <a class="nav-link" href="/quests" th:attr="aria-current=${uiPageKey == 'quests' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">✧</span><span data-i18n="quests" th:text="${uiCopy['quests']}">Quests</span></a>
@@ -45,7 +45,7 @@
 <a class="nav-link" href="/support" th:attr="aria-current=${uiPageKey == 'support' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">◉</span><span data-i18n="support" th:text="${uiCopy['support']}">Help & support</span></a>
 <a class="nav-link" href="/account" th:attr="aria-current=${uiPageKey == 'account' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">♙</span><span data-i18n="account" th:text="${uiCopy['account']}">Account</span></a></nav>
 </aside>
-<nav class="bottom-tabs" id="mobile-tabs" aria-label="Mobile bottom navigation"><a class="bottom-tab" href="/" th:attr="aria-current=${uiPageKey == 'home' ? 'page' : null}"><span aria-hidden="true">⌂</span><span data-i18n="home" th:text="${uiCopy['home']}">My assets</span></a><a class="bottom-tab" href="/wallet" th:attr="aria-current=${uiPageKey == 'wallet' ? 'page' : null}"><span aria-hidden="true">▣</span><span data-i18n="wallet" th:text="${uiCopy['wallet']}">Wallet</span></a><a class="bottom-tab" href="/stocks" th:attr="aria-current=${uiPageKey == 'stocks' ? 'page' : null}"><span aria-hidden="true">↗</span><span data-i18n="stocks" th:text="${uiCopy['stocks']}">Invest</span></a><a class="bottom-tab" href="/quests" th:attr="aria-current=${uiPageKey == 'quests' ? 'page' : null}"><span aria-hidden="true">✧</span><span data-i18n="quests" th:text="${uiCopy['quests']}">Quests</span></a><a class="bottom-tab" href="/board" th:attr="aria-current=${uiPageKey == 'board' ? 'page' : null}"><span aria-hidden="true">☷</span><span data-i18n="board" th:text="${uiCopy['board']}">Community</span></a></nav>
+<nav class="bottom-tabs" id="mobile-tabs" aria-label="Mobile bottom navigation" data-i18n-aria="navigationMobile" th:attr="aria-label=${uiCopy['navigationMobile']}"><a class="bottom-tab" href="/" th:attr="aria-current=${uiPageKey == 'home' ? 'page' : null}"><span aria-hidden="true">⌂</span><span data-i18n="home" th:text="${uiCopy['home']}">My assets</span></a><a class="bottom-tab" href="/wallet" th:attr="aria-current=${uiPageKey == 'wallet' ? 'page' : null}"><span aria-hidden="true">▣</span><span data-i18n="wallet" th:text="${uiCopy['wallet']}">Wallet</span></a><a class="bottom-tab" href="/stocks" th:attr="aria-current=${uiPageKey == 'stocks' ? 'page' : null}"><span aria-hidden="true">↗</span><span data-i18n="stocks" th:text="${uiCopy['stocks']}">Invest</span></a><a class="bottom-tab" href="/quests" th:attr="aria-current=${uiPageKey == 'quests' ? 'page' : null}"><span aria-hidden="true">✧</span><span data-i18n="quests" th:text="${uiCopy['quests']}">Quests</span></a><a class="bottom-tab" href="/board" th:attr="aria-current=${uiPageKey == 'board' ? 'page' : null}"><span aria-hidden="true">☷</span><span data-i18n="board" th:text="${uiCopy['board']}">Community</span></a></nav>
 </th:block>
 <th:block th:fragment="support">
 <button type="button" id="mv-support-launcher" class="support-fab" aria-haspopup="dialog" aria-controls="mv-support-panel" aria-label="Help & chat" th:attr="aria-label=${uiCopy['support']}"><span aria-hidden="true">☏</span></button>
@@ -53,7 +53,7 @@
   <header class="mv-support-heading"><h2 id="mv-support-heading" data-i18n="supportHero" th:text="${uiCopy['supportHero']}">Contact support</h2>
     <button type="button" id="mv-support-close" class="mv-support-close" aria-label="Close" th:attr="aria-label=${uiCopy['close']}">×</button></header>
   <p data-i18n="supportLead" th:text="${uiCopy['supportLead']}">Open help resources or contact the support team.</p>
-  <nav class="mv-support-options" aria-label="Support channels">
+  <nav class="mv-support-options" aria-label="Support channels" data-i18n-aria="supportChannels" th:attr="aria-label=${uiCopy['supportChannels']}">
     <a href="/support" data-i18n="supportHero" th:text="${uiCopy['supportHero']}">Contact support</a>
     <a href="/chat">1:1 <span data-i18n="support" th:text="${uiCopy['support']}">Help & chat</span></a>
     <a href="/guide" data-i18n="guide" th:text="${uiCopy['guide']}">Guide</a>
