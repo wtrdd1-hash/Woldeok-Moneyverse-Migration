@@ -1,6 +1,6 @@
-<!doctype html><html xmlns:th="http://www.thymeleaf.org"><head><th:block th:fragment="commonHead"><link rel="stylesheet" href="/assets/mv43/chrome.css?v=85bff83f4fd419099b3abb337f6925471366e8225ba00d792f891ec3edfafbe6"><script src="/assets/mv43/chrome.js?v=d9f8a8987e748f00460eebfd7cab3ed5e07ddd75090569f9dcde64f0bb857a55" defer></script></th:block></head><body>
+<!doctype html><html xmlns:th="http://www.thymeleaf.org"><head><th:block th:fragment="commonHead"><link rel="icon" type="image/x-icon" href="/assets/mv39/favicon.ico?v=9ce0a8f10cafff52d1d2f7aa451b3e9162944162f61258842e13aa8546f98e78"><link rel="stylesheet" href="/assets/mv43/chrome.css?v=dc1e8c8b6d7ddf5624978dc60a79596491ab5acf70d0feb892d41d9a09c17264"><script src="/assets/mv43/chrome.js?v=d9f8a8987e748f00460eebfd7cab3ed5e07ddd75090569f9dcde64f0bb857a55" defer></script></th:block></head><body>
   <aside th:fragment="sidebar" class="sidebar" aria-label="Main navigation" data-i18n-aria="navigationMain" th:attr="aria-label=${uiCopy['navigationMain']}">
-    <a href="/" class="brand"><span class="brand-mark">W</span><span>W Moneyverse</span></a>
+    <a href="/" class="brand"><img class="brand-mark" src="/assets/mv39/favicon.ico?v=9ce0a8f10cafff52d1d2f7aa451b3e9162944162f61258842e13aa8546f98e78" alt="" width="32" height="32"><span>W Moneyverse</span></a>
     <nav class="side-links" aria-label="Primary navigation" data-i18n-aria="navigationMain" th:attr="aria-label=${uiCopy['navigationMain']}">
       <a class="nav-link" href="/" th:attr="aria-current=${uiPageKey == 'home' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">⌂</span><span data-i18n="home" th:text="${uiCopy['home']}">My assets</span></a>
 <a class="nav-link" href="/wallet" th:attr="aria-current=${uiPageKey == 'wallet' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">▣</span><span data-i18n="wallet" th:text="${uiCopy['wallet']}">Wallet</span></a>
@@ -34,7 +34,7 @@
 <th:block th:fragment="mobileNavigation">
 <div id="drawer-backdrop" class="drawer-backdrop" hidden></div>
 <aside id="mobile-menu" class="drawer" hidden aria-label="Mobile navigation" data-i18n-aria="navigationMobile" th:attr="aria-label=${uiCopy['navigationMobile']}">
-  <div class="drawer-header"><a href="/" class="brand"><span class="brand-mark">W</span><span>W Moneyverse</span></a>
+  <div class="drawer-header"><a href="/" class="brand"><img class="brand-mark" src="/assets/mv39/favicon.ico?v=9ce0a8f10cafff52d1d2f7aa451b3e9162944162f61258842e13aa8546f98e78" alt="" width="32" height="32"><span>W Moneyverse</span></a>
     <button type="button" id="mobile-menu-close" class="drawer-close" aria-label="Close menu" data-i18n-aria="close" th:attr="aria-label=${uiCopy['close']}">×</button></div>
   <nav class="side-links" aria-label="Mobile primary navigation" data-i18n-aria="navigationMobile" th:attr="aria-label=${uiCopy['navigationMobile']}"><a class="nav-link" href="/" th:attr="aria-current=${uiPageKey == 'home' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">⌂</span><span data-i18n="home" th:text="${uiCopy['home']}">My assets</span></a>
 <a class="nav-link" href="/wallet" th:attr="aria-current=${uiPageKey == 'wallet' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">▣</span><span data-i18n="wallet" th:text="${uiCopy['wallet']}">Wallet</span></a>

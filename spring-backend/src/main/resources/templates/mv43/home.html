@@ -6,14 +6,14 @@
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#0C1020">
   <meta name="description" content="W Moneyverse — personal finance, investing, quests and community">
-  <title th:text="${uiCopy['personalTitle']} + ' · W Moneyverse'">My assets · W Moneyverse</title>
+  <title th:text="${uiCopy[uiPageKey == 'home' ? 'personalTitle' : uiPageKey]} + ' · W Moneyverse'">My assets · W Moneyverse</title>
   <link rel="stylesheet" href="/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31">
   <script src="/assets/mv39/i18n.js?v=a992a6fde0c61f1b174974fda96c50f65f5aa4cd92c492211ef15cd4fb07fe0c" defer></script>
   <script src="/assets/mv39/money.js?v=9e95a9188599bc8d14d9743b3506f68af9fd17a63c6dd7db471e0d077d9283d5" defer></script>
   <script src="/assets/mv39/app.js?v=dd1448ca8e6f4b4cb585e0a1ee199a523b3b503f3df2b8be562058bbe897a9d4" defer></script>
   <th:block th:replace="~{shared/chrome :: commonHead}"></th:block>
 </head>
-<body data-page="home" >
+<body data-page="home" th:attr="data-page=${uiPageKey}">
 <a class="skip-link" href="#main-content" data-i18n="authSkip" th:text="${uiCopy['authSkip']}">Skip to main content</a>
 <div class="app-shell">
   <th:block th:replace="~{shared/chrome :: sidebar}"></th:block>
@@ -22,7 +22,7 @@
       <th:block th:replace="~{shared/chrome :: pageHeader}"></th:block>
       <main id="main-content" tabindex="-1">
         <section class="hero" aria-labelledby="hero-title">
-          <div><div class="eyebrow"><span aria-hidden="true">✦</span> WOLDEOK MONEYVERSE</div><h2 id="hero-title" data-i18n="personalTitle" th:text="${uiCopy['personalTitle']}">My assets</h2><p id="hero-description" data-i18n="homeLead" th:text="${uiCopy['homeLead']}">See your wallet, investments and activity in one place.</p></div>
+          <div><div class="eyebrow"><span aria-hidden="true">✦</span> WOLDEOK MONEYVERSE</div><h2 id="hero-title" th:attr="data-i18n=${uiPageKey == 'home' ? 'personalTitle' : uiPageKey + 'Hero'}" th:text="${uiCopy[uiPageKey == 'home' ? 'personalTitle' : uiPageKey + 'Hero']}">My assets</h2><p id="hero-description" th:attr="data-i18n=${uiPageKey + 'Lead'}" th:text="${uiCopy[uiPageKey + 'Lead']}">See your wallet, investments and activity in one place.</p></div>
           <div class="hero-decoration" aria-hidden="true"><span class="realm-orbit"><span class="realm-core">W</span></span></div>
         </section>
         <div id="page-content" aria-live="polite"></div>

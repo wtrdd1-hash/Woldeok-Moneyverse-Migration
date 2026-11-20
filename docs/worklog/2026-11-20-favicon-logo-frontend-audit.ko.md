@@ -1,0 +1,64 @@
+# 파비콘 로고 및 운영 프론트엔드 재점검
+
+## Before work
+- 사용자 요청: 실제 운영 프론트엔드를 확인하고 현재 파비콘 이미지를 로고로 사용한다. 별도 11월 17일 디자인 원본도 찾는다.
+- 최신 origin/main 2a172ce199bbc4dfe123b0672fcb5fb548dea09e에서 미니PC의 기존 격리 worktree에 전용 브랜치를 생성했다. 공유 checkout 및 다른 작업은 변경하지 않는다.
+- Superpowers systematic-debugging, writing-plans, executing-plans, TDD, verification-before-completion을 적용한다.
+- 운영 브라우저 홈: 로고 2곳은 이미지가 아닌 SPAN W이며 명시적 favicon link가 없다. 실제 /favicon.ico와 /assets/mv39/favicon.ico는 동일한 11,781바이트, SHA256 9ce0a8f10cafff52d1d2f7aa451b3e9162944162f61258842e13aa8546f98e78이다. 저장소 파일과도 일치한다.
+
+## In progress
+- [x] GitHub PR 및 main 디자인 이력, 미니PC 작업 폴더, 연결된 디자인 대화, 사용자 로컬 이미지 목록을 조사했다.
+- [x] 공식 왕관·월계수 W 아이콘과 실제 파비콘의 출처를 확인했다.
+- [ ] 실제 파비콘을 공통 로고/탭 아이콘으로 연결한다.
+- [ ] 회귀 테스트 RED→GREEN 및 관련 전체 검사, 독립 리뷰를 기록한다.
+- [ ] 실제 PC·모바일 메뉴/언어/버튼/데이터 로딩을 검사하고 오류 및 미검증 범위를 기록한다.
+- [ ] 정확한 소스의 Test와 운영 전환 상태를 기록한다.
+
+### 디자인 원본 검색 결과
+- PR3247은 11월 17일 게임형 앱 기획 문서이며 원본 픽셀 이미지가 아니다.
+- 보관된 reference-approved-home.jpg 및 180 PNG는 11월 18일 개념 와이어프레임이다. 사용자가 말한 별도 11월 17일 원본이라고 판정하지 않는다.
+- 기존 UI_IMAGE_IMPLEMENTATION_HANDOFF 및 LIVE_HOME_APPROVED_UI_GAP 문서도 대화 생성 이미지와 복구 PNG 일치를 미검증으로 명시한다.
+- 연결된 ‘사이트 새 디자인 요청’·‘UI 이미지 전달 확인’ 대화는 조회 결과에 생성 이미지 대신 참조만 반환했다. 브라우저는 비로그인 상태이며 앱 화면 접근 승인이 시간 내 완료되지 않아 원본 이미지는 확보하지 못했다.
+- 별도 11월 17일 원본 일치 판정은 OPEN이다. 원본을 확보하기 전 임의 디자인을 그 원본이라고 보고하지 않는다.
+
+## Finished
+아직 종료하지 않았다. 운영 변경 없음.
+
+### Owner clarification — in progress
+- 사용자가 디자인 기준을 **11월 18일**로 다시 명시했다. 이 명시가 앞선 별도11월17일 원본 탐색을 대체한다. 승인된 NOV18 authority 및 180화면 디자인 문서를 기준으로 구현·대조한다.
+- 관리자 페이지 점검, 실제 백엔드 데이터 사용, 고정 샘플 정보 금지, 발견한 백엔드 문제 해결도 요청했다. 이전 backend-later 우선순위는 이 후속 지시로 갱신됐다. 개별 금융 수정은 기존 승인 및 독립 검토·백업·정합성 게이트를 계속 적용한다.
+- 실제 /admin 브라우저 접속은 /login?error=login_required로 이동했다. 현 QA 브라우저는 비로그인 상태다. 인증된 관리자 기능 완료를 주장하지 않는다.
+- 실제 홈 Invest 링크를 클릭하면 /stocks에서 12,580WLD/+2.41% 샘플 시안이 나타났다. P1 실제 기능 대체 결함으로 기록한다. API는 별도 검증하며 HTTP200을 기능 정상으로 판정하지 않는다.
+- 파비콘 회귀는 최초 XPath HTML파싱 오류 후 검사 방식을 수정했다. 이후6개 실제 로고 누락 논리실패 RED를 확인한 뒤 shared template 두 곳을 기존 favicon IMG로 교체하고 tab icon link를 추가했다. focused27건 GREEN(0실패) 확인. 전체검사 및 독립리뷰 진행 중이며 운영에는 아직 반영하지 않았다.
+
+### Public source and admin boundary inspection
+- 실제 브라우저 /admin 로그인 이동 확인. origin에서 관리자 HTML4개는302/noindex, 관리자 API4개는401/no-store였다. 로그인된 관리자 작업은 미검증이다.
+- 실제 공개 API 주식10/상점146/게시글2를 확인했다. 고정 수치가 아니라 점검 시점의 원천 행 수이며 화면에 이 숫자를 하드코딩하지 않는다.
+- Task3 추가: 기존 실제 API 소비 모듈을 공유하여 /stocks,/shop,/board의 샘플 화면을 교체한다. 공개 데이터 조회 전용이고 회원 주문/구매/관리자 권한을 우회하지 않는다.
+
+### Implementation validation checkpoint
+- 공개3경로와 관리자 파비콘4logicalRED→38GREEN. 새 공개 Controller는 presentation패키지에만 명시적으로 import하여 일반 backend의 기존 /stocks mapping과 충돌하지 않는다. 기존 API/session/member/admin 경계는 그대로다.
+- 최신 전체 Spring546tests0fail/error/skip, bootJar 성공. 공유CSS/JS/자산바이트는 변경하지 않았다.
+- 추가 기존 Node18검사 중13pass/5fail 발견. 기존Next지원금fallback·허위성공 및 낡은 라벨 기대를 별도OPEN으로 기록. 새 native공개렌더러는 해당Next 코드/금융 API를 포함하지 않으며 전체검사green이라고 보고하지 않는다.
+- 실제 운영6메뉴 추가 확인: stocks/shop/board/quests에 같은 설계용 예시 노출; wallet/support/account는 셸·언어 혼용. 상세 docs/qa/2026-11-20-favicon-real-frontend-audit.ko.md.
+
+### CI asset-version regression
+- 첫 CI spring-web-check는 새 favicon URL의 내용 기반 v해시가 빠져 native-assets 검사1건이 실패했다. 로컬 동일 검사 RED 재현 후 실제 favicon SHA256 쿼리를 추가한다. 자산 검사/보안 게이트는 완화하지 않는다.
+- 독립 소스 리뷰는 기존546건 XML 및 순수 GET/HEAD 범위 확인 후 승인했으나 실제 후보 런타임·브라우저·관리자 인증 검증은 별도OPEN임을 명시했다.
+
+### Latest validation and owner rollout order
+- 사용자가 로그인 완료를 알리고 **한 화면을 만든 뒤 검증·승격하는 순서**를 명시했다. 홈 파비콘부터 전환하고, 공개 기능 페이지는 각 경로의 실제 데이터를 확인한 뒤 하나씩 전환한다. 관리자 화면은 실제 로그인 세션으로 열어 점검 중이다.
+- favicon 내용해시쿼리 추가 후 native자산검사GREEN. URL과 클래스패스 자원 경로를 분리하고 HTML검사에서 쿼리의 regex 의미를 제거했다. 최초 fixture오류10건은 실패로 보존한다. 최신전체 Spring546건0실패/0오류/0skip 및bootJar, CI와동일 native Node79건0실패/0skip 확인.
+
+### Actual320px browser findings and minimal header correction
+- 격리 Test120케이스에서 실제 UI 실패3건 재현:320px 영어 복리·주식 계산기는 문서 폭331px, 베트남어 계산기 목록은322px였다. 공통 헤더의 로그인 버튼이 오른쪽 화면 밖으로 밀렸다. 표 내부 가로 스크롤과 문서 가로 넘침을 구분했다.
+- 359px 이하에서만 공통 헤더를 줄바꿈하고 제목·인증 조작의 축소 및 밀림을 방지한다. 공유 CSS의 새 내용 SHA를 HTML에 연결하고 이전 버전의 자산 라우팅은 보존한다.
+- 주식 검사15실패는 미인증 보유란1행과 시장10행을 합산한 harness 오류였다. 시장 요소로 검사를 한정하며 상품 데이터 부족으로 보고하지 않는다. 첫 Chromium 실행 실패도 환경 설정 실패로 보존했다.
+- 통제된 CSS 원인 확인 실험은331/331/322px를 모두320px로 해소했다. 실험용 스타일 주입은 최종 배포 검증으로 사용하지 않으며, 새 실제 JAR의 반복 검증이 필요하다.
+
+- 모바일에서는 sidebar와hero장식이 숨겨져 로고가 drawer안에만 남는 것을 확인했다. topbar 제목의 장식용 배경에도 동일한 실제 favicon을 연결해 기본 모바일 화면에서 식별되게 한다. 기존 제목·메뉴 의미·키보드 순서는 변경하지 않는다.
+
+### Frozen source checkpoint
+- 모바일 제목의 장식용 favicon이 없는 상태를 actual browser에서background:none으로 논리RED 확인한 뒤 최소 CSS를 구현했다. 제목 텍스트/메뉴/포커스 순서는 유지한다. 최종 CSS SHA256 dc1e8c8b6d7ddf5624978dc60a79596491ab5acf70d0feb892d41d9a09c17264.
+- 최종 소스 전체 Spring546/Node79 모두0실패/0skip 및bootJar 성공. 소스 독립 리뷰도 최종3줄 장식용 이미지 및 좁은 헤더수정 승인.359/360px 경계와 실제 재빌드 브라우저 검사는 별도 수행한다.
+- 앞선 개발 전용/identity:unverified JAR120브라우저 케이스는0실패였으나 운영승격 증거로 대체하지 않는다. source-bound CI→정확한main 재검증 후 승인된 홈/공통헤더부터 전환한다.
