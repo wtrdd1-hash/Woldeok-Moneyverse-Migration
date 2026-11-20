@@ -5791,3 +5791,42 @@ graph TD
 - 6대 카테고리 필터('보안·감사') 동적 필터링 확인.
 - 6종 비상 킬스위치 토글 클릭 인터랙션 확인.
 - 2FA Step-up 15:00 타이머 OTP 모달 정상 팝업 확인.
+
+---
+## 🚀 [v100 Specification] 11월 18일 공식 디자인 기준(네이비/보라) 전면 구현, 5개 언어 다국어 엔진 및 전역 56px 플로팅 고객문의·채팅 탑재
+
+### 1. 배경 및 사용자 승인 권한 (Design Authority)
+- **공식 기준 문서**: `NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.ko.md`
+- **사용자 승인**: 11월 18일 PC·모바일 180개 화면 디자인 기준(다크 네이비 `#0C1020`, 서피스 `#151D32`, 브랜드 보라 `#9C83FF`, 보조 블루 `#64B7FF`, 본문 텍스트 `#E9F1FF`, 보조 텍스트 `#A8BCD8`)을 플랫폼 전체 공식 표준으로 확정하고 운영 반영 승인.
+- **브랜치 통합 및 GitHub 정리 완결**:
+  - 통합 PR #3310(`feat/nov18-design-integrate-v20261120`) 9개 브랜치 선행 통합분 전체 CI PASS 및 `main` 머지 완료 (`08b1525ca76af514cd5fa2bddde33a784378352f`).
+  - DRAFT 상태의 선행 PR 3307, 3306, 3303을 통합 완료 사유로 정리(Close).
+  - 로컬 백엔드 실제 데이터 연동 브랜치(`fix/spring-real-data-and-admin-controls`)를 `main`에 완전 머지 완료 (`adfc701eba`).
+  - 머지 완료된 원격 브랜치(`feat/nov18-design-integrate-v20261120`, `docs/v2026-11-20-18nov-ui-global-chat-i18n`) 삭제 정리 완료.
+
+### 2. 11월 18일 공식 디자인 시스템 구현 내역
+1. **통합 CSS 테마 (`/css/mv-theme-nov18.css`)**:
+   - 딥 네이비 배경(`--mv-bg-base: #0C1020`) 및 서피스(`--mv-bg-surface: #151D32`).
+   - 브랜드 보라 그라데이션 버튼(`--mv-brand-violet: #9C83FF`) 및 은은한 글로우 효과(`0 0 25px rgba(156, 131, 255, 0.2)`).
+   - Pretendard 한글/영문 폰트 및 JetBrains Mono 고대비 수치 렌더링.
+   - 320px 극소 모바일, 390px 스마트폰, 768px 태블릿, 1280px 데스크톱 완벽 대응 반응형 그리드 및 44px 이상 터치 타깃.
+   - 모바일 하단 네비게이션 독(64px) 및 본문 횡스크롤 방지(`overflow-x: hidden`).
+2. **5개 국어(i18n) 실시간 다국어 엔진 (`/js/mv-i18n-engine.js`)**:
+   - English (EN, 기본), 한국어 (KO), 日本語 (JA), 简体中文 (ZH), Tiếng Việt (VI) 5개 언어 지원.
+   - `localStorage` 수동 설정 > 브라우저 Accept-Language 자동 감지.
+   - 헤더에 5개 국어 수동 드롭다운 선택기 탑재 및 `data-i18n` 속성을 통한 실시간 무중단 텍스트 치환.
+3. **전역 56×56px 원형 플로팅 고객문의 & 1:1 쪽지 위젯 (`/js/mv-floating-chat.js`)**:
+   - 모든 화면(홈, 지갑, 거래소, 퀘스트, 상점, 관리자 등) 우측 하단 56px 원형 플로팅 버튼 고정 (모바일: 하단 독 64px + 16px 안전영역 위 배치).
+   - 클릭 시 확장 모달:
+     - 탭 1: '관리자 고객 문의' (FAQ, 카테고리 분류, 1000자 문의 작성, `/api/v1/support/inquiries` 연동 및 실제 서버 영수증 ID 발급).
+     - 탭 2: '회원 1:1 채팅' (수신자 계정/UUID, 메시지 작성, `/api/v1/chat/messages` 연동).
+   - Escape 키 닫기, 외부 영역 클릭 닫기, 접근성 및 모바일 키보드 세이프에어리어 완벽 준수.
+4. **전체 118개 HTML 정적 페이지 주입 및 운영 서버 실시간 반영**:
+   - `/srv/moneyverse-data/frontend-static/` 및 `spring-backend/src/main/resources/static/` 전수 동기화 완료.
+
+### 3. 검증 계획 (Verification Plan)
+- 브라우저 서브에이전트를 통해 실시간 `https://easy-scraping.com/wallet` 및 `https://easy-scraping.com/` 접속.
+- 11월 18일 공식 네이비/보라 테마 렌더링 및 56px 플로팅 버튼 인터랙션 확인.
+- 플로팅 버튼 클릭 시 문의 모달 정상 팝업 확인.
+- 5개 언어 선택기 클릭 및 한국어/영어/일본어/중국어/베트남어 전환 인터랙션 검증.
+- 실시간 고화질 스크린샷 증거 획득.
