@@ -224,3 +224,17 @@ The independent task review found an administrator-close legacy-cookie identity 
 - Refreshed native asset digests after catalog/CSS integration. Fresh integrated evidence: **388 Spring tests,0 failures/errors/skips, bootJar successful;220 Node tests passed,0 failed/skipped**.
 - This is a task-branch integration checkpoint, not completion of all route families. Registration/recovery/provider gaps, real browser geometry/session continuity and exact-source Test/release remain unverified; production HOLD.
 - Follow-up inspection found three remaining dynamic dictionary lookups that can resolve against the map rather than the page model. Add real rendered title/header/password-label regressions before the next UI correction.
+
+## Native public tools/calculators/status — before work
+- [x] Read actual controllers, pure calculation functions, collector service/policy, all five native templates and their tests plus approved November18 authority.
+- [x] Confirmed isolated branch/base bad193 and fetched main unchanged at08b1525. Native scope is /tools, /calculators, /tools/compound-calculator, /tools/stock-calculator and /status; no captured tools are included as converted.
+- [x] Recorded exact fields/defaults/limits/metrics/models, all17 destinations and original Korean copy in task report before implementation.
+- [ ] Logical RED for shared chrome/five locales and native result/control preservation.
+- [ ] Scoped templates/assets/catalogs, GREEN, full Spring/Node/build, source self-review and checkpoint publication.
+- Status source failure stays503. No API/auth/SQL/schema/runtime/release changes. Browser/Test acceptance unavailable; production HOLD.
+
+## Native public tools/calculators/status — in progress
+- [x] Logical RED:35 real MVC cases,34 failures/0 errors/skips (missing shared uiLanguage/launcher/five-language headers and bindings). Existing hub destination/filter test passes; no failure was hidden.
+- [x] Behavioral client RED:2 cases fail. Annual compounding fixture (1000 principal,100% rate,no deposits,one year) overwrites submitted2,000 with monthly2,613 after frequency change; language change leaves English label and hidden language unchanged.
+- Ruling approved by parent: saved manual cookie > supported explicit lang deep-link compatibility > supported browser language > EN. Shared engine remains sole persisted preference. Remove incorrect competing client math, leave submitted results until explicit Calculate; no server arithmetic/rate change.
+- [ ] Scoped implementation and full gates. Browser/Test acceptance and production remain HOLD.
