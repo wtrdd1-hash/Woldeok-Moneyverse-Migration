@@ -23,3 +23,21 @@
 
 ## Finished
 아직 종료하지 않았다. 운영 변경 없음.
+
+### Owner clarification — in progress
+- 사용자가 디자인 기준을 **11월 18일**로 다시 명시했다. 이 명시가 앞선 별도11월17일 원본 탐색을 대체한다. 승인된 NOV18 authority 및 180화면 디자인 문서를 기준으로 구현·대조한다.
+- 관리자 페이지 점검, 실제 백엔드 데이터 사용, 고정 샘플 정보 금지, 발견한 백엔드 문제 해결도 요청했다. 이전 backend-later 우선순위는 이 후속 지시로 갱신됐다. 개별 금융 수정은 기존 승인 및 독립 검토·백업·정합성 게이트를 계속 적용한다.
+- 실제 /admin 브라우저 접속은 /login?error=login_required로 이동했다. 현 QA 브라우저는 비로그인 상태다. 인증된 관리자 기능 완료를 주장하지 않는다.
+- 실제 홈 Invest 링크를 클릭하면 /stocks에서 12,580WLD/+2.41% 샘플 시안이 나타났다. P1 실제 기능 대체 결함으로 기록한다. API는 별도 검증하며 HTTP200을 기능 정상으로 판정하지 않는다.
+- 파비콘 회귀는 최초 XPath HTML파싱 오류 후 검사 방식을 수정했다. 이후6개 실제 로고 누락 논리실패 RED를 확인한 뒤 shared template 두 곳을 기존 favicon IMG로 교체하고 tab icon link를 추가했다. focused27건 GREEN(0실패) 확인. 전체검사 및 독립리뷰 진행 중이며 운영에는 아직 반영하지 않았다.
+
+### Public source and admin boundary inspection
+- 실제 브라우저 /admin 로그인 이동 확인. origin에서 관리자 HTML4개는302/noindex, 관리자 API4개는401/no-store였다. 로그인된 관리자 작업은 미검증이다.
+- 실제 공개 API 주식10/상점146/게시글2를 확인했다. 고정 수치가 아니라 점검 시점의 원천 행 수이며 화면에 이 숫자를 하드코딩하지 않는다.
+- Task3 추가: 기존 실제 API 소비 모듈을 공유하여 /stocks,/shop,/board의 샘플 화면을 교체한다. 공개 데이터 조회 전용이고 회원 주문/구매/관리자 권한을 우회하지 않는다.
+
+### Implementation validation checkpoint
+- 공개3경로와 관리자 파비콘4logicalRED→38GREEN. 새 공개 Controller는 presentation패키지에만 명시적으로 import하여 일반 backend의 기존 /stocks mapping과 충돌하지 않는다. 기존 API/session/member/admin 경계는 그대로다.
+- 최신 전체 Spring546tests0fail/error/skip, bootJar 성공. 공유CSS/JS/자산바이트는 변경하지 않았다.
+- 추가 기존 Node18검사 중13pass/5fail 발견. 기존Next지원금fallback·허위성공 및 낡은 라벨 기대를 별도OPEN으로 기록. 새 native공개렌더러는 해당Next 코드/금융 API를 포함하지 않으며 전체검사green이라고 보고하지 않는다.
+- 실제 운영6메뉴 추가 확인: stocks/shop/board/quests에 같은 설계용 예시 노출; wallet/support/account는 셸·언어 혼용. 상세 docs/qa/2026-11-20-favicon-real-frontend-audit.ko.md.

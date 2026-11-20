@@ -24,10 +24,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration(proxyBeanMethods=false)
 @EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class,JdbcTemplateAutoConfiguration.class,
     HibernateJpaAutoConfiguration.class,UserDetailsServiceAutoConfiguration.class})
-@Import({NativeHomeController.class,SpringNativeToolHubController.class,SpringNativeCalculatorsController.class,
+@Import({NativeHomeController.class,NativePublicFeaturePageController.class,SpringNativeToolHubController.class,SpringNativeCalculatorsController.class,
     UiLocale.class,NativeBuildIdentity.class,NativePresentationIdentityController.class})
 public class NativePresentationApplication implements WebMvcConfigurer {
-    private static final String[] PUBLIC_PATHS={"/","/index.html","/tools","/calculators",
+    private static final String[] PUBLIC_PATHS={"/","/index.html","/tools","/calculators","/stocks","/shop","/board",
         "/tools/compound-calculator","/tools/stock-calculator","/frontend-version","/presentation-health",
         "/assets/mv39/**","/assets/mv43/**"};
 

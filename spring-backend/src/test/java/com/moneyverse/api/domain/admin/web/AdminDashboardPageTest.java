@@ -93,6 +93,15 @@ class AdminDashboardPageTest {
         assertFalse(out.getBody().contains("@@"));
     }
 
+    @Test void desktopAndMobileAdminBrandingReuseTheActualFavicon() {
+        UUID actor=UUID.randomUUID();when(auth.resolveVerifiedAdminActor(any())).thenReturn(Optional.of(actor));
+        String html=dashboard.show(new MockHttpServletRequest("GET","/admin")).getBody();
+        var logos=java.util.regex.Pattern.compile("<img\\b[^>]*class=\"brand-mark\"[^>]*>").matcher(html)
+            .results().map(java.util.regex.MatchResult::group).toList();
+        assertEquals(2,logos.size(),"Admin sidebar and drawer must use the site favicon");
+        for(String logo:logos) assertTrue(logo.contains("src=\"/assets/mv39/favicon.ico\"") && logo.contains("alt=\"\""));
+    }
+
     @Test void malformedSourceListsStayUnavailable() {
         UUID actor=UUID.randomUUID();when(auth.resolveVerifiedAdminActor(any())).thenReturn(Optional.of(actor));
         when(governance.listUsers(actor,50)).thenReturn(new AdminUsersResponse(null,java.util.Map.of()));

@@ -34,12 +34,26 @@ class NativePresentationIsolationTest {
             assertFalse(context.containsBean(name),"Presentation must exclude backend bean: "+name);
     }
     @ParameterizedTest @ValueSource(strings={"/","/index.html","/tools","/calculators",
-        "/tools/compound-calculator","/tools/stock-calculator"})
+        "/tools/compound-calculator","/tools/stock-calculator","/stocks","/shop","/board"})
     void existingPublicPagesRenderWithoutAnyDatabase(String path) throws Exception {
-        mvc.perform(get(path).header("Accept-Language","ko")).andExpect(status().isOk())
+        String html=mvc.perform(get(path).header("Accept-Language","ko")).andExpect(status().isOk())
             .andExpect(header().string("Content-Language","ko"))
             .andExpect(header().string("X-MV-Renderer","Spring-MVC-Thymeleaf"))
-            .andExpect(header().doesNotExist("Set-Cookie"));
+            .andExpect(header().doesNotExist("Set-Cookie"))
+            .andReturn().getResponse().getContentAsString();
+        if(java.util.List.of("/stocks","/shop","/board").contains(path)) {
+            assertTrue(html.contains("data-page=\""+path.substring(1)+"\""),"The source-backed renderer must select the requested feature");
+            assertFalse(html.contains("12,580"));
+            assertFalse(html.contains("+2.41%"));
+        }
+        var logos=java.util.regex.Pattern.compile("<img\\b[^>]*class=\"brand-mark\"[^>]*>").matcher(html)
+            .results().map(java.util.regex.MatchResult::group).toList();
+        assertEquals(2,logos.size(),"Desktop and mobile brand links must show the actual favicon");
+        for(String logo:logos) for(String attribute:new String[]{"src=\"/assets/mv39/favicon.ico\"",
+            "alt=\"\"","width=\"32\"","height=\"32\""})
+            assertTrue(logo.contains(attribute),"Logo must preserve accessible fixed-size favicon markup: "+attribute);
+        assertEquals(1,java.util.regex.Pattern.compile("<link[^>]*rel=\"icon\"[^>]*href=\"/assets/mv39/favicon.ico\"[^>]*>")
+            .matcher(html).results().count(),"Tab and page branding must use the same actual favicon");
     }
     @ParameterizedTest @ValueSource(strings={"/api/version","/api/v1/auth/local/login",
         "/api/treasury/overview","/wallet","/admin","/socket.io/","/login","/actuator/health"})
@@ -55,6 +69,9 @@ class NativePresentationIsolationTest {
         var expected=new ClassPathResource("static/assets/mv39/i18n.js").getContentAsByteArray();
         mvc.perform(get("/assets/mv39/i18n.js")).andExpect(status().isOk()).andExpect(content().bytes(expected));
         assertNotEquals(200,mvc.perform(get("/assets/mv39/missing.js")).andReturn().getResponse().getStatus());
+        mvc.perform(get("/assets/mv39/favicon.ico")).andExpect(status().isOk())
+            .andExpect(header().doesNotExist("Set-Cookie"))
+            .andExpect(content().bytes(new ClassPathResource("static/assets/mv39/favicon.ico").getContentAsByteArray()));
     }
     @Test void queryValidationAndFlightNegativesRemainActive() throws Exception {
         mvc.perform(get("/tools").param("category","unsupported")).andExpect(status().isBadRequest());
