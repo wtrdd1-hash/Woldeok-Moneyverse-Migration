@@ -5894,3 +5894,9 @@ graph TD
 - **타이틀 '홈 대시보드'**: `{ x: 56px, width: 95.5px }` (단 한 줄로 완벽 정렬, 분절 0건)
 - **언어 선택기 ('KO')**: `{ x: 167.5px, width: 64.5px }`
 - **로그인 버튼 ('로그인')**: `{ x: 237px, width: 67px }` (우측 끝 `x = 304px <= 320px`, 우측 16px 마진 완벽 확보, 잘림 0건)
+
+## v2026.11.20.43 — Java4Shell security response (2026-11-20)
+- Emergency runtime audit of Spring Boot on Debian 13 against CVE-2026-114938.
+- Installed Debian OpenJDK 21.0.13.1 security JRE and JDK host packages; fresh-JVM smoke and local API health passed.
+- **HOLD full release:** existing Java processes, including main PID 2183683, were still using the old runtime at verification time. Controlled zero-downtime traffic cutover and regression QA remain required.
+- Independent Temurin/other JDK inventory required. No secrets in Git; see docs/updates/v2026.11.20.43-java4shell-security.md.
