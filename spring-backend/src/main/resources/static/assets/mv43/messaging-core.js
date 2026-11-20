@@ -5,6 +5,8 @@
   const uuid=value=>typeof value==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(value)?value:null;
   const date=value=>typeof value==='string'&&/^\d{4}-\d{2}-\d{2}T.+(?:Z|[+-]\d{2}:\d{2})$/.test(value)&&!Number.isNaN(Date.parse(value));
   const count=value=>Number.isInteger(value)&&value>=0&&value<=2147483647;
+  // Java String.isBlank differs from ECMAScript trim for NBSP, BOM and separators.
+  const blank=value=>/^[\u0009-\u000d\u001c-\u0020\u1680\u2000-\u2006\u2008-\u200a\u2028\u2029\u205f\u3000]*$/.test(value);
   function text(raw,maximum,chat) {
     if(typeof raw!=='string'||[...raw].length>maximum)throw fail('invalid');
     for(const char of raw) {
@@ -12,12 +14,11 @@
       if(code===0||(code>=0xd800&&code<=0xdfff)||(chat&&(code<32||(code>=127&&code<=159))))throw fail('invalid');
     }
     const normal=raw.replace(/^ +| +$/g,'');
-    // Java String.isBlank differs from ECMAScript trim for NBSP, BOM and separators.
-    if(/^[\u0009-\u000d\u001c-\u0020\u1680\u2000-\u2006\u2008-\u200a\u2028\u2029\u205f\u3000]*$/.test(normal))throw fail('invalid');
+    if(blank(normal))throw fail('invalid');
     return normal;
   }
   function thread(row,owner) {
-    if(!row||!uuid(row.id)||row.userId!==owner||typeof row.subject!=='string'||!row.subject.trim()
+    if(!row||!uuid(row.id)||row.userId!==owner||typeof row.subject!=='string'||blank(row.subject)
         ||!['open','waiting_user','resolved'].includes(row.status)
         ||!date(row.createdAt)||!date(row.updatedAt)||!date(row.lastMessageAt))throw fail('source');
     return Object.freeze({...row});
@@ -78,10 +79,16 @@
   function createReader(options) {
     let epoch=0,abort=null;
     function clear(){epoch++;if(abort)abort.abort();abort=null;}
-    async function get(url) {
+    async function get(url,expectedOwner) {
       clear();const token=epoch;abort=new AbortController();
       try {
-        const data=await json(await options.fetch(url,{credentials:'same-origin',cache:'no-store',signal:abort.signal,headers:{Accept:'application/json'}}));
+        const response=await options.fetch(url,{credentials:'same-origin',cache:'no-store',signal:abort.signal,headers:{Accept:'application/json'}});
+        if(response&&response.ok&&expectedOwner!==undefined) {
+          const stamp=response.headers&&response.headers.get('X-MV-Owner');
+          if(!uuid(expectedOwner)||!uuid(stamp))throw fail('source');
+          if(stamp!==expectedOwner)throw fail('account_changed');
+        }
+        const data=await json(response);
         if(token!==epoch)throw fail('stale');
         return data;
       } catch(error){if(token!==epoch)throw fail('stale');throw error;}

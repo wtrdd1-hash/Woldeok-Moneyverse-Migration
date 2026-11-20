@@ -6,7 +6,7 @@ const base=new URL('../spring-backend/src/main/resources/',import.meta.url);
 const owner='00000000-0000-0000-0000-000000000101',peer='00000000-0000-0000-0000-000000000102',id='00000000-0000-0000-0000-000000000103',key='00000000-0000-0000-0000-000000000104',messageId='00000000-0000-0000-0000-000000000105',date='2026-11-20T01:23:45Z';
 function core(){const path=new URL('static/assets/mv43/messaging-core.js',base);assert.ok(existsSync(path),'native messaging core must replace capture-only behavior');const window={};runInNewContext(readFileSync(path,'utf8'),{window,Intl,AbortController});return window.MV43Messaging;}
 const session=()=>({ok:true,signedIn:true,csrfToken:'raw-proof',user:{id:owner}});
-const response=(value,status=200)=>({ok:status<400,status,json:async()=>value,headers:{get:()=> 'application/json'}});
+const response=(value,status=200,responseOwner=owner)=>({ok:status<400,status,json:async()=>value,headers:new Headers({'content-type':'application/json',...(responseOwner===null?{}:{'X-MV-Owner':responseOwner})})});
 const thread=()=>({id,userId:owner,subject:'Question',status:'open',createdAt:date,updatedAt:date,lastMessageAt:date});
 const reply=()=>({id:messageId,threadId:id,senderUserId:owner,senderKind:'user',body:'Hello\nWorld',createdAt:date});
 const chat=()=>({id:messageId,conversationId:id,senderUserId:owner,body:'Hello',sequence:'9007199254740993',createdAt:date});
@@ -94,15 +94,18 @@ test('source privacy constraints, scoped catalogs and no native UTF16 body maxle
  assert.doesNotMatch(js,/innerHTML|insertAdjacentHTML|localStorage|sessionStorage|console\.|X-User-Id|x-actor-user-id|setInterval/);
  assert.match(js,/textContent/);assert.match(js,/mv39-language-change/);assert.match(js,/pagehide/);assert.match(js,/visibilitychange/);
  for(const name of ['support','chat']){
-  const html=readFileSync(new URL('templates/mv43/'+name+'.html',base),'utf8');assert.doesNotMatch(html,/maxlength="1000"/);assert.match(html,/pageHeader/);
+  const published=[];
+ const html=readFileSync(new URL('templates/mv43/'+name+'.html',base),'utf8');assert.doesNotMatch(html,/maxlength="1000"/);assert.match(html,/pageHeader/);
  }
  const catalog=JSON.parse(readFileSync(new URL('ui/mv43-copy.json',base),'utf8'));for(const [key,values] of Object.entries(catalog).filter(([key])=>key.startsWith('msg')))assert.equal(values.length,5);
 });
 
 function harness(kind='support',fetcher,query='') {
+ const published=[];
  const html=readFileSync(new URL('templates/mv43/'+kind+'.html',base),'utf8'),nodes=new Map(),events={};
  class Node {
   constructor(tag='div'){this.tagName=tag.toUpperCase();this.value='';this.children=[];this.listeners={};this.dataset={};this.disabled=false;this.hidden=false;this.attributes={};this.textContent='';}
+  set textContent(value){this._text=value;published.push(value);}get textContent(){return this._text;}
   addEventListener(type,fn){(this.listeners[type]??=[]).push(fn);}
   async fire(type){for(const fn of this.listeners[type]||[])await fn({preventDefault(){},persisted:false});}
   append(...children){this.children.push(...children);}appendChild(child){this.append(child);return child;}
@@ -132,7 +135,7 @@ function harness(kind='support',fetcher,query='') {
  const jsPath=new URL('static/assets/mv43/messaging.js',base);assert.ok(existsSync(jsPath),'native DOM binding must exist');
  runInNewContext(readFileSync(jsPath,'utf8'),{window,document,fetch,Intl,URL:DownloadURL,URLSearchParams,Blob,AbortController});
  const flush=async()=>{for(let i=0;i<8;i++)await new Promise(r=>setImmediate(r));};
- return {nodes,calls,downloads,flush,language:async code=>{language=code;for(const fn of events['mv39-language-change']||[])await fn();},
+ return {nodes,calls,downloads,published,flush,language:async code=>{language=code;for(const fn of events['mv39-language-change']||[])await fn();},
   emit:async name=>{for(const fn of events[name]||[])await fn({persisted:false});},document};
 }
 test('binding uses real owner list before private history; safe text, language retention and pagehide clearing',async()=>{
@@ -236,4 +239,109 @@ test('binding preserves original query filters locally without sending private s
 test('verified support transcript is chronologically ordered with deterministic same-time IDs',()=>{
  const api=core(),rows=api.messages({ok:true,messages:[{...reply(),id:messageId,createdAt:'2026-11-21T01:00:00Z'},{...reply(),id:key,createdAt:date}]},'support',id,owner);
  assert.equal(rows[0].id,key);
+});
+
+test('reader requires exact server response owner; missing malformed and foreign headers fail closed including ABA',async()=>{
+ const api=core();
+ for(const stamp of [null,'malformed',peer]){
+  const reader=api.createReader({fetch:async()=>response({ok:true,conversations:[]},200,stamp)});
+  await assert.rejects(reader.get('/api/v1/chat/conversations',owner),/source|account_changed/);
+ }
+ const reader=api.createReader({fetch:async()=>response({ok:true,conversations:[]},200,owner)});
+ assert.equal((await reader.get('/api/v1/chat/conversations',owner)).ok,true);
+});
+test('NBSP support subject remains valid in canonical creation receipt and subsequent owner list',async()=>{
+ const api=core(),nbsp='\u00a0',item={...thread(),subject:nbsp};
+ assert.equal(api.text(nbsp,120,false),nbsp);
+ const c=client(api,async()=>response({ok:true,thread:item}));
+ assert.equal((await c.submit({kind:'thread',subject:nbsp,body:'Hello'})).subject,nbsp);
+ assert.equal(c.hasPending(),false);
+ assert.equal(api.threads({ok:true,threads:[item],totalCount:1},owner)[0].subject,nbsp);
+});
+const dm=(nickname='Secret B')=>({id,peerUserId:key,peerNickname:nickname,lastMessage:'Private preview B',unreadCount:1,updatedAt:date});
+test('ownerless list stamped B cannot publish in A even after A→B→A cookies',async()=>{
+ let active=owner,finishList;
+ const h=harness('chat',async(url,o,fallback)=>{
+  if(url==='/api/auth/session')return response({...session(),user:{id:active}});
+  if(url==='/api/v1/chat/conversations')return new Promise(resolve=>finishList=resolve);
+  return fallback(url,o);
+ });
+ await h.flush();active=peer;
+ const b=response({ok:true,conversations:[dm()],totalUnread:1},200,peer);
+ active=owner;finishList(b);await h.flush();
+ assert.ok(!h.published.includes('Secret B'));assert.ok(!h.published.includes('Private preview B'));
+ assert.equal(h.nodes.get('messaging-private').hidden,true);
+});
+test('list owner header alone is insufficient: post-read session transition suppresses publication',async()=>{
+ let active=owner,finishList;
+ const h=harness('chat',async(url,o,fallback)=>{
+  if(url==='/api/auth/session')return response({...session(),user:{id:active}});
+  if(url==='/api/v1/chat/conversations')return new Promise(resolve=>finishList=resolve);
+  return fallback(url,o);
+ });
+ await h.flush();active=peer;finishList(response({ok:true,conversations:[dm('Private A')],totalUnread:1},200,owner));await h.flush();
+ assert.ok(!h.published.includes('Private A'));assert.equal(h.nodes.get('messaging-private').hidden,true);
+});
+test('deferred session reproof keeps correctly stamped list hidden until owner is proven',async()=>{
+ let sessions=0,finishProof;
+ const h=harness('chat',async(url,o,fallback)=>{
+  if(url==='/api/auth/session'){
+   if(++sessions===1)return response(session());
+   return new Promise(resolve=>finishProof=resolve);
+  }
+  if(url==='/api/v1/chat/conversations')return response({ok:true,conversations:[dm('Waiting A')],totalUnread:1},200,owner);
+  return fallback(url,o);
+ });
+ await h.flush();assert.equal(h.nodes.get('messaging-private').hidden,true);
+ assert.ok(!h.published.includes('Waiting A'));assert.equal(typeof finishProof,'function');
+ finishProof(response({...session(),user:{id:peer}}));await h.flush();
+ assert.ok(!h.published.includes('Waiting A'));
+});
+test('history requires original response owner and fresh session before any private text publication',async()=>{
+ for(const scenario of ['foreign-header-ABA','session-changed']){
+  let active=owner,finishHistory;
+  const h=harness('chat',async(url,o,fallback)=>{
+   if(url==='/api/auth/session')return response({...session(),user:{id:active}});
+   if(url==='/api/v1/chat/conversations')return response({ok:true,conversations:[dm('Known A')],totalUnread:1},200,owner);
+   if(url.includes('/messages'))return new Promise(resolve=>finishHistory=resolve);
+   return fallback(url,o);
+  },'?conversationId='+id);
+  await h.flush();assert.equal(typeof finishHistory,'function');active=peer;
+  const stamp=scenario==='foreign-header-ABA'?peer:owner;
+  if(scenario==='foreign-header-ABA')active=owner;
+  finishHistory(response({ok:true,messages:[{...chat(),body:'Wrong private history'}]},200,stamp));await h.flush();
+  assert.ok(!h.published.includes('Wrong private history'));assert.equal(h.nodes.get('messaging-private').hidden,true);
+ }
+});
+test('deferred summary cannot publish under another owner after list reproof',async()=>{
+ let active=owner,finishSummary;
+ const h=harness('support',async(url,o,fallback)=>{
+  if(url==='/api/auth/session')return response({...session(),user:{id:active}});
+  if(url==='/api/v1/support/threads/summary')return new Promise(resolve=>finishSummary=resolve);
+  return fallback(url,o);
+ });
+ await h.flush();active=peer;
+ finishSummary(response({ok:true,total:17,open:17,waitingUser:0,resolved:0},200,owner));await h.flush();
+ assert.ok(!h.published.some(value=>typeof value==='string'&&value.includes('msgOpen: 17')));
+ assert.equal(h.nodes.get('messaging-private').hidden,true);
+});
+test('verified send receipt cannot return after awaited reload changes to another owner',async()=>{
+ let afterSend=false,proofs=0,finishReloadProof;
+ const h=harness('support',async(url,o,fallback)=>{
+  if(o?.method==='POST'){afterSend=true;return response({ok:true,message:reply()});}
+  if(url==='/api/auth/session'&&afterSend){
+   if(++proofs===1)return response(session());
+   if(proofs===2)return new Promise(resolve=>finishReloadProof=resolve);
+   return response({...session(),user:{id:peer}});
+  }
+  if(url==='/api/v1/support/threads'&&afterSend)return response({ok:true,threads:[],totalCount:0},200,peer);
+  if(url==='/api/v1/support/threads/summary'&&afterSend)return response({ok:true,total:0,open:0,waitingUser:0,resolved:0},200,peer);
+  return fallback(url,o);
+ });
+ await h.flush();h.nodes.get('message-body').value='Hello\nWorld';
+ const sending=h.nodes.get('message-form').fire('submit');await h.flush();
+ assert.equal(typeof finishReloadProof,'function');finishReloadProof(response({...session(),user:{id:peer}}));
+ await sending;await h.flush();
+ assert.ok(!h.nodes.get('messaging-result').textContent.includes(messageId));
+ assert.equal(h.nodes.get('message-body').value,'');
 });

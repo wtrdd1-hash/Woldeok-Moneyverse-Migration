@@ -35,3 +35,14 @@ Expected: real native page UI with guarded API/state/receipt tests, source-backe
 - Auth/CSRF/owner transitions and asynchronous completions cannot expose another account's private text; no private storage, raw URL or error leaks.
 -1000codepoints, sequence precision, source counts, locale field preservation, originalcopy and singular native chrome; missing backend actions remain honest.
 - Global draft retention, actual authenticated browser acceptance and exact-source Test/production remain OPEN in report/worklog, not silently discarded.
+
+## Review round1 — authorized owner-binding correction
+Ruling before implementation: session reproof alone cannot bind an ownerless DTO when cookies switch A→B→A. Narrow approved exception to prior UI-only API scope: SupportController and ChatController may add X-MV-Owner RESPONSE headers solely from the MemberApiGuard session-derived actor on successful private GET responses, with private/no-store and Vary: Cookie. Anonymous/denied/error responses must carry no owner header. No incoming identity header/override, service/SQL/RBAC/CSRF/auth change.
+The client must validate that exact response-owner header equals the originally active owner, then reprove session after each list/history/summary read before publishing. Missing/malformed/foreign owner headers fail closed; older servers/proxies without the header remain unavailable until coordinated same-source rollout. Deferred A→B and A→B→A cases must never publish wrong-owner lists/history.
+Review also requires original-owner/privateEpoch recheck after post-send load, and one shared exact Java blank predicate for NBSP support subjects in input and stored source.
+- [x] Read independent review and verified all3 Important findings against actual source/guard/DTOs.
+- [ ] Add HTTP response-owner/no-owner-on-denial and deferred/ABA client regressions; observe RED.
+- [ ] Minimal scoped fixes; focused/full gates; publish fix and report for scoped re-review.
+No unsafe-current-main merge, real user messages, browser acceptance or release claim.
+
+Review round1 execution:3 Important findings fixed; focused24 Spring/26 client cases GREEN, full453 Spring/254 Node GREEN,0 failures/errors/skips. Response-owner compatibility gate is mandatory; missing stamp remains unavailable until same-source rollout. Scoped independent re-review and browser/Test/release acceptance pending.

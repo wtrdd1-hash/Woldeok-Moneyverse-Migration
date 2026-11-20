@@ -114,16 +114,33 @@
     document.title=t(support?'msgSupport':'msgChat')+' · W Moneyverse';
     renderControls();renderList();renderHistory();renderSummary();renderAccount();
   }
+  async function privateRead(reader,url,expected,token,current=()=>true) {
+    try {
+      const data=await reader.get(url,expected);
+      if(token!==epoch||owner()!==expected||!current())throw Error('stale');
+      // A server stamp binds the DTO under ABA cookie changes; a second proof prevents
+      // publishing even correctly stamped old data after the active account changes.
+      const fresh=await reader.get('/api/auth/session');
+      if(token!==epoch||owner()!==expected||!current())throw Error('stale');
+      if(!fresh||fresh.ok!==true||typeof fresh.signedIn!=='boolean')throw Error('source');
+      if(!fresh.signedIn||!fresh.user||fresh.user.id!==expected)throw Error('account_changed');
+      session=fresh;
+      return data;
+    } catch(error) {
+      if(error.message==='account_changed'&&token===epoch)resetPrivate();
+      throw error;
+    }
+  }
   async function select(id,restore=false) {
     if(!rows||!rows.some(row=>row.id===id)||(!restore&&(client.isBusy()||client.hasPending())))return;
     if(selected!==id)body.value='';
     selected=id;historyRows=null;historyState='loading';if(!restore)outcome=null;
-    const token=epoch,active=rows.find(row=>row.id===id);render();
+    const token=epoch,expected=owner(),active=rows.find(row=>row.id===id);render();
     try {
       const path='/api/v1/'+(support?'support/threads/':'chat/conversations/')+id+'/messages';
-      const data=await readers.history.get(path);
+      const data=await privateRead(readers.history,path,expected,token,()=>selected===id);
       if(token!==epoch||selected!==id)return;
-      historyRows=core.messages(data,kind,id,owner(),support?undefined:active.peerUserId);
+      historyRows=core.messages(data,kind,id,expected,support?undefined:active.peerUserId);
     } catch(error) {
       if(token!==epoch||selected!==id||error.message==='stale')return;
       historyRows=null;historyState=error.message==='denied'?'msgDenied':error.message==='auth'?'msgAuth':error.message==='rate'?'msgRate':'msgSource';
@@ -143,12 +160,12 @@
       if(!fresh.signedIn||!next){resetPrivate();return;}
       if(previous&&previous!==next){resetPrivate();session=fresh;checking=false;load();return;}
       session=fresh;renderAccount();
-      const data=await readers.list.get('/api/v1/'+(support?'support/threads':'chat/conversations'));
+      const data=await privateRead(readers.list,'/api/v1/'+(support?'support/threads':'chat/conversations'),next,token);
       if(token!==epoch)return;
       rows=support?core.threads(data,next):core.conversations(data,next);unread=support?null:data.totalUnread;
       checking=false;privateView.hidden=false;message='msgReady';
       if(support) {
-        readers.summary.get('/api/v1/support/threads/summary').then(data=>{
+        privateRead(readers.summary,'/api/v1/support/threads/summary',next,token).then(data=>{
           if(token!==epoch)return;summary=core.summary(data);renderSummary();
         }).catch(()=>{if(token===epoch){summary=null;renderSummary();}});
       }
@@ -168,15 +185,17 @@
   async function submit(event,isNew) {
     event.preventDefault();const button=byId(isNew?'support-start':'message-send');
     if(button.disabled||!ready())return;
-    const token=privateEpoch;pendingKind=isNew?'thread':support?'reply':'chat';outcome=null;
+    const token=privateEpoch,originalOwner=owner();pendingKind=isNew?'thread':support?'reply':'chat';outcome=null;
     const fields={kind:pendingKind,body:isNew?newBody.value:body.value};
     if(isNew)fields.subject=subject.value;else fields.target=selected;
     const promise=client.submit(fields);renderControls();renderList();
     try {
-      const receipt=await promise;if(token!==privateEpoch)return;
+      const receipt=await promise;if(token!==privateEpoch||owner()!==originalOwner)return;
       if(isNew){subject.value='';newBody.value='';selected=receipt.id;}else body.value='';
       outcome={key:'msgSent',id:receipt.id};pendingKind=null;
-      const delivered=outcome;await load();if(owner()&&outcome===null)outcome=delivered;
+      const delivered=outcome;await load();
+      if(token!==privateEpoch||owner()!==originalOwner)return;
+      if(outcome===null)outcome=delivered;
     } catch(error) {
       if(token!==privateEpoch)return;
       if(error.message==='account_changed'||error.message==='auth'){resetPrivate();return;}

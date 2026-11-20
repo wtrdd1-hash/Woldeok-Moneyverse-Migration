@@ -2,6 +2,17 @@ package com.moneyverse.api.domain.web;
 
 import com.moneyverse.api.domain.identity.service.UserAuthService;
 import jakarta.servlet.http.Cookie;
+import com.moneyverse.api.domain.support.service.SupportService;
+import com.moneyverse.api.domain.support.dto.SupportDtos;
+import com.moneyverse.api.domain.chat.service.ChatService;
+import com.moneyverse.api.domain.chat.dto.ChatDtos;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -24,6 +35,8 @@ class NativeMessagingWebTest {
     @Autowired MockMvc mvc;
     @Autowired UiLocale locale;
     @MockBean UserAuthService auth;
+    @MockBean SupportService supportService;
+    @MockBean ChatService chatService;
     private void signedIn() {
         var session=new UserAuthService.SessionInfo();
         session.setUserId(UUID.fromString("00000000-0000-0000-0000-000000000101"));
@@ -80,5 +93,55 @@ class NativeMessagingWebTest {
         mvc.perform(get("/"+family).param("_rsc","opaque")).andExpect(status().isNotAcceptable());
         mvc.perform(get("/"+family).header("Accept-Language","fr;q=1,ja;q=0.8"))
             .andExpect(status().isOk()).andExpect(header().string("Content-Language","ja"));
+    }
+
+    @Test void everyPrivateReadAliasCarriesOnlyItsVerifiedSessionOwnerAndPrivateCacheHeaders() throws Exception {
+        signedIn();
+        UUID actor=UUID.fromString("00000000-0000-0000-0000-000000000101");
+        UUID target=UUID.fromString("00000000-0000-0000-0000-000000000202");
+        when(supportService.listThreads(eq(actor),isNull())).thenReturn(new SupportDtos.ThreadListResponse(true,List.of(),0));
+        when(supportService.summary(actor)).thenReturn(new SupportDtos.ThreadSummaryResponse(true,0,0,0,0));
+        when(supportService.listMessages(actor,target)).thenReturn(new SupportDtos.MessageListResponse(true,List.of()));
+        when(chatService.listConversations(actor,50)).thenReturn(new ChatDtos.ConversationListResponse(true,List.of(),0));
+        when(chatService.totalUnreadCount(actor)).thenReturn(0);
+        when(chatService.listMessages(actor,target,50)).thenReturn(new ChatDtos.MessageListResponse(true,List.of()));
+        for(String prefix:new String[]{"/api","/api/v1"}) {
+            for(String suffix:new String[]{"/support/threads","/support/threads/summary","/support/threads/"+target+"/messages",
+                    "/chat/conversations","/chat/unread-count","/chat/conversations/"+target+"/messages"}) {
+                mvc.perform(get(prefix+suffix).header("X-MV-Owner",target.toString()))
+                    .andExpect(status().isOk()).andExpect(header().string("X-MV-Owner",actor.toString()))
+                    .andExpect(header().stringValues("Cache-Control",hasItem(containsString("private"))))
+                    .andExpect(header().stringValues("Cache-Control",hasItem(containsString("no-store"))))
+                    .andExpect(header().stringValues("Vary",hasItem(containsString("Cookie"))));
+                for(String forged:new String[]{"X-User-Id","x-actor-user-id"})
+                    mvc.perform(get(prefix+suffix).header(forged,target.toString()))
+                        .andExpect(status().isForbidden()).andExpect(header().doesNotExist("X-MV-Owner"));
+            }
+        }
+        verify(supportService,times(2)).listThreads(eq(actor),isNull());
+        verify(chatService,times(2)).listConversations(actor,50);
+    }
+    @Test void anonymousAndDeniedPrivateReadAliasesNeverStampAnOwner() throws Exception {
+        UUID actor=UUID.fromString("00000000-0000-0000-0000-000000000101");
+        UUID target=UUID.fromString("00000000-0000-0000-0000-000000000202");
+        for(String prefix:new String[]{"/api","/api/v1"}) {
+            for(String suffix:new String[]{"/support/threads","/support/threads/summary","/support/threads/"+target+"/messages",
+                    "/chat/conversations","/chat/unread-count","/chat/conversations/"+target+"/messages"}) {
+                when(auth.resolveSession(any())).thenReturn(Optional.empty());
+                mvc.perform(get(prefix+suffix).header("X-User-Id",actor.toString()).header("X-MV-Owner",actor.toString()))
+                    .andExpect(status().isUnauthorized()).andExpect(header().doesNotExist("X-MV-Owner"));
+            }
+        }
+        signedIn();
+        when(supportService.listThreads(eq(actor),isNull())).thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN,"denied"));
+        when(supportService.summary(actor)).thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN,"denied"));
+        when(chatService.listConversations(actor,50)).thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN,"denied"));
+        when(chatService.totalUnreadCount(actor)).thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN,"denied"));
+        when(supportService.listMessages(actor,target)).thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN,"denied"));
+        when(chatService.listMessages(actor,target,50)).thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN,"denied"));
+        for(String prefix:new String[]{"/api","/api/v1"})
+            for(String suffix:new String[]{"/support/threads","/support/threads/summary","/support/threads/"+target+"/messages",
+                    "/chat/conversations","/chat/unread-count","/chat/conversations/"+target+"/messages"})
+                mvc.perform(get(prefix+suffix)).andExpect(status().isForbidden()).andExpect(header().doesNotExist("X-MV-Owner"));
     }
 }
