@@ -620,3 +620,10 @@ html, body {
     right: 16px !important;
   }
 }
+
+/* A native modal keeps keyboard focus inside the access panel. */
+#mv-floating-chat-modal{inset:auto 20px calc(90px + env(safe-area-inset-bottom)) auto;margin:0;padding:0;height:auto;max-height:calc(100dvh - 130px);overflow:auto;border:1px solid var(--mv-border-color)}
+#mv-floating-chat-modal::backdrop{background:rgba(0,0,0,.5)}
+#mv-floating-chat-modal h2{font-size:1rem;margin:0}
+#mv-floating-chat-modal .mv-chat-body a{min-height:44px;display:flex;align-items:center;justify-content:center}
+@media(max-width:480px){#mv-floating-chat-modal{left:12px;right:12px;width:auto}}

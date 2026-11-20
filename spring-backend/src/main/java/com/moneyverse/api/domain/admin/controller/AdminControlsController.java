@@ -10,93 +10,45 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Map;
 
-@Tag(name = "Admin Controls", description = "관리자 피처 플래그 및 비상 킬스위치 제어 API")
+@Tag(name="Admin Controls",description="Verified administrator feature-switch access")
 @RestController
 public class AdminControlsController {
-
-    private final AdminGovernanceService governanceService;
-    private final AdminAuthService adminAuthService;
-    private final org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
-
-    public AdminControlsController(AdminGovernanceService governanceService, AdminAuthService adminAuthService, org.springframework.jdbc.core.JdbcTemplate jdbcTemplate) {
-        this.governanceService = governanceService;
-        this.adminAuthService = adminAuthService;
-        this.jdbcTemplate = jdbcTemplate;
+    private final AdminGovernanceService governance;
+    private final AdminAuthService auth;
+    public AdminControlsController(AdminGovernanceService governance,AdminAuthService auth) {
+        this.governance=governance;this.auth=auth;
     }
-
-    @Operation(summary = "관리자 웹 UI 비상 킬스위치 즉시 토글")
-    @PostMapping(path = {
-            "/api/v1/admin/controls",
-            "/api/admin/controls"
-    })
-    public ResponseEntity<?> toggleControl(
-            HttpServletRequest request,
-            @RequestBody Map<String, Object> body
-    ) {
-        String feature = (String) body.get("feature");
-        Object enabledObj = body.get("enabled");
-        boolean enabled = Boolean.TRUE.equals(enabledObj) || "true".equalsIgnoreCase(String.valueOf(enabledObj));
-        String state = enabled ? "enabled" : "disabled";
-
-        SetFeatureSwitchRequest req = new SetFeatureSwitchRequest();
-        req.setState(state);
-        req.setReason("Admin web quick toggle");
-        req.setIdempotencyKey(java.util.UUID.randomUUID().toString());
-
-        java.util.UUID actorId = java.util.UUID.fromString("5f7b8b44-e4aa-40b8-b93a-800ec0151d20");
-        try {
-            Map<String, Object> res = governanceService.setFeatureSwitch(actorId, feature, req);
-            return ResponseEntity.ok(res);
-        } catch (Exception e) {
-            try {
-                jdbcTemplate.update("UPDATE public.feature_switches SET state = ?, updated_at = NOW() WHERE feature_key = ?", state, feature);
-                return ResponseEntity.ok(Map.of("featureKey", feature, "nextState", state, "success", true));
-            } catch (Exception ex) {
-                return ResponseEntity.ok(Map.of("featureKey", feature, "nextState", state, "success", true));
-            }
-        }
-    }
-
-    @Operation(summary = "피처 플래그 및 킬스위치 현황 조회")
-    @GetMapping(path = {
-            "/api/v1/admin/controls",
-            "/api/admin/controls"
-    })
+    @GetMapping({"/api/v1/admin/controls","/api/admin/controls"})
+    @Operation(summary="Read feature switches for the verified administrator")
     public ResponseEntity<?> getControlsOverview(HttpServletRequest request) {
-        if (!adminAuthService.isAuthorizedAdmin(request)) return adminAuthService.unauthorizedResponse();
-        FeatureSwitchOverviewResponse response = governanceService.getFeatureSwitchesOverview(null);
-        return ResponseEntity.ok(response);
+        var actor=auth.resolveVerifiedAdminActor(request);
+        if(actor.isEmpty())return auth.unauthorizedResponse();
+        FeatureSwitchOverviewResponse result=governance.getFeatureSwitchesOverview(actor.get());
+        return ResponseEntity.ok(result);
     }
-
-    @Operation(summary = "경제 자동 정책 스위치 조정")
-    @PutMapping(path = {
-            "/api/v1/admin/controls/feature-switches/economy_auto_policy",
-            "/api/admin/controls/feature-switches/economy_auto_policy"
-    })
-    public ResponseEntity<?> setAutoPolicySwitch(
-            HttpServletRequest request,
-            @Valid @RequestBody SetFeatureSwitchRequest body
-    ) {
-        if (!adminAuthService.isAuthorizedAdmin(request)) return adminAuthService.unauthorizedResponse();
-        Map<String, Object> res = governanceService.setFeatureSwitch(null, "economy_auto_policy", body);
-        return ResponseEntity.ok(res);
+    private ResponseEntity<?> unavailableHighRiskMutation(HttpServletRequest request) {
+        if(auth.resolveVerifiedAdminActor(request).isEmpty())return auth.unauthorizedResponse();
+        if(!auth.hasVerifiedSessionCsrf(request))
+            return ResponseEntity.status(403).body(Map.of("ok",false,"code","CSRF_REQUIRED"));
+        // An internal token or browser OTP length is not a session-bound MFA receipt.
+        return ResponseEntity.status(503).body(Map.of("ok",false,"code","ADMIN_STEP_UP_UNAVAILABLE"));
     }
-
-    @Operation(summary = "피처 스위치 상태 변경 (토글/킬스위치)")
-    @PutMapping(path = {
-            "/api/v1/admin/controls/feature-switches/{featureKey}",
-            "/api/admin/controls/feature-switches/{featureKey}"
-    })
-    public ResponseEntity<?> setFeatureSwitch(
-            HttpServletRequest request,
-            @PathVariable("featureKey") String featureKey,
-            @Valid @RequestBody SetFeatureSwitchRequest body
-    ) {
-        if (!adminAuthService.isAuthorizedAdmin(request)) return adminAuthService.unauthorizedResponse();
-        Map<String, Object> res = governanceService.setFeatureSwitch(null, featureKey, body);
-        return ResponseEntity.ok(res);
+    @PostMapping({"/api/v1/admin/controls","/api/admin/controls"})
+    @Operation(summary="Legacy quick toggle is unavailable until verified native step-up exists")
+    public ResponseEntity<?> toggleControl(HttpServletRequest request,@RequestBody Map<String,Object> body) {
+        return unavailableHighRiskMutation(request);
+    }
+    @PutMapping({"/api/v1/admin/controls/feature-switches/economy_auto_policy","/api/admin/controls/feature-switches/economy_auto_policy"})
+    @Operation(summary="Automatic policy changes require verified native step-up")
+    public ResponseEntity<?> setAutoPolicySwitch(HttpServletRequest request,@Valid @RequestBody SetFeatureSwitchRequest body) {
+        return unavailableHighRiskMutation(request);
+    }
+    @PutMapping({"/api/v1/admin/controls/feature-switches/{featureKey}","/api/admin/controls/feature-switches/{featureKey}"})
+    @Operation(summary="High-risk switch changes require verified native step-up")
+    public ResponseEntity<?> setFeatureSwitch(HttpServletRequest request,@PathVariable("featureKey") String featureKey,
+            @Valid @RequestBody SetFeatureSwitchRequest body) {
+        return unavailableHighRiskMutation(request);
     }
 }
