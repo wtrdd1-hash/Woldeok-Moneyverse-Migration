@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.20.1 — 18 November UI baseline + five-language/global support authority (docs only)
+[Official EN plan](planning/NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.md) / [한국어](planning/NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.ko.md): 18 Nov PC/mobile navy-violet design binding for all eventual Spring MVC+Thymeleaf website screens, manual+auto EN/KO/JA/ZH/VI and one safe admin support/member chat launcher everywhere. Old mockup-only scope and Next runtime plans do not override latest owner directive. Current runtime and Production **not** certified by this documentation-only update.
+
+
 ## v2026.11.19.32.1 — 운영 홈페이지·승인 디자인 실제 불일치(P0 증거 / 배포 없음)
 
 \`/\`에서 실제 ‘신규 사용자 유입을 위한 홈 화면 3안’이 출력됨을 공개 HTTP·미니PC 정적 HTML로 확인. [한국어 상세 보고서+실제 GitHub 홈/관리자 이미지](findings/LIVE_HOME_APPROVED_UI_GAP_v2026.11.19.32.1.ko.md) / [EN](findings/LIVE_HOME_APPROVED_UI_GAP_v2026.11.19.32.1.md) · [Spring 구현 기준](planning/SPRING_HOME_VISUAL_IMPLEMENTATION_GATES_v2026.11.19.32.1.ko.md) · [QA](qa/2026-11-19-home-ui-design-gap-v32.ko.md). UI·API·DB·운영 미변경.
