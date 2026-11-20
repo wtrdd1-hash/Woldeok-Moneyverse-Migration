@@ -49,12 +49,16 @@ public class BoardController {
 
     @PostMapping({"", "/"})
     @Operation(summary = "새 게시글 작성")
-    public ResponseEntity<CreateBoardPostResponse> createPost(
+    public ResponseEntity<?> createPost(
             @RequestBody CreateBoardPostRequest req,
             @RequestHeader(value = "X-User-Id", required = false) String xUserId,
             @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId
     ) {
-        UUID userId = resolveUserUuid(xUserId, xActorUserId);
-        return ResponseEntity.ok(boardService.createPost(userId, req));
+        try {
+            UUID userId = resolveUserUuid(xUserId, xActorUserId);
+            return ResponseEntity.ok(boardService.createPost(userId, req));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("ok", false, "message", e.getMessage()));
+        }
     }
 }

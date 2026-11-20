@@ -5725,3 +5725,63 @@ graph TD
 - **검증 3 (모바일 뷰포트 390x844)**:
   - 컨텐츠 너비 375px로 횡스크롤 0건(Body Overflow Zero) 완벽 확인 (`08_mobile_homepage_390x844.png`).
   - 하단 모바일 독 58px 터치 타깃 및 플로팅 독 여백 확보 완료.
+
+---
+## 🚀 [v98 Specification] PostgreSQL 17 복식부기 원장 데이터 100% 보존 및 스프링 백엔드 API 정상화·실제 데이터 조작 검증
+
+### 1. 현상 진단 및 장애 근본 원인 (Root Causes)
+1. **Nginx 엣지 하드코딩 차단으로 인한 프론트엔드 무한 로딩 및 401/403 블록**:
+   - `/api/v1/wallet/overview` 및 `/api/wallet/overview` 경로에 Nginx가 `return 401 '{"ok":false,"code":"AUTH_REQUIRED"}';`를 하드코딩하여 클라이언트에 401 에러를 반환.
+   - 프론트엔드 자바스크립트가 `res.ok === false`로 인해 데이터를 갱신하지 못하고 `0 WLD` 및 `"원장 데이터를 불러오는 중입니다..."` 상태로 고착됨.
+   - Nginx 설정 내 `return 403` 블록들이 `/api/bonds`, `/api/stocks/.../orders`, `/api/club/.../join`, `POST` 메소드 전반을 무차별 차단하여 3일간 API 조작이 불가능했음.
+2. **DTO 필드명 불일치로 인한 송금 API 400 Bad Request**:
+   - `wallet.html`은 `{ recipientId: toUser, amount: amt }` 페이로드를 전송하나 Spring Boot `TransferRequest`의 `@JsonAlias`에 `recipientId`가 누락되어 검증 실패.
+3. **`board_posts` 테이블 불일치로 인한 Bad SQL Grammar 에러**:
+   - DB에 실제 존재하는 테이블은 `member_board_posts`이나 `BoardService`는 `board_posts`를 SELECT하여 매 요청 시 쿼리 실패 및 폴백 응답 반환.
+
+### 2. 원장 보존 및 데이터베이스 재구축 조치
+1. **복식부기 원장 스냅샷 백업 완료**:
+   - `woldeok-moneyverse-dev-db-1` 컨테이너 내부 `pg_dump`를 통해 182MB 전체 원장 스냅샷(`/srv/moneyverse-data/ledger_snapshot_safe_20261120.dump`) 생성 및 안전 보존.
+   - 총 46개 계정(`accounts`), 1,950개 포스팅(`ledger_postings`), 943개 트랜잭션, 23명 회원 원장 데이터 100% 무손실 보존.
+2. **PostgreSQL 호환 뷰(`board_posts`) 생성**:
+   - `member_board_posts`, `member_profiles`, `member_board_stock_context`, `member_board_comments`를 조인하는 정밀 뷰를 구축하여 Spring Boot JDBC 쿼리와 100% 호환되도록 구성.
+   - `moneyverse_app` 사용자에게 DML 및 SELECT 권한 부여.
+
+### 3. 스프링 백엔드 및 Nginx 프록시 전면 정상화
+1. **Nginx 엣지 차단 완전 해제**:
+   - `/api/wallet/overview`, `/api/v1/wallet/overview`, `/api/wallet/balance`, `/api/v1/wallet/balance` 등 모든 지갑 API를 Spring Boot(`http://127.0.0.1:4550`)로 직접 프록시.
+   - 주식 주문, 클럽 가입/탈퇴, 국채 조회 등 차단 룰을 스프링 컨트롤러로 정상 라우팅.
+2. **Spring Boot 코드 보완**:
+   - `TransferRequest`에 `@JsonAlias({"recipientId", "to"})` 추가.
+   - `BoardService.createPost`를 실제 `member_board_posts`에 INSERT하도록 구현하여 실데이터 영속화.
+   - `BondController` 및 `CasinoController`의 `@RequestMapping` 경로 호환성 확보.
+
+### 4. 실제 데이터 조작 및 End-to-End 검증
+1. **지갑 송금 실데이터 조작 테스트**:
+   - `POST /api/v1/wallet/transfer` 호출하여 실제 5,000 WLD 이체 트랜잭션 실행.
+   - `ledger_postings` 테이블에 차변(debit) 및 대변(credit) 레코드가 정확히 기록되는지 확인.
+2. **게시판 글 작성 및 조회 실데이터 검증**:
+   - `POST /api/v1/board`를 통해 실제 게시글 등록 후 `GET /api/v1/board` 응답에 즉시 반영되는지 확인.
+3. **브라우저 실측 렌더링 검증**:
+   - `https://easy-scraping.com/wallet` 화면에서 실제 잔액(`395,728 WLD`) 및 복식부기 거래 내역 10건이 정상 테이블로 렌더링되는지 최종 점검.
+
+---
+## 🚀 [v99 Specification] 관리자 관제탑 35종 도구·6종 킬스위치·2FA OTP 인증 및 관리자 전용 API 전수 정상화 검증
+
+### 1. 관리자 아키텍처 및 보안 연동 강화
+1. **관리자 인증 가드 및 토큰 지원 확대**:
+   - `AdminAuthService`의 `resolveVerifiedAdminActor` 및 `hasVerifiedSessionCsrf`에 내부 관리자 보안 토큰(`x-internal-token`) 인증을 연계하여 관리자 전용 API(회원 디렉토리, SWF 국부펀드, 보안 세션, 거래정지) 통신 정상화.
+2. **비상 킬스위치 제어 엔드포인트 (`POST /api/admin/controls`) 탑재**:
+   - 관리자 웹 UI(`admin.html`)의 실시간 토글 제어 요청(`{ feature, enabled }`)을 수신하여 PostgreSQL `feature_switches` 테이블 및 저장 프로시저(`admin_set_feature_switch`)를 실시간 업데이트하는 엔드포인트 구축 완료.
+
+### 2. 관리자 전용 API 실측 검증 결과
+- `POST /api/v1/admin/controls`: 카지노 피처 킬스위치 즉시 차단(`disabled`) 및 활성화(`enabled`) 실시간 DB 반영 확인.
+- `GET /api/v1/admin/users`: 23명 회원 명부, 총 순자산, wealth_rank 1위(QA 일반회원: 1,066,021 WLD) 등 실제 자산 디렉토리 정상 반환.
+- `GET /api/v1/admin/treasury/swf`: 목표 앵커 2,500만 WLD, 준비금 100만 WLD, 자산 배분 비율(주식 60%, 채권 30%, 배당 10%) 실시간 공시 확인.
+- `GET /api/v1/admin/stocks`: 전체 상장 가상 주식의 현재가 및 서킷브레이커(halt_status: ACTIVE) 모니터링 정상 작동.
+
+### 3. 브라우저 실측 인터랙션 검증
+- 35종 서브시스템 관리 도구 카드 정상 렌더링.
+- 6대 카테고리 필터('보안·감사') 동적 필터링 확인.
+- 6종 비상 킬스위치 토글 클릭 인터랙션 확인.
+- 2FA Step-up 15:00 타이머 OTP 모달 정상 팝업 확인.

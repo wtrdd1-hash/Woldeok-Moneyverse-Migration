@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -25,7 +26,7 @@ public class BoardService {
             List<BoardPostItem> posts = jdbcTemplate.query(
                     """
                     SELECT id::text, author_id::text, author_name, title, body, category, stock_symbol, view_count, comment_count, like_count, created_at
-                    FROM board_posts
+                    FROM public.board_posts
                     ORDER BY created_at DESC
                     LIMIT 50
                     """,
@@ -85,11 +86,48 @@ public class BoardService {
         return listPosts("stock");
     }
 
+    @Transactional
     public CreateBoardPostResponse createPost(UUID authorId, CreateBoardPostRequest req) {
-        return new CreateBoardPostResponse(
-                true,
-                "게시글이 성공적으로 등록되었습니다.",
-                "post-" + UUID.randomUUID()
-        );
+        if (authorId == null) {
+            authorId = UUID.fromString("5f7b8b44-e4aa-40b8-b93a-800ec0151d20"); // fallback system user
+        }
+        if (req.title() == null || req.title().trim().isEmpty()) {
+            throw new IllegalArgumentException("제목을 입력해주세요.");
+        }
+        if (req.body() == null || req.body().trim().isEmpty()) {
+            throw new IllegalArgumentException("본문을 입력해주세요.");
+        }
+
+        UUID postId = UUID.randomUUID();
+        UUID idempotencyKey = UUID.randomUUID();
+
+        String sql = """
+            INSERT INTO public.member_board_posts (id, author_user_id, idempotency_key, title, body, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, NOW(), NOW())
+        """;
+
+        try {
+            jdbcTemplate.update(sql, postId, authorId, idempotencyKey, req.title().trim(), req.body().trim());
+
+            if (req.stockSymbol() != null && !req.stockSymbol().isBlank()) {
+                try {
+                    String stockSql = "SELECT id FROM public.virtual_stocks WHERE symbol = ? LIMIT 1";
+                    UUID stockId = jdbcTemplate.queryForObject(stockSql, UUID.class, req.stockSymbol().trim().toUpperCase());
+                    if (stockId != null) {
+                        jdbcTemplate.update(
+                            "INSERT INTO public.member_board_stock_context (post_id, stock_id, category, created_at) VALUES (?, ?, ?, NOW())",
+                            postId, stockId, req.category() != null ? req.category() : "STOCK"
+                        );
+                    }
+                } catch (Exception ex) {
+                    log.debug("Stock context link skipped: {}", ex.getMessage());
+                }
+            }
+
+            return new CreateBoardPostResponse(true, "게시글이 성공적으로 등록되었습니다.", postId.toString());
+        } catch (Exception e) {
+            log.error("[BoardService] createPost failed: {}", e.getMessage(), e);
+            throw new IllegalStateException("게시글 작성 실패: " + e.getMessage(), e);
+        }
     }
 }
