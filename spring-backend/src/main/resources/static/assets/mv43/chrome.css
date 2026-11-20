@@ -63,3 +63,6 @@
   .topbar .lang-control{margin-left:auto}
   .topbar .auth-actions{flex-shrink:0}
 }
+
+/* Keep the official mark visible when the sidebar and hero emblem are hidden. */
+@media(max-width:1023px){.topbar h1::before{content:"";display:inline-block;width:24px;height:24px;margin-inline-end:8px;vertical-align:middle;background:url('/assets/mv39/favicon.ico?v=9ce0a8f10cafff52d1d2f7aa451b3e9162944162f61258842e13aa8546f98e78') center/contain no-repeat}}
