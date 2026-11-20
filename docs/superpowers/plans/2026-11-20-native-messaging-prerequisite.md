@@ -33,3 +33,13 @@ Expected: focused behavioral tests green; SQL invocation/ownership is asserted w
 
 ## Verification / review focus
 Run isolated Spring full test plus bootJar with test storage, Node scripts suite, git diff --check. Review actor/CSRF binding, no swallowed errors, exact keys/sequence/body receipts, and unchanged SQL privileges. Fresh whole-branch reviewer is required. Browser message sending, concurrency/replay against real PostgreSQL, public Test and production remain unverified and HOLD.
+
+## Task 3: Disposable PostgreSQL verification of the actual Java services
+Files: spring-backend/src/test/java/com/moneyverse/api/domain/messaging/MessagingPostgresIntegrationTest.java; spring-backend/build.gradle.kts; .github/workflows/ci.yml runtime-check; scripts/release/native-spring-ci.test.mjs and worklog.
+- Add a separate tagged postgresMessagingTest Gradle task, excluded from ordinary H2 test selection. Absence of CI-only database settings fails the dedicated task; it never silently skips or guesses a connection.
+- Allow only explicit GitHub Actions environment and loopback woldeok_moneyverse_dev JDBC URL without embedded credentials. Existing CI PostgreSQL service is disposable; never connect this task to MiniPC/production.
+- Seed three synthetic users on one migrator transaction, SET LOCAL ROLE moneyverse_app, and invoke real SupportService/ChatService through JDBC on that same connection. Roll back and close after every test. No committed fixture messages or economy writes.
+- Verify support creation/replay/changed intent/reply/exact stored receipt/foreign owner denial; DM same-key replay/changed body/participant refusal; bigint sequences above2^53 remain exact strings in mutation and history; revoked raw-table access remains revoked.
+- Add Java setup and a mandatory dedicated task in runtime-check after migrations, using the existing disposable CI service. Keep the native H2/source-JAR gate and source identity intact.
+- Observe and read actual CI results. Local H2 passes do not certify this task; report separately. All SQL execution remains in CI under project rules.
+Expected: dedicated tests execute without skips in CI; normal isolated suite stays independently green. No applied migration or production deployment change.

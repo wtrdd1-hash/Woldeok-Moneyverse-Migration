@@ -63,3 +63,15 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+tasks.named<Test>("test") {
+    useJUnitPlatform { excludeTags("postgres-messaging") }
+}
+
+tasks.register<Test>("postgresMessagingTest") {
+    description = "Verify native messaging against the explicitly configured disposable CI PostgreSQL"
+    group = "verification"
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
+    useJUnitPlatform { includeTags("postgres-messaging") }
+}

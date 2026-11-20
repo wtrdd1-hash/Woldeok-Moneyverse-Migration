@@ -232,3 +232,15 @@ The independent task review found an administrator-close legacy-cookie identity 
 - [x] Fresh final isolated full test/JAR: **394 Spring tests,0 failures/errors/skips; BUILD SUCCESSFUL**. Full Node UI/security/release: **220 passed,0 failures/cancellations/skips**. Commands/logs: /tmp/nov18-native-copy-full.log and /tmp/nov18-native-copy-node.log. Existing Gradle/dependency warnings remain.
 - Read-only HTTP recheck at15:25KST: production root200, public Test /api/version403. HTTP200 only confirms response availability, not feature or source identity. No current browser screenshot/click acceptance is claimed.
 - Native public tools/calculators/status presentation is the next isolated in-progress task, based on bad193193e. Its source-control progress is separate until independent review/integration. The original dirty checkout remains untouched.
+
+## Native messaging real-PostgreSQL gate — before work
+- [ ] Add a dedicated tagged Java/JDBC integration task that fails without explicit disposable CI connection settings. Ordinary H2 tests exclude this task; do not report it as locally passed.
+- [ ] Seed only synthetic users in a rollback-only CI transaction, switch to moneyverse_app, and execute the actual services/wrappers for ownership, stable retries, exact stored receipts and large sequences.
+- [ ] Run it against the existing GitHub disposable PostgreSQL service after immutable migrations, with no new role grants/migrations or MiniPC/production SQL.
+- [ ] Read mandatory CI results separately from H2/UI/JAR results; preserve browser/Test/production HOLD.
+
+## Native messaging real-PostgreSQL gate — in progress
+- [x] Added9 actual-service JDBC cases and a separate tagged Gradle task. Ordinary isolated suite remains394 tests,0 failures/errors/skips plus successful bootJar. These394 explicitly exclude the9 PostgreSQL cases.
+- [x] Verified the dedicated task refuses this non-CI host:9 cases failed at the GitHub-only guard before any connection/SQL. This is expected safety-refusal evidence, not PostgreSQL verification and not a passing suite.
+- Tests use a single rollback-only CI connection and SET LOCAL ROLE moneyverse_app. Test-only privileged fixture seeding is explicit; production application privileges remain unchanged. Large sequence fixture is above2^53, and raw-table privilege assertions accompany function behavior.
+- [ ] Publish test-runner checkpoint and wire mandatory execution to the existing disposable CI PostgreSQL service; read actual9-case results. No production/MiniPC PostgreSQL connection was attempted.
