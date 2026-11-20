@@ -230,3 +230,51 @@ jobs:
           npm --prefix bot ci --no-audit --no-fund
           npm --prefix bot test
           npm --prefix bot audit --omit=dev --audit-level=high
+
+  spring-web-check:
+    needs: [classify, policy]
+    if: >-
+      needs.classify.outputs.classification == 'RUNTIME_RELEVANT' ||
+      needs.classify.outputs.classification == 'MIXED'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SPRING_PROFILES_ACTIVE: test
+      SERVER_ADDRESS: 127.0.0.1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+          cache-dependency-path: spring-backend/*.gradle.kts
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Test native UI locale, navigation and money contracts
+        run: node --test scripts/native-chrome.test.mjs scripts/admin-tools.test.mjs scripts/mv39-money.test.mjs
+      - name: Test and build the native Spring application
+        working-directory: spring-backend
+        run: ./gradlew test bootJar --no-daemon -Dorg.gradle.workers.max=2
+      - name: Bind native artifact to exact source
+        run: |
+          node --input-type=module -e '
+            import fs from "node:fs";
+            import crypto from "node:crypto";
+            const dir="spring-backend/build/libs";
+            const jars=fs.readdirSync(dir).filter(name=>name.endsWith(".jar")&&!name.endsWith("-plain.jar"));
+            if(jars.length!==1)throw new Error("Expected one native boot JAR");
+            const file=dir+"/"+jars[0];
+            const sha256=crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
+            fs.writeFileSync(dir+"/source-manifest.json",JSON.stringify({sourceSha:process.env.GITHUB_SHA,jar:jars[0],sha256})+"\n");
+          '
+      - name: Upload source-bound native candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: spring-native-candidate-${{ github.sha }}
+          path: |
+            spring-backend/build/libs/*.jar
+            spring-backend/build/libs/source-manifest.json
+          if-no-files-found: error
+          retention-days: 14
