@@ -225,6 +225,11 @@
     authRegisterPassword:["Password (at least 8 characters)","비밀번호 (8자 이상)","パスワード（8文字以上）","密码（至少8个字符）","Mật khẩu (ít nhất 8 ký tự)"],
     authLoginSubmit:["Sign In with Email","자체 계정으로 로그인","メールでログイン","邮箱登录","Đăng nhập với Email"],
     authRegisterSubmit:["Sign up and get started","가입하고 시작하기","登録して始める","注册并开始","Đăng ký và bắt đầu"],
+    authLoginHeading:["Welcome Back!","반가워요!","おかえりなさい！","欢迎回来！","Chào mừng bạn!"],
+    authLoginLead:["Start your virtual economy journey and build financial assets.","월덕 머니버스에서 경제와 자산을 시작해보세요.","ウォルドク・マネーバースで仮想経済と資産運用を始めましょう。","在月德虚拟金融平台开启您的数字资产之旅。","Bắt đầu hành trình kinh tế và xây dựng tài sản ảo của bạn."],
+    authRegisterHeading:["Create a new account","새 계정 만들기","新しいアカウントを作成","创建新账户","Tạo tài khoản mới"],
+    authRegisterLead:["Join Woldeok Moneyverse and experience the virtual economy.","월덕 머니버스의 회원이 되어 가상 경제를 체험해보세요.","ウォルドク・マネーバースの会員になって仮想経済を体験しましょう。","加入月德 Moneyverse，体验虚拟经济。","Tham gia Woldeok Moneyverse và trải nghiệm nền kinh tế ảo."],
+    authHelp:["Account help","계정 도움말","アカウントヘルプ","账户帮助","Trợ giúp tài khoản"],
   };
   const supports = code => SUPPORTED.includes(code);
   const storage = {

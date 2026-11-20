@@ -14,8 +14,8 @@
 <div class="app-shell"><th:block th:replace="~{shared/chrome :: sidebar}"></th:block>
 <div class="app-main"><div class="app-inner"><th:block th:replace="~{shared/chrome :: header}"></th:block>
 <main id="main-content" tabindex="-1" class="auth-main">
-<section class="hero"><div><div class="eyebrow">WOLDEOK MONEYVERSE</div><h2 id="auth-heading" th:attr="data-i18n=${uiPageKey}" th:text="${uiCopy[uiPageKey]}">Log in</h2>
-<p  data-i18n="authLead" th:text="${uiCopy['authLead']}">Access your Moneyverse account.</p></div></section>
+<section class="hero"><div><div class="eyebrow">WOLDEOK MONEYVERSE</div><h2 id="auth-heading" th:attr="data-i18n=${authHeadingKey}" th:text="${uiCopy.get(#vars.authHeadingKey)}">Log in</h2>
+<p th:if="${authLeadKey != null}" th:attr="data-i18n=${authLeadKey}" th:text="${uiCopy.get(#vars.authLeadKey)}">Access your Moneyverse account.</p></div></section>
 <section class="card auth-card" aria-labelledby="auth-heading">
 <th:block th:if="${authFields}">
 <p class="auth-note" data-i18n="authConsentNotice" th:text="${uiCopy['authConsentNotice']}">These acknowledgements are only checked in this browser. Consent recording is not available.</p>
@@ -47,12 +47,12 @@
 <a class="auth-provider" href="/auth/discord/authorize"><span  data-i18n="authDiscord" th:text="${uiCopy['authDiscord']}">Continue with Discord</span></a>
 <p class="auth-note" data-i18n="authGoogleUnavailable" th:text="${uiCopy['authGoogleUnavailable']}">Google sign-in is currently unavailable.</p>
 </div>
-<nav class="auth-links" aria-label="Account help"><a href="/login"><span  data-i18n="login" th:text="${uiCopy['login']}">Log in</span></a><a href="/register"><span  data-i18n="authRegister" th:text="${uiCopy['authRegister']}">Create account</span></a><a href="/forgot-password"><span  data-i18n="authForgot" th:text="${uiCopy['authForgot']}">Forgot password</span></a></nav>
+<nav id="auth-help-navigation" class="auth-links" aria-label="Account help" th:attr="aria-label=${uiCopy['authHelp']}"><a href="/login"><span  data-i18n="login" th:text="${uiCopy['login']}">Log in</span></a><a href="/register"><span  data-i18n="authRegister" th:text="${uiCopy['authRegister']}">Create account</span></a><a href="/forgot-password"><span  data-i18n="authForgot" th:text="${uiCopy['authForgot']}">Forgot password</span></a></nav>
 </th:block>
 <th:block th:unless="${authFields}">
 <p role="status" class="auth-unavailable" data-i18n="authUnavailable" th:text="${uiCopy['authUnavailable']}">This action is currently unavailable. No change has been made and no email delivery has been confirmed.</p>
 <a class="auth-provider" href="/login"><span  data-i18n="authBackLogin" th:text="${uiCopy['authBackLogin']}">Back to login</span></a>
-<a th:if="${authPage == 'reset-password'}" href="/forgot-password"><span  data-i18n="authForgot" th:text="${uiCopy['authForgot']}">Forgot password</span></a>
+<a id="auth-reset-help" class="auth-help-link" th:if="${authPage == 'reset-password'}" href="/forgot-password"><span  data-i18n="authForgot" th:text="${uiCopy['authForgot']}">Forgot password</span></a>
 </th:block>
 </section>
 </main>

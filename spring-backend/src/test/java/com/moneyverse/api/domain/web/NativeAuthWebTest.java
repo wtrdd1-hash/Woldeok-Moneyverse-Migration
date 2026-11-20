@@ -64,6 +64,29 @@ class NativeAuthWebTest {
             .andExpect(content().string(containsString("이메일 주소")))
             .andExpect(content().string(containsString("자체 계정으로 로그인")));
     }
+    @Test void originalPageSpecificKoreanHeadingsAndLeadsRemainVisible() throws Exception {
+        for(String path:new String[]{"/login","/login/providers"}) mvc.perform(get(path).cookie(new Cookie("wdmv_locale","ko")))
+            .andExpect(content().string(matchesPattern("(?s).*<h2[^>]*id=\"auth-heading\"[^>]*>반가워요!</h2>.*")))
+            .andExpect(content().string(containsString("월덕 머니버스에서 경제와 자산을 시작해보세요.")));
+        mvc.perform(get("/register").cookie(new Cookie("wdmv_locale","ko")))
+            .andExpect(content().string(matchesPattern("(?s).*<h2[^>]*id=\"auth-heading\"[^>]*>새 계정 만들기</h2>.*")))
+            .andExpect(content().string(containsString("월덕 머니버스의 회원이 되어 가상 경제를 체험해보세요.")))
+            .andExpect(content().string(containsString("data-i18n=\"authRegistrationUnavailable\"")));
+        mvc.perform(get("/reset-password"))
+            .andExpect(content().string(containsString("id=\"auth-reset-help\" class=\"auth-help-link\"")));
+    }
+    @ParameterizedTest @ValueSource(strings={"en","ko","ja","zh","vi"})
+    void accountHelpLandmarkUsesRequestedLanguage(String language) throws Exception {
+        String label=switch(language) {
+            case "ko" -> "계정 도움말";
+            case "ja" -> "アカウントヘルプ";
+            case "zh" -> "账户帮助";
+            case "vi" -> "Trợ giúp tài khoản";
+            default -> "Account help";
+        };
+        mvc.perform(get("/login").cookie(new Cookie("wdmv_locale",language)))
+            .andExpect(content().string(matchesPattern("(?s).*<nav[^>]*id=\"auth-help-navigation\"[^>]*aria-label=\""+label+"\"[^>]*>.*")));
+    }
     @Test void missingActionsRenderUnavailableWithoutFormOrTokenReflection() throws Exception {
         for(String page:new String[]{"forgot-password","reset-password","verify-email","verify-email-change","account-deletion"})
             mvc.perform(get("/"+page).param("token","ci_private_value"))

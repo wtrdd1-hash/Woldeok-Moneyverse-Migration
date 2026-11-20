@@ -41,10 +41,14 @@ public class NativeAuthPageController {
             case "account-deletion" -> "authDeletion";
             default -> "login";
         };
+        String heading=page.equals("login") ? "authLoginHeading" : page.equals("register") ? "authRegisterHeading" : title;
+        String lead=page.equals("login") ? "authLoginLead" : page.equals("register") ? "authRegisterLead" : null;
         String language=locale.resolve(request);
         response.setHeader("Content-Language",language);
         response.setHeader("X-MV-Renderer","Spring-MVC-Thymeleaf");
         response.setHeader("Content-Security-Policy","default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'");
+        model.addAttribute("authHeadingKey",heading);
+        model.addAttribute("authLeadKey",lead);
         model.addAttribute("authPage",page);
         model.addAttribute("authFields",page.equals("login")||page.equals("register"));
         model.addAttribute("uiPageKey",title);

@@ -9,6 +9,8 @@
   const field=name=>form.elements.namedItem(name),client=core.createClient({fetch:(url,options)=>fetch(url,options)});
   let message=page==='register'?'authRegistrationUnavailable':'authReady',owner=null,known=false,epoch=0,sessionCheck=0,checking=false;
   function render(){
+    const navigation=document.getElementById('auth-help-navigation');
+    if(navigation)navigation.setAttribute('aria-label',locale.tx('authHelp'));
     submit.disabled=page!=='login'||client.isBusy();
     form.setAttribute('aria-busy',String(client.isBusy()));
     submit.textContent=locale.tx(client.isBusy()?'authSending':page==='register'?'authRegisterSubmit':'authLoginSubmit');

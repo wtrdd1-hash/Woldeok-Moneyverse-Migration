@@ -52,14 +52,14 @@ function view(page='login'){
  class Element extends EventTarget{constructor(){super();this.value='';this.checked=false;this.disabled=false;this.dataset={};this.textContent='';}setAttribute(k,v){this[k]=v;}}
  const window=new EventTarget(),fields=Object.fromEntries(['email','password','displayName','terms','privacy','age'].map(n=>[n,new Element()]));
  const form=new Element();form.elements={namedItem:n=>fields[n]};
- const submit=new Element(),status=new Element();const ids={'native-auth-form':form,'auth-submit':submit,'auth-status':status};
+ const submit=new Element(),status=new Element(),navigation=new Element();const ids={'native-auth-form':form,'auth-submit':submit,'auth-status':status,'auth-help-navigation':navigation};
  const document={body:{dataset:{authPage:page}},title:'',hidden:false,getElementById:id=>ids[id]||null,addEventListener(){}};
  window.MV43Auth=core();window.MV39Locale={tx:key=>key};window.location={assign:url=>{window.destination=url;}};
  let session={signedIn:false,user:null},reply=result(401,{}),calls=[];
  const fetch=async(url,options)=>{calls.push({url,options});return url==='/api/v1/auth/session'?result(200,session):reply;};
  const ui=new URL('../spring-backend/src/main/resources/static/assets/mv43/auth.js',import.meta.url);
  if(existsSync(ui))runInNewContext(readFileSync(ui,'utf8'),{window,document,fetch});
- return {window,fields,form,submit,status,calls,setSession:value=>{session=value;},setReply:value=>{reply=value;}};
+ return {window,fields,form,submit,status,navigation,calls,setSession:value=>{session=value;},setReply:value=>{reply=value;}};
 }
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 test('real form preserves values on failure and language changes, and requires server receipt before navigation',async()=>{
@@ -85,4 +85,57 @@ test('confirmed account transition and page exit clear private fields without br
  v.setSession({signedIn:true,user:{id:userId}});v.window.dispatchEvent(new Event('focus'));await tick();
  assert.equal(v.fields.password.value,'');assert.equal(v.fields.email.value,'');assert.equal(v.fields.terms.checked,false);
  v.fields.password.value='ci_password';v.window.dispatchEvent(new Event('pagehide'));assert.equal(v.fields.password.value,'');
+});
+
+test('account help landmark follows language changes without clearing credentials',async()=>{
+ const v=view();await tick();v.fields.password.value='ci_password';
+ v.window.MV39Locale.tx=key=>'ko:'+key;v.window.dispatchEvent(new Event('mv39-language-change'));
+ assert.equal(v.navigation['aria-label'],'ko:authHelp');assert.equal(v.fields.password.value,'ci_password');
+});
+
+// Resolve authored desktop declarations and custom properties; this is not browser geometry.
+function rules(css){
+ const result=[];css=css.replace(/\/\*[\s\S]*?\*\//g,'');let at=0;
+ while(at<css.length){
+  const open=css.indexOf('{',at);if(open<0)break;
+  let end=open+1,depth=1;while(end<css.length&&depth){if(css[end]==='{')depth++;if(css[end]==='}')depth--;end++;}
+  const selector=css.slice(at,open).trim(),body=css.slice(open+1,end-1);at=end;
+  if(selector.startsWith('@'))continue;
+  const declarations={};for(const item of body.split(';')){const colon=item.indexOf(':');if(colon>0)declarations[item.slice(0,colon).trim()]=item.slice(colon+1).trim();}
+  for(const match of selector.split(','))result.push({selector:match.trim(),declarations});
+ }
+ return result;
+}
+function projectedStyle(selectors){
+ const resource=new URL('../spring-backend/src/main/resources/static/assets/',import.meta.url);
+ const parsed=[...rules(readFileSync(new URL('mv39/site.css',resource),'utf8')),...rules(readFileSync(new URL('mv43/chrome.css',resource),'utf8'))];
+ const variables=Object.assign({},...parsed.filter(r=>r.selector===':root').map(r=>r.declarations)),values={},weights={};
+ for(const rule of parsed){
+  if(!selectors.includes(rule.selector))continue;
+  const specificity=(rule.selector.match(/#/g)||[]).length*100+(rule.selector.match(/[.\[:]/g)||[]).length*10;
+  for(const [key,value] of Object.entries(rule.declarations))if(weights[key]===undefined||specificity>=weights[key]){values[key]=value;weights[key]=specificity;}
+ }
+ const resolve=value=>value&&value.replace(/var\((--[\w-]+)(?:,\s*([^)]*))?\)/g,(_,key,fallback)=>variables[key]||fallback||'');
+ return Object.fromEntries(Object.entries(values).map(([key,value])=>[key,resolve(value).replace(/#[0-9a-f]{3,8}/gi,color=>color.toUpperCase())]));
+}
+test('auth controls resolve to the binding native palette including primary foreground',()=>{
+ const input=projectedStyle(['input','.auth-main input:not([type=checkbox])']);
+ const primary=projectedStyle(['button','.auth-main .auth-primary']);
+ const provider=projectedStyle(['a','.auth-main .auth-provider']);
+ const focus=projectedStyle(['input:focus-visible','.auth-main input:focus-visible']);
+ const checkbox=projectedStyle(['input','.auth-main input[type=checkbox]']);
+ assert.equal(input.background,'#0C1020');assert.equal(input.color,'#E9F1FF');
+ assert.equal(primary.background,'#9C83FF');assert.equal(primary.color,'#0C1020');
+ assert.equal(provider.border,'1px solid #9C83FF');assert.equal(provider.color,'#E9F1FF');
+ assert.equal(focus.outline,'3px solid #64B7FF');assert.equal(checkbox['accent-color'],'#9C83FF');
+});
+test('acknowledgements and their legal and reset-help links declare 44px hit targets',()=>{
+ for(const selectors of [
+  ['label','.auth-main .auth-consent label'],
+  ['a','.auth-main .auth-consent a'],
+  ['a','.auth-main .auth-help-link']
+ ]){
+  const style=projectedStyle(selectors);assert.ok(parseFloat(style['min-height'])>=44,'interactive target needs at least 44px height');
+  if(selectors[0]==='a')assert.ok(parseFloat(style['min-width'])>=44,'help/legal link needs at least 44px width');
+ }
 });
