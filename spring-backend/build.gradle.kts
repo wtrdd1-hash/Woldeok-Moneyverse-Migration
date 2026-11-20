@@ -75,3 +75,10 @@ tasks.register<Test>("postgresMessagingTest") {
     classpath = sourceSets["test"].runtimeClasspath
     useJUnitPlatform { includeTags("postgres-messaging") }
 }
+
+tasks.register<JavaExec>("nativeUiPreview") {
+    description = "Run an explicitly opted-in loopback H2 native UI preview on the test classpath"
+    group = "verification"
+    classpath = sourceSets["test"].runtimeClasspath
+    mainClass.set("com.moneyverse.api.domain.web.NativeUiPreview")
+}
