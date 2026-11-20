@@ -49,8 +49,20 @@ class NativeAuthWebTest {
             .andExpect(content().string(containsString("href=\"/privacy\"")));
         mvc.perform(get("/register")).andExpect(content().string(containsString("name=\"displayName\"")))
             .andExpect(content().string(containsString("id=\"auth-submit\" type=\"submit\" disabled")))
-            .andExpect(content().string(containsString("data-i18n=\"authRegistrationUnavailable\"")));
+            .andExpect(content().string(containsString("data-i18n=\"authRegistrationUnavailable\"")))
+            .andExpect(content().string(containsString("<fieldset class=\"auth-fields\" disabled=\"disabled\">")));
         mvc.perform(get("/login")).andExpect(content().string(containsString("href=\"/auth/discord/authorize\"")));
+    }
+    @Test void originalRegistrationBoundsAndKoreanFieldCopyRemainVisible() throws Exception {
+        mvc.perform(get("/register").cookie(new Cookie("wdmv_locale","ko")))
+            .andExpect(content().string(containsString("활동 닉네임 (2~20자)")))
+            .andExpect(content().string(containsString("minlength=\"2\" maxlength=\"20\"")))
+            .andExpect(content().string(containsString("비밀번호 (8자 이상)")))
+            .andExpect(content().string(containsString("minlength=\"8\"")))
+            .andExpect(content().string(containsString("가입하고 시작하기")));
+        mvc.perform(get("/login").cookie(new Cookie("wdmv_locale","ko")))
+            .andExpect(content().string(containsString("이메일 주소")))
+            .andExpect(content().string(containsString("자체 계정으로 로그인")));
     }
     @Test void missingActionsRenderUnavailableWithoutFormOrTokenReflection() throws Exception {
         for(String page:new String[]{"forgot-password","reset-password","verify-email","verify-email-change","account-deletion"})
