@@ -7,6 +7,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class MoneyverseSpringApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(MoneyverseSpringApplication.class, args);
+        String mode=System.getProperty("moneyverse.runtime-mode", "application");
+        Class<?> application=switch(mode) {
+            case "application" -> MoneyverseSpringApplication.class;
+            case "presentation" -> com.moneyverse.presentation.NativePresentationApplication.class;
+            default -> throw new IllegalArgumentException("Unknown Moneyverse runtime mode");
+        };
+        SpringApplication.run(application, args);
     }
 }

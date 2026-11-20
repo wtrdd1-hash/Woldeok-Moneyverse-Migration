@@ -559,3 +559,19 @@ Browser geometry, global cross-navigation drafts, authenticated delivery and Tes
 ### CI policy fixture follow-up
 - New CI correctly rejected a dummy credential-shaped URI in the CORS negative fixture before runtime jobs started. This was a test placeholder, not an operational credential. Replaced it with the scanner documented USER:PASSWORD@HOST placeholder form, preserving the same userinfo rejection case. The security guard is unchanged.
 - Fresh repository scan passed;6 security-policy tests and17 focused CORS cases passed0skips. The failed CI is retained as failure; a new exact-source CI is required.
+
+### User-prioritized presentation cutover — before work
+The owner explicitly deferred backend issues and requested the new frontend first. Accordingly, do not promote owned APIs, alter Production DB/grants/migrations or execute the approved projection repair in this phase. Prior financial approval remains recorded for the later reviewed repair; no correction SQL review approval has been issued.
+- [ ] Add a DB-free presentation startup mode using only existing pure native page controllers/resources and build identity, with all API/auth mutation/socket/bot/scheduling components absent.
+- [ ] Prove isolation with a real application-context/HTTP regression, then verify locale, calculator input and route negatives. Default backend startup remains compatible.
+- [ ] Route exact public home/tool hub/two calculator pages only; version-isolate the3 changed shared assets. Preserve current API/auth/socket/financial/admin routes and signup hold byte-for-byte.
+- [ ] Protected Test/browser evidence, source/process identity, exact-main artifact and independent review precede a reversible public presentation-only switch.
+This phase is a partial public presentation release, not whole-site/full-backend acceptance. The financial and migration346 provenance findings remain open.
+
+### DB-free presentation checkpoint — in progress
+- First actual-context RED: the existing full application created a datasource. Added an explicit-import presentation runtime outside the backend component scan, excluding DataSource/JDBC/JPA and importing only the existing pure public pages, locales, fixed packaged build identity and classpath assets.
+- Independent real HTTP review found denied HTML requests created JSESSIONID. Added explicit STATELESS/request-cache disable;3 logical RED regressions became GREEN, plus an actual embedded-Tomcat no-cookie regression.
+- Fresh clean validation:542 Spring cases across92 suites,0 failures/errors/skips; bootJar successful;276 Node cases,0 failures/skips. Source fingerprint c4377f36b87c673a809646d5f20f99caf561a8ed1cbc05121b3e8ad9de9bcdd3 remained stable. Independent revised source review APPROVED and separately repeated actual HTTP negatives without cookies.
+- Frontend identity is explicitly public-presentation-only; this mode does not expose backend version/API/session/member/admin paths. No DB credential/environment file is required.
+- Exact route proposal covers home/index,tools,calculators and the two native calculators only. Three changed shared asset paths require matching version-query routing; all legacy/unknown versions retain their old origin. All API/auth/socket/financial/admin paths and registration holds remain unchanged.
+- Public Test and final exact-main artifact/route/browser checks remain pending. No frontend Production switch and no Production database correction has occurred.
