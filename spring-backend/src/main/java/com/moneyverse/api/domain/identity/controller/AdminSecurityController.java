@@ -181,6 +181,9 @@ public class AdminSecurityController {
                 .build();
         response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         UserAuthService.clearCsrfCookies(response);
+        // Removing the host cookie must not reveal a different legacy account.
+        response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from("mv_session", "")
+                .path("/").maxAge(0).httpOnly(true).secure(true).sameSite("Lax").build().toString());
 
         return ResponseEntity.noContent().build();
     }

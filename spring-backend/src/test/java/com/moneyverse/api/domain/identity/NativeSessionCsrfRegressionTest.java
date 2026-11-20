@@ -19,6 +19,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.mock.web.MockFilterChain;
+import org.springframework.mock.web.MockCookie;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
@@ -37,6 +38,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -449,6 +451,58 @@ class NativeSessionCsrfRegressionTest {
         assertTrue(auth.resolveSession(request).isEmpty());
         assertTrue(new AdminAuthService(jdbc).resolveAdminUserId(request).isEmpty(),
                 "An invalid host session must not select a different bearer identity");
+    }
+
+    @Test void closingHostAdminSessionCannotRevealAnotherActiveLegacyAccount() {
+        UUID legacyId = UUID.fromString("00000000-0000-4000-8000-000000000104");
+        UUID legacyOwner = UUID.fromString("00000000-0000-4000-8000-000000000103");
+        String legacySession = "ci_legacy_close_session";
+        String legacyProof = "ci_legacy_close_proof";
+        jdbc.execute("ALTER TABLE auth_sessions ADD COLUMN admin_closed_at TIMESTAMP WITH TIME ZONE");
+        jdbc.update("INSERT INTO auth_sessions (id, token_hash, csrf_hash, user_id, expires_at) VALUES (?, ?, ?, ?, ?)",
+                legacyId, UserAuthService.sha256(legacySession), UserAuthService.sha256(legacyProof), legacyOwner,
+                Timestamp.from(Instant.now().plusSeconds(3600)));
+
+        var legacyRequest = new MockHttpServletRequest();
+        legacyRequest.addHeader("Sec-Fetch-Site", "same-origin");
+        legacyRequest.setCookies(new Cookie("mv_session", legacySession), new Cookie("mv_csrf", legacyProof));
+        var legacy = auth.resolveSession(legacyRequest).orElseThrow();
+        assertEquals(legacyOwner, legacy.getUserId());
+        assertTrue(legacyProof.equals(auth.verifiedCsrfToken(legacyRequest, legacy)),
+                "The other account starts with an active session-owned proof");
+
+        var browserCookies = new LinkedHashMap<String, Cookie>();
+        for (Cookie cookie : List.of(new Cookie("mv_session", legacySession), new Cookie("mv_csrf", legacyProof),
+                new Cookie("__Host-mv_session", SESSION), new Cookie(HOST_PROOF, PROOF))) {
+            browserCookies.put(cookie.getName(), cookie);
+        }
+        var request = new MockHttpServletRequest();
+        request.addHeader("Sec-Fetch-Site", "same-origin");
+        request.setCookies(browserCookies.values().toArray(Cookie[]::new));
+        var selected = auth.resolveSession(request).orElseThrow();
+        assertEquals(OWNER, selected.getUserId());
+        assertTrue(PROOF.equals(auth.verifiedCsrfToken(request, selected)), "Host identity owns the selected proof");
+
+        var response = new MockHttpServletResponse();
+        new AdminSecurityController(new AdminAuthService(jdbc), jdbc).closeConsoleSession(request, response);
+        for (String header : response.getHeaders("Set-Cookie")) {
+            Cookie update = MockCookie.parse(header);
+            if (update.getMaxAge() == 0) browserCookies.remove(update.getName());
+            else browserCookies.put(update.getName(), update);
+        }
+        var nextRequest = new MockHttpServletRequest();
+        nextRequest.addHeader("Sec-Fetch-Site", "same-origin");
+        nextRequest.setCookies(browserCookies.values().toArray(Cookie[]::new));
+        assertTrue(auth.resolveSession(nextRequest).isEmpty(),
+                "Closing the selected host session must not switch to another legacy account");
+        assertTrue(new AdminAuthService(jdbc).resolveAdminUserId(nextRequest).isEmpty());
+        var bootstrap = new AuthController(auth).session(nextRequest, new MockHttpServletResponse());
+        assertEquals(false, bootstrap.get("signedIn"));
+        assertNull(bootstrap.get("user"));
+        assertTrue("".equals(bootstrap.get("csrfToken")), "Closed session exposes no mutation proof");
+        assertNotNull(jdbc.queryForObject("SELECT revoked_at FROM auth_sessions WHERE id = ?", Timestamp.class, SESSION_ID));
+        assertNull(jdbc.queryForObject("SELECT revoked_at FROM auth_sessions WHERE id = ?", Timestamp.class, legacyId),
+                "Cookie cleanup must not revoke the unrelated database session");
     }
 
     private void assertBootstrapDenied(MockHttpServletRequestBuilder request) throws Exception {

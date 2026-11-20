@@ -71,3 +71,20 @@ Integration implementation and local checks completed; GitHub checks, main merge
 - [x] Exact production diff self-reviewed; both existing member mutation guards, database files, CORS allowlist, role/reauthentication/TOTP checks and existing database session rotation mechanics remain unchanged. Main was fetched again and remains an ancestor at `08b1525ca76af514cd5fa2bddde33a784378352f`; `git diff --check` passes.
 - Compatibility limits: legacy sessions without matching proof remain authenticated but cannot bootstrap mutation proof. Browsers without Fetch Metadata need an explicit configured matching origin; noncanonical explicit origins are refused. No existing session hash is rotated to compensate.
 - Implementation is ready for the parent's independent review and integration. No live database/schema/privilege, environment, running-service, merge or deployment changes were made. Browser/exact-source Test acceptance is unverified; production remains **HOLD**.
+
+## Native session CSRF review round 1 — before fix
+- Independent review found administrator close clears the host session cookie but leaves an active legacy session cookie for another account. After applying response cookie deletion, the next request can silently resolve that other identity.
+- [ ] Reproduce close followed by browser-cookie application and session/proof resolution with two distinct active identities.
+- [ ] Clear the legacy session cookie alongside the existing host-session/proof cleanup, preserving database revocation behavior.
+- [ ] Run the isolated focused regression suite, self-review the scoped diff, record RED/GREEN, commit and push for the parent's review continuation.
+
+## Native session CSRF review round 1 — in progress
+- [x] Reproduced the review finding using real isolated session rows for distinct active host/legacy accounts, each with a matching proof. Applying close-response cookies then resolving the next request selected the legacy account: **45 tests, 1 logical failure**.
+- [x] Added Secure HttpOnly SameSite=Lax Path=/ legacy session-cookie deletion to the existing administrator close response. Existing selected-session database revocation is unchanged; the unrelated database session is not revoked.
+
+## Native session CSRF review round 1 — finished fix
+- [x] Focused GREEN: **45 tests, 0 failures/errors/skips**, including close followed by browser-cookie application, member/admin session resolution, anonymous bootstrap, proof absence and preservation of the unrelated database session.
+- Command: `MONEYVERSE_STORAGE_PATH=/tmp/native-session-csrf-media-20261120-0228-e64a SPRING_PROFILES_ACTIVE=test SERVER_ADDRESS=127.0.0.1 ./gradlew test --tests '*NativeSessionCsrfRegressionTest' --offline --no-daemon -Dorg.gradle.workers.max=1`.
+- [x] Self-reviewed the three-line cookie-only production delta and behavioral regression; `git diff --check` passes.
+- Parent owns the final integrated full-suite/build gate after this review fix. Previous full 330-test/JAR evidence belongs to the preceding implementation commit and is not claimed as a run of this fix.
+- Independent scoped re-review is pending. No database/schema/environment/service, merge or deployment change; production remains **HOLD**.
