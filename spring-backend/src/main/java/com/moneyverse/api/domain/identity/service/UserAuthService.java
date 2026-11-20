@@ -8,10 +8,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -25,6 +27,9 @@ public class UserAuthService {
 
     private static final Logger log = LoggerFactory.getLogger(UserAuthService.class);
     private static final SecureRandom RANDOM = new SecureRandom();
+
+    @org.springframework.beans.factory.annotation.Value("${moneyverse.app-base-url:${APP_BASE_URL:}}")
+    private String appBaseUrl = "";
 
     private final JdbcTemplate jdbcTemplate;
     private final Argon2PasswordEncoder passwordEncoder;
@@ -67,46 +72,16 @@ public class UserAuthService {
         return email.trim().toLowerCase();
     }
 
-    /**
-     * Resolves the current session from request cookie or Authorization header.
-     * Accurately supports both mv_session and __Host-mv_session, raw Cookie headers,
-     * URL-decoding, and queries display_name from member_profile_view.
-     */
-    public Optional<SessionInfo> resolveSession(HttpServletRequest request) {
-        if (request == null) return Optional.empty();
+    /** Member and administrator verification must resolve the same authoritative session. */
+    public static String extractSessionToken(HttpServletRequest request) {
+        if (request == null) return null;
 
-// Security hardline: Never synthesize an admin session from untrusted client headers.
-
-        String rawToken = null;
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie c : cookies) {
-                if ("mv_session".equals(c.getName()) || "__Host-mv_session".equals(c.getName())) {
-                    if (c.getValue() != null && !c.getValue().isBlank()) {
-                        rawToken = c.getValue().trim();
-                        break;
-                    }
-                }
-            }
-        }
-
-        // Direct Cookie header parsing fallback (critical for reverse-proxies and SSR)
-        if (rawToken == null) {
-            String cookieHeader = request.getHeader("Cookie");
-            if (cookieHeader != null && !cookieHeader.isBlank()) {
-                String[] parts = cookieHeader.split(";");
-                for (String part : parts) {
-                    int eq = part.indexOf('=');
-                    if (eq > 0) {
-                        String name = part.substring(0, eq).trim();
-                        if ("mv_session".equals(name) || "__Host-mv_session".equals(name)) {
-                            rawToken = part.substring(eq + 1).trim();
-                            break;
-                        }
-                    }
-                }
-            }
-        }
+        Map<String, List<String>> cookies = cookieValues(request, Set.of("__Host-mv_session", "mv_session"));
+        List<String> tokens = cookies.containsKey("__Host-mv_session")
+                ? cookies.get("__Host-mv_session") : cookies.get("mv_session");
+        // A host cookie is authoritative even when invalid; falling back could select another account.
+        String rawToken = tokens == null ? null
+                : tokens.size() == 1 && tokens.get(0) != null ? tokens.get(0).trim() : "";
 
         if (rawToken == null) {
             String authHeader = request.getHeader("Authorization");
@@ -116,7 +91,7 @@ public class UserAuthService {
         }
 
         if (rawToken == null || rawToken.isBlank()) {
-            return Optional.empty();
+            return null;
         }
 
         if (rawToken.length() > 1 && rawToken.charAt(0) == '"' && rawToken.charAt(rawToken.length() - 1) == '"') {
@@ -125,6 +100,18 @@ public class UserAuthService {
         try {
             rawToken = java.net.URLDecoder.decode(rawToken, StandardCharsets.UTF_8);
         } catch (Exception ignored) {}
+
+        return rawToken;
+    }
+
+    /**
+     * Resolves the current session from request cookie or Authorization header.
+     * Accurately supports both mv_session and __Host-mv_session, raw Cookie headers,
+     * URL-decoding, and queries display_name from member_profile_view.
+     */
+    public Optional<SessionInfo> resolveSession(HttpServletRequest request) {
+        String rawToken = extractSessionToken(request);
+        if (rawToken == null) return Optional.empty();
 
         String tokenHash = sha256(rawToken);
         String sql = """
@@ -182,6 +169,103 @@ public class UserAuthService {
             log.warn("[UserAuthService] resolveSession error: {}", e.getMessage());
             return Optional.empty();
         }
+    }
+
+    /**
+     * The stored digest cannot recover the raw proof. A host-only cookie preserves
+     * it across navigation without making the cookie script-readable or rotating live sessions.
+     */
+    public String verifiedCsrfToken(HttpServletRequest request, SessionInfo session) {
+        if (request == null || session == null || session.getCsrfHash() == null
+                || !hasSameOriginBrowserContext(request)) return "";
+        if (session.getExpiresAt() == null || !session.getExpiresAt().isAfter(Instant.now())) return "";
+
+        Map<String, List<String>> proofs = cookieValues(request, Set.of("__Host-mv_csrf", "mv_csrf"));
+
+        // An invalid host proof must not be rescued by a weaker legacy cookie.
+        List<String> values = proofs.containsKey("__Host-mv_csrf")
+                ? proofs.get("__Host-mv_csrf") : proofs.get("mv_csrf");
+        if (values == null || values.size() != 1) return "";
+        String raw = values.get(0);
+        if (raw == null || !raw.matches("[A-Za-z0-9_-]{1,128}")) return "";
+        return MessageDigest.isEqual(session.getCsrfHash().getBytes(StandardCharsets.UTF_8),
+                sha256(raw).getBytes(StandardCharsets.UTF_8)) ? raw : "";
+    }
+
+    private static Map<String, List<String>> cookieValues(HttpServletRequest request, Set<String> names) {
+        Map<String, List<String>> values = new HashMap<>();
+        Enumeration<String> headers = request.getHeaders("Cookie");
+        boolean hasCookieHeader = headers != null && headers.hasMoreElements();
+        if (hasCookieHeader) {
+            while (headers.hasMoreElements()) {
+                for (String part : headers.nextElement().split(";")) {
+                    int equals = part.indexOf('=');
+                    String name = (equals < 0 ? part : part.substring(0, equals)).trim();
+                    if (names.contains(name)) {
+                        values.computeIfAbsent(name, ignored -> new ArrayList<>())
+                                .add(equals < 0 ? "" : part.substring(equals + 1));
+                    }
+                }
+            }
+        } else if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if (names.contains(cookie.getName())) {
+                    values.computeIfAbsent(cookie.getName(), ignored -> new ArrayList<>()).add(cookie.getValue());
+                }
+            }
+        }
+
+        return values;
+    }
+
+    public boolean rejectsBootstrapContext(HttpServletRequest request) {
+        if (request == null) return true;
+        // Legacy service clients retain session status, but explicit untrusted browser context gets no private body.
+        boolean explicitContext = request.getHeader("Origin") != null || request.getHeader("Sec-Fetch-Site") != null;
+        return explicitContext && !hasSameOriginBrowserContext(request);
+    }
+
+    private boolean hasSameOriginBrowserContext(HttpServletRequest request) {
+        List<String> sites = Collections.list(request.getHeaders("Sec-Fetch-Site"));
+        if (sites.size() > 1 || (!sites.isEmpty() && !"same-origin".equals(sites.get(0)))) return false;
+        List<String> origins = Collections.list(request.getHeaders("Origin"));
+        if (origins.isEmpty()) return sites.size() == 1;
+        if (origins.size() != 1 || appBaseUrl == null || appBaseUrl.isBlank()) return false;
+        try {
+            URI expected = browserOrigin(appBaseUrl);
+            URI supplied = browserOrigin(origins.get(0));
+            return expected != null && supplied != null
+                    && expected.getScheme().equalsIgnoreCase(supplied.getScheme())
+                    && expected.getHost().equalsIgnoreCase(supplied.getHost())
+                    && originPort(expected) == originPort(supplied);
+        } catch (IllegalArgumentException ignored) {
+            return false;
+        }
+    }
+
+    private static URI browserOrigin(String value) {
+        URI uri = URI.create(value);
+        if (uri.getHost() == null || uri.getUserInfo() != null || uri.getQuery() != null || uri.getFragment() != null
+                || !List.of("http", "https").contains(uri.getScheme())
+                || (uri.getRawPath() != null && !uri.getRawPath().isEmpty() && !"/".equals(uri.getRawPath()))) return null;
+        return uri;
+    }
+
+    private static int originPort(URI uri) {
+        return uri.getPort() >= 0 ? uri.getPort() : ("https".equals(uri.getScheme()) ? 443 : 80);
+    }
+
+    public static void setCsrfCookie(HttpServletResponse response, String rawProof, long maxAgeSeconds) {
+        if (response == null) return;
+        response.addHeader("Set-Cookie", ResponseCookie.from("__Host-mv_csrf", rawProof)
+                .path("/").maxAge(maxAgeSeconds).httpOnly(true).secure(true).sameSite("Lax").build().toString());
+    }
+
+    public static void clearCsrfCookies(HttpServletResponse response) {
+        if (response == null) return;
+        setCsrfCookie(response, "", 0);
+        response.addHeader("Set-Cookie", ResponseCookie.from("mv_csrf", "")
+                .path("/").maxAge(0).httpOnly(true).secure(true).sameSite("Lax").build().toString());
     }
 
     public List<String> findUserRoles(UUID userId) {
@@ -265,6 +349,7 @@ public class UserAuthService {
         jdbcTemplate.update(sql, sessionId, tokenHash, csrfHash, Timestamp.from(expiresAt), Timestamp.from(now));
 
         setSessionCookie(response, rawToken);
+        setCsrfCookie(response, csrfToken, 30 * 24 * 60 * 60);
         return new PreloginSessionResult(sessionId, rawToken, csrfToken);
     }
 
@@ -315,6 +400,7 @@ public class UserAuthService {
         jdbcTemplate.update(sessionSql, sessionId, tokenHash, csrfHash, userId, Timestamp.from(expiresAt), Timestamp.from(now), Timestamp.from(now));
 
         setSessionCookie(response, rawToken);
+        setCsrfCookie(response, csrfToken, 30 * 24 * 60 * 60);
 
         // Fetch user profile details
         String displayName = "시민";
@@ -446,6 +532,7 @@ public class UserAuthService {
 
     public void clearSessionCookie(HttpServletResponse response) {
         if (response == null) return;
+        clearCsrfCookies(response);
         Cookie cookie = new Cookie("mv_session", "");
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
@@ -580,6 +667,7 @@ public class UserAuthService {
 
         // Set session cookies
         setSessionCookie(response, rawToken);
+        setCsrfCookie(response, csrfToken, 8 * 60 * 60);
 
         return new OAuthLoginResult(userId, sessionId, rawToken, csrfToken, safeName, isNew != null && isNew);
     }
