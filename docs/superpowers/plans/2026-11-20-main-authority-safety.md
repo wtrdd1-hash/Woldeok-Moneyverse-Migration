@@ -17,3 +17,8 @@ Files: static/js/mv-floating-chat.js and scripts/legacy-floating-chat.test.mjs.
 
 ## Verification
 Run actual focused auth/HTTP/widget regressions RED thenGREEN, full isolated Spring test/JAR, native/release/security Node gates and git diff --check. Rerun actual PostgreSQL CI9-case gate on latest source. Fresh whole-branch review before integration/release. Exact-source public Test403 remains a release blocker.
+
+## Task3: Browser-discovered shared control regressions
+Actual browser found7 links below44px and shared English aria/footer/skip strings in Korean. Reuse existing product copy, add only navigation region labels, test negotiated SSR in5 locales and live locale change with expanded-menu state. Enlarge inline/auth/footer link targets without rewriting card/navigation layout. Rerun actual browser all5 locales/8 widths; record remaining acceptance gaps.
+## Integration
+Current main9635262fb2 includes unrelated official brand assets, preserved. PR3311 squash removed old task ancestry: integrate reviewed8746..3fe753fc43 pure messaging diff while retaining child parentage, resolve only catalog/doc/digest conflicts, re-run full fresh tests and independent whole-branch review.

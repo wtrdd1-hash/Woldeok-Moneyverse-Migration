@@ -22,16 +22,19 @@ public class ChatController {
     @GetMapping("/conversations")
     public ResponseEntity<ConversationListResponse> listConversations(HttpServletRequest request,
             @RequestParam(value="limit",defaultValue="50") int limit) {
-        return ResponseEntity.ok(chatService.listConversations(guard.actor(request),limit));
+        UUID actor=guard.actor(request);
+        return ownerRead(actor,chatService.listConversations(actor,limit));
     }
     @GetMapping("/unread-count")
     public ResponseEntity<ChatUnreadResponse> unreadCount(HttpServletRequest request) {
-        return ResponseEntity.ok(new ChatUnreadResponse(true,chatService.totalUnreadCount(guard.actor(request))));
+        UUID actor=guard.actor(request);
+        return ownerRead(actor,new ChatUnreadResponse(true,chatService.totalUnreadCount(actor)));
     }
     @GetMapping("/conversations/{id}/messages")
     public ResponseEntity<MessageListResponse> listMessages(HttpServletRequest request,@PathVariable("id") UUID id,
             @RequestParam(value="limit",defaultValue="50") int limit) {
-        return ResponseEntity.ok(chatService.listMessages(guard.actor(request),id,limit));
+        UUID actor=guard.actor(request);
+        return ownerRead(actor,chatService.listMessages(actor,id,limit));
     }
     @PostMapping("/conversations/{id}/messages")
     public ResponseEntity<SendMessageResponse> sendMessage(HttpServletRequest request,@PathVariable("id") UUID id,
@@ -39,5 +42,10 @@ public class ChatController {
         UUID actor=guard.verifiedMutationActor(request);
         MessageContract.matchingKey(body.idempotencyKey(),request.getHeader("Idempotency-Key"));
         return ResponseEntity.ok(chatService.sendMessage(actor,id,body));
+    }
+    // Bind ownerless read DTOs to the exact verified actor, including across cookie races.
+    private static <T> ResponseEntity<T> ownerRead(UUID actor,T body) {
+        return ResponseEntity.ok().header("X-MV-Owner",actor.toString())
+            .header("Cache-Control","private, no-store").header("Vary","Cookie").body(body);
     }
 }

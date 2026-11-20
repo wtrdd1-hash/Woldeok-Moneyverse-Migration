@@ -67,3 +67,16 @@ The pre-migration source inventory contained290 static HTML files covering147 co
 - [ ] Complete all browser/locale/responsive/admin/mutation acceptance rows.
 - [ ] Fresh whole-branch review and current-main integration.
 - [ ] Exact-source Test, session continuity/rollback and documented production release.
+
+## Current integrated checkpoint —2026-11-20 owner safety continuation
+This entry supersedes earlier per-slice totals only for the current isolated candidate; it is not full-site acceptance.
+| Gate | Evidence/state |
+|---|---|
+| Current-main integration | Main9635262fb2 plus reviewed messaging3fe753fc43; administrator network-credential shortcut removed; previous11 deleted admin regressions restored |
+| Ordinary Spring | Fresh clean469 tests/84 suites,0 failures/errors/skips, bootJar successful; unchanged source fingerprint cdae0616cc1f025c88872ee2ad1669e11b6989eb2be97f5aa0f27aba14d7f1bc |
+| Node |262 passed,0 failed/cancelled/skipped; native, admin, money, release, security guards |
+| Messaging source review | Scoped round1/5 APPROVED,3 findings addressed,0 open source findings; owner-stamped reads and post-send epoch checked |
+| Actual browser | Prior source8746:40 home locale/width cases no overflow/FAB overlap;7 link targets below44px and untranslated shared labels found. Candidate remediation implemented; rerun pending |
+| Actual PostgreSQL | Ancestor7cb CI44689405118 had9 passed/0 skips; latest-source CI pending |
+| Test/release | Public Test HTTP403 rechecked; production HOLD |
+| Remaining acceptance | Authenticated member/admin flows, full-page linguistic review,200%/keyboard/reduced motion, simultaneous concurrency, global cross-navigation drafts, remaining legacy pages OPEN |
