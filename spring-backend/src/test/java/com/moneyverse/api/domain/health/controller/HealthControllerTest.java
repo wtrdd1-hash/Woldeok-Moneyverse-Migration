@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -16,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@TestPropertySource(properties = "moneyverse.release.sha=0123456789abcdef0123456789abcdef01234567")
 class HealthControllerTest {
 
     @Autowired
@@ -37,6 +39,7 @@ class HealthControllerTest {
         mockMvc.perform(get("/api/version").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.id").value("0123456789abcdef0123456789abcdef01234567"))
                 .andExpect(jsonPath("$.data.version").value("v2026.11.14-spring"))
                 .andExpect(jsonPath("$.data.activeEngine").value("Java Spring Boot"));
     }
