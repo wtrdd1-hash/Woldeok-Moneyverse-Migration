@@ -6,7 +6,8 @@
 - Superpowers systematic-debugging, writing-plans, executing-plans, TDD, verification-before-completion을 적용한다.
 - 운영 브라우저 홈: 로고 2곳은 이미지가 아닌 SPAN W이며 명시적 favicon link가 없다. 실제 /favicon.ico와 /assets/mv39/favicon.ico는 동일한 11,781바이트, SHA256 9ce0a8f10cafff52d1d2f7aa451b3e9162944162f61258842e13aa8546f98e78이다. 저장소 파일과도 일치한다.
 
-## In progress
+## In progress — historical initial checklist
+아래 체크리스트와 중간 기록은 당시 상태를 보존한다. 현재 상태는 문서 끝의 종료 기록과 후속 OPEN 항목을 따른다.
 - [x] GitHub PR 및 main 디자인 이력, 미니PC 작업 폴더, 연결된 디자인 대화, 사용자 로컬 이미지 목록을 조사했다.
 - [x] 공식 왕관·월계수 W 아이콘과 실제 파비콘의 출처를 확인했다.
 - [ ] 실제 파비콘을 공통 로고/탭 아이콘으로 연결한다.
@@ -21,8 +22,8 @@
 - 연결된 ‘사이트 새 디자인 요청’·‘UI 이미지 전달 확인’ 대화는 조회 결과에 생성 이미지 대신 참조만 반환했다. 브라우저는 비로그인 상태이며 앱 화면 접근 승인이 시간 내 완료되지 않아 원본 이미지는 확보하지 못했다.
 - 별도 11월 17일 원본 일치 판정은 OPEN이다. 원본을 확보하기 전 임의 디자인을 그 원본이라고 보고하지 않는다.
 
-## Finished
-아직 종료하지 않았다. 운영 변경 없음.
+## Finished — first approved public rollout
+2026-11-21 첫 공개 홈·공통 헤더 반영 완료. 아래 중간 이력은 당시 상태이며, 현재 상태는 문서 끝의 종료 증거와 후속 OPEN 항목을 기준으로 한다.
 
 ### Owner clarification — in progress
 - 사용자가 디자인 기준을 **11월 18일**로 다시 명시했다. 이 명시가 앞선 별도11월17일 원본 탐색을 대체한다. 승인된 NOV18 authority 및 180화면 디자인 문서를 기준으로 구현·대조한다.
@@ -62,3 +63,41 @@
 - 모바일 제목의 장식용 favicon이 없는 상태를 actual browser에서background:none으로 논리RED 확인한 뒤 최소 CSS를 구현했다. 제목 텍스트/메뉴/포커스 순서는 유지한다. 최종 CSS SHA256 dc1e8c8b6d7ddf5624978dc60a79596491ab5acf70d0feb892d41d9a09c17264.
 - 최종 소스 전체 Spring546/Node79 모두0실패/0skip 및bootJar 성공. 소스 독립 리뷰도 최종3줄 장식용 이미지 및 좁은 헤더수정 승인.359/360px 경계와 실제 재빌드 브라우저 검사는 별도 수행한다.
 - 앞선 개발 전용/identity:unverified JAR120브라우저 케이스는0실패였으나 운영승격 증거로 대체하지 않는다. source-bound CI→정확한main 재검증 후 승인된 홈/공통헤더부터 전환한다.
+
+## 2026-11-21 — exact-main staging and Test privacy correction (in progress)
+- PR3325 merged at00:01KST, application main93a3c8dbe8c04fda28689904ffe43a86992c73c1. Branch CI44756988867 all4jobsSUCCESS and exactPRmerge4cc20a5bd5484fd5da8617b027268df6d8424724/JARb0f0cef3621d2aa8a5bc1f18c7e86125b8a17cf7ba55eb091c7de827d208d819 passed280actual isolated browser cases.
+- Exact-main CI44759127347 native artifact validated: SHA256af0913b0546716871ad57e3fb49b893a4cb662b4a5078882db8707158b6b6cc0; all1,829 application classes/resources byte-identical to the tested PR candidate. Full mainCI and final acceptance remain required.
+- New loopback-only mainTest4794/standby4792 use this exact JAR. Both actually return main93a3 identity; direct admin/API/mutating calls403 with no session cookies. No Production traffic change has occurred. Final main125browser cases are running.
+- Standalone actual Nginx10regressions passed: newCSSdc→newsource, old85b→oldsource, unknown/unversioned→unchangedlegacyf132, scopedsource/legacyReferer/204/HEAD/405 behavior retained. Independent source and routing proposal reviews approved.
+
+### Test privacy — before work / correction
+- Earlier HTTP403 observations did not establish privacy. Actual IAB Test home rendered the old frontend; Nginx exact Test routes had no origin access gate. This corrects the earlier interpretation explicitly. Do not claim the initial state was protected.
+- Proposed Test-only change: same exact main on4794, exactfavicon route, server-level loopback allowlist, deny Cloudflare-origin indicators to avoid a local tunnel appearing as localhost. Public Production/API/admin/session/actuator/signup-hold bytes outside this Test server remain identical.
+- Cloudflare documents that CF-Ray and CF-Connecting-IP are forwarded to origins: https://developers.cloudflare.com/fundamentals/reference/http-headers/ . No secret or new external credential is created.
+- Proposal0ad494595ff50f152ea261088b4a0aa736b74c932d5dff9d922c0ebd2ff781f0 against base1881ba134b9c278c097af84c21b555bd592a78cbf086d781cf8f0bbe23ad6157 passed complete Nginx syntax and independent scoped review. Same existing nonfatal proxy_headers_hash warning retained; no warning-free claim.
+- [ ] Apply Test-only compare-and-swap/graceful reload; require real external browser root+favicon403 and direct trusted loopback200/main93a3.
+- [ ] After exact-main gates and rollback, switch only existing public home/shared-header routes; verify existing authenticated user survives. Newstocks/shop/board public routes and private/admin routing remain unchanged for this first rollout.
+
+## 2026-11-21 — finished for the first approved public rollout
+- 실제main93a3 CI44759127347 4jobSUCCESS, artifactaf0913...b6cc0, Test125casePASS, PRmerge280casePASS/앱1,829바이트 동등성 확인. 서비스PID와 열린JAR inode/hash/생성시각/자격파일0/재시작0 및boot/restart 보호를 확인했다.
+- Test-only 정책을CAS1881ba→0ad494로 적용해 실제 외부IAB홈/favicon403, 내부200/source93를 확인했다. 기존Test가보호됐다는 초기HTTP판단은 정정했다.
+- 첫 공개 전환은 잘못된내부actuator응답기대 때문에 자동복구. 동일한원천값404를 올바르게보존해 재전환했으며00:22:17KST에CAS0ad494→b5aa4016으로 수용됐다. 기존로그인/계정/지갑값표시유지. 실제외부IABactuator health/env403 별도확인.
+- 공유기능5경로+index별칭만전환. CSSnewdc/old85b/unknownf132 및legacyversion204/기존ID호환성 유지. 이전프로세스/로컬artifact복구대상과새Test보호를보존한inverse구문검사완료. NoSQL/DB/grant/잔액/원장변경.
+- 실제 운영25개배치(5페이지×320/359/360/390/1440), logo로드/모바일표시/넘침없음 확인. 대상탭오류로390px반복했던초기측정은증거제외하고재측정했다. 실제복리3400/평단15·수량4·원가60계산도조작했다.
+- 관리자홈+35도구 실제로그인조사, 검색·필터·언어조작 완료. 원시로그/식별자/쿠키/잔액원문 미기록. /admin/logs/system은실제API정상이나저장된오류HTML이제공되는결함확인.
+- 독립postcutover검토는metadata/좁은hash·source·로그검사로완료했다. raw설정출력은자동검토가차단하여더안전한방법으로검토했고미해결승인요청은없다. 최신서비스로그에ERROR/FATAL/Exception없음확인.
+- 후속OPEN: 도구4경로정적로그인표시, 운영stocks/shop/board/quests시안, 관리자기능/테마혼용및운영관리자로고, source없는성공fallback/금융·346출처, 전체역할/언어/변경기능QA. 전체프론트엔드완료로기재하지않는다.
+- 최신[운영receipt](../releases/2026-11-21-favicon-public-production.ko.md), [상세QA](../qa/2026-11-20-favicon-real-frontend-audit.ko.md), [공개검증요약](../qa/evidence/2026-11-21-favicon-public-release.md).
+
+
+### Final scope checklist
+- [x] 기존 favicon을 공개 공통 로고·탭 아이콘·모바일 제목에 연결.
+- [x] RED→GREEN, 정확한 main CI/Test, 독립 소스·라우팅·운영 검토.
+- [x] 공개 5경로 및 index 별칭 운영 전환, 로그인 연속성·계산 입력·25개 실제 배치 검증.
+- [x] 관리자 홈·35개 도구 조회 결과와 결함 기록.
+- [ ] 후속 화면별 구현·승격 및 관리자 전체 변경 기능 검증 — 별도 후속 작업.
+
+### Documentation closure validation
+- 원본 main `93a3c8dbe8c04fda28689904ffe43a86992c73c1` 재확인. 후속 변경은 문서 10개뿐이며 운영 애플리케이션 소스를 재명명하거나 재배포하지 않는다.
+- 독립 문서 리뷰: blocker 없음. 계획의 CSS 변경 이력과 과거 체크리스트 표기를 정정했다.
+- 문서·릴리스 정책 관련 Node 184건 통과, 실패·skip 0. 저장소 보안·제어문자 검사 및 git diff --check 통과. 상대 링크와 증거 JSON 유효성 확인. 기존 추가 Next QA 5건 실패는 OPEN 유지.
