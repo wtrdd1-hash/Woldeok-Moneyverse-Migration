@@ -1,6 +1,6 @@
 package com.moneyverse.api.domain.admin.service;
 
-import jakarta.servlet.http.Cookie;
+import com.moneyverse.api.domain.identity.service.UserAuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.*;
@@ -49,55 +48,7 @@ public class AdminAuthService {
     }
 
     public String extractSessionToken(HttpServletRequest request) {
-        if (request == null) return null;
-
-        String rawToken = null;
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie c : cookies) {
-                if ("mv_session".equals(c.getName()) || "__Host-mv_session".equals(c.getName())) {
-                    if (c.getValue() != null && !c.getValue().isBlank()) {
-                        rawToken = c.getValue().trim();
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (rawToken == null) {
-            String cookieHeader = request.getHeader("Cookie");
-            if (cookieHeader != null && !cookieHeader.isBlank()) {
-                String[] parts = cookieHeader.split(";");
-                for (String part : parts) {
-                    int eq = part.indexOf('=');
-                    if (eq > 0) {
-                        String name = part.substring(0, eq).trim();
-                        if ("mv_session".equals(name) || "__Host-mv_session".equals(name)) {
-                            rawToken = part.substring(eq + 1).trim();
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        if (rawToken == null) {
-            String authHeader = request.getHeader("Authorization");
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                rawToken = authHeader.substring(7).trim();
-            }
-        }
-
-        if (rawToken == null || rawToken.isBlank()) return null;
-
-        if (rawToken.length() > 1 && rawToken.charAt(0) == '"' && rawToken.charAt(rawToken.length() - 1) == '"') {
-            rawToken = rawToken.substring(1, rawToken.length() - 1);
-        }
-        try {
-            rawToken = URLDecoder.decode(rawToken, StandardCharsets.UTF_8);
-        } catch (Exception ignored) {}
-
-        return rawToken;
+        return UserAuthService.extractSessionToken(request);
     }
 
     public boolean isAuthorizedAdmin(HttpServletRequest request) {

@@ -145,6 +145,10 @@ public class AdminSecurityController {
                 .maxAge(30 * 24 * 60 * 60)
                 .build();
         response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        UserAuthService.setCsrfCookie(response, newCsrfToken, 30 * 24 * 60 * 60);
+        // The old legacy cookie must not shadow the newly rotated host session.
+        response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from("mv_session", "")
+                .path("/").maxAge(0).httpOnly(true).secure(true).sameSite("Lax").build().toString());
 
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("state", "open");
@@ -176,6 +180,10 @@ public class AdminSecurityController {
                 .maxAge(0)
                 .build();
         response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        UserAuthService.clearCsrfCookies(response);
+        // Removing the host cookie must not reveal a different legacy account.
+        response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from("mv_session", "")
+                .path("/").maxAge(0).httpOnly(true).secure(true).sameSite("Lax").build().toString());
 
         return ResponseEntity.noContent().build();
     }
@@ -210,6 +218,8 @@ public class AdminSecurityController {
         List<String> cookieNames = List.of(
                 "mv_session",
                 "__Host-mv_session",
+                "__Host-mv_csrf",
+                "mv_csrf",
                 "moneyverse_session",
                 "wdmv_session",
                 "JSESSIONID"

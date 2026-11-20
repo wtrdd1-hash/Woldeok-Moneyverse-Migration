@@ -14,7 +14,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 @Tag(name = "Auth Session & Policy", description = "인증 세션 CSRF, 뷰어 상태 및 세션 초기화 API")
 @RestController
@@ -47,7 +46,13 @@ public class AuthController {
             "/api/auth/session"
     })
     @Operation(summary = "현재 세션의 CSRF 토큰 조회 및 로그인 상태 반환")
-    public Map<String, Object> session(HttpServletRequest request) {
+    public Map<String, Object> session(HttpServletRequest request, HttpServletResponse response) {
+        response.setHeader("Cache-Control", "private, no-store");
+        response.addHeader("Vary", "Cookie");
+        if (authService.rejectsBootstrapContext(request)) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            return Map.of("success", false, "ok", false, "code", "same_origin_required");
+        }
         Optional<SessionInfo> session = authService.resolveSession(request);
         Map<String, Object> res = new LinkedHashMap<>();
         boolean signedIn = session.isPresent() && session.get().isSignedIn();
@@ -55,7 +60,7 @@ public class AuthController {
         res.put("ok", true);
         res.put("authenticated", signedIn);
         res.put("signedIn", signedIn);
-        res.put("csrfToken", session.map(SessionInfo::getCsrfHash).orElse(UUID.randomUUID().toString()));
+        res.put("csrfToken", session.map(s -> authService.verifiedCsrfToken(request, s)).orElse(""));
         if (signedIn) {
             SessionInfo s = session.get();
             Map<String, Object> u = new LinkedHashMap<>();
