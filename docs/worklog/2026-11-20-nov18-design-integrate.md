@@ -120,3 +120,18 @@ The new native CI gate exposed an inherited media integration fixture using Imag
 
 ## Auth bridge integration review
 The independent task review found an administrator-close legacy-cookie identity transition. Fix round1/5 added the missing legacy session-cookie deletion and a real H2/browser-cookie-jar regression (45 cases:1RED failure→45GREEN). Scoped independent review approved the fix with no new findings. Full integrated candidate verification follows; actual browser/TLS/Test continuity remains a release gate.
+
+## Native asset version integrity — before work / in progress / finished implementation
+- [x] Reproduced stale query versions in native entry templates with a content-hash regression. Logical RED identified a release label instead of the actual SHA256.
+- [x] Added a narrowly scoped native template asset-version generator and independent digest verification. The generator refuses paths outside the classpath static root and non-CSS/JavaScript files.
+- [x] Current four native templates now address assets by full SHA256; focused Node verification: 1 pass, 0 failure/skip. These are content digests, not release/source attestation.
+- Auth integration changes shared assets again; rerun generation and integrity checks after that merge. The full integrated Spring test/JAR command at wallet/auth base72aa55 completed successfully; final candidate verification still follows.
+- Browser and exact-source Test acceptance remain unavailable; no running service or production change.
+
+## Native support/chat prerequisite — before work
+- Root-cause inspection confirmed both controllers trust arbitrary identity headers or a fixed UUID. Services generate replacement retry keys and return successful empty histories after source/ownership errors; chat sequence crosses JSON as a numeric long.
+- [ ] Add HTTP session/CSRF negative regressions and service request/receipt/error regressions; observe logical RED.
+- [ ] Reuse MemberApiGuard for every private read/write. Never change session, RBAC, SQL grants or applied migrations.
+- [ ] Require caller UUID retry keys and nonblank messages up to1000 Unicode code points; keep exact validated intent on retry.
+- [ ] Reuse existing support_create_thread, support_add_message and private_chat_send owner-scoped functions. Require complete canonical receipts and string sequences; fail unavailable/forbidden rather than fabricate success.
+- [ ] Run focused and full isolated tests/JAR; independent whole-branch review and browser/Test gates remain mandatory before enabling production.
