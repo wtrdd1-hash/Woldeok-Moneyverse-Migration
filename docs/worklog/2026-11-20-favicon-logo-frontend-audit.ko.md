@@ -62,3 +62,17 @@
 - 모바일 제목의 장식용 favicon이 없는 상태를 actual browser에서background:none으로 논리RED 확인한 뒤 최소 CSS를 구현했다. 제목 텍스트/메뉴/포커스 순서는 유지한다. 최종 CSS SHA256 dc1e8c8b6d7ddf5624978dc60a79596491ab5acf70d0feb892d41d9a09c17264.
 - 최종 소스 전체 Spring546/Node79 모두0실패/0skip 및bootJar 성공. 소스 독립 리뷰도 최종3줄 장식용 이미지 및 좁은 헤더수정 승인.359/360px 경계와 실제 재빌드 브라우저 검사는 별도 수행한다.
 - 앞선 개발 전용/identity:unverified JAR120브라우저 케이스는0실패였으나 운영승격 증거로 대체하지 않는다. source-bound CI→정확한main 재검증 후 승인된 홈/공통헤더부터 전환한다.
+
+## 2026-11-21 — exact-main staging and Test privacy correction (in progress)
+- PR3325 merged at00:01KST, application main93a3c8dbe8c04fda28689904ffe43a86992c73c1. Branch CI44756988867 all4jobsSUCCESS and exactPRmerge4cc20a5bd5484fd5da8617b027268df6d8424724/JARb0f0cef3621d2aa8a5bc1f18c7e86125b8a17cf7ba55eb091c7de827d208d819 passed280actual isolated browser cases.
+- Exact-main CI44759127347 native artifact validated: SHA256af0913b0546716871ad57e3fb49b893a4cb662b4a5078882db8707158b6b6cc0; all1,829 application classes/resources byte-identical to the tested PR candidate. Full mainCI and final acceptance remain required.
+- New loopback-only mainTest4794/standby4792 use this exact JAR. Both actually return main93a3 identity; direct admin/API/mutating calls403 with no session cookies. No Production traffic change has occurred. Final main125browser cases are running.
+- Standalone actual Nginx10regressions passed: newCSSdc→newsource, old85b→oldsource, unknown/unversioned→unchangedlegacyf132, scopedsource/legacyReferer/204/HEAD/405 behavior retained. Independent source and routing proposal reviews approved.
+
+### Test privacy — before work / correction
+- Earlier HTTP403 observations did not establish privacy. Actual IAB Test home rendered the old frontend; Nginx exact Test routes had no origin access gate. This corrects the earlier interpretation explicitly. Do not claim the initial state was protected.
+- Proposed Test-only change: same exact main on4794, exactfavicon route, server-level loopback allowlist, deny Cloudflare-origin indicators to avoid a local tunnel appearing as localhost. Public Production/API/admin/session/actuator/signup-hold bytes outside this Test server remain identical.
+- Cloudflare documents that CF-Ray and CF-Connecting-IP are forwarded to origins: https://developers.cloudflare.com/fundamentals/reference/http-headers/ . No secret or new external credential is created.
+- Proposal0ad494595ff50f152ea261088b4a0aa736b74c932d5dff9d922c0ebd2ff781f0 against base1881ba134b9c278c097af84c21b555bd592a78cbf086d781cf8f0bbe23ad6157 passed complete Nginx syntax and independent scoped review. Same existing nonfatal proxy_headers_hash warning retained; no warning-free claim.
+- [ ] Apply Test-only compare-and-swap/graceful reload; require real external browser root+favicon403 and direct trusted loopback200/main93a3.
+- [ ] After exact-main gates and rollback, switch only existing public home/shared-header routes; verify existing authenticated user survives. Newstocks/shop/board public routes and private/admin routing remain unchanged for this first rollout.
