@@ -225,6 +225,7 @@ jobs:
         run: |
           node --input-type=module -e '
             import {execFileSync,spawnSync} from "node:child_process";
+            import {readFileSync} from "node:fs";
             const container=process.env.CI_POSTGRES_CONTAINER;
             if(process.env.GITHUB_ACTIONS!=="true"||!/^[a-f0-9]{12,64}$/.test(container||""))throw new Error("Disposable CI service required");
             let password;
@@ -236,7 +237,14 @@ jobs:
               env:{...process.env,MONEYVERSE_MESSAGING_PG_TEST_PASSWORD:password},stdio:"inherit"
             });
             if(result.error)throw new Error("Native PostgreSQL verifier could not start");
-            process.exit(result.status??1);
+            if(result.status!==0)process.exit(result.status??1);
+            const xml=readFileSync("build/test-results/postgresMessagingTest/TEST-com.moneyverse.api.domain.messaging.MessagingPostgresIntegrationTest.xml","utf8");
+            const tests=Number(xml.match(/tests="([0-9]+)"/)?.[1]);
+            const failures=Number(xml.match(/failures="([0-9]+)"/)?.[1]);
+            const errors=Number(xml.match(/errors="([0-9]+)"/)?.[1]);
+            const skipped=Number(xml.match(/skipped="([0-9]+)"/)?.[1]);
+            if(!(tests>=9)||failures!==0||errors!==0||skipped!==0)throw new Error("Native PostgreSQL coverage incomplete");
+            console.log(JSON.stringify({nativePostgresMessaging:{tests,failures,errors,skipped}}));
           '
 
       - name: Test
