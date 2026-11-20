@@ -256,3 +256,20 @@ The independent task review found an administrator-close legacy-cookie identity 
 - [x] Exact source/diff/content digests self-reviewed. Generator/integrity coverage includes mv28/mv29/mv30; existing mv43 edits are generated digest-only. Main unchanged at08b1525; parent44a773e942 incorporated as22a075d404 retaining both worklog histories.
 - Shared markup/behavior unchanged. Suspected shared-header issue disproved by real rendered heading assertions. Existing catalog keys, auth/API/identity/security/SQL/schema/grants/runtime/release workflows and original dirty checkout unchanged by this scoped implementation.
 - Independent parent review pending. Browser geometry/accessibility, human linguistic review, PostgreSQL live collector and exact-source Test/release acceptance unverified. No CUA workaround, main merge or deployment; production HOLD.
+
+## Native public review round1 — before fix
+- Independent review identified one Important finding: /status lost original UTF-8 and mobile viewport declarations. Confirmed actual status head and shared commonHead; no replacement metadata is present.
+- [ ] Add rendered head regressions for all5 locales, requiring exactly one UTF-8 declaration and the original device-width/initial-scale/viewport-fit content. Observe logical RED before the narrow template fix.
+- [ ] Restore original metadata, run focused covering Spring plus native asset/client Node checks, record exact results and publish scoped fix for re-review.
+- No shared markup, controller/source logic, browser geometry or release claim is in this fix. Production HOLD.
+
+## Native public review round1 — in progress
+- [x] Logical RED:5 rendered /status locale cases,5 failures/0 errors/skips, each reporting missing device layout viewport. Production source was unchanged until this output was read.
+- [ ] Restore the original one UTF-8 plus one device-width/initial-scale/viewport-fit declaration, then run covering checks and publish for re-review.
+
+## Native public review round1 — finished fix candidate
+- [x] Restored original UTF-8 and width=device-width,initial-scale=1,viewport-fit=cover declarations as one line in /status head. No shared markup or controller/client/asset content changed.
+- [x] New rendered regression checks /status in all5 locales: exactly one original viewport and exactly one UTF-8 declaration. Logical RED5 failures/0 errors/skips; covering GREEN66 tests/0 failures/errors/skips, including44 NativePublicChromeTest cases.
+- Spring covering command: MONEYVERSE_STORAGE_PATH=/tmp/native-public-chrome-media-20261120 SPRING_PROFILES_ACTIVE=test SERVER_ADDRESS=127.0.0.1 ./gradlew test --tests '*NativePublicChromeTest' --tests '*SpringNativeCalculatorUiTest' --tests '*SpringNativeToolHubTest' --tests '*StatusSourceTruth*Test' --tests '*SpringCalculatorMathUnitTest' --offline --no-daemon -Dorg.gradle.workers.max=1. BUILD SUCCESSFUL in27s, exit0. RED used only --tests '*NativePublicChromeTest.statusHeadKeepsExactlyOneOriginalMobileViewportAndUtf8*', exit1 with expected missing-device-viewport assertions.
+- [x] Node native client/shared chrome/asset integrity:15 passed,0 failed/cancelled/skipped. Command: node --test scripts/native-public.test.mjs scripts/native-assets.test.mjs scripts/native-chrome.test.mjs. git diff --check passes; main remains08b1525.
+- Full433-test/bootJar and228-Node evidence above belongs to the prior candidate; full suite was not repeated for this metadata-only fix under the review instruction. Scoped re-review remains pending. No browser geometry or release acceptance claimed; production HOLD.

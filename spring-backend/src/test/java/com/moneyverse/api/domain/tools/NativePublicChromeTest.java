@@ -197,4 +197,19 @@ class NativePublicChromeTest {
         assertTrue(html.contains("有效的最新记录"));assertTrue(html.contains("2026-11-20T00:00:01.000Z"));
     }
 
+    @ParameterizedTest @org.junit.jupiter.params.provider.ValueSource(strings={"en","ko","ja","zh","vi"})
+    void statusHeadKeepsExactlyOneOriginalMobileViewportAndUtf8(String lang) throws Exception {
+        String html=mvc.perform(get("/status").header("Accept-Language",lang))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        var head=java.util.regex.Pattern.compile("<head>([\\s\\S]*?)</head>").matcher(html);
+        assertTrue(head.find());String markup=head.group(1);
+        var viewport=java.util.regex.Pattern.compile("<meta[^>]*name=\"viewport\"[^>]*>").matcher(markup);
+        assertTrue(viewport.find(),"Status must use the device layout viewport");
+        assertTrue(viewport.group().contains("content=\"width=device-width,initial-scale=1,viewport-fit=cover\""));
+        assertFalse(viewport.find(),"Status must not declare conflicting viewports");
+        var charset=java.util.regex.Pattern.compile("<meta[^>]*charset=\"utf-8\"[^>]*>").matcher(markup);
+        assertTrue(charset.find(),"Status must preserve UTF-8 metadata");
+        assertFalse(charset.find(),"Status must declare UTF-8 once");
+    }
+
 }
