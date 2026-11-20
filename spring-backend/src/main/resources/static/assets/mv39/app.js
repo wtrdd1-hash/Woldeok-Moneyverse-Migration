@@ -106,24 +106,39 @@
     tbl.tbody.appendChild(tr);
   }
   function stockTable(limit) {
+    const wrap=elt('div','market-data');
     const tbl=table([t('symbol'),t('stockName'),t('sector'),t('currentPrice'),t('change'),t('status')],t('marketTitle'));
+    const mobile=elt('div','market-mobile-list');
+    mobile.setAttribute('role','list');mobile.setAttribute('aria-label',t('marketTitle'));
+    mobile.appendChild(state(t('loading')));
+    wrap.appendChild(tbl.wrap);wrap.appendChild(mobile);
     tableLoading(tbl);
     const gen=epoch;
+    const updateState=(label)=>{tableMessage(tbl,label);mobile.replaceChildren(state(label));};
     fetchJson('/api/v1/stocks').then(source=>{
       if (!validNow(gen)) return;
       const rows=source&&Array.isArray(source.stocks)?source.stocks.slice(0,limit):null;
-      if (!rows) {tableMessage(tbl,t('unavailable'));return;}
-      tbl.tbody.replaceChildren();
+      if (!rows) {updateState(t('unavailable'));return;}
+      tbl.tbody.replaceChildren();mobile.replaceChildren();
       rows.forEach(stock=>{
         if (!stock||typeof stock.symbol!=='string'||typeof stock.name!=='string') return;
         const change=pct(stock.current_price,stock.day_open_price);
         const validPrice=wld(stock.current_price);
         const status=stock.halt_status==='ACTIVE'?t('tradable'):stock.halt_status==='HALTED'?t('halted'):t('unavailable');
         addRow(tbl,[stock.symbol,stock.name,stock.description||'—',validPrice||t('unavailable'),change||'—',status],['mono','','long','mono',change&&change.startsWith('+')?'positive':'negative','']);
+        // Mobile source-truth compact rows, no 760px-wide table or invented trend.
+        const row=elt('article','market-mobile-row');row.setAttribute('role','listitem');
+        const label=elt('div','market-mobile-identity');
+        label.appendChild(elt('strong','market-mobile-symbol',stock.symbol));
+        label.appendChild(elt('span','market-mobile-name',stock.name));
+        const meta=elt('div','market-mobile-values');
+        meta.appendChild(elt('strong','market-mobile-price',validPrice||t('unavailable')));
+        meta.appendChild(elt('span','market-mobile-status',change||status));
+        row.appendChild(label);row.appendChild(meta);mobile.appendChild(row);
       });
-      if (!tbl.tbody.children.length) tableMessage(tbl,t('empty'));
-    }).catch(()=>{if(validNow(gen))tableMessage(tbl,t('unavailable'));});
-    return tbl.wrap;
+      if (!tbl.tbody.children.length) updateState(t('empty'));
+    }).catch(()=>{if(validNow(gen))updateState(t('unavailable'));});
+    return wrap;
   }
   function listFeed(url,limit,kind) {
     const container=elt('div','feed-list');container.appendChild(state(t('loading')));
@@ -165,7 +180,7 @@
     const quests=metric(t('myQuests'));
     quests.value.replaceChildren(link('/quests',t('goToQuests')));
     wallet.value.textContent=isSignedIn()?t('loading'):t('loggedOut');
-    stocks.value.replaceChildren(isSignedIn()?link('/stocks',t('myHoldings')):document.createTextNode(t('loggedOut')));
+    stocks.value.replaceChildren(isSignedIn()?link('/stocks',t('myHoldings')):link('/login',t('signInAction')));
     stocks.sub.textContent=isSignedIn()?t('holdingsNotice'):'';
     const cards=withChildren(elt('div','kpi-grid'),wallet.container,stocks.container,quests.container);
     if (isSignedIn()) {

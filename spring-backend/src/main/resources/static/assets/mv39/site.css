@@ -35,3 +35,46 @@
 .action-card:hover,.nav-link:hover { transition:background-color .15s,border-color .15s; }
 @media(max-width:767px){.hero{min-height:0}.dashboard-section-header{margin-top:5px}.hero-decoration{display:none} }
 @media(max-width:480px){.dashboard-section-header .section-heading{font-size:15px}.refresh-button{flex-shrink:0}.bottom-tabs{padding-inline:4px}.bottom-tab{font-size:9.5px} }
+
+/* v2026.11.20.42.3: owner screenshot-driven mobile visual-regression repair.
+ * Compact first-fold card hierarchy and genuine 2-column actions matching the approved
+ * desktop/mobile design reference. Do not fake real finance figures to fill cards. */
+@media (max-width:480px) {
+  .kpi-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+  .kpi-grid .card:first-child { grid-column:1/-1; }
+  .kpi-grid .card { padding:15px; min-height:126px; }
+  .kpi-grid .metric-value {font-size:clamp(15px,4.5vw,20px);line-height:1.25;overflow-wrap:anywhere;}
+  .kpi-grid .metric-label {margin-bottom:9px; font-size:11px;}
+  .tools-grid {grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;}
+  .tools-grid .action-card {min-height:51px; padding:11px 12px; font-size:12px; overflow-wrap:anywhere;}
+  .hero {padding:19px 17px;min-height:0; margin-top:17px;}
+  .hero h2 {font-size:21px;}
+  .section-heading {margin:20px 0 12px;}
+  .bottom-tabs {background:#0d1121f7;}
+}
+@media (max-width:355px) {
+  .kpi-grid .card {padding:12px;}
+  .tools-grid .action-card {padding:9px 10px;font-size:11px;}
+  .topbar h1 {max-width:100px;}
+}
+
+/* v42.3 accessible responsive *real* stock source list for phones. */
+.market-mobile-list {display:none;}
+@media(max-width:480px){
+  .market-data .table-scroll {display:none;}
+  .market-mobile-list {display:grid;gap:8px;min-width:0;}
+  .market-mobile-row {display:flex;align-items:center;justify-content:space-between;
+      gap:10px;padding:11px 12px;min-width:0;border:1px solid var(--stroke);
+      background:var(--raised);border-radius:10px;}
+  .market-mobile-identity,.market-mobile-values {display:grid;gap:3px;min-width:0;}
+  .market-mobile-identity {flex:1;}
+  .market-mobile-values {text-align:right;max-width:55%;}
+  .market-mobile-symbol {font-size:12px;overflow-wrap:anywhere;}
+  .market-mobile-name {font-size:11px;color:var(--muted);overflow-wrap:anywhere;}
+  .market-mobile-price {font-size:12px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums;}
+  .market-mobile-status {font-size:10px;color:var(--muted);}
+}
+
+/* v2026.11.20.42.3.1: avoid floating help target covering real mobile buttons.
+ * The same help function remains available in the quick action grid/menu. */
+@media(max-width:1023px){.support-fab{display:none;}}

@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.20.42.3.1 — 회원 웹 UI 깨짐 신고 → 즉시 롤백 → 모바일 디자인 수리·운영 재승격 완료
+- [운영 실화면 PC/모바일](docs/design/mv42.3.1/README.md) · [QA 한국어](docs/qa/2026-11-20-member-home-visual-incident-v42.3.1.ko.md) / [English](docs/qa/2026-11-20-member-home-visual-incident-v42.3.1.md) · [시작/중간/종료 작업기록](docs/worklog/2026-11-20-member-home-visual-incident-v42.3.1.ko.md) · [GitHub 업데이트](docs/updates/v2026.11.20.42.3.1-member-frontend-github.ko.md). 모바일 1+2 카드·빠른실행2열·실제 시세8종목·안 겹치는 문의 UI, 5언어. Java271/271, 운영 HTTPS 실제 시세6/6, 5언어×6화면×5회30/30, 구형 허위 국고/게시판 표시 금지. **운영 반영은 회원 홈 한정, 관리자/전체 Java·금융/API 및 전 웹 경로는 미승격**.
+
+
 ## v2026.11.20.42.1 — 읽기 전용 Spring Test 271/271 · 관리자 직접 JSON P0 수리 · HTML 2경로 운영 수정 (전체 승격 보류)
 - [QA 한국어](docs/qa/2026-11-20-spring-web-promotion-v42.1.ko.md) / [English](docs/qa/2026-11-20-spring-web-promotion-v42.1.md) · [작업기록 국문](docs/worklog/2026-11-20-spring-web-promotion-v42.1.ko.md) / [EN](docs/worklog/2026-11-20-spring-web-promotion-v42.1.md) · [GitHub 업데이트](docs/updates/v2026.11.20.42.1-spring-web-github.ko.md). 실제 미니PC Test Spring+읽기 전용 DB 기동, 전체 271/271, 정적HTML281경로×5회 GET1,405·비모의 Chromium 홈30/30. Java 옛 관리자 JSON13주소 직접 익명 200→401, HTML 405 충돌 2건 해결. 실제 **운영 적용은** Nginx HTML 2개 URL만 405→302. 공식 Test403, 15개 API503, 실관리자·금융 영수증·G442 웹 180페이지×5 전체 인터랙션 및 복구 미검증으로 **전체 Java/프론트엔드 미승격**.
 
