@@ -57,3 +57,38 @@ test('candidate security policy receives its resolved classification comparison 
   assert.match(ci, /comparison_base_sha:[\s\S]*type: string/);
   assert.match(ci, /SECURITY_BASE_SHA: \$\{\{ inputs\.comparison_base_sha \|\| github\.event\.pull_request\.base\.sha \|\| github\.event\.before \}\}/);
 });
+
+test('CLI fails closed for invalid CI bases and scans changed private paths with a valid base', async () => {
+  const { execFileSync, spawnSync } = await import('node:child_process');
+  const { mkdtempSync, mkdirSync, writeFileSync, rmSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const { fileURLToPath } = await import('node:url');
+  const repo = mkdtempSync(join(tmpdir(), 'moneyverse-security-base-'));
+  const scanner = fileURLToPath(new URL('./check-repository-security.mjs', import.meta.url));
+  const git = (...args) => execFileSync('git', ['-C', repo, ...args], { encoding: 'utf8' }).trim();
+  try {
+    git('init', '-q');
+    git('-c', 'user.name=CI', '-c', 'user.email=ci@example.test', 'commit', '-q', '--allow-empty', '-m', 'base');
+    const base = git('rev-parse', 'HEAD');
+    const scan = value => spawnSync(process.execPath, [scanner], {
+      cwd: repo, encoding: 'utf8', env: { ...process.env, GITHUB_ACTIONS: 'true', SECURITY_BASE_SHA: value },
+    });
+    for (const value of ['', '0'.repeat(40), 'f'.repeat(40), 'invalid']) {
+      const result = scan(value);
+      assert.equal(result.status, 1);
+      assert.match(result.stderr, /refusing unverified CI scan/);
+      assert.doesNotMatch(result.stderr, /Command failed|fatal:/);
+    }
+    assert.equal(scan(base).status, 0);
+    mkdirSync(join(repo, 'docs', 'worklog'), { recursive: true });
+    writeFileSync(join(repo, 'docs', 'worklog', 'example-internal.md'), '# Non-sensitive fixture');
+    git('add', 'docs/worklog/example-internal.md');
+    git('-c', 'user.name=CI', '-c', 'user.email=ci@example.test', 'commit', '-q', '-m', 'changed path');
+    const blocked = scan(base);
+    assert.equal(blocked.status, 1);
+    assert.match(blocked.stderr, /new.modified internal or sensitive path forbidden/);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
