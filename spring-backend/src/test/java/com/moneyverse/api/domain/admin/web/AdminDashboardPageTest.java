@@ -99,7 +99,7 @@ class AdminDashboardPageTest {
         var logos=java.util.regex.Pattern.compile("<img\\b[^>]*class=\"brand-mark\"[^>]*>").matcher(html)
             .results().map(java.util.regex.MatchResult::group).toList();
         assertEquals(2,logos.size(),"Admin sidebar and drawer must use the site favicon");
-        for(String logo:logos) assertTrue(logo.contains("src=\"/assets/mv39/favicon.ico\"") && logo.contains("alt=\"\""));
+        for(String logo:logos) assertTrue(logo.contains("src=\"/assets/mv39/favicon.ico?v=9ce0a8f10cafff52d1d2f7aa451b3e9162944162f61258842e13aa8546f98e78\"") && logo.contains("alt=\"\""));
     }
 
     @Test void malformedSourceListsStayUnavailable() {

@@ -41,3 +41,11 @@
 - 최신 전체 Spring546tests0fail/error/skip, bootJar 성공. 공유CSS/JS/자산바이트는 변경하지 않았다.
 - 추가 기존 Node18검사 중13pass/5fail 발견. 기존Next지원금fallback·허위성공 및 낡은 라벨 기대를 별도OPEN으로 기록. 새 native공개렌더러는 해당Next 코드/금융 API를 포함하지 않으며 전체검사green이라고 보고하지 않는다.
 - 실제 운영6메뉴 추가 확인: stocks/shop/board/quests에 같은 설계용 예시 노출; wallet/support/account는 셸·언어 혼용. 상세 docs/qa/2026-11-20-favicon-real-frontend-audit.ko.md.
+
+### CI asset-version regression
+- 첫 CI spring-web-check는 새 favicon URL의 내용 기반 v해시가 빠져 native-assets 검사1건이 실패했다. 로컬 동일 검사 RED 재현 후 실제 favicon SHA256 쿼리를 추가한다. 자산 검사/보안 게이트는 완화하지 않는다.
+- 독립 소스 리뷰는 기존546건 XML 및 순수 GET/HEAD 범위 확인 후 승인했으나 실제 후보 런타임·브라우저·관리자 인증 검증은 별도OPEN임을 명시했다.
+
+### Latest validation and owner rollout order
+- 사용자가 로그인 완료를 알리고 **한 화면을 만든 뒤 검증·승격하는 순서**를 명시했다. 홈 파비콘부터 전환하고, 공개 기능 페이지는 각 경로의 실제 데이터를 확인한 뒤 하나씩 전환한다. 관리자 화면은 실제 로그인 세션으로 열어 점검 중이다.
+- favicon 내용해시쿼리 추가 후 native자산검사GREEN. URL과 클래스패스 자원 경로를 분리하고 HTML검사에서 쿼리의 regex 의미를 제거했다. 최초 fixture오류10건은 실패로 보존한다. 최신전체 Spring546건0실패/0오류/0skip 및bootJar, CI와동일 native Node79건0실패/0skip 확인.
