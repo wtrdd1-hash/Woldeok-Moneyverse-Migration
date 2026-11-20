@@ -1,57 +1,63 @@
 <!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" th:lang="${language}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:lang="${uiLanguage}" th:attr="data-ui-language=${uiLanguage}">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#0b1020">
-  <meta name="description" th:content="${ko} ? '월덕 머니버스 금융 계산기, 복리 및 주식 평균단가와 17개 기존 도구 탐색.' : 'Moneyverse financial calculators and 17 source-listed financial tools, with verified native Spring capabilities clearly identified.'">
+  <meta name="description" th:content="${uiCopy['publicText73']}">
   <link rel="canonical" th:href="${isCompact} ? 'https://easy-scraping.com/tools' : 'https://easy-scraping.com/calculators'">
   <link rel="alternate" hreflang="en-US" th:href="${'https://easy-scraping.com' + calculatorPath + '?lang=en'}">
   <link rel="alternate" hreflang="ko-KR" th:href="${'https://easy-scraping.com' + calculatorPath + '?lang=ko'}">
-  <link rel="alternate" hreflang="x-default" th:href="${'https://easy-scraping.com' + calculatorPath}">
+  <link rel="alternate" hreflang="ja" th:href="${'https://easy-scraping.com' + calculatorPath + '?lang=ja'}">
+<link rel="alternate" hreflang="zh" th:href="${'https://easy-scraping.com' + calculatorPath + '?lang=zh'}">
+<link rel="alternate" hreflang="vi" th:href="${'https://easy-scraping.com' + calculatorPath + '?lang=vi'}">
+<link rel="alternate" hreflang="x-default" th:href="${'https://easy-scraping.com' + calculatorPath}">
   <meta property="og:type" content="website">
   <meta property="og:title" th:content="${pageTitle} + ' | Woldeok Moneyverse'">
-  <meta property="og:description" th:content="${ko} ? '17종 금융 계산기 및 정확한 검증 상태 제공.' : '17 financial tool routes with truthful verification status.'">
+  <meta property="og:description" th:content="${uiCopy['publicText74']}">
   <meta name="twitter:card" content="summary">
   <script type="application/ld+json" th:utext="${schemaJson}">{"@context":"https://schema.org","@type":"CollectionPage","name":"Woldeok Moneyverse financial calculators","mainEntity":{"@type":"ItemList","numberOfItems":17}}</script>
-  <title th:text="${pageTitle} + ' | Woldeok Moneyverse'">Financial tools | Woldeok Moneyverse</title>
-  <link rel="stylesheet" href="/mv-spring/v28/styles.css">
-  <link rel="stylesheet" href="/mv-spring/v30/hubs.css">
+<meta name="color-scheme" content="dark"><meta name="theme-color" content="#0C1020">
+<title th:attr="data-public-title=${publicTitleKey}" th:text="${pageTitle} + ' | Woldeok Moneyverse'">Woldeok Moneyverse</title>
+<link rel="stylesheet" href="/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31"><script src="/assets/mv39/i18n.js?v=695770456cb14d5a884754897c4c366302ebac7ec135e0157bb7440b50551ba3" defer></script>
+<link rel="stylesheet" href="/assets/mv43/public.css?v=6a6a264de0f0c2e9d7daba2b10938d5743dc345a1acde077a0240b261236fa16"><script src="/assets/mv43/public.js?v=09919f3ac61d392224a14d7c20471093f0e1d122a6cf5c027c01ad919c2e90d1" defer></script>
+<th:block th:replace="~{shared/chrome :: commonHead}"></th:block>
 </head>
 <body th:attr="data-spring-page=${hubType},data-ui-release='v2026.11.19.30.1',data-total-tools=${toolCount},data-results=${resultCount}">
-<header th:replace="~{mv28/layout :: header}"></header>
-<main class="shell content">
-  <nav class="crumbs" aria-label="Breadcrumb"><a href="/" th:text="${ko} ? '홈' : 'Home'">Home</a><span aria-hidden="true">/</span><span th:text="${pageTitle}">Tools</span></nav>
+<a class="skip-link" href="#main-content" data-i18n="publicSkip" th:text="${uiCopy['publicSkip']}">Skip to main content</a>
+<div class="app-shell"><th:block th:replace="~{shared/chrome :: sidebar}"></th:block><div class="app-main"><div class="app-inner"><th:block th:replace="~{shared/chrome :: header}"></th:block>
+<main id="main-content" class="public-main" tabindex="-1">
+  <nav class="crumbs" data-i18n-aria="publicBreadcrumb" th:attr="aria-label=${uiCopy['publicBreadcrumb']}"><a href="/" data-i18n="publicText46" th:text="${uiCopy['publicText46']}">Home</a><span aria-hidden="true">/</span><span th:attr="data-i18n=${publicTitleKey}" th:text="${pageTitle}">Tools</span></nav>
   <section class="hero hub-hero" aria-labelledby="hub-title"><div class="hero-text">
-    <p class="eyebrow">MONEYVERSE / SPRING NATIVE / WEB PLATFORM</p>
-    <h1 id="hub-title" th:text="${ko} ? (${isCompact} ? '하나의 공간, 금융 도구 탐색' : '내 손안의 금융 계산기 센터') : (${isCompact} ? 'Financial tools, all in one place' : 'Your financial calculator center')">Explore financial tools</h1>
-    <p th:text="${ko} ? '지금 Spring에서 실제 검증된 계산기와 전환 중인 기존 도구를 명확히 구분합니다. 검색과 필터는 JavaScript 없이 서버에서 작동합니다.' : 'Explore independently verified Spring calculators alongside legacy tools still awaiting full verification. Search and filters work on the server with JavaScript disabled.'">Native Spring tools</p>
-    <div class="hero-tags"><span class="chip chip-primary" th:text="${ko} ? 'Spring 검증 완료 ' + ${verifiedCount} + '개' : ${verifiedCount} + ' Spring-verified tools'">2 Spring-verified</span><span class="chip" th:text="${ko} ? '기존 도구 전체 ' + ${toolCount} + '개' : ${toolCount} + ' listed tool routes'">17 routes</span></div>
+    <p class="eyebrow" data-i18n="publicPlatform" th:text="${uiCopy['publicPlatform']}">MONEYVERSE / SPRING NATIVE / WEB PLATFORM</p>
+    <h1 id="hub-title" th:attr="data-i18n=${isCompact ? 'publicHubHeroTools' : 'publicHubHeroCalculators'}" th:text="${#ctx.getVariable('uiCopy').get(isCompact ? 'publicHubHeroTools' : 'publicHubHeroCalculators')}">Explore financial tools</h1>
+    <p data-i18n="publicText75" th:text="${uiCopy['publicText75']}">Native Spring tools</p>
+    <div class="hero-tags"><span class="chip chip-primary" data-public-format="publicVerifiedFormat" th:attr="data-public-count=${verifiedCount}" th:text="${#ctx.getVariable('uiCopy').get('publicVerifiedFormat').replace('{count}',#strings.toString(verifiedCount))}">Count</span><span class="chip" data-public-format="publicToolFormat" th:attr="data-public-count=${toolCount}" th:text="${#ctx.getVariable('uiCopy').get('publicToolFormat').replace('{count}',#strings.toString(toolCount))}">Count</span></div>
   </div><div class="hero-icon" aria-hidden="true"><span class="hero-icon-number">✦</span><span class="hero-icon-line"></span></div></section>
-  <section class="panel hub-controls" aria-labelledby="tools-filter-title"><div class="panel-header"><span class="panel-step">01</span><div><h2 id="tools-filter-title" th:text="${ko} ? '원하는 금융 도구 찾기' : 'Find the right financial tool'">Find tools</h2><p th:text="${ko} ? '검색/카테고리는 실제 서버에서 필터링합니다.' : 'Native server-side search and category filters.'">Native search</p></div></div>
+  <section class="panel hub-controls" aria-labelledby="tools-filter-title"><div class="panel-header"><span class="panel-step">01</span><div><h2 id="tools-filter-title" data-i18n="publicText76" th:text="${uiCopy['publicText76']}">Find tools</h2><p data-i18n="publicText77" th:text="${uiCopy['publicText77']}">Native search</p></div></div>
     <form class="hub-search" th:action="${calculatorPath}" method="get" role="search">
       <input type="hidden" name="lang" th:value="${language}">
-      <div class="form-field"><label for="hub-q" th:text="${ko} ? '이름·내용 검색' : 'Search titles and details'">Search</label><input id="hub-q" name="q" type="search" maxlength="64" autocomplete="off" th:value="${searchTerm}" th:placeholder="${ko} ? '예: 복리, 주식, 세금' : 'E.g. compound, stock, tax'" aria-describedby="hub-search-help"><small id="hub-search-help" th:text="${ko} ? '한국어·영어 검색 지원' : 'Search works with English and Korean terms'">Search</small></div>
-      <div class="form-field"><label for="hub-category" th:text="${ko} ? '카테고리' : 'Category'">Category</label><select id="hub-category" name="category"><option value="all" th:selected="${selectedCategory == 'all'}" th:text="${ko} ? '전체 도구' : 'All tools'">All</option><option value="investing" th:selected="${selectedCategory == 'investing'}" th:text="${ko} ? '투자·복리' : 'Investing &amp; compound'">Investing</option><option value="tax" th:selected="${selectedCategory == 'tax'}" th:text="${ko} ? '세금·소득' : 'Taxes &amp; income'">Taxes</option><option value="retirement" th:selected="${selectedCategory == 'retirement'}" th:text="${ko} ? '연금·은퇴' : 'Pension &amp; retirement'">Retirement</option><option value="lending" th:selected="${selectedCategory == 'lending'}" th:text="${ko} ? '대출·부동산' : 'Loans &amp; property'">Loans</option><option value="simulation" th:selected="${selectedCategory == 'simulation'}" th:text="${ko} ? '가상자산·게임' : 'Crypto &amp; simulation'">Simulation</option></select></div>
-      <div class="form-field"><label for="hub-verified"><input id="hub-verified" type="checkbox" name="verified" value="true" th:checked="${verifiedOnly}"> <span th:text="${ko} ? 'Spring 검증 완료 도구만 보기' : 'Show only Spring-verified tools'">Show verified only</span></label></div>
-      <div class="hub-search-actions"><button class="primary-button" type="submit" th:text="${ko} ? '검색하기' : 'Search tools'">Search tools</button><a class="secondary-button" th:href="@{${calculatorPath}(lang=${language})}" th:text="${ko} ? '초기화' : 'Reset'">Reset</a></div>
+      <div class="form-field"><label for="hub-q" data-i18n="publicText78" th:text="${uiCopy['publicText78']}">Search</label><input id="hub-q" name="q" type="search" maxlength="64" autocomplete="off" th:value="${searchTerm}" data-i18n-placeholder="publicText79" th:placeholder="${uiCopy['publicText79']}" aria-describedby="hub-search-help"><small id="hub-search-help" data-i18n="publicText80" th:text="${uiCopy['publicText80']}">Search</small></div>
+      <div class="form-field"><label for="hub-category" data-i18n="publicText81" th:text="${uiCopy['publicText81']}">Category</label><select id="hub-category" name="category"><option value="all" th:selected="${selectedCategory == 'all'}" data-i18n="publicText82" th:text="${uiCopy['publicText82']}">All</option><option value="investing" th:selected="${selectedCategory == 'investing'}" data-i18n="publicText83" th:text="${uiCopy['publicText83']}">Investing</option><option value="tax" th:selected="${selectedCategory == 'tax'}" data-i18n="publicText84" th:text="${uiCopy['publicText84']}">Taxes</option><option value="retirement" th:selected="${selectedCategory == 'retirement'}" data-i18n="publicText85" th:text="${uiCopy['publicText85']}">Retirement</option><option value="lending" th:selected="${selectedCategory == 'lending'}" data-i18n="publicText86" th:text="${uiCopy['publicText86']}">Loans</option><option value="simulation" th:selected="${selectedCategory == 'simulation'}" data-i18n="publicText87" th:text="${uiCopy['publicText87']}">Simulation</option></select></div>
+      <div class="form-field"><label for="hub-verified"><input id="hub-verified" type="checkbox" name="verified" value="true" th:checked="${verifiedOnly}"> <span data-i18n="publicText88" th:text="${uiCopy['publicText88']}">Show verified only</span></label></div>
+      <div class="hub-search-actions"><button class="primary-button" type="submit" data-i18n="publicText89" th:text="${uiCopy['publicText89']}">Search tools</button><a class="secondary-button" data-public-locale-link th:href="@{${calculatorPath}(lang=${language})}" data-i18n="publicText16" th:text="${uiCopy['publicText16']}">Reset</a></div>
     </form>
   </section>
-  <section class="hub-results" aria-labelledby="tools-results-title"><div class="hub-results-heading"><div><p class="eyebrow">CURATED FINANCIAL UTILITIES</p><h2 id="tools-results-title" th:text="${ko} ? '계산기 목록' : 'Calculator library'">Calculator library</h2></div><span class="hub-result-count" role="status" th:text="${ko} ? '검색 결과 ' + ${resultCount} + '개' : ${resultCount} + ' matching tools'">Results</span></div>
-    <p class="notice" th:if="${#lists.isEmpty(tools)}" th:text="${ko} ? '일치하는 도구가 없습니다. 검색어를 바꿔 주세요.' : 'No matching tools. Try a different search or category.'">No tools found</p>
+  <section class="hub-results" aria-labelledby="tools-results-title"><div class="hub-results-heading"><div><p class="eyebrow" data-i18n="publicCurated" th:text="${uiCopy['publicCurated']}">CURATED FINANCIAL UTILITIES</p><h2 id="tools-results-title" data-i18n="publicText90" th:text="${uiCopy['publicText90']}">Calculator library</h2></div><span class="hub-result-count" data-public-format="publicResultFormat" th:attr="data-public-count=${resultCount}" th:text="${#ctx.getVariable('uiCopy').get('publicResultFormat').replace('{count}',#strings.toString(resultCount))}">Count</span></div>
+    <p class="notice" th:if="${#lists.isEmpty(tools)}" data-i18n="publicText91" th:text="${uiCopy['publicText91']}">No tools found</p>
     <ul class="hub-tool-grid" th:unless="${#lists.isEmpty(tools)}">
       <li th:each="tool : ${tools}" th:attr="data-tool-id=${tool.id},data-status=${tool.status},data-category=${tool.category}">
         <article class="hub-tool-card" th:classappend="${tool.verified} ? ' is-certified' : ' is-legacy'">
-          <div class="hub-card-head"><span class="hub-symbol" aria-hidden="true" th:text="${tool.verified} ? '✦' : '○'">✦</span><span class="hub-tool-state" th:classappend="${tool.verified} ? ' certified' : ' legacy'" th:text="${tool.verified} ? (${ko} ? 'Spring 검증' : 'Spring verified') : (${ko} ? '기존 화면 · QA 대기' : 'Legacy · QA pending')">Status</span></div>
-          <h3 th:text="${tool.title(ko)}">Financial calculator</h3><p th:text="${tool.description(ko)}">Financial calculation</p>
-          <a class="hub-card-link" th:href="${tool.href()}" th:attr="aria-label=${ko} ? ${tool.title(ko)} + ' 화면으로 이동' : 'Open ' + ${tool.title(ko)}" th:text="${ko} ? '도구 열기 ↗' : 'Open calculator ↗'">Open calculator</a>
+          <div class="hub-card-head"><span class="hub-symbol" aria-hidden="true" th:text="${tool.verified} ? '✦' : '○'">✦</span><span class="hub-tool-state" th:classappend="${tool.verified} ? ' certified' : ' legacy'" th:attr="data-i18n=${tool.verified ? 'publicText92' : 'publicText93'}" th:text="${#ctx.getVariable('uiCopy').get(tool.verified ? 'publicText92' : 'publicText93')}">Status</span></div>
+          <h3 th:attr="data-i18n=${'publicTool_' + tool.id.replace('-','_')}" th:text="${#ctx.getVariable('uiCopy').get('publicTool_' + tool.id.replace('-','_'))}">Financial calculator</h3><p th:attr="data-i18n=${'publicToolDesc_' + tool.id.replace('-','_')}" th:text="${#ctx.getVariable('uiCopy').get('publicToolDesc_' + tool.id.replace('-','_'))}">Financial calculation</p>
+          <a class="hub-card-link" th:href="${tool.href()}" th:attr="data-i18n-aria=${'publicOpenTool_' + tool.id.replace('-','_')},aria-label=${#ctx.getVariable('uiCopy').get('publicOpenTool_' + tool.id.replace('-','_'))}" data-i18n="publicText94" th:text="${uiCopy['publicText94']}">Open calculator</a>
         </article>
       </li>
     </ul>
   </section>
-  <section class="panel hub-help" aria-labelledby="hub-help-title"><div class="panel-header"><span class="panel-step">02</span><div><h2 id="hub-help-title" th:text="${ko} ? '서비스 품질 및 확인 기준' : 'Reliability and verification'">Reliability</h2><p th:text="${ko} ? '방문할 수 있는 주소와 모든 기능 검증은 다릅니다.' : 'A navigable link is not the same as fully verified functionality.'">Verification</p></div></div>
-    <details><summary th:text="${ko} ? 'Spring 검증과 기존 화면의 차이는?' : 'What do Spring verified and legacy mean?'">Status details</summary><p th:text="${ko} ? 'Spring 검증은 실제 Java 서버 계산·입력·반응형·영어/한국어 UI를 실브라우저로 확인한 도구입니다. 기존 화면은 경로를 보존했지만 모든 상호작용과 API가 아직 확인된 것은 아닙니다.' : 'Spring verified means the Java server UI, calculation, forms, responsive layouts and languages were exercised in a browser. Legacy routes are retained for navigation but their full interactions and APIs are not yet certified.'">Explanation</p></details>
-    <div class="hub-quick-links"><a class="secondary-button" href="/stocks" th:text="${ko} ? 'Spring 주식 거래소 보기' : 'Explore Spring stock market'">Stocks</a><a class="secondary-button" href="/status" th:text="${ko} ? '실제 서비스 상태 보기' : 'View source-backed service status'">Status</a><a class="secondary-button" href="/support" th:text="${ko} ? '문의 및 지원' : 'Support &amp; help'">Support</a></div>
+  <section class="panel hub-help" aria-labelledby="hub-help-title"><div class="panel-header"><span class="panel-step">02</span><div><h2 id="hub-help-title" data-i18n="publicText95" th:text="${uiCopy['publicText95']}">Reliability</h2><p data-i18n="publicText96" th:text="${uiCopy['publicText96']}">Verification</p></div></div>
+    <details><summary data-i18n="publicText97" th:text="${uiCopy['publicText97']}">Status details</summary><p data-i18n="publicText98" th:text="${uiCopy['publicText98']}">Explanation</p></details>
+    <div class="hub-quick-links"><a class="secondary-button" href="/stocks" data-i18n="publicText99" th:text="${uiCopy['publicText99']}">Stocks</a><a class="secondary-button" href="/status" data-i18n="publicText100" th:text="${uiCopy['publicText100']}">Status</a><a class="secondary-button" href="/support" data-i18n="publicText101" th:text="${uiCopy['publicText101']}">Support</a></div>
   </section>
 </main>
-<footer th:replace="~{mv28/layout :: footer}"></footer>
+<th:block th:replace="~{shared/chrome :: footer}"></th:block></div></div></div>
+<th:block th:replace="~{shared/chrome :: mobileNavigation}"></th:block><th:block th:replace="~{shared/chrome :: support}"></th:block>
 </body></html>

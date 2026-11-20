@@ -1,5 +1,6 @@
 package com.moneyverse.api.domain.status;
 
+import com.moneyverse.api.domain.web.UiLocale;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,8 @@ import java.util.Map;
 public class StatusSourceTruthController {
     public static final String RELEASE="v2026.11.19.29.1-spring-status";
     private final StatusTruthService service;
-    public StatusSourceTruthController(StatusTruthService service){this.service=service;}
+    private final UiLocale locale;
+    public StatusSourceTruthController(StatusTruthService service,UiLocale locale){this.service=service;this.locale=locale;}
 
     @ResponseBody
     @GetMapping(value={"/api/v1/status","/api/status"},produces=MediaType.APPLICATION_JSON_VALUE)
@@ -34,7 +36,8 @@ public class StatusSourceTruthController {
                        @RequestParam Map<String,String> query){
         if("1".equals(request.getHeader("RSC"))||query.containsKey("_rsc"))
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,"NEXT_RSC_NOT_SUPPORTED_BY_SPRING");
-        boolean ko="ko".equalsIgnoreCase(query.getOrDefault("lang","en"));
+        String language=locale.resolvePublic(request);
+        boolean ko="ko".equals(language);
         StatusSourceTruthPolicy.StatusResponse status=service.publicStatus();
         List<StatusSourceTruthPolicy.StatusRow> rows=status.status();
         String overall=StatusSourceTruthPolicy.overall(rows.stream().map(StatusSourceTruthPolicy.StatusRow::state).toList());
@@ -42,11 +45,17 @@ public class StatusSourceTruthController {
         response.setHeader("X-Robots-Tag","noindex,nofollow");
         response.setHeader("X-Content-Type-Options","nosniff");
         response.setHeader("X-MV-UI-Release",RELEASE);
-        response.setHeader("Content-Language",ko?"ko":"en");
+        response.setHeader("Content-Language",language);
+        response.setHeader("Vary","Cookie, Accept-Language");
+        response.setHeader("X-MV-Renderer","Spring-MVC-Thymeleaf");
         response.setHeader("Content-Security-Policy","default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; form-action 'self'; frame-ancestors 'none'; base-uri 'self';");
         model.addAttribute("ko",ko);
-        model.addAttribute("language",ko?"ko":"en");
-        model.addAttribute("pageTitle",ko?"서비스 상태":"Service status");
+        model.addAttribute("language",language);
+        model.addAttribute("uiLanguage",language);
+        model.addAttribute("uiCopy",locale.labels(language));
+        model.addAttribute("uiPageKey","publicStatusTitle");
+        model.addAttribute("publicTitleKey","publicStatusTitle");
+        model.addAttribute("pageTitle",locale.labels(language).get("publicStatusTitle"));
         model.addAttribute("calculatorPath","/status");
         model.addAttribute("rows",rows);
         model.addAttribute("overall",overall);

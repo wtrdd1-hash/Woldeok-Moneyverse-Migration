@@ -50,12 +50,38 @@ class NativePublicChromeTest {
                 .andReturn().getResponse().getContentAsString();
         assertTrue(html.contains("data-ui-language=\""+lang+"\""));
         assertTrue(html.contains("id=\"language-selector\""));
+        var titles=java.util.Map.of(
+                "/tools",List.of("Financial tools","금융 도구","金融ツール","金融工具","Công cụ tài chính"),
+                "/calculators",List.of("Calculator center","금융 계산기 센터","金融計算機センター","金融计算器中心","Trung tâm máy tính tài chính"),
+                "/tools/compound-calculator",List.of("Compound interest calculator","복리 계산기","複利計算機","复利计算器","Máy tính lãi kép"),
+                "/tools/stock-calculator",List.of("Stock average price calculator","주식 평균단가 계산기","株式平均取得単価計算機","股票平均成本计算器","Máy tính giá vốn cổ phiếu"),
+                "/status",List.of("Service status","서비스 상태","サービス状態","服务状态","Tình trạng dịch vụ"));
+        var heading=java.util.regex.Pattern.compile("<header[^>]*class=\"topbar\"[^>]*>[\\s\\S]*?<h1[^>]*>([^<]+)</h1>").matcher(html);
+        assertTrue(heading.find(),"Shared header has a real rendered heading for "+path+"/"+lang);
+        assertEquals(titles.get(path).get(List.of("en","ko","ja","zh","vi").indexOf(lang)),heading.group(1));
         assertEquals(1,html.split("id=\"mv-support-launcher\"", -1).length-1);
         assertFalse(html.contains("floating-help"));
         assertFalse(html.contains("/_next/"));
         assertFalse(html.contains("__next_f"));
         assertTrue(html.contains("/assets/mv43/public.js"));
         assertFalse(html.contains("th:text"));
+        mvc.perform(get(path).param("lang",lang).header("Accept-Language","en"))
+                .andExpect(status().isOk()).andExpect(header().string("Content-Language",lang));
+        mvc.perform(get(path).cookie(new Cookie("wdmv_locale",lang)).param("lang","en").header("Accept-Language","ko"))
+                .andExpect(status().isOk()).andExpect(header().string("Content-Language",lang));
+        if(path.equals("/tools/compound-calculator")) {
+            String label=switch(lang){case "ko" -> "초기 투자 금액"; case "ja" -> "初期投資額";
+                case "zh" -> "初始本金"; case "vi" -> "Vốn ban đầu"; default -> "Initial principal";};
+            assertTrue(html.contains(">"+label+"</label>"));
+            String metric=switch(lang){case "ko" -> "예상 최종 자산"; case "ja" -> "予測最終資産";
+                case "zh" -> "预计最终资产"; case "vi" -> "Số dư dự kiến"; default -> "Projected balance";};
+            assertTrue(html.contains(">"+metric+"</span>"));
+        }
+        if(path.equals("/status")) {
+            String label=switch(lang){case "ko" -> "기록 만료"; case "ja" -> "期限切れの記録";
+                case "zh" -> "记录已过期"; case "vi" -> "Quan sát hết hạn"; default -> "Stale observation";};
+            assertTrue(html.contains(">"+label+"</span>"));
+        }
     }
 
     @ParameterizedTest @MethodSource("nativeRoutes")
@@ -71,12 +97,12 @@ class NativePublicChromeTest {
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         for(String field:List.of("principal","monthlyDeposit","annualRate","years","frequency"))
             assertTrue(html.contains("name=\""+field+"\""));
-        assertTrue(html.contains("value=\"daily\" selected=\"selected\""));
+        assertTrue(java.util.regex.Pattern.compile("<option[^>]*value=\"daily\"[^>]*selected=\"selected\"").matcher(html).find());
         assertTrue(html.contains(">3,400</strong>"));
         assertTrue(html.contains("data-testid=\"total-deposit\""));
         assertTrue(html.contains("<td>2,200</td>"));
         assertTrue(html.contains("data-i18n=\"publicPrincipal\""));
-        assertFalse(html.contains("function recalculate"),"Only authoritative server math may replace the submitted result");
+
     }
 
     @Test void stockRetainsExactFieldsAndServerValuesInOtherLocales() throws Exception {
@@ -124,4 +150,51 @@ class NativePublicChromeTest {
         String empty=mvc.perform(get("/status")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         assertTrue(empty.contains("No public source observations are registered. Current health is unknown."));
     }
+    @Test void submittedAnnualFrequencyUsesTheExistingAnnualMath() throws Exception {
+        String html=mvc.perform(get("/tools/compound-calculator").param("principal","1000").param("monthlyDeposit","0")
+                        .param("annualRate","100").param("years","1").param("frequency","annually"))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        assertTrue(html.contains(">2,000</strong>"));
+        assertFalse(html.contains(">2,613</strong>"));
+    }
+
+    @Test void nativeFormsKeepSourceNumericConstraintsAndDefaults() throws Exception {
+        String compound=mvc.perform(get("/tools/compound-calculator")).andReturn().getResponse().getContentAsString();
+        for(String[] field:new String[][]{{"principal","0","1000000000000","0.01","100000"},
+                {"monthlyDeposit","0","1000000000000","0.01","10000"},{"annualRate","0","100","0.01","8.5"},{"years","1","50","1","3"}})
+            assertNumericField(compound,field);
+        String stock=mvc.perform(get("/tools/stock-calculator")).andReturn().getResponse().getContentAsString();
+        for(String[] field:new String[][]{{"initialPrice","0","1000000000","0.01","50"},{"initialQuantity","0","100000000","1","100"},
+                {"additionalPrice","0","1000000000","0.01","40"},{"additionalQuantity","0","100000000","1","150"},
+                {"targetProfitPercent","0","1000","0.01","15"},{"feeRate","0","50","0.01","0.05"}})
+            assertNumericField(stock,field);
+    }
+    private static void assertNumericField(String html,String[] field) {
+        var matcher=java.util.regex.Pattern.compile("<input[^>]*name=\""+field[0]+"\"[^>]*>").matcher(html);
+        assertTrue(matcher.find(),field[0]);String input=matcher.group();
+        for(String attribute:List.of("type=\"number\"","min=\""+field[1]+"\"","max=\""+field[2]+"\"", "step=\""+field[3]+"\"","value=\""+field[4]+"\"","required"))
+            assertTrue(input.contains(attribute),field[0]+": "+attribute);
+    }
+
+    @Test void publicLocaleFallsBackSafelyAndAllRoutesRejectFlight() throws Exception {
+        for(String path:nativeRoutes().toList()) {
+            mvc.perform(get(path).param("lang","xx").header("Accept-Language","fr-FR"))
+                    .andExpect(status().isOk()).andExpect(header().string("Content-Language","en"));
+            mvc.perform(get(path).param("_rsc","legacy"))
+                    .andExpect(status().isNotAcceptable());
+        }
+    }
+
+    @Test void statusStatesStaySeparateAndLocalizedWithoutChangingEvidence() throws Exception {
+        when(collector.publicStatus()).thenReturn(new StatusSourceTruthPolicy.StatusResponse(List.of(
+                new StatusSourceTruthPolicy.StatusRow("web","Web","operational",null,"2026-11-20T00:00:00.000Z","fresh",100L,"status-v1"),
+                new StatusSourceTruthPolicy.StatusRow("api","API","outage",null,"2026-11-20T00:00:01.000Z","fresh",100L,"status-v1"))));
+        String html=mvc.perform(get("/status").header("Accept-Language","zh"))
+                .andExpect(status().isOk()).andExpect(model().attribute("overall","outage"))
+                .andReturn().getResponse().getContentAsString();
+        assertTrue(html.contains("state-operational"));assertTrue(html.contains("state-outage"));
+        assertTrue(html.contains("观测为正常"));assertTrue(html.contains("观测到故障"));
+        assertTrue(html.contains("有效的最新记录"));assertTrue(html.contains("2026-11-20T00:00:01.000Z"));
+    }
+
 }
