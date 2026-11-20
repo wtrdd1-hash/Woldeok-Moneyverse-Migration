@@ -209,6 +209,36 @@ jobs:
           APP_DB_PASSWORD: ci_app_password
         run: node packages/database/ci-apply.mjs
 
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+          cache-dependency-path: spring-backend/*.gradle.kts
+
+      - name: Verify native messaging with disposable PostgreSQL
+        working-directory: spring-backend
+        env:
+          CI_POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+          MONEYVERSE_MESSAGING_PG_TEST_URL: jdbc:postgresql://127.0.0.1:5432/woldeok_moneyverse_dev
+          MONEYVERSE_MESSAGING_PG_TEST_USER: moneyverse_migrator
+        run: |
+          node --input-type=module -e '
+            import {execFileSync,spawnSync} from "node:child_process";
+            const container=process.env.CI_POSTGRES_CONTAINER;
+            if(process.env.GITHUB_ACTIONS!=="true"||!/^[a-f0-9]{12,64}$/.test(container||""))throw new Error("Disposable CI service required");
+            let password;
+            try {
+              password=execFileSync("docker",["exec",container,"printenv","POSTGRES_PASSWORD"],{encoding:"utf8",stdio:["ignore","pipe","pipe"]}).replace(/\r?\n$/,"");
+            } catch {throw new Error("Disposable service credential unavailable");}
+            if(!password||password.includes("\n")||password.includes("\0"))throw new Error("Invalid disposable service credential");
+            const result=spawnSync("./gradlew",["postgresMessagingTest","--no-daemon","-Dorg.gradle.workers.max=2"],{
+              env:{...process.env,MONEYVERSE_MESSAGING_PG_TEST_PASSWORD:password},stdio:"inherit"
+            });
+            if(result.error)throw new Error("Native PostgreSQL verifier could not start");
+            process.exit(result.status??1);
+          '
+
       - name: Test
         env:
           DATABASE_URL: postgresql://moneyverse_app:ci_app_password@localhost:5432/woldeok_moneyverse_dev
