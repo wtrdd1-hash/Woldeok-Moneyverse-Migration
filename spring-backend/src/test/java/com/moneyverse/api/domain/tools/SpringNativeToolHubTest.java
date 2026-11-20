@@ -54,6 +54,16 @@ class SpringNativeToolHubTest {
                 .andExpect(content().string(containsString("data-results=\"3\"")));
     }
 
+    @Test void verifiedOnlyFilterShowsOnlyActuallyNativeSpringToolsAndPreservesLocale() throws Exception {
+        mvc.perform(get("/calculators").param("verified", "true").param("lang", "ko"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("data-results=\"2\"")))
+                .andExpect(content().string(containsString("name=\"verified\"")))
+                .andExpect(content().string(not(containsString("href=\"/tools/dividend-tax-calculator\""))));
+        mvc.perform(get("/tools").param("verified", "false"))
+                .andExpect(status().isBadRequest());
+    }
+
     @Test void maliciousAndOverlongQueriesCannotInjectOrClaimWorkingTools() throws Exception {
         mvc.perform(get("/tools").param("q","<script>alert(1)</script>"))
                 .andExpect(status().isOk())
