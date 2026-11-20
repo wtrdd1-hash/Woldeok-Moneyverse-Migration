@@ -120,3 +120,28 @@ The new native CI gate exposed an inherited media integration fixture using Imag
 
 ## Auth bridge integration review
 The independent task review found an administrator-close legacy-cookie identity transition. Fix round1/5 added the missing legacy session-cookie deletion and a real H2/browser-cookie-jar regression (45 cases:1RED failure→45GREEN). Scoped independent review approved the fix with no new findings. Full integrated candidate verification follows; actual browser/TLS/Test continuity remains a release gate.
+
+## Native authentication route family — before work
+- Approved task branch `feat/native-auth-ui-v20261120`, base `72aa55cfe596869b273e5f84e5565ab26733dbb0`; fetched main remains `08b1525ca76af514cd5fa2bddde33a784378352f`.
+- Read remote AGENTS, binding task brief, TDD/testing, debugging and verification skills. Parent completed approved design, isolation and structured plan; this task implements that scoped plan.
+- [ ] Write real Spring route/locale/cache/alias/security tests and client contract/state tests; observe logical RED.
+- [ ] Implement native shared-chrome screens and five-language labels with source-backed requests only.
+- [ ] Verify focused and full isolated test-profile suites, self-review and publish exact task files.
+
+| Page | Fields/actions in original UI | Existing Spring source contract | Native behavior |
+| --- | --- | --- | --- |
+| /login, /login/providers | email/password; terms/privacy/age; Discord/Google | POST /api/v1/auth/local/login returns 200 signed-in + userId/proof; form POST /login remains | Login fields with unchecked acknowledgements and legal links; browser-only acknowledgement notice (no consent-write API); Discord link; Google unavailable because authorize source lacks a complete URL |
+| /register | email/displayName/password; legal links | POST /api/v1/auth/local/register returns 202 accepted:true + signed-in + userId/proof | Preserve fields, require unchecked acknowledgements; never claim consent recording |
+| /forgot-password | email | No recovery request or delivery receipt API | Honest unavailable state; no submission or mail-sent claim |
+| /reset-password | token/password/confirmPassword | No reset-completion API | Honest unavailable state; no query token reflection or request |
+| /verify-email | token confirmation | No email activation API | Honest unavailable state; no automatic token action |
+| /verify-email-change | token confirmation | No email-change completion API | Honest unavailable state |
+| /account-deletion | deletion confirmation / receipt status | No deletion API | Honest unavailable state; no destructive action |
+
+- GET ownership: LocalAuthController owns /login and /login/ forwarding to captured HTML. Only that GET will move; POST JSON/form mappings and all services/security/database remain unchanged. Native routes own canonical, trailing slash, .html and /index.html aliases; API paths never render this template.
+- Provider/email/browser/live database execution is excluded. Media tests will use a task-owned absolute /tmp override. Production remains HOLD.
+
+## Native authentication route family — in progress
+- [x] Logical RED: 9 Spring tests failed with 0 errors/skips: missing MVC views, missing native fields/unavailable state and Flight requests accepted by the legacy renderer. Six Node tests failed with assertions that the native auth contract was missing.
+- Parent ruling: registration must fail closed until server-side consent persistence/age gating is verified. Preserve its fields and unchecked legal/age controls but disable submit; core must reject registration with zero requests. Existing login remains available; browser acknowledgements must explicitly say they are not recorded. This replaces the initial registration row above and is a P0 source-contract gap for parent follow-up.
+- [ ] Implement scoped native routes/client and catalog parity, then run focused and whole-suite gates.
