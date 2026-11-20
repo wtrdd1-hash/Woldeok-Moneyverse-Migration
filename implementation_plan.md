@@ -5683,3 +5683,45 @@ graph TD
    - `rebuilt_home_mobile.png`: 390x844 해상도에서 `home.png` 우측 모바일 뷰와 100% 일치 확인.
    - `rebuilt_admin_desktop.png`: 1280x800 해상도에서 `admin-console-desktop.png`와 100% 일치 확인.
    - `rebuilt_admin_mobile.png`: 390x844 해상도에서 `admin-console-mobile.png`와 100% 일치 확인.
+
+
+---
+## 🚀 [v97 Specification] 5개국어 실시간 자동 번역 엔진 탑재 및 35종 관리자 관제탑 전면 복원·배포 완료
+
+### 1. 주요 배경 및 변경 목적
+- 사용자의 피드백을 반영하여 실서비스(`https://easy-scraping.com`) 상에서 낡은 6KB 임시 파일이 제공되던 Nginx 릴리스 경로 및 불필요한 `/admin-preview` 리다이렉트 구조를 원천 교정.
+- 5개 국어(한국어, 영어, 일본어, 중국어 간체, 베트남어) 실시간 브라우저 DOM 자동 번역 엔진(`/js/mv-i18n.js`) 구축 및 전 웹 서피스(Home, Wallet, Stocks, Quests, Shop, Status, Board, Guide, Tools, Admin)에 언어 전환 UI(`.mv-lang-btn`) 및 스크립트 전면 탑재.
+- 기존의 분실/축소되었던 35종 관리자 기능(6대 카테고리 필터, 6종 킬스위치 즉시 제어, 15:00 카운트다운 2FA TOTP 스텝업 모달, 회원 조회 디렉토리, 인프라 헬스체크, 플로팅 지원 독)을 100% 완전 복원하여 운영 관제탑 구축 완료.
+
+### 2. 세부 구현 및 아키텍처 변경 내역
+1. **5개국어 자동 번역 엔진 (`/js/mv-i18n.js`)**:
+   - `navigator.language` 기반 브라우저 기본 로케일 감지 및 `localStorage`/`cookie`(`wdmv_locale`) 기반 지속성 보장.
+   - 금융/가상경제 전문 5개국어 용어 사전(KO, EN, JA, ZH, VI) 내장 및 실시간 DOM 텍스트 노드 탐색(TextWalker)을 통한 페이지 새로고침 없는 즉각 번역.
+   - 플로팅/헤더 언어 모달(`.mv-lang-modal`)을 통한 원클릭 언어 선택 및 active 상태 표시.
+2. **35개 서브시스템 관리 도구 관제탑 복원 (`admin.html`)**:
+   - 6대 카테고리 필터: `거시·금융`(6), `국고·세정`(5), `시장·기업`(6), `보안·감사`(6), `유저·콘텐츠`(6), `시스템·관제`(6) = 총 35개 관리 도구 카드 완벽 매핑.
+   - 6종 실시간 킬스위치 그리드: SWF 국부펀드, KDIC 예금보험, 암시장 거래소, 연금공단, P2P 경매장, 카지노 베팅 (`/api/admin/controls` 비동기 통신 및 토글 애니메이션).
+   - 2FA 스텝업 인증 모달: 15:00 카운트다운 타이머, 6자리 OTP 입력창, 텔레그램/디스코드 인증 채널 안내 및 검증 로직 탑재.
+   - 회원 관리 및 시스템 관제: 12,840명 회원 데이터 및 실시간 인프라 노드 상태 시각화.
+   - 기존의 "디자인 샘플", "시안입니다", "SAMPLE UI" 등 플레이스홀더 및 면책성 문구 완전 제거.
+3. **Nginx 프로덕션 실시간 라우팅 동기화 (`/etc/nginx/sites-enabled/moneyverse`)**:
+   - `member-responsive-ui-v2026.11.20.42.3.1/index.html`에 승인된 47KB 완성형 홈 대시보드 및 `/js/mv-i18n.js` 동기화.
+   - `/admin.html` 및 `/admin-preview`를 `/srv/moneyverse-data/frontend-static/admin.html`로 직접 서빙하도록 Nginx 설정 변경 후 `sudo systemctl reload nginx` 완료.
+4. **전 웹 서피스 언어 전환 버튼 및 스크립트 일괄 주입**:
+   - 대상: `wallet.html`, `stocks.html`, `quests.html`, `shop.html`, `status.html`, `board.html`, `guide.html`, `tools.html`
+   - `frontend-static`, `releases/member-responsive-ui-v2026.11.20.42.3.1`, `spring-backend/src/main/resources/static` 3개 경로 모두 동기화 완료.
+
+### 3. 실측 브라우저 서브에이전트 검증 완료 증빙
+- **실제 접속 대상**: `https://easy-scraping.com/` 및 `https://easy-scraping.com/admin-preview`
+- **검증 1 (데스크톱 홈 1280x800)**:
+  - Pretendard & JetBrains Mono 모노스페이스 수치 렌더링 정상.
+  - 언어 모달 열기 성공 (`02_desktop_lang_modal.png`), 5개 국어(KO, EN, JA, ZH, VI) 노출 확인.
+  - 영어(EN) 선택 즉시 실시간 텍스트 변환 검증 완료 (`03_desktop_home_en.png`).
+- **검증 2 (관리자 관제탑 1280x900)**:
+  - 35개 관리 도구 카드 및 6대 카테고리 정상 렌더링 확인 (`04_desktop_admin_console_ko.png`).
+  - '보안·감사' 필터 클릭 시 전용 6개 카드 즉시 필터링 검증 (`05_desktop_admin_filtered_security.png`).
+  - 2FA Step-up 15:00 카운트다운 OTP 모달 정상 개폐 확인 (`06_desktop_admin_2fa_modal.png`).
+  - 카지노 베팅 킬스위치 클릭 시 토글 애니메이션 및 차단 상태 전환 확인 (`07_desktop_admin_killswitch_toggled_clean.png`).
+- **검증 3 (모바일 뷰포트 390x844)**:
+  - 컨텐츠 너비 375px로 횡스크롤 0건(Body Overflow Zero) 완벽 확인 (`08_mobile_homepage_390x844.png`).
+  - 하단 모바일 독 58px 터치 타깃 및 플로팅 독 여백 확보 완료.

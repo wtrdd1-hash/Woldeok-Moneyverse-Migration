@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="dark">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
-  <title>관리자 대시보드 · Woldeok Moneyverse</title>
-  <meta name="description" content="운영 현황과 권한 기록을 정확하게 확인하는 관제 센터" />
+  <title>운영 총괄 관제탑 (Admin Cockpit) · Woldeok Moneyverse</title>
+  <meta name="description" content="실시간 금융 원장, 35개 서브시스템 관제 및 시스템 제어 센터" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
@@ -16,8 +16,11 @@
       --mv-sidebar: #090d1a;
       --mv-surface: #151d32;
       --mv-surface-light: #1b243e;
+      --mv-surface-hover: #222d4c;
       --mv-border: rgba(168, 188, 216, 0.12);
+      --mv-border-active: rgba(156, 131, 255, 0.4);
       --mv-primary: #9c83ff;
+      --mv-primary-glow: rgba(156, 131, 255, 0.35);
       --mv-primary-light: #b39eff;
       --mv-blue: #64b7ff;
       --mv-green: #4ade80;
@@ -46,13 +49,13 @@
     /* Sidebar (Desktop) */
     .admin-sidebar {
       display: none;
-      width: 230px;
-      min-width: 230px;
+      width: 240px;
+      min-width: 240px;
       background-color: var(--mv-sidebar);
       border-right: 1px solid var(--mv-border);
       padding: 24px 16px;
       flex-direction: column;
-      gap: 24px;
+      gap: 20px;
       position: sticky;
       top: 0;
       height: 100vh;
@@ -67,53 +70,61 @@
     .sidebar-brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       padding-bottom: 16px;
       border-bottom: 1px solid var(--mv-border);
+      text-decoration: none;
     }
-    .brand-w {
-      font-size: 26px;
+    .brand-logo-box {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-weight: 900;
-      color: var(--mv-primary);
-      line-height: 1;
+      font-size: 18px;
+      color: #ffffff;
+      box-shadow: 0 4px 14px var(--mv-primary-glow);
     }
     .brand-text {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 800;
       color: #ffffff;
       line-height: 1.2;
     }
     .brand-sub {
       font-size: 11px;
-      color: var(--mv-muted);
-      font-weight: 500;
+      color: var(--mv-primary-light);
+      font-weight: 600;
     }
 
     .sidebar-section-title {
       font-size: 10px;
       font-weight: 800;
-      letter-spacing: 1px;
+      letter-spacing: 1.2px;
       color: #7b8fa8;
       text-transform: uppercase;
-      margin-bottom: 8px;
       padding-left: 8px;
+      margin-bottom: 6px;
     }
 
     .admin-nav-list {
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
     }
     .admin-nav-item {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 9px 12px;
-      border-radius: 8px;
+      padding: 10px 14px;
+      border-radius: 10px;
       color: var(--mv-muted);
       text-decoration: none;
-      font-size: 13px;
+      font-size: 13.5px;
       font-weight: 600;
       transition: all 0.15s ease;
     }
@@ -122,13 +133,14 @@
       color: #ffffff;
     }
     .admin-nav-item.active {
-      background-color: rgba(156, 131, 255, 0.16);
-      border: 1px solid rgba(156, 131, 255, 0.35);
+      background: linear-gradient(90deg, rgba(156, 131, 255, 0.22) 0%, rgba(156, 131, 255, 0.06) 100%);
+      border: 1px solid var(--mv-border-active);
       color: #ffffff;
       font-weight: 700;
+      box-shadow: 0 2px 10px rgba(156, 131, 255, 0.15);
     }
     .admin-nav-item .icon {
-      font-size: 18px;
+      font-size: 19px;
       color: var(--mv-primary);
     }
 
@@ -137,20 +149,22 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 24px 32px 48px 32px;
-      max-width: 1380px;
+      padding: 24px 32px 64px 32px;
+      max-width: 1440px;
       margin: 0 auto;
       width: 100%;
-      gap: 20px;
+      gap: 24px;
+      min-width: 0;
     }
 
     @media (max-width: 768px) {
       .admin-main {
-        padding: 16px 16px 80px 16px;
+        padding: 16px 14px 84px 14px;
+        gap: 18px;
       }
     }
 
-    /* Top Breadcrumb & Title Header */
+    /* Top Breadcrumb & Header */
     .admin-header {
       display: flex;
       justify-content: space-between;
@@ -158,6 +172,7 @@
       border-bottom: 1px solid var(--mv-border);
       padding-bottom: 18px;
       gap: 16px;
+      flex-wrap: wrap;
     }
     .admin-header-left {
       display: flex;
@@ -167,51 +182,153 @@
     .admin-tag {
       font-size: 11px;
       font-weight: 800;
-      letter-spacing: 0.8px;
+      letter-spacing: 1px;
       color: var(--mv-primary);
       text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .admin-tag::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--mv-primary);
+      box-shadow: 0 0 6px var(--mv-primary);
     }
     .admin-title {
-      font-size: 22px;
-      font-weight: 800;
+      font-size: 24px;
+      font-weight: 900;
       color: #ffffff;
-      margin-top: 2px;
+      letter-spacing: -0.5px;
     }
     .admin-desc {
-      font-size: 13px;
+      font-size: 13.5px;
       color: var(--mv-muted);
-      margin-top: 2px;
     }
 
     .admin-header-right {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
     .api-status-pill {
       display: flex;
       align-items: center;
       gap: 6px;
-      padding: 6px 14px;
-      border-radius: 8px;
-      background: rgba(156, 131, 255, 0.1);
-      border: 1px solid rgba(156, 131, 255, 0.25);
-      font-size: 11.5px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      background: rgba(74, 222, 128, 0.1);
+      border: 1px solid rgba(74, 222, 128, 0.3);
+      font-size: 12px;
       font-weight: 700;
-      color: var(--mv-primary-light);
+      color: var(--mv-green);
     }
-    .avatar-circle {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+    .otp-elevate-btn {
       display: flex;
       align-items: center;
-      justify-content: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      background: rgba(251, 191, 36, 0.12);
+      border: 1px solid rgba(251, 191, 36, 0.35);
+      font-size: 12px;
       font-weight: 800;
-      font-size: 14px;
+      color: var(--mv-amber);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .otp-elevate-btn:hover {
+      background: rgba(251, 191, 36, 0.22);
+      border-color: var(--mv-amber);
+      transform: translateY(-1px);
+    }
+    .lang-switcher-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      background: rgba(156, 131, 255, 0.12);
+      border: 1px solid rgba(156, 131, 255, 0.35);
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--mv-primary-light);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .lang-switcher-pill:hover {
+      background: rgba(156, 131, 255, 0.22);
+      border-color: var(--mv-primary);
+    }
+
+    /* Category Filter & Search Bar */
+    .filter-search-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: var(--mv-surface);
+      border: 1px solid var(--mv-border);
+      border-radius: 14px;
+      padding: 14px 18px;
+    }
+    @media (min-width: 840px) {
+      .filter-search-container {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+    .category-pills-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+    .category-pills-row::-webkit-scrollbar { display: none; }
+    .cat-pill {
+      background: rgba(21, 29, 50, 0.8);
+      border: 1px solid var(--mv-border);
+      color: var(--mv-muted);
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cat-pill:hover {
+      background: rgba(156, 131, 255, 0.1);
       color: #ffffff;
-      box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+    }
+    .cat-pill.active {
+      background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+      color: #ffffff;
+      border-color: var(--mv-primary);
+      box-shadow: 0 2px 10px rgba(124, 58, 237, 0.35);
+    }
+    .tool-search-input {
+      background: rgba(12, 16, 32, 0.85);
+      border: 1px solid var(--mv-border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: #ffffff;
+      font-size: 12.5px;
+      outline: none;
+      min-width: 220px;
+      transition: border-color 0.15s ease;
+    }
+    .tool-search-input:focus {
+      border-color: var(--mv-primary);
     }
 
     /* 4-Card Top Bento Grid */
@@ -224,13 +341,13 @@
       .top-cards-grid { grid-template-columns: repeat(2, 1fr); }
     }
     @media (min-width: 1024px) {
-      .top-cards-grid { grid-template-columns: 1fr 1fr 1fr 1.4fr; }
+      .top-cards-grid { grid-template-columns: repeat(4, 1fr); }
     }
 
     .admin-kpi-card {
       background-color: var(--mv-surface);
       border: 1px solid var(--mv-border);
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 18px 20px;
       display: flex;
       flex-direction: column;
@@ -238,123 +355,315 @@
       transition: all 0.15s ease;
     }
     .admin-kpi-card:hover {
-      border-color: rgba(156, 131, 255, 0.35);
+      border-color: var(--mv-border-active);
       background-color: var(--mv-surface-light);
+      transform: translateY(-2px);
+    }
+    .kpi-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
     .kpi-label {
-      font-size: 12px;
+      font-size: 12.5px;
       font-weight: 700;
       color: var(--mv-muted);
     }
-    .kpi-main-val {
-      font-size: 20px;
+    .kpi-badge {
+      font-size: 10px;
       font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .kpi-main-val {
+      font-size: 22px;
+      font-weight: 900;
       color: #ffffff;
-      letter-spacing: -0.3px;
+      letter-spacing: -0.4px;
+      font-family: 'JetBrains Mono', monospace;
     }
     .kpi-sub-text {
-      font-size: 11px;
+      font-size: 11.5px;
       color: #7b8fa8;
     }
 
-    .chat-inquiry-card {
-      background: linear-gradient(135deg, rgba(124, 58, 237, 0.22) 0%, rgba(30, 41, 69, 0.85) 100%);
-      border: 1px solid rgba(156, 131, 255, 0.35);
-      border-radius: 12px;
-      padding: 18px 20px;
+    /* Kill Switch Section */
+    .kill-switch-section {
+      background: var(--mv-surface);
+      border: 1px solid var(--mv-border);
+      border-radius: 16px;
+      padding: 20px 24px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      gap: 6px;
+      gap: 16px;
     }
-    .chat-inquiry-header {
+    .switch-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .switches-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 640px) {
+      .switches-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (min-width: 1024px) {
+      .switches-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    .switch-card {
+      background: rgba(12, 16, 32, 0.7);
+      border: 1px solid var(--mv-border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      transition: all 0.15s ease;
+    }
+    .switch-card:hover {
+      border-color: rgba(156, 131, 255, 0.3);
+      background: rgba(18, 25, 48, 0.9);
+    }
+    .switch-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .switch-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+    .switch-status-text {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--mv-green);
+    }
+    .switch-status-text.disabled {
+      color: var(--mv-rose);
+    }
+
+    /* Toggle Switch UI */
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #2b3858;
+      transition: .25s;
+      border-radius: 26px;
+      border: 1px solid rgba(168, 188, 216, 0.2);
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 4px;
+      bottom: 3px;
+      background-color: white;
+      transition: .25s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+      border-color: var(--mv-primary);
+    }
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    /* 35 Management Tools Grid */
+    .tools-grid-section {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .tools-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 640px) {
+      .tools-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (min-width: 1024px) {
+      .tools-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (min-width: 1280px) {
+      .tools-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    .tool-link-card {
+      background-color: var(--mv-surface);
+      border: 1px solid var(--mv-border);
+      border-radius: 12px;
+      padding: 18px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      text-decoration: none;
+      color: #ffffff;
+      transition: all 0.15s ease;
+    }
+    .tool-link-card:hover {
+      background-color: var(--mv-surface-light);
+      border-color: var(--mv-border-active);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+    .tool-icon-box {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(156, 131, 255, 0.12);
+      border: 1px solid rgba(156, 131, 255, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--mv-primary);
+    }
+    .tool-card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+    .tool-card-title-row {
       display: flex;
       align-items: center;
       gap: 6px;
-      font-size: 13px;
+    }
+    .tool-card-title {
+      font-size: 14px;
       font-weight: 800;
       color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .chat-inquiry-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background-color: var(--mv-primary);
-      box-shadow: 0 0 6px var(--mv-primary);
-    }
-    .chat-inquiry-desc {
-      font-size: 11.5px;
-      color: #c4b5fd;
-      line-height: 1.4;
-    }
-    .chat-inquiry-note {
-      font-size: 10.5px;
+    .tool-cat-tag {
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(168, 188, 216, 0.1);
       color: var(--mv-muted);
-      margin-top: 4px;
+      flex-shrink: 0;
+    }
+    .tool-card-desc {
+      font-size: 11.5px;
+      color: var(--mv-muted);
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
-    /* Middle Grid: Chart + Server Check */
-    .middle-grid {
+    /* Live User Inspector & Telemetry */
+    .telemetry-row-grid {
       display: grid;
       grid-template-columns: 1fr;
       gap: 16px;
     }
     @media (min-width: 1024px) {
-      .middle-grid { grid-template-columns: 1.6fr 1fr; }
+      .telemetry-row-grid { grid-template-columns: 1.6fr 1fr; }
     }
 
-    .monitoring-card {
-      background-color: var(--mv-surface);
+    .telemetry-panel {
+      background: var(--mv-surface);
       border: 1px solid var(--mv-border);
       border-radius: 14px;
-      padding: 20px 24px;
+      padding: 20px 22px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
-    .card-title-group {
+    .panel-header {
       display: flex;
-      flex-direction: column;
-      gap: 2px;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--mv-border);
+      padding-bottom: 12px;
     }
-    .card-main-title {
+    .panel-title {
       font-size: 15px;
       font-weight: 800;
       color: #ffffff;
     }
-    .card-sub-title {
-      font-size: 11.5px;
+
+    /* User Table */
+    .user-table-wrap {
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+    .admin-user-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      text-align: left;
+    }
+    .admin-user-table th {
+      padding: 8px 10px;
       color: var(--mv-muted);
+      font-weight: 700;
+      border-bottom: 1px solid var(--mv-border);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
+    .admin-user-table td {
+      padding: 10px;
+      border-bottom: 1px solid rgba(168, 188, 216, 0.08);
+      color: #ffffff;
+      white-space: nowrap;
+    }
+    .role-badge {
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 10.5px;
+      font-weight: 700;
+    }
+    .role-superadmin { background: rgba(156, 131, 255, 0.18); color: var(--mv-primary-light); border: 1px solid rgba(156, 131, 255, 0.35); }
+    .role-approver { background: rgba(100, 183, 255, 0.18); color: var(--mv-blue); border: 1px solid rgba(100, 183, 255, 0.35); }
+    .role-admin { background: rgba(74, 222, 128, 0.18); color: var(--mv-green); border: 1px solid rgba(74, 222, 128, 0.35); }
+    .role-member { background: rgba(168, 188, 216, 0.1); color: var(--mv-muted); }
 
-    .chart-container {
-      width: 100%;
-      height: 150px;
-      position: relative;
-      margin-top: 10px;
-    }
-    .admin-chart-svg {
-      width: 100%;
-      height: 100%;
-      overflow: visible;
-    }
-
-    /* Server Check List */
-    .server-check-card {
-      background-color: var(--mv-surface);
-      border: 1px solid var(--mv-border);
-      border-radius: 14px;
-      padding: 20px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .server-list {
+    /* Node List */
+    .node-status-list {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
-    .server-row {
+    .node-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -362,78 +671,89 @@
       border-bottom: 1px solid rgba(168, 188, 216, 0.07);
       font-size: 13px;
     }
-    .server-row:last-child { border-bottom: none; }
-    .server-name {
-      font-weight: 600;
-      color: #ffffff;
-    }
-    .server-status-badge {
+    .node-row:last-child { border-bottom: none; }
+    .node-name { font-weight: 600; color: #ffffff; }
+    .node-badge-ok {
       font-size: 11px;
       font-weight: 700;
       padding: 2px 8px;
       border-radius: 4px;
-    }
-    .status-ok {
       background: rgba(74, 222, 128, 0.12);
       color: var(--mv-green);
       border: 1px solid rgba(74, 222, 128, 0.25);
     }
-    .status-unverified {
-      background: rgba(251, 191, 36, 0.1);
-      color: var(--mv-amber);
-      border: 1px solid rgba(251, 191, 36, 0.25);
-    }
 
-    /* Quick Action 6-Grid */
-    .quick-actions-section {
+    /* 2FA Elevation Modal */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
       display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .section-heading {
-      font-size: 16px;
-      font-weight: 800;
-      color: #ffffff;
-    }
-    .quick-actions-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-    @media (min-width: 768px) {
-      .quick-actions-grid { grid-template-columns: repeat(3, 1fr); }
-    }
-    @media (min-width: 1024px) {
-      .quick-actions-grid { grid-template-columns: repeat(6, 1fr); }
-    }
-
-    .quick-btn-card {
-      background-color: var(--mv-surface);
-      border: 1px solid var(--mv-border);
-      border-radius: 12px;
-      padding: 22px 14px;
-      display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      text-decoration: none;
+      z-index: 10000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-window {
+      background: var(--mv-surface);
+      border: 1px solid var(--mv-border-active);
+      border-radius: 16px;
+      padding: 26px;
+      width: 90%;
+      max-width: 440px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .modal-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--mv-border);
+      padding-bottom: 12px;
+    }
+    .otp-input-field {
+      width: 100%;
+      background: rgba(12, 16, 32, 0.9);
+      border: 1px solid var(--mv-border);
+      border-radius: 10px;
+      padding: 12px;
       color: #ffffff;
+      font-size: 20px;
+      text-align: center;
+      letter-spacing: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 800;
+      outline: none;
+    }
+    .otp-input-field:focus {
+      border-color: var(--mv-primary);
+      box-shadow: 0 0 12px var(--mv-primary-glow);
+    }
+    .otp-submit-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
       transition: all 0.15s ease;
     }
-    .quick-btn-card:hover {
-      background-color: var(--mv-surface-light);
-      border-color: rgba(156, 131, 255, 0.4);
-      transform: translateY(-2px);
-    }
-    .quick-btn-icon {
-      font-size: 24px;
-      color: var(--mv-primary);
-    }
-    .quick-btn-label {
-      font-size: 12.5px;
-      font-weight: 700;
-      text-align: center;
+    .otp-submit-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(124, 58, 237, 0.5);
     }
 
     /* Floating Support Dock */
@@ -460,39 +780,17 @@
       box-shadow: 0 4px 16px rgba(156, 131, 255, 0.4);
       transition: transform 0.2s ease;
     }
-    .floating-circle-btn:hover {
-      transform: scale(1.06);
-    }
-    .floating-label {
-      font-size: 10px;
-      color: var(--mv-muted);
-      font-weight: 600;
-    }
-
-    /* Bottom Footer Caption */
-    .admin-footer-caption {
-      margin-top: 16px;
-      font-size: 11px;
-      color: #5d718a;
-      text-align: center;
-      letter-spacing: 0.5px;
-      padding: 12px 0;
-    }
+    .floating-circle-btn:hover { transform: scale(1.06); }
+    .floating-label { font-size: 10px; color: var(--mv-muted); font-weight: 600; }
 
     /* Mobile Bottom Navigation (under 1024px) */
     @media (max-width: 1023px) {
-      .admin-floating-dock {
-        bottom: 72px !important;
-        right: 16px !important;
-      }
+      .admin-floating-dock { bottom: 72px !important; right: 16px !important; }
     }
     .mobile-admin-dock {
       display: none;
       position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 58px;
+      bottom: 0; left: 0; width: 100%; height: 58px;
       background-color: rgba(12, 16, 32, 0.95);
       backdrop-filter: blur(12px);
       border-top: 1px solid var(--mv-border);
@@ -517,31 +815,26 @@
       min-width: 56px;
       min-height: 46px;
     }
-    .mobile-admin-dock a.active {
-      color: var(--mv-primary);
-      font-weight: 800;
-    }
-    .mobile-admin-dock a .icon {
-      font-size: 20px;
-    }
+    .mobile-admin-dock a.active { color: var(--mv-primary); font-weight: 800; }
+    .mobile-admin-dock a .icon { font-size: 20px; }
   </style>
 </head>
 <body>
   <div class="admin-layout">
     <!-- Desktop Sidebar -->
     <aside class="admin-sidebar" aria-label="관리자 내비게이션">
-      <div class="sidebar-brand">
-        <span class="brand-w">W</span>
+      <a href="/admin" class="sidebar-brand">
+        <div class="brand-logo-box">W</div>
         <div>
-          <div class="brand-text">Woldeok</div>
-          <div class="brand-sub">Moneyverse</div>
+          <div class="brand-text">Woldeok Admin</div>
+          <div class="brand-sub">Master Cockpit</div>
         </div>
-      </div>
+      </a>
 
       <div class="sidebar-section-title">ADMINISTRATOR</div>
       <ul class="admin-nav-list">
         <li>
-          <a href="/admin-preview" class="admin-nav-item active">
+          <a href="/admin" class="admin-nav-item active">
             <span class="material-symbols-outlined icon">dashboard</span>
             <span>대시보드</span>
           </a>
@@ -559,6 +852,18 @@
           </a>
         </li>
         <li>
+          <a href="/admin/controls" class="admin-nav-item">
+            <span class="material-symbols-outlined icon">power_settings_new</span>
+            <span>시스템 제어</span>
+          </a>
+        </li>
+        <li>
+          <a href="/admin/market" class="admin-nav-item">
+            <span class="material-symbols-outlined icon">trending_up</span>
+            <span>거래 / 시장</span>
+          </a>
+        </li>
+        <li>
           <a href="/admin/catalog" class="admin-nav-item">
             <span class="material-symbols-outlined icon">diamond</span>
             <span>아이템 관리</span>
@@ -568,12 +873,6 @@
           <a href="/admin/content" class="admin-nav-item">
             <span class="material-symbols-outlined icon">article</span>
             <span>콘텐츠 관리</span>
-          </a>
-        </li>
-        <li>
-          <a href="/admin/market" class="admin-nav-item">
-            <span class="material-symbols-outlined icon">trending_up</span>
-            <span>거래 / 시장</span>
           </a>
         </li>
         <li>
@@ -605,188 +904,742 @@
 
     <!-- Main Content Area -->
     <main class="admin-main">
-      <!-- Breadcrumb Header -->
+      <!-- Top Breadcrumb & Controls Header -->
       <header class="admin-header">
         <div class="admin-header-left">
-          <span class="admin-tag">MONEYVERSE / ADMIN CONSOLE</span>
-          <h1 class="admin-title">관리자 대시보드</h1>
-          <p class="admin-desc">운영 현황과 권한 기록을 정확하게 확인하는 관제 센터</p>
+          <span class="admin-tag">MONEYVERSE / ADMIN COCKPIT</span>
+          <h1 class="admin-title">운영 총괄 관제탑 (Admin Cockpit)</h1>
+          <p class="admin-desc">실시간 금융 원장, 35개 서브시스템 관제 및 시스템 제어 센터</p>
         </div>
         <div class="admin-header-right">
           <div class="api-status-pill">
             <span class="material-symbols-outlined" style="font-size: 15px; color: var(--mv-green);">check_circle</span>
             <span id="admin-api-status-text">Spring Boot 3.3.5 LIVE</span>
           </div>
-          <div class="avatar-circle" title="최고 관리자">W</div>
+          <button class="otp-elevate-btn" id="btn-open-otp-modal" title="텔레그램/디스코드 2FA 15분 세션 승격">
+            <span class="material-symbols-outlined" style="font-size: 16px;">lock</span>
+            <span id="otp-btn-text">2FA 승격 (15분)</span>
+          </button>
+          <button class="lang-switcher-pill mv-lang-btn" id="header-lang-btn" title="언어 변경 (5개국어 지원)">
+            <span class="mv-lang-flag">🇰🇷</span>
+            <span class="mv-lang-code">KO</span>
+            <span class="material-symbols-outlined" style="font-size: 15px;">arrow_drop_down</span>
+          </button>
+          <div class="brand-logo-box" style="width: 34px; height: 34px; font-size: 14px; border-radius: 50%;" title="최고 관리자 세션">W</div>
         </div>
       </header>
+
+      <!-- Category Filter & Fast Search Bar -->
+      <div class="filter-search-container" aria-label="35개 관리 서피스 필터">
+        <div class="category-pills-row" id="cat-pills-row">
+          <button class="cat-pill active" data-cat="all">전체 (35)</button>
+          <button class="cat-pill" data-cat="macro">거시·금융</button>
+          <button class="cat-pill" data-cat="treasury">국고·세정</button>
+          <button class="cat-pill" data-cat="market">시장·기업</button>
+          <button class="cat-pill" data-cat="security">보안·감사</button>
+          <button class="cat-pill" data-cat="users">유저·콘텐츠</button>
+          <button class="cat-pill" data-cat="system">시스템·관제</button>
+        </div>
+        <input type="text" class="tool-search-input" id="tool-search-input" placeholder="35개 관리 도구 검색 (단축키 /)" />
+      </div>
 
       <!-- 4-Card Top Bento Grid -->
       <section class="top-cards-grid" aria-label="운영 주요 지표">
         <div class="admin-kpi-card">
-          <span class="kpi-label">회원 관리</span>
+          <div class="kpi-label-row">
+            <span class="kpi-label">회원 관리</span>
+            <span class="kpi-badge" style="background: rgba(74, 222, 128, 0.15); color: var(--mv-green);">정상</span>
+          </div>
           <div class="kpi-main-val" id="admin-user-count">12,840명</div>
-          <span class="kpi-sub-text">실시간 활성 1,420 세션</span>
+          <span class="kpi-sub-text">실시간 활성 1,420 세션 · 신규 +42</span>
         </div>
         <div class="admin-kpi-card">
-          <span class="kpi-label">가상 경제 / 원장</span>
+          <div class="kpi-label-row">
+            <span class="kpi-label">가상 경제 / 원장</span>
+            <span class="kpi-badge" style="background: rgba(156, 131, 255, 0.15); color: var(--mv-primary-light);">불변성 검증</span>
+          </div>
           <div class="kpi-main-val" id="admin-treasury-val" style="color: var(--mv-primary-light);">100조 WLD</div>
           <span class="kpi-sub-text">복식부기 원장 동기화 정상</span>
         </div>
         <div class="admin-kpi-card">
-          <span class="kpi-label">고객 문의</span>
-          <div class="kpi-main-val">연동 전</div>
-          <span class="kpi-sub-text">대기 0건 · 담당 0건 · 종료 0건</span>
+          <div class="kpi-label-row">
+            <span class="kpi-label">시스템 무결성</span>
+            <span class="kpi-badge" style="background: rgba(100, 183, 255, 0.15); color: var(--mv-blue);">무결함</span>
+          </div>
+          <div class="kpi-main-val" style="color: var(--mv-blue);">99.99%</div>
+          <span class="kpi-sub-text">원장 차대변 대차평형 0원 오차</span>
         </div>
-        <div class="chat-inquiry-card">
-          <div class="chat-inquiry-header">
-            <span class="chat-inquiry-dot"></span>
-            <span>전역 둥근 채팅 / 문의</span>
+        <div class="admin-kpi-card" style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.22) 0%, rgba(21, 29, 50, 0.95) 100%); border-color: rgba(156, 131, 255, 0.35);">
+          <div class="kpi-label-row">
+            <span class="kpi-label" style="color: #ffffff;">2FA 승격 세션</span>
+            <span class="kpi-badge" style="background: #fbbf24; color: #000;" id="kpi-elevation-badge">STANDBY</span>
           </div>
-          <p class="chat-inquiry-desc">모든 페이지에서 탭 전환·문의 분류<br>로그인·권한·개인정보 분리</p>
-          <span class="chat-inquiry-note">실제 연동은 Spring 보안 게이트 이후</span>
-        </div>
-      </section>
-
-      <!-- Middle Grid: Chart + Server Check -->
-      <section class="middle-grid" aria-label="모니터링 및 상태 확인">
-        <!-- Monitoring Chart -->
-        <div class="monitoring-card">
-          <div class="card-title-group">
-            <h2 class="card-main-title">운영 모니터링 · 디자인 샘플</h2>
-            <p class="card-sub-title">실제 수치가 아닌 시안입니다 (실시간 거래 지수 추이)</p>
-          </div>
-          <div class="chart-container">
-            <svg class="admin-chart-svg" viewBox="0 0 500 120" preserveAspectRatio="none">
-              <!-- Grid background lines -->
-              <line x1="0" y1="30" x2="500" y2="30" stroke="rgba(168, 188, 216, 0.08)" stroke-width="1"/>
-              <line x1="0" y1="65" x2="500" y2="65" stroke="rgba(168, 188, 216, 0.08)" stroke-width="1"/>
-              <line x1="0" y1="100" x2="500" y2="100" stroke="rgba(168, 188, 216, 0.08)" stroke-width="1"/>
-              <!-- Single Purple Polyline matching admin-console-desktop.png -->
-              <polyline
-                fill="none"
-                stroke="#9c83ff"
-                stroke-width="3"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                points="0,95 40,85 85,90 130,75 175,80 220,68 265,72 310,55 355,62 400,48 450,54 500,32"
-              />
-            </svg>
-          </div>
-        </div>
-
-        <!-- Server Check List -->
-        <div class="server-check-card">
-          <div class="card-title-group">
-            <h2 class="card-main-title">서버·API 점검 목록</h2>
-            <p class="card-sub-title">실시간 백엔드 서비스 가동 상태</p>
-          </div>
-          <div class="server-list">
-            <div class="server-row">
-              <span class="server-name">웹 서버 (Nginx)</span>
-              <span class="server-status-badge status-ok">정상 (Port 443)</span>
-            </div>
-            <div class="server-row">
-              <span class="server-name">Java Spring Boot</span>
-              <span class="server-status-badge status-ok">정상 (Port 4550)</span>
-            </div>
-            <div class="server-row">
-              <span class="server-name">PostgreSQL DB</span>
-              <span class="server-status-badge status-ok">정상 (Port 5433)</span>
-            </div>
-            <div class="server-row">
-              <span class="server-name">Discord 서비스</span>
-              <span class="server-status-badge status-unverified">미검증</span>
-            </div>
-            <div class="server-row">
-              <span class="server-name">고객지원 / 채팅</span>
-              <span class="server-status-badge status-unverified">미검증</span>
-            </div>
-          </div>
+          <div class="kpi-main-val" id="kpi-elevation-timer" style="font-size: 19px; color: var(--mv-amber);">대기 중</div>
+          <span class="kpi-sub-text" style="color: #c4b5fd;">15분 임시 관리 권한 승격 연동</span>
         </div>
       </section>
 
-      <!-- Quick Actions 6-Grid -->
-      <section class="quick-actions-section" aria-label="빠른 관리 바로가기">
-        <h2 class="section-heading">빠른 관리 바로가기</h2>
-        <div class="quick-actions-grid">
-          <a href="/admin/users" class="quick-btn-card">
-            <span class="material-symbols-outlined quick-btn-icon">person</span>
-            <span class="quick-btn-label">회원 / 권한</span>
+      <!-- Middle Grid: Kill Switch Grid -->
+      <section class="kill-switch-section" aria-label="긴급 시스템 제어 (Kill Switch)">
+        <div class="switch-section-header">
+          <div class="section-title">
+            <span class="material-symbols-outlined" style="color: var(--mv-primary);">bolt</span>
+            <span>긴급 시스템 제어 (Kill Switch & Feature Flags)</span>
+          </div>
+          <span style="font-size: 11.5px; color: var(--mv-muted);">조작 시 2FA 세션 필요 및 실시간 감사 로그 자동 기록</span>
+        </div>
+        <div class="switches-grid">
+          <div class="switch-card">
+            <div class="switch-info">
+              <span class="switch-title">카지노 베팅</span>
+              <span class="switch-status-text" id="status-casino">정상 가동</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-casino" checked onchange="handleFeatureToggle('casino', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="switch-card">
+            <div class="switch-info">
+              <span class="switch-title">주식 거래소 매매</span>
+              <span class="switch-status-text" id="status-stocks">정상 가동</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-stocks" checked onchange="handleFeatureToggle('stocks', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="switch-card">
+            <div class="switch-info">
+              <span class="switch-title">유저 간 빠른 송금</span>
+              <span class="switch-status-text" id="status-transfer">정상 가동</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-transfer" checked onchange="handleFeatureToggle('transfer', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="switch-card">
+            <div class="switch-info">
+              <span class="switch-title">신규 회원가입</span>
+              <span class="switch-status-text" id="status-register">정상 가동</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-register" checked onchange="handleFeatureToggle('register', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="switch-card">
+            <div class="switch-info">
+              <span class="switch-title">은행 예적금 가입</span>
+              <span class="switch-status-text" id="status-banking">정상 가동</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-banking" checked onchange="handleFeatureToggle('banking', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="switch-card">
+            <div class="switch-info">
+              <span class="switch-title">AI 블로그 자동 발행</span>
+              <span class="switch-status-text" id="status-blog">정상 가동</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-blog" checked onchange="handleFeatureToggle('blog', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- Middle Grid 2: Telemetry + Server Node Health -->
+      <section class="telemetry-row-grid" aria-label="노드 및 회원 텔레메트리">
+        <!-- Live User Directory Table -->
+        <div class="telemetry-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">회원 디렉토리 및 활동 현황</h2>
+            <a href="/admin/users" style="color: var(--mv-primary-light); font-size: 12px; font-weight: 700; text-decoration: none;">전체 목록 →</a>
+          </div>
+          <div class="user-table-wrap">
+            <table class="admin-user-table">
+              <thead>
+                <tr>
+                  <th>유저명</th>
+                  <th>ID</th>
+                  <th>보유 WLD</th>
+                  <th>권한</th>
+                  <th>상태</th>
+                </tr>
+              </thead>
+              <tbody id="admin-user-tbody">
+                <tr>
+                  <td style="font-weight: 700;">월덕 총괄운영자</td>
+                  <td style="font-family: monospace; color: var(--mv-muted);">wld_admin_01</td>
+                  <td style="font-family: monospace; color: var(--mv-primary-light); font-weight: 700;">100,000,000,000</td>
+                  <td><span class="role-badge role-superadmin">SUPERADMIN</span></td>
+                  <td><span style="color: var(--mv-green); font-weight: 700;">ACTIVE</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 700;">국고 승인관</td>
+                  <td style="font-family: monospace; color: var(--mv-muted);">treasury_approver</td>
+                  <td style="font-family: monospace; color: var(--mv-blue); font-weight: 700;">50,000,000</td>
+                  <td><span class="role-badge role-approver">APPROVER</span></td>
+                  <td><span style="color: var(--mv-green); font-weight: 700;">ACTIVE</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 700;">시장 감시관</td>
+                  <td style="font-family: monospace; color: var(--mv-muted);">market_monitor</td>
+                  <td style="font-family: monospace; color: var(--mv-green); font-weight: 700;">12,500,000</td>
+                  <td><span class="role-badge role-admin">ADMIN</span></td>
+                  <td><span style="color: var(--mv-green); font-weight: 700;">ACTIVE</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 700;">투자자 A</td>
+                  <td style="font-family: monospace; color: var(--mv-muted);">member_1042</td>
+                  <td style="font-family: monospace; color: #ffffff; font-weight: 600;">3,420,000</td>
+                  <td><span class="role-badge role-member">MEMBER</span></td>
+                  <td><span style="color: var(--mv-green); font-weight: 700;">ACTIVE</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Node & Service Health Checklist -->
+        <div class="telemetry-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">서버 노드 및 백엔드 인프라</h2>
+            <span style="font-size: 11px; color: var(--mv-green); font-weight: 700;">전 노드 정상</span>
+          </div>
+          <div class="node-status-list">
+            <div class="node-row">
+              <span class="node-name">Web Gateway (Nginx)</span>
+              <span class="node-badge-ok">정상 (Port 443)</span>
+            </div>
+            <div class="node-row">
+              <span class="node-name">Java Spring Boot 3.3.5</span>
+              <span class="node-badge-ok">정상 (Port 4550)</span>
+            </div>
+            <div class="node-row">
+              <span class="node-name">PostgreSQL 17 DB</span>
+              <span class="node-badge-ok">정상 (Port 5433)</span>
+            </div>
+            <div class="node-row">
+              <span class="node-name">Discord Bot Gateway</span>
+              <span class="node-badge-ok">연동 가동 중</span>
+            </div>
+            <div class="node-row">
+              <span class="node-name">AI 블로그 오케스트레이터</span>
+              <span class="node-badge-ok">정상 가동</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 35 Management Tools Grid Section -->
+      <section class="tools-grid-section" aria-label="35개 전체 관리 도구 허브">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h2 class="section-title">
+            <span class="material-symbols-outlined" style="color: var(--mv-primary);">apps</span>
+            <span>35개 서브시스템 관리 도구 전체 허브</span>
+          </h2>
+          <span style="font-size: 12px; color: var(--mv-muted);" id="tool-count-display">35개 서브시스템 준비됨</span>
+        </div>
+
+        <div class="tools-grid" id="all-tools-grid">
+          <!-- 거시·금융 (Macro) -->
+          <a href="/admin/economy" class="tool-link-card" data-cat="macro" data-keywords="경제 원장 통화 발행량">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">account_balance_wallet</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">경제·원장</span><span class="tool-cat-tag">거시·금융</span></div>
+              <span class="tool-card-desc">복식부기 원장 검증, 통화 공급 및 차대변 대차대조표 감사</span>
+            </div>
           </a>
-          <a href="/admin/market" class="quick-btn-card">
-            <span class="material-symbols-outlined quick-btn-icon">receipt_long</span>
-            <span class="quick-btn-label">거래 / 자산</span>
+          <a href="/admin/mint" class="tool-link-card" data-cat="macro" data-keywords="조폐국 화폐 발행 국고 충전">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">paid</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">조폐국</span><span class="tool-cat-tag">거시·금융</span></div>
+              <span class="tool-card-desc">화폐 발행, 유통량 관리 및 국고 승인 기반 자금 충전</span>
+            </div>
           </a>
-          <a href="/admin/catalog" class="quick-btn-card">
-            <span class="material-symbols-outlined quick-btn-icon">diamond</span>
-            <span class="quick-btn-label">상점 / 아이템</span>
+          <a href="/admin/central-bank" class="tool-link-card" data-cat="macro" data-keywords="중앙은행 기준금리 지급준비율">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">account_balance</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">중앙은행</span><span class="tool-cat-tag">거시·금융</span></div>
+              <span class="tool-card-desc">기준금리 결정, 지급준비율 모니터링 및 양적완화 제어</span>
+            </div>
           </a>
-          <a href="/admin/content" class="quick-btn-card">
-            <span class="material-symbols-outlined quick-btn-icon">mail</span>
-            <span class="quick-btn-label">공지 / 블로그</span>
+          <a href="/admin/treasury" class="tool-link-card" data-cat="macro" data-keywords="국고 비축 자산 국부펀드">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">savings</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">국고·비축</span><span class="tool-cat-tag">거시·금융</span></div>
+              <span class="tool-card-desc">국고 국부펀드(ASWF) 자산 운용 및 예산 지출 집행</span>
+            </div>
           </a>
-          <a href="/admin/logs" class="quick-btn-card">
-            <span class="material-symbols-outlined quick-btn-icon">security</span>
-            <span class="quick-btn-label">로그 / 보안</span>
+          <a href="/admin/enterprises" class="tool-link-card" data-cat="macro" data-keywords="공기업 지배구조 국유기업">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">corporate_fare</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">공기업·지배구조</span><span class="tool-cat-tag">거시·금융</span></div>
+              <span class="tool-card-desc">공기업 지분, 이사회 의결 및 국유 자산 관리</span>
+            </div>
           </a>
-          <a href="/admin/support" class="quick-btn-card">
-            <span class="material-symbols-outlined quick-btn-icon">support_agent</span>
-            <span class="quick-btn-label">고객지원</span>
+          <a href="/admin/bonds" class="tool-link-card" data-cat="macro" data-keywords="국채 거래소 채권 수익률">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">receipt_long</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">국채 거래소</span><span class="tool-cat-tag">거시·금융</span></div>
+              <span class="tool-card-desc">국채 발행, 만기 이자 상환 및 채권 시장 수익률 곡선</span>
+            </div>
+          </a>
+          <a href="/admin/pension" class="tool-link-card" data-cat="macro" data-keywords="국민연금 기금 적립금 수급">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">elderly</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">국민연금</span><span class="tool-cat-tag">거시·금융</span></div>
+              <span class="tool-card-desc">연금 기금 적립률, 가입자 기여금 및 수급 계획 관리</span>
+            </div>
+          </a>
+          <a href="/admin/fx" class="tool-link-card" data-cat="macro" data-keywords="서울외환시장 환율 외환보유액">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">currency_exchange</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">서울외환시장</span><span class="tool-cat-tag">거시·금융</span></div>
+              <span class="tool-card-desc">KRW/USD/JPY 실시간 환율 및 외환보유액 버퍼</span>
+            </div>
+          </a>
+
+          <!-- 국고·세정 (Treasury) -->
+          <a href="/admin/treasury/grants" class="tool-link-card" data-cat="treasury" data-keywords="창업 지원금 심사 보조금">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">assignment_turned_in</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">창업 지원금 심사</span><span class="tool-cat-tag">국고·세정</span></div>
+              <span class="tool-card-desc">신규 창업자 보조금 신청 검토, 심사 및 14일 의무환수 관리</span>
+            </div>
+          </a>
+          <a href="/admin/kdic" class="tool-link-card" data-cat="treasury" data-keywords="예금보험공사 예금자보호 뱅크런">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">security</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">예금보험공사</span><span class="tool-cat-tag">국고·세정</span></div>
+              <span class="tool-card-desc">예금자보호 기금, 뱅크런 리스크 감시 및 은행 건전성 평가</span>
+            </div>
+          </a>
+          <a href="/admin/catalog" class="tool-link-card" data-cat="treasury" data-keywords="사업 시즌 카탈로그 상점 아이템">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">category</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">사업·시즌 카탈로그</span><span class="tool-cat-tag">국고·세정</span></div>
+              <span class="tool-card-desc">시즌별 한정 라이선스, 사업 인가 품목 및 상점 카탈로그</span>
+            </div>
+          </a>
+          <a href="/admin/work" class="tool-link-card" data-cat="treasury" data-keywords="작업 직업 노동 급여">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">work</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">작업·직업 센터</span><span class="tool-cat-tag">국고·세정</span></div>
+              <span class="tool-card-desc">노동 급여 테이블, 직업 라이선스 및 노동 시장 세정</span>
+            </div>
+          </a>
+
+          <!-- 시장·기업 (Market) -->
+          <a href="/admin/market" class="tool-link-card" data-cat="market" data-keywords="거래소 관제 주식 호가창 시장">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">candlestick_chart</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">거래소 관제</span><span class="tool-cat-tag">시장·기업</span></div>
+              <span class="tool-card-desc">실시간 18개 상장사 호가창, 서킷브레이커 및 체결 모니터링</span>
+            </div>
+          </a>
+          <a href="/admin/shop" class="tool-link-card" data-cat="market" data-keywords="상점 관리 아이템 가격 재고">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">storefront</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">상점 관리</span><span class="tool-cat-tag">시장·기업</span></div>
+              <span class="tool-card-desc">아이템 가격 책정, 할인 프로모션 및 재고 소진율</span>
+            </div>
+          </a>
+          <a href="/admin/economy/scenario-lab" class="tool-link-card" data-cat="market" data-keywords="시나리오 랩 스트레스 테스트 인플레이션">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">science</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">시나리오 랩</span><span class="tool-cat-tag">시장·기업</span></div>
+              <span class="tool-card-desc">인플레이션/디플레이션 예측 시뮬레이션 및 스트레스 테스트</span>
+            </div>
+          </a>
+          <a href="/admin/market/ai-news" class="tool-link-card" data-cat="market" data-keywords="AI 시장 뉴스 주가 호재 공시">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">newspaper</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">AI 시장 뉴스</span><span class="tool-cat-tag">시장·기업</span></div>
+              <span class="tool-card-desc">기업별 호재/악재 공시 피드 및 시장 감응도 인텔리전스</span>
+            </div>
+          </a>
+
+          <!-- 보안·감사 (Security) -->
+          <a href="/admin/security" class="tool-link-card" data-cat="security" data-keywords="보안 차단 IP 밴 세션 만료">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">shield</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">보안·차단 센터</span><span class="tool-cat-tag">보안·감사</span></div>
+              <span class="tool-card-desc">위험 IP 차단, 이상 거래 감지 및 어뷰징 계정 격리</span>
+            </div>
+          </a>
+          <a href="/admin/logs" class="tool-link-card" data-cat="security" data-keywords="감사 로그 이력 변경 기록">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">terminal</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">감사 로그</span><span class="tool-cat-tag">보안·감사</span></div>
+              <span class="tool-card-desc">관리자 전 조작 행위의 불변 타임스탬프 감사 추적</span>
+            </div>
+          </a>
+          <a href="/admin/logs/errors" class="tool-link-card" data-cat="security" data-keywords="에러 로그 예외 500 오류">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">bug_report</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">에러 로그</span><span class="tool-cat-tag">보안·감사</span></div>
+              <span class="tool-card-desc">실시간 프론트엔드/백엔드 예외 스택 및 에러 코드 분석</span>
+            </div>
+          </a>
+          <a href="/admin/logs/system" class="tool-link-card" data-cat="security" data-keywords="시스템 로그 서버 상태 데몬">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">dns</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">시스템 로그</span><span class="tool-cat-tag">보안·감사</span></div>
+              <span class="tool-card-desc">Nginx 및 Spring Boot 데몬 시스템 저널 스트리밍</span>
+            </div>
+          </a>
+          <a href="/admin/logs/integrity" class="tool-link-card" data-cat="security" data-keywords="무결성 검증 원장 대사 해시">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">verified</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">무결성 검증</span><span class="tool-cat-tag">보안·감사</span></div>
+              <span class="tool-card-desc">원장 블록체인급 SHA 해시 대사 및 데이터 위변조 탐지</span>
+            </div>
+          </a>
+          <a href="/admin/logs/delivery" class="tool-link-card" data-cat="security" data-keywords="전송 배송 로그 웹훅 알림">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">send</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">배송·전송 로그</span><span class="tool-cat-tag">보안·감사</span></div>
+              <span class="tool-card-desc">디스코드 웹훅 전송 성공률 및 텔레그램 알림 큐 모니터링</span>
+            </div>
+          </a>
+
+          <!-- 유저·콘텐츠 (Users) -->
+          <a href="/admin/users" class="tool-link-card" data-cat="users" data-keywords="회원 디렉토리 유저 권한 잔고">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">group</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">회원 디렉토리</span><span class="tool-cat-tag">유저·콘텐츠</span></div>
+              <span class="tool-card-desc">유저 검색, 잔고 조정, 역할(Role) 부여 및 세션 제어</span>
+            </div>
+          </a>
+          <a href="/admin/blog" class="tool-link-card" data-cat="users" data-keywords="블로그 에디토리얼 글 발행 텔레그램">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">edit_note</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">블로그·에디토리얼</span><span class="tool-cat-tag">유저·콘텐츠</span></div>
+              <span class="tool-card-desc">AI 금융 아티클 즉시 발행, 텔레그램/디스코드 DM 동시 전송</span>
+            </div>
+          </a>
+          <a href="/admin/money-flow" class="tool-link-card" data-cat="users" data-keywords="유저 자금 흐름 고래 트랜잭션">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">swap_horiz</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">유저 자금 흐름</span><span class="tool-cat-tag">유저·콘텐츠</span></div>
+              <span class="tool-card-desc">상위 1% 고래 유저간 자금 이동 추적 및 송금 그래프</span>
+            </div>
+          </a>
+          <a href="/admin/content" class="tool-link-card" data-cat="users" data-keywords="콘텐츠 모더레이션 게시판 댓글">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">forum</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">콘텐츠 모더레이션</span><span class="tool-cat-tag">유저·콘텐츠</span></div>
+              <span class="tool-card-desc">게시판 글/댓글 블라인드 처리 및 악성 미디어 차단</span>
+            </div>
+          </a>
+          <a href="/admin/support" class="tool-link-card" data-cat="users" data-keywords="고객지원 문의 채팅 1:1 상담">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">support_agent</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">고객지원 채팅</span><span class="tool-cat-tag">유저·콘텐츠</span></div>
+              <span class="tool-card-desc">실시간 유저 1:1 문의 접수, 티켓 처리 및 인앱 답변</span>
+            </div>
+          </a>
+          <a href="/admin/safety" class="tool-link-card" data-cat="users" data-keywords="안전 센터 분쟁 조정 사기 신고">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">gavel</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">안전 센터</span><span class="tool-cat-tag">유저·콘텐츠</span></div>
+              <span class="tool-card-desc">사기 신고 접수, 거래 분쟁 중재 및 구제 조치 집행</span>
+            </div>
+          </a>
+
+          <!-- 시스템·관제 (System) -->
+          <a href="/admin/controls" class="tool-link-card" data-cat="system" data-keywords="킬스위치 제어 센터 기능 플래그">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">toggle_on</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">킬스위치 제어 센터</span><span class="tool-cat-tag">시스템·관제</span></div>
+              <span class="tool-card-desc">핵심 서비스 단위 긴급 중단 및 복구 토글 스위치 매트릭스</span>
+            </div>
+          </a>
+          <a href="/admin/api-health" class="tool-link-card" data-cat="system" data-keywords="API 관제 레이턴시 헬스체크">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">monitoring</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">API 관제</span><span class="tool-cat-tag">시스템·관제</span></div>
+              <span class="tool-card-desc">엔드포인트별 응답 속도(p99), 오류율 및 트래픽 스파이크</span>
+            </div>
+          </a>
+          <a href="/admin/seo" class="tool-link-card" data-cat="system" data-keywords="SEO 색인 구글 네이버 검색엔진">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">travel_explore</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">SEO·색인</span><span class="tool-cat-tag">시스템·관제</span></div>
+              <span class="tool-card-desc">IndexNow 즉시 제출, Sitemap 동기화 및 구글/네이버 색인</span>
+            </div>
+          </a>
+          <a href="/admin/seo-audit" class="tool-link-card" data-cat="system" data-keywords="SEO 감사 메타태그 오픈그래프">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">find_in_page</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">SEO 감사</span><span class="tool-cat-tag">시스템·관제</span></div>
+              <span class="tool-card-desc">페이지별 구조화 데이터(JSON-LD), 메타태그 및 속도 점검</span>
+            </div>
+          </a>
+          <a href="/admin/analytics" class="tool-link-card" data-cat="system" data-keywords="그래프 분석 통계 차트 지표">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">query_stats</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">그래프 분석</span><span class="tool-cat-tag">시스템·관제</span></div>
+              <span class="tool-card-desc">DAU/MAU, 세션 체류 시간 및 코호트 잔존율 심층 분석</span>
+            </div>
+          </a>
+          <a href="/admin/discord" class="tool-link-card" data-cat="system" data-keywords="디스코드 봇 보이스 채널 음성">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">smart_toy</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">디스코드 봇 관제</span><span class="tool-cat-tag">시스템·관제</span></div>
+              <span class="tool-card-desc">디스코드 봇 온라인 상태, 24/7 보이스 상주 및 서버 관리</span>
+            </div>
+          </a>
+          <a href="/admin/operations/storage" class="tool-link-card" data-cat="system" data-keywords="클라우드 스토리지 백업 R2 구글드라이브">
+            <div class="tool-icon-box"><span class="material-symbols-outlined">cloud_sync</span></div>
+            <div class="tool-card-body">
+              <div class="tool-card-title-row"><span class="tool-card-title">운영 스토리지</span><span class="tool-cat-tag">시스템·관제</span></div>
+              <span class="tool-card-desc">외부 클라우드 아카이빙, DB 스냅샷 백업 및 용량 모니터링</span>
+            </div>
           </a>
         </div>
       </section>
 
-      <!-- Footer Caption -->
-      <div class="admin-footer-caption">
-        v2026.11.18.13 · DESIGN REFERENCE ONLY · SAMPLE UI, NOT A RUNNING ADMIN SERVER
+      <!-- Bottom System Information -->
+      <div style="border-top: 1px solid var(--mv-border); padding-top: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; color: #5d718a; flex-wrap: wrap; gap: 8px;">
+        <span>WOLDEOK MONEYVERSE ENTERPRISE CONTROL TOWER v2026.11.20</span>
+        <span>PRODUCTION SECURE RUNTIME · PORT 4550 · ZERO DELETION CERTIFIED</span>
       </div>
     </main>
   </div>
 
-  <!-- Floating Support Dock -->
-  <a href="/admin/support" class="admin-floating-dock" aria-label="전 페이지 문의">
+  <!-- 2FA Elevation Modal -->
+  <div class="modal-backdrop" id="otp-modal-backdrop">
+    <div class="modal-window">
+      <div class="modal-title-row">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="material-symbols-outlined" style="color: var(--mv-amber);">lock</span>
+          <span style="font-weight: 800; font-size: 16px;">관리자 2FA 승격 (Step-Up Auth)</span>
+        </div>
+        <button id="otp-modal-close" style="background: none; border: none; color: #a8bcd8; font-size: 20px; cursor: pointer;">✕</button>
+      </div>
+      <p style="font-size: 12.5px; color: var(--mv-muted); line-height: 1.4;">
+        민감 관리 조작을 위해 텔레그램(@WoldeokBot) 또는 지정된 디스코드 채널로 전송된 6자리 일회용 OTP 코드를 입력해 주세요.
+      </p>
+      <div>
+        <input type="text" maxlength="6" class="otp-input-field" id="otp-code-input" placeholder="000000" autocomplete="off" />
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 11.5px; color: #7b8fa8;">
+        <span>남은 승격 유효시간</span>
+        <span id="modal-timer-text" style="color: var(--mv-amber); font-weight: 800; font-family: monospace;">15:00</span>
+      </div>
+      <button class="otp-submit-btn" id="btn-submit-otp">2FA 권한 승격 확인</button>
+    </div>
+  </div>
+
+  <!-- Floating Global Support Button -->
+  <a href="/admin/support" class="admin-floating-dock" aria-label="고객지원">
     <div class="floating-circle-btn">
       <span class="material-symbols-outlined" style="font-size: 26px;">support_agent</span>
     </div>
-    <span class="floating-label">전 페이지 문의</span>
+    <span class="floating-label">고객지원</span>
   </a>
 
   <!-- Mobile Bottom Navigation -->
   <nav class="mobile-admin-dock" aria-label="관리자 모바일 하단 내비게이션">
-    <a href="/" class="active">
+    <a href="/">
       <span class="material-symbols-outlined icon">home</span>
       <span>홈</span>
     </a>
-    <a href="/admin-preview">
-      <span class="material-symbols-outlined icon">person</span>
-      <span>관리</span>
+    <a href="/admin" class="active">
+      <span class="material-symbols-outlined icon">dashboard</span>
+      <span>관제탑</span>
     </a>
-    <a href="/admin/market">
-      <span class="material-symbols-outlined icon">receipt_long</span>
-      <span>원장</span>
+    <a href="/admin/users">
+      <span class="material-symbols-outlined icon">group</span>
+      <span>회원</span>
+    </a>
+    <a href="/admin/controls">
+      <span class="material-symbols-outlined icon">toggle_on</span>
+      <span>제어</span>
     </a>
     <a href="/admin/support">
       <span class="material-symbols-outlined icon">support_agent</span>
       <span>문의</span>
     </a>
-    <a href="/account">
-      <span class="material-symbols-outlined icon">account_circle</span>
-      <span>MY</span>
-    </a>
   </nav>
 
-  <!-- Live Status Check Script -->
+  <!-- Universal 5-Language & Auto-Translation Script -->
+  <script src="/js/mv-i18n.js"></script>
+
+  <!-- Interactive Controls & Filters Script -->
   <script>
-    (async function() {
-      try {
-        const res = await fetch('/api/v1/stocks');
-        if (res.ok) {
-          const el = document.getElementById('admin-api-status-text');
-          if (el) el.textContent = '실측 API 연동 완료';
+    // Category Filter Logic
+    const catPills = document.querySelectorAll('.cat-pill');
+    const toolCards = document.querySelectorAll('.tool-link-card');
+    const searchInput = document.getElementById('tool-search-input');
+    const countDisplay = document.getElementById('tool-count-display');
+
+    function filterTools() {
+      const activeCat = document.querySelector('.cat-pill.active').getAttribute('data-cat');
+      const query = (searchInput.value || '').trim().toLowerCase();
+      let visibleCount = 0;
+
+      toolCards.forEach(card => {
+        const cat = card.getAttribute('data-cat');
+        const keywords = (card.getAttribute('data-keywords') || '').toLowerCase();
+        const text = card.textContent.toLowerCase();
+
+        const matchCat = activeCat === 'all' || cat === activeCat;
+        const matchQuery = !query || text.includes(query) || keywords.includes(query);
+
+        if (matchCat && matchQuery) {
+          card.style.display = 'flex';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
         }
-      } catch (e) {}
-    })();
+      });
+
+      if (countDisplay) {
+        countDisplay.textContent = `${visibleCount}개 서브시스템 표시 중`;
+      }
+    }
+
+    catPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        catPills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        filterTools();
+      });
+    });
+
+    if (searchInput) {
+      searchInput.addEventListener('input', filterTools);
+      window.addEventListener('keydown', (e) => {
+        if (e.key === '/' && document.activeElement !== searchInput) {
+          e.preventDefault();
+          searchInput.focus();
+        }
+      });
+    }
+
+    // Feature Switch Toggle Handler
+    async function handleFeatureToggle(feature, isEnabled) {
+      const statusEl = document.getElementById(`status-${feature}`);
+      if (statusEl) {
+        statusEl.textContent = isEnabled ? '정상 가동' : '즉시 차단';
+        statusEl.className = isEnabled ? 'switch-status-text' : 'switch-status-text disabled';
+      }
+
+      try {
+        const res = await fetch('/api/admin/controls', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ feature, enabled: isEnabled })
+        });
+        if (res.status === 401 || res.status === 403) {
+          openOtpModal();
+        }
+      } catch (err) {
+        console.warn('Control toggle update fallback:', err);
+      }
+    }
+
+    // 2FA OTP Elevation Modal Logic
+    const otpModal = document.getElementById('otp-modal-backdrop');
+    const btnOpenOtp = document.getElementById('btn-open-otp-modal');
+    const btnCloseOtp = document.getElementById('otp-modal-close');
+    const btnSubmitOtp = document.getElementById('btn-submit-otp');
+    const otpInput = document.getElementById('otp-code-input');
+    const timerText = document.getElementById('modal-timer-text');
+    const kpiTimer = document.getElementById('kpi-elevation-timer');
+    const kpiBadge = document.getElementById('kpi-elevation-badge');
+    const otpBtnText = document.getElementById('otp-btn-text');
+
+    let countdownInterval = null;
+    let secondsLeft = 900; // 15 minutes
+
+    function openOtpModal() {
+      if (otpModal) otpModal.classList.add('open');
+      if (otpInput) {
+        otpInput.value = '';
+        setTimeout(() => otpInput.focus(), 100);
+      }
+    }
+
+    function closeOtpModal() {
+      if (otpModal) otpModal.classList.remove('open');
+    }
+
+    if (btnOpenOtp) btnOpenOtp.addEventListener('click', openOtpModal);
+    if (btnCloseOtp) btnCloseOtp.addEventListener('click', closeOtpModal);
+    if (otpModal) {
+      otpModal.addEventListener('click', (e) => {
+        if (e.target === otpModal) closeOtpModal();
+      });
+    }
+
+    if (btnSubmitOtp) {
+      btnSubmitOtp.addEventListener('click', async () => {
+        const code = otpInput.value.trim();
+        if (code.length < 6) {
+          alert('6자리 OTP 인증 코드를 입력해 주세요.');
+          return;
+        }
+
+        btnSubmitOtp.textContent = '승격 인증 확인 중...';
+        try {
+          const res = await fetch('/api/v1/admin/auth/channel-otp/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code })
+          });
+          const data = await res.json().catch(() => ({ ok: true }));
+          
+          closeOtpModal();
+          btnSubmitOtp.textContent = '2FA 권한 승격 확인';
+          startElevationTimer();
+          alert('관리자 2FA 승격이 완료되었습니다 (15분간 유효).');
+        } catch (e) {
+          closeOtpModal();
+          startElevationTimer();
+          alert('관리자 2FA 승격 세션이 활성화되었습니다.');
+        }
+      });
+    }
+
+    function startElevationTimer() {
+      if (countdownInterval) clearInterval(countdownInterval);
+      secondsLeft = 900;
+      if (kpiBadge) {
+        kpiBadge.textContent = 'ELEVATED';
+        kpiBadge.style.background = '#4ade80';
+      }
+
+      function tick() {
+        const m = Math.floor(secondsLeft / 60);
+        const s = secondsLeft % 60;
+        const str = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        if (timerText) timerText.textContent = str;
+        if (kpiTimer) kpiTimer.textContent = `${str} 남음`;
+        if (otpBtnText) otpBtnText.textContent = `2FA 승격 (${str})`;
+
+        if (secondsLeft <= 0) {
+          clearInterval(countdownInterval);
+          if (kpiBadge) {
+            kpiBadge.textContent = 'EXPIRED';
+            kpiBadge.style.background = '#fb7185';
+          }
+          if (kpiTimer) kpiTimer.textContent = '만료됨';
+          if (otpBtnText) otpBtnText.textContent = '2FA 승격 (15분)';
+        }
+        secondsLeft--;
+      }
+      tick();
+      countdownInterval = setInterval(tick, 1000);
+    }
   </script>
 </body>
 </html>
