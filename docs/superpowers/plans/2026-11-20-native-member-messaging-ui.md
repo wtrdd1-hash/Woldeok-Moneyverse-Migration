@@ -46,3 +46,13 @@ Review also requires original-owner/privateEpoch recheck after post-send load, a
 No unsafe-current-main merge, real user messages, browser acceptance or release claim.
 
 Review round1 execution:3 Important findings fixed; focused24 Spring/26 client cases GREEN, full453 Spring/254 Node GREEN,0 failures/errors/skips. Response-owner compatibility gate is mandatory; missing stamp remains unavailable until same-source rollout. Scoped independent re-review and browser/Test/release acceptance pending.
+
+## Native messaging review round2 — before work
+- [x] Verified whole-branch integration finding against actual source: messaging.js loads before shared chrome.js, and chrome localize later rewrites every data-i18n node. Component-owned ready state, selected subject and retry labels still carry static translation keys.
+- [x] Verified second Important finding against established mv39 app.js renderAuthControls/site.css: account/profile/logout classes and topbar.member-authenticated select44px sizing, long-name ellipsis and <=480px second-row wrapping; messaging's bare anchors/custom logout omit that contract.
+- [ ] Add actual locale/core/messaging/chrome scripts in template order on one shared DOM with real template data-i18n/fragment IDs. Observe RED for ready/selected heading/retry plus account classes/transition contract.
+- [ ] Remove only shared-localizer ownership from messaging-rendered dynamic nodes while preserving initial escaped SSR fallback; reuse established account classes and member-authenticated toggle, no shared chrome/CSS changes.
+- [ ] Focused Node/HTTP, appropriate full gates, report and checkpoint for scoped re-review. Fixed child base retained; no blind main merge or parent-root edit.
+Browser geometry, global cross-navigation drafts, authenticated delivery and Test/release remain OPEN.
+
+Round2 execution: Important I1/I2 fixed with actual4-script shared-DOM integration tests,34 client/29 focused Spring GREEN. Parent explicitly assigned minor M1/M3, both resolved; M2 remains parent-owned. Full458 Spring+bootJar/262 Node GREEN,0 failures/errors/skips. Shared chrome/CSS untouched; scoped re-review and actual browser geometry/release acceptance remain open.

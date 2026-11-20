@@ -144,4 +144,24 @@ class NativeMessagingWebTest {
                     "/chat/conversations","/chat/unread-count","/chat/conversations/"+target+"/messages"})
                 mvc.perform(get(prefix+suffix)).andExpect(status().isForbidden()).andExpect(header().doesNotExist("X-MV-Owner"));
     }
+
+    @ParameterizedTest @ValueSource(strings={"en","ko","ja","zh","vi"})
+    void componentOwnedDynamicLabelsKeepLocalizedInitialSsrWithoutCompetingStaticKeys(String code) throws Exception {
+        signedIn();
+        for(String family:new String[]{"support","chat"}) {
+            String html=mvc.perform(get("/"+family).cookie(new Cookie("wdmv_locale",code)))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+            var labels=new java.util.LinkedHashMap<String,String>();
+            labels.put("messaging-status","loading");labels.put("message-heading","msgHistory");
+            labels.put("message-send","msgSend");
+            if(family.equals("support"))labels.put("support-start","msgStart");
+            for(var item:labels.entrySet()) {
+                var pattern=java.util.regex.Pattern.compile("(<[^>]*\\bid=\""+item.getKey()+"\"[^>]*>)([^<]*)</[^>]+>");
+                var match=pattern.matcher(html);
+                org.junit.jupiter.api.Assertions.assertTrue(match.find(),item.getKey());
+                org.junit.jupiter.api.Assertions.assertEquals(locale.labels(code).get(item.getValue()),match.group(2));
+                org.junit.jupiter.api.Assertions.assertFalse(match.group(1).contains("data-i18n="),item.getKey()+" belongs to messaging state");
+            }
+        }
+    }
 }

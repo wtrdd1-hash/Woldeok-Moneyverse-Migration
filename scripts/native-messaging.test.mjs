@@ -100,26 +100,43 @@ test('source privacy constraints, scoped catalogs and no native UTF16 body maxle
  const catalog=JSON.parse(readFileSync(new URL('ui/mv43-copy.json',base),'utf8'));for(const [key,values] of Object.entries(catalog).filter(([key])=>key.startsWith('msg')))assert.equal(values.length,5);
 });
 
-function harness(kind='support',fetcher,query='') {
- const published=[];
- const html=readFileSync(new URL('templates/mv43/'+kind+'.html',base),'utf8'),nodes=new Map(),events={};
+function harness(kind='support',fetcher,query='',shared=false) {
+ const published=[],html=readFileSync(new URL('templates/mv43/'+kind+'.html',base),'utf8');
+ const sharedHtml=shared?readFileSync(new URL('templates/shared/chrome.html',base),'utf8'):'';
+ const nodes=new Map(),allNodes=[],events={},executed=[];
  class Node {
-  constructor(tag='div'){this.tagName=tag.toUpperCase();this.value='';this.children=[];this.listeners={};this.dataset={};this.disabled=false;this.hidden=false;this.attributes={};this.textContent='';}
+  constructor(tag='div'){this.tagName=tag.toUpperCase();this.value='';this.children=[];this.listeners={};this.dataset={};this.disabled=false;this.hidden=false;this.attributes={};this.textContent='';this.className='';this.parentElement=null;this.isConnected=true;}
   set textContent(value){this._text=value;published.push(value);}get textContent(){return this._text;}
+  get classList(){return {contains:name=>this.className.split(/\s+/).includes(name),
+   toggle:(name,on)=>{const classes=new Set(this.className.split(/\s+/).filter(Boolean));if(on)classes.add(name);else classes.delete(name);this.className=[...classes].join(' ');},
+   add:name=>this.classList.toggle(name,true),remove:name=>this.classList.toggle(name,false)};}
   addEventListener(type,fn){(this.listeners[type]??=[]).push(fn);}
-  async fire(type){for(const fn of this.listeners[type]||[])await fn({preventDefault(){},persisted:false});}
-  append(...children){this.children.push(...children);}appendChild(child){this.append(child);return child;}
-  replaceChildren(...children){this.children=[...children];this.textContent='';}
+  async fire(type){for(const fn of this.listeners[type]||[])await fn({preventDefault(){},persisted:false,target:this});}
+  append(...children){for(const child of children){child.parentElement=this;this.children.push(child);}}appendChild(child){this.append(child);return child;}
+  replaceChildren(...children){for(const child of this.children)child.isConnected=false;this.children=[];this.append(...children);this.textContent='';}
   setAttribute(k,v){this.attributes[k]=v;}getAttribute(k){return this.attributes[k]??null;}
-  focus(){this.focused=true;}remove(){}click(){return this.fire('click');}
+  closest(selector){if(selector.startsWith('.')&&this.classList.contains(selector.slice(1)))return this;return this.parentElement?.closest(selector)||null;}
+  querySelectorAll(selector){return this.children.flatMap(child=>[...(selector==='a'?child.tagName==='A':selector==='[data-i18n]'?Boolean(child.dataset.i18n):false)?[child]:[],...child.querySelectorAll(selector)]);}
+  focus(){this.focused=true;document.activeElement=this;}remove(){this.isConnected=false;}click(){return this.fire('click');}
+  showModal(){this.open=true;}close(){this.open=false;this.fire('close');}
  }
- for(const match of html.matchAll(/<([a-z0-9]+)\b[^>]*\bid="([^"]+)"[^>]*>/g)){
-  const node=new Node(match[1]);node.id=match[2];node.disabled=/\bdisabled\b/.test(match[0]);nodes.set(node.id,node);
+ const tree=new Node('root'),stack=[tree],voids=new Set(['area','base','br','col','embed','hr','img','input','link','meta','param','source','track','wbr']);
+ for(const match of (html+sharedHtml).matchAll(/<(\/?)([a-z0-9:-]+)\b([^>]*)>/g)){
+  const [,closing,tag,attrs]=match;if(closing){const index=stack.map(node=>node.tagName.toLowerCase()).lastIndexOf(tag);if(index>0)stack.length=index;continue;}
+  const node=new Node(tag);for(const attr of attrs.matchAll(/([a-zA-Z0-9:-]+)="([^"]*)"/g)){
+   const [,name,value]=attr;node.setAttribute(name,value);if(name==='id'){node.id=value;nodes.set(value,node);}if(name==='class')node.className=value;
+   if(name.startsWith('data-'))node.dataset[name.slice(5).replace(/-([a-z])/g,(_,char)=>char.toUpperCase())]=value;
+  }
+  node.disabled=/\bdisabled\b/.test(attrs);stack.at(-1).append(node);allNodes.push(node);
+  if(!voids.has(tag)&&!attrs.endsWith('/'))stack.push(node);
  }
  nodes.get('messaging-root').dataset.kind=kind;
- const document={getElementById:id=>nodes.get(id)||null,createElement:tag=>new Node(tag),body:new Node('body'),hidden:false,
+ const document={getElementById:id=>nodes.get(id)||null,createElement:tag=>new Node(tag),body:tree,hidden:false,readyState:'complete',cookie:'',
+  documentElement:{dataset:{uiLanguage:'en'}},querySelectorAll:selector=>selector==='[data-i18n]'?allNodes.filter(node=>node.isConnected&&node.dataset.i18n):[],
   addEventListener:(name,fn)=>(events[name]??=[]).push(fn)};
- const window={MV43Messaging:core(),MV39Locale:{tx:k=>language+':'+k,current:()=>language},crypto:{randomUUID:()=>key},
+ const window={MV43Messaging:core(),MV39Locale:{tx:k=>language+':'+k,current:()=>language,preference:()=>language},
+  document,navigator:{languages:['en']},localStorage:{getItem:()=>null,setItem(){}},crypto:{randomUUID:()=>key},
+  dispatchEvent:event=>{for(const fn of events[event.type]||[])fn(event);},
   location:{search:query,assign(){}},addEventListener:(name,fn)=>(events[name]??=[]).push(fn)};
  let language='en';
  const downloads=[];
@@ -132,12 +149,18 @@ function harness(kind='support',fetcher,query='') {
   return response({},503);
  };
  const fetch=async(url,o)=>{calls.push({url,o});return fetcher?fetcher(url,o,defaultFetch):defaultFetch(url,o);};
- const jsPath=new URL('static/assets/mv43/messaging.js',base);assert.ok(existsSync(jsPath),'native DOM binding must exist');
- runInNewContext(readFileSync(jsPath,'utf8'),{window,document,fetch,Intl,URL:DownloadURL,URLSearchParams,Blob,AbortController});
+ const context={window,document,fetch,Intl,Event,URL:DownloadURL,URLSearchParams,Blob,AbortController};
+ function execute(path){executed.push(path);runInNewContext(readFileSync(new URL('static/assets/'+path,base),'utf8'),context);}
+ if(shared){execute('mv39/i18n.js');execute('mv43/messaging-core.js');}
+ execute('mv43/messaging.js');if(shared)execute('mv43/chrome.js');
  const flush=async()=>{for(let i=0;i<8;i++)await new Promise(r=>setImmediate(r));};
- return {nodes,calls,downloads,published,flush,language:async code=>{language=code;for(const fn of events['mv39-language-change']||[])await fn();},
+ return {nodes,calls,downloads,published,flush,executed,tx:key=>window.MV39Locale.tx(key),language:async code=>{
+  if(shared)window.MV39Locale.setPreference(code);
+  else{language=code;for(const fn of events['mv39-language-change']||[])await fn();}
+ },
   emit:async name=>{for(const fn of events[name]||[])await fn({persisted:false});},document};
 }
+
 test('binding uses real owner list before private history; safe text, language retention and pagehide clearing',async()=>{
  const h=harness();await h.flush();
  assert.ok(h.calls.find(x=>x.url==='/api/v1/support/threads'));
@@ -344,4 +367,155 @@ test('verified send receipt cannot return after awaited reload changes to anothe
  await sending;await h.flush();
  assert.ok(!h.nodes.get('messaging-result').textContent.includes(messageId));
  assert.equal(h.nodes.get('message-body').value,'');
+});
+
+test('actual template-order locale/messaging/chrome scripts preserve ready state, selected subject and drafts in five languages',async()=>{
+ const h=harness('support',undefined,'',true);await h.flush();
+ assert.deepEqual(h.executed,['mv39/i18n.js','mv43/messaging-core.js','mv43/messaging.js','mv43/chrome.js']);
+ const html=readFileSync(new URL('templates/mv43/support.html',base),'utf8');
+ assert.ok(html.indexOf('/messaging.js')<html.indexOf('shared/chrome :: commonHead'));
+ h.nodes.get('support-subject').value='Unsent subject';h.nodes.get('support-body').value='Draft 😀';h.nodes.get('message-body').value='Reply draft';
+ for(const code of ['en','ko','ja','zh','vi']){
+  await h.language(code);
+  assert.equal(h.nodes.get('messaging-status').textContent,h.tx('msgReady'),code+': ready state');
+  assert.equal(h.nodes.get('message-heading').textContent,'Question',code+': selected source subject');
+  assert.equal(h.nodes.get('support-body').value,'Draft 😀');assert.equal(h.nodes.get('message-body').value,'Reply draft');
+  assert.equal(h.nodes.get('support-subject').value,'Unsent subject');
+ }
+ assert.equal(h.calls.filter(call=>call.o?.method==='POST').length,0);
+});
+test('actual chrome localization preserves unknown same-key retry and verified receipt without sending on locale changes',async()=>{
+ let tries=0;const posts=[];
+ const h=harness('support',async(url,o,fallback)=>{
+  if(o?.method==='POST'){posts.push(JSON.parse(o.body));if(++tries===1)throw Error('network');return response({ok:true,message:reply()});}
+  return fallback(url,o);
+ },'',true);
+ await h.flush();h.nodes.get('message-body').value='Hello\nWorld';
+ await h.nodes.get('message-form').fire('submit');await h.flush();
+ for(const code of ['en','ko','ja','zh','vi']){
+  await h.language(code);assert.equal(h.nodes.get('message-send').textContent,h.tx('msgRetry'),code+': unknown retry');
+  assert.equal(h.nodes.get('message-body').disabled,true);assert.equal(h.nodes.get('message-body').value,'Hello\nWorld');
+  assert.equal(h.nodes.get('messaging-result').textContent,h.tx('msgUnknown'));
+  assert.equal(h.nodes.get('message-heading').textContent,'Question');
+ }
+ assert.equal(posts.length,1);
+ await h.nodes.get('message-form').fire('submit');await h.flush();
+ assert.equal(posts.length,2);assert.equal(posts[0].idempotencyKey,posts[1].idempotencyKey);assert.equal(posts[0].body,posts[1].body);
+ for(const code of ['en','ko','ja','zh','vi']){
+  await h.language(code);
+  assert.ok(h.nodes.get('messaging-result').textContent.startsWith(h.tx('msgSent')));
+  assert.ok(h.nodes.get('messaging-result').textContent.includes(messageId));
+  assert.equal(h.nodes.get('message-body').value,'');assert.equal(h.nodes.get('message-send').textContent,h.tx('msgSend'));
+  assert.equal(h.nodes.get('message-heading').textContent,'Question');assert.equal(posts.length,2);
+ }
+});
+test('actual chrome integration preserves new-thread unknown retry label and key across five locales',async()=>{
+ let tries=0;const posts=[];
+ const h=harness('support',async(url,o,fallback)=>{
+  if(o?.method==='POST'){posts.push(JSON.parse(o.body));if(++tries===1)throw Error('network');return response({ok:true,thread:thread()});}
+  return fallback(url,o);
+ },'',true);
+ await h.flush();h.nodes.get('support-subject').value='Question';h.nodes.get('support-body').value='Hello\nWorld';
+ await h.nodes.get('new-thread-form').fire('submit');await h.flush();
+ for(const code of ['en','ko','ja','zh','vi']){
+  await h.language(code);assert.equal(h.nodes.get('support-start').textContent,h.tx('msgRetry'));
+  assert.equal(h.nodes.get('support-subject').value,'Question');assert.equal(h.nodes.get('support-body').value,'Hello\nWorld');
+ }
+ await h.nodes.get('new-thread-form').fire('submit');await h.flush();
+ assert.equal(posts.length,2);assert.equal(posts[0].idempotencyKey,posts[1].idempotencyKey);
+});
+test('actual shared account contract uses established classes and resets member row on logout and owner transition',async()=>{
+ const name='Very long private member name '.repeat(12);let active=owner;
+ const h=harness('support',async(url,o,fallback)=>{
+  if(url==='/api/auth/session')return response({...session(),user:{id:active,displayName:active===owner?name:'New owner'}});
+  if(url==='/api/v1/auth/logout')return response({ok:true});
+  if(url==='/api/v1/support/threads'&&active!==owner)return response({ok:true,threads:[],totalCount:0},200,active);
+  if(url==='/api/v1/support/threads/summary'&&active!==owner)return response({ok:true,total:0,open:0,waitingUser:0,resolved:0},200,active);
+  return fallback(url,o);
+ },'',true);
+ await h.flush();const controls=h.nodes.get('auth-actions'),topbar=controls.closest('.topbar');
+ assert.ok(topbar.classList.contains('member-authenticated'));assert.equal(controls.children.length,2);
+ const [profile,logout]=controls.children;
+ assert.equal(profile.textContent,name);assert.ok(profile.classList.contains('auth-link'));assert.ok(profile.classList.contains('auth-profile'));
+ assert.ok(logout.classList.contains('auth-logout'));assert.equal(profile.title,h.tx('account'));
+ for(const code of ['en','ko','ja','zh','vi']){await h.language(code);assert.equal(controls.children.length,2);assert.equal(controls.children[0].textContent,name);}
+ active=peer;await h.emit('focus');await h.flush();assert.equal(controls.children[0].textContent,'New owner');
+ assert.equal(controls.children.length,2);assert.ok(topbar.classList.contains('member-authenticated'));
+ await controls.children[1].fire('click');await h.flush();
+ assert.equal(controls.children.length,1);assert.equal(controls.children[0].href,'/login?next=%2Fsupport');
+ assert.ok(controls.children[0].classList.contains('auth-link'));assert.equal(topbar.classList.contains('member-authenticated'),false);
+ assert.equal(h.calls.filter(call=>call.url==='/api/v1/auth/logout').length,1);
+});
+
+test('actual chat/chrome script integration preserves selected peer and unknown retry owner/key in all five locales',async()=>{
+ let tries=0;const posts=[];
+ const h=harness('chat',async(url,o,fallback)=>{
+  if(o?.method==='POST'){posts.push(JSON.parse(o.body));if(++tries===1)throw Error('network');return response({ok:true,message:chat()});}
+  if(url==='/api/v1/chat/conversations')return response({ok:true,conversations:[{id,peerUserId:peer,peerNickname:'Source peer 名',unreadCount:2,updatedAt:date}],totalUnread:2});
+  if(url.includes('/messages'))return response({ok:true,messages:[chat()]});
+  return fallback(url,o);
+ },'?conversationId='+id,true);
+ await h.flush();h.nodes.get('message-body').value='Hello';
+ await h.nodes.get('message-form').fire('submit');await h.flush();
+ for(const code of ['en','ko','ja','zh','vi']){
+  await h.language(code);assert.equal(h.nodes.get('messaging-status').textContent,h.tx('msgReady'));
+  assert.equal(h.nodes.get('message-heading').textContent,'Source peer 名');assert.equal(h.nodes.get('message-send').textContent,h.tx('msgRetry'));
+  assert.equal(h.nodes.get('message-body').value,'Hello');assert.equal(h.nodes.get('message-body').disabled,true);
+ }
+ assert.equal(posts.length,1);
+ await h.nodes.get('message-form').fire('submit');await h.flush();
+ assert.equal(posts.length,2);assert.equal(posts[0].idempotencyKey,posts[1].idempotencyKey);
+ assert.equal(posts[0].body,posts[1].body);assert.ok(h.nodes.get('messaging-result').textContent.includes(messageId));
+});
+
+test('actual chrome localization preserves in-flight labels and cannot imply receipt before response',async()=>{
+ let finish;const h=harness('support',async(url,o,fallback)=>{
+  if(o?.method==='POST')return new Promise(resolve=>finish=resolve);
+  return fallback(url,o);
+ },'',true);
+ await h.flush();h.nodes.get('message-body').value='Hello\nWorld';
+ const sending=h.nodes.get('message-form').fire('submit');await h.flush();
+ for(const code of ['en','ko','ja','zh','vi']){
+  await h.language(code);assert.equal(h.nodes.get('message-send').textContent,h.tx('msgSending'));
+  assert.equal(h.nodes.get('message-send').disabled,true);assert.equal(h.nodes.get('message-body').value,'Hello\nWorld');
+  assert.equal(h.nodes.get('message-heading').textContent,'Question');
+  assert.ok(!h.nodes.get('messaging-result').textContent.includes(messageId));
+ }
+ assert.equal(h.calls.filter(call=>call.o?.method==='POST').length,1);
+ finish(response({ok:true,message:reply()}));await sending;await h.flush();
+ assert.ok(h.nodes.get('messaging-result').textContent.includes(messageId));
+});
+
+test('shared five-locale data refresh remains distinct from stable mutation retry and never posts automatically',async()=>{
+ let tries=0;const posts=[];
+ const h=harness('support',async(url,o,fallback)=>{
+  if(o?.method==='POST'){posts.push(JSON.parse(o.body));if(++tries===1)throw Error('network');return response({ok:true,message:reply()});}
+  return fallback(url,o);
+ },'',true);
+ await h.flush();h.nodes.get('message-body').value='Hello\nWorld';await h.nodes.get('message-form').fire('submit');await h.flush();
+ await h.nodes.get('messaging-refresh').fire('click');await h.flush();
+ for(const code of ['en','ko','ja','zh','vi']){
+  await h.language(code);assert.equal(h.nodes.get('messaging-refresh').textContent,h.tx('refresh'));
+  assert.equal(h.nodes.get('message-send').textContent,h.tx('msgRetry'));assert.equal(h.nodes.get('message-body').value,'Hello\nWorld');
+ }
+ assert.equal(posts.length,1);
+ await h.nodes.get('message-form').fire('submit');await h.flush();
+ assert.equal(posts.length,2);assert.equal(posts[0].idempotencyKey,posts[1].idempotencyKey);
+});
+test('disabled action guidance uses five localized functional explanations without engineering review terms',async()=>{
+ const expected=[
+  'These actions are currently unavailable. Select an existing conversation to view its history or send a reply.',
+  '현재 이 기능들은 사용할 수 없습니다. 기존 대화를 선택하면 내역을 확인하거나 답장할 수 있습니다.',
+  '現在これらの操作は利用できません。既存の会話を選択すると履歴の確認や返信ができます。',
+  '这些操作暂不可用。请选择已有对话查看记录或回复。',
+  'Các thao tác này hiện chưa khả dụng. Chọn cuộc trò chuyện hiện có để xem lịch sử hoặc trả lời.'
+ ];
+ const h=harness('chat',async(url,o,fallback)=>{
+  if(url==='/api/v1/chat/conversations')return response({ok:true,conversations:[],totalUnread:0});return fallback(url,o);
+ },'',true);await h.flush();
+ for(const [index,code] of ['en','ko','ja','zh','vi'].entries()){
+  await h.language(code);assert.equal(h.nodes.get('messaging-unavailable').textContent,expected[index]);
+ }
+ const catalog=JSON.parse(readFileSync(new URL('ui/mv43-copy.json',base),'utf8'));
+ assert.deepEqual(catalog.msgMissing,expected);assert.equal(h.calls.filter(call=>call.o?.method==='POST').length,0);
 });
