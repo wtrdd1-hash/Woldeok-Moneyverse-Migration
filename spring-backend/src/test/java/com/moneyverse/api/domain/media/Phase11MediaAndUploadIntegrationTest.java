@@ -38,6 +38,19 @@ public class Phase11MediaAndUploadIntegrationTest {
     private JdbcTemplate jdbcTemplate;
 
 
+    @Autowired
+    private org.springframework.core.env.Environment environment;
+
+    @org.junit.jupiter.api.BeforeEach
+    void mediaFixtureMustNeverUseSharedRuntimeStorage() {
+        String configured=environment.getProperty("moneyverse.storage.path");
+        org.junit.jupiter.api.Assertions.assertNotNull(configured,"Test media storage must be explicit");
+        java.nio.file.Path target=java.nio.file.Path.of(configured).toAbsolutePath().normalize();
+        java.nio.file.Path temporary=java.nio.file.Path.of(System.getProperty("java.io.tmpdir")).toAbsolutePath().normalize();
+        org.junit.jupiter.api.Assertions.assertTrue(target.startsWith(temporary),
+                "Test media uploads must remain in the temporary directory");
+    }
+
     // 1x1 valid transparent PNG bytes
     private static final byte[] VALID_PNG = new byte[]{
             (byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,

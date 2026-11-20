@@ -55,3 +55,10 @@ Integration implementation and local checks completed; GitHub checks, main merge
 - Read-only route/control inventory:290 static HTML files normalize to147 concepts;135 concepts include captured Next output. These counts are inventory, not implemented/native certification. Native admin/home conversion does not claim all routes complete.
 - The prior integrated GitHub Node monorepo run was green but included36 skipped backend test files; those skips are unverified, not passing tests. No production promotion followed.
 - Native wallet preservation and session-owned CSRF bootstrap are next. Existing wallet has mismatched transfer fields, floating-point amounts and no replay key/CSRF; the old session bootstrap exposes the stored hash instead of usable raw proof. A dedicated isolated security implementer handles only that lifecycle while this branch owns UI, with independent review before integration.
+
+
+## Upload fixture isolation correction
+The new native CI gate exposed an inherited media integration fixture using ImageStorageService's shared default directory. Earlier local full-suite runs also used that default, so the earlier broad statement of no shared filesystem changes was too strong: a synthetic 1x1 PNG may have been written into the default media directory. No shared-file deletion or unverified cleanup was attempted. Financial data, shared database DDL/DML, production service configuration and traffic were not changed by these tests.
+- Added an explicit test-profile temporary media directory and a pre-upload guard requiring a configured path beneath java.io.tmpdir.
+- RED: all five media tests refuse the old unconfigured path before upload. GREEN: all five media tests, including real isolated upload/retrieval, pass with the temporary path.
+- Test isolation is now enforced in source; no production permissions were expanded to make CI pass.
