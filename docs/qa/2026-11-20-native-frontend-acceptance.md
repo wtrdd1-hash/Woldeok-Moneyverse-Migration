@@ -1,17 +1,35 @@
 # Native frontend implementation and acceptance ledger — 2026-11-20
 
-> Current scope: reviewed incremental implementation at173e7255c7. Local fresh Spring479/Node270 passed; functional commit173e7255c7 GitHub CI44714457273 passed all4 jobs, with9 actual PostgreSQL cases and0 failures/errors/skips. Later documentation checkpoints do not change that implementation. Production HOLD. Use the latest checkpoint and OPEN findings below; earlier source totals are historical.
+> Current observation: public presentation5-page Production promotion at2026-11-20 21:53:58KST, source42422aab0d3bed3399a27819c6eb774cfd1a933a, PR#3319/mainCI44736479741. Clean Spring542/Node276 passed without skips; source-equivalent Test50 and final Production10 browser cases passed. Full member/admin/backend/financial acceptance remains OPEN. Earlier totals and HOLD records below are historical.
 
 
 This page describes the November18 Spring MVC/Thymeleaf frontend migration. It is an implementation/QA ledger, not a statement that every existing page or production feature works.
 
-- Task PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3311
+- Current task PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3319
+- Historical first integration PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3311
 - Design authority: ../planning/NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.ko.md
 - Detailed work/checkpoint history: ../worklog/2026-11-20-nov18-design-integrate.md
 - Source checkpoint44a773e942:394 isolated Spring tests,0 failures/errors/skips; bootJar successful;220 Node tests passed. CI checkpoint7cb9890d95 additionally passed9 actual-service PostgreSQL cases, with0 failures/errors/skips (run44689405118).
 - All task source work is on isolated MiniPC branches. The original checkout's unrelated uncommitted changes were not reset, stashed or overwritten.
 
-## Current release gates
+## Current scoped release gates — 2026-11-20 21:53KST
+
+| Gate | Evidence | Status |
+|---|---|---|
+| Exact current application source | Merged42422aab; mainCI44736479741 all4jobs successful; CI JAR/open-process hash match | PASS for public presentation |
+| No backend/DB dependency in new renderer | Real context with invalid DB URL; explicit-import runtime; denied API/member/admin/mutation routes; actual HTTP no session cookies | PASS |
+| Public Test | Exact final main frontend source, five native pages/noindex; private/API paths403 | PASS for this frontend only |
+| Browser/layout | Five locales ×390/1440px ×five pages50 source-equivalent cases; final Production10; no overflow/small effective targets | PASS for listed cases |
+| Actual site data integration | Existing API10stocks/2posts; new home8listed rows/cards and2posts; anonymous user/amount absent | PASS for public reads |
+| Legacy compatibility | Three asset version selectors; actual8-case mixed-version regression; default version policy preserved | PASS |
+| Availability/rollback | Graceful Nginx reload; old backend unchanged; frontend boot/restart protection; reviewed inverse config preserves concurrent actuator hardening and signup holds | PASS for scoped rollout |
+| Authenticated member/admin/economic actions | Current browser unsigned; no live trade/transfer/admin operation certified | OPEN / deferred |
+| Financial/migration provenance | Approved orphan correction not executed; ledger DML and manual346 drift unresolved | BLOCKED for full application promotion |
+| Entire route/language/a11y parity | Retained `/stocks` still an explicit sample design; native-speaker and full zoom/screen-reader QA incomplete | OPEN |
+
+[Detailed current receipt and remaining issues](../releases/2026-11-20-native-presentation-production.ko.md). The following table preserves the older pre-cutover state.
+
+## Historical release gates before this scoped cutover
 
 | Gate | Current evidence | Status |
 |---|---|---|
