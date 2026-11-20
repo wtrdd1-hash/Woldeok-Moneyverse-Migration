@@ -22,3 +22,6 @@ Run actual focused auth/HTTP/widget regressions RED thenGREEN, full isolated Spr
 Actual browser found7 links below44px and shared English aria/footer/skip strings in Korean. Reuse existing product copy, add only navigation region labels, test negotiated SSR in5 locales and live locale change with expanded-menu state. Enlarge inline/auth/footer link targets without rewriting card/navigation layout. Rerun actual browser all5 locales/8 widths; record remaining acceptance gaps.
 ## Integration
 Current main9635262fb2 includes unrelated official brand assets, preserved. PR3311 squash removed old task ancestry: integrate reviewed8746..3fe753fc43 pure messaging diff while retaining child parentage, resolve only catalog/doc/digest conflicts, re-run full fresh tests and independent whole-branch review.
+
+## Task4: Preserve native status shell on unavailable data
+Actual isolated-browser /status returns default Whitelabel503 with emptytitle/no navigation/FAB because service.publicStatus throws before model/header population. Preserve HTTP503 and unchangedJSON API while rendering existing localized status template with emptyverifiedrows, unknown overall, explicitunavailable copy and native shell. Catch only the known503 response condition; rethrow other failures. Add5locale HTTP regressions proving no falseoperationalbadge/no exceptiondetail and actualbrowser rerun.

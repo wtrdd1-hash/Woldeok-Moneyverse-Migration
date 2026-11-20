@@ -80,3 +80,9 @@ This entry supersedes earlier per-slice totals only for the current isolated can
 | Actual PostgreSQL | Ancestor7cb CI44689405118 had9 passed/0 skips; latest-source CI pending |
 | Test/release | Public Test HTTP403 rechecked; production HOLD |
 | Remaining acceptance | Authenticated member/admin flows, full-page linguistic review,200%/keyboard/reduced motion, simultaneous concurrency, global cross-navigation drafts, remaining legacy pages OPEN |
+
+### Actual browser refinement — source4e10ee6f04
+- Home/login:80cases (2routepaths×5locales×8widths), no undersized44px controls, no overflow/FAB-bottomnavoverlap, correct localized titles,56px launcher. Checkbox targets measured using their associated clickable labels.
+- Tools/calculators/compound/stock:160cases, no undersized targets/overflow. All checks guest on isolatedH2; unavailable stock/board data is not a live-source failure claim.
+- Status source unavailable: actual Whitelabel503/no shell found and repaired after5logicalRED SSR failures;11focusedGREEN including truthpolicy. Actual after-fix status geometry and integrated whole-branch review pending.
+- Source8f0 whole-branch review2Important open, assigned original messaging implementer round2/5: shared generic localization overwrites dynamic state, and authenticated messaging header bypasses shared sizing/mobile classes.2minor labels/copy also assigned; rootbrand/helpwidth/titleminor addressed and browserverified.

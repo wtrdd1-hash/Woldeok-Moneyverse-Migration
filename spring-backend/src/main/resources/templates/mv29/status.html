@@ -20,6 +20,7 @@
     <p data-i18n="publicText47" th:text="${uiCopy['publicText47']}">Only real records.</p>
     <div class="hero-tags"><span class="chip chip-primary" data-i18n="publicText48" th:text="${uiCopy['publicText48']}">No invented health claims</span><span class="chip" data-i18n="publicText49" th:text="${uiCopy['publicText49']}">Database-backed snapshots</span></div>
   </div><div class="hero-icon" aria-hidden="true"><span class="hero-icon-number">●</span><span class="hero-icon-line"></span></div></section>
+  <p class="notice" role="status" th:if="${sourceUnavailable}" data-i18n="unavailable" th:text="${uiCopy['unavailable']}">Data is unavailable.</p>
   <section class="status-overview panel" aria-labelledby="status-overview-title">
     <div class="panel-header"><span class="panel-step">01</span><div><h2 id="status-overview-title" data-i18n="publicText50" th:text="${uiCopy['publicText50']}">Overall health</h2><p data-i18n="publicText51" th:text="${uiCopy['publicText51']}">No averaging.</p></div></div>
     <div class="status-summary" role="status" aria-live="polite"><span class="status-pill" th:classappend="' state-' + ${overall}" th:with="stateKey=${overall == 'unknown' ? 'publicText52' : overall == 'operational' ? 'publicText53' : overall == 'outage' ? 'publicText54' : overall == 'degraded' ? 'publicText55' : 'publicText56'}" th:attr="data-i18n=${stateKey}" th:text="${#ctx.getVariable('uiCopy').get(#ctx.getVariable('stateKey'))}">Unknown</span>

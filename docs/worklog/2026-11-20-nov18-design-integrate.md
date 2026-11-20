@@ -445,3 +445,12 @@ No unsafe-current-main merge, real user messages, browser acceptance or release 
 - Reviewed8f0df95ff9 verdict With fixes:0 Critical,2 Important. I1 shared generic localization overwrites component-owned ready/heading/retry text; I2 messaging authenticated header bypasses established shared44px/mobile-name classes. Original implementer fix round2/5 in progress; covering tests must load actual scripts in actual order.
 - Minor deferred: top messaging refresh uses a retry label while only reloading; msgMissing exposes implementation/review terminology. Both remain tracked for final triage, not silently discarded.
 - Minor observed by root and being fixed: desktop39px brand, narrow login-help links, auth document title stale after locale change. Runtime-title logical RED reproduced before patch; apply only current pageHeader translation key and minimum target sizes. No user/product wording rewritten.
+
+### Native status unavailable-state repair — before work / in progress
+- Actual browser4e10 source: tools/calculators/compound/stock160locale-width cases no smalltargets/overflow. /status shows Whitelabel503, no title/navigation/FAB under expected scratch source failure. Existing test asserted503 only and missed HTML degradation.
+- TDD5locale native503 HTML/header/unknown/unavailable regressions added. Preserve actual503 and unknownstate, do not invent source rows or change status JSON/API/SQL.
+
+### Status and shared control checkpoint — in progress
+- Status logicalRED7 tests/5failures→focusedGREEN11 tests/0fail/error/skip including truth policy. Native HTML preserves HTTP503/unknown state, localized unavailable message and full common shell; JSON API unchanged; no fabricated observation.
+- Actual guest browser source4e10: home/login80cases alltargets>=44px, nooverflow/FAB-bottomnavoverlap, dynamic titlecorrect,56px launcher. Tools/calculators/compound/stock160cases no smalltargets/overflow. Separate source-unavailable/status1failure led to this repair; after-fix browser pending.
+- Local evidence implementation-audit/nov20-native-home-login-80case-browser.json and nov20-native-public-browser-before-status-fix.json. These are guest layout checks on isolatedH2, not authenticated/member delivery or financial acceptance.
