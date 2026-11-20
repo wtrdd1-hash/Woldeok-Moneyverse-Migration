@@ -5,15 +5,15 @@
     const launcher = document.getElementById('mv-support-launcher');
     const panel = document.getElementById('mv-support-panel');
     const close = document.getElementById('mv-support-close');
-    if (!launcher || !panel || !close) return;
+    const hasSupportDialog = Boolean(launcher && panel && close);
     let previousFocus = null;
-    launcher.addEventListener('click', () => {
+    if (hasSupportDialog) launcher.addEventListener('click', () => {
       previousFocus = document.activeElement;
       if (!panel.open) panel.showModal();
       close.focus();
     });
-    close.addEventListener('click', () => panel.close());
-    panel.addEventListener('close', () => {
+    if (hasSupportDialog) close.addEventListener('click', () => panel.close());
+    if (hasSupportDialog) panel.addEventListener('close', () => {
       if (previousFocus && previousFocus.isConnected) previousFocus.focus();
       else launcher.focus();
     });
@@ -42,11 +42,13 @@
       if(document.querySelectorAll)document.querySelectorAll('[data-i18n]').forEach(element=>{
         element.textContent=locale.tx(element.dataset.i18n);
       });
-      launcher.setAttribute('aria-label', locale.tx('support'));
-      close.setAttribute('aria-label', locale.tx('close'));
-      panel.querySelectorAll('[data-i18n]').forEach(element => {
-        element.textContent = locale.tx(element.dataset.i18n);
-      });
+      if (hasSupportDialog) {
+        launcher.setAttribute('aria-label', locale.tx('support'));
+        close.setAttribute('aria-label', locale.tx('close'));
+        panel.querySelectorAll('[data-i18n]').forEach(element => {
+          element.textContent = locale.tx(element.dataset.i18n);
+        });
+      }
     }
     window.addEventListener('mv39-language-change', localize);
     localize();
