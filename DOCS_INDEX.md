@@ -3,6 +3,13 @@
 ## v2026.11.19.39 — Spring safety remediation: scoped Production privacy HOTFIX, full frontend release HOLD
 - [QA EN](docs/qa/2026-11-19-spring-safety-and-frontend-release-v39.md) / [QA KO](docs/qa/2026-11-19-spring-safety-and-frontend-release-v39.ko.md) · [Worklog KO](docs/worklog/2026-11-19-mv39-production-readiness.ko.md) · [GitHub notes](docs/updates/v2026.11.19.39-github.md). Real public Nginx protection for anonymous wallet/pension and spoofed headers (10/10); separate immutable read-only Spring Test API 21/21 and 243/243 Java tests. Full 180-route/5-pass/official-Test/signed-in Finance QA NOT complete; backend/full new UI Production not promoted.
 
+## v2026.11.19.40.1 — 관리자·회원 웹 + 보안 수정 통합 QA (253/253 소스 테스트 PASS / 운영 보류)
+- [한국어 QA](docs/qa/2026-11-19-spring-admin-security-integration-v40.1.ko.md) / [English](docs/qa/2026-11-19-spring-admin-security-integration-v40.1.md) · [GitHub 변경 기록](docs/updates/v2026.11.19.40.1-integration-qa-github.ko.md). 보안 PR #3302와 웹 PR #3301/#3303를 격리된 미니PC에서만 합쳐 전체 Spring 253개 모두 통과. 실제 관리자/회원 금융 E2E, 공식 Test 403, 180페이지 완전성·무중단 운영 승격은 아직 미검증. 운영에 설치하지 않음.
+
+
+## v2026.11.19.40 — 관리자·회원 공통 Java Spring **반응형 웹** (신규 소스 후보 · 운영 승격 보류)
+- [영문 상세 기획](docs/planning/SPRING_ADMIN_MEMBER_WEB_UI_v2026.11.19.40.md) / [한국어](docs/planning/SPRING_ADMIN_MEMBER_WEB_UI_v2026.11.19.40.ko.md) · [관리자 PC/모바일 실제 Chromium 픽스처 화면](docs/design/mv40/README.md) · [실제 검증](docs/qa/2026-11-19-spring-admin-member-web-v40.md) · [작업기록](docs/worklog/2026-11-19-spring-admin-member-web-v40.ko.md) · [GitHub 공개 업데이트](docs/updates/v2026.11.19.40-admin-member-web-github.ko.md). 관리자 Spring SSR와 HTML 접근 보호, 사용자 홈 일관성, 자동/수동 5개 언어 반영. 전체 Java 247중 38개 실패, 공식 Test 403·180페이지/실계정 원장 미검증. **운영 배포 아님**.
+
 
 ## v2026.11.19.34 — Personal-assets desktop/mobile real-data contract & public diagnostics removal (SPEC ONLY)
 - [Detailed KO spec](docs/planning/PERSONAL_ASSETS_REAL_DATA_UI_v2026.11.19.34.ko.md) / [EN](docs/planning/PERSONAL_ASSETS_REAL_DATA_UI_v2026.11.19.34.md) · [Worklog](docs/worklog/2026-11-19-personal-ui-real-data-v2026.11.19.34.ko.md) · [Internal local-only, not tracked] · [GitHub update](docs/updates/v2026.11.19.34-personal-ui-github.md). All user money/graphs/transactions must use real authenticated Spring/ledger data. No member-facing runtime version/API/DB/sync/system diagnostic information; Treasury is admin-only. Existing design catalog reused; newly generated chat images not yet transferred. No code or Production release.
