@@ -15,7 +15,7 @@
 - Existing support summary covers only recent100 rows; do not label this as lifetime totals. Unread int counts must be nonnegative canonical values in range; missing/overflow does not become0.
 - No API creation for opening arbitrary new conversations without a source-backed recipient flow in this step. No real user messages, shared DB or production mutations in tests.
 
-## Task1: Verified HTTP boundary
+## Task 1: Verified HTTP boundary
 Files: SupportController.java, ChatController.java under spring-backend/src/main/java/com/moneyverse/api/domain; new domain/messaging/MessagingHttpBoundaryTest.java in test sources.
 1. Add MockMvc regressions: every existing read/write alias denies anonymous forged headers; authenticated reads use session owner despite headers; absent/wrong CSRF denies writes without invoking services.
 2. Observe RED on currently accepted forged requests.
@@ -23,7 +23,7 @@ Files: SupportController.java, ChatController.java under spring-backend/src/main
 4. Add real-session guarded mutation and stable retry-key/receipt HTTP evidence with synthetic service boundaries; verify no API routes conflict with native page routes.
 Expected: focused HTTP tests green; no live database calls.
 
-## Task2: Exact request and receipt contract
+## Task 2: Exact request and receipt contract
 Files: SupportService.java, ChatService.java, ChatDtos.java; new domain/messaging/MessageContract.java and MessagingServiceContractTest.java.
 1. Add service tests for missing/malformed keys, blank/1001-codepoint/control/malformed UTF16 bodies, exact1000-codepoint acceptance, caller-key reuse, incomplete/mismatched receipt, denied/unavailable histories and bigint string serialization.
 2. Observe expected RED against current random keys, fabricated empty reads and long sequence.

@@ -23,7 +23,7 @@ public class ChatDtos {
             UUID conversationId,
             UUID senderUserId,
             String body,
-            long sequence,
+            String sequence,
             OffsetDateTime createdAt
     ) {}
 
