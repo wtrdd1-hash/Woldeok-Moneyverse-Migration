@@ -2,78 +2,42 @@ package com.moneyverse.api.domain.chat.controller;
 
 import com.moneyverse.api.domain.chat.dto.ChatDtos.*;
 import com.moneyverse.api.domain.chat.service.ChatService;
-import io.swagger.v3.oas.annotations.Operation;
+import com.moneyverse.api.domain.identity.service.MemberApiGuard;
+import com.moneyverse.api.domain.messaging.MessageContract;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.UUID;
 
-@Tag(name = "Direct Chat & Messages", description = "1:1 쪽지 및 실시간 대화방 API")
+@Tag(name="Direct Chat & Messages")
 @RestController
-@RequestMapping({"/api/chat", "/api/v1/chat"})
+@RequestMapping({"/api/chat","/api/v1/chat"})
 public class ChatController {
-
     private final ChatService chatService;
-
-    public ChatController(ChatService chatService) {
-        this.chatService = chatService;
+    private final MemberApiGuard guard;
+    public ChatController(ChatService chatService,MemberApiGuard guard) {
+        this.chatService=chatService;this.guard=guard;
     }
-
-    private UUID resolveUserUuid(String xUserId, String xActorUserId) {
-        String raw = (xUserId != null && !xUserId.isBlank()) ? xUserId.trim()
-                : (xActorUserId != null && !xActorUserId.isBlank()) ? xActorUserId.trim()
-                : "5f7b8b44-e4aa-40b8-b93a-800ec0151d20";
-        try {
-            return UUID.fromString(raw);
-        } catch (IllegalArgumentException e) {
-            return UUID.fromString("5f7b8b44-e4aa-40b8-b93a-800ec0151d20");
-        }
-    }
-
     @GetMapping("/conversations")
-    @Operation(summary = "내 1:1 대화방 목록 조회")
-    public ResponseEntity<ConversationListResponse> listConversations(
-            @RequestParam(value = "limit", defaultValue = "50") int limit,
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId,
-            @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId
-    ) {
-        UUID userId = resolveUserUuid(xUserId, xActorUserId);
-        return ResponseEntity.ok(chatService.listConversations(userId, limit));
+    public ResponseEntity<ConversationListResponse> listConversations(HttpServletRequest request,
+            @RequestParam(value="limit",defaultValue="50") int limit) {
+        return ResponseEntity.ok(chatService.listConversations(guard.actor(request),limit));
     }
-
     @GetMapping("/unread-count")
-    @Operation(summary = "안 읽은 전체 쪽지 건수 조회")
-    public ResponseEntity<ChatUnreadResponse> unreadCount(
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId,
-            @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId
-    ) {
-        UUID userId = resolveUserUuid(xUserId, xActorUserId);
-        int unread = chatService.totalUnreadCount(userId);
-        return ResponseEntity.ok(new ChatUnreadResponse(true, unread));
+    public ResponseEntity<ChatUnreadResponse> unreadCount(HttpServletRequest request) {
+        return ResponseEntity.ok(new ChatUnreadResponse(true,chatService.totalUnreadCount(guard.actor(request))));
     }
-
     @GetMapping("/conversations/{id}/messages")
-    @Operation(summary = "대화방 메시지 이력 조회")
-    public ResponseEntity<MessageListResponse> listMessages(
-            @PathVariable("id") UUID id,
-            @RequestParam(value = "limit", defaultValue = "50") int limit,
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId,
-            @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId
-    ) {
-        UUID userId = resolveUserUuid(xUserId, xActorUserId);
-        return ResponseEntity.ok(chatService.listMessages(userId, id, limit));
+    public ResponseEntity<MessageListResponse> listMessages(HttpServletRequest request,@PathVariable("id") UUID id,
+            @RequestParam(value="limit",defaultValue="50") int limit) {
+        return ResponseEntity.ok(chatService.listMessages(guard.actor(request),id,limit));
     }
-
     @PostMapping("/conversations/{id}/messages")
-    @Operation(summary = "대화방에 쪽지 메시지 전송")
-    public ResponseEntity<SendMessageResponse> sendMessage(
-            @PathVariable("id") UUID id,
-            @RequestBody SendMessageRequest req,
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId,
-            @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId
-    ) {
-        UUID userId = resolveUserUuid(xUserId, xActorUserId);
-        return ResponseEntity.ok(chatService.sendMessage(userId, id, req));
+    public ResponseEntity<SendMessageResponse> sendMessage(HttpServletRequest request,@PathVariable("id") UUID id,
+            @RequestBody SendMessageRequest body) {
+        UUID actor=guard.verifiedMutationActor(request);
+        MessageContract.matchingKey(body.idempotencyKey(),request.getHeader("Idempotency-Key"));
+        return ResponseEntity.ok(chatService.sendMessage(actor,id,body));
     }
 }

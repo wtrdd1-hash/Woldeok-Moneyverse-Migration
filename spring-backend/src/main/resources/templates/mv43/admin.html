@@ -1,0 +1,63 @@
+<!doctype html><html lang="en" xmlns:th="http://www.thymeleaf.org" th:lang="${uiLanguage}" th:attr="data-ui-language=${uiLanguage}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0c1020"><meta name="robots" content="noindex,nofollow"><title th:text="${uiCopy['dashboard']} + ' · Woldeok Moneyverse'">Admin dashboard · Woldeok Moneyverse</title>
+<link rel="stylesheet" href="/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31"><link rel="stylesheet" href="/assets/mv40/admin.css?v=98e3f870af4bdb8aeb7bbefbeec6e8ba548b61515079f747654a9b81cb3f2064">
+<script src="/assets/mv39/i18n.js?v=695770456cb14d5a884754897c4c366302ebac7ec135e0157bb7440b50551ba3" defer></script><script src="/assets/mv40/admin.js?v=e9ed809f6e044beeab99225de96e64f5b7dcac5cd5a7b235978d40c2bffafacd" defer></script><th:block th:replace="~{shared/chrome :: commonHead}"></th:block><script src="/assets/mv43/admin-tools.js?v=855d388777ab7afe2f05b2d9e7e3de6d979a1fb6aea7e748851c2d90eaed472d" defer></script></head>
+<body class="admin-v40">
+<a href="#main" class="skip-link">Skip to content</a><div class="admin-layout">
+<aside class="admin-sidebar" aria-label="Admin navigation"><a href="/admin" class="brand"><span class="brand-mark">W</span><span>W Moneyverse <small>ADMIN</small></span></a>
+<p class="sidebar-label" data-i18n="adminConsole" th:text="${uiCopy['adminConsole']}">Management</p><nav class="admin-nav" aria-label="Administration">
+<a href="/admin" aria-current="page"><span aria-hidden="true">⌂</span><span data-i18n="dashboard" th:text="${uiCopy['dashboard']}">Dashboard</span></a>
+<a href="/admin/users"><span aria-hidden="true">♙</span><span data-i18n="members" th:text="${uiCopy['members']}">Members</span></a>
+<a href="/admin/economy"><span aria-hidden="true">▣</span><span data-i18n="ledger" th:text="${uiCopy['ledger']}">Economy & ledger</span></a>
+<a href="/admin/shop"><span aria-hidden="true">◇</span><span data-i18n="items" th:text="${uiCopy['items']}">Items & shop</span></a>
+<a href="/admin/blog"><span aria-hidden="true">☷</span><span data-i18n="content" th:text="${uiCopy['content']}">Content</span></a>
+<a href="/admin/market"><span aria-hidden="true">↗</span><span data-i18n="adminMarket" th:text="${uiCopy['adminMarket']}">Market</span></a>
+<a href="/admin/analytics"><span aria-hidden="true">◫</span><span data-i18n="analytics" th:text="${uiCopy['analytics']}">Analytics</span></a>
+<a href="/admin/logs"><span aria-hidden="true">☰</span><span data-i18n="logs" th:text="${uiCopy['logs']}">Audit & logs</span></a>
+<a href="/admin/security"><span aria-hidden="true">◈</span><span data-i18n="security" th:text="${uiCopy['security']}">Security</span></a>
+<a href="/admin/support"><span aria-hidden="true">◉</span><span data-i18n="support" th:text="${uiCopy['support']}">Support</span></a>
+</nav><div class="admin-sidebar-foot"><a href="/" data-i18n="memberSite" th:text="${uiCopy['memberSite']}">Member site</a></div></aside>
+<div class="admin-area"><header class="admin-topbar"><button id="admin-menu-open" type="button" class="admin-menu-button" aria-expanded="false" aria-controls="admin-drawer" aria-label="Open admin menu">☰</button>
+<div class="admin-heading"><span class="admin-kicker">WOLDEOK / ADMIN CONSOLE</span><h1 data-i18n="dashboard" th:text="${uiCopy['dashboard']}">Admin dashboard</h1></div>
+<label class="admin-locale-label" for="admin-locale"><span class="sr-only" data-i18n="selectLanguage" th:text="${uiCopy['selectLanguage']}">Choose language</span>
+<select id="admin-locale" aria-label="Choose language"><option value="auto">Auto</option><option value="en">English</option><option value="ko">한국어</option><option value="ja">日本語</option><option value="zh">简体中文</option><option value="vi">Tiếng Việt</option></select></label>
+<a class="admin-account" href="/account" data-i18n="account" th:text="${uiCopy['account']}">Account</a></header>
+<main id="main" tabindex="-1"><section class="admin-hero"><div><p class="hero-eyebrow">✦ W MONEYVERSE</p><h2 data-i18n="adminWelcome" th:text="${uiCopy['adminWelcome']}">Control center</h2><p data-i18n="adminLead" th:text="${uiCopy['adminLead']}">Review verified data and navigate protected operations.</p></div>
+<span class="admin-status" th:attr="data-i18n=${partial ? 'adminPartial' : 'adminVerified'}" th:text="${partial ? uiCopy['adminPartial'] : uiCopy['adminVerified']}" title="Source state">Source-backed overview</span></section>
+<section aria-label="Source backed key metrics"><div class="admin-section-head"><h2 data-i18n="sourceOverview" th:text="${uiCopy['sourceOverview']}">Verified overview</h2><a href="/admin" class="admin-refresh" data-i18n="refresh" th:text="${uiCopy['refresh']}">Refresh</a></div>
+<div class="admin-metrics"><article class="admin-card"><span data-i18n="members" th:text="${uiCopy['members']}">Members</span><strong th:attr="data-i18n=${users == null ? 'unavailable' : null}" th:text="${users == null ? uiCopy['unavailable'] : users.users.size()}">Source unavailable</strong><small data-i18n="verifiedResult" th:text="${uiCopy['verifiedResult']}">Source records, not site-wide total</small></article>
+<article class="admin-card"><span data-i18n="adminMarket" th:text="${uiCopy['adminMarket']}">Market</span><strong th:attr="data-i18n=${stocks == null ? 'unavailable' : null}" th:text="${stocks == null ? uiCopy['unavailable'] : stocks.stocks.size()}">Source unavailable</strong><small data-i18n="verifiedResult" th:text="${uiCopy['verifiedResult']}">Source records, not site-wide total</small></article>
+<article class="admin-card"><span data-i18n="features" th:text="${uiCopy['features']}">Feature switches</span><strong th:attr="data-i18n=${features == null ? 'unavailable' : null}" th:text="${features == null ? uiCopy['unavailable'] : features.featureSwitches.size()}">Source unavailable</strong><small data-i18n="verifiedResult" th:text="${uiCopy['verifiedResult']}">Source records, not site-wide total</small></article></div></section>
+<section class="admin-sections"><article class="admin-card"><div class="admin-section-head"><h2 data-i18n="marketPreview" th:text="${uiCopy['marketPreview']}">Market snapshot</h2><a href="/admin/market" data-i18n="viewAll" th:text="${uiCopy['viewAll']}">View all</a></div><p th:if="${stocks == null}" class="unknown" data-i18n="unavailable" th:text="${uiCopy['unavailable']}">Source unavailable</p>
+<p th:if="${stocks != null and stocks.stocks.isEmpty()}" class="unknown" data-i18n="empty" th:text="${uiCopy['empty']}">No verified entries</p>
+<div th:if="${stocks != null and !stocks.stocks.isEmpty()}" class="table-frame" tabindex="0" role="region" aria-label="Stocks">
+<table><thead><tr><th data-i18n="symbol" th:text="${uiCopy['symbol']}">Symbol</th><th data-i18n="stockName" th:text="${uiCopy['stockName']}">Company</th><th data-i18n="currentPrice" th:text="${uiCopy['currentPrice']}">Price</th><th data-i18n="status" th:text="${uiCopy['status']}">Status</th></tr></thead>
+<tbody><tr th:each="item, index : ${stocks.stocks}" th:if="${index.index < 7}">
+<td class="mono" th:text="${item.symbol}"></td><td th:text="${item.name}"></td>
+<td class="mono" th:text="${item.currentPrice == null ? uiCopy['unavailable'] : item.currentPrice + ' WLD'}"></td><td th:text="${item.haltStatus}"></td>
+</tr></tbody></table></div></article>
+<article class="admin-card"><h2 data-i18n="quickActions" th:text="${uiCopy['quickActions']}">Quick actions</h2><div class="admin-actions"><a href="/admin/users" data-i18n="members" th:text="${uiCopy['members']}">Members</a><a href="/admin/controls" data-i18n="controls" th:text="${uiCopy['controls']}">Controls</a><a href="/admin/economy" data-i18n="ledger" th:text="${uiCopy['ledger']}">Economy & ledger</a><a href="/admin/support" data-i18n="support" th:text="${uiCopy['support']}">Support</a><a href="/admin/logs" data-i18n="logs" th:text="${uiCopy['logs']}">Audit & logs</a><a href="/admin/security" data-i18n="security" th:text="${uiCopy['security']}">Security</a></div></article></section>
+<section class="admin-card admin-tool-directory" aria-labelledby="admin-tools-title">
+<div class="admin-section-head"><h2 id="admin-tools-title" data-i18n="adminConsole" th:text="${uiCopy['adminConsole']}">Administration</h2><output id="admin-tool-count" aria-live="polite">35 / 35</output></div>
+<div class="admin-directory-controls">
+<label for="admin-tool-search"><span data-i18n="search" th:text="${uiCopy['search']}">Search</span><input id="admin-tool-search" type="search" maxlength="100" th:placeholder="${uiCopy['search']}" autocomplete="off"></label>
+<label for="admin-tool-category"><span data-i18n="adminAllTools" th:text="${uiCopy['adminAllTools']}">All tools</span>
+<select id="admin-tool-category"><option value="all" data-i18n="adminAllTools" th:text="${uiCopy['adminAllTools']}">All tools</option>
+<option value="macro" data-i18n="adminCategory_macro" th:text="${uiCopy['adminCategory_macro']}">macro</option>
+<option value="treasury" data-i18n="adminCategory_treasury" th:text="${uiCopy['adminCategory_treasury']}">treasury</option>
+<option value="market" data-i18n="adminCategory_market" th:text="${uiCopy['adminCategory_market']}">market</option>
+<option value="security" data-i18n="adminCategory_security" th:text="${uiCopy['adminCategory_security']}">security</option>
+<option value="users" data-i18n="adminCategory_users" th:text="${uiCopy['adminCategory_users']}">users</option>
+<option value="system" data-i18n="adminCategory_system" th:text="${uiCopy['adminCategory_system']}">system</option>
+</select></label></div>
+<div class="admin-tools-grid">
+<a th:each="tool : ${adminTools}" class="admin-tool-link" th:href="${tool.href}" th:attr="data-admin-tool=${tool.href},data-category=${tool.category},data-search=${tool.search}">
+<span th:attr="data-i18n=${tool.labelKey}" th:text="${tool.label}"></span><small th:attr="data-i18n=${tool.categoryKey}" th:text="${tool.categoryLabel}"></small>
+</a></div><p id="admin-tools-empty" hidden data-i18n="empty" th:text="${uiCopy['empty']}">Nothing to display yet</p>
+</section>
+</main><footer class="admin-footer"><span data-i18n="verifiedOnly" th:text="${uiCopy['verifiedOnly']}">Only verified source responses are shown. Unavailable is not zero.</span></footer></div></div>
+<div id="admin-backdrop" class="admin-backdrop" hidden></div><aside id="admin-drawer" class="admin-drawer" aria-label="Admin mobile menu" hidden><div class="drawer-heading"><span class="brand-mark">W</span><strong data-i18n="adminConsole">Management</strong><button type="button" id="admin-menu-close" aria-label="Close menu">×</button></div>
+<nav><a href="/admin" data-i18n="dashboard" th:text="${uiCopy['dashboard']}">Dashboard</a><a href="/admin/users" data-i18n="members" th:text="${uiCopy['members']}">Members</a><a href="/admin/economy" data-i18n="ledger" th:text="${uiCopy['ledger']}">Economy & ledger</a><a href="/admin/shop" data-i18n="items" th:text="${uiCopy['items']}">Items & shop</a><a href="/admin/blog" data-i18n="content" th:text="${uiCopy['content']}">Content</a><a href="/admin/market" data-i18n="adminMarket" th:text="${uiCopy['adminMarket']}">Market</a><a href="/admin/analytics" data-i18n="analytics" th:text="${uiCopy['analytics']}">Analytics</a><a href="/admin/logs" data-i18n="logs" th:text="${uiCopy['logs']}">Audit & logs</a><a href="/admin/security" data-i18n="security" th:text="${uiCopy['security']}">Security</a><a href="/admin/support" data-i18n="support" th:text="${uiCopy['support']}">Support</a><a href="/" data-i18n="memberSite" th:text="${uiCopy['memberSite']}">Member site</a></nav></aside>
+<nav class="admin-bottom-tabs" aria-label="Admin mobile bottom navigation"><a href="/admin" aria-current="page"><span>⌂</span><span data-i18n="dashboard" th:text="${uiCopy['dashboard']}">Home</span></a><a href="/admin/users"><span>♙</span><span data-i18n="members" th:text="${uiCopy['members']}">Members</span></a><a href="/admin/market"><span>↗</span><span data-i18n="adminMarket" th:text="${uiCopy['adminMarket']}">Market</span></a><a href="/admin/logs"><span>☰</span><span data-i18n="logs" th:text="${uiCopy['logs']}">Logs</span></a><a href="/admin/support"><span>◉</span><span data-i18n="support" th:text="${uiCopy['support']}">Support</span></a></nav>
+<th:block th:replace="~{shared/chrome :: support}"></th:block>
+</body></html>

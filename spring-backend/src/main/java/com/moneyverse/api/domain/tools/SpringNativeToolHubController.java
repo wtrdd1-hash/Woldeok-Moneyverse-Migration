@@ -1,5 +1,6 @@
 package com.moneyverse.api.domain.tools;
 
+import com.moneyverse.api.domain.web.UiLocale;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,8 @@ import java.util.Set;
  */
 @Controller
 public class SpringNativeToolHubController {
+    private final UiLocale locale;
+    public SpringNativeToolHubController(UiLocale locale){this.locale=locale;}
     public static final String RELEASE = "v2026.11.19.30.1-spring-tools";
     private static final Set<String> CATEGORIES=Set.of("all","investing","tax","retirement","lending","simulation");
     public record Tool(String id,String category,String titleEn,String titleKo,String descriptionEn,String descriptionKo,boolean verified){
@@ -65,7 +68,8 @@ public class SpringNativeToolHubController {
         boolean verifiedOnly="true".equals(verifiedArg);
         String category=args.getOrDefault("category","all");
         if(!CATEGORIES.contains(category))throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"INVALID_TOOL_CATEGORY");
-        boolean ko="ko".equalsIgnoreCase(args.getOrDefault("lang","en"));
+        String language=locale.resolvePublic(request);
+        boolean ko="ko".equals(language);
         boolean compact="/tools".equals(request.getRequestURI());
         String needle=query.toLowerCase(Locale.ROOT);
         List<Tool> shown=TOOLS.stream()
@@ -76,11 +80,18 @@ public class SpringNativeToolHubController {
         response.setHeader("X-MV-UI-Release",RELEASE);
         response.setHeader("X-Content-Type-Options","nosniff");
         response.setHeader("Cache-Control","private,no-store");
-        response.setHeader("Content-Language",ko?"ko":"en");
+        response.setHeader("Content-Language",language);
+        response.setHeader("Vary","Cookie, Accept-Language");
+        response.setHeader("X-MV-Renderer","Spring-MVC-Thymeleaf");
         response.setHeader("Content-Security-Policy","default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; form-action 'self'; frame-ancestors 'none'; base-uri 'self';");
         model.addAttribute("ko",ko);
-        model.addAttribute("language",ko?"ko":"en");
-        model.addAttribute("pageTitle",ko?(compact?"금융 도구":"금융 계산기 센터"):(compact?"Financial tools":"Calculator center"));
+        model.addAttribute("language",language);
+        model.addAttribute("uiLanguage",language);
+        model.addAttribute("uiCopy",locale.labels(language));
+        String titleKey=compact?"publicToolsTitle":"publicCalculatorsTitle";
+        model.addAttribute("uiPageKey",titleKey);
+        model.addAttribute("publicTitleKey",titleKey);
+        model.addAttribute("pageTitle",locale.labels(language).get(titleKey));
         model.addAttribute("calculatorPath",request.getRequestURI());
         model.addAttribute("hubType",compact?"tools-hub":"calculators-hub");
         model.addAttribute("isCompact",compact);

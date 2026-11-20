@@ -209,6 +209,44 @@ jobs:
           APP_DB_PASSWORD: ci_app_password
         run: node packages/database/ci-apply.mjs
 
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+          cache-dependency-path: spring-backend/*.gradle.kts
+
+      - name: Verify native messaging with disposable PostgreSQL
+        working-directory: spring-backend
+        env:
+          CI_POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+          MONEYVERSE_MESSAGING_PG_TEST_URL: jdbc:postgresql://127.0.0.1:5432/woldeok_moneyverse_dev
+          MONEYVERSE_MESSAGING_PG_TEST_USER: moneyverse_migrator
+        run: |
+          node --input-type=module -e '
+            import {execFileSync,spawnSync} from "node:child_process";
+            import {readFileSync} from "node:fs";
+            const container=process.env.CI_POSTGRES_CONTAINER;
+            if(process.env.GITHUB_ACTIONS!=="true"||!/^[a-f0-9]{12,64}$/.test(container||""))throw new Error("Disposable CI service required");
+            let password;
+            try {
+              password=execFileSync("docker",["exec",container,"printenv","POSTGRES_PASSWORD"],{encoding:"utf8",stdio:["ignore","pipe","pipe"]}).replace(/\r?\n$/,"");
+            } catch {throw new Error("Disposable service credential unavailable");}
+            if(!password||password.includes("\n")||password.includes("\0"))throw new Error("Invalid disposable service credential");
+            const result=spawnSync("./gradlew",["postgresMessagingTest","--no-daemon","-Dorg.gradle.workers.max=2"],{
+              env:{...process.env,MONEYVERSE_MESSAGING_PG_TEST_PASSWORD:password},stdio:"inherit"
+            });
+            if(result.error)throw new Error("Native PostgreSQL verifier could not start");
+            if(result.status!==0)process.exit(result.status??1);
+            const xml=readFileSync("build/test-results/postgresMessagingTest/TEST-com.moneyverse.api.domain.messaging.MessagingPostgresIntegrationTest.xml","utf8");
+            const tests=Number(xml.match(/tests="([0-9]+)"/)?.[1]);
+            const failures=Number(xml.match(/failures="([0-9]+)"/)?.[1]);
+            const errors=Number(xml.match(/errors="([0-9]+)"/)?.[1]);
+            const skipped=Number(xml.match(/skipped="([0-9]+)"/)?.[1]);
+            if(!(tests>=9)||failures!==0||errors!==0||skipped!==0)throw new Error("Native PostgreSQL coverage incomplete");
+            console.log(JSON.stringify({nativePostgresMessaging:{tests,failures,errors,skipped}}));
+          '
+
       - name: Test
         env:
           DATABASE_URL: postgresql://moneyverse_app:ci_app_password@localhost:5432/woldeok_moneyverse_dev
@@ -230,3 +268,51 @@ jobs:
           npm --prefix bot ci --no-audit --no-fund
           npm --prefix bot test
           npm --prefix bot audit --omit=dev --audit-level=high
+
+  spring-web-check:
+    needs: [classify, policy]
+    if: >-
+      needs.classify.outputs.classification == 'RUNTIME_RELEVANT' ||
+      needs.classify.outputs.classification == 'MIXED'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SPRING_PROFILES_ACTIVE: test
+      SERVER_ADDRESS: 127.0.0.1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+          cache-dependency-path: spring-backend/*.gradle.kts
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Test native UI locale, navigation and money contracts
+        run: node --test scripts/native-*.test.mjs scripts/admin-tools.test.mjs scripts/mv39-money.test.mjs
+      - name: Test and build the native Spring application
+        working-directory: spring-backend
+        run: ./gradlew test bootJar --no-daemon -Dorg.gradle.workers.max=2
+      - name: Bind native artifact to exact source
+        run: |
+          node --input-type=module -e '
+            import fs from "node:fs";
+            import crypto from "node:crypto";
+            const dir="spring-backend/build/libs";
+            const jars=fs.readdirSync(dir).filter(name=>name.endsWith(".jar")&&!name.endsWith("-plain.jar"));
+            if(jars.length!==1)throw new Error("Expected one native boot JAR");
+            const file=dir+"/"+jars[0];
+            const sha256=crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
+            fs.writeFileSync(dir+"/source-manifest.json",JSON.stringify({sourceSha:process.env.GITHUB_SHA,jar:jars[0],sha256})+"\n");
+          '
+      - name: Upload source-bound native candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: spring-native-candidate-${{ github.sha }}
+          path: |
+            spring-backend/build/libs/*.jar
+            spring-backend/build/libs/source-manifest.json
+          if-no-files-found: error
+          retention-days: 14

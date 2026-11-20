@@ -2,75 +2,47 @@ package com.moneyverse.api.domain.support.controller;
 
 import com.moneyverse.api.domain.support.dto.SupportDtos.*;
 import com.moneyverse.api.domain.support.service.SupportService;
-import io.swagger.v3.oas.annotations.Operation;
+import com.moneyverse.api.domain.identity.service.MemberApiGuard;
+import com.moneyverse.api.domain.messaging.MessageContract;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.UUID;
 
-@Tag(name = "Customer Support", description = "고객 지원 문의 스레드 조회, 접수 및 메시지 이력 API")
+@Tag(name="Customer Support")
 @RestController
-@RequestMapping({"/api/support", "/api/v1/support"})
+@RequestMapping({"/api/support","/api/v1/support"})
 public class SupportController {
-
     private final SupportService supportService;
-
-    public SupportController(SupportService supportService) {
-        this.supportService = supportService;
+    private final MemberApiGuard guard;
+    public SupportController(SupportService supportService,MemberApiGuard guard) {
+        this.supportService=supportService;this.guard=guard;
     }
-
-    private UUID resolveUserUuid(String xUserId, String xActorUserId) {
-        String raw = (xUserId != null && !xUserId.isBlank()) ? xUserId.trim()
-                : (xActorUserId != null && !xActorUserId.isBlank()) ? xActorUserId.trim()
-                : "5f7b8b44-e4aa-40b8-b93a-800ec0151d20";
-        try {
-            return UUID.fromString(raw);
-        } catch (IllegalArgumentException e) {
-            return UUID.fromString("5f7b8b44-e4aa-40b8-b93a-800ec0151d20");
-        }
-    }
-
     @GetMapping("/threads")
-    @Operation(summary = "내 1:1 고객지원 문의 목록 조회")
-    public ResponseEntity<ThreadListResponse> listThreads(
-            @RequestParam(value = "status", required = false) String status,
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId,
-            @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId
-    ) {
-        UUID userId = resolveUserUuid(xUserId, xActorUserId);
-        return ResponseEntity.ok(supportService.listThreads(userId, status));
+    public ResponseEntity<ThreadListResponse> listThreads(HttpServletRequest request,
+            @RequestParam(value="status",required=false) String status) {
+        return ResponseEntity.ok(supportService.listThreads(guard.actor(request),status));
     }
-
     @GetMapping("/threads/summary")
-    @Operation(summary = "내 문의 건수 상태별 요약 조회")
-    public ResponseEntity<ThreadSummaryResponse> summary(
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId,
-            @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId
-    ) {
-        UUID userId = resolveUserUuid(xUserId, xActorUserId);
-        return ResponseEntity.ok(supportService.summary(userId));
+    public ResponseEntity<ThreadSummaryResponse> summary(HttpServletRequest request) {
+        return ResponseEntity.ok(supportService.summary(guard.actor(request)));
     }
-
     @PostMapping("/threads")
-    @Operation(summary = "새로운 1:1 고객지원 문의 등록")
-    public ResponseEntity<ThreadCreateResponse> createThread(
-            @RequestBody NewThreadRequest req,
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId,
-            @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId
-    ) {
-        UUID userId = resolveUserUuid(xUserId, xActorUserId);
-        return ResponseEntity.ok(supportService.createThread(userId, req));
+    public ResponseEntity<ThreadCreateResponse> createThread(HttpServletRequest request,@RequestBody NewThreadRequest body) {
+        UUID actor=guard.verifiedMutationActor(request);
+        MessageContract.matchingKey(body.idempotencyKey(),request.getHeader("Idempotency-Key"));
+        return ResponseEntity.ok(supportService.createThread(actor,body));
     }
-
     @GetMapping("/threads/{id}/messages")
-    @Operation(summary = "특정 문의의 대화 메시지 이력 조회")
-    public ResponseEntity<MessageListResponse> listMessages(
-            @PathVariable("id") UUID id,
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId,
-            @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId
-    ) {
-        UUID userId = resolveUserUuid(xUserId, xActorUserId);
-        return ResponseEntity.ok(supportService.listMessages(userId, id));
+    public ResponseEntity<MessageListResponse> listMessages(HttpServletRequest request,@PathVariable("id") UUID id) {
+        return ResponseEntity.ok(supportService.listMessages(guard.actor(request),id));
+    }
+    @PostMapping("/threads/{id}/messages")
+    public ResponseEntity<MessageCreateResponse> addMessage(HttpServletRequest request,@PathVariable("id") UUID id,
+            @RequestBody NewMessageRequest body) {
+        UUID actor=guard.verifiedMutationActor(request);
+        MessageContract.matchingKey(body.idempotencyKey(),request.getHeader("Idempotency-Key"));
+        return ResponseEntity.ok(supportService.addMessage(actor,id,body));
     }
 }

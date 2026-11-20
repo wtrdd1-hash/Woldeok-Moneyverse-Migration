@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:lang="${uiLanguage}" th:attr="data-ui-language=${uiLanguage}">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark"><meta name="theme-color" content="#0C1020"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="referrer" content="no-referrer">
+<title th:text="${uiCopy.get(#vars.uiPageKey)} + ' · W Moneyverse'">Log in · W Moneyverse</title>
+<link rel="stylesheet" href="/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31">
+<script src="/assets/mv39/i18n.js?v=695770456cb14d5a884754897c4c366302ebac7ec135e0157bb7440b50551ba3" defer></script>
+<script src="/assets/mv43/auth-core.js?v=f2531bd940e0d3ba591a4e4ede875ea66b3b03365a6ac73684e0bdaeb3fd617e" defer></script><script src="/assets/mv43/auth.js?v=11fdfba8d53004315a1ab140deb95a5040847a0bb50add727a53785f4928cd03" defer></script>
+<th:block th:replace="~{shared/chrome :: commonHead}"></th:block>
+</head>
+<body data-page="auth" th:attr="data-auth-page=${authPage}">
+<a class="skip-link" href="#main-content" data-i18n="authSkip" th:text="${uiCopy['authSkip']}">Skip to main content</a>
+<div class="app-shell"><th:block th:replace="~{shared/chrome :: sidebar}"></th:block>
+<div class="app-main"><div class="app-inner"><th:block th:replace="~{shared/chrome :: pageHeader}"></th:block>
+<main id="main-content" tabindex="-1" class="auth-main">
+<section class="hero"><div><div class="eyebrow">WOLDEOK MONEYVERSE</div><h2 id="auth-heading" th:attr="data-i18n=${authHeadingKey}" th:text="${uiCopy.get(#vars.authHeadingKey)}">Log in</h2>
+<p th:if="${authLeadKey != null}" th:attr="data-i18n=${authLeadKey}" th:text="${uiCopy.get(#vars.authLeadKey)}">Access your Moneyverse account.</p></div></section>
+<section class="card auth-card" aria-labelledby="auth-heading">
+<th:block th:if="${authFields}">
+<p class="auth-note" data-i18n="authConsentNotice" th:text="${uiCopy['authConsentNotice']}">These acknowledgements are only checked in this browser. Consent recording is not available.</p>
+<form id="native-auth-form" action="/login" method="post" th:attr="data-auth-mode=${authPage},action=${authPage == 'login' ? '/login' : '/register'}">
+<fieldset class="auth-fields" th:disabled="${authPage == 'register'}">
+<label for="auth-email" data-i18n="authEmail" th:text="${uiCopy['authEmail']}">Email</label>
+<input id="auth-email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" required>
+<th:block th:if="${authPage == 'register'}">
+<label for="auth-display-name" data-i18n="authDisplayName" th:text="${uiCopy['authDisplayName']}">Display name</label>
+<input id="auth-display-name" name="displayName" type="text" autocomplete="nickname" minlength="2" maxlength="20" required>
+</th:block>
+<label for="auth-password" th:attr="data-i18n=${authPage == 'register' ? 'authRegisterPassword' : 'authPassword'}" th:text="${uiCopy[authPage == 'register' ? 'authRegisterPassword' : 'authPassword']}">Password</label>
+<input id="auth-password" name="password" type="password" maxlength="128" required th:attr="autocomplete=${authPage == 'register' ? 'new-password' : 'current-password'},minlength=${authPage == 'register' ? 8 : null}">
+<fieldset class="auth-consent"><legend data-i18n="authAcknowledgements" th:text="${uiCopy['authAcknowledgements']}">Acknowledgements</legend>
+<label><input name="terms" type="checkbox" required><span  data-i18n="authTerms" th:text="${uiCopy['authTerms']}">I have read and agree to the terms.</span> <a href="/terms" target="_blank" rel="noopener noreferrer"><span  data-i18n="authTermsLink" th:text="${uiCopy['authTermsLink']}">Terms</span></a></label>
+<label><input name="privacy" type="checkbox" required><span  data-i18n="authPrivacy" th:text="${uiCopy['authPrivacy']}">I have read and agree to the privacy policy.</span> <a href="/privacy" target="_blank" rel="noopener noreferrer"><span  data-i18n="authPrivacyLink" th:text="${uiCopy['authPrivacyLink']}">Privacy</span></a></label>
+<label><input name="age" type="checkbox" required><span  data-i18n="authAge" th:text="${uiCopy['authAge']}">I confirm that I am at least 14 years old.</span></label>
+</fieldset>
+<th:block th:if="${authPage == 'register'}">
+<button id="auth-submit" type="submit" disabled class="auth-primary" data-i18n="authRegisterSubmit" th:text="${uiCopy['authRegisterSubmit']}">Sign up and get started</button>
+<p data-i18n="authRegistrationUnavailable" th:text="${uiCopy['authRegistrationUnavailable']}">Registration is unavailable until consent and age confirmation can be recorded by the service.</p>
+</th:block>
+<button th:if="${authPage == 'login'}" id="auth-submit" type="submit" class="auth-primary" data-i18n="authLoginSubmit" th:text="${uiCopy['authLoginSubmit']}">Sign In with Email</button>
+<p id="auth-status" role="status" aria-live="polite"></p>
+</fieldset>
+</form>
+<noscript><p  data-i18n="authJavascript" th:text="${uiCopy['authJavascript']}">JavaScript is required for verified form submission.</p></noscript>
+<div th:if="${authPage == 'login'}" class="auth-providers">
+<a class="auth-provider" href="/auth/discord/authorize"><span  data-i18n="authDiscord" th:text="${uiCopy['authDiscord']}">Continue with Discord</span></a>
+<p class="auth-note" data-i18n="authGoogleUnavailable" th:text="${uiCopy['authGoogleUnavailable']}">Google sign-in is currently unavailable.</p>
+</div>
+<nav id="auth-help-navigation" class="auth-links" aria-label="Account help" th:attr="aria-label=${uiCopy['authHelp']}"><a href="/login"><span  data-i18n="login" th:text="${uiCopy['login']}">Log in</span></a><a href="/register"><span  data-i18n="authRegister" th:text="${uiCopy['authRegister']}">Create account</span></a><a href="/forgot-password"><span  data-i18n="authForgot" th:text="${uiCopy['authForgot']}">Forgot password</span></a></nav>
+</th:block>
+<th:block th:unless="${authFields}">
+<p role="status" class="auth-unavailable" data-i18n="authUnavailable" th:text="${uiCopy['authUnavailable']}">This action is currently unavailable. No change has been made and no email delivery has been confirmed.</p>
+<a class="auth-provider" href="/login"><span  data-i18n="authBackLogin" th:text="${uiCopy['authBackLogin']}">Back to login</span></a>
+<a id="auth-reset-help" class="auth-help-link" th:if="${authPage == 'reset-password'}" href="/forgot-password"><span  data-i18n="authForgot" th:text="${uiCopy['authForgot']}">Forgot password</span></a>
+</th:block>
+</section>
+</main>
+<th:block th:replace="~{shared/chrome :: footer}"></th:block>
+</div></div></div>
+<th:block th:replace="~{shared/chrome :: mobileNavigation}"></th:block><th:block th:replace="~{shared/chrome :: support}"></th:block>
+</body></html>

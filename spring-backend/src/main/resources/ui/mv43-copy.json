@@ -1,0 +1,2879 @@
+{
+  "home": [
+    "Home",
+    "홈",
+    "ホーム",
+    "首页",
+    "Trang chủ"
+  ],
+  "wallet": [
+    "Wallet",
+    "지갑",
+    "ウォレット",
+    "钱包",
+    "Ví"
+  ],
+  "stocks": [
+    "Invest",
+    "투자",
+    "投資",
+    "投资",
+    "Đầu tư"
+  ],
+  "quests": [
+    "Quests",
+    "퀘스트",
+    "クエスト",
+    "任务",
+    "Nhiệm vụ"
+  ],
+  "shop": [
+    "Shop",
+    "상점",
+    "ショップ",
+    "商店",
+    "Cửa hàng"
+  ],
+  "board": [
+    "Community",
+    "커뮤니티",
+    "コミュニティ",
+    "社区",
+    "Cộng đồng"
+  ],
+  "support": [
+    "Help & chat",
+    "문의·채팅",
+    "サポート",
+    "客服与聊天",
+    "Hỗ trợ"
+  ],
+  "account": [
+    "My account",
+    "내 계정",
+    "アカウント",
+    "我的账户",
+    "Tài khoản"
+  ],
+  "calculators": [
+    "Calculators",
+    "계산기",
+    "計算機",
+    "计算器",
+    "Máy tính"
+  ],
+  "guide": [
+    "Guide",
+    "가이드",
+    "ガイド",
+    "指南",
+    "Hướng dẫn"
+  ],
+  "menu": [
+    "Menu",
+    "메뉴",
+    "メニュー",
+    "菜单",
+    "Trình đơn"
+  ],
+  "close": [
+    "Close",
+    "닫기",
+    "閉じる",
+    "关闭",
+    "Đóng"
+  ],
+  "language": [
+    "Language",
+    "언어",
+    "言語",
+    "语言",
+    "Ngôn ngữ"
+  ],
+  "auto": [
+    "Auto (browser)",
+    "자동 (브라우저)",
+    "自動（ブラウザー）",
+    "自动（浏览器）",
+    "Tự động (trình duyệt)"
+  ],
+  "login": [
+    "Log in",
+    "로그인",
+    "ログイン",
+    "登录",
+    "Đăng nhập"
+  ],
+  "logout": [
+    "Log out",
+    "로그아웃",
+    "ログアウト",
+    "退出登录",
+    "Đăng xuất"
+  ],
+  "search": [
+    "Search",
+    "검색",
+    "検索",
+    "搜索",
+    "Tìm kiếm"
+  ],
+  "loggedOut": [
+    "Log in to view your assets",
+    "로그인 후 내 자산을 확인하세요",
+    "ログインして資産を確認",
+    "登录后查看您的资产",
+    "Đăng nhập để xem tài sản"
+  ],
+  "loading": [
+    "Loading verified data…",
+    "실제 데이터 조회 중…",
+    "データ取得中…",
+    "正在读取真实数据…",
+    "Đang tải dữ liệu thực…"
+  ],
+  "unavailable": [
+    "Unable to load data",
+    "데이터를 불러올 수 없습니다",
+    "データを取得できません",
+    "无法加载数据",
+    "Không thể tải dữ liệu"
+  ],
+  "retry": [
+    "Try again",
+    "다시 시도",
+    "再試行",
+    "重试",
+    "Thử lại"
+  ],
+  "empty": [
+    "Nothing to display yet",
+    "표시할 내역이 없습니다",
+    "表示するデータがありません",
+    "暂无记录",
+    "Chưa có dữ liệu"
+  ],
+  "seeAll": [
+    "View details",
+    "자세히 보기",
+    "詳細を見る",
+    "查看详情",
+    "Xem chi tiết"
+  ],
+  "lastUpdated": [
+    "Updated",
+    "갱신",
+    "更新",
+    "更新时间",
+    "Đã cập nhật"
+  ],
+  "welcome": [
+    "My financial world",
+    "나의 금융 세계",
+    "私の資産の世界",
+    "我的金融世界",
+    "Thế giới tài chính của tôi"
+  ],
+  "homeLead": [
+    "See your wallet, investments and activity in one place.",
+    "내 지갑·투자·활동을 한곳에서 확인하세요.",
+    "ウォレット、投資、活動をひと目で確認。",
+    "一站式查看钱包、投资与活动。",
+    "Xem ví, đầu tư và hoạt động tại một nơi."
+  ],
+  "personalTitle": [
+    "My assets dashboard",
+    "내 자산 대시보드",
+    "マイ資産ダッシュボード",
+    "我的资产概览",
+    "Tổng quan tài sản"
+  ],
+  "walletAvailable": [
+    "Available wallet balance",
+    "사용 가능 지갑 잔액",
+    "利用可能な残高",
+    "可用钱包余额",
+    "Số dư ví khả dụng"
+  ],
+  "positionsCount": [
+    "Shares held",
+    "보유 주식 종목",
+    "保有銘柄",
+    "持有股票种类",
+    "Số mã đang nắm giữ"
+  ],
+  "myQuests": [
+    "My quests",
+    "내 퀘스트",
+    "マイクエスト",
+    "我的任务",
+    "Nhiệm vụ của tôi"
+  ],
+  "goToQuests": [
+    "See quest activity",
+    "퀘스트 진행 보기",
+    "クエストを確認",
+    "查看任务",
+    "Xem nhiệm vụ"
+  ],
+  "trendTitle": [
+    "My asset history",
+    "내 자산 변화 추이",
+    "資産推移",
+    "我的资产走势",
+    "Biến động tài sản"
+  ],
+  "trendUnavailable": [
+    "Verified asset history is not yet available.",
+    "검증된 자산 추이는 아직 제공되지 않습니다.",
+    "確認済み資産履歴は未提供です。",
+    "暂未提供经核实的资产历史。",
+    "Chưa có lịch sử tài sản đã xác thực."
+  ],
+  "marketTitle": [
+    "Market prices",
+    "시장 시세",
+    "市場価格",
+    "市场行情",
+    "Giá thị trường"
+  ],
+  "marketDesc": [
+    "Live values from the market service; delayed or unavailable data will be marked.",
+    "시장 서비스가 제공하는 실제 시세이며 오류 시 조회 불가로 표시합니다.",
+    "市場サービスの実データを表示します。",
+    "显示市场服务提供的真实行情。",
+    "Dữ liệu thị trường thực; lỗi sẽ được hiển thị rõ."
+  ],
+  "symbol": [
+    "Symbol",
+    "종목코드",
+    "銘柄コード",
+    "股票代码",
+    "Mã"
+  ],
+  "stockName": [
+    "Company",
+    "기업명",
+    "企業名",
+    "公司",
+    "Công ty"
+  ],
+  "sector": [
+    "Description",
+    "설명",
+    "説明",
+    "说明",
+    "Mô tả"
+  ],
+  "currentPrice": [
+    "Price (WLD)",
+    "현재가 (WLD)",
+    "価格 (WLD)",
+    "价格 (WLD)",
+    "Giá (WLD)"
+  ],
+  "change": [
+    "Change",
+    "등락률",
+    "騰落率",
+    "涨跌幅",
+    "Thay đổi"
+  ],
+  "status": [
+    "Status",
+    "상태",
+    "状態",
+    "状态",
+    "Trạng thái"
+  ],
+  "action": [
+    "Action",
+    "바로가기",
+    "操作",
+    "操作",
+    "Hành động"
+  ],
+  "marketView": [
+    "Visit market",
+    "시장 자세히",
+    "市場へ",
+    "查看市场",
+    "Xem thị trường"
+  ],
+  "quickActions": [
+    "Quick actions",
+    "빠른 작업",
+    "クイック操作",
+    "快捷操作",
+    "Thao tác nhanh"
+  ],
+  "walletHero": [
+    "My wallet",
+    "내 지갑",
+    "マイウォレット",
+    "我的钱包",
+    "Ví của tôi"
+  ],
+  "walletLead": [
+    "Your verified wallet balance and transaction history.",
+    "실제 지갑 잔액과 거래 내역을 확인하세요.",
+    "残高と取引履歴を確認します。",
+    "查看真实钱包余额与交易记录。",
+    "Xem số dư và lịch sử giao dịch xác thực."
+  ],
+  "pendingBalance": [
+    "Pending",
+    "처리 중 잔액",
+    "処理中",
+    "处理中",
+    "Đang xử lý"
+  ],
+  "lockedBalance": [
+    "Reserved",
+    "보류 잔액",
+    "保留残高",
+    "冻结余额",
+    "Số dư tạm giữ"
+  ],
+  "transactions": [
+    "Recent transactions",
+    "최근 거래 내역",
+    "最近の取引",
+    "近期交易",
+    "Giao dịch gần đây"
+  ],
+  "walletNotice": [
+    "Transactions only appear after your account is verified.",
+    "본인 인증 세션이 확인된 경우에만 거래 내역을 표시합니다.",
+    "本人認証後のみ取引を表示します。",
+    "仅在验证您的登录后显示交易记录。",
+    "Chỉ hiển thị giao dịch sau khi xác minh tài khoản."
+  ],
+  "stocksHero": [
+    "My investments",
+    "내 투자·주식",
+    "マイ投資",
+    "我的投资",
+    "Đầu tư của tôi"
+  ],
+  "stocksLead": [
+    "Browse market prices and your own holdings.",
+    "시장 시세와 내 보유 종목을 확인하세요.",
+    "市場価格と保有銘柄を確認。",
+    "查看行情与您的持仓。",
+    "Xem thị trường và danh mục của bạn."
+  ],
+  "myHoldings": [
+    "My holdings",
+    "내 보유 종목",
+    "保有銘柄",
+    "我的持仓",
+    "Danh mục của tôi"
+  ],
+  "quantity": [
+    "Quantity",
+    "수량",
+    "数量",
+    "数量",
+    "Số lượng"
+  ],
+  "marketValue": [
+    "Market value",
+    "평가액",
+    "評価額",
+    "市值",
+    "Giá trị thị trường"
+  ],
+  "questsHero": [
+    "Quest progress",
+    "퀘스트 진행",
+    "クエスト進捗",
+    "任务进度",
+    "Tiến độ nhiệm vụ"
+  ],
+  "questsLead": [
+    "Only verified activity and earned rewards count.",
+    "검증된 활동과 실제 지급 보상만 표시합니다.",
+    "確認済みの活動のみ表示します。",
+    "仅显示已核实的活动与奖励。",
+    "Chỉ hiển thị hoạt động và phần thưởng đã xác thực."
+  ],
+  "questsPending": [
+    "Your verified quest history is not yet connected here.",
+    "본인 퀘스트 검증 데이터가 아직 연결되지 않았습니다.",
+    "クエスト履歴は現在未連携です。",
+    "尚未接入您的已验证任务记录。",
+    "Chưa kết nối lịch sử nhiệm vụ được xác minh."
+  ],
+  "shopHero": [
+    "Item shop",
+    "아이템 상점",
+    "アイテムショップ",
+    "道具商店",
+    "Cửa hàng vật phẩm"
+  ],
+  "shopLead": [
+    "Browse real catalog items and availability.",
+    "실제 상품과 재고 정보를 확인하세요.",
+    "実際の商品と在庫を表示します。",
+    "查看真实商品与库存。",
+    "Xem vật phẩm và tồn kho thực tế."
+  ],
+  "price": [
+    "Price",
+    "가격",
+    "価格",
+    "价格",
+    "Giá"
+  ],
+  "inStock": [
+    "Available",
+    "재고",
+    "在庫",
+    "库存",
+    "Còn hàng"
+  ],
+  "soldOut": [
+    "Out of stock",
+    "품절",
+    "売り切れ",
+    "售罄",
+    "Hết hàng"
+  ],
+  "boardHero": [
+    "Community",
+    "커뮤니티",
+    "コミュニティ",
+    "社区",
+    "Cộng đồng"
+  ],
+  "boardLead": [
+    "Read real posts and recent conversations.",
+    "실제 게시글과 소통 내용을 확인하세요.",
+    "実際の投稿を閲覧できます。",
+    "浏览真实帖子与讨论。",
+    "Xem bài viết và thảo luận thực tế."
+  ],
+  "recentPosts": [
+    "Recent posts",
+    "최근 게시글",
+    "最近の投稿",
+    "最新帖子",
+    "Bài viết gần đây"
+  ],
+  "supportHero": [
+    "Contact support",
+    "고객지원·문의",
+    "お問い合わせ",
+    "联系支持",
+    "Liên hệ hỗ trợ"
+  ],
+  "supportLead": [
+    "Open help resources or contact the support team.",
+    "도움말과 1:1 문의를 이용하세요.",
+    "ヘルプとサポートをご利用ください。",
+    "查看帮助或联系客服。",
+    "Mở trợ giúp và liên hệ hỗ trợ."
+  ],
+  "supportUnavailable": [
+    "Private support messages require a verified member service.",
+    "개인 문의 내역은 인증·권한 검증 후 제공됩니다.",
+    "お問い合わせ履歴は認証が必要です。",
+    "私人客服记录需要认证。",
+    "Lịch sử hỗ trợ riêng tư yêu cầu xác minh."
+  ],
+  "openHelp": [
+    "Help center",
+    "도움말 센터",
+    "ヘルプセンター",
+    "帮助中心",
+    "Trung tâm trợ giúp"
+  ],
+  "accountHero": [
+    "My profile",
+    "내 프로필",
+    "マイプロフィール",
+    "我的资料",
+    "Hồ sơ của tôi"
+  ],
+  "accountLead": [
+    "Secure access to your own profile and preferences.",
+    "내 계정과 언어 설정을 안전하게 관리하세요.",
+    "アカウントと言語設定を管理します。",
+    "安全管理账户与语言偏好。",
+    "Quản lý tài khoản và tùy chọn ngôn ngữ."
+  ],
+  "accountName": [
+    "Display name",
+    "표시 이름",
+    "表示名",
+    "显示名称",
+    "Tên hiển thị"
+  ],
+  "personalOnly": [
+    "Private information is only loaded after login.",
+    "개인정보는 로그인 후에만 조회합니다.",
+    "個人情報はログイン後に表示します。",
+    "登录后才加载私人信息。",
+    "Chỉ tải thông tin cá nhân sau đăng nhập."
+  ],
+  "more": [
+    "More",
+    "더보기",
+    "その他",
+    "更多",
+    "Thêm"
+  ],
+  "notices": [
+    "Updates",
+    "소식",
+    "お知らせ",
+    "公告",
+    "Tin tức"
+  ],
+  "allRights": [
+    "Virtual WLD is not legal tender.",
+    "WLD는 서비스 내 가상 화폐이며 법정통화가 아닙니다.",
+    "WLDはサービス内の仮想通貨です。",
+    "WLD是服务内虚拟货币，并非法定货币。",
+    "WLD là tiền ảo trong dịch vụ, không phải tiền pháp định."
+  ],
+  "helpButton": [
+    "Contact us",
+    "문의하기",
+    "お問い合わせ",
+    "联系我们",
+    "Liên hệ"
+  ],
+  "errorAuth": [
+    "Please sign in to continue.",
+    "계속하려면 로그인하세요.",
+    "ログインしてください。",
+    "请先登录。",
+    "Vui lòng đăng nhập."
+  ],
+  "signInAction": [
+    "Sign in",
+    "로그인하기",
+    "ログイン",
+    "登录",
+    "Đăng nhập"
+  ],
+  "netError": [
+    "The service is temporarily unavailable.",
+    "현재 서비스를 이용할 수 없습니다.",
+    "サービスをご利用いただけません。",
+    "服务暂时不可用。",
+    "Dịch vụ tạm thời không khả dụng."
+  ],
+  "viewAll": [
+    "View all",
+    "전체 보기",
+    "すべて表示",
+    "查看全部",
+    "Xem tất cả"
+  ],
+  "roleDenied": [
+    "Only authorized administrators can view operational data.",
+    "관리자 권한이 확인된 사용자만 운영 정보를 볼 수 있습니다.",
+    "管理者のみ閲覧できます。",
+    "仅授权管理员可查看运营数据。",
+    "Chỉ quản trị viên được phép xem dữ liệu."
+  ],
+  "admin": [
+    "Admin console",
+    "관리자",
+    "管理コンソール",
+    "管理控制台",
+    "Quản trị"
+  ],
+  "tradable": [
+    "Trading open",
+    "거래 가능",
+    "取引可能",
+    "可交易",
+    "Đang giao dịch"
+  ],
+  "halted": [
+    "Trading halted",
+    "거래 중지",
+    "取引停止",
+    "暂停交易",
+    "Tạm ngừng"
+  ],
+  "adminMarket": [
+    "Market",
+    "시장 관리",
+    "市場管理",
+    "市场管理",
+    "Thị trường"
+  ],
+  "dashboard": [
+    "Dashboard",
+    "대시보드",
+    "ダッシュボード",
+    "控制面板",
+    "Bảng điều khiển"
+  ],
+  "adminConsole": [
+    "Administration",
+    "관리자 메뉴",
+    "管理メニュー",
+    "管理菜单",
+    "Quản trị"
+  ],
+  "members": [
+    "Members",
+    "회원 관리",
+    "会員管理",
+    "成员管理",
+    "Thành viên"
+  ],
+  "ledger": [
+    "Economy & ledger",
+    "경제·원장",
+    "経済と台帳",
+    "经济与账本",
+    "Kinh tế và sổ cái"
+  ],
+  "items": [
+    "Items & shop",
+    "아이템·상점",
+    "アイテムとショップ",
+    "物品与商店",
+    "Vật phẩm và cửa hàng"
+  ],
+  "content": [
+    "Content",
+    "콘텐츠",
+    "コンテンツ",
+    "内容",
+    "Nội dung"
+  ],
+  "analytics": [
+    "Analytics",
+    "분석",
+    "分析",
+    "分析",
+    "Phân tích"
+  ],
+  "logs": [
+    "Audit & logs",
+    "감사·로그",
+    "監査とログ",
+    "审计与日志",
+    "Kiểm toán và nhật ký"
+  ],
+  "security": [
+    "Security",
+    "보안·권한",
+    "セキュリティ",
+    "安全与权限",
+    "Bảo mật"
+  ],
+  "controls": [
+    "Feature controls",
+    "기능 제어",
+    "機能制御",
+    "功能控制",
+    "Điều khiển tính năng"
+  ],
+  "features": [
+    "Feature switches",
+    "기능 스위치",
+    "機能スイッチ",
+    "功能开关",
+    "Công tắc tính năng"
+  ],
+  "sourceOverview": [
+    "Verified overview",
+    "검증된 운영 현황",
+    "確認済み概要",
+    "已核实概览",
+    "Tổng quan đã xác minh"
+  ],
+  "verifiedResult": [
+    "Source records, not a site-wide total",
+    "조회된 원천 기록이며 전체 합계가 아닙니다",
+    "全体の総数ではなく取得されたデータです",
+    "仅为已查询数据，并非全站总数",
+    "Số liệu nguồn, không phải tổng toàn hệ thống"
+  ],
+  "marketPreview": [
+    "Market snapshot",
+    "주식 시장 현황",
+    "株式市場状況",
+    "市场概况",
+    "Tình hình thị trường"
+  ],
+  "memberSite": [
+    "User website",
+    "사용자 웹사이트",
+    "ユーザーサイト",
+    "用户网站",
+    "Trang người dùng"
+  ],
+  "adminWelcome": [
+    "Operations control center",
+    "운영 관리 센터",
+    "運営管理センター",
+    "运营管理中心",
+    "Trung tâm điều hành"
+  ],
+  "adminLead": [
+    "Verified records, permissions and actions in one place.",
+    "실제 조회된 기록과 권한을 한곳에서 확인합니다.",
+    "確認済み記録と権限を一か所で確認します。",
+    "集中查看已核实的记录与权限。",
+    "Xem dữ liệu đã xác minh và quyền hạn tại một nơi."
+  ],
+  "verifiedOnly": [
+    "Only verified source responses are shown. Unavailable is not zero.",
+    "검증된 원천 응답만 표시합니다. 조회 불가는 0이 아닙니다.",
+    "確認済みデータのみ表示。取得不可はゼロではありません。",
+    "仅显示经核实的数据。无法获取不等于零。",
+    "Chỉ hiện dữ liệu đã xác minh. Không khả dụng không phải số không."
+  ],
+  "adminPartial": [
+    "Some sources unavailable",
+    "일부 데이터 조회 불가",
+    "一部データが取得不可",
+    "部分数据不可用",
+    "Một số nguồn không khả dụng"
+  ],
+  "adminVerified": [
+    "Source-backed overview",
+    "원천 데이터 기준 현황",
+    "データソースに基づく概要",
+    "基于来源数据的概览",
+    "Tổng quan dựa trên nguồn dữ liệu"
+  ],
+  "myOverview": [
+    "Your overview",
+    "내 자산 현황",
+    "資産サマリー",
+    "我的资产概览",
+    "Tổng quan tài sản"
+  ],
+  "refresh": [
+    "Refresh",
+    "새로고침",
+    "更新",
+    "刷新",
+    "Tải lại"
+  ],
+  "postsPending": [
+    "Verified community posts are not available here yet.",
+    "확인된 커뮤니티 게시글을 현재 홈에서 표시할 수 없습니다.",
+    "確認済みの投稿は現在表示できません。",
+    "目前无法在首页显示经核实的帖子。",
+    "Chưa thể hiển thị bài viết đã xác minh tại trang chủ."
+  ],
+  "holdingsNotice": [
+    "Holdings data is awaiting secure account verification. Open the stocks page for market information.",
+    "보유 종목 데이터는 본인 계정 보호 검증 전이므로 표시하지 않습니다. 주식 페이지에서 시장 정보를 확인하세요.",
+    "保有情報は本人確認後に提供します。株式画面をご覧ください。",
+    "持仓数据须完成账户验证后提供。请查看股票页面。",
+    "Dữ liệu nắm giữ chờ xác minh tài khoản an toàn. Xem trang cổ phiếu."
+  ],
+  "selectLanguage": [
+    "Choose language",
+    "언어 선택",
+    "言語を選択",
+    "选择语言",
+    "Chọn ngôn ngữ"
+  ],
+  "adminAllTools": [
+    "All tools",
+    "전체 도구",
+    "すべてのツール",
+    "全部工具",
+    "Tất cả công cụ"
+  ],
+  "adminTool_economy": [
+    "Economy & ledger",
+    "경제·원장",
+    "経済・台帳",
+    "经济与账本",
+    "Kinh tế và sổ cái"
+  ],
+  "adminTool_mint": [
+    "Mint",
+    "조폐국",
+    "造幣局",
+    "铸币局",
+    "Sở đúc tiền"
+  ],
+  "adminTool_central_bank": [
+    "Central bank",
+    "중앙은행",
+    "中央銀行",
+    "中央银行",
+    "Ngân hàng trung ương"
+  ],
+  "adminTool_treasury": [
+    "Treasury & reserves",
+    "국고·비축",
+    "国庫・準備金",
+    "国库与储备",
+    "Kho bạc và dự trữ"
+  ],
+  "adminTool_enterprises": [
+    "Public enterprises & governance",
+    "공기업·지배구조",
+    "公企業・ガバナンス",
+    "公共企业与治理",
+    "Doanh nghiệp công và quản trị"
+  ],
+  "adminTool_bonds": [
+    "Government bond exchange",
+    "국채 거래소",
+    "国債市場",
+    "国债市场",
+    "Sàn trái phiếu chính phủ"
+  ],
+  "adminTool_pension": [
+    "Pension fund",
+    "국민연금",
+    "年金基金",
+    "养老基金",
+    "Quỹ hưu trí"
+  ],
+  "adminTool_fx": [
+    "Foreign exchange",
+    "서울외환시장",
+    "外国為替市場",
+    "外汇市场",
+    "Thị trường ngoại hối"
+  ],
+  "adminTool_treasury_grants": [
+    "Startup grants review",
+    "창업 지원금 심사",
+    "創業支援金の審査",
+    "创业补助审核",
+    "Xét duyệt hỗ trợ khởi nghiệp"
+  ],
+  "adminTool_kdic": [
+    "Deposit insurance",
+    "예금보험공사",
+    "預金保険",
+    "存款保险",
+    "Bảo hiểm tiền gửi"
+  ],
+  "adminTool_catalog": [
+    "Business & season catalog",
+    "사업·시즌 카탈로그",
+    "事業・シーズン一覧",
+    "业务与赛季目录",
+    "Danh mục kinh doanh và mùa giải"
+  ],
+  "adminTool_work": [
+    "Work & jobs",
+    "작업·직업 센터",
+    "作業・職業センター",
+    "工作与职业中心",
+    "Trung tâm công việc và nghề nghiệp"
+  ],
+  "adminTool_market": [
+    "Market monitoring",
+    "거래소 관제",
+    "市場監視",
+    "市场监控",
+    "Giám sát thị trường"
+  ],
+  "adminTool_shop": [
+    "Shop management",
+    "상점 관리",
+    "ショップ管理",
+    "商店管理",
+    "Quản lý cửa hàng"
+  ],
+  "adminTool_economy_scenario_lab": [
+    "Scenario lab",
+    "시나리오 랩",
+    "シナリオ実験室",
+    "情景实验室",
+    "Phòng thử nghiệm kịch bản"
+  ],
+  "adminTool_market_ai_news": [
+    "AI market news",
+    "AI 시장 뉴스",
+    "AI市場ニュース",
+    "AI市场新闻",
+    "Tin thị trường AI"
+  ],
+  "adminTool_security": [
+    "Security & blocking",
+    "보안·차단 센터",
+    "セキュリティ・ブロック",
+    "安全与封禁",
+    "Bảo mật và chặn truy cập"
+  ],
+  "adminTool_logs": [
+    "Audit logs",
+    "감사 로그",
+    "監査ログ",
+    "审计日志",
+    "Nhật ký kiểm toán"
+  ],
+  "adminTool_logs_errors": [
+    "Error logs",
+    "에러 로그",
+    "エラーログ",
+    "错误日志",
+    "Nhật ký lỗi"
+  ],
+  "adminTool_logs_system": [
+    "System logs",
+    "시스템 로그",
+    "システムログ",
+    "系统日志",
+    "Nhật ký hệ thống"
+  ],
+  "adminTool_logs_integrity": [
+    "Integrity verification",
+    "무결성 검증",
+    "整合性検証",
+    "完整性验证",
+    "Xác minh tính toàn vẹn"
+  ],
+  "adminTool_logs_delivery": [
+    "Delivery logs",
+    "배송·전송 로그",
+    "配信・転送ログ",
+    "投递与传输日志",
+    "Nhật ký chuyển giao"
+  ],
+  "adminTool_users": [
+    "Member directory",
+    "회원 디렉토리",
+    "会員一覧",
+    "成员目录",
+    "Danh bạ thành viên"
+  ],
+  "adminTool_blog": [
+    "Blog & editorial",
+    "블로그·에디토리얼",
+    "ブログ・編集",
+    "博客与编辑",
+    "Blog và biên tập"
+  ],
+  "adminTool_money_flow": [
+    "Member money flows",
+    "유저 자금 흐름",
+    "会員の資金フロー",
+    "成员资金流",
+    "Luồng tiền thành viên"
+  ],
+  "adminTool_content": [
+    "Content moderation",
+    "콘텐츠 모더레이션",
+    "コンテンツ審査",
+    "内容审核",
+    "Kiểm duyệt nội dung"
+  ],
+  "adminTool_support": [
+    "Support chat",
+    "고객지원 채팅",
+    "サポートチャット",
+    "客服聊天",
+    "Trò chuyện hỗ trợ"
+  ],
+  "adminTool_safety": [
+    "Safety center",
+    "안전 센터",
+    "安全センター",
+    "安全中心",
+    "Trung tâm an toàn"
+  ],
+  "adminTool_controls": [
+    "Feature controls",
+    "킬스위치 제어 센터",
+    "機能制御",
+    "功能控制",
+    "Điều khiển tính năng"
+  ],
+  "adminTool_api_health": [
+    "API monitoring",
+    "API 관제",
+    "API監視",
+    "API监控",
+    "Giám sát API"
+  ],
+  "adminTool_seo": [
+    "SEO & indexing",
+    "SEO·색인",
+    "SEO・インデックス",
+    "SEO与索引",
+    "SEO và lập chỉ mục"
+  ],
+  "adminTool_seo_audit": [
+    "SEO audit",
+    "SEO 감사",
+    "SEO監査",
+    "SEO审计",
+    "Kiểm toán SEO"
+  ],
+  "adminTool_analytics": [
+    "Graph analytics",
+    "그래프 분석",
+    "グラフ分析",
+    "图表分析",
+    "Phân tích biểu đồ"
+  ],
+  "adminTool_discord": [
+    "Discord bot monitoring",
+    "디스코드 봇 관제",
+    "Discordボット監視",
+    "Discord机器人监控",
+    "Giám sát bot Discord"
+  ],
+  "adminTool_operations_storage": [
+    "Operations storage",
+    "운영 스토리지",
+    "運用ストレージ",
+    "运维存储",
+    "Lưu trữ vận hành"
+  ],
+  "adminCategory_macro": [
+    "Macroeconomy & finance",
+    "거시·금융",
+    "マクロ経済・金融",
+    "宏观经济与金融",
+    "Kinh tế vĩ mô và tài chính"
+  ],
+  "adminCategory_treasury": [
+    "Treasury & taxation",
+    "국고·세정",
+    "国庫・税務",
+    "国库与税务",
+    "Kho bạc và thuế"
+  ],
+  "adminCategory_market": [
+    "Markets & businesses",
+    "시장·기업",
+    "市場・企業",
+    "市场与企业",
+    "Thị trường và doanh nghiệp"
+  ],
+  "adminCategory_security": [
+    "Security & audit",
+    "보안·감사",
+    "セキュリティ・監査",
+    "安全与审计",
+    "Bảo mật và kiểm toán"
+  ],
+  "adminCategory_users": [
+    "Members & content",
+    "유저·콘텐츠",
+    "会員・コンテンツ",
+    "成员与内容",
+    "Thành viên và nội dung"
+  ],
+  "adminCategory_system": [
+    "Systems & monitoring",
+    "시스템·관제",
+    "システム・監視",
+    "系统与监控",
+    "Hệ thống và giám sát"
+  ],
+  "walletTotal": [
+    "Total balance",
+    "총 자산",
+    "合計残高",
+    "总余额",
+    "Tổng số dư"
+  ],
+  "walletCash": [
+    "Cash wallet",
+    "현금 지갑",
+    "現金ウォレット",
+    "现金钱包",
+    "Ví tiền mặt"
+  ],
+  "walletBank": [
+    "Bank deposits",
+    "은행 예치금",
+    "銀行預金",
+    "银行存款",
+    "Tiền gửi ngân hàng"
+  ],
+  "walletTransfer": [
+    "Send WLD",
+    "WLD 송금",
+    "WLDを送る",
+    "转账WLD",
+    "Chuyển WLD"
+  ],
+  "walletRecipient": [
+    "Recipient user ID",
+    "받는 사람 ID",
+    "受取人のユーザーID",
+    "收款人用户ID",
+    "ID người nhận"
+  ],
+  "walletAmount": [
+    "Amount (WLD)",
+    "송금 금액 (WLD)",
+    "金額（WLD）",
+    "金额（WLD）",
+    "Số tiền (WLD)"
+  ],
+  "walletSubmit": [
+    "Send transfer",
+    "안전 송금 실행",
+    "送金する",
+    "确认转账",
+    "Thực hiện chuyển tiền"
+  ],
+  "walletQuick": [
+    "Quick amount",
+    "빠른 금액",
+    "金額の選択",
+    "快捷金额",
+    "Chọn nhanh số tiền"
+  ],
+  "walletAll": [
+    "All available cash",
+    "전액",
+    "利用可能な現金すべて",
+    "全部可用现金",
+    "Toàn bộ tiền mặt khả dụng"
+  ],
+  "walletReceipt": [
+    "Receipt ID",
+    "영수증 ID",
+    "取引証明ID",
+    "凭证ID",
+    "ID biên nhận"
+  ],
+  "walletUnconfirmed": [
+    "Result not confirmed. Retry this same request.",
+    "처리 결과를 확인하지 못했습니다. 같은 요청으로 다시 시도하세요.",
+    "結果を確認できません。同じ内容で再試行してください。",
+    "尚未确认处理结果。请重试同一请求。",
+    "Chưa xác nhận kết quả. Hãy thử lại cùng yêu cầu."
+  ],
+  "walletRejected": [
+    "Transfer could not be completed. Check the recipient and balance.",
+    "송금을 완료하지 못했습니다. 받는 사람과 잔액을 확인하세요.",
+    "送金できません。受取人と残高を確認してください。",
+    "转账未能完成。请检查收款人和余额。",
+    "Không thể hoàn tất chuyển tiền. Hãy kiểm tra người nhận và số dư."
+  ],
+  "walletAuthRequired": [
+    "Sign in to verify your account.",
+    "로그인해 본인 계정을 확인해주세요.",
+    "ログインしてアカウントを確認してください。",
+    "请登录以验证账户。",
+    "Đăng nhập để xác minh tài khoản."
+  ],
+  "walletCsrfRequired": [
+    "Verify your authenticated session before sending.",
+    "송금 전에 인증 상태를 다시 확인해주세요.",
+    "送金前にログイン認証を再確認してください。",
+    "转账前请重新确认登录认证。",
+    "Xác minh phiên đăng nhập trước khi chuyển tiền."
+  ],
+  "walletInvalid": [
+    "Enter a valid recipient ID and a positive whole amount.",
+    "받는 사람 ID와 1 WLD 이상의 정수 금액을 입력해주세요.",
+    "有効な受取人IDと1 WLD以上の整数を入力してください。",
+    "请输入有效的收款人ID和至少1 WLD的整数金额。",
+    "Nhập ID người nhận hợp lệ và số tiền nguyên từ 1 WLD."
+  ],
+  "walletSending": [
+    "Processing transfer…",
+    "송금 처리 중…",
+    "送金処理中…",
+    "正在处理转账…",
+    "Đang xử lý chuyển tiền…"
+  ],
+  "walletDone": [
+    "Transfer confirmed.",
+    "송금이 확인되었습니다.",
+    "送金が確認されました。",
+    "转账已确认。",
+    "Đã xác nhận chuyển tiền."
+  ],
+  "walletExport": [
+    "Export shown transactions",
+    "표시된 거래 내역 내보내기",
+    "表示中の履歴をエクスポート",
+    "导出当前交易记录",
+    "Xuất các giao dịch đang hiển thị"
+  ],
+  "walletDirection": [
+    "Direction",
+    "구분",
+    "入出金",
+    "方向",
+    "Chiều giao dịch"
+  ],
+  "walletIn": [
+    "Received",
+    "입금",
+    "入金",
+    "转入",
+    "Nhận"
+  ],
+  "walletOut": [
+    "Sent",
+    "출금",
+    "出金",
+    "转出",
+    "Gửi"
+  ],
+  "walletWhen": [
+    "Date",
+    "일시",
+    "日時",
+    "日期",
+    "Ngày giờ"
+  ],
+  "walletType": [
+    "Type",
+    "유형",
+    "種類",
+    "类型",
+    "Loại"
+  ],
+  "walletRetry": [
+    "Retry same request",
+    "같은 요청 재시도",
+    "同じ内容で再試行",
+    "重试同一请求",
+    "Thử lại cùng yêu cầu"
+  ],
+  "walletProofNotice": [
+    "Sending is available after your account, balance and security proof are verified.",
+    "본인 계정·잔액·보안 검증 후 송금할 수 있습니다.",
+    "アカウント・残高・安全性の確認後に送金できます。",
+    "账户、余额和安全验证完成后即可转账。",
+    "Có thể chuyển tiền sau khi xác minh tài khoản, số dư và bảo mật."
+  ],
+  "walletUnknown": [
+    "Unable to verify wallet data. Unverified balances are not shown as zero.",
+    "지갑 데이터를 확인할 수 없습니다. 미확인 잔액은 0으로 표시하지 않습니다.",
+    "残高を確認できません。未確認の値をゼロとして表示しません。",
+    "无法核实钱包数据。未核实的余额不会显示为零。",
+    "Không thể xác minh dữ liệu ví. Số dư chưa xác minh không được hiển thị là số không."
+  ],
+  "authSkip": [
+    "Skip to main content",
+    "본문으로 건너뛰기",
+    "本文へスキップ",
+    "跳转到主要内容",
+    "Chuyển đến nội dung chính"
+  ],
+  "authLead": [
+    "Access your Moneyverse account.",
+    "머니버스 계정에 로그인하세요.",
+    "Moneyverseアカウントにアクセスします。",
+    "访问您的 Moneyverse 账户。",
+    "Truy cập tài khoản Moneyverse."
+  ],
+  "authRegister": [
+    "Create account",
+    "회원가입",
+    "アカウント作成",
+    "创建账户",
+    "Tạo tài khoản"
+  ],
+  "authForgot": [
+    "Forgot password",
+    "비밀번호 찾기",
+    "パスワードを忘れた場合",
+    "忘记密码",
+    "Quên mật khẩu"
+  ],
+  "authReset": [
+    "Reset password",
+    "비밀번호 재설정",
+    "パスワード再設定",
+    "重置密码",
+    "Đặt lại mật khẩu"
+  ],
+  "authVerify": [
+    "Verify email",
+    "이메일 확인",
+    "メール確認",
+    "验证邮箱",
+    "Xác minh email"
+  ],
+  "authVerifyChange": [
+    "Confirm email change",
+    "이메일 변경 확인",
+    "メール変更の確認",
+    "确认邮箱变更",
+    "Xác nhận đổi email"
+  ],
+  "authDeletion": [
+    "Account deletion",
+    "계정 삭제",
+    "アカウント削除",
+    "删除账户",
+    "Xóa tài khoản"
+  ],
+  "authEmail": [
+    "Email Address",
+    "이메일 주소",
+    "メールアドレス",
+    "邮箱地址",
+    "Địa chỉ Email"
+  ],
+  "authDisplayName": [
+    "Nickname (2–20 characters)",
+    "활동 닉네임 (2~20자)",
+    "ニックネーム（2～20文字）",
+    "昵称（2–20个字符）",
+    "Biệt danh (2–20 ký tự)"
+  ],
+  "authPassword": [
+    "Password",
+    "비밀번호",
+    "パスワード",
+    "密码",
+    "Mật khẩu"
+  ],
+  "authAcknowledgements": [
+    "Acknowledgements",
+    "동의 사항",
+    "確認事項",
+    "确认事项",
+    "Xác nhận"
+  ],
+  "authTerms": [
+    "I have read and agree to the terms.",
+    "이용약관을 끝까지 읽고 동의합니다.",
+    "利用規約を最後まで読み、同意します。",
+    "我已完整阅读并同意服务条款。",
+    "Tôi đã đọc hết và đồng ý với điều khoản."
+  ],
+  "authPrivacy": [
+    "I have read and agree to the privacy policy.",
+    "개인정보처리방침을 끝까지 읽고 동의합니다.",
+    "プライバシーポリシーを最後まで読み、同意します。",
+    "我已完整阅读并同意隐私政策。",
+    "Tôi đã đọc hết và đồng ý với chính sách bảo mật."
+  ],
+  "authAge": [
+    "I confirm that I am at least 14 years old.",
+    "만 14세 이상임을 확인합니다.",
+    "14歳以上であることを確認します。",
+    "我确认已年满14周岁。",
+    "Tôi xác nhận mình từ 14 tuổi trở lên."
+  ],
+  "authTermsLink": [
+    "Terms",
+    "이용약관",
+    "利用規約",
+    "服务条款",
+    "Điều khoản"
+  ],
+  "authPrivacyLink": [
+    "Privacy",
+    "개인정보처리방침",
+    "プライバシー",
+    "隐私政策",
+    "Quyền riêng tư"
+  ],
+  "authConsentNotice": [
+    "These acknowledgements are only checked in this browser. Consent recording is not available.",
+    "동의 사항은 이 브라우저에서만 확인되며 서비스에 기록되지 않습니다.",
+    "これらの確認はブラウザー内のみで行われ、サービスには記録されません。",
+    "这些确认仅在本浏览器中检查，服务无法记录同意。",
+    "Các xác nhận này chỉ được kiểm tra trong trình duyệt; dịch vụ chưa thể lưu sự đồng ý."
+  ],
+  "authRegistrationUnavailable": [
+    "Registration is unavailable until consent and age confirmation can be recorded by the service.",
+    "서비스에서 약관 동의와 연령 확인을 기록할 수 있을 때까지 회원가입을 이용할 수 없습니다.",
+    "規約同意と年齢確認をサービスで記録できるまで登録は利用できません。",
+    "在服务能够记录条款同意和年龄确认之前，注册暂不可用。",
+    "Chưa thể đăng ký cho đến khi dịch vụ lưu được sự đồng ý và xác nhận tuổi."
+  ],
+  "authUnavailable": [
+    "This action is currently unavailable. No change has been made and no email delivery has been confirmed.",
+    "현재 이 기능을 이용할 수 없습니다. 변경된 내용이 없으며 이메일 발송도 확인되지 않았습니다.",
+    "現在この操作は利用できません。変更は行われず、メール送信も確認されていません。",
+    "此操作暂不可用。未进行任何更改，也未确认邮件已发送。",
+    "Thao tác này hiện chưa khả dụng. Chưa có thay đổi và chưa xác nhận email được gửi."
+  ],
+  "authJavascript": [
+    "JavaScript is required for verified form submission.",
+    "확인된 양식 제출을 위해 JavaScript가 필요합니다.",
+    "確認付きのフォーム送信にはJavaScriptが必要です。",
+    "经验证的表单提交需要 JavaScript。",
+    "Cần JavaScript để gửi biểu mẫu có xác nhận."
+  ],
+  "authDiscord": [
+    "Continue with Discord",
+    "Discord로 계속하기",
+    "Discordで続行",
+    "使用 Discord 继续",
+    "Tiếp tục với Discord"
+  ],
+  "authGoogleUnavailable": [
+    "Google sign-in is currently unavailable.",
+    "현재 Google 로그인을 이용할 수 없습니다.",
+    "現在Googleログインは利用できません。",
+    "Google 登录暂不可用。",
+    "Đăng nhập Google hiện chưa khả dụng."
+  ],
+  "authBackLogin": [
+    "Back to login",
+    "로그인으로 돌아가기",
+    "ログインに戻る",
+    "返回登录",
+    "Quay lại đăng nhập"
+  ],
+  "authReady": [
+    "Enter your credentials and check the acknowledgements to continue.",
+    "이메일과 비밀번호를 입력하고 동의 사항을 확인해 주세요.",
+    "認証情報を入力し、確認事項を選択してください。",
+    "请输入登录信息并确认各项声明。",
+    "Nhập thông tin đăng nhập và đánh dấu các xác nhận."
+  ],
+  "authSending": [
+    "Signing in…",
+    "로그인 중…",
+    "ログイン中…",
+    "正在登录…",
+    "Đang đăng nhập…"
+  ],
+  "authValidation": [
+    "Check your email, password and required acknowledgements.",
+    "이메일, 비밀번호와 필수 동의 사항을 확인해 주세요.",
+    "メール、パスワードと必須確認事項を確認してください。",
+    "请检查邮箱、密码及必选确认项。",
+    "Kiểm tra email, mật khẩu và các xác nhận bắt buộc."
+  ],
+  "authCredentials": [
+    "Email or password is incorrect.",
+    "이메일 또는 비밀번호가 올바르지 않습니다.",
+    "メールアドレスまたはパスワードが正しくありません。",
+    "邮箱或密码不正确。",
+    "Email hoặc mật khẩu không đúng."
+  ],
+  "authUnconfirmed": [
+    "Sign-in could not be confirmed. Your fields are preserved; try again.",
+    "로그인을 확인하지 못했습니다. 입력 내용은 유지됩니다. 다시 시도해 주세요.",
+    "ログインを確認できませんでした。入力内容は保持されています。再試行してください。",
+    "无法确认登录。输入内容已保留，请重试。",
+    "Chưa xác nhận đăng nhập. Nội dung được giữ lại; vui lòng thử lại."
+  ],
+  "authSignedIn": [
+    "Sign-in confirmed. Opening your account…",
+    "로그인이 확인되었습니다. 계정으로 이동합니다…",
+    "ログインを確認しました。アカウントを開きます…",
+    "登录已确认。正在打开账户…",
+    "Đã xác nhận đăng nhập. Đang mở tài khoản…"
+  ],
+  "authAccountChanged": [
+    "Your account session changed. Private fields were cleared.",
+    "계정 세션이 변경되어 개인 입력 내용을 지웠습니다.",
+    "アカウントのセッションが変わったため、入力内容を消去しました。",
+    "账户会话已变更，私人输入内容已清除。",
+    "Phiên tài khoản đã thay đổi. Đã xóa nội dung riêng tư."
+  ],
+  "authRegisterPassword": [
+    "Password (at least 8 characters)",
+    "비밀번호 (8자 이상)",
+    "パスワード（8文字以上）",
+    "密码（至少8个字符）",
+    "Mật khẩu (ít nhất 8 ký tự)"
+  ],
+  "authLoginSubmit": [
+    "Sign In with Email",
+    "자체 계정으로 로그인",
+    "メールでログイン",
+    "邮箱登录",
+    "Đăng nhập với Email"
+  ],
+  "authRegisterSubmit": [
+    "Sign up and get started",
+    "가입하고 시작하기",
+    "登録して始める",
+    "注册并开始",
+    "Đăng ký và bắt đầu"
+  ],
+  "authLoginHeading": [
+    "Welcome Back!",
+    "반가워요!",
+    "おかえりなさい！",
+    "欢迎回来！",
+    "Chào mừng bạn!"
+  ],
+  "authLoginLead": [
+    "Start your virtual economy journey and build financial assets.",
+    "월덕 머니버스에서 경제와 자산을 시작해보세요.",
+    "ウォルドク・マネーバースで仮想経済と資産運用を始めましょう。",
+    "在月德虚拟金融平台开启您的数字资产之旅。",
+    "Bắt đầu hành trình kinh tế và xây dựng tài sản ảo của bạn."
+  ],
+  "authRegisterHeading": [
+    "Create a new account",
+    "새 계정 만들기",
+    "新しいアカウントを作成",
+    "创建新账户",
+    "Tạo tài khoản mới"
+  ],
+  "authRegisterLead": [
+    "Join Woldeok Moneyverse and experience the virtual economy.",
+    "월덕 머니버스의 회원이 되어 가상 경제를 체험해보세요.",
+    "ウォルドク・マネーバースの会員になって仮想経済を体験しましょう。",
+    "加入月德 Moneyverse，体验虚拟经济。",
+    "Tham gia Woldeok Moneyverse và trải nghiệm nền kinh tế ảo."
+  ],
+  "authHelp": [
+    "Account help",
+    "계정 도움말",
+    "アカウントヘルプ",
+    "账户帮助",
+    "Trợ giúp tài khoản"
+  ],
+  "publicText0": [
+    "Tools",
+    "도구",
+    "ツール",
+    "工具",
+    "Công cụ"
+  ],
+  "publicText1": [
+    "No account needed",
+    "로그인 불필요",
+    "アカウント不要",
+    "无需账户",
+    "Không cần tài khoản"
+  ],
+  "publicText2": [
+    "No React hydration",
+    "순수 HTML 계산",
+    "HTMLによる計算",
+    "纯 HTML 计算",
+    "Tính toán bằng HTML"
+  ],
+  "publicText3": [
+    "Projection inputs",
+    "계산 조건",
+    "計算条件",
+    "计算条件",
+    "Điều kiện tính toán"
+  ],
+  "publicText4": [
+    "Adjust the values, then calculate.",
+    "값을 변경한 후 계산 버튼을 누르세요.",
+    "値を変更して計算してください。",
+    "修改数值后点击计算。",
+    "Điều chỉnh giá trị rồi tính toán."
+  ],
+  "publicInputError": [
+    "Please correct the input.",
+    "입력값을 확인하세요.",
+    "入力値を確認してください。",
+    "请检查输入值。",
+    "Vui lòng kiểm tra dữ liệu nhập."
+  ],
+  "publicPrincipal": [
+    "Initial principal",
+    "초기 투자 금액",
+    "初期投資額",
+    "初始本金",
+    "Vốn ban đầu"
+  ],
+  "publicText7": [
+    "Use a consistent currency across all inputs.",
+    "통화 단위는 입력값에 따릅니다.",
+    "入力全体で同じ通貨単位を使用してください。",
+    "所有输入请使用相同货币单位。",
+    "Sử dụng cùng một đơn vị tiền tệ cho mọi dữ liệu."
+  ],
+  "publicText8": [
+    "Monthly deposit",
+    "매월 적립 금액",
+    "毎月の積立額",
+    "每月存款",
+    "Khoản gửi hàng tháng"
+  ],
+  "publicText9": [
+    "Annual rate (%)",
+    "연이율 (%)",
+    "年利（%）",
+    "年利率（%）",
+    "Lãi suất năm (%)"
+  ],
+  "publicText10": [
+    "Duration (years)",
+    "기간 (년)",
+    "期間（年）",
+    "期限（年）",
+    "Thời hạn (năm)"
+  ],
+  "publicText11": [
+    "Compounding frequency",
+    "복리 계산 주기",
+    "複利計算の頻度",
+    "复利频率",
+    "Chu kỳ lãi kép"
+  ],
+  "publicText12": [
+    "Monthly",
+    "매월",
+    "毎月",
+    "每月",
+    "Hàng tháng"
+  ],
+  "publicText13": [
+    "Daily",
+    "매일",
+    "毎日",
+    "每日",
+    "Hàng ngày"
+  ],
+  "publicText14": [
+    "Annually",
+    "매년",
+    "毎年",
+    "每年",
+    "Hàng năm"
+  ],
+  "publicText15": [
+    "Calculate projection",
+    "계산하기",
+    "予測を計算",
+    "计算预测",
+    "Tính dự báo"
+  ],
+  "publicText16": [
+    "Reset",
+    "초기화",
+    "リセット",
+    "重置",
+    "Đặt lại"
+  ],
+  "publicText17": [
+    "Projection summary",
+    "예상 결과",
+    "予測結果",
+    "预测结果",
+    "Kết quả dự báo"
+  ],
+  "publicText18": [
+    "Calculated from your assumptions.",
+    "입력한 가정에 따른 계산입니다.",
+    "入力した仮定に基づく計算です。",
+    "根据您输入的假设计算。",
+    "Tính từ các giả định bạn nhập."
+  ],
+  "publicText19": [
+    "Year-by-year growth",
+    "연도별 성장",
+    "年ごとの成長",
+    "逐年增长",
+    "Tăng trưởng theo năm"
+  ],
+  "publicText20": [
+    "Estimated end-of-year values.",
+    "연말 기준 예상 현황입니다.",
+    "年末時点の予測値です。",
+    "预计年末数值。",
+    "Giá trị dự kiến cuối năm."
+  ],
+  "publicText21": [
+    "Year",
+    "연도",
+    "年",
+    "年份",
+    "Năm"
+  ],
+  "publicText22": [
+    "Contributed",
+    "납입 원금",
+    "払込元本",
+    "已投入本金",
+    "Vốn đã góp"
+  ],
+  "publicText23": [
+    "Projected value",
+    "총 예상 금액",
+    "予測額",
+    "预测金额",
+    "Giá trị dự kiến"
+  ],
+  "publicText24": [
+    "Interest",
+    "이자",
+    "利息",
+    "利息",
+    "Tiền lãi"
+  ],
+  "publicText25": [
+    "How the calculation works",
+    "계산 방법",
+    "計算方法",
+    "计算方法",
+    "Phương pháp tính"
+  ],
+  "publicText26": [
+    "How are compounding and deposits handled?",
+    "복리와 월 납입금은 어떻게 처리되나요?",
+    "複利と積立はどのように計算しますか？",
+    "如何处理复利和每月存款？",
+    "Lãi kép và khoản gửi được tính thế nào?"
+  ],
+  "publicText27": [
+    "Initial principal compounds at the selected frequency. Each monthly contribution is added at the end of its month, then grows over the remaining period.",
+    "초기 원금에 지정한 복리 주기를 적용하고, 매월 말 납입한 적립금을 남은 기간만큼 복리 계산합니다.",
+    "初期元本に選択した頻度で複利を適用します。毎月末の積立金は残りの期間で運用されます。",
+    "初始本金按所选频率计息。每月末存入的款项在剩余期限内复利增长。",
+    "Vốn ban đầu được tính lãi kép theo chu kỳ đã chọn. Khoản gửi cuối mỗi tháng tăng trưởng trong thời gian còn lại."
+  ],
+  "publicText28": [
+    "No live trades",
+    "실제 주문 없음",
+    "実際の取引なし",
+    "不进行实际交易",
+    "Không giao dịch thực"
+  ],
+  "publicText29": [
+    "Server calculated",
+    "서버 계산",
+    "サーバー計算",
+    "服务器计算",
+    "Tính trên máy chủ"
+  ],
+  "publicText30": [
+    "Simulated positions",
+    "투자 조건",
+    "投資条件",
+    "模拟持仓",
+    "Điều kiện đầu tư"
+  ],
+  "publicText31": [
+    "Inputs are not connected to an investment account.",
+    "값은 실제 계좌와 연결되지 않습니다.",
+    "入力値は投資口座に接続されません。",
+    "输入与投资账户无关联。",
+    "Dữ liệu nhập không kết nối với tài khoản đầu tư."
+  ],
+  "publicInitialPurchase": [
+    "Initial purchase",
+    "기존 보유",
+    "既存の保有",
+    "初次买入",
+    "Khoản mua ban đầu"
+  ],
+  "publicText33": [
+    "Price per share",
+    "첫 매수가",
+    "初回購入単価",
+    "首次买入价",
+    "Giá mua ban đầu"
+  ],
+  "publicText34": [
+    "Quantity",
+    "기존 수량",
+    "既存数量",
+    "原有数量",
+    "Số lượng ban đầu"
+  ],
+  "publicText35": [
+    "Additional purchase",
+    "추가 매수",
+    "追加購入",
+    "追加买入",
+    "Mua bổ sung"
+  ],
+  "publicText36": [
+    "Price per share",
+    "추가 매수가",
+    "追加購入単価",
+    "追加买入价",
+    "Giá mua bổ sung"
+  ],
+  "publicText37": [
+    "Quantity",
+    "추가 수량",
+    "追加数量",
+    "追加数量",
+    "Số lượng bổ sung"
+  ],
+  "publicText38": [
+    "Target profit (%)",
+    "목표 수익률 (%)",
+    "目標利益率（%）",
+    "目标收益率（%）",
+    "Lợi nhuận mục tiêu (%)"
+  ],
+  "publicText39": [
+    "Exit fee (%)",
+    "예상 매도 수수료 (%)",
+    "想定売却手数料（%）",
+    "预计卖出手续费（%）",
+    "Phí bán dự kiến (%)"
+  ],
+  "publicText40": [
+    "Calculate cost basis",
+    "평균단가 계산",
+    "平均取得単価を計算",
+    "计算平均成本",
+    "Tính giá vốn bình quân"
+  ],
+  "publicText41": [
+    "Cost basis summary",
+    "평균단가 결과",
+    "平均取得単価の結果",
+    "平均成本结果",
+    "Kết quả giá vốn"
+  ],
+  "publicText42": [
+    "Includes your exit-fee assumption.",
+    "수수료 포함 가정입니다.",
+    "想定した売却手数料を含みます。",
+    "包含您假设的卖出手续费。",
+    "Bao gồm giả định phí bán của bạn."
+  ],
+  "publicText43": [
+    "Simulation notes",
+    "투자 시뮬레이션 안내",
+    "投資シミュレーションの注意",
+    "投资模拟说明",
+    "Lưu ý mô phỏng"
+  ],
+  "publicText44": [
+    "How is the target sale price calculated?",
+    "목표 매도가는 어떻게 계산하나요?",
+    "目標売却価格はどう計算しますか？",
+    "如何计算目标卖出价？",
+    "Giá bán mục tiêu được tính thế nào?"
+  ],
+  "publicText45": [
+    "Target exit price divides the cost plus target gain by total quantity adjusted for the assumed exit fee. No order is placed.",
+    "총 투자 원가와 목표 수익률을 합한 목표 회수액을, 수수료를 제외한 전체 주식 수로 나눕니다. 실제 거래 주문은 실행되지 않습니다.",
+    "投資原価に目標利益を加え、想定手数料を調整した総数量で割ります。実際の注文は行いません。",
+    "将成本加上目标收益后，除以按假定手续费调整的总股数。不执行实际订单。",
+    "Chia giá vốn cộng lợi nhuận mục tiêu cho tổng số lượng đã điều chỉnh theo phí bán giả định. Không đặt lệnh thực."
+  ],
+  "publicText46": [
+    "Home",
+    "홈",
+    "ホーム",
+    "首页",
+    "Trang chủ"
+  ],
+  "publicText47": [
+    "Only real public monitoring records are displayed. A historical success does not prove current health.",
+    "실제 수집된 공개 상태 기록만 표시합니다. 오래된 성공 기록은 현재 정상을 의미하지 않습니다.",
+    "実際に収集された公開監視記録のみ表示します。過去の成功は現在の正常稼働を証明しません。",
+    "仅显示实际收集的公开监测记录。历史成功不能证明当前正常。",
+    "Chỉ hiển thị bản ghi giám sát công khai thực. Thành công trước đây không chứng minh tình trạng hiện tại."
+  ],
+  "publicText48": [
+    "No invented health claims",
+    "실시간 추측 금지",
+    "状態の推測なし",
+    "不虚构状态",
+    "Không suy đoán tình trạng"
+  ],
+  "publicText49": [
+    "Database-backed snapshots",
+    "서버 원천 자료",
+    "データベースの記録",
+    "数据库快照",
+    "Bản ghi từ cơ sở dữ liệu"
+  ],
+  "publicText50": [
+    "Overall health",
+    "전체 상태",
+    "全体の状態",
+    "总体状态",
+    "Tình trạng tổng thể"
+  ],
+  "publicText51": [
+    "Worst-first. No averaging away outages.",
+    "가장 문제가 큰 상태를 기준으로 표시합니다.",
+    "最も重大な状態を表示します。障害を平均で隠しません。",
+    "按最严重的状态显示，不以平均值掩盖故障。",
+    "Hiển thị tình trạng nghiêm trọng nhất, không lấy trung bình để che sự cố."
+  ],
+  "publicText52": [
+    "Current health unverified",
+    "최신 상태 확인 중",
+    "現在の状態は未確認",
+    "当前状态未确认",
+    "Chưa xác minh tình trạng hiện tại"
+  ],
+  "publicText53": [
+    "All observed services operational",
+    "모든 서비스 정상",
+    "観測された全サービスが正常",
+    "所有已观测服务正常",
+    "Mọi dịch vụ được quan sát đều hoạt động"
+  ],
+  "publicText54": [
+    "Observed outage",
+    "관측된 장애 있음",
+    "障害を観測",
+    "观测到故障",
+    "Đã quan sát sự cố"
+  ],
+  "publicText55": [
+    "Degraded service",
+    "일부 성능 저하",
+    "一部サービスの性能低下",
+    "部分服务性能下降",
+    "Dịch vụ suy giảm"
+  ],
+  "publicText56": [
+    "Maintenance",
+    "점검 중",
+    "メンテナンス中",
+    "维护中",
+    "Đang bảo trì"
+  ],
+  "publicText57": [
+    "Public monitored sources",
+    "공개 서비스 관측 기록",
+    "公開サービスの観測記録",
+    "公开服务观测记录",
+    "Nguồn giám sát công khai"
+  ],
+  "publicText58": [
+    "Last observed time and freshness policy are shown.",
+    "원천 수집 시각과 데이터 신선도를 확인합니다.",
+    "最終観測時刻と鮮度ポリシーを表示します。",
+    "显示最后观测时间与数据时效策略。",
+    "Hiển thị lần quan sát cuối và chính sách độ mới."
+  ],
+  "publicText59": [
+    "No public source observations are registered. Current health is unknown.",
+    "현재 공개 수집 대상이 없습니다. 정상으로 추정하지 않습니다.",
+    "公開の観測対象は登録されていません。現在の状態は不明です。",
+    "尚未注册公开观测来源。当前状态未知。",
+    "Chưa đăng ký nguồn quan sát công khai. Tình trạng hiện tại chưa rõ."
+  ],
+  "publicText60": [
+    "Unverified",
+    "확인 중",
+    "未確認",
+    "未确认",
+    "Chưa xác minh"
+  ],
+  "publicText61": [
+    "Observed operational",
+    "정상 확인",
+    "正常稼働を観測",
+    "观测为正常",
+    "Đã quan sát hoạt động bình thường"
+  ],
+  "publicText62": [
+    "Observed outage",
+    "장애 관측",
+    "障害を観測",
+    "观测到故障",
+    "Đã quan sát sự cố"
+  ],
+  "publicText63": [
+    "Degraded",
+    "성능 저하",
+    "性能低下",
+    "性能下降",
+    "Suy giảm"
+  ],
+  "publicText64": [
+    "Fresh observation",
+    "유효한 최신 기록",
+    "有効な最新記録",
+    "有效的最新记录",
+    "Quan sát còn hiệu lực"
+  ],
+  "publicFreshnessStale": [
+    "Stale observation",
+    "기록 만료",
+    "期限切れの記録",
+    "记录已过期",
+    "Quan sát hết hạn"
+  ],
+  "publicText66": [
+    "No usable observation",
+    "기록 없음",
+    "利用可能な記録なし",
+    "无可用记录",
+    "Chưa có quan sát hợp lệ"
+  ],
+  "publicText67": [
+    "Last observation (UTC)",
+    "마지막 관측 시각 (UTC)",
+    "最終観測時刻（UTC）",
+    "最后观测时间（UTC）",
+    "Lần quan sát cuối (UTC)"
+  ],
+  "publicText68": [
+    "Interpreting status records",
+    "상태 기록을 이해하는 방법",
+    "状態記録の読み方",
+    "如何理解状态记录",
+    "Cách hiểu bản ghi trạng thái"
+  ],
+  "publicText69": [
+    "Why can a previous success say Unverified?",
+    "왜 이전에 정상인 기록이 확인 중으로 표시되나요?",
+    "以前の成功が未確認になる理由は？",
+    "为什么之前成功的记录显示未确认？",
+    "Vì sao thành công trước đây thành chưa xác minh?"
+  ],
+  "publicText70": [
+    "Each source has a configured freshness window. After it expires, a prior successful result is not evidence of current health. The view will update when the collector records a new observation.",
+    "각 감시 대상에는 상태 확인 유효시간이 있습니다. 그 시간이 지났다면 기존 정상 결과도 현재 서비스 상태의 증거가 아닙니다. 상태 수집이 다시 실행되면 최신 기록에 따라 변경됩니다.",
+    "各監視対象には有効期間があります。期間を過ぎた成功記録は現在の状態の証拠ではありません。収集器が新しい観測を記録すると表示が更新されます。",
+    "每个来源都有时效期限。过期的成功记录不能证明当前状态。采集器记录新观测后，视图会更新。",
+    "Mỗi nguồn có thời hạn hiệu lực. Sau khi hết hạn, thành công cũ không chứng minh tình trạng hiện tại. Màn hình thay đổi khi bộ thu ghi quan sát mới."
+  ],
+  "publicText71": [
+    "This is the last recorded collector evidence, not a live end-to-end certification. Refresh to request the latest stored snapshot.",
+    "이 페이지는 실제 수집기의 마지막 기록을 보여주며, 브라우저 접속만으로 서비스를 정상이라고 추정하지 않습니다.",
+    "これは収集器の最終記録であり、現在の全体稼働を保証しません。更新すると最新の保存済み記録を取得します。",
+    "此处显示采集器最后保存的证据，不是实时端到端认证。刷新以获取最新存储快照。",
+    "Đây là bằng chứng được lưu gần nhất, không phải chứng nhận trực tiếp toàn hệ thống. Tải lại để lấy bản ghi đã lưu mới nhất."
+  ],
+  "publicText72": [
+    "Refresh stored status",
+    "상태 새로 조회",
+    "保存済み状態を更新",
+    "刷新已保存状态",
+    "Tải lại trạng thái đã lưu"
+  ],
+  "publicText73": [
+    "Moneyverse financial calculators and 17 source-listed financial tools, with verified native Spring capabilities clearly identified.",
+    "월덕 머니버스 금융 계산기, 복리 및 주식 평균단가와 17개 기존 도구 탐색.",
+    "Moneyverseの金融計算機と既存17ツール。ネイティブSpringの検証状態を明示します。",
+    "Moneyverse 金融计算器及17个原有工具，明确标识原生 Spring 功能的验证状态。",
+    "Máy tính tài chính Moneyverse và 17 công cụ gốc, phân biệt rõ trạng thái xác minh Spring."
+  ],
+  "publicText74": [
+    "17 financial tool routes with truthful verification status.",
+    "17종 금융 계산기 및 정확한 검증 상태 제공.",
+    "検証状態を明示した17の金融ツール。",
+    "17个金融工具路径及真实验证状态。",
+    "17 đường dẫn công cụ tài chính với trạng thái xác minh rõ ràng."
+  ],
+  "publicText75": [
+    "Explore independently verified Spring calculators alongside legacy tools still awaiting full verification. Search and filters work on the server with JavaScript disabled.",
+    "지금 Spring에서 실제 검증된 계산기와 전환 중인 기존 도구를 명확히 구분합니다. 검색과 필터는 JavaScript 없이 서버에서 작동합니다.",
+    "検証済みSpring計算機と、完全な検証を待つ既存ツールを区別します。検索と絞り込みはJavaScriptなしでも動作します。",
+    "明确区分已验证的 Spring 计算器和仍待全面验证的原有工具。搜索和筛选无需 JavaScript 即可在服务器运行。",
+    "Phân biệt máy tính Spring đã xác minh và công cụ gốc đang chờ kiểm tra đầy đủ. Tìm kiếm và bộ lọc hoạt động trên máy chủ khi tắt JavaScript."
+  ],
+  "publicText76": [
+    "Find the right financial tool",
+    "원하는 금융 도구 찾기",
+    "必要な金融ツールを探す",
+    "查找所需金融工具",
+    "Tìm công cụ tài chính"
+  ],
+  "publicText77": [
+    "Native server-side search and category filters.",
+    "검색/카테고리는 실제 서버에서 필터링합니다.",
+    "検索とカテゴリはサーバーで絞り込みます。",
+    "搜索与分类由服务器筛选。",
+    "Tìm kiếm và lọc danh mục trên máy chủ."
+  ],
+  "publicText78": [
+    "Search titles and details",
+    "이름·내용 검색",
+    "名前・内容を検索",
+    "搜索名称与详情",
+    "Tìm tên và nội dung"
+  ],
+  "publicText79": [
+    "E.g. compound, stock, tax",
+    "예: 복리, 주식, 세금",
+    "例：compound、stock、tax",
+    "例如：compound、stock、tax",
+    "Ví dụ: compound, stock, tax"
+  ],
+  "publicText80": [
+    "Search works with English and Korean terms",
+    "한국어·영어 검색 지원",
+    "英語と韓国語の検索に対応",
+    "支持英语和韩语搜索词",
+    "Hỗ trợ từ khóa tiếng Anh và Hàn"
+  ],
+  "publicText81": [
+    "Category",
+    "카테고리",
+    "カテゴリ",
+    "分类",
+    "Danh mục"
+  ],
+  "publicText82": [
+    "All tools",
+    "전체 도구",
+    "すべてのツール",
+    "全部工具",
+    "Tất cả công cụ"
+  ],
+  "publicText83": [
+    "Investing & compound",
+    "투자·복리",
+    "投資・複利",
+    "投资与复利",
+    "Đầu tư và lãi kép"
+  ],
+  "publicText84": [
+    "Taxes & income",
+    "세금·소득",
+    "税金・所得",
+    "税务与收入",
+    "Thuế và thu nhập"
+  ],
+  "publicText85": [
+    "Pension & retirement",
+    "연금·은퇴",
+    "年金・退職",
+    "养老金与退休",
+    "Hưu trí"
+  ],
+  "publicText86": [
+    "Loans & property",
+    "대출·부동산",
+    "融資・不動産",
+    "贷款与房地产",
+    "Vay và bất động sản"
+  ],
+  "publicText87": [
+    "Crypto & simulation",
+    "가상자산·게임",
+    "暗号資産・シミュレーション",
+    "加密资产与模拟",
+    "Tiền mã hóa và mô phỏng"
+  ],
+  "publicText88": [
+    "Show only Spring-verified tools",
+    "Spring 검증 완료 도구만 보기",
+    "Spring検証済みのみ表示",
+    "仅显示已验证 Spring 工具",
+    "Chỉ hiện công cụ Spring đã xác minh"
+  ],
+  "publicText89": [
+    "Search tools",
+    "검색하기",
+    "ツールを検索",
+    "搜索工具",
+    "Tìm công cụ"
+  ],
+  "publicText90": [
+    "Calculator library",
+    "계산기 목록",
+    "計算機一覧",
+    "计算器列表",
+    "Danh sách máy tính"
+  ],
+  "publicText91": [
+    "No matching tools. Try a different search or category.",
+    "일치하는 도구가 없습니다. 검색어를 바꿔 주세요.",
+    "該当するツールがありません。検索語やカテゴリを変更してください。",
+    "无匹配工具，请更换搜索词或分类。",
+    "Không có công cụ phù hợp. Hãy đổi từ khóa hoặc danh mục."
+  ],
+  "publicText92": [
+    "Spring verified",
+    "Spring 검증",
+    "Spring検証済み",
+    "Spring 已验证",
+    "Spring đã xác minh"
+  ],
+  "publicText93": [
+    "Legacy · QA pending",
+    "기존 화면 · QA 대기",
+    "既存画面・QA待ち",
+    "原有页面 · 等待 QA",
+    "Màn hình gốc · Chờ QA"
+  ],
+  "publicText94": [
+    "Open calculator ↗",
+    "도구 열기 ↗",
+    "ツールを開く ↗",
+    "打开工具 ↗",
+    "Mở công cụ ↗"
+  ],
+  "publicText95": [
+    "Reliability and verification",
+    "서비스 품질 및 확인 기준",
+    "品質と検証の基準",
+    "服务质量与验证标准",
+    "Độ tin cậy và xác minh"
+  ],
+  "publicText96": [
+    "A navigable link is not the same as fully verified functionality.",
+    "방문할 수 있는 주소와 모든 기능 검증은 다릅니다.",
+    "リンクが開けることと、全機能の検証は異なります。",
+    "路径可访问不代表所有功能均已验证。",
+    "Có thể truy cập liên kết không đồng nghĩa mọi chức năng đã được xác minh."
+  ],
+  "publicText97": [
+    "What do Spring verified and legacy mean?",
+    "Spring 검증과 기존 화면의 차이는?",
+    "Spring検証済みと既存画面の違いは？",
+    "Spring 已验证和原有页面有何区别？",
+    "Spring đã xác minh và màn hình gốc khác nhau thế nào?"
+  ],
+  "publicText98": [
+    "Spring verified means the Java server UI, calculation, forms, responsive layouts and languages were exercised in a browser. Legacy routes are retained for navigation but their full interactions and APIs are not yet certified.",
+    "Spring 검증은 실제 Java 서버 계산·입력·반응형·영어/한국어 UI를 실브라우저로 확인한 도구입니다. 기존 화면은 경로를 보존했지만 모든 상호작용과 API가 아직 확인된 것은 아닙니다.",
+    "Spring検証は、Javaサーバーの計算・フォーム・レスポンシブ表示・英韓UIをブラウザーで確認した既存分類です。既存画面は経路のみ保持し、全操作やAPIの認証を意味しません。",
+    "Spring 已验证是既有分类，表示 Java 服务器计算、表单、响应式及英韩界面曾经浏览器检查。原有路径保留导航，不代表全部交互和 API 已认证。",
+    "Spring đã xác minh là phân loại cũ cho công cụ có tính toán Java, biểu mẫu, bố cục và giao diện Anh/Hàn từng được kiểm tra trong trình duyệt. Đường dẫn gốc được giữ để điều hướng, chưa chứng nhận đầy đủ thao tác hay API."
+  ],
+  "publicText99": [
+    "Explore Spring stock market",
+    "Spring 주식 거래소 보기",
+    "Spring株式市場を見る",
+    "查看 Spring 股票市场",
+    "Xem thị trường cổ phiếu Spring"
+  ],
+  "publicText100": [
+    "View source-backed service status",
+    "실제 서비스 상태 보기",
+    "実際のサービス状態を見る",
+    "查看来源支持的服务状态",
+    "Xem tình trạng dịch vụ từ nguồn thực"
+  ],
+  "publicText101": [
+    "Support & help",
+    "문의 및 지원",
+    "お問い合わせとヘルプ",
+    "支持与帮助",
+    "Hỗ trợ và trợ giúp"
+  ],
+  "publicCompoundTitle": [
+    "Compound interest calculator",
+    "복리 계산기",
+    "複利計算機",
+    "复利计算器",
+    "Máy tính lãi kép"
+  ],
+  "publicStockTitle": [
+    "Stock average price calculator",
+    "주식 평균단가 계산기",
+    "株式平均取得単価計算機",
+    "股票平均成本计算器",
+    "Máy tính giá vốn cổ phiếu"
+  ],
+  "publicToolsTitle": [
+    "Financial tools",
+    "금융 도구",
+    "金融ツール",
+    "金融工具",
+    "Công cụ tài chính"
+  ],
+  "publicCalculatorsTitle": [
+    "Calculator center",
+    "금융 계산기 센터",
+    "金融計算機センター",
+    "金融计算器中心",
+    "Trung tâm máy tính tài chính"
+  ],
+  "publicStatusTitle": [
+    "Service status",
+    "서비스 상태",
+    "サービス状態",
+    "服务状态",
+    "Tình trạng dịch vụ"
+  ],
+  "publicCompoundIntro": [
+    "Project compound growth with regular deposits and annual milestones.",
+    "적립식 복리 성장과 연도별 자산 변화를 계산합니다.",
+    "定期積立による複利成長と年ごとの資産を計算します。",
+    "计算定期存款的复利增长及逐年资产变化。",
+    "Dự báo tăng trưởng lãi kép với khoản gửi định kỳ và mốc hàng năm."
+  ],
+  "publicStockIntro": [
+    "Explore average cost and target exit price for hypothetical additional purchases.",
+    "추가 매수 전후 평균단가와 목표 매도가를 계산합니다.",
+    "追加購入前後の平均取得単価と目標売却価格を計算します。",
+    "计算假设追加买入前后的平均成本和目标卖出价。",
+    "Tính giá vốn bình quân và giá bán mục tiêu khi giả định mua thêm."
+  ],
+  "publicCompoundDescription": [
+    "Assumes a fixed annual rate and end-of-month deposits; this is a mathematical projection, not a return guarantee.",
+    "연이율 고정·매월 말 납입 가정의 수학적 예측값이며 실제 수익을 보장하지 않습니다.",
+    "固定年利と月末積立を仮定した数学的予測であり、実際の収益を保証しません。",
+    "假设固定年利率及月末存款的数学预测，不保证实际收益。",
+    "Giả định lãi suất năm cố định và gửi cuối tháng; đây là dự báo toán học, không bảo đảm lợi nhuận."
+  ],
+  "publicStockDescription": [
+    "This is a cost-basis simulation from your inputs. It does not place orders or fetch live quotes.",
+    "입력값에 따른 원가 시뮬레이션입니다. 실제 주문·시세 조회·정산을 하지 않습니다.",
+    "入力に基づく原価シミュレーションです。実際の注文、相場取得、決済は行いません。",
+    "这是基于输入的成本模拟，不执行实际订单、行情查询或结算。",
+    "Đây là mô phỏng giá vốn theo dữ liệu nhập, không đặt lệnh, lấy giá trực tiếp hay thanh toán."
+  ],
+  "publicSubmittedNotice": [
+    "Results show the last submitted calculation. Select Calculate after editing.",
+    "결과는 마지막으로 제출한 계산입니다. 값을 변경한 후 계산 버튼을 누르세요.",
+    "結果は最後に送信した計算です。編集後は計算ボタンを押してください。",
+    "结果为上次提交的计算。修改后请点击计算。",
+    "Kết quả là lần tính đã gửi gần nhất. Sau khi sửa, hãy chọn Tính."
+  ],
+  "publicHubHeroTools": [
+    "Financial tools, all in one place",
+    "하나의 공간, 금융 도구 탐색",
+    "金融ツールを一か所で",
+    "一站式探索金融工具",
+    "Khám phá công cụ tài chính tại một nơi"
+  ],
+  "publicHubHeroCalculators": [
+    "Your financial calculator center",
+    "내 손안의 금융 계산기 센터",
+    "手元の金融計算機センター",
+    "您的金融计算器中心",
+    "Trung tâm máy tính tài chính của bạn"
+  ],
+  "publicBreadcrumb": [
+    "Breadcrumb",
+    "현재 경로",
+    "現在の経路",
+    "当前位置",
+    "Đường dẫn"
+  ],
+  "publicSkip": [
+    "Skip to main content",
+    "본문 바로가기",
+    "本文へ移動",
+    "跳至主内容",
+    "Chuyển đến nội dung chính"
+  ],
+  "publicErrorNumber": [
+    "Enter a non-negative numeric value.",
+    "0 이상의 숫자를 입력하세요.",
+    "0以上の数値を入力してください。",
+    "请输入非负数值。",
+    "Nhập một số không âm."
+  ],
+  "publicErrorRange": [
+    "Value exceeds the supported range.",
+    "지원 범위를 초과한 값입니다.",
+    "値が対応範囲を超えています。",
+    "数值超出支持范围。",
+    "Giá trị vượt phạm vi hỗ trợ."
+  ],
+  "publicErrorYears": [
+    "Years must be between 1 and 50.",
+    "기간은 1년 이상 50년 이하여야 합니다.",
+    "期間は1年から50年にしてください。",
+    "期限须为1至50年。",
+    "Thời hạn phải từ 1 đến 50 năm."
+  ],
+  "publicErrorFrequency": [
+    "Invalid compounding frequency.",
+    "복리 계산 주기를 확인하세요.",
+    "複利計算の頻度を確認してください。",
+    "复利频率无效。",
+    "Chu kỳ lãi kép không hợp lệ."
+  ],
+  "publicErrorCalculation": [
+    "Calculation exceeds the supported range.",
+    "계산 결과가 지원 범위를 초과합니다.",
+    "計算結果が対応範囲を超えています。",
+    "计算结果超出支持范围。",
+    "Kết quả tính vượt phạm vi hỗ trợ."
+  ],
+  "publicErrorCheck": [
+    "Check the input values.",
+    "입력값을 확인하세요.",
+    "入力値を確認してください。",
+    "请检查输入值。",
+    "Kiểm tra dữ liệu nhập."
+  ],
+  "publicMetric_total_final": [
+    "Projected balance",
+    "예상 최종 자산",
+    "予測最終資産",
+    "预计最终资产",
+    "Số dư dự kiến"
+  ],
+  "publicMetric_total_deposit": [
+    "Total contributed",
+    "총 납입금",
+    "払込総額",
+    "累计投入",
+    "Tổng vốn đã góp"
+  ],
+  "publicMetric_total_interest": [
+    "Projected interest",
+    "예상 복리 수익",
+    "予測複利収益",
+    "预计复利收益",
+    "Lãi dự kiến"
+  ],
+  "publicMetric_simple_interest": [
+    "Simple interest comparison",
+    "단리 비교 수익",
+    "単利比較収益",
+    "单利对比收益",
+    "Lãi đơn để so sánh"
+  ],
+  "publicMetric_compound_bonus": [
+    "Compound advantage",
+    "복리 추가 이익",
+    "複利による追加利益",
+    "复利额外收益",
+    "Lợi thế lãi kép"
+  ],
+  "publicMetric_average": [
+    "New average price",
+    "변경 후 평균 매입가",
+    "変更後の平均取得単価",
+    "新的平均买入价",
+    "Giá vốn bình quân mới"
+  ],
+  "publicMetric_quantity": [
+    "Total shares",
+    "총 주식 수",
+    "総株数",
+    "总股数",
+    "Tổng số cổ phiếu"
+  ],
+  "publicMetric_cost": [
+    "Total simulated cost",
+    "총 가상 투자원가",
+    "総シミュレーション原価",
+    "总模拟投资成本",
+    "Tổng giá vốn mô phỏng"
+  ],
+  "publicMetric_price_change": [
+    "Average change vs initial",
+    "초기 매수가 대비 평균 변동",
+    "初回単価からの変化",
+    "相对初始买价的平均变化",
+    "Biến động so với giá mua đầu"
+  ],
+  "publicMetric_target_price": [
+    "Target sale price",
+    "목표 매도가",
+    "目標売却価格",
+    "目标卖出价",
+    "Giá bán mục tiêu"
+  ],
+  "publicMetric_profit": [
+    "Estimated net profit",
+    "예상 수수료 차감 수익",
+    "手数料控除後の予測利益",
+    "预计扣除手续费后收益",
+    "Lợi nhuận ròng dự kiến"
+  ],
+  "publicTool_stock_calculator": [
+    "Stock average cost calculator",
+    "주식 물타기·평단가 계산기",
+    "株式平均取得単価計算機",
+    "股票平均成本计算器",
+    "Máy tính giá vốn cổ phiếu"
+  ],
+  "publicToolDesc_stock_calculator": [
+    "Model average costs and target exit prices; no live trade.",
+    "평균매수가와 목표 매도가 계산. 실제 거래·체결 아님.",
+    "平均取得原価と目標売却価格を試算。実際の取引は行いません。",
+    "模拟平均成本与目标卖出价，不进行实际交易。",
+    "Mô phỏng giá vốn và giá bán mục tiêu; không giao dịch thực."
+  ],
+  "publicTool_compound_calculator": [
+    "Compound interest calculator",
+    "복리 계산기",
+    "複利計算機",
+    "复利计算器",
+    "Máy tính lãi kép"
+  ],
+  "publicToolDesc_compound_calculator": [
+    "Project recurring deposits and compounding periods.",
+    "월별 적립과 일·월·연 복리 결과 계산.",
+    "定期積立と複利期間を試算。",
+    "预测定期存款与复利周期。",
+    "Dự báo khoản gửi định kỳ và chu kỳ lãi kép."
+  ],
+  "publicTool_dividend_tax_calculator": [
+    "Dividend withholding calculator",
+    "배당소득세·배당률 계산기",
+    "配当源泉税計算機",
+    "股息预扣税计算器",
+    "Máy tính thuế cổ tức"
+  ],
+  "publicToolDesc_dividend_tax_calculator": [
+    "Estimate domestic and overseas dividend tax.",
+    "국내·해외 배당 예상 소득세.",
+    "国内外の配当税を試算。",
+    "估算境内外股息税。",
+    "Ước tính thuế cổ tức trong và ngoài nước."
+  ],
+  "publicTool_capital_gains_tax_calculator": [
+    "Stock capital gains tax calculator",
+    "주식 양도소득세 계산기",
+    "株式譲渡所得税計算機",
+    "股票资本利得税计算器",
+    "Máy tính thuế lãi vốn cổ phiếu"
+  ],
+  "publicToolDesc_capital_gains_tax_calculator": [
+    "Estimate capital gains taxes and allowances.",
+    "주식 양도소득세 및 공제 간이 시뮬레이션.",
+    "譲渡益の税と控除を簡易試算。",
+    "估算资本利得税与扣除额。",
+    "Ước tính thuế lãi vốn và khoản miễn trừ."
+  ],
+  "publicTool_salary_calculator": [
+    "Take-home salary calculator",
+    "연봉 실수령액 계산기",
+    "手取り給与計算機",
+    "税后工资计算器",
+    "Máy tính lương thực nhận"
+  ],
+  "publicToolDesc_salary_calculator": [
+    "Estimate salary after common deductions.",
+    "공제 적용 후 급여 예상액 계산.",
+    "一般的な控除後の給与を試算。",
+    "估算常见扣除后的工资。",
+    "Ước tính lương sau các khoản khấu trừ phổ biến."
+  ],
+  "publicTool_isa_calculator": [
+    "ISA tax benefit calculator",
+    "ISA 세제 혜택 계산기",
+    "ISA税制優遇計算機",
+    "ISA 税收优惠计算器",
+    "Máy tính ưu đãi thuế ISA"
+  ],
+  "publicToolDesc_isa_calculator": [
+    "Explore individual savings account tax treatment.",
+    "ISA 비과세와 세제 혜택 참고용 계산.",
+    "ISAの非課税と税制優遇を確認。",
+    "模拟 ISA 免税和税收优惠。",
+    "Khám phá cách tính thuế tài khoản ISA."
+  ],
+  "publicTool_pension_tax_calculator": [
+    "Pension and IRP tax credit calculator",
+    "연금저축·IRP 세액공제 계산기",
+    "年金積立・IRP税額控除計算機",
+    "养老金与 IRP 税额抵免计算器",
+    "Máy tính khấu trừ thuế hưu trí và IRP"
+  ],
+  "publicToolDesc_pension_tax_calculator": [
+    "Estimate contributions and eligible tax credits.",
+    "연금저축과 IRP 세액공제 계산.",
+    "年金積立と適用税額控除を試算。",
+    "估算缴款与可用税额抵免。",
+    "Ước tính đóng góp và khoản khấu trừ thuế phù hợp."
+  ],
+  "publicTool_fire_calculator": [
+    "FIRE early retirement calculator",
+    "FIRE 조기은퇴 계산기",
+    "FIRE早期退職計算機",
+    "FIRE 提前退休计算器",
+    "Máy tính nghỉ hưu sớm FIRE"
+  ],
+  "publicToolDesc_fire_calculator": [
+    "Estimate retirement capital and withdrawal scenarios.",
+    "경제적 자유와 은퇴 목표자산 추정.",
+    "退職資金と引き出しシナリオを試算。",
+    "估算退休资本与提款情景。",
+    "Ước tính vốn nghỉ hưu và kịch bản rút tiền."
+  ],
+  "publicTool_retirement_calculator": [
+    "National pension estimate",
+    "국민연금 예상액 계산기",
+    "国民年金予測計算機",
+    "国民养老金估算",
+    "Máy tính ước lượng lương hưu quốc gia"
+  ],
+  "publicToolDesc_retirement_calculator": [
+    "Estimate national pension benefits.",
+    "국민연금 수령액 간이 예상.",
+    "国民年金の受給額を簡易予測。",
+    "简单估算国民养老金福利。",
+    "Ước tính quyền lợi lương hưu quốc gia."
+  ],
+  "publicTool_tax_calculator": [
+    "Income tax calculator",
+    "종합소득세 간이 계산기",
+    "所得税簡易計算機",
+    "所得税简易计算器",
+    "Máy tính thuế thu nhập"
+  ],
+  "publicToolDesc_tax_calculator": [
+    "Review simplified income-tax scenarios.",
+    "종합소득세 과세표준 간이 계산.",
+    "簡易的な所得税シナリオを確認。",
+    "查看简化所得税情景。",
+    "Xem kịch bản thuế thu nhập đơn giản."
+  ],
+  "publicTool_gift_tax_calculator": [
+    "Gift tax calculator",
+    "증여세 계산기",
+    "贈与税計算機",
+    "赠与税计算器",
+    "Máy tính thuế quà tặng"
+  ],
+  "publicToolDesc_gift_tax_calculator": [
+    "Estimate gift tax and deductions.",
+    "증여세 공제와 세금 간이 계산.",
+    "贈与税と控除を試算。",
+    "估算赠与税与扣除额。",
+    "Ước tính thuế quà tặng và khoản khấu trừ."
+  ],
+  "publicTool_loan_interest_calculator": [
+    "Loan repayment calculator",
+    "대출이자·상환 계산기",
+    "ローン返済計算機",
+    "贷款还款计算器",
+    "Máy tính trả nợ vay"
+  ],
+  "publicToolDesc_loan_interest_calculator": [
+    "Compare principal and interest repayment plans.",
+    "월별 대출이자 및 상환 계획 비교.",
+    "元金・利息の返済計画を比較。",
+    "比较本金与利息还款计划。",
+    "So sánh kế hoạch trả gốc và lãi."
+  ],
+  "publicTool_real_estate_calculator": [
+    "Real estate fees calculator",
+    "부동산 중개보수·취득세 계산기",
+    "不動産仲介料・取得税計算機",
+    "房地产中介费与购置税计算器",
+    "Máy tính phí bất động sản"
+  ],
+  "publicToolDesc_real_estate_calculator": [
+    "Estimate brokerage fees and acquisition tax.",
+    "부동산 거래 중개보수와 취득세 추정.",
+    "仲介手数料と取得税を試算。",
+    "估算中介费与购置税。",
+    "Ước tính phí môi giới và thuế mua tài sản."
+  ],
+  "publicTool_youth_leap_calculator": [
+    "Youth Leap savings calculator",
+    "청년도약계좌 만기 계산기",
+    "青年跳躍貯蓄計算機",
+    "青年跃升储蓄计算器",
+    "Máy tính tiết kiệm Youth Leap"
+  ],
+  "publicToolDesc_youth_leap_calculator": [
+    "Explore savings contributions and maturity value.",
+    "청년도약계좌 만기 예상액 계산.",
+    "積立額と満期額を試算。",
+    "模拟储蓄缴款与到期金额。",
+    "Mô phỏng đóng góp và giá trị đáo hạn."
+  ],
+  "publicTool_kimchi_premium_calculator": [
+    "Crypto price spread calculator",
+    "김치 프리미엄 계산기",
+    "暗号資産価格差計算機",
+    "加密资产价差计算器",
+    "Máy tính chênh lệch giá tiền mã hóa"
+  ],
+  "publicToolDesc_kimchi_premium_calculator": [
+    "Explore exchange price spreads; not real-time proof.",
+    "거래소 가격차이 시뮬레이션. 실시간 시세 보장 아님.",
+    "取引所の価格差を試算。リアルタイムの証拠ではありません。",
+    "模拟交易所价差，不代表实时行情。",
+    "Mô phỏng chênh lệch giá sàn; không chứng minh giá trực tiếp."
+  ],
+  "publicTool_crypto_apy_calculator": [
+    "Crypto APY calculator",
+    "암호화폐 APY 계산기",
+    "暗号資産APY計算機",
+    "加密资产 APY 计算器",
+    "Máy tính APY tiền mã hóa"
+  ],
+  "publicToolDesc_crypto_apy_calculator": [
+    "Estimate hypothetical compounding returns.",
+    "가상자산 예치 수익률 모의 계산.",
+    "仮定した複利収益を試算。",
+    "估算假设复利收益。",
+    "Ước tính lợi nhuận lãi kép giả định."
+  ],
+  "publicTool_farming_calculator": [
+    "Virtual farming ROI calculator",
+    "가상 채굴 ROI 계산기",
+    "仮想採掘ROI計算機",
+    "虚拟挖矿 ROI 计算器",
+    "Máy tính ROI khai thác ảo"
+  ],
+  "publicToolDesc_farming_calculator": [
+    "Explore virtual rewards and payback scenarios.",
+    "머니버스 가상 채굴 보상·회수기간 추정.",
+    "仮想報酬と回収期間を試算。",
+    "模拟虚拟奖励与回收期限。",
+    "Mô phỏng phần thưởng ảo và thời gian hoàn vốn."
+  ],
+  "publicVerifiedFormat": [
+    "{count} Spring-verified tools",
+    "Spring 검증 완료 {count}개",
+    "Spring検証済みツール {count}件",
+    "{count}个 Spring 已验证工具",
+    "{count} công cụ Spring đã xác minh"
+  ],
+  "publicToolFormat": [
+    "{count} listed tool routes",
+    "기존 도구 전체 {count}개",
+    "既存ツール経路 {count}件",
+    "{count}个原有工具路径",
+    "{count} đường dẫn công cụ gốc"
+  ],
+  "publicResultFormat": [
+    "{count} matching tools",
+    "검색 결과 {count}개",
+    "検索結果 {count}件",
+    "{count}个匹配工具",
+    "{count} công cụ phù hợp"
+  ],
+  "publicStatusFormat": [
+    "{count} public sources · {stale} unverified or stale",
+    "공개 감시 대상: {count}개 · 최신 확인 필요: {stale}개",
+    "公開監視対象 {count}件・未確認または期限切れ {stale}件",
+    "{count}个公开来源 · {stale}个未确认或过期",
+    "{count} nguồn công khai · {stale} chưa xác minh hoặc hết hạn"
+  ],
+  "publicLab": [
+    "THE MONEYVERSE LAB / SPRING NATIVE",
+    "THE MONEYVERSE LAB / SPRING NATIVE",
+    "MONEYVERSEラボ / SPRINGネイティブ",
+    "MONEYVERSE 实验室 / SPRING 原生",
+    "PHÒNG THỬ NGHIỆM MONEYVERSE / SPRING"
+  ],
+  "publicObservability": [
+    "SOURCE-BACKED OBSERVABILITY / SPRING NATIVE",
+    "SOURCE-BACKED OBSERVABILITY / SPRING NATIVE",
+    "記録に基づく監視 / SPRINGネイティブ",
+    "基于来源的观测 / SPRING 原生",
+    "GIÁM SÁT TỪ NGUỒN THỰC / SPRING"
+  ],
+  "publicPlatform": [
+    "MONEYVERSE / SPRING NATIVE / WEB PLATFORM",
+    "MONEYVERSE / SPRING NATIVE / WEB PLATFORM",
+    "MONEYVERSE / SPRINGネイティブ / WEB",
+    "MONEYVERSE / SPRING 原生 / WEB 平台",
+    "MONEYVERSE / SPRING / NỀN TẢNG WEB"
+  ],
+  "publicCurated": [
+    "CURATED FINANCIAL UTILITIES",
+    "CURATED FINANCIAL UTILITIES",
+    "金融ツール一覧",
+    "精选金融工具",
+    "CÔNG CỤ TÀI CHÍNH"
+  ],
+  "publicOpenTool_stock_calculator": [
+    "Open Stock average cost calculator",
+    "주식 물타기·평단가 계산기 화면으로 이동",
+    "株式平均取得単価計算機を開く",
+    "打开股票平均成本计算器",
+    "Mở Máy tính giá vốn cổ phiếu"
+  ],
+  "publicOpenTool_compound_calculator": [
+    "Open Compound interest calculator",
+    "복리 계산기 화면으로 이동",
+    "複利計算機を開く",
+    "打开复利计算器",
+    "Mở Máy tính lãi kép"
+  ],
+  "publicOpenTool_dividend_tax_calculator": [
+    "Open Dividend withholding calculator",
+    "배당소득세·배당률 계산기 화면으로 이동",
+    "配当源泉税計算機を開く",
+    "打开股息预扣税计算器",
+    "Mở Máy tính thuế cổ tức"
+  ],
+  "publicOpenTool_capital_gains_tax_calculator": [
+    "Open Stock capital gains tax calculator",
+    "주식 양도소득세 계산기 화면으로 이동",
+    "株式譲渡所得税計算機を開く",
+    "打开股票资本利得税计算器",
+    "Mở Máy tính thuế lãi vốn cổ phiếu"
+  ],
+  "publicOpenTool_salary_calculator": [
+    "Open Take-home salary calculator",
+    "연봉 실수령액 계산기 화면으로 이동",
+    "手取り給与計算機を開く",
+    "打开税后工资计算器",
+    "Mở Máy tính lương thực nhận"
+  ],
+  "publicOpenTool_isa_calculator": [
+    "Open ISA tax benefit calculator",
+    "ISA 세제 혜택 계산기 화면으로 이동",
+    "ISA税制優遇計算機を開く",
+    "打开ISA 税收优惠计算器",
+    "Mở Máy tính ưu đãi thuế ISA"
+  ],
+  "publicOpenTool_pension_tax_calculator": [
+    "Open Pension and IRP tax credit calculator",
+    "연금저축·IRP 세액공제 계산기 화면으로 이동",
+    "年金積立・IRP税額控除計算機を開く",
+    "打开养老金与 IRP 税额抵免计算器",
+    "Mở Máy tính khấu trừ thuế hưu trí và IRP"
+  ],
+  "publicOpenTool_fire_calculator": [
+    "Open FIRE early retirement calculator",
+    "FIRE 조기은퇴 계산기 화면으로 이동",
+    "FIRE早期退職計算機を開く",
+    "打开FIRE 提前退休计算器",
+    "Mở Máy tính nghỉ hưu sớm FIRE"
+  ],
+  "publicOpenTool_retirement_calculator": [
+    "Open National pension estimate",
+    "국민연금 예상액 계산기 화면으로 이동",
+    "国民年金予測計算機を開く",
+    "打开国民养老金估算",
+    "Mở Máy tính ước lượng lương hưu quốc gia"
+  ],
+  "publicOpenTool_tax_calculator": [
+    "Open Income tax calculator",
+    "종합소득세 간이 계산기 화면으로 이동",
+    "所得税簡易計算機を開く",
+    "打开所得税简易计算器",
+    "Mở Máy tính thuế thu nhập"
+  ],
+  "publicOpenTool_gift_tax_calculator": [
+    "Open Gift tax calculator",
+    "증여세 계산기 화면으로 이동",
+    "贈与税計算機を開く",
+    "打开赠与税计算器",
+    "Mở Máy tính thuế quà tặng"
+  ],
+  "publicOpenTool_loan_interest_calculator": [
+    "Open Loan repayment calculator",
+    "대출이자·상환 계산기 화면으로 이동",
+    "ローン返済計算機を開く",
+    "打开贷款还款计算器",
+    "Mở Máy tính trả nợ vay"
+  ],
+  "publicOpenTool_real_estate_calculator": [
+    "Open Real estate fees calculator",
+    "부동산 중개보수·취득세 계산기 화면으로 이동",
+    "不動産仲介料・取得税計算機を開く",
+    "打开房地产中介费与购置税计算器",
+    "Mở Máy tính phí bất động sản"
+  ],
+  "publicOpenTool_youth_leap_calculator": [
+    "Open Youth Leap savings calculator",
+    "청년도약계좌 만기 계산기 화면으로 이동",
+    "青年跳躍貯蓄計算機を開く",
+    "打开青年跃升储蓄计算器",
+    "Mở Máy tính tiết kiệm Youth Leap"
+  ],
+  "publicOpenTool_kimchi_premium_calculator": [
+    "Open Crypto price spread calculator",
+    "김치 프리미엄 계산기 화면으로 이동",
+    "暗号資産価格差計算機を開く",
+    "打开加密资产价差计算器",
+    "Mở Máy tính chênh lệch giá tiền mã hóa"
+  ],
+  "publicOpenTool_crypto_apy_calculator": [
+    "Open Crypto APY calculator",
+    "암호화폐 APY 계산기 화면으로 이동",
+    "暗号資産APY計算機を開く",
+    "打开加密资产 APY 计算器",
+    "Mở Máy tính APY tiền mã hóa"
+  ],
+  "publicOpenTool_farming_calculator": [
+    "Open Virtual farming ROI calculator",
+    "가상 채굴 ROI 계산기 화면으로 이동",
+    "仮想採掘ROI計算機を開く",
+    "打开虚拟挖矿 ROI 计算器",
+    "Mở Máy tính ROI khai thác ảo"
+  ]
+}

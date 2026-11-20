@@ -63,3 +63,22 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+tasks.named<Test>("test") {
+    useJUnitPlatform { excludeTags("postgres-messaging") }
+}
+
+tasks.register<Test>("postgresMessagingTest") {
+    description = "Verify native messaging against the explicitly configured disposable CI PostgreSQL"
+    group = "verification"
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
+    useJUnitPlatform { includeTags("postgres-messaging") }
+}
+
+tasks.register<JavaExec>("nativeUiPreview") {
+    description = "Run an explicitly opted-in loopback H2 native UI preview on the test classpath"
+    group = "verification"
+    classpath = sourceSets["test"].runtimeClasspath
+    mainClass.set("com.moneyverse.api.domain.web.NativeUiPreview")
+}

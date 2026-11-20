@@ -103,7 +103,7 @@ public class WalletController {
             throw new org.springframework.web.server.ResponseStatusException(
                     org.springframework.http.HttpStatus.BAD_REQUEST, "valid Idempotency-Key UUID required");
         }
-        Map<String, Object> result = walletService.transferWithIdempotencyKey(
+        Map<String, Object> result = walletService.transferCanonicalWithIdempotencyKey(
                 userId, req.getRecipientUserId(), req.getAmountWld(), req.getMemo(), key);
         return ApiResponse.ok(result, (String) result.get("message"));
     }
