@@ -224,3 +224,11 @@ The independent task review found an administrator-close legacy-cookie identity 
 - Refreshed native asset digests after catalog/CSS integration. Fresh integrated evidence: **388 Spring tests,0 failures/errors/skips, bootJar successful;220 Node tests passed,0 failed/skipped**.
 - This is a task-branch integration checkpoint, not completion of all route families. Registration/recovery/provider gaps, real browser geometry/session continuity and exact-source Test/release remain unverified; production HOLD.
 - Follow-up inspection found three remaining dynamic dictionary lookups that can resolve against the map rather than the page model. Add real rendered title/header/password-label regressions before the next UI correction.
+
+## Native rendered copy / CI selection — before work, in progress and finished fix
+- [x] Root independently tested the three suspected dynamic bindings. Five login document-title cases failed with literal `null`; the shared page header and original registration minimum-password label already rendered correctly and were preserved. Focused6 cases:5 logical RED failures→6GREEN.
+- [x] Corrected only the confirmed document-title lookup to explicit page-model scope. No blind rewrite of the already-correct conditional bindings.
+- [x] CI expansion to native-*.test.mjs exposed an old guard asserting the literal native-chrome filename. The new guard expands the actual command's file patterns and requires every tracked native test plus admin/money tests. No guard exemption was added. The intermediate Node/CI failure is recorded and not presented as a pass.
+- [x] Fresh final isolated full test/JAR: **394 Spring tests,0 failures/errors/skips; BUILD SUCCESSFUL**. Full Node UI/security/release: **220 passed,0 failures/cancellations/skips**. Commands/logs: /tmp/nov18-native-copy-full.log and /tmp/nov18-native-copy-node.log. Existing Gradle/dependency warnings remain.
+- Read-only HTTP recheck at15:25KST: production root200, public Test /api/version403. HTTP200 only confirms response availability, not feature or source identity. No current browser screenshot/click acceptance is claimed.
+- Native public tools/calculators/status presentation is the next isolated in-progress task, based on bad193193e. Its source-control progress is separate until independent review/integration. The original dirty checkout remains untouched.
