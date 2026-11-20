@@ -225,6 +225,20 @@ The independent task review found an administrator-close legacy-cookie identity 
 - This is a task-branch integration checkpoint, not completion of all route families. Registration/recovery/provider gaps, real browser geometry/session continuity and exact-source Test/release remain unverified; production HOLD.
 - Follow-up inspection found three remaining dynamic dictionary lookups that can resolve against the map rather than the page model. Add real rendered title/header/password-label regressions before the next UI correction.
 
+
+## Native public tools/calculators/status — before work
+- [x] Read actual controllers, pure calculation functions, collector service/policy, all five native templates and their tests plus approved November18 authority.
+- [x] Confirmed isolated branch/base bad193 and fetched main unchanged at08b1525. Native scope is /tools, /calculators, /tools/compound-calculator, /tools/stock-calculator and /status; no captured tools are included as converted.
+- [x] Recorded exact fields/defaults/limits/metrics/models, all17 destinations and original Korean copy in task report before implementation.
+- [ ] Logical RED for shared chrome/five locales and native result/control preservation.
+- [ ] Scoped templates/assets/catalogs, GREEN, full Spring/Node/build, source self-review and checkpoint publication.
+- Status source failure stays503. No API/auth/SQL/schema/runtime/release changes. Browser/Test acceptance unavailable; production HOLD.
+
+## Native public tools/calculators/status — in progress
+- [x] Logical RED:35 real MVC cases,34 failures/0 errors/skips (missing shared uiLanguage/launcher/five-language headers and bindings). Existing hub destination/filter test passes; no failure was hidden.
+- [x] Behavioral client RED:2 cases fail. Annual compounding fixture (1000 principal,100% rate,no deposits,one year) overwrites submitted2,000 with monthly2,613 after frequency change; language change leaves English label and hidden language unchanged.
+- Ruling approved by parent: saved manual cookie > supported explicit lang deep-link compatibility > supported browser language > EN. Shared engine remains sole persisted preference. Remove incorrect competing client math, leave submitted results until explicit Calculate; no server arithmetic/rate change.
+- [ ] Scoped implementation and full gates. Browser/Test acceptance and production remain HOLD.
 ## Native rendered copy / CI selection — before work, in progress and finished fix
 - [x] Root independently tested the three suspected dynamic bindings. Five login document-title cases failed with literal `null`; the shared page header and original registration minimum-password label already rendered correctly and were preserved. Focused6 cases:5 logical RED failures→6GREEN.
 - [x] Corrected only the confirmed document-title lookup to explicit page-model scope. No blind rewrite of the already-correct conditional bindings.
@@ -263,3 +277,38 @@ The independent task review found an administrator-close legacy-cookie identity 
 - Root cause: Thymeleaf fragment selector header also selects the other header element in the shared template. Renamed the shared fragment pageHeader and adapted its native consumers; administrator chrome owns a separate header and was not changed.
 - Regression for home/login/register:9 focused cases,3 logical RED failures (expected one support heading, observed two), then9 GREEN. Full isolated Spring test/JAR:397 tests,0 failures/errors/skips; Node220 passes,0 failures/skips. Preview was stopped before rebuilding; its own loopback listener is closed.
 - Public task viewport fix98b0afa89d passed independent scoped re-review. Next integrate that reviewed task, adapt its shared-header consumers to the new fragment contract and rerun source/browser acceptance. No running production service was changed.
+
+## Native public tools/calculators/status — finished implementation candidate
+- [x] Existing5 native HTML paths use shared chrome/one gated support launcher, with192 scoped five-language keys in shared catalogs.17 destinations retained:2 existing native calculators,15 explicitly legacy/QA pending.
+- [x] Exact fields/defaults/limits/frequency options, GET filters, server metrics/yearly rows and collector state/freshness/failure preserved. Pure calculation/collector service/policy are byte-unchanged. Invalid forms400, Flight406, unavailable collector503.
+- [x] Only demonstrated mismatching client compound math removed; results stay last submitted until Calculate. Five-language VM cases retain unsent inputs, filters and results; labels/hidden locale/reset links/counts/title/ARIA update without reload/private storage.
+- [x] Focused61 Spring cases,0 failures/errors/skips. Public39 cases additionally assert actual shared h1 strings for all25 route×locale combinations. Selected-option assertion corrected for attribute ordering after confirming actual selected state; count-translation RED1 failure/2 passes before GREEN.
+- [x] FINAL isolated Spring:433 tests across81 suites,0 failures/errors/skips; bootJar successful, exit0. Command: MONEYVERSE_STORAGE_PATH=/tmp/native-public-chrome-media-20261120 SPRING_PROFILES_ACTIVE=test SERVER_ADDRESS=127.0.0.1 ./gradlew test bootJar --offline --no-daemon -Dorg.gradle.workers.max=1.
+- [x] FINAL Node:228 passed,0 failed/cancelled/skipped. Command: node --test scripts/native-*.test.mjs scripts/admin-tools.test.mjs scripts/mv39-money.test.mjs scripts/release/*.test.mjs scripts/security/*.test.mjs. Public suite8; public/chrome/assets15.
+- [x] Exact source/diff/content digests self-reviewed. Generator/integrity coverage includes mv28/mv29/mv30; existing mv43 edits are generated digest-only. Main unchanged at08b1525; parent44a773e942 incorporated as22a075d404 retaining both worklog histories.
+- Shared markup/behavior unchanged. Suspected shared-header issue disproved by real rendered heading assertions. Existing catalog keys, auth/API/identity/security/SQL/schema/grants/runtime/release workflows and original dirty checkout unchanged by this scoped implementation.
+- Independent parent review pending. Browser geometry/accessibility, human linguistic review, PostgreSQL live collector and exact-source Test/release acceptance unverified. No CUA workaround, main merge or deployment; production HOLD.
+
+## Native public review round1 — before fix
+- Independent review identified one Important finding: /status lost original UTF-8 and mobile viewport declarations. Confirmed actual status head and shared commonHead; no replacement metadata is present.
+- [ ] Add rendered head regressions for all5 locales, requiring exactly one UTF-8 declaration and the original device-width/initial-scale/viewport-fit content. Observe logical RED before the narrow template fix.
+- [ ] Restore original metadata, run focused covering Spring plus native asset/client Node checks, record exact results and publish scoped fix for re-review.
+- No shared markup, controller/source logic, browser geometry or release claim is in this fix. Production HOLD.
+
+## Native public review round1 — in progress
+- [x] Logical RED:5 rendered /status locale cases,5 failures/0 errors/skips, each reporting missing device layout viewport. Production source was unchanged until this output was read.
+- [ ] Restore the original one UTF-8 plus one device-width/initial-scale/viewport-fit declaration, then run covering checks and publish for re-review.
+
+## Native public review round1 — finished fix candidate
+- [x] Restored original UTF-8 and width=device-width,initial-scale=1,viewport-fit=cover declarations as one line in /status head. No shared markup or controller/client/asset content changed.
+- [x] New rendered regression checks /status in all5 locales: exactly one original viewport and exactly one UTF-8 declaration. Logical RED5 failures/0 errors/skips; covering GREEN66 tests/0 failures/errors/skips, including44 NativePublicChromeTest cases.
+- Spring covering command: MONEYVERSE_STORAGE_PATH=/tmp/native-public-chrome-media-20261120 SPRING_PROFILES_ACTIVE=test SERVER_ADDRESS=127.0.0.1 ./gradlew test --tests '*NativePublicChromeTest' --tests '*SpringNativeCalculatorUiTest' --tests '*SpringNativeToolHubTest' --tests '*StatusSourceTruth*Test' --tests '*SpringCalculatorMathUnitTest' --offline --no-daemon -Dorg.gradle.workers.max=1. BUILD SUCCESSFUL in27s, exit0. RED used only --tests '*NativePublicChromeTest.statusHeadKeepsExactlyOneOriginalMobileViewportAndUtf8*', exit1 with expected missing-device-viewport assertions.
+- [x] Node native client/shared chrome/asset integrity:15 passed,0 failed/cancelled/skipped. Command: node --test scripts/native-public.test.mjs scripts/native-assets.test.mjs scripts/native-chrome.test.mjs. git diff --check passes; main remains08b1525.
+- Full433-test/bootJar and228-Node evidence above belongs to the prior candidate; full suite was not repeated for this metadata-only fix under the review instruction. Scoped re-review remains pending. No browser geometry or release acceptance claimed; production HOLD.
+
+## Reviewed public-page integration — checkpoint
+- Independent public task review found missing viewport/UTF-8 metadata on status. Original implementer fix98b0afa89d observed five logical RED cases, then66 focused Spring/15 Node GREEN; scoped re-review approved, no new findings. Fix round1/5:1 addressed,0 open.
+- Integrated the reviewed public branch. Preserved both append-only worklog histories and verified the shared test version contains every child test plus root duplicate-heading regressions before resolving add/add.
+- Added the duplicate-heading assertion to25 public route/language cases:25 logical RED failures with old generic header selector. Adapted five public template consumers to pageHeader. No computation/status source method changed.
+- Fresh integrated full verification:441 Spring tests,0 failures/errors/skips, bootJar successful;228 Node UI/security/release tests passed with0 failures/skips; asset generator changed0 references and integrity checks passed. Source test/JAR and Node logs: /tmp/nov18-native-public-integrated-full.log and /tmp/nov18-native-public-integrated-node.log.
+- Actual browser acceptance continues after restarting the stopped isolated H2 preview on this integrated source. Real PostgreSQL service gate passed9/9 at ancestor7cb9890d95; newest CI will rerun. Exact-source public Test remains403; production HOLD.

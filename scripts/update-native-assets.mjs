@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../spring-backend/src/main/resources');
 const staticRoot=resolve(root,'static');
 let changed=0;
-for(const family of ['mv43','shared']) {
+for(const family of ['mv43','shared','mv28','mv29','mv30']) {
   for(const entry of readdirSync(resolve(root,'templates',family)).filter(file=>file.endsWith('.html'))) {
     const template=resolve(root,'templates',family,entry),before=readFileSync(template,'utf8');
     const after=before.replace(/((?:src|href)=")(\/assets\/(?:mv39|mv40|mv43)\/[^"?]+)(?:\?[^"]*)?"/g,(_,attribute,path)=>{
