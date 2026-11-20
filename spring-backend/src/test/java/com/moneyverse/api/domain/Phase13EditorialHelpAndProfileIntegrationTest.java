@@ -75,11 +75,10 @@ public class Phase13EditorialHelpAndProfileIntegrationTest {
     }
 
     @Test
-    @DisplayName("6. 관리자 AI 경제 속보 설정 조회 200 OK")
+    @DisplayName("6. 관리자 AI 경제 속보 설정은 비로그인 계정에 401")
     void testAiNewsSettings() throws Exception {
         mockMvc.perform(get("/admin/ai-news/settings"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

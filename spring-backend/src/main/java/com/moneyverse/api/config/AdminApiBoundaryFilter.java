@@ -28,6 +28,15 @@ public class AdminApiBoundaryFilter extends OncePerRequestFilter {
         if (path.startsWith("/api/v1/blog/notify") || path.startsWith("/api/blog/notify")) {
             return true;
         }
+        // Older admin REST controllers also use /admin/** (without /api). Protect
+        // those JSON endpoints at the Spring entrypoint, including direct port access.
+        // Actual SSR/static admin HTML is separately protected by the earlier
+        // AdminHtmlBoundaryFilter and keeps browser-login redirect semantics.
+        if (path.startsWith("/admin/")) {
+            boolean htmlGet = ("GET".equals(request.getMethod()) || "HEAD".equals(request.getMethod()))
+                    && AdminHtmlBoundaryFilter.isSensitiveAdminPath(path);
+            return htmlGet;
+        }
         return !(path.startsWith("/api/v1/admin/") || path.startsWith("/api/admin/"));
     }
 
