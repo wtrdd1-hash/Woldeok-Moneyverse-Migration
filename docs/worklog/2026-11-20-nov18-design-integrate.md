@@ -555,3 +555,7 @@ Browser geometry, global cross-navigation drafts, authenticated delivery and Tes
 - Private Production backup restore completed on a newly owned isolated loopback PostgreSQL generation. This proves restore completion, not financial correctness. Production database remains unchanged.
 - Reviewed exact local-registration API edge hold is active in Production (503/private-no-store). Home/login remain200. Anonymous Test access remains403. No frontend traffic transition has occurred.
 - Still BLOCKED: unexplained1,000,000WLD opening, app ledger DML, manual346 provenance/definition drift, exact-source protected Test and authenticated continuity.
+
+### CI policy fixture follow-up
+- New CI correctly rejected a dummy credential-shaped URI in the CORS negative fixture before runtime jobs started. This was a test placeholder, not an operational credential. Replaced it with the scanner documented USER:PASSWORD@HOST placeholder form, preserving the same userinfo rejection case. The security guard is unchanged.
+- Fresh repository scan passed;6 security-policy tests and17 focused CORS cases passed0skips. The failed CI is retained as failure; a new exact-source CI is required.

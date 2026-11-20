@@ -21,7 +21,7 @@ class NativeCorsOriginValidationTest {
         assertEquals(expected,SecurityConfig.configuredOrigin(configured));
     }
     @ParameterizedTest @NullAndEmptySource
-    @ValueSource(strings={"https://user:password@example.invalid","https://example.invalid/path",
+    @ValueSource(strings={"https://USER:PASSWORD@HOST.invalid","https://example.invalid/path",
         "https://example.invalid?key=value","https://example.invalid#fragment",
         "http://test.easy-scraping.com","https://*.example.invalid","file:///tmp/a",
         "https://example.invalid:99999","not-an-origin"})
