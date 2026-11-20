@@ -802,6 +802,20 @@
         font-size: 14px !important;
       }
     }
+
+    /* 10대 상장사 모바일 테이블 텍스트 꺾임 방지 */
+    .stocks-table-container, .stock-table-wrapper, table {
+      width: 100% !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+    }
+    table th, table td {
+      white-space: nowrap !important;
+    }
+    .stock-corp-name, .stock-corp-sector {
+      white-space: nowrap !important;
+      word-break: keep-all !important;
+    }
 </style>
 <link rel="stylesheet" href="/css/mv-theme-nov18.css">
 </head>

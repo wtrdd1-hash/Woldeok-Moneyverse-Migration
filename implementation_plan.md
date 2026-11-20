@@ -5830,3 +5830,67 @@ graph TD
 - 플로팅 버튼 클릭 시 문의 모달 정상 팝업 확인.
 - 5개 언어 선택기 클릭 및 한국어/영어/일본어/중국어/베트남어 전환 인터랙션 검증.
 - 실시간 고화질 스크린샷 증거 획득.
+
+---
+## 🚀 [v101 Specification] 모바일 횡스크롤 제로(Zero-Overflow) 및 Nginx 정적 서빙 동기화 (2026-11-20)
+- **버전**: v101
+- **목적**: 사용자 실측 보고된 모바일 화면 깨짐(608px 그리드 팽창, 우측 잘림) 및 상단 배너 번역 키 노출, Nginx 라우팅 누락 문제의 원천 해결 및 실 브라우저 정밀 검증.
+
+### 1. 근본 원인 분석 결과
+1. **Nginx 라우팅 누락**: `/stocks`만 static alias가 걸려 있고, `/wallet`, `/shop`, `/quests` 등은 Spring Boot JAR 내부의 구버전 HTML로 프록시되어 CSS 문법 오류가 있는 과거 파일이 서빙되고 있었음.
+2. **배너의 가로 밀림 현상**: `.service-alert-banner span`에 긴 한글 문장이 `word-break: keep-all;`로 지정되어 너비가 659.2px까지 팽창하면서 브라우저의 모바일 미디어 쿼리(`@media (max-width: 640px)`) 트리거를 무력화함.
+3. **CSS Grid 트랙 팽창**: `.wallet-grid`와 `.kpi-row`가 `minmax(0, 1fr)`이 아닌 `1fr`로 지정되어 내부 복식부기 거래 내역 테이블(`min-width: 440px`)에 끌려가면서 카드가 608.5px로 강제 팽창함.
+
+### 2. 조치 사항
+1. **Nginx 설정 강화 (`/etc/nginx/snippets/moneyverse-frontend-v24-pages.conf`)**:
+   - `/wallet`, `/shop`, `/quests`, `/board`, `/css/`, `/js/` 정적 alias를 주입하여 Spring Boot JAR를 거치지 않고 실시간 최신 파일로 즉시 서빙.
+   - 문법 검증 통과 후 `sudo systemctl reload nginx` 완료.
+2. **Spring Boot 실행 JAR 내부 동기화**:
+   - `/srv/moneyverse-data/spring-backend/moneyverse-spring-backend-0.0.1-SNAPSHOT.jar` 내부 `BOOT-INF/classes/static/` 정적 파일 1,513개를 최신 11월 18일 테마 파일로 전수 동기화 및 서비스 정상 재시작 완료.
+3. **모바일 반응형 CSS Grid 및 텍스트 래핑 보강**:
+   - `html, body { overflow-x: hidden !important; width: 100% !important; max-width: 100vw !important; }`
+   - `.service-alert-banner span { word-break: break-word !important; overflow-wrap: anywhere !important; }`
+   - `.wallet-grid, .kpi-row { grid-template-columns: minmax(0, 1fr) !important; }`
+   - `.wallet-grid > div { min-width: 0 !important; max-width: 100% !important; }`
+   - `.super-header`: 모바일에서 `flex-direction: column` 및 언어 선택기/로그인 버튼 `white-space: nowrap !important;` 보장.
+   - `.mv-floating-chat-btn`: 모바일에서 `bottom: 76px !important;`로 상향 배치하여 64px 모바일 바텀 독과의 간섭을 원천 배제.
+
+### 3. 브라우저 실측 정량 데이터 (Subagent 87bae23f)
+- **Viewport**: 390px × 844px (가용 바디 폭 375px)
+- **`.mv-panel` (카드 컨테이너 폭)**: 정확히 **351.00px** (좌 12px, 우 12px 여백 대칭)
+- **KPI 박스 폭**: 정확히 **317.00px** (카드 내부 100% 안착)
+- **KPI 세로 1열 스택**: 현금 지갑 (`y: 294.98px`) 및 은행 예치금 (`y: 406.16px`) 완벽한 수직 1열 스택
+- **우측 테두리 클리핑**: 0px (x = 363.00px에서 라운드 테두리 완벽 렌더링)
+- **상단 배너**: 한글 정적 문구 정상 출력 (번역 키 노출 0건)
+
+---
+## 🚀 [v102 Specification] 320px 극소 모바일 헤더 텍스트 꺾임 및 잘림 방지 (2026-11-20)
+- **버전**: v102
+- **목적**: 320px 극소 모바일 화면(Chrome DevTools 320x644)에서 상단 헤더 내비바의 타이틀('홈 대시보드') 3줄 꺾임 및 로그인 버튼 우측 잘림 결함 해결.
+
+### 1. 근본 원인 분석
+- 320px 뷰포트 너비에서 [햄버거 메뉴 40px] + [홈 대시보드 타이틀 약 100px] + [LIVE 뱃지 45px] + [언어 선택기 70px] + [로그인 버튼 70px] = 총 325px 이상의 요소가 가로 1열에 억지로 우겨넣어짐.
+- 미디어 쿼리 부재로 인해 글자가 `홈 \n 대시보 \n 드` 및 `LI \n VE`로 분절되고, 로그인 버튼 우측이 화면 밖으로 잘려 나감.
+
+### 2. 조치 사항
+1. **`index.html` 모바일 헤더 복원력 CSS 보강**:
+   - `@media (max-width: 480px)`:
+     - `.home-topbar`: 패딩 `8px 10px !important;`
+     - `.mobile-menu-btn`: `34px x 34px`로 축약
+     - `.header-title`: `font-size: 14px; white-space: nowrap !important; overflow: hidden; text-overflow: ellipsis;`
+     - `.locale-toggle-btn`: 패딩 `4px 6px`, 높이 `32px`, 폰트 `11px`
+     - `.login-cta-btn`: 패딩 `4px 8px`, 높이 `32px`, 폰트 `11px`, `white-space: nowrap !important;`
+   - `@media (max-width: 350px)`:
+     - 350px 이하 극소 뷰포트에서는 공간 확보를 위해 `LIVE` 뱃지를 숨겨 버튼 잘림 원천 차단.
+2. **Spring Boot JAR 내부 동기화 및 백엔드 서비스 리로드**:
+   - `/srv/moneyverse-data/spring-backend/moneyverse-spring-backend-0.0.1-SNAPSHOT.jar` 내부 `static/index.html` 갱신 및 `moneyverse-spring-backend.service` 재시작 완료.
+3. **Nginx 프록시 정합성 점검**:
+   - GPT의 PR #3311 (Spring MVC Thymeleaf 작업)과 충돌하지 않도록 `location = /`의 `proxy_pass http://127.0.0.1:4550;` 구조를 온전히 유지.
+
+### 3. 브라우저 실측 정량 데이터 (Subagent d4c3a330, 320x644)
+- **Viewport**: 320px × 644px
+- **Document Body Width**: 정확히 **320.00px** (가로 스크롤바 0건)
+- **메뉴 버튼**: `{ x: 16px, width: 34px }`
+- **타이틀 '홈 대시보드'**: `{ x: 56px, width: 95.5px }` (단 한 줄로 완벽 정렬, 분절 0건)
+- **언어 선택기 ('KO')**: `{ x: 167.5px, width: 64.5px }`
+- **로그인 버튼 ('로그인')**: `{ x: 237px, width: 67px }` (우측 끝 `x = 304px <= 320px`, 우측 16px 마진 완벽 확보, 잘림 0건)
