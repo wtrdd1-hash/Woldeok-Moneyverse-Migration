@@ -1,0 +1,47 @@
+# November 18 Design Baseline — Global Language and Support/Chat Implementation Authority
+
+Version: v2026.11.20.1 | Status: OWNER-APPROVED DESIGN / IMPLEMENTATION REQUIRED / RELEASE NOT VERIFIED
+Korean: [한국어](NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.ko.md)
+Initial main: `245489a1452a1f187af831f483c18ab2501a65c5` (2026-11-20 KST). This specification adopts the [180-screen PC/mobile design from November 18](ALL_PAGES_RESPONSIVE_REDESIGN_v2026.11.18.12.md) and [administrator/global-chat concepts](ADMIN_GLOBAL_CHAT_DESIGN_v2026.11.18.13.md) as the **visual baseline** for the website. It supersedes the historical “mockups only / no development” restriction **for future authorized implementation**, not as a retroactive claim that implementation or release occurred.
+
+## 1. Product and rendering authority
+- Entire website (home, guest, signed-in users, 40 admin concepts, financial, game, community, tools, account, policy screens) uses a consistent deep-navy/violet/blue visual system: background `#0C1020`, surface `#151D32`, primary `#9C83FF`, secondary `#64B7FF`, readable text `#E9F1FF`, muted `#A8BCD8`. Green/red are semantic verified positive/negative states, never generic decorative primaries. The 180-route list is a **concept inventory** (178 source + 2 provisional), not 180 certified production routes.
+- Approved 2026-11-18 preview/reference files are the per-screen structure benchmark; images are not runtime components and mock balances/graphs must never be called live. Preserve real user workflows and no false-success fallbacks.
+- Owner's later architecture directive governs: Java Spring Boot MVC + Thymeleaf must serve all website screens and APIs ultimately; Next/React remnants and exported HTML do not establish Spring-native completion. Maintain reversible route-by-route migration, no uncontrolled removal of existing functionality or split financial writers.
+- Shared header, responsive navigation, cards, forms, data tables, alerts, dialogs, support launcher, icons and typography should be sourced from one reusable design system. No per-route color overrides without reviewed semantic reasons.
+
+## 2. Language and locale UX — every screen
+- Default English, Korean mandatory second language, preserve and offer existing Japanese, Simplified Chinese and Vietnamese (EN, KO, JA, ZH, VI) across all user/admin screens, authentication, error/empty/loading states, FAQ and global support widget.
+- On initial visit: explicit persisted manual choice (if any) > permitted account locale > browser Accept-Language best supported match > English fallback. Geo-IP must not silently override a manual choice. User can always manually choose any of the five languages in the header and in mobile navigation/settings.
+- Language selector is labeled with readable language names, keyboard/screen-reader operable, available while logged out and logged in. Switching language does not log out the user, lose an unfinished form or reset a support draft; reset account-sensitive state on logout/account switch. Locale preference is securely stored without exposing chat content or tokens.
+- Localize date/number/currency formatting and pluralization without altering canonical monetary integer values; no hardcoded mixed-language UI or machine-translated security/financial claims passed off as verified. Missing translation falls back to English with observability, never raw translation keys. Do not change API field names or financial ledger semantics.
+- Test all five languages for long text, 320/360/390/430/768/1024/1440/1920px, 200% zoom, keyboard/assistive tech, translated server-side Spring errors, hydration/session transitions and English fallback. Auto-selection and manual-selection tested independently.
+
+## 3. One global support / member chat entry everywhere
+- Exactly one fixed 56×56px round launcher accessible on every public, authenticated and admin page, including forms and error routes; desktop lower right, mobile above bottom-navigation and safe-area insets, no overlap with CTA, consent dialog or accessibility controls. No duplicate floating support, mascot or help widgets.
+- Launcher opens accessible panel with **Contact administrator / Support** and **Member 1:1 chat**, plus safe FAQ, ticket status, inbox, and context-aware category (account, wallet/ledger, stock, quests/items, bug, other). Support is a user→authorized support operator ticket; member DM is a separate user↔user permission domain. Admin screens provide authorized support triage/assignment/reply/close and audit, not unrestricted member chat access. On login/re-auth or permission failure show accurate state, not a simulated success.
+- Preserve panel navigation state and in-progress text across internal navigation and locale changes without persisting sensitive message text/tokens to disk; on logout/account switch clear it. Pass only coarse source route categories, never URL query, identifiers or financial details. Draft max 1,000 characters, nonempty validation, anti-duplicate submission, real server receipt required before “sent”, clear offline/429/401/403/5xx errors and safe retry.
+- Reuse existing `/app-api/v1/support` and `/app-api/v1/chat` contracts where verified rather than creating duplicate data stores. **P0 block:** Spring SupportController/ChatController must derive identity from authenticated server session, not client-provided `X-User-Id`/`x-actor-user-id` headers or fallback fixed UUID; enforce object ownership, admin RBAC/step-up, CSRF, audit, failure transparency, rate limits and safe HTML/message handling. Do not release until proven with negative tests.
+- Dialog behavior: visible label/accessible name, 44px+ targets, Escape to close, initial focus and focus return, safe keyboard/soft-keyboard insets, no unintended page-wide horizontal scroll, semantic live state updates and reduced motion. Keep options available on admin pages while protecting user privacy.
+
+## 4. Conflict resolution and implementation acceptance
+| Conflict / observed state | Binding resolution | Evidence gate |
+| --- | --- | --- |
+| Nov 18 mockup-only language vs later implementation order | Historical design artifacts remain unchanged; this 2026-11-20 authority mandates implementation in separate code branch | Source PR, live screenshot per approved reference |
+| Legacy black/gold/emerald UI vs Nov 18 navy/violet | Nov 18 palette/structure wins globally; preserve green/red solely for semantic status | Design token audit + visual regressions |
+| Next dynamic pages vs Spring static snapshots | Spring-native MVC/Thymeleaf route/renderer ownership map, avoid wrong static root and /_next asset dependency as final state | Exact deployed SHA, route→renderer→artifact mapping |
+| Design gallery mistakenly served at public root | Serve actual functional home, never “3 homepage concepts” | Public URL browser + signed-in/guest assertions |
+| Global chat omitted on admin routes / overlapping launchers | Single launcher, admin-specific authorized support UX, no security shortcut | Five-language + responsive screen, auth and CSRF E2E |
+| Legacy plans conflicting about runtime | Later owner Spring-only order supersedes retain-Next runtime plans; preserve historical wording | G0–G6 checkpoints and rollback |
+| New language engine commit vs actual end-to-end support | `245489a` advertises five-language engine only; do not assume every screen translated | Locale manual/auto full route matrix |
+
+## 5. Work order and release gates
+1. Read current `AGENTS.md`, documentation policy, English Project Plan, integrated master, 2026-11-18 UI and support specs; inspect main SHA before and mid-work. Record branch ownership to avoid concurrent Gemini work.
+2. Inventory the effective root HTML, Nginx upstreams, Spring route/controller/template/static JAR, Next remnants, admin/member flows and API ownership at exact SHA; identify which branch already owns each changed file.
+3. Implement shared Spring design shell; home real features; then member/finance/game/community/tools/admin screen families, preserving existing functionality, locale and single chat launcher.
+4. Repair Spring support/chat P0 before enabling send; verify authenticated ownership/CSRF/RBAC, real ledger and API responses. Do not fabricate success or zero values.
+5. Visual screenshot diff vs Nov 18 references by route/family and 5 languages, mobile/desktop/200% zoom. Browser navigation, auth, chat, locale, 401/403/429/503, ledger and rollback tests must be actually run on isolated Test backed by Spring.
+6. Only after clean QA gates, owner-approved release process, exact SHA and immutable artifact verification, tested rollback and zero-downtime promotion may scoped Production be claimed. Documentation-only changes do not release anything.
+
+## 6. Scope/status
+This document defines the authoritative updated requirement, **not an implementation claim**. At authoring the miniPC remote device is offline; current live routing, server artifact and production UI are unverified. Historical 2026-11-19 QA confirmed a wrong home gallery, while later 2026-11-20 repository commit advertises a five-language engine; current Production behavior is not inferred.
