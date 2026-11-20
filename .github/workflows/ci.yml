@@ -253,7 +253,7 @@ jobs:
         with:
           node-version: 24
       - name: Test native UI locale, navigation and money contracts
-        run: node --test scripts/native-chrome.test.mjs scripts/admin-tools.test.mjs scripts/mv39-money.test.mjs
+        run: node --test scripts/native-*.test.mjs scripts/admin-tools.test.mjs scripts/mv39-money.test.mjs
       - name: Test and build the native Spring application
         working-directory: spring-backend
         run: ./gradlew test bootJar --no-daemon -Dorg.gradle.workers.max=2
