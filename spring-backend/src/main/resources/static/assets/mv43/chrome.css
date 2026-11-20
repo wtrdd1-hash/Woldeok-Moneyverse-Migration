@@ -51,3 +51,6 @@
 /* Text actions need the same touch area as the surrounding native controls. */
 .inline-link,.foot-links a,.auth-link{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;max-width:100%;padding:6px 4px;overflow-wrap:anywhere}
 .foot-links{align-items:center;flex-wrap:wrap}
+
+.brand{min-width:44px;min-height:44px}
+.auth-main .auth-links a{min-width:44px;justify-content:center;padding:6px 4px}

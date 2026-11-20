@@ -89,14 +89,17 @@ test('shared aria labels follow locale changes while an expanded menu retains it
   }
   const ids=Object.fromEntries(['mv-support-launcher','mv-support-panel','mv-support-close','mobile-menu-toggle','mobile-menu-close','drawer-backdrop','mobile-menu','language-selector'].map(id=>[id,new Element(id==='mobile-menu-toggle'?'menu':'close')]));
   const navigation=new Element('navigationMain');
+  const pageHeading={dataset:{i18n:'login'}};
   const aria=[ids['mobile-menu-toggle'],ids['mobile-menu-close'],navigation];
   const document={readyState:'complete',activeElement:null,getElementById:id=>ids[id]||null,
-    addEventListener:()=>{},querySelectorAll:selector=>selector==='[data-i18n-aria]'?aria:[]};
+    addEventListener:()=>{},title:'Old page title',querySelector:selector=>selector==='.topbar h1[data-i18n]'?pageHeading:null,querySelectorAll:selector=>selector==='[data-i18n-aria]'?aria:[]};
   runInNewContext(source('static/assets/mv43/chrome.js'),{document,window});
   assert.equal(navigation.attributes['aria-label'],'ko:navigationMain');
+  assert.equal(document.title,'ko:login · W Moneyverse');
   ids['mobile-menu-toggle'].dispatchEvent(new Event('click'));
   language='ja';window.dispatchEvent(new Event('mv39-language-change'));
   assert.equal(navigation.attributes['aria-label'],'ja:navigationMain');
+  assert.equal(document.title,'ja:login · W Moneyverse');
   assert.equal(ids['mobile-menu-toggle'].attributes['aria-label'],'ja:close');
   assert.equal(ids['mobile-menu-close'].attributes['aria-label'],'ja:close');
 });
