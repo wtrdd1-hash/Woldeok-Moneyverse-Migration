@@ -29,15 +29,6 @@ public class LocalAuthController {
     }
 
     /**
-     * Serves the login page for browser GET requests (/login, /login/).
-     */
-    @GetMapping(path = {"/login", "/login/"})
-    @Operation(summary = "로그인 HTML 페이지 제공")
-    public void serveLoginPage(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        request.getRequestDispatcher("/login.html").forward(request, response);
-    }
-
-    /**
      * Standard Form POST for browser forms (/login)
      */
     @PostMapping(

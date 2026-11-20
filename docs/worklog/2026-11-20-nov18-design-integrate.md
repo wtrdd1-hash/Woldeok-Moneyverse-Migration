@@ -150,3 +150,77 @@ The independent task review found an administrator-close legacy-cookie identity 
 - [x] Node UI/security/release suite: **208 passes,0 failures/cancellations/skips**. `git diff --check` passes. No migration, database grant or session/role security mechanism was changed.
 - JDBC boundary doubles verify SQL/function/actor/key arguments and receipt handling; the PostgreSQL wrappers were not executed by these H2/isolated tests. Real ownership/concurrency/replay and browser/Test acceptance are still required. Global panel sending is not enabled by this API change alone.
 - Source implementation checkpoint only; independent whole-branch review pending. No live messages, shared DB writes, service routing or deployment changes. Production **HOLD**.
+
+## Native authentication route family — before work
+- Approved task branch `feat/native-auth-ui-v20261120`, base `72aa55cfe596869b273e5f84e5565ab26733dbb0`; fetched main remains `08b1525ca76af514cd5fa2bddde33a784378352f`.
+- Read remote AGENTS, binding task brief, TDD/testing, debugging and verification skills. Parent completed approved design, isolation and structured plan; this task implements that scoped plan.
+- [ ] Write real Spring route/locale/cache/alias/security tests and client contract/state tests; observe logical RED.
+- [ ] Implement native shared-chrome screens and five-language labels with source-backed requests only.
+- [ ] Verify focused and full isolated test-profile suites, self-review and publish exact task files.
+
+| Page | Fields/actions in original UI | Existing Spring source contract | Native behavior |
+| --- | --- | --- | --- |
+| /login, /login/providers | email/password; terms/privacy/age; Discord/Google | POST /api/v1/auth/local/login returns 200 signed-in + userId/proof; form POST /login remains | Login fields with unchecked acknowledgements and legal links; browser-only acknowledgement notice (no consent-write API); Discord link; Google unavailable because authorize source lacks a complete URL |
+| /register | email/displayName/password; legal links | POST /api/v1/auth/local/register returns 202 accepted:true + signed-in + userId/proof | Preserve fields, require unchecked acknowledgements; never claim consent recording |
+| /forgot-password | email | No recovery request or delivery receipt API | Honest unavailable state; no submission or mail-sent claim |
+| /reset-password | token/password/confirmPassword | No reset-completion API | Honest unavailable state; no query token reflection or request |
+| /verify-email | token confirmation | No email activation API | Honest unavailable state; no automatic token action |
+| /verify-email-change | token confirmation | No email-change completion API | Honest unavailable state |
+| /account-deletion | deletion confirmation / receipt status | No deletion API | Honest unavailable state; no destructive action |
+
+- GET ownership: LocalAuthController owns /login and /login/ forwarding to captured HTML. Only that GET will move; POST JSON/form mappings and all services/security/database remain unchanged. Native routes own canonical, trailing slash, .html and /index.html aliases; API paths never render this template.
+- Provider/email/browser/live database execution is excluded. Media tests will use a task-owned absolute /tmp override. Production remains HOLD.
+
+## Native authentication route family — in progress
+- [x] Logical RED: 9 Spring tests failed with 0 errors/skips: missing MVC views, missing native fields/unavailable state and Flight requests accepted by the legacy renderer. Six Node tests failed with assertions that the native auth contract was missing.
+- Parent ruling: registration must fail closed until server-side consent persistence/age gating is verified. Preserve its fields and unchecked legal/age controls but disable submit; core must reject registration with zero requests. Existing login remains available; browser acknowledgements must explicitly say they are not recorded. This replaces the initial registration row above and is a P0 source-contract gap for parent follow-up.
+- [ ] Implement scoped native routes/client and catalog parity, then run focused and whole-suite gates.
+
+### Native authentication implementation checkpoint
+- [x] Native MVC/Thymeleaf owns all seven canonical routes and public HTML aliases, plus /login/providers aliases. Sensitive query values are never copied into HTML; responses are private/no-store/noindex with no-referrer and restrictive CSP. Existing LocalAuthController POST methods are byte-unchanged; only its HTML GET moved.
+- [x] Login uses the existing fixed same-origin JSON API and accepts only its documented signed-in receipt. Duplicate in-flight posts are blocked, errors keep fields, confirmed account transitions/page exit clear private fields, and navigation is fixed to /. No caller identity header or persisted credential/proof data is introduced.
+- [x] Registration fails closed at disabled fieldset, disabled submit and client action boundary. Recovery, reset, verification, email-change and deletion actions have no Spring APIs and present unavailable states without forms. Google is unavailable; the existing source-backed Discord link remains.
+- [x] Added five-language labels and auth-scoped styles. Focused GREEN: 9 Spring tests, 0 failures/errors/skips; 15 Node auth/chrome tests passed. Client DOM RED separately observed 3 expected failures (missing submit binding, registration block and account-change clearing), followed by GREEN. Catalog parity initially exposed insertion-order mismatch, then a missing separator during relocation; both corrected and parity passes.
+- Publication checkpoint 277bc325ff succeeded after providing explicit user AGENTS checkpoint-commit authorization to automatic approval review. The earlier rejection made no changes. A whole-file CSS replacement was also rejected; a narrow auth-only append succeeded without rewriting parent-owned styles.
+- [ ] Final whole-suite test/bootJar, source self-review and parent independent review remain pending. Browser layout, live providers/email/database and deployment remain unverified; production HOLD.
+
+## Native authentication route family — finished implementation
+- [x] Completed the scoped MVC/template/client/catalog implementation and reviewed the exact diff against the brief. Only LocalAuthController's old HTML GET block changed; POST compatibility, identity services, security guards, database, environment and release files are unchanged.
+- [x] Final full verification: **353 Spring tests across 76 suites, 0 failures/errors/skips; bootJar successful**. Command: `MONEYVERSE_STORAGE_PATH=/tmp/native-auth-ui-media-20261120 SPRING_PROFILES_ACTIVE=test SERVER_ADDRESS=127.0.0.1 ./gradlew test bootJar --offline --no-daemon -Dorg.gradle.workers.max=1`.
+- [x] Final relevant Node verification: **216 tests passed, 0 failed/cancelled/skipped**. Command: `node --test scripts/native-auth.test.mjs scripts/native-wallet.test.mjs scripts/native-chrome.test.mjs scripts/admin-tools.test.mjs scripts/mv39-money.test.mjs scripts/release/*.test.mjs scripts/security/*.test.mjs`. Auth-specific suite has 9 cases; focused auth/shared chrome suite has 15.
+- [x] Re-fetched main: unchanged at `08b1525ca76af514cd5fa2bddde33a784378352f`, still an ancestor. `git diff --check` and commit-trailer check pass. Full suite retains existing dependency/Gradle deprecation warnings; no test failures were omitted.
+- Self-review confirms fixed same-origin login payload, documented receipt checks, duplicate-submit protection, error preservation, account-change clearing and no private browser storage. Registration has disabled fieldset/submit plus zero-request client rejection; missing actions contain no active form. All 31 new keys have five nonempty translations and server/client catalog parity passes. Human linguistic/layout review remains pending.
+- Source gaps: verified consent persistence/age gating blocks native registration (P0 parent follow-up); recovery/reset/email verification/email-change/deletion APIs and email delivery receipts do not exist in the Spring controller tree; Google authorize source is incomplete. Existing API handlers remain unchanged. The existing Discord login flow is exposed without being executed or certified here.
+- Independent parent review, exact-source browser/Test acceptance and release validation remain pending. No live provider/email/database traffic, service/configuration change, main merge, deletion or deployment was performed. Production remains **HOLD**.
+
+### Native authentication final self-review correction — finished
+- Self-review found the first disabled registration form did not retain the original nickname 2–20/password minimum 8 constraints and used generic field/action copy. Added a focused source-parity regression first: **1 test, 1 logical failure, 0 errors/skips** (missing original Korean nickname label). Restored those constraints and original email/nickname/register-password/login-submit/register-submit Korean strings without enabling registration.
+- Final source now has **34 five-language auth keys**. The previous 353-test entry above belongs to the earlier candidate. Fresh final verification after this correction: **354 Spring tests across 76 suites, 0 failures/errors/skips; bootJar successful**, including **10 NativeAuthWebTest cases**. The same isolated full command was rerun.
+- Fresh final relevant Node suite: **216 passed, 0 failed/cancelled/skipped**. Focused auth/chrome remains **15 passed**. No provider/email/live database/browser workflow was run. Independent review and deployment state remain pending/HOLD as recorded above.
+
+## Native authentication review round 1 — before fix
+- Independent review found auth palette overrides diverging from shared tokens, acknowledgement/legal/reset-help targets below or without 44px rules, replaced original page-specific Korean headings/leads, and an English-only navigation landmark. Verified the shared native palette and original registration/login-provider copy before changing source.
+- [ ] Add failing stylesheet-projection and real MVC locale/copy/ARIA regressions, plus client language-change ARIA coverage.
+- [ ] Use existing approved palette variables (including dark primary foreground), establish 44px label/link targets, restore original page-specific copy and localize the landmark.
+- [ ] Run covering isolated Spring/Node tests, update exact review evidence, self-review and publish scoped fix; parent re-review and production HOLD remain.
+
+## Native authentication review round 1 — in progress
+- [x] Logical RED after fixing a test-only XML/HTML parser mismatch: 16 Spring cases, 6 logical failures, 0 errors/skips (page-specific heading and five-language landmark); Node 12 cases, 3 logical failures (runtime ARIA, native palette, missing 44px declarations), 9 existing passes. Production source was unchanged until logical RED was read.
+- [x] Applied shared palette variables with dark primary foreground, added 44px acknowledgement/link targets, restored original page-specific headings/leads and added SSR/runtime five-language landmark localization. Missing-action notices and blocked registration are unchanged.
+- [ ] Covering GREEN, exact diff self-review and parent re-review remain pending.
+
+## Native authentication review round 1 — finished fix
+- [x] All three Important findings and the Minor landmark issue are fixed in scoped source. Auth input/background/text/border/focus/checkbox/provider/primary styles use approved shared variables; primary foreground is the dark background token. Acknowledgement labels declare 44px minimum height; legal/reset-help links declare both 44px minimum height and width.
+- [x] Original registration and login-provider Korean headings/leads are restored with page-specific five-language catalog keys. Unavailable routes omit the generic login lead and retain their unavailable notice. Account-help landmark is translated during SSR and language changes. Registration remains disabled; no action/API/guard changes.
+- [x] Focused Spring command: `MONEYVERSE_STORAGE_PATH=/tmp/native-auth-ui-review1-media SPRING_PROFILES_ACTIVE=test SERVER_ADDRESS=127.0.0.1 ./gradlew test --tests '*NativeAuthWebTest' --offline --no-daemon -Dorg.gradle.workers.max=1`. RED: 16 tests, 6 logical failures, 0 errors/skips. GREEN: **16 tests, 0 failures/errors/skips; BUILD SUCCESSFUL**.
+- [x] Focused Node command: `node --test scripts/native-auth.test.mjs scripts/native-chrome.test.mjs scripts/native-wallet.test.mjs`. Auth-only RED: 12 cases, 3 logical failures and 9 passes. Covering GREEN: **24 tests passed, 0 failed/cancelled/skipped**. Auth-specific GREEN is 12 cases. Stylesheet projection verifies authored desktop declarations and custom-property values; it does not measure browser hit geometry.
+- During verification the new dynamic Thymeleaf map-index expressions rendered empty heading/lead text. Catalog and built resources contained the values; explicit view-context map lookup fixed the one remaining real assertion failure. The intermediate full run had exactly that failure. Initial XPath assertions were corrected because HTML5 is not XML; CSS projection also normalizes semantically identical hexadecimal case. Expectations for original copy and approved palette were retained.
+- [x] Final full command: `MONEYVERSE_STORAGE_PATH=/tmp/native-auth-ui-review1-media SPRING_PROFILES_ACTIVE=test SERVER_ADDRESS=127.0.0.1 ./gradlew test bootJar --offline --no-daemon -Dorg.gradle.workers.max=1`. Output: **BUILD SUCCESSFUL in 40s; 360 tests across 76 suites, 0 failures/errors/skips**, totals read from final JUnit XML.
+- [x] Expanded Node command: `node --test scripts/native-auth.test.mjs scripts/native-wallet.test.mjs scripts/native-chrome.test.mjs scripts/admin-tools.test.mjs scripts/mv39-money.test.mjs scripts/release/*.test.mjs scripts/security/*.test.mjs`. Output: **219 tests, 219 passed, 0 failed/cancelled/skipped**.
+- [x] Exact diff self-reviewed; `git diff --check` passes. No shared non-auth styles, backend identity/security services, database/environment/workflow, parent worktree or deployment changed. Browser/layout/computed hit geometry/provider/live database acceptance remains unverified. Parent re-review pending; production **HOLD**.
+
+## Native auth integration — checkpoint
+- Independent scoped round1 review approved all three Important UI fixes and the localized landmark. Auth branch tip483c053dce merged into the task branch; append-only worklog conflict combined both histories. No runtime source conflict.
+- Refreshed native asset digests after catalog/CSS integration. Fresh integrated evidence: **388 Spring tests,0 failures/errors/skips, bootJar successful;220 Node tests passed,0 failed/skipped**.
+- This is a task-branch integration checkpoint, not completion of all route families. Registration/recovery/provider gaps, real browser geometry/session continuity and exact-source Test/release remain unverified; production HOLD.
+- Follow-up inspection found three remaining dynamic dictionary lookups that can resolve against the map rather than the page model. Add real rendered title/header/password-label regressions before the next UI correction.

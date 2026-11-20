@@ -24,3 +24,26 @@
 @media(max-width:1100px){.wallet-workspace{grid-template-columns:minmax(0,1fr)}}@media(max-width:600px){.wallet-metrics{grid-template-columns:minmax(0,1fr);gap:12px}.wallet-metrics .card{padding:16px}.wallet-value{font-size:24px}}
 
 #wallet-transfer-form[hidden]{display:none}
+/* Authentication controls share the native shell and remain usable at narrow widths. */
+.auth-main .auth-card{max-width:640px;margin:24px auto;padding:28px;overflow-wrap:anywhere}
+.auth-main form{display:grid;gap:12px}
+.auth-main form>label{font-weight:600;margin-top:8px}
+.auth-main input:not([type=checkbox]){box-sizing:border-box;width:100%;min-height:48px;border:1px solid var(--stroke);border-radius:12px;background:var(--bg);color:var(--text);padding:12px 14px;font:inherit}
+.auth-main input:focus-visible,.auth-main button:focus-visible,.auth-main a:focus-visible{outline:3px solid var(--accent2);outline-offset:3px}
+.auth-main .auth-consent{display:grid;gap:12px;margin:8px 0;padding:16px;border:1px solid var(--stroke);border-radius:12px}
+.auth-main .auth-consent label{display:flex;align-items:flex-start;flex-wrap:wrap;gap:8px;line-height:1.6;min-height:44px}
+.auth-main input[type=checkbox]{width:20px;height:20px;flex-shrink:0;margin-top:3px;accent-color:var(--accent)}
+.auth-main .auth-primary,.auth-main .auth-provider{display:block;box-sizing:border-box;min-height:48px;padding:12px 20px;border:1px solid var(--accent);background:var(--bg);color:var(--text);border-radius:12px;text-align:center;font:inherit;font-weight:650}
+.auth-main .auth-primary{background:var(--accent);color:var(--bg);cursor:pointer}
+.auth-main .auth-primary:disabled{opacity:.5;cursor:not-allowed}
+.auth-main .auth-note,.auth-main #auth-status{color:var(--muted);font-size:.9rem;line-height:1.6}
+.auth-main #auth-status{min-height:1.6em;margin:0}
+.auth-main .auth-providers{border-top:1px solid var(--stroke);padding-top:20px;margin-top:20px}
+.auth-main .auth-links{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+.auth-main .auth-links a{display:inline-flex;align-items:center;min-height:44px;text-decoration:underline}
+.auth-main .auth-unavailable{line-height:1.8;margin:0 0 24px}
+@media(max-width:640px){.auth-main .auth-card{padding:20px;margin:16px 0}.auth-main .auth-consent{padding:12px}}
+.auth-main .auth-fields{display:grid;gap:12px;border:0;padding:0;margin:0;min-width:0}
+.auth-main .auth-fields>label{font-weight:600;margin-top:8px}
+
+.auth-main .auth-consent a,.auth-main .auth-help-link{display:inline-flex;align-items:center;min-height:44px;min-width:44px;padding:8px 4px}
