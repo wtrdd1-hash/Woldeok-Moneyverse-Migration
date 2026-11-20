@@ -34,3 +34,26 @@ test('detects high-confidence credentials and ignores placeholders', () => {
   assert.equal(secretFindings('INTERNAL_API_TOKEN=' + '$' + '{INTERNAL_API_TOKEN}').length, 0);
   assert.equal(secretFindings('TOKEN=CHANGE_ME').length, 0);
 });
+
+test('security baseline accepts only an available nonzero commit and handles missing objects', async () => {
+  const { isAvailableCommit } = await import('./check-repository-security.mjs');
+  assert.equal(typeof isAvailableCommit, 'function');
+  assert.equal(isAvailableCommit('0'.repeat(40)), false);
+  assert.equal(isAvailableCommit('not-a-sha'), false);
+  assert.equal(isAvailableCommit('f'.repeat(40)), false);
+  const { execFileSync } = await import('node:child_process');
+  const head = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+  assert.equal(isAvailableCommit(head), true);
+  const tree = execFileSync('git', ['rev-parse', 'HEAD^{tree}'], { encoding: 'utf8' }).trim();
+  assert.equal(isAvailableCommit(tree), false);
+});
+
+test('candidate security policy receives its resolved classification comparison base', async () => {
+  const { readFileSync } = await import('node:fs');
+  const ci = readFileSync(new URL('../../.github/workflows/ci.yml', import.meta.url), 'utf8');
+  const candidate = readFileSync(new URL('../../.github/workflows/test-candidate.yml', import.meta.url), 'utf8');
+  assert.match(candidate, /comparison_base_sha: \$\{\{ steps\.base\.outputs\.sha \}\}/);
+  assert.match(candidate, /comparison_base_sha: \$\{\{ needs\.release-input\.outputs\.comparison_base_sha \}\}/);
+  assert.match(ci, /comparison_base_sha:[\s\S]*type: string/);
+  assert.match(ci, /SECURITY_BASE_SHA: \$\{\{ inputs\.comparison_base_sha \|\| github\.event\.pull_request\.base\.sha \|\| github\.event\.before \}\}/);
+});

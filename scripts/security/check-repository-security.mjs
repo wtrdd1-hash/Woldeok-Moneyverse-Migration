@@ -46,6 +46,17 @@ export function secretFindings(text) {
   return [...findings];
 }
 
+export function isAvailableCommit(sha) {
+  if (!/^[0-9a-f]{40}$/.test(sha) || /^0{40}$/.test(sha)) return false;
+  try {
+    return execFileSync('git', ['cat-file', '-t', sha], {
+      encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim() === 'commit';
+  } catch {
+    return false;
+  }
+}
+
 function run() {
   const files = execFileSync('git', ['ls-files', '-z'], { encoding: 'utf8' }).split('\0').filter(Boolean);
   const failures = [];
@@ -61,7 +72,7 @@ function run() {
   }
 
   const base = process.env.SECURITY_BASE_SHA || '';
-  if (base && /^[0-9a-f]{40}$/.test(base) && execFileSync('git', ['cat-file', '-t', base], { encoding: 'utf8' }).trim() === 'commit') {
+  if (isAvailableCommit(base)) {
     const changed = execFileSync('git', ['diff', '--name-only', '-z', '--diff-filter=ACMR', base, 'HEAD'], { encoding: 'utf8' }).split('\0').filter(Boolean);
     for (const file of changed) if (forbiddenChangedPath(file)) {
       failures.push(file + ': new/modified internal or sensitive path forbidden');
