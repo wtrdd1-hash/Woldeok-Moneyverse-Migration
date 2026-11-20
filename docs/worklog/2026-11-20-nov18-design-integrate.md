@@ -43,3 +43,15 @@ Integration implementation and local checks completed; GitHub checks, main merge
 - Client locale now honors negotiated SSR language on first load, Auto can return to browser detection, malformed cookie decoding cannot crash, and missing translations show safe English with a diagnostic instead of raw keys.
 - RED: native HTTP 10/10 failed on the old static page, and three new locale cases failed on the old engine. GREEN: **286 Spring tests, zero failures/errors/skips; bootJar successful; 198 Node tests pass without skips**.
 - Next: migrate administrator rendering to shared Thymeleaf without losing authorization, source status or actions; inventory all existing route/control families before further conversions. No all-route/native frontend/production completion is claimed.
+
+
+## Native administrator and CI checkpoint
+- Canonical administrator rendering now uses the actual Spring Thymeleaf engine and a native template; manual HTML concatenation was removed. Existing session/RBAC lookup, escaped source names, private/no-store headers and partial-source HTTP503 remain.
+- Missing/null source collections now remain unavailable rather than raising an unhandled render exception. Regressions observed RED then GREEN.
+- All 35 original navigation targets are present, organized in the original actual six categories (8/4/4/6/6/7). Search supports all five translated labels, case folding and full-width normalization; changing language does not clear filters. The directory is navigation, not certification of every linked operation.
+- Preserved original Korean tool labels and added explicit EN/JA/ZH/VI labels. Shared catalog now contains154 keys and is parity-tested against the client catalog. Old optimistic kill switches, false OTP success, invented member rows and infrastructure metrics were not carried into this source-backed entry screen.
+- Fresh whole Spring suite: **289 tests, zero failures/errors/skips; bootJar successful**. Node UI/security/release suite: **199 pass**, before adding the native-CI contract test.
+- New native Spring CI gate builds/tests the actual Java frontend and publishes a JAR manifest tied to the exact source SHA, separate from the existing Next image candidate. That gate is not production deployment or public Test acceptance.
+- Read-only route/control inventory:290 static HTML files normalize to147 concepts;135 concepts include captured Next output. These counts are inventory, not implemented/native certification. Native admin/home conversion does not claim all routes complete.
+- The prior integrated GitHub Node monorepo run was green but included36 skipped backend test files; those skips are unverified, not passing tests. No production promotion followed.
+- Native wallet preservation and session-owned CSRF bootstrap are next. Existing wallet has mismatched transfer fields, floating-point amounts and no replay key/CSRF; the old session bootstrap exposes the stored hash instead of usable raw proof. A dedicated isolated security implementer handles only that lifecycle while this branch owns UI, with independent review before integration.

@@ -10,3 +10,8 @@
 .support-fab{align-items:center;justify-content:center}
 @media(max-width:600px){.mv-support-panel{right:16px;bottom:calc(148px + env(safe-area-inset-bottom,0px));padding:20px;max-height:calc(100dvh - 180px)}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.mv-support-panel,.support-fab{animation:none;transition:none}}
+
+.admin-tool-directory{margin-top:24px}.admin-directory-controls{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:16px;margin:16px 0}.admin-directory-controls label{display:grid;gap:8px;min-width:0;color:#A8BCD8}.admin-directory-controls input,.admin-directory-controls select{width:100%;min-height:44px;padding:10px 12px;background:#0C1020;color:#E9F1FF;border:1px solid #A8BCD866;border-radius:10px;font:inherit}
+.admin-tools-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.admin-tool-link{display:grid;gap:8px;min-width:0;min-height:88px;padding:16px;border:1px solid #9C83FF55;background:#0C1020;border-radius:12px;text-decoration:none;color:#E9F1FF;overflow-wrap:anywhere}.admin-tool-link[hidden]{display:none}.admin-tool-link small{color:#A8BCD8}
+.admin-tool-link:focus-visible,.admin-directory-controls input:focus-visible,.admin-directory-controls select:focus-visible{outline:2px solid #64B7FF;outline-offset:3px}
+@media(max-width:1100px){.admin-tools-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){.admin-directory-controls,.admin-tools-grid{grid-template-columns:minmax(0,1fr)}}

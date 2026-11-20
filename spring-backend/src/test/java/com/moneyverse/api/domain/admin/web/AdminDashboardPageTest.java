@@ -17,7 +17,19 @@ import static org.mockito.Mockito.*;
 class AdminDashboardPageTest {
     private final AdminAuthService auth=mock(AdminAuthService.class);
     private final AdminGovernanceService governance=mock(AdminGovernanceService.class);
-    private final AdminDashboardPage dashboard=new AdminDashboardPage(auth,governance);
+    private final AdminDashboardPage dashboard=new AdminDashboardPage(auth,governance,pages(),new AdminNavigation(new com.fasterxml.jackson.databind.ObjectMapper(),new com.moneyverse.api.domain.web.UiLocale(new com.fasterxml.jackson.databind.ObjectMapper())));
+
+    private static com.moneyverse.api.domain.web.UiPageRenderer pages() {
+        var resolver=new org.thymeleaf.templateresolver.ClassLoaderTemplateResolver();
+        resolver.setPrefix("templates/");
+        resolver.setSuffix(".html");
+        resolver.setCharacterEncoding("UTF-8");
+        resolver.setTemplateMode("HTML");
+        var engine=new org.thymeleaf.spring6.SpringTemplateEngine();
+        engine.setTemplateResolver(resolver);
+        return new com.moneyverse.api.domain.web.UiPageRenderer(engine,
+                new com.moneyverse.api.domain.web.UiLocale(new com.fasterxml.jackson.databind.ObjectMapper()));
+    }
 
     @Test void guestAndForgedHeadersMustNotReadSources() {
         MockHttpServletRequest req=new MockHttpServletRequest("GET","/admin");req.addHeader("X-User-Id", UUID.randomUUID().toString());
@@ -68,6 +80,74 @@ class AdminDashboardPageTest {
         }
     }
 
+    @Test void nativeAdminRendererHonorsManualLanguageAndHasOneGlobalSupportEntry() {
+        UUID actor=UUID.randomUUID();when(auth.resolveVerifiedAdminActor(any())).thenReturn(Optional.of(actor));
+        MockHttpServletRequest request=new MockHttpServletRequest("GET","/admin");
+        request.setCookies(new jakarta.servlet.http.Cookie("wdmv_locale","ko"));
+        request.addHeader("Accept-Language","vi");
+        ResponseEntity<String> out=dashboard.show(request);
+        assertEquals("Spring-MVC-Thymeleaf",out.getHeaders().getFirst("X-MV-Renderer"));
+        assertEquals("ko",out.getHeaders().getFirst("Content-Language"));
+        assertTrue(out.getBody().contains("lang=\"ko\""));
+        assertEquals(1,out.getBody().split("id=\"mv-support-launcher\"", -1).length-1);
+        assertFalse(out.getBody().contains("@@"));
+    }
+
+    @Test void malformedSourceListsStayUnavailable() {
+        UUID actor=UUID.randomUUID();when(auth.resolveVerifiedAdminActor(any())).thenReturn(Optional.of(actor));
+        when(governance.listUsers(actor,50)).thenReturn(new AdminUsersResponse(null,java.util.Map.of()));
+        when(governance.listStocks(actor)).thenReturn(new AdminStocksResponse(null));
+        when(governance.getFeatureSwitchesOverview(actor)).thenReturn(new FeatureSwitchOverviewResponse(null,List.of(),List.of()));
+        ResponseEntity<String> out=assertDoesNotThrow(() -> dashboard.show(new MockHttpServletRequest("GET","/admin")));
+        assertEquals(503,out.getStatusCode().value());
+        assertTrue(out.getBody().contains("Unable to load data"));
+    }
+
+    @Test void allOriginal35ToolDestinationsRemainDiscoverableWithoutFakeOperationFeedback() {
+        UUID actor=UUID.randomUUID();when(auth.resolveVerifiedAdminActor(any())).thenReturn(Optional.of(actor));
+        String html=dashboard.show(new MockHttpServletRequest("GET","/admin")).getBody();
+        for (String path : List.of("/admin/economy",
+                "/admin/mint",
+                "/admin/central-bank",
+                "/admin/treasury",
+                "/admin/enterprises",
+                "/admin/bonds",
+                "/admin/pension",
+                "/admin/fx",
+                "/admin/treasury/grants",
+                "/admin/kdic",
+                "/admin/catalog",
+                "/admin/work",
+                "/admin/market",
+                "/admin/shop",
+                "/admin/economy/scenario-lab",
+                "/admin/market/ai-news",
+                "/admin/security",
+                "/admin/logs",
+                "/admin/logs/errors",
+                "/admin/logs/system",
+                "/admin/logs/integrity",
+                "/admin/logs/delivery",
+                "/admin/users",
+                "/admin/blog",
+                "/admin/money-flow",
+                "/admin/content",
+                "/admin/support",
+                "/admin/safety",
+                "/admin/controls",
+                "/admin/api-health",
+                "/admin/seo",
+                "/admin/seo-audit",
+                "/admin/analytics",
+                "/admin/discord",
+                "/admin/operations/storage")) assertTrue(html.contains("href=\"" + path + "\""),path);
+        assertEquals(35,html.split("data-admin-tool=", -1).length-1);
+        assertTrue(html.contains("id=\"admin-tool-search\""));
+        assertTrue(html.contains("id=\"admin-tool-category\""));
+        assertFalse(html.contains("ELEVATED"));
+        assertFalse(html.contains("12,840"));
+    }
+
     @Test void dbOfflineMustNotProduceFakeGreenOrCounts() {
         UUID actor=UUID.randomUUID();when(auth.resolveVerifiedAdminActor(any())).thenReturn(Optional.of(actor));
         when(governance.listUsers(actor,50)).thenThrow(new IllegalStateException("DB OFFLINE"));
@@ -75,7 +155,7 @@ class AdminDashboardPageTest {
         when(governance.getFeatureSwitchesOverview(actor)).thenThrow(new IllegalStateException("DB OFFLINE"));
         ResponseEntity<String> out=dashboard.show(new MockHttpServletRequest("GET","/admin"));
         assertEquals(503,out.getStatusCode().value());
-        assertTrue(out.getBody().contains("Source unavailable"));
+        assertTrue(out.getBody().contains("Unable to load data"));
         assertFalse(out.getBody().contains("<strong>0</strong>"));
         assertFalse(out.getBody().contains("DB OFFLINE"));
     }

@@ -782,5 +782,299 @@
     "言語を選択",
     "选择语言",
     "Chọn ngôn ngữ"
+  ],
+  "adminAllTools": [
+    "All tools",
+    "전체 도구",
+    "すべてのツール",
+    "全部工具",
+    "Tất cả công cụ"
+  ],
+  "adminTool_economy": [
+    "Economy & ledger",
+    "경제·원장",
+    "経済・台帳",
+    "经济与账本",
+    "Kinh tế và sổ cái"
+  ],
+  "adminTool_mint": [
+    "Mint",
+    "조폐국",
+    "造幣局",
+    "铸币局",
+    "Sở đúc tiền"
+  ],
+  "adminTool_central_bank": [
+    "Central bank",
+    "중앙은행",
+    "中央銀行",
+    "中央银行",
+    "Ngân hàng trung ương"
+  ],
+  "adminTool_treasury": [
+    "Treasury & reserves",
+    "국고·비축",
+    "国庫・準備金",
+    "国库与储备",
+    "Kho bạc và dự trữ"
+  ],
+  "adminTool_enterprises": [
+    "Public enterprises & governance",
+    "공기업·지배구조",
+    "公企業・ガバナンス",
+    "公共企业与治理",
+    "Doanh nghiệp công và quản trị"
+  ],
+  "adminTool_bonds": [
+    "Government bond exchange",
+    "국채 거래소",
+    "国債市場",
+    "国债市场",
+    "Sàn trái phiếu chính phủ"
+  ],
+  "adminTool_pension": [
+    "Pension fund",
+    "국민연금",
+    "年金基金",
+    "养老基金",
+    "Quỹ hưu trí"
+  ],
+  "adminTool_fx": [
+    "Foreign exchange",
+    "서울외환시장",
+    "外国為替市場",
+    "外汇市场",
+    "Thị trường ngoại hối"
+  ],
+  "adminTool_treasury_grants": [
+    "Startup grants review",
+    "창업 지원금 심사",
+    "創業支援金の審査",
+    "创业补助审核",
+    "Xét duyệt hỗ trợ khởi nghiệp"
+  ],
+  "adminTool_kdic": [
+    "Deposit insurance",
+    "예금보험공사",
+    "預金保険",
+    "存款保险",
+    "Bảo hiểm tiền gửi"
+  ],
+  "adminTool_catalog": [
+    "Business & season catalog",
+    "사업·시즌 카탈로그",
+    "事業・シーズン一覧",
+    "业务与赛季目录",
+    "Danh mục kinh doanh và mùa giải"
+  ],
+  "adminTool_work": [
+    "Work & jobs",
+    "작업·직업 센터",
+    "作業・職業センター",
+    "工作与职业中心",
+    "Trung tâm công việc và nghề nghiệp"
+  ],
+  "adminTool_market": [
+    "Market monitoring",
+    "거래소 관제",
+    "市場監視",
+    "市场监控",
+    "Giám sát thị trường"
+  ],
+  "adminTool_shop": [
+    "Shop management",
+    "상점 관리",
+    "ショップ管理",
+    "商店管理",
+    "Quản lý cửa hàng"
+  ],
+  "adminTool_economy_scenario_lab": [
+    "Scenario lab",
+    "시나리오 랩",
+    "シナリオ実験室",
+    "情景实验室",
+    "Phòng thử nghiệm kịch bản"
+  ],
+  "adminTool_market_ai_news": [
+    "AI market news",
+    "AI 시장 뉴스",
+    "AI市場ニュース",
+    "AI市场新闻",
+    "Tin thị trường AI"
+  ],
+  "adminTool_security": [
+    "Security & blocking",
+    "보안·차단 센터",
+    "セキュリティ・ブロック",
+    "安全与封禁",
+    "Bảo mật và chặn truy cập"
+  ],
+  "adminTool_logs": [
+    "Audit logs",
+    "감사 로그",
+    "監査ログ",
+    "审计日志",
+    "Nhật ký kiểm toán"
+  ],
+  "adminTool_logs_errors": [
+    "Error logs",
+    "에러 로그",
+    "エラーログ",
+    "错误日志",
+    "Nhật ký lỗi"
+  ],
+  "adminTool_logs_system": [
+    "System logs",
+    "시스템 로그",
+    "システムログ",
+    "系统日志",
+    "Nhật ký hệ thống"
+  ],
+  "adminTool_logs_integrity": [
+    "Integrity verification",
+    "무결성 검증",
+    "整合性検証",
+    "完整性验证",
+    "Xác minh tính toàn vẹn"
+  ],
+  "adminTool_logs_delivery": [
+    "Delivery logs",
+    "배송·전송 로그",
+    "配信・転送ログ",
+    "投递与传输日志",
+    "Nhật ký chuyển giao"
+  ],
+  "adminTool_users": [
+    "Member directory",
+    "회원 디렉토리",
+    "会員一覧",
+    "成员目录",
+    "Danh bạ thành viên"
+  ],
+  "adminTool_blog": [
+    "Blog & editorial",
+    "블로그·에디토리얼",
+    "ブログ・編集",
+    "博客与编辑",
+    "Blog và biên tập"
+  ],
+  "adminTool_money_flow": [
+    "Member money flows",
+    "유저 자금 흐름",
+    "会員の資金フロー",
+    "成员资金流",
+    "Luồng tiền thành viên"
+  ],
+  "adminTool_content": [
+    "Content moderation",
+    "콘텐츠 모더레이션",
+    "コンテンツ審査",
+    "内容审核",
+    "Kiểm duyệt nội dung"
+  ],
+  "adminTool_support": [
+    "Support chat",
+    "고객지원 채팅",
+    "サポートチャット",
+    "客服聊天",
+    "Trò chuyện hỗ trợ"
+  ],
+  "adminTool_safety": [
+    "Safety center",
+    "안전 센터",
+    "安全センター",
+    "安全中心",
+    "Trung tâm an toàn"
+  ],
+  "adminTool_controls": [
+    "Feature controls",
+    "킬스위치 제어 센터",
+    "機能制御",
+    "功能控制",
+    "Điều khiển tính năng"
+  ],
+  "adminTool_api_health": [
+    "API monitoring",
+    "API 관제",
+    "API監視",
+    "API监控",
+    "Giám sát API"
+  ],
+  "adminTool_seo": [
+    "SEO & indexing",
+    "SEO·색인",
+    "SEO・インデックス",
+    "SEO与索引",
+    "SEO và lập chỉ mục"
+  ],
+  "adminTool_seo_audit": [
+    "SEO audit",
+    "SEO 감사",
+    "SEO監査",
+    "SEO审计",
+    "Kiểm toán SEO"
+  ],
+  "adminTool_analytics": [
+    "Graph analytics",
+    "그래프 분석",
+    "グラフ分析",
+    "图表分析",
+    "Phân tích biểu đồ"
+  ],
+  "adminTool_discord": [
+    "Discord bot monitoring",
+    "디스코드 봇 관제",
+    "Discordボット監視",
+    "Discord机器人监控",
+    "Giám sát bot Discord"
+  ],
+  "adminTool_operations_storage": [
+    "Operations storage",
+    "운영 스토리지",
+    "運用ストレージ",
+    "运维存储",
+    "Lưu trữ vận hành"
+  ],
+  "adminCategory_macro": [
+    "Macroeconomy & finance",
+    "거시·금융",
+    "マクロ経済・金融",
+    "宏观经济与金融",
+    "Kinh tế vĩ mô và tài chính"
+  ],
+  "adminCategory_treasury": [
+    "Treasury & taxation",
+    "국고·세정",
+    "国庫・税務",
+    "国库与税务",
+    "Kho bạc và thuế"
+  ],
+  "adminCategory_market": [
+    "Markets & businesses",
+    "시장·기업",
+    "市場・企業",
+    "市场与企业",
+    "Thị trường và doanh nghiệp"
+  ],
+  "adminCategory_security": [
+    "Security & audit",
+    "보안·감사",
+    "セキュリティ・監査",
+    "安全与审计",
+    "Bảo mật và kiểm toán"
+  ],
+  "adminCategory_users": [
+    "Members & content",
+    "유저·콘텐츠",
+    "会員・コンテンツ",
+    "成员与内容",
+    "Thành viên và nội dung"
+  ],
+  "adminCategory_system": [
+    "Systems & monitoring",
+    "시스템·관제",
+    "システム・監視",
+    "系统与监控",
+    "Hệ thống và giám sát"
   ]
 }
