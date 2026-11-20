@@ -312,3 +312,35 @@ The independent task review found an administrator-close legacy-cookie identity 
 - Added the duplicate-heading assertion to25 public route/language cases:25 logical RED failures with old generic header selector. Adapted five public template consumers to pageHeader. No computation/status source method changed.
 - Fresh integrated full verification:441 Spring tests,0 failures/errors/skips, bootJar successful;228 Node UI/security/release tests passed with0 failures/skips; asset generator changed0 references and integrity checks passed. Source test/JAR and Node logs: /tmp/nov18-native-public-integrated-full.log and /tmp/nov18-native-public-integrated-node.log.
 - Actual browser acceptance continues after restarting the stopped isolated H2 preview on this integrated source. Real PostgreSQL service gate passed9/9 at ancestor7cb9890d95; newest CI will rerun. Exact-source public Test remains403; production HOLD.
+
+## Native member messaging pages — before work
+- [x] Read full actual AGENTS, approved authority/plan/brief, original support/chat pages/forms/room controls, actual Spring controllers/services/DTOs/MessageContract, native wallet/auth/session/locale/chrome/test patterns.
+- [x] Isolated approved base8746cd5131dd4e74a901bd033bb310e03c5c38af. Original dirty checkout untouched. Fetched origin/main now a9b1070d1091191c5fe2b68b2759f24762be780a; parent notified of advancement before implementation.
+- [x] Inventory: member-only /support and /chat plus /, .html, /index.html aliases; selected thread/conversationId/peer query values must resolve from verified owner lists. No original dynamic page path. Original transcript/{id} and /text routes are separate exports, not private page aliases.
+- [x] Support controls: new subject/body/start; status, title search, sort, inclusive Korea-time last-message date range max366 days; selection, recent100 summary, CSV/TXT downloads, reply/send. Spring list caps50 from latest100; keep local display filters with explicit latest50 disclosure and sample100 summary. Export only loaded verified max500 messages, safely escaped.
+- [x] Chat controls: existing conversations/search/select/back/refresh/history/send; new DM/user search, archived view/archive, mute, block/unblock, report and image upload have no reviewed Spring endpoints and remain visibly disabled with explanation. No automatic peer creation, staff private-DM browse or optimistic unread updates.
+- [ ] Real rendered HTTP and independently authored client-core/binding regressions RED.
+- [ ] Native implementation, focused GREEN/full Spring test+bootJar/Node/security/release, self-review and scoped checkpoint.
+- No backend/auth/SQL/schema/grants or production changes. Global cross-navigation drafts, authenticated browser and exact-source public Test403/release acceptance remain OPEN; production HOLD.
+
+## Native member messaging pages — in progress
+- [x] HTTP logical RED:10 tests,10 failures (captured routes lack native templates/privacy/member redirects/controls/Flight refusal). Command: test --tests '*NativeMessagingWebTest' with test profile/loopback/task temp media; /tmp/native-messaging-http-red.log.
+- [x] Client RED:9 cases fail the explicit missing-native-core assertion; source-constraint case fails on absent binding file. No old client was represented as verified. Implementing independently hand-authored real DTO fixtures and async receipt/session state.
+- Parent confirms fixed base pending root integration, local sample filtering with KST boundaries and formula-safe CSV export. No main integration in this child.
+
+- [x] First focused HTTP GREEN:10 tests,0 failures/errors/skips. Initial binding run9 passed/3 failed traced to VM inventory omitting h3 tag digits; corrected harness, not product assertions. Account-change test now asserts no private article after transition while allowing safe empty-state text.
+- [x] Self-inspection added2 logical RED focus-race cases (12 passed/2 failed): same-owner refresh erased reply draft; a shared read generation suppressed a verified mutation result and could leave a delivered body available. Separate private-owner generation from read epochs and restore history without resetting same-target drafts.
+
+- [x] Added existing-DM/forged-selection/five-language draft/exact-bigint binding and actual Blob CSV formula-safety checks. Java-vs-JavaScript whitespace test exposed real U+001C blank mismatch (RED), corrected to Java whitespace set; ASCII-only edge trim remains exact. CSV assertion initially tested literal backslash-r rather than fixture carriage return, corrected that test expectation.
+
+- [x] Focused messaging GREEN16/16 Node cases,0 failures/skips. Broader Node run exposed catalog insertion-order parity (client keys prepended vs server appended); existing parity compares serialized ordered dictionaries. Moved only new messaging entries to matching append position; no parity exemption.
+- [ ] Full Spring/bootJar and expanded Node final gates, scoped checkpoint and independent parent review.
+
+- [x] Clean full Spring rerun451 tests,0 failures/errors/skips, bootJar successful exit0. Prior wrapper printed BUILD SUCCESSFUL but had a shell exit quoting error; rerun used a readable shell script with correct status propagation and final JUnit totals.
+- [x] Final source review found original query-filter initialization and source-independent chronological transcript ordering missing. Added2 logical RED regressions before scoped fix. Query search stays local and is never included in source fetch URLs.
+
+## Native member messaging pages — implementation checkpoint
+- [x] Native member-only support/chat aliases, singular shared chrome, five locale catalogs and exact reviewed DTO/receipt/session/CSRF paths implemented.18 executable messaging cases pass;10 real rendered HTTP cases pass.
+- [x] Prior full Spring451/0 failures/errors/skips and Node244/244 passed. Final query/ordering corrections have focused18/18 evidence; rerunning whole gates after final asset generation before completion report.
+- [x] Source review verified all9 existing-template changes are asset-query SHA256 digests only; all preexisting locale keys/values unchanged. No shared chrome/backend API/security/SQL/schema/grant/runtime or original dirty-checkout modifications.
+- [ ] Independent parent review and final exact-source full gates. Browser geometry/authenticated-browser/source-success acceptance and global cross-navigation memory-only draft shell remain OPEN. Production HOLD; no main integration/deployment.
