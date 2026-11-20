@@ -44,7 +44,7 @@ test('support opens, retains state on language change and restores focus on clos
     querySelectorAll(){return [];}
   }
   const launcher=new Element(),panel=new Element(),close=new Element();
-  const document={readyState:'complete',activeElement:launcher,getElementById:id=>({'mv-support-launcher':launcher,'mv-support-panel':panel,'mv-support-close':close}[id])};
+  const document={readyState:'complete',activeElement:launcher,addEventListener:()=>{},getElementById:id=>({'mv-support-launcher':launcher,'mv-support-panel':panel,'mv-support-close':close}[id])};
   const window=new EventTarget();window.MV39Locale={tx:k=>k};window.localStorage={setItem(){throw Error('private state persisted');}};
   runInNewContext(source('static/assets/mv43/chrome.js'),{document,window});
   launcher.dispatchEvent(new Event('click'));
@@ -53,4 +53,27 @@ test('support opens, retains state on language change and restores focus on clos
   assert.equal(panel.open,true);
   close.dispatchEvent(new Event('click'));
   assert.equal(panel.open,false);assert.equal(document.activeElement,launcher);
+});
+
+test('shared mobile navigation and locale selection work without the home renderer',()=>{
+  const window=new EventTarget();let chosen=null;
+  window.MV39Locale={tx:k=>k,setPreference:value=>{chosen=value;},preference:()=> 'auto'};
+  const document={readyState:'complete',activeElement:null,querySelectorAll:()=>[]};
+  class Element extends EventTarget {
+    constructor(){super();this.hidden=true;this.open=false;this.dataset={};this.attributes={};this.value='';}
+    setAttribute(k,v){this.attributes[k]=v;}
+    focus(){document.activeElement=this;}
+    querySelectorAll(){return [];}
+  }
+  const ids=Object.fromEntries(['mv-support-launcher','mv-support-panel','mv-support-close','mobile-menu-toggle','mobile-menu-close','drawer-backdrop','mobile-menu','language-selector'].map(id=>[id,new Element()]));
+  document.getElementById=id=>ids[id]||null;
+  document.addEventListener=()=>{};
+  runInNewContext(source('static/assets/mv43/chrome.js'),{document,window});
+  ids['mobile-menu-toggle'].dispatchEvent(new Event('click'));
+  assert.equal(ids['mobile-menu'].hidden,false);
+  assert.equal(ids['mobile-menu-toggle'].attributes['aria-expanded'],'true');
+  ids['mobile-menu-close'].dispatchEvent(new Event('click'));
+  assert.equal(ids['mobile-menu'].hidden,true);
+  ids['language-selector'].value='ko';ids['language-selector'].dispatchEvent(new Event('change'));
+  assert.equal(chosen,'ko');
 });

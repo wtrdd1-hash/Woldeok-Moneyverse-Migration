@@ -68,7 +68,7 @@ public class WalletService {
         List<Map<String, Object>> txs = new ArrayList<>();
         try {
             String txSql = """
-                SELECT lp.id, lp.amount, lp.direction::text AS direction, lp.created_at,
+                SELECT lp.id::text AS id, lp.amount::text AS amount, lp.direction::text AS direction, lp.created_at,
                        COALESCE(lt.type, 'TRANSFER') AS tx_type
                 FROM ledger_postings lp
                 JOIN accounts a ON lp.account_id = a.id
@@ -102,11 +102,18 @@ public class WalletService {
     @Transactional
     public Map<String, Object> transferWithIdempotencyKey(
             String fromUserId, String toUserId, Long amountWld, String memo, UUID idempotencyKey) {
+        return transferCanonicalWithIdempotencyKey(fromUserId,toUserId,
+                amountWld==null?null:amountWld.toString(),memo,idempotencyKey);
+    }
+
+    @Transactional
+    public Map<String, Object> transferCanonicalWithIdempotencyKey(
+            String fromUserId, String toUserId, String amountWld, String memo, UUID idempotencyKey) {
         if (idempotencyKey == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Idempotency-Key UUID required");
         }
-        if (amountWld == null || amountWld <= 0) {
-            throw new IllegalArgumentException("이체 금액은 1 WLD 이상이어야 합니다.");
+        if (amountWld == null || !amountWld.matches("[1-9][0-9]{0,37}")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "positive canonical amountWld required");
         }
         if (fromUserId.equals(toUserId)) {
             throw new IllegalArgumentException("자신에게는 이체할 수 없습니다.");
@@ -124,7 +131,7 @@ public class WalletService {
         // Key must be provided by the authenticated caller; retries reuse the same key.
         try {
             String sql = "SELECT public.economy_transfer(?::uuid, ?::uuid, ?::uuid, ?::numeric)";
-            UUID txId = jdbcTemplate.queryForObject(sql, UUID.class, idempotencyKey, fromUid, toUid, BigDecimal.valueOf(amountWld));
+            UUID txId = jdbcTemplate.queryForObject(sql, UUID.class, idempotencyKey, fromUid, toUid, new BigDecimal(amountWld));
 
             Map<String, Object> res = new LinkedHashMap<>();
             res.put("success", true);
@@ -138,6 +145,17 @@ public class WalletService {
             res.put("message", "P2P 불변 복식부기 원장 이체가 성공적으로 집행되었습니다.");
             return res;
         } catch (Exception e) {
+            for (Throwable cause=e;cause!=null;cause=cause.getCause()) {
+                if(cause instanceof java.sql.SQLException sqlError) {
+                    String state=sqlError.getSQLState();
+                    if("22023".equals(state)||"23505".equals(state)) {
+                        throw new ResponseStatusException(HttpStatus.CONFLICT,"transfer request rejected");
+                    }
+                    if("28000".equals(state)) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"transfer receipt owner mismatch");
+                    }
+                }
+            }
             log.warn("[WalletService] canonical economy transfer unavailable; no success receipt");
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
                     "canonical transfer receipt unavailable", e);

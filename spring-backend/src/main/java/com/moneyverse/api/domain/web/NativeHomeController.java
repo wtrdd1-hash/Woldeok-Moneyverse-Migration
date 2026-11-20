@@ -26,6 +26,7 @@ public class NativeHomeController {
         response.setHeader("Cache-Control", "private, no-store");
         response.setHeader("X-MV-Renderer", "Spring-MVC-Thymeleaf");
         response.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'");
+        model.addAttribute("uiPageKey", "home");
         model.addAttribute("uiLanguage", language);
         model.addAttribute("uiCopy", locale.labels(language));
         return "mv43/home";

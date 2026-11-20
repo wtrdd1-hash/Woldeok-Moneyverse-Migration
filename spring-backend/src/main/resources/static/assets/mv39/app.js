@@ -327,12 +327,14 @@
     else toggle.focus();
   }
   function bindNavigation() {
+    if(!document.documentElement.dataset.uiLanguage) {
     document.getElementById('mobile-menu-toggle').addEventListener('click',()=>toggleDrawer(true));
     document.getElementById('mobile-menu-close').addEventListener('click',()=>toggleDrawer(false));
     document.getElementById('drawer-backdrop').addEventListener('click',()=>toggleDrawer(false));
     document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!document.getElementById('mobile-menu').hidden)toggleDrawer(false);});
     document.querySelectorAll('#mobile-menu a').forEach(a=>a.addEventListener('click',()=>toggleDrawer(false)));
     document.getElementById('language-selector').addEventListener('change',event=>locale.setPreference(event.target.value));
+    }
     window.addEventListener('mv39-language-change',()=>{localizeStatic();renderAuthControls();renderPage();});
   }
   async function readSession() {

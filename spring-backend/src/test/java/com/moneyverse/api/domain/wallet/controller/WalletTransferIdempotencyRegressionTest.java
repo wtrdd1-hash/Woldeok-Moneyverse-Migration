@@ -42,4 +42,21 @@ class WalletTransferIdempotencyRegressionTest {
                 ()->service.transferWithIdempotencyKey(from.toString(),to.toString(),11L,"test",key));
         assertEquals(HttpStatus.SERVICE_UNAVAILABLE,error.getStatusCode());
     }
+    @Test void canonical38DigitTransferReachesDatabaseAsExactDecimalAndReturnsString() {
+        UUID key=UUID.randomUUID(),from=UUID.randomUUID(),to=UUID.randomUUID(),posted=UUID.randomUUID();
+        String amount="99999999999999999999999999999999999999";
+        when(jdbc.queryForObject(contains("economy_transfer"),eq(UUID.class),eq(key),eq(from),eq(to),eq(new BigDecimal(amount)))).thenReturn(posted);
+        var result=service.transferCanonicalWithIdempotencyKey(from.toString(),to.toString(),amount,"",key);
+        assertEquals(amount,result.get("amount"));
+        assertEquals(posted.toString(),result.get("txId"));
+    }
+    @Test void canonicalRejectionMustNotBecomeAnUncertainRetry() {
+        when(jdbc.queryForObject(contains("economy_transfer"),eq(UUID.class),any(),any(),any(),any()))
+                .thenThrow(new org.springframework.dao.DataIntegrityViolationException("ci_rejected",
+                        new java.sql.SQLException("ci_no_funds","22023")));
+        var error=assertThrows(ResponseStatusException.class,()->service.transferCanonicalWithIdempotencyKey(
+                UUID.randomUUID().toString(),UUID.randomUUID().toString(),"11","",UUID.randomUUID()));
+        assertEquals(HttpStatus.CONFLICT,error.getStatusCode());
+    }
+
 }

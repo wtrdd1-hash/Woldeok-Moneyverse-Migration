@@ -62,3 +62,13 @@ The new native CI gate exposed an inherited media integration fixture using Imag
 - Added an explicit test-profile temporary media directory and a pre-upload guard requiring a configured path beneath java.io.tmpdir.
 - RED: all five media tests refuse the old unconfigured path before upload. GREEN: all five media tests, including real isolated upload/retrieval, pass with the temporary path.
 - Test isolation is now enforced in source; no production permissions were expanded to make CI pass.
+
+
+## Native wallet checkpoint
+- Native authenticated wallet now owns /wallet, /wallet/, /wallet.html and /wallet/index.html; forged identity headers cannot open the private page. SSR five-language and login/alias tests observed6RED→6GREEN. Native views preserve transfer inputs, quick amounts, available-cash selection and transaction history, with explicit loading/error/verified states and no fabricated zeroes.
+- Monetary requests now cross JSON as canonical positive integer strings up to38 digits and reach the existing canonical PostgreSQL wrapper as BigDecimal. The legacy internal Long method delegates without changing the database transaction function. History amounts/IDs cross JSON as text; no money is rounded through Number.
+- Client transfer state uses the actual recipientUserId/amountWld fields, session CSRF and stable caller UUID. Unconfirmed requests keep their exact intent/key and cannot silently change amount; duplicate in-flight posting, stale owner, missing canonical receipt and malformed money are rejected. CSV export preserves text and prevents spreadsheet formula evaluation.
+- Known canonical SQLSTATE22023/23505 refusals map to409 rather than an uncertain503; owner receipt refusal28000 maps400. Unknown or unavailable source remains503. This is presentation mapping, not a database privilege or business-rule change.
+- Shared native mobile menu/language selection now works outside the home renderer. Language change preserves transfer fields and pending state; account changes clear private values.
+- Fresh local evidence before auth-bridge merge: **299 Spring tests, zero failures/errors/skips; bootJar success;207 Node UI/security/release tests pass**. Native browser layout and actual financial mutation acceptance remain unverified; no live transfer was performed.
+- The source-bound native GitHub test/build gate on the prior published checkpoint is green after media isolation. These checks do not certify later uncommitted changes or production.
