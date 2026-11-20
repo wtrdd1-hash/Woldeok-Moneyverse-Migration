@@ -61,12 +61,7 @@
   }
   function wld(raw) { const value=numberString(raw);return value===null?null:value+' WLD'; }
   function smallNumber(raw) { return new Intl.NumberFormat(locale.current()).format(Number(raw)); }
-  function pct(price,open) {
-    const a=Number(price),b=Number(open);
-    if (!Number.isFinite(a)||!Number.isFinite(b)||b<=0||a<0) return null;
-    const value=(a-b)/b*100;
-    return (value>=0?'+':'')+value.toFixed(2)+'%';
-  }
+  function pct(price,open) { return window.MV39Money.percentageChange(price,open); }
   function isSignedIn() { return checkedSession&&Boolean(session&&(session.signedIn===true||session.authenticated===true)&&session.user); }
   async function fetchJson(url) {
     const response=await fetch(url,{credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json'}});
