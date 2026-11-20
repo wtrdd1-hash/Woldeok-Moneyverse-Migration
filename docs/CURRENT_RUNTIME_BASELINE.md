@@ -1,6 +1,15 @@
 # Current Runtime Baseline
 
-## 2026-11-20 — current public presentation observation (SCOPED)
+## 2026-11-21 — current public favicon/header observation (SCOPED)
+
+At 00:22:17 KST the same five public home/tool/calculator routes plus index alias moved to application main `93a3c8dbe8c04fda28689904ffe43a86992c73c1`, PR #3325, exact-main CI 44759127347 (all 4 jobs SUCCESS). The official existing favicon is now the desktop/drawer/mobile mark; the 320px localized-header overflow is fixed. Boot-enabled `moneyverse-native-favicon-prod-v20261121.service` serves port 4792 from `/srv/moneyverse-data/releases/prod-native-favicon-v2026.11.21.1-93a3c8dbe8c0`; matching Test serves port 4794. Both use CI JAR `af0913b0546716871ad57e3fb49b893a4cb662b4a5078882db8707158b6b6cc0` with live-JAR/process evidence. Use `/frontend-version?scope=public-presentation`; preserve unscoped legacy behavior.
+
+Exact-main Test 125 browser cases and actual Production 25 layout checks passed; home authentication/account/wallet display survived. Four native tool routes still show a static login header and remain OPEN for account-display integration. Three new source-backed feature candidates remain inactive publicly. Existing backend/private/admin traffic is retained; 35 admin tool routes were inspected, not fully accepted. No data/grant/migration/ledger/balance write occurred; financial/manual migration 346 findings remain OPEN.
+
+Test privacy was corrected after actual-browser access disproved the earlier HTTP 403 interpretation. External Test home/favicon now return 403, while trusted MiniPC loopback serves the exact candidate. Old 42422aab remains active for rollback and legacy-version assets; it no longer serves these public HTML routes. [Current receipt](releases/2026-11-21-favicon-public-production.ko.md).
+
+
+## 2026-11-20 — previous public presentation observation (HISTORICAL)
 
 The public home, tool hubs and two native calculator routes now run the database-free Spring presentation mode from main `42422aab0d3bed3399a27819c6eb774cfd1a933a`, PR #3319, exact-main CI44736479741. Production unit `moneyverse-native-presentation-prod-v20261120.service` is active and boot-enabled; its immutable root is `/srv/moneyverse-data/releases/prod-native-v2026.11.20.1-42422aab0d3b`. Test uses the same CI JAR and source. The live open JAR matches SHA256 `e3d01bef2605147cfabae4ff4f45d33489c05550bb6f593cfc4f8f3315ee23b6`.
 

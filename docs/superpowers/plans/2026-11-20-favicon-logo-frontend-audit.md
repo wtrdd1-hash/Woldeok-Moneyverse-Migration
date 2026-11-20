@@ -1,5 +1,7 @@
 # Favicon logo and frontend audit implementation plan
 
+**2026-11-21 execution state:** First public favicon/header rollout accepted at00:22:17KST from main93a3c8dbe8c04fda28689904ffe43a86992c73c1. Exact-main CI/Test/runtime/rollback and actual authenticated home continuity are verified. Three additional public feature shells remain candidates, not activated features; private/admin/full financial acceptance and tool account hydration remain OPEN. See the linked task worklog and release receipt.
+
 > Execute inline using Superpowers executing-plans; retain an independent final code review.
 
 **Goal:** Use the actual Production favicon as the native shell logo and inspect the real frontend.
@@ -16,11 +18,11 @@
 - The owner clarified Nov18 as the design authority; use the NOV18 authority and approved references. Favicon acceptance is not whole-design acceptance.
 
 ## Task 1: Render the favicon in the shared native chrome
-- [ ] Add rendered-page assertions to NativePresentationIsolationTest: two brand IMG elements using /assets/mv39/favicon.ico with empty alt and fixed32px dimensions, plus an explicit shortcut icon link; GET icon must match packaged bytes without cookies.
-- [ ] Run focused Gradle test; expect logical missing-logo assertions to fail before production edits.
-- [ ] In templates/shared/chrome.html replace both brand SPANs with the specified IMG and add icon link in commonHead. Existing CSS fixes the brand mark box; no shared CSS/JS edits or new asset paths.
-- [ ] Run focused tests, full Spring tests and bootJar, applicable Node tests/security/whitespace checks.
-- [ ] Record RED/GREEN and review the complete source delta independently before integration.
+- [x] Add rendered-page assertions to NativePresentationIsolationTest: two brand IMG elements using /assets/mv39/favicon.ico with empty alt and fixed32px dimensions, plus an explicit shortcut icon link; GET icon must match packaged bytes without cookies.
+- [x] Run focused Gradle test; expect logical missing-logo assertions to fail before production edits.
+- [x] In templates/shared/chrome.html replace both brand SPANs with the specified IMG and add icon link in commonHead. Existing CSS fixes the brand mark box; initial markup-only change, followed by explicitly reviewed chrome.css header/mobile refinements; shared JS unchanged or new asset paths.
+- [x] Run focused tests, full Spring tests and bootJar, applicable Node tests/security/whitespace checks.
+- [x] Record RED/GREEN and review the complete source delta independently before integration.
 
 ## Task 2: Verify the actual frontend and release state
 - [ ] Inspect home, hubs and calculators at320/390/1440, five locales, menu/dialog/keyboard, search and inputs; follow member links as guest without claiming authenticated QA.
