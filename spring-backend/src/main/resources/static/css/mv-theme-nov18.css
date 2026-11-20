@@ -580,3 +580,43 @@ html, body {
     padding-bottom: 74px; /* clearance for mobile nav */
   }
 }
+
+/* Responsive Language Switcher & Auth Header Protection */
+.mv-lang-container {
+  display: inline-flex !important;
+  align-items: center !important;
+  position: relative !important;
+  flex-shrink: 0 !important;
+}
+.mv-lang-btn {
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  font-size: 11px !important;
+  padding: 4px 8px !important;
+  min-height: 30px !important;
+  flex-shrink: 0 !important;
+}
+#auth-action-container {
+  display: inline-flex !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+}
+#auth-action-container a, 
+#auth-action-container button {
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  font-size: 11px !important;
+  padding: 4px 10px !important;
+  min-height: 30px !important;
+  flex-shrink: 0 !important;
+}
+@media (max-width: 1023px) {
+  .mv-floating-chat-btn {
+    bottom: 76px !important;
+    right: 16px !important;
+  }
+}
