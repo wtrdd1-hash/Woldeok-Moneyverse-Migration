@@ -46,7 +46,7 @@ public class WalletDtos {
 
     public static class TransferRequest {
         @NotBlank(message = "recipientUserId is required")
-        @JsonAlias({"recipientUserId", "toUserId", "recipient", "to_user_id"})
+        @JsonAlias({"recipientUserId", "toUserId", "recipient", "to_user_id", "recipientId", "to"})
         private String recipientUserId;
 
         @NotBlank(message = "amountWld is required")
