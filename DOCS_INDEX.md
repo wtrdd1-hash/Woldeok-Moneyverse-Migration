@@ -1,5 +1,31 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.19.39 — Spring safety remediation: scoped Production privacy HOTFIX, full frontend release HOLD
+- [QA EN](docs/qa/2026-11-19-spring-safety-and-frontend-release-v39.md) / [QA KO](docs/qa/2026-11-19-spring-safety-and-frontend-release-v39.ko.md) · [Worklog KO](docs/worklog/2026-11-19-mv39-production-readiness.ko.md) · [GitHub notes](docs/updates/v2026.11.19.39-github.md). Real public Nginx protection for anonymous wallet/pension and spoofed headers (10/10); separate immutable read-only Spring Test API 21/21 and 243/243 Java tests. Full 180-route/5-pass/official-Test/signed-in Finance QA NOT complete; backend/full new UI Production not promoted.
+
+## v2026.11.19.40.1 — 관리자·회원 웹 + 보안 수정 통합 QA (253/253 소스 테스트 PASS / 운영 보류)
+- [한국어 QA](docs/qa/2026-11-19-spring-admin-security-integration-v40.1.ko.md) / [English](docs/qa/2026-11-19-spring-admin-security-integration-v40.1.md) · [GitHub 변경 기록](docs/updates/v2026.11.19.40.1-integration-qa-github.ko.md). 보안 PR #3302와 웹 PR #3301/#3303를 격리된 미니PC에서만 합쳐 전체 Spring 253개 모두 통과. 실제 관리자/회원 금융 E2E, 공식 Test 403, 180페이지 완전성·무중단 운영 승격은 아직 미검증. 운영에 설치하지 않음.
+
+## v2026.11.20.42.3.1 — 회원 웹 UI 깨짐 신고 → 즉시 롤백 → 모바일 디자인 수리·운영 재승격 완료
+- [운영 실화면 PC/모바일](docs/design/mv42.3.1/README.md) · [QA 한국어](docs/qa/2026-11-20-member-home-visual-incident-v42.3.1.ko.md) / [English](docs/qa/2026-11-20-member-home-visual-incident-v42.3.1.md) · [시작/중간/종료 작업기록](docs/worklog/2026-11-20-member-home-visual-incident-v42.3.1.ko.md) · [GitHub 업데이트](docs/updates/v2026.11.20.42.3.1-member-frontend-github.ko.md). 모바일 1+2 카드·빠른실행2열·실제 시세8종목·안 겹치는 문의 UI, 5언어. Java271/271, 운영 HTTPS 실제 시세6/6, 5언어×6화면×5회30/30, 구형 허위 국고/게시판 표시 금지. **운영 반영은 회원 홈 한정, 관리자/전체 Java·금융/API 및 전 웹 경로는 미승격**.
+
+
+## v2026.11.20.42.1 — 읽기 전용 Spring Test 271/271 · 관리자 직접 JSON P0 수리 · HTML 2경로 운영 수정 (전체 승격 보류)
+- [QA 한국어](docs/qa/2026-11-20-spring-web-promotion-v42.1.ko.md) / [English](docs/qa/2026-11-20-spring-web-promotion-v42.1.md) · [작업기록 국문](docs/worklog/2026-11-20-spring-web-promotion-v42.1.ko.md) / [EN](docs/worklog/2026-11-20-spring-web-promotion-v42.1.md) · [GitHub 업데이트](docs/updates/v2026.11.20.42.1-spring-web-github.ko.md). 실제 미니PC Test Spring+읽기 전용 DB 기동, 전체 271/271, 정적HTML281경로×5회 GET1,405·비모의 Chromium 홈30/30. Java 옛 관리자 JSON13주소 직접 익명 200→401, HTML 405 충돌 2건 해결. 실제 **운영 적용은** Nginx HTML 2개 URL만 405→302. 공식 Test403, 15개 API503, 실관리자·금융 영수증·G442 웹 180페이지×5 전체 인터랙션 및 복구 미검증으로 **전체 Java/프론트엔드 미승격**.
+
+
+## v2026.11.19.41 — 운영 관리자 접근 보호 2건 실제 반영 + Java API 실데이터 수정 후보 (전체 운영 승격 보류)
+- [운영 변경 영문](docs/operations/2026-11-19-scoped-admin-edge-v41.md) / [한국어](docs/operations/2026-11-19-scoped-admin-edge-v41.ko.md) · [API 208건 운영 QA 영문](docs/findings/2026-11-19-public-api-matrix-v41.md) / [한국어](docs/findings/2026-11-19-public-api-matrix-v41.ko.md) · [소스/JUnit/Chromium QA](docs/qa/2026-11-19-spring-api-source-truth-v41.md) / [KO](docs/qa/2026-11-19-spring-api-source-truth-v41.ko.md) · [작업로그](docs/worklog/2026-11-19-web-api-promotion-v41.ko.md) · [업데이트](docs/updates/v2026.11.19.41-web-api-github.ko.md). 실제 운영 Nginx는 관리자 시안4주소·블로그4주소 익명 접근302로 보호. API·회원·관리자·보안 통합 Java 266/266, Chromium 회원16/관리자13/게시판6 및 5언어 검증은 **소스/픽스처 후보**. 공식 Test403·약180화면×5회·실관리자/원장·무중단 롤백 미검증, Java/프론트엔드 신규 버전은 **운영 배포 안 됨**.
+
+
+## v2026.11.19.40 — 관리자·회원 공통 Java Spring **반응형 웹** (신규 소스 후보 · 운영 승격 보류)
+- [영문 상세 기획](docs/planning/SPRING_ADMIN_MEMBER_WEB_UI_v2026.11.19.40.md) / [한국어](docs/planning/SPRING_ADMIN_MEMBER_WEB_UI_v2026.11.19.40.ko.md) · [관리자 PC/모바일 실제 Chromium 픽스처 화면](docs/design/mv40/README.md) · [실제 검증](docs/qa/2026-11-19-spring-admin-member-web-v40.md) · [작업기록](docs/worklog/2026-11-19-spring-admin-member-web-v40.ko.md) · [GitHub 공개 업데이트](docs/updates/v2026.11.19.40-admin-member-web-github.ko.md). 관리자 Spring SSR와 HTML 접근 보호, 사용자 홈 일관성, 자동/수동 5개 언어 반영. 전체 Java 247중 38개 실패, 공식 Test 403·180페이지/실계정 원장 미검증. **운영 배포 아님**.
+
+
+## v2026.11.19.39 — Spring safety remediation: scoped Production privacy HOTFIX, full frontend release HOLD
+- [QA EN](docs/qa/2026-11-19-spring-safety-and-frontend-release-v39.md) / [QA KO](docs/qa/2026-11-19-spring-safety-and-frontend-release-v39.ko.md) · [Worklog KO](docs/worklog/2026-11-19-mv39-production-readiness.ko.md) · [GitHub notes](docs/updates/v2026.11.19.39-github.md). Real public Nginx protection for anonymous wallet/pension and spoofed headers (10/10); separate immutable read-only Spring Test API 21/21 and 243/243 Java tests. Full 180-route/5-pass/official-Test/signed-in Finance QA NOT complete; backend/full new UI Production not promoted.
+
+
 ## v2026.11.19.34 — Personal-assets desktop/mobile real-data contract & public diagnostics removal (SPEC ONLY)
 - [Detailed KO spec](docs/planning/PERSONAL_ASSETS_REAL_DATA_UI_v2026.11.19.34.ko.md) / [EN](docs/planning/PERSONAL_ASSETS_REAL_DATA_UI_v2026.11.19.34.md) · [Worklog](docs/worklog/2026-11-19-personal-ui-real-data-v2026.11.19.34.ko.md) · [Internal local-only, not tracked] · [GitHub update](docs/updates/v2026.11.19.34-personal-ui-github.md). All user money/graphs/transactions must use real authenticated Spring/ledger data. No member-facing runtime version/API/DB/sync/system diagnostic information; Treasury is admin-only. Existing design catalog reused; newly generated chat images not yet transferred. No code or Production release.
 

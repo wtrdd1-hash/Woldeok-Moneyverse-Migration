@@ -23,46 +23,23 @@ public class ProgressionService {
     }
 
     public ProgressionStatusResponse status(UUID userId) {
-        ProgressionStatus status = getOrCreateProgression(userId);
-        return new ProgressionStatusResponse(true, status);
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "PROGRESSION_CANONICAL_SOURCE_UNAVAILABLE");
     }
 
     public ProgressionRefreshResponse refresh(UUID userId) {
-        ProgressionStatus status = getOrCreateProgression(userId);
-        return new ProgressionRefreshResponse(true, status, false);
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "PROGRESSION_CANONICAL_SOURCE_UNAVAILABLE");
     }
 
     public CreditStatusResponse creditStatus(UUID userId) {
-        String grade = "A+";
-        int score = 850;
-        long maxLimit = 50_000_000L;
-        long activeBalance = 0L;
-
-        try {
-            Long loanSum = jdbcTemplate.queryForObject(
-                "SELECT COALESCE(SUM(remaining_principal), 0) FROM loans WHERE user_id = ? AND status = 'ACTIVE'",
-                Long.class, userId
-            );
-            if (loanSum != null) {
-                activeBalance = loanSum;
-            }
-        } catch (Exception ignored) {}
-
-        return new CreditStatusResponse(true, grade, score, maxLimit, activeBalance, List.of());
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "PROGRESSION_CANONICAL_SOURCE_UNAVAILABLE");
     }
 
     public EarlyGameStatusResponse earlyGameStatus(UUID userId) {
-        List<Map<String, Object>> quests = List.of(
-            Map.of("id", "QUEST_1", "step", 1, "title", "로그인 및 이용 동의", "rewardWld", 10000, "isCompleted", true),
-            Map.of("id", "QUEST_2", "step", 2, "title", "실전 복리 계산기 체험", "rewardWld", 5000, "isCompleted", true),
-            Map.of("id", "QUEST_3", "step", 3, "title", "가상 주식 10단 호가창 조회", "rewardWld", 5000, "isCompleted", true),
-            Map.of("id", "QUEST_4", "step", 4, "title", "가상 주식 모의투자 첫 체결", "rewardWld", 20000, "isCompleted", false),
-            Map.of("id", "QUEST_5", "step", 5, "title", "일일 직업 파밍 루틴 수행", "rewardWld", 10000, "isCompleted", false),
-            Map.of("id", "QUEST_6", "step", 6, "title", "1:1 스마트 P2P 간편 송금", "rewardWld", 15000, "isCompleted", false),
-            Map.of("id", "QUEST_7", "step", 7, "title", "핀테크 금융 상식 퀴즈 정답", "rewardWld", 10000, "isCompleted", false)
-        );
-
-        return new EarlyGameStatusResponse(true, "STEP_4_TRADING", false, quests);
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "PROGRESSION_CANONICAL_SOURCE_UNAVAILABLE");
     }
 
     private ProgressionStatus getOrCreateProgression(UUID userId) {

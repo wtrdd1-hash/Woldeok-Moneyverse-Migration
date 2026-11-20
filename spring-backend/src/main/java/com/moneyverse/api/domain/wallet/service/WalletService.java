@@ -4,6 +4,8 @@ import com.moneyverse.api.domain.wallet.dto.WalletDtos.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,15 +28,16 @@ public class WalletService {
         try {
             uid = UUID.fromString(userId.trim());
         } catch (Exception e) {
-            uid = UUID.fromString("5f7b8b44-e4aa-40b8-b93a-800ec0151d20");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid wallet owner identifier");
         }
 
         BigDecimal cashBalance = BigDecimal.ZERO;
         BigDecimal bankBalance = BigDecimal.ZERO;
+        Set<String> verifiedAccountTypes = new HashSet<>();
 
         try {
             String sql = """
-                SELECT a.account_type, COALESCE(b.available_amount, 0) AS amount
+                SELECT a.account_type, b.available_amount AS amount
                 FROM accounts a
                 LEFT JOIN account_balances b ON a.id = b.account_id
                 WHERE a.owner_user_id = ?
@@ -42,15 +45,21 @@ public class WalletService {
             List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, uid);
             for (Map<String, Object> r : rows) {
                 String type = String.valueOf(r.get("account_type"));
-                BigDecimal amount = new BigDecimal(String.valueOf(r.get("amount")));
-                if ("USER_CASH".equals(type)) {
-                    cashBalance = amount;
-                } else if ("USER_BANK".equals(type)) {
-                    bankBalance = amount;
-                }
+                if (!"USER_CASH".equals(type) && !"USER_BANK".equals(type)) continue;
+                // A missing balance row is not proof of a 0-WLD balance.
+                Object reportedAmount = r.get("amount");
+                if (reportedAmount == null) throw new IllegalStateException("missing balance proof");
+                BigDecimal amount = new BigDecimal(String.valueOf(reportedAmount));
+                if (!verifiedAccountTypes.add(type)) throw new IllegalStateException("duplicate wallet account type");
+                if ("USER_CASH".equals(type)) cashBalance = amount;
+                else bankBalance = amount;
             }
         } catch (Exception e) {
-            log.warn("[WalletService] Failed to load ledger balances for userId={}: {}", uid, e.getMessage());
+            log.warn("[WalletService] Authoritative wallet balance query unavailable");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "wallet balance source unavailable", e);
+        }
+        if (!verifiedAccountTypes.containsAll(Set.of("USER_CASH", "USER_BANK"))) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "wallet ownership/balance not verified");
         }
 
         BigDecimal total = cashBalance.add(bankBalance);
@@ -70,7 +79,8 @@ public class WalletService {
             """;
             txs = jdbcTemplate.queryForList(txSql, uid);
         } catch (Exception e) {
-            log.warn("[WalletService] Failed to load recent ledger postings for userId={}: {}", uid, e.getMessage());
+            log.warn("[WalletService] Authoritative wallet postings query unavailable");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "wallet postings source unavailable", e);
         }
 
         return new WalletOverview(
@@ -83,8 +93,18 @@ public class WalletService {
         );
     }
 
-    @Transactional
+    /** Legacy direct transfer has no replay-stable request key; never post twice on retry. */
     public Map<String, Object> transfer(String fromUserId, String toUserId, Long amountWld, String memo) {
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "wallet transfer requires a verified idempotency receipt key");
+    }
+
+    @Transactional
+    public Map<String, Object> transferWithIdempotencyKey(
+            String fromUserId, String toUserId, Long amountWld, String memo, UUID idempotencyKey) {
+        if (idempotencyKey == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Idempotency-Key UUID required");
+        }
         if (amountWld == null || amountWld <= 0) {
             throw new IllegalArgumentException("이체 금액은 1 WLD 이상이어야 합니다.");
         }
@@ -101,15 +121,15 @@ public class WalletService {
             throw new IllegalArgumentException("유효하지 않은 유저 식별자 형식입니다.");
         }
 
-        UUID idempotencyKey = UUID.randomUUID();
-
+        // Key must be provided by the authenticated caller; retries reuse the same key.
         try {
             String sql = "SELECT public.economy_transfer(?::uuid, ?::uuid, ?::uuid, ?::numeric)";
             UUID txId = jdbcTemplate.queryForObject(sql, UUID.class, idempotencyKey, fromUid, toUid, BigDecimal.valueOf(amountWld));
 
             Map<String, Object> res = new LinkedHashMap<>();
             res.put("success", true);
-            res.put("txId", txId != null ? txId.toString() : UUID.randomUUID().toString());
+            if (txId == null) throw new IllegalStateException("missing canonical posting receipt");
+            res.put("txId", txId.toString());
             res.put("fromUserId", fromUserId);
             res.put("toUserId", toUserId);
             res.put("amount", amountWld);
@@ -118,8 +138,9 @@ public class WalletService {
             res.put("message", "P2P 불변 복식부기 원장 이체가 성공적으로 집행되었습니다.");
             return res;
         } catch (Exception e) {
-            log.error("[WalletService] economy_transfer failed from={} to={} amount={}: {}", fromUid, toUid, amountWld, e.getMessage());
-            throw new IllegalStateException("원장 이체 처리 실패: " + e.getMessage(), e);
+            log.warn("[WalletService] canonical economy transfer unavailable; no success receipt");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "canonical transfer receipt unavailable", e);
         }
     }
 }

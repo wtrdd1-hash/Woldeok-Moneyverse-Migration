@@ -54,8 +54,8 @@ public class ChatService {
             }, actor, bounded);
             return new ConversationListResponse(true, rows, totalUnreadCount(actor));
         } catch (Exception ex) {
-            log.warn("[ChatService] listConversations fallback: {}", ex.getMessage());
-            return new ConversationListResponse(true, List.of(), 0);
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "CHAT_CONVERSATIONS_UNAVAILABLE", ex);
         }
     }
 
@@ -63,10 +63,11 @@ public class ChatService {
         try {
             String result = jdbcTemplate.queryForObject(
                     "SELECT public.private_chat_total_unread(?::uuid)::text", String.class, actor);
+            if (result == null) throw new IllegalStateException("canonical unread count missing");
             return count(result);
         } catch (Exception ex) {
-            log.warn("[ChatService] totalUnreadCount fallback: {}", ex.getMessage());
-            return 0;
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "CHAT_UNREAD_UNAVAILABLE", ex);
         }
     }
 

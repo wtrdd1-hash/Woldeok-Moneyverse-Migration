@@ -71,23 +71,16 @@ public class PensionController {
 
     @PostMapping("/toggle-retirement")
     public ResponseEntity<?> toggleRetirement(HttpServletRequest request) {
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "isRetired", false,
-                "message", "은퇴 플랜 상태가 갱신되었습니다."
-        ));
+        if (verifiedMember(request).isEmpty()) return unauthenticated();
+        // No mutation can be acknowledged without a verified pension posting receipt.
+        return sourceUnavailable();
     }
 
     @GetMapping("/funded/position")
     public ResponseEntity<?> getFundedPosition(HttpServletRequest request) {
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "fundedAmountWld", 850000L,
-                "projectedMonthlyPayoutWld", 125000L,
-                "retirementAge", 65,
-                "expectedReturnRatePct", 6.8,
-                "status", "ACTIVE"
-        ));
+        if (verifiedMember(request).isEmpty()) return unauthenticated();
+        // A decorative projection cannot be represented as an actual funded ledger balance.
+        return sourceUnavailable();
     }
 
 }

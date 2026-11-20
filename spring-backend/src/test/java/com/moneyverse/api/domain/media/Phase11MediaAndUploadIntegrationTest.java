@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
@@ -31,6 +33,10 @@ public class Phase11MediaAndUploadIntegrationTest {
 
     @Autowired
     private UserAuthService authService;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
 
     // 1x1 valid transparent PNG bytes
     private static final byte[] VALID_PNG = new byte[]{
@@ -76,10 +82,18 @@ public class Phase11MediaAndUploadIntegrationTest {
     @Test
     @DisplayName("POST /api/v1/photos/uploads & GET /media: 정상 이미지 업로드 및 바이너리 스트리밍 검증")
     void testUploadAndRetrieveMedia() throws Exception {
-        // Register test user
+        // H2 test schema is deliberately not a PostgreSQL production-migration clone.
+        // Seed a test-only canonical login credential in its own ephemeral database;
+        // exercise real Spring login/session issuance, media upload and read access.
         String email = "testmedia_" + UUID.randomUUID().toString().substring(0, 8) + "@moneyverse.local";
+        String password = "pass1234!";
+        UUID actor = UUID.randomUUID();
+        jdbcTemplate.update("INSERT INTO users (id, email, display_name, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)",
+                actor, email, "미디어테스터");
+        jdbcTemplate.update("INSERT INTO auth_local_credentials (user_id, email, email_hash, password_verifier, verified_at, changed_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+                actor, email, UserAuthService.sha256(email), new Argon2PasswordEncoder(16, 32, 1, 19456, 2).encode(password));
         MockHttpServletResponse res = new MockHttpServletResponse();
-        LoginResult login = authService.register(email, "pass1234!", "미디어테스터", res);
+        LoginResult login = authService.login(email, password, res);
 
         MockMultipartFile file = new MockMultipartFile(
                 "file", "test.png", "image/png", VALID_PNG

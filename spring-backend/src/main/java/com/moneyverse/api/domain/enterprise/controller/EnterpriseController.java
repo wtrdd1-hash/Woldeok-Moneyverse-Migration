@@ -39,57 +39,31 @@ public class EnterpriseController {
     @GetMapping
     public ResponseEntity<Map<String, Object>> listEnterprises(HttpServletRequest request) {
         verifyAdmin(request);
-        List<Map<String, Object>> enterprises = List.of(
-            Map.of("id", "ENT-01", "name", "한국가상전력공사", "sector", "에너지·전력", "stateSharePct", 85.0, "valuationWld", 150_000_000_000L, "status", "PUBLIC_OWNED"),
-            Map.of("id", "ENT-02", "name", "월덕가상철도공사", "sector", "교통·물류", "stateSharePct", 100.0, "valuationWld", 80_000_000_000L, "status", "PUBLIC_OWNED"),
-            Map.of("id", "ENT-03", "name", "한국가상가스공사", "sector", "자원·에너지", "stateSharePct", 70.0, "valuationWld", 60_000_000_000L, "status", "PUBLIC_OWNED"),
-            Map.of("id", "ENT-04", "name", "월덕우체국금융공사", "sector", "금융·우편", "stateSharePct", 100.0, "valuationWld", 120_000_000_000L, "status", "PUBLIC_OWNED")
-        );
-        return ResponseEntity.ok(Map.of("ok", true, "enterprises", enterprises, "total", enterprises.size()));
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "Verified enterprise ownership and valuation records unavailable");
     }
 
     @PostMapping("/{id}/privatize")
-    public ResponseEntity<Map<String, Object>> privatizeShares(
-            HttpServletRequest request,
-            @PathVariable("id") String id,
-            @RequestBody(required = false) Map<String, Object> body) {
+    public ResponseEntity<Map<String, Object>> privatizeShares(HttpServletRequest request,
+            @PathVariable("id") String id, @RequestBody(required = false) Map<String, Object> body) {
         verifyAdmin(request);
-        if (body == null || !body.containsKey("sharesToOfferPercent")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "sharesToOfferPercent is required");
-        }
-        double pct = ((Number) body.get("sharesToOfferPercent")).doubleValue();
-        return ResponseEntity.ok(Map.of(
-            "ok", true,
-            "enterpriseId", id,
-            "privatizedPct", pct,
-            "message", "공기업 지분 " + pct + "% 민영화 공모 절차가 승인되었습니다."
-        ));
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "No idempotent privatization or ledger receipt source available");
     }
 
     @PostMapping("/{id}/dividends/disburse")
-    public ResponseEntity<Map<String, Object>> disburseDividends(
-            HttpServletRequest request,
+    public ResponseEntity<Map<String, Object>> disburseDividends(HttpServletRequest request,
             @PathVariable("id") String id) {
         verifyAdmin(request);
-        return ResponseEntity.ok(Map.of(
-            "ok", true,
-            "enterpriseId", id,
-            "disbursedAmountWld", 5_000_000_000L,
-            "message", "국고 및 주주 대상 배당금 지급이 완료되었습니다."
-        ));
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "No canonical dividend disbursement receipt available");
     }
 
     @GetMapping("/{id}/governance")
-    public ResponseEntity<Map<String, Object>> getGovernance(
-            HttpServletRequest request,
+    public ResponseEntity<Map<String, Object>> getGovernance(HttpServletRequest request,
             @PathVariable("id") String id) {
         verifyAdmin(request);
-        return ResponseEntity.ok(Map.of(
-            "ok", true,
-            "enterpriseId", id,
-            "boardMembers", List.of("김상임 (이사장)", "박이사 (정부파견)", "이사외 (사외이사)"),
-            "auditStatus", "QUALIFIED",
-            "lastAuditedAt", "2026-10-31T00:00:00Z"
-        ));
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "Verified enterprise governance and audit source unavailable");
     }
 }

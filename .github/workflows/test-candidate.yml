@@ -36,6 +36,7 @@ jobs:
   release-input:
     runs-on: ubuntu-latest
     outputs:
+      comparison_base_sha: ${{ steps.base.outputs.sha }}
       classification: ${{ steps.classify.outputs.classification }}
       repository_head_sha: ${{ steps.classify.outputs.repository_head_sha }}
       application_source_sha: ${{ steps.classify.outputs.application_source_sha }}
@@ -112,6 +113,7 @@ jobs:
     needs: release-input
     uses: ./.github/workflows/ci.yml
     with:
+      comparison_base_sha: ${{ needs.release-input.outputs.comparison_base_sha }}
       classification: ${{ needs.release-input.outputs.classification }}
 
   build:

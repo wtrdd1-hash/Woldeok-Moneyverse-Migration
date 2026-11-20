@@ -11,20 +11,14 @@ import java.util.*;
 @RequestMapping(path = {
         "/api/v1/derivatives",
         "/api/derivatives",
-        "/derivatives"
+        "/derivatives",
+        "/api/v1/stocks/derivatives",
+        "/stocks/derivatives"
 })
 public class DerivativesController {
 
-    @GetMapping({"", "/overview"})
+    @GetMapping({"", "/overview", "/markets", "/positions"})
     public ResponseEntity<Map<String, Object>> getDerivativesOverview() {
-        List<Map<String, Object>> contracts = List.of(
-                Map.of("symbol", "WLD-FUT-2612", "underlying", "WLD Index", "strikePrice", 1000, "currentPrice", 1042, "openInterest", 15400, "status", "TRADING"),
-                Map.of("symbol", "CHIMU-CALL-70K", "underlying", "CHIMU314", "strikePrice", 70000, "currentPrice", 2350, "openInterest", 8200, "status", "TRADING")
-        );
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "marketStatus", "OPEN",
-                "contracts", contracts
-        ));
+        return ResponseEntity.status(503).body(Map.of("code", "DERIVATIVES_DATA_UNVERIFIED"));
     }
 }
