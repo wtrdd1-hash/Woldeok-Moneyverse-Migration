@@ -373,3 +373,23 @@
     LOCALES: SUPPORTED_LOCALES
   };
 })();
+
+
+  // System Under Maintenance / Troubleshooting Notice Banner
+  function injectServiceNoticeBanner() {
+    if (document.getElementById('mv-troubleshooting-banner')) return;
+    const banner = document.createElement('div');
+    banner.id = 'mv-troubleshooting-banner';
+    banner.style.cssText = 'position:sticky;top:0;left:0;right:0;z-index:9999999;background:linear-gradient(90deg,#7C2D12 0%,#9A3412 100%);border-bottom:1px solid rgba(244,63,94,0.5);color:#fed7aa;padding:10px 16px;font-size:13px;font-weight:600;text-align:center;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 16px rgba(0,0,0,0.6);font-family:Pretendard,sans-serif;';
+    banner.innerHTML = `
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#f43f5e;box-shadow:0 0 10px #f43f5e;"></span>
+      <span>⚠️ [시스템 안내] 연결 서비스 프론트엔드 서비스 문제 해결중 (백엔드 연동 및 복식부기 원장 데이터 보존 재구축 작업)</span>
+    `;
+    document.body.prepend(banner);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectServiceNoticeBanner);
+  } else {
+    injectServiceNoticeBanner();
+  }

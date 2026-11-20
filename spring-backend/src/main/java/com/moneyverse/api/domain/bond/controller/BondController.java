@@ -13,7 +13,7 @@ import java.util.*;
 
 @Tag(name = "Treasury Bonds", description = "媛??援?콈 怨듬え 泥?빟 諛??덊룷(Repo) ?대낫 ?異?API")
 @RestController
-@RequestMapping("/api/bonds")
+@RequestMapping({"/api/v1/bonds", "/api/bonds"})
 public class BondController {
 
     private final BondService bondService;
