@@ -131,6 +131,11 @@ public class LocalAuthController {
             res.put("userId", result.userId().toString());
             res.put("displayName", result.displayName());
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(res);
+        } catch (org.springframework.web.server.ResponseStatusException unavailable) {
+            if(unavailable.getStatusCode().value()!=503) throw unavailable;
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .header(HttpHeaders.CACHE_CONTROL,"private, no-store")
+                .body(Map.of("ok",false,"success",false,"code","LOCAL_REGISTRATION_CONTRACT_UNAVAILABLE"));
         } catch (IllegalStateException e) {
             Map<String, Object> err = new LinkedHashMap<>();
             err.put("title", "Conflict");

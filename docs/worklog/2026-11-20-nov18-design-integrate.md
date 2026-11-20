@@ -514,3 +514,44 @@ Browser geometry, global cross-navigation drafts, authenticated delivery and Tes
 - Local fresh Spring479/Node270/bootJar and three source review stages remain the implementation evidence. This checkpoint changes only QA/worklog documents, verified by exact changed-path list and git diff --check; no redundant runtime tests claimed for a documentation-only edit.
 - Build Test Candidate44714447977 still building frontend at last check; public Test403 and authenticated/browser/full-route gates remain OPEN. Implementation is on task branch/PR3319, not a production release or all-site certification. No production deployment or branch deletion; retain branches while integration/acceptance is unfinished.
 - Current source-gap table now explicitly includes public stocks EN/KO/nonshared-shell and other remaining feature/page families. Next scope must preserve read-only market/canonical money and handle unavailable data honestly; no inferred trade/graph parity.
+
+## Approved Production transition continuation — before work / in progress
+- User authorizes resolving promotion gates and switching to the implemented native frontend. Execute the new native-frontend-production-cutover plan in the same task worktree/branch; existing main9635262fb2 and PR3319 retained, foreign original checkout untouched.
+- Read current release guide and observed host facts; historical K8s and Nov10 runtime records are not current public-runtime proof. No deployment mutation yet.
+- Read-only independent audits confirm deliberate Test loopback ACL (public403), unverified old build identity, inactive official Test pair and older private Spring canary. Preserve Test privacy while preparing authenticated exact-source verification.
+- Unwaived financial blockers: direct app DML on ledger_transactions/postings, one recent member-owned USER_CASH1,000,000WLD opening without postings; migration346 manual checksum and salary body/searchpath drift. Keep accepted-existing-DML exceptions separate. No member identifiers/credentials recorded; no silent balance/checksum edit or waiver.
+- [ ] Build-bound identity/quiescent candidate; [ ] protected isolated Test; [ ] financial/provenance resolution; [ ] exact-main integration/zero-downtime cutover; [ ] observed Production acceptance.
+
+### Production blocker root cause — in progress
+- Source trace found the local registration prototype directly inserts USER_CASH available_amount1,000,000 without ledger posting, using the same Instant for user/account/balance. This matches the unexplained opening and is a repeatable new-account integrity defect, beyond a merely suspected test fixture.
+- Add fail-closed registration regression before patch; native UI already marks registration unavailable pending persisted consent/age/canonical funding contract. Do not write a synthetic ledger event or silently alter the existing member balance. Financial acceptance remains BLOCKED until historical integrity/provenance is legitimately resolved.
+
+- Task1 identity/scheduling GREEN14 focused cases after9logicalRED: packaged source identity and explicit scheduling suppression work; default scheduling retained. Registration2logicalRED→GREEN and native auth UI checks passed. No deployment claim yet.
+- Test CORS needs process-scoped trusted origin: add2logical regression assertions before code so authenticated Test POSTs work without permitting Test-origin credential access to Production. Private Test ingress operator gate remains required.
+
+- Registration service2RED→GREEN; HTTP aliases then reproduced generic exception handler converting intended503 to500 (4tests/2fail), now map only explicit503 to sanitized unavailable/no-store with no cookie or JDBC interaction. No other auth result contract changed.
+- Safe empty registration requests at actual loopback Production origin returned400 before the proposed exact-path hold; public Python request was independently403 Cloudflare1010, not proof that application path is safe. No valid Production signup or balance creation was attempted. Review the bounded Nginx prevention separately before changing host configuration.
+- Consistent private Production dump215,397,410bytes SHA256efdc9441a522b90f7605efb4898c29d19226c1b9189d8c2a2811cf8727a3733a and passwordless-role archive completed; isolated internal-network/loopback-only restore is in progress. No Production SQL writes or traffic changes.
+
+### Review remediation — in progress
+- Fresh whole delta review requested changes: SecurityConfig uninjected field broke45 existing standalone CSRF tests; preserve the exact canonical Production default at declaration while retaining strict explicit-config validation. No test deleted/softened.
+- Actual Spring transaction-proxy reproduction failed instead of503 on unavailable connection; remove Transactional only from the now-always-unavailable registration method. Login/session transactions remain unchanged.
+- Additional packaged-identity test proved runtime spring.info.build.location could substitute forged BuildProperties (expected503, got200). Identity now reads literal classpath build-info directly, never configurable project-info bean; real Properties parsing tested via test-only Resource fixtures. Both proxy and metadata logicalRED observed before fix.
+- Isolated internal-network/loopback-only Production restore completed, zero role/data restore errors, no Production database modification. Scoped live signup edge hold applied after independent review; origin emptyPOST and publicGET503, home/login200, Testanonymous403. First immediate reload probe raced old workers and was rolled back; condition-based generation retry passed. No full frontend promotion yet.
+
+- Review fix63 covering cases had1 remaining failure: older CORS-allowed localhost raw-proof denial now stopped at the framework's plaintext403, so the existing JSON guard check could not run. Preserve the exact pre-existing Production CORS origins (no expansion) and keep configured Test exclusive; retain all45 tests and the same-origin raw-proof guard. Scoped policy ruling recorded in plan.
+
+- Review remediation focused65 tests GREEN: all45 original session/CSRF cases retained, real transactional-proxy unavailable-DB hold works without JDBC, fixed-classpath identity rejects external Spring build-info override. Extra identity/proxy2 logicalRED were independently observed before remediation.
+- Test operator probe adds optional private, no-follow, Unix-permission-checked scoped credential file; fixed Test origin/read-only paths/redirect:error, never Production.6logicalRED→13GREEN with existing public-edge checks unchanged; no financial/source/noindex criterion waived.
+- Private Production restore completed under internal Docker network and loopback-only publication. No Production SQL writes. Existing member1M and historical migration346 remain unresolved and are not silently changed.
+
+### Production prerequisite checkpoint — reviewed, in progress
+- Initial full regression was NOT a pass:513 Spring cases,45 failures. Fixed programmatic SecurityConfig initialization while retaining the exact old Production CORS allowlist; configured Test stays origin-exclusive. All45 existing CSRF regressions remain unchanged.
+- Added real transaction-proxy regression: registration previously connected to JDBC before returning the safety hold. Removed only register transaction interception;503 now precedes all JDBC.
+- Replaced configurable BuildProperties identity lookup with the literal packaged classpath resource. An external build-info override regression first produced forged200 (RED); fixed implementation ignores it.
+- Fresh clean full validation:515 Spring cases across91 suites,0 failures/errors/skips, bootJar successful;276 Node cases,0 failures/skips. Source fingerprint before/after aff57bdff8eeb7e36863f6d914bbbbe3f159e046ab99971645c9a2ca67726cd1 matched.
+- Independent source re-review APPROVED; original P1/P2 addressed. Reviewer independently verified13 operator-probe cases. No financial/release gate waiver follows from this approval.
+- Optional Test operator probe sends credentials only to fixed Test GET/HEAD paths, refuses redirects/other origins, and reads a purpose-bound owner-private no-follow file. Existing public treasury/source/noindex acceptance criteria are unchanged.
+- Private Production backup restore completed on a newly owned isolated loopback PostgreSQL generation. This proves restore completion, not financial correctness. Production database remains unchanged.
+- Reviewed exact local-registration API edge hold is active in Production (503/private-no-store). Home/login remain200. Anonymous Test access remains403. No frontend traffic transition has occurred.
+- Still BLOCKED: unexplained1,000,000WLD opening, app ledger DML, manual346 provenance/definition drift, exact-source protected Test and authenticated continuity.

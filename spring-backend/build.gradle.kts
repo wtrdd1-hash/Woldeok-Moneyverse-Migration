@@ -82,3 +82,15 @@ tasks.register<JavaExec>("nativeUiPreview") {
     classpath = sourceSets["test"].runtimeClasspath
     mainClass.set("com.moneyverse.api.domain.web.NativeUiPreview")
 }
+
+// CI artifact provenance is checked independently; runtime environment cannot override this resource.
+val nativeSourceRevision = providers.gradleProperty("moneyverseSourceSha")
+    .orElse(providers.environmentVariable("GITHUB_SHA"))
+    .getOrElse("unverified")
+springBoot {
+    buildInfo {
+        properties {
+            additional.set(mapOf("sourceRevision" to nativeSourceRevision, "runtimeKind" to "spring-native"))
+        }
+    }
+}
