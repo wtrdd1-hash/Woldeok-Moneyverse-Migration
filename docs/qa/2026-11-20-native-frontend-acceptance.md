@@ -86,3 +86,15 @@ This entry supersedes earlier per-slice totals only for the current isolated can
 - Tools/calculators/compound/stock:160cases, no undersized targets/overflow. All checks guest on isolatedH2; unavailable stock/board data is not a live-source failure claim.
 - Status source unavailable: actual Whitelabel503/no shell found and repaired after5logicalRED SSR failures;11focusedGREEN including truthpolicy. Actual after-fix status geometry and integrated whole-branch review pending.
 - Source8f0 whole-branch review2Important open, assigned original messaging implementer round2/5: shared generic localization overwrites dynamic state, and authenticated messaging header bypasses shared sizing/mobile classes.2minor labels/copy also assigned; rootbrand/helpwidth/titleminor addressed and browserverified.
+
+## Current authoritative checkpoint — reviewed integrated candidate
+| Gate | Current evidence |
+|---|---|
+| Source review | Messaging round2/5 approved0a64b35a46,2 Important plus M1/M3 resolved; root follow-up approved0 Critical/Important; patchd5e374b0b8fd |
+| Fresh ordinary verification | Spring479/84suites0failures/errors/skips +bootJar; Node2700failed/cancelled/skipped; source fingerprint8a0e75106ef6 stable before/after |
+| Actual PostgreSQL |8f0 CI44702880854 success, read9tests0failures/errors/skips; final-commit CI pending |
+| Actual guest browser |240 locale/width cases6routepaths at4e10; not authenticated or delivery proof |
+| Source-unavailable/status | Native503 shell/unknown/no invented0counts;5RED→11focusedGREEN and source review approved; latest actual-browser rerun OPEN due external SSH transport refusal |
+| Deployment | HOLD: exact-source public TestHTTP403; no production rollout |
+| Remaining | Authenticated member/admin QA, remaining legacy pages, full linguistic/accessibility/200% checks, global cross-navigation drafts and simultaneous concurrency OPEN |
+Earlier slice totals remain historical. Only the rows above describe this checkpoint; source code completion does not imply release acceptance.

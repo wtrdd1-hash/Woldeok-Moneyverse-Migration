@@ -96,9 +96,10 @@
   }
   function renderAccount() {
     const container=byId('auth-actions');if(!container)return;container.replaceChildren();
-    if(!owner()){const login=node('a',t('login'));login.href='/login?next=%2F'+kind;container.appendChild(login);return;}
-    const account=node('a',session.user.displayName||t('account'));account.href='/account';
-    const logout=node('button',t('logout'));logout.type='button';logout.className='messaging-logout';
+    const topbar=container.closest('.topbar');if(topbar)topbar.classList.toggle('member-authenticated',Boolean(owner()));
+    if(!owner()){const login=node('a',t('login'));login.className='auth-link';login.href='/login?next=%2F'+kind;container.appendChild(login);return;}
+    const account=node('a',session.user.displayName||t('account'));account.href='/account';account.className='auth-link auth-profile';account.title=t('account');
+    const logout=node('button',t('logout'));logout.type='button';logout.className='auth-logout';
     logout.addEventListener('click',async()=>{
       const proof=session&&session.csrfToken;
       resetPrivate();checking=true;renderControls();

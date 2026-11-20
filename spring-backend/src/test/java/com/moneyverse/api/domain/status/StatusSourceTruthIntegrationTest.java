@@ -41,5 +41,7 @@ class StatusSourceTruthIntegrationTest {
         org.junit.jupiter.api.Assertions.assertFalse(html.contains("Whitelabel Error Page"));
         org.junit.jupiter.api.Assertions.assertFalse(html.contains("state-operational"));
         org.junit.jupiter.api.Assertions.assertFalse(html.contains("STATUS_SOURCE_UNAVAILABLE"));
+        org.junit.jupiter.api.Assertions.assertFalse(html.contains("data-public-count=\"0\""));
+        org.junit.jupiter.api.Assertions.assertFalse(html.contains("data-i18n=\"publicText59\""));
     }
 }
