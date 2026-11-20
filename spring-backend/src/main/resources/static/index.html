@@ -804,10 +804,11 @@
             <span class="material-symbols-outlined" style="font-size: 16px; color: var(--mv-muted);">search</span>
             <input type="text" placeholder="메뉴 및 주식 검색...">
           </div>
-          <a href="?lang=en" class="locale-toggle-btn" title="언어 변경">
-            <span class="material-symbols-outlined" style="font-size: 15px;">language</span>
-            <span>EN / KO</span>
-          </a>
+          <button type="button" class="locale-toggle-btn mv-lang-btn" id="header-lang-btn" title="언어 변경 (5개국어 지원)" style="cursor: pointer; background: rgba(156, 131, 255, 0.12); border: 1px solid rgba(156, 131, 255, 0.35); color: var(--mv-primary-light); border-radius: 8px; padding: 6px 12px; display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 800;">
+            <span class="mv-lang-flag">🇰🇷</span>
+            <span class="mv-lang-code">KO</span>
+            <span class="material-symbols-outlined" style="font-size: 14px;">arrow_drop_down</span>
+          </button>
           <div id="auth-action-container" style="display: flex; align-items: center;">
             <a href="/login" class="login-cta-btn" id="header-login-btn">
               <span class="material-symbols-outlined" style="font-size: 16px;">login</span>
@@ -1315,5 +1316,6 @@
       }
     })();
   </script>
+  <script src="/js/mv-i18n.js"></script>
 </body>
 </html>
