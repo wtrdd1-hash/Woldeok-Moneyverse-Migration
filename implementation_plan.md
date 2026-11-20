@@ -5894,3 +5894,40 @@ graph TD
 - **타이틀 '홈 대시보드'**: `{ x: 56px, width: 95.5px }` (단 한 줄로 완벽 정렬, 분절 0건)
 - **언어 선택기 ('KO')**: `{ x: 167.5px, width: 64.5px }`
 - **로그인 버튼 ('로그인')**: `{ x: 237px, width: 67px }` (우측 끝 `x = 304px <= 320px`, 우측 16px 마진 완벽 확보, 잘림 0건)
+
+---
+## 🚀 [v103 Specification] 공식 브랜드 아이콘/파비콘 적용 및 백엔드 GitHub 메인 통합 (2026-11-20)
+- **적용 일시**: 2026-11-20 16:35 KST
+- **목적**: 사용자가 제공한 1024x1024 고해상도 공식 3D 엠블럼(왕관, W, 다이아몬드, 우주 궤도 링, 월계수 관)을 기반으로 공식 파비콘, 앱 터치 아이콘, 웹 UI 내비바 심볼을 규격화하고, Nginx 정적 캐시 라우팅 및 Spring Boot JAR 내장 배포를 완료함. 또한 백엔드/네이티브 템플릿(PR #3311)의 CI 회귀 오류(`mv39-money.test.mjs`)를 근본 해결하고 GitHub `main`에 최종 통합함.
+
+### 1. 공식 브랜드 아이콘 에셋 매트릭스
+1. **생성된 에셋 규격**:
+   - `favicon.ico` (16x16, 32x32, 48x48 멀티레이어 ICO, 11,781 bytes)
+   - `apple-touch-icon.png` (180x180, iOS 홈 화면 최적화, 63,937 bytes)
+   - `android-chrome-192x192.png` (192x192, 71,403 bytes)
+   - `android-chrome-512x512.png` (512x512, 386,047 bytes)
+   - `woldeok-symbol.png` (128x128 UI 내비바 및 사이드바 뱃지, 35,971 bytes)
+   - `woldeok-official-icon.png` (1024x1024 무손실 마스터 PNG, 1,148,485 bytes)
+2. **배치 디렉토리**:
+   - `/srv/moneyverse-data/frontend-static/` 및 `/images/` (Nginx 고속 정적 서빙)
+   - `spring-backend/src/main/resources/static/` (소스 리포지토리)
+   - `spring-backend/src/main/resources/static/assets/mv39/` (Thymeleaf/Spring SSR 호환)
+   - `frontend/public/` (Next.js 빌드 호환)
+   - `/srv/moneyverse-data/spring-backend/moneyverse-spring-backend-0.0.1-SNAPSHOT.jar` (실행 JAR 내부 클래스패스 `BOOT-INF/classes/static/`)
+3. **Nginx 라우팅 강화 (`/etc/nginx/snippets/moneyverse-frontend-v24-pages.conf`)**:
+   - `/favicon.ico` -> `/srv/moneyverse-data/frontend-static/favicon.ico` (HTTP 200 OK)
+   - `/apple-touch-icon.png` -> `/srv/moneyverse-data/frontend-static/apple-touch-icon.png` (HTTP 200 OK)
+   - `/images/` -> `/srv/moneyverse-data/frontend-static/images/` (HTTP 200 OK)
+4. **브랜드 사양 문서**:
+   - `docs/design/OFFICIAL_ICON_AND_BRAND_ASSETS.md` 신설 완료.
+
+### 2. 백엔드 및 네이티브 프론트엔드 GitHub 메인 통합 (PR #3311)
+- **통합 커밋 OID**: `88b70b90d7ee0049c1f75e1e68507caf3d261517`
+- **통합 완료 시각**: 2026-11-20 17:04:16 KST
+- **통과된 브랜치 보호 체크**:
+  - `classify` (9s), `policy` (16s), `runtime-check` (9m 47s), `spring-web-check` (1m 27s)
+  - `verify / classify` (5s), `verify / policy` (15s), `verify / runtime-check` (9m 24s), `verify / spring-web-check` (1m 31s)
+- **통합 산출물**:
+  - Spring Boot Thymeleaf 네이티브 템플릿 6종 (`mv43/home`, `mv43/admin`, `mv43/wallet`, `mv43/auth`, `shared/chrome`)
+  - 154개 다국어 번역 사전 SSR 엔진 및 5개 국어(한국어, 영어, 일본어, 중국어, 베트남어) 정합성 보장
+  - 44개 노드 UI/회계 계약 테스트 및 289개 Spring 백엔드 테스트 100% 통과
