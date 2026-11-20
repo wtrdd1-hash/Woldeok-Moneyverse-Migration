@@ -19,7 +19,7 @@
   <th:block th:replace="~{shared/chrome :: sidebar}"></th:block>
   <div class="app-main">
     <div class="app-inner">
-      <th:block th:replace="~{shared/chrome :: header}"></th:block>
+      <th:block th:replace="~{shared/chrome :: pageHeader}"></th:block>
       <main id="main-content" tabindex="-1">
         <section class="hero" aria-labelledby="hero-title">
           <div><div class="eyebrow"><span aria-hidden="true">✦</span> WOLDEOK MONEYVERSE</div><h2 id="hero-title" data-i18n="walletHero" th:text="${uiCopy['walletHero']}">My assets</h2><p id="hero-description" data-i18n="walletLead" th:text="${uiCopy['walletLead']}">See your wallet, investments and activity in one place.</p></div>

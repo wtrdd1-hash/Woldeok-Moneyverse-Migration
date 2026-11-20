@@ -12,7 +12,7 @@
 <body data-page="auth" th:attr="data-auth-page=${authPage}">
 <a class="skip-link" href="#main-content" data-i18n="authSkip" th:text="${uiCopy['authSkip']}">Skip to main content</a>
 <div class="app-shell"><th:block th:replace="~{shared/chrome :: sidebar}"></th:block>
-<div class="app-main"><div class="app-inner"><th:block th:replace="~{shared/chrome :: header}"></th:block>
+<div class="app-main"><div class="app-inner"><th:block th:replace="~{shared/chrome :: pageHeader}"></th:block>
 <main id="main-content" tabindex="-1" class="auth-main">
 <section class="hero"><div><div class="eyebrow">WOLDEOK MONEYVERSE</div><h2 id="auth-heading" th:attr="data-i18n=${authHeadingKey}" th:text="${uiCopy.get(#vars.authHeadingKey)}">Log in</h2>
 <p th:if="${authLeadKey != null}" th:attr="data-i18n=${authLeadKey}" th:text="${uiCopy.get(#vars.authLeadKey)}">Access your Moneyverse account.</p></div></section>

@@ -13,7 +13,7 @@
     </nav>
     <div class="side-bottom"><span class="side-helper" data-i18n="allRights" th:text="${uiCopy['allRights']}">Virtual WLD is not legal tender.</span></div>
   </aside>
-      <header th:fragment="header" class="topbar">
+      <header th:fragment="pageHeader" class="topbar">
         <button id="mobile-menu-toggle" class="menu-toggle" type="button" aria-label="Open menu" aria-controls="mobile-menu" aria-expanded="false">☰</button>
         <h1 th:attr="data-i18n=${uiPageKey != null ? uiPageKey : 'home'}" th:text="${uiCopy[uiPageKey != null ? uiPageKey : 'home']}">My assets</h1>
         <div class="top-spacer"></div>

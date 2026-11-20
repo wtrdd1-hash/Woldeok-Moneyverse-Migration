@@ -257,3 +257,9 @@ The independent task review found an administrator-close legacy-cookie identity 
 - [x] Added test-source-only preview launcher and explicit Gradle task. It refuses missing opt-in/source SHA and forces classpath test config, H2, localhost binding, empty bot token and temporary media through fixed command-line arguments. It is excluded from bootJar by test-source placement.
 - [x] Preview harness compilation succeeded; full ordinary Spring test/JAR remains394 cases,0 failures/errors/skips, and Node UI/security/release220 passes. Actual preview browser checks follow after launching the isolated process/tunnel.
 - Public-chrome independent review is in progress. Important missing status viewport metadata is being collected for the original implementer's scoped fix loop; unreviewed public changes are not integrated yet.
+
+## Actual browser header regression — before work / in progress / finished fix
+- Opened source3290a526bb in a test-classpath H2 preview through loopback-only SSH forwarding. Actual screenshot and DOM show an extra support header above the homepage; there are two support-heading IDs, only one inside the closed dialog.
+- Root cause: Thymeleaf fragment selector header also selects the other header element in the shared template. Renamed the shared fragment pageHeader and adapted its native consumers; administrator chrome owns a separate header and was not changed.
+- Regression for home/login/register:9 focused cases,3 logical RED failures (expected one support heading, observed two), then9 GREEN. Full isolated Spring test/JAR:397 tests,0 failures/errors/skips; Node220 passes,0 failures/skips. Preview was stopped before rebuilding; its own loopback listener is closed.
+- Public task viewport fix98b0afa89d passed independent scoped re-review. Next integrate that reviewed task, adapt its shared-header consumers to the new fragment contract and rerun source/browser acceptance. No running production service was changed.

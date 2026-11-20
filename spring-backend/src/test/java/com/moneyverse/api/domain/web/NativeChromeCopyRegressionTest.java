@@ -24,6 +24,13 @@ class NativeChromeCopyRegressionTest {
             .andExpect(content().string(containsString("<title>"+title+" · W Moneyverse</title>")))
             .andExpect(content().string(containsString("<h1 data-i18n=\"login\">"+title+"</h1>")));
     }
+    @ParameterizedTest @org.junit.jupiter.params.provider.ValueSource(strings={"/","/login","/register"})
+    void headerFragmentDoesNotDuplicateTheHiddenSupportHeading(String path) throws Exception {
+        String html=mvc.perform(get(path)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        org.junit.jupiter.api.Assertions.assertEquals(1,java.util.regex.Pattern.compile("id=\\\"mv-support-heading\\\"").matcher(html).results().count(),
+            "The support heading belongs only to the single hidden dialog");
+        org.junit.jupiter.api.Assertions.assertEquals(1,java.util.regex.Pattern.compile("class=\\\"topbar\\\"").matcher(html).results().count());
+    }
     @Test void registrationServerLabelRetainsItsActualMinimumPasswordCopy() throws Exception {
         mvc.perform(get("/register").header("Accept-Language","ko"))
             .andExpect(status().isOk())
