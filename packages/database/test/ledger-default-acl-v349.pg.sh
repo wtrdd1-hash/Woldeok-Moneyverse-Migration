@@ -9,8 +9,9 @@ trap cleanup EXIT
 
 docker run -d --rm --network none --name "$NAME" -e POSTGRES_PASSWORD="$PASSWORD" postgres:17.11-alpine >/dev/null
 ready=0
+# The image bootstrap server accepts Unix sockets before it shuts down; TCP marks the final server.
 for _ in $(seq 1 60); do
-  if docker exec "$NAME" pg_isready -U postgres >/dev/null 2>&1; then ready=1; break; fi
+  if docker exec "$NAME" pg_isready -h 127.0.0.1 -U postgres >/dev/null 2>&1; then ready=1; break; fi
   sleep 0.5
 done
 if [[ "$ready" != 1 ]]; then echo 'isolated PostgreSQL readiness timeout' >&2; exit 1; fi
