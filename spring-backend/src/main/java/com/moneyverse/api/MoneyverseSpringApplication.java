@@ -10,6 +10,7 @@ public class MoneyverseSpringApplication {
         String mode=System.getProperty("moneyverse.runtime-mode", "application");
         Class<?> application=switch(mode) {
             case "application" -> MoneyverseSpringApplication.class;
+            case "admin-presentation" -> com.moneyverse.adminpresentation.NativeAdminApplication.class;
             case "presentation" -> com.moneyverse.presentation.NativePresentationApplication.class;
             default -> throw new IllegalArgumentException("Unknown Moneyverse runtime mode");
         };

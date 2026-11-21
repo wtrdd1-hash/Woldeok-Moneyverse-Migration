@@ -1,0 +1,18 @@
+<!doctype html><html xmlns:th="http://www.thymeleaf.org" th:replace="~{shared/admin-shell :: page(~{::main})}"><body>
+<main id="main" tabindex="-1"><section class="admin-hero"><div><p class="hero-eyebrow">W MONEYVERSE</p><h2 data-i18n="adminSystemLogs" th:text="${uiCopy['adminSystemLogs']}">System logs</h2><p data-i18n="adminLogsLead" th:text="${uiCopy['adminLogsLead']}">Inspect current source logs.</p></div></section>
+<section class="admin-card" aria-labelledby="admin-log-query-title"><h2 id="admin-log-query-title" data-i18n="adminLogsQuery" th:text="${uiCopy['adminLogsQuery']}">Log query</h2>
+<form method="get" action="/admin/logs/system" id="admin-log-query" class="admin-log-controls">
+<input type="hidden" name="lang" th:value="${uiLanguage}" id="admin-log-language">
+<label for="admin-log-source"><span data-i18n="adminLogsSource" th:text="${uiCopy['adminLogsSource']}">Source</span><select id="admin-log-source" name="source"><option th:each="entry : ${logSources}" th:value="${entry}" th:selected="${entry == selectedSource}" th:attr="data-i18n=${'adminLogsSource_' + entry}" th:text="${uiCopy['adminLogsSource_' + entry]}"></option></select></label>
+<label for="admin-log-lines"><span data-i18n="adminLogsLines" th:text="${uiCopy['adminLogsLines']}">Maximum lines</span><input id="admin-log-lines" type="number" min="10" max="500" name="lines" th:value="${lineLimit}" required></label>
+<label for="admin-log-filter" class="admin-log-filter"><span data-i18n="adminLogsFilter" th:text="${uiCopy['adminLogsFilter']}">Contains text</span><input id="admin-log-filter" type="search" name="filter" maxlength="100" th:value="${logFilter}" autocomplete="off"></label>
+<button type="submit" class="admin-refresh" data-i18n="adminLogsLoad" th:text="${uiCopy['adminLogsLoad']}">Load logs</button>
+</form><p th:if="${invalidQuery}" class="unknown" role="alert" data-i18n="adminLogsInvalid" th:text="${uiCopy['adminLogsInvalid']}">Check the query.</p>
+</section>
+<section class="admin-card admin-log-results" aria-labelledby="admin-log-results-title"><div class="admin-section-head"><h2 id="admin-log-results-title" data-i18n="adminLogsResults" th:text="${uiCopy['adminLogsResults']}">Source results</h2><span th:if="${logs != null}" class="badge" data-i18n="adminVerified" th:text="${uiCopy['adminVerified']}">Source-backed overview</span></div>
+<p th:if="${logs == null}" class="unknown" role="alert" data-i18n="unavailable" th:text="${uiCopy['unavailable']}">Unable to load data</p>
+<th:block th:if="${logs != null}"><dl class="admin-log-meta"><div><dt data-i18n="adminLogsReturned" th:text="${uiCopy['adminLogsReturned']}">Returned lines</dt><dd th:text="${logs.totalCount}"></dd></div><div><dt data-i18n="adminLogsUpdated" th:text="${uiCopy['adminLogsUpdated']}">Read at</dt><dd><time th:datetime="${logs.timestamp}" th:text="${logs.timestamp}"></time></dd></div></dl>
+<p th:if="${logs.truncated}" class="unknown" data-i18n="adminLogsTruncated" th:text="${uiCopy['adminLogsTruncated']}">More logs may exist.</p><p th:if="${logs.lines.isEmpty()}" class="unknown" data-i18n="empty" th:text="${uiCopy['empty']}">Nothing to display yet</p>
+<pre th:unless="${logs.lines.isEmpty()}" class="admin-log-output" tabindex="0" role="region" th:attr="aria-label=${uiCopy['adminLogsResults']}"><code th:each="line : ${logs.lines}" th:text="${line + '
+'}"></code></pre></th:block>
+</section></main></body></html>

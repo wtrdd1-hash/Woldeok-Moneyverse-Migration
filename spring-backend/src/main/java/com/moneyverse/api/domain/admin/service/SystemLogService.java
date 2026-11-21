@@ -32,6 +32,15 @@ public class SystemLogService {
         int clampedLines = Math.max(10, Math.min(500, lines));
         List<String> rawLines = fetchRawLogs(source, clampedLines);
 
+        return responseFor(source,clampedLines,filter,rawLines,Instant.now());
+    }
+
+    /** Read failures must survive filtering; missing data cannot certify an empty source. */
+    static SystemLogResponse responseFor(SystemLogSource source,int clampedLines,String filter,List<String> rawLines,Instant readAt) {
+        boolean failed=rawLines.stream().anyMatch(line -> line.startsWith("[WARN] Log file not found")
+                || line.startsWith("[WARN] Log fetch timed out") || line.startsWith("[ERROR] Failed to read logs")
+                || line.contains("-- No entries --") || line.startsWith("No journal files were found"));
+        if(failed)return new SystemLogResponse(source.getKey(),source.name(),List.of(),0,false,readAt.toString(),"UNAVAILABLE",false);
         String effectiveFilter = filter;
         if ((effectiveFilter == null || effectiveFilter.trim().isEmpty()) && source == SystemLogSource.DISCORD_BOT) {
             effectiveFilter = "Discord";
@@ -55,8 +64,9 @@ public class SystemLogService {
                 sanitizedLines,
                 sanitizedLines.size(),
                 rawLines.size() >= clampedLines,
-                Instant.now().toString(),
-                sanitizedLines.isEmpty() ? "EMPTY" : "OK"
+                readAt.toString(),
+                sanitizedLines.isEmpty() ? "EMPTY" : "OK",
+                true
         );
     }
 
@@ -99,6 +109,8 @@ public class SystemLogService {
                 process.destroyForcibly();
                 log.warn("Log fetch process timed out for source: {}", source);
                 result.add("[WARN] Log fetch timed out after 4 seconds");
+            } else if(process.exitValue()!=0) {
+                return List.of("[ERROR] Failed to read logs");
             }
         } catch (Exception e) {
             log.error("Failed to read system logs for {}: {}", source, e.getMessage());

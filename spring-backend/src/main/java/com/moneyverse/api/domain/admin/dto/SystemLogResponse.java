@@ -9,5 +9,6 @@ public record SystemLogResponse(
         int totalCount,
         boolean truncated,
         String timestamp,
-        String status
+        String status,
+        boolean sourceAvailable
 ) {}
