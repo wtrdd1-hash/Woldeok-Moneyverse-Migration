@@ -1,0 +1,248 @@
+{
+  "ciRun": 44892088811,
+  "sourceSha": "37053df900b86d6f7ff5e0f3275cd1454dae715b",
+  "job": "runtime-check",
+  "filesWithSkippedTests": [
+    {
+      "file": "src/bank/bank-pocket-customize-replay.db.test.ts",
+      "tests": 8,
+      "skipped": 2,
+      "entireFileSkipped": false
+    },
+    {
+      "file": "src/core/financial-settlement-v653.db.test.ts",
+      "tests": 4,
+      "skipped": 4,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/casino/casino.e2e.test.ts",
+      "tests": 29,
+      "skipped": 29,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/economy/monetary/monetary-query-limit.db.test.ts",
+      "tests": 7,
+      "skipped": 7,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/chat/chat.report-receipt.db.test.ts",
+      "tests": 3,
+      "skipped": 3,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/wallet/wallet-page-summary.pg.test.ts",
+      "tests": 1,
+      "skipped": 1,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/wallet/wallet-direction.db.test.ts",
+      "tests": 2,
+      "skipped": 2,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/admin/treasury/treasury-moneyflow-filter-v574.db.test.ts",
+      "tests": 5,
+      "skipped": 5,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/economy/monetary/mint-policy-v653.db.test.ts",
+      "tests": 1,
+      "skipped": 1,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/space/space-private-read.db.test.ts",
+      "tests": 5,
+      "skipped": 5,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/admin/operations-bank-evidence.db.test.ts",
+      "tests": 5,
+      "skipped": 5,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/space/space-finance-ledger-hold.db.test.ts",
+      "tests": 1,
+      "skipped": 1,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/admin/storage-evidence-reader.host.test.ts",
+      "tests": 1,
+      "skipped": 1,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/wallet/wallet-activity-direction.pg.test.ts",
+      "tests": 1,
+      "skipped": 1,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/collection/collection.provenance.db.test.ts",
+      "tests": 1,
+      "skipped": 1,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/admin/treasury/treasury-ledger-cursor-v619.db.test.ts",
+      "tests": 1,
+      "skipped": 1,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/chat/chat.message-limit.db.test.ts",
+      "tests": 5,
+      "skipped": 5,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/admin/treasury/treasury-fiscal-proof-v1603.db.test.ts",
+      "tests": 1,
+      "skipped": 1,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/club/club.directory.db.test.ts",
+      "tests": 3,
+      "skipped": 3,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/wallet/wallet-calendar-range.pg.test.ts",
+      "tests": 1,
+      "skipped": 1,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/club/club.paging.db.test.ts",
+      "tests": 3,
+      "skipped": 3,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/admin/treasury/public-treasury-proof-v680.db.test.ts",
+      "tests": 1,
+      "skipped": 1,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/wallet/wallet-transaction-detail.pg.test.ts",
+      "tests": 1,
+      "skipped": 1,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/wallet/wallet-transfer-receipt.db.test.ts",
+      "tests": 4,
+      "skipped": 4,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/wallet/wallet-activity.pg.test.ts",
+      "tests": 1,
+      "skipped": 1,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/club/warfare.db.test.ts",
+      "tests": 2,
+      "skipped": 2,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/admin/treasury/treasury-donor-limit.db.test.ts",
+      "tests": 3,
+      "skipped": 3,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/admin/treasury/treasury-flow-evidence-v633.db.test.ts",
+      "tests": 2,
+      "skipped": 2,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/admin/enterprises/enterprise-dividend-log-limit.pg.test.ts",
+      "tests": 3,
+      "skipped": 3,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/economy/monetary/monetary-telemetry.db.test.ts",
+      "tests": 3,
+      "skipped": 3,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/admin/treasury/treasury-moneyflow-cursor-v573.db.test.ts",
+      "tests": 2,
+      "skipped": 2,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/admin/treasury/treasury-overview-evidence-v628.db.test.ts",
+      "tests": 2,
+      "skipped": 2,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/work/work-difficulty.db.test.ts",
+      "tests": 4,
+      "skipped": 4,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/admin/treasury/treasury-reconciliation-v572.db.test.ts",
+      "tests": 2,
+      "skipped": 2,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/admin/treasury/treasury-backup-evidence-hold.db.test.ts",
+      "tests": 1,
+      "skipped": 1,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/stock/stock-league.owner-participation.db.test.ts",
+      "tests": 3,
+      "skipped": 3,
+      "entireFileSkipped": true
+    },
+    {
+      "file": "src/stock/stock-league-wld-precision.pg.test.ts",
+      "tests": 1,
+      "skipped": 1,
+      "entireFileSkipped": true
+    }
+  ],
+  "entireFilesSkipped": 36,
+  "totalSkippedTestsFromFiles": 117,
+  "summaries": [
+    "Test Files  6 passed (6)",
+    "Tests  41 passed (41)",
+    "Test Files  35 passed (35)",
+    "Tests  94 passed (94)",
+    "Test Files  488 passed | 36 skipped (524)",
+    "Tests  3668 passed | 117 skipped (3785)",
+    "Test Files  590 passed (590)",
+    "Tests  3084 passed (3084)"
+  ],
+  "productionReleaseRun": 44893099874,
+  "productionFailure": [
+    {
+      "step": "Require exact main push CI runtime-check SUCCESS",
+      "message": "BLOCKED: exact main push CI runtime-check must complete SUCCESS (not skipped)"
+    }
+  ]
+}
