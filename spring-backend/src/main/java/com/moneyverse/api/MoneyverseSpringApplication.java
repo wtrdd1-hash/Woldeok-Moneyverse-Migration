@@ -12,6 +12,7 @@ public class MoneyverseSpringApplication {
             case "application" -> MoneyverseSpringApplication.class;
             case "admin-presentation" -> com.moneyverse.adminpresentation.NativeAdminApplication.class;
             case "presentation" -> com.moneyverse.presentation.NativePresentationApplication.class;
+            case "frontend-presentation" -> com.moneyverse.frontendpresentation.UnifiedFrontendApplication.class;
             default -> throw new IllegalArgumentException("Unknown Moneyverse runtime mode");
         };
         SpringApplication.run(application, args);

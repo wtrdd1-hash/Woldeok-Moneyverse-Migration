@@ -18,7 +18,7 @@ public final class AdminSourceClient {
     private static final Set<String> ROLES=Set.of("superadmin","admin","operator","approver","server_operator");
     private static final Set<String> PATHS=Set.of("/api/v1/admin/me","/api/v1/admin/users","/api/v1/admin/stocks",
         "/api/v1/admin/controls","/api/v1/admin/logs/system","/api/v1/admin/discord-outbox-events",
-        "/api/v1/business/catalog","/api/v1/admin/economy/reconciliations/latest");
+        "/api/v1/business/catalog","/api/v1/admin/economy/reconciliations/latest","/api/v1/auth/me");
     private final URI origin;
     private final ObjectMapper mapper;
     private final HttpClient http=HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2))
@@ -33,7 +33,7 @@ public final class AdminSourceClient {
     }
     public static final class SourceFailure extends RuntimeException {
         private final int status;
-        SourceFailure(int status){super("Administrator source unavailable");this.status=status;}
+        public SourceFailure(int status){super("Administrator source unavailable");this.status=status;}
         public int status(){return status;}
     }
     /** Host-cookie precedence matches the backend and cannot switch accounts via a duplicate/legacy fallback. */
