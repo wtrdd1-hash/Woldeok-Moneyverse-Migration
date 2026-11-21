@@ -36,6 +36,9 @@ class CatalogReadPostgresIntegrationTest {
         assertEquals(1,count("SELECT count(*) FROM public.shop_catalog WHERE id=?::uuid",item));
         for(var row:List.of(List.of(actor,adminSession,"1 hour"),List.of(member,memberSession,"1 hour"),List.of(actor,expiredSession,"-1 hour")))
             execute("INSERT INTO public.auth_sessions(token_hash,csrf_hash,user_id,expires_at) VALUES (?::text,'ci_read_fixture',?::uuid,clock_timestamp()+?::interval)",UserAuthService.sha256((String)row.get(1)),row.get(0),row.get(2));
+        // Migration216 extends every new member session; expire only this synthetic row after the insert trigger runs.
+        execute("UPDATE public.auth_sessions SET expires_at=clock_timestamp()-interval '1 hour' WHERE token_hash=?::text",UserAuthService.sha256(expiredSession));
+        assertEquals(1,count("SELECT count(*) FROM public.auth_sessions WHERE token_hash=?::text AND expires_at<clock_timestamp()",UserAuthService.sha256(expiredSession)));
         fixture.commit();
         Map<String,Object> properties=new HashMap<>();
         properties.put("spring.datasource.url",url);properties.put("spring.datasource.username",user);properties.put("spring.datasource.password",password);
