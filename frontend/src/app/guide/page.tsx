@@ -50,7 +50,7 @@ export default async function GuidePage() {
   ]);
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-8 sm:space-y-10 px-4 sm:px-6 py-4 sm:py-8 pb-28 zero-overflow-shield">
+    <div className="mx-auto w-full max-w-5xl space-y-8 sm:space-y-10 px-4 sm:px-6 py-4 sm:py-8 pb-36 sm:pb-24 zero-overflow-shield">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(guideBreadcrumb) }} />
 
       {/* 1. Header Hero */}

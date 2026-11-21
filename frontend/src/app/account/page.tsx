@@ -360,7 +360,7 @@ export default async function AccountPage({
         </aside>
 
         {/* Right Column: Detailed Management Cards */}
-        <main className="space-y-6">
+        <main className="space-y-6 pb-36 sm:pb-24">
           {/* Section 1: Linked Sign-in Methods */}
           <Card className="rounded-2xl border-zinc-800/80 bg-card/95 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md">
             <CardHeader className="pb-4">

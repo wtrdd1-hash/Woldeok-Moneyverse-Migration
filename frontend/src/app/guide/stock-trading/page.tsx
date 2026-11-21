@@ -76,7 +76,7 @@ export default async function StockTradingGuidePage() {
   };
 
   return (
-    <div data-page="guide-stock-trading" className="mv-page mv-page--finance grid gap-6 max-w-4xl mx-auto">
+    <div data-page="guide-stock-trading" className="mv-page mv-page--finance grid gap-6 max-w-4xl mx-auto pb-36 sm:pb-24">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdArticle) }}
