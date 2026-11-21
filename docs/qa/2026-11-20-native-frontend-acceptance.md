@@ -1,5 +1,7 @@
 # Native frontend implementation and acceptance ledger — 2026-11-20
 
+> **Current authority — 2026-11-22:** The owner-approved maintenance frontdoor supersedes the historical public presentation release below. Use the [current180-route rebuild ledger](2026-11-21-native-rebuild-feature-ledger.md) and [actual protected preview receipt](../releases/2026-11-21-native-admin-rebuild-preview.md). Earlier scoped PASS/HTTP200 records do not certify the current whole frontend.
+
 > Current observation: public presentation5-page Production promotion at2026-11-20 21:53:58KST, source42422aab0d3bed3399a27819c6eb774cfd1a933a, PR#3319/mainCI44736479741. Clean Spring542/Node276 passed without skips; source-equivalent Test50 and final Production10 browser cases passed. Full member/admin/backend/financial acceptance remains OPEN. Earlier totals and HOLD records below are historical.
 
 

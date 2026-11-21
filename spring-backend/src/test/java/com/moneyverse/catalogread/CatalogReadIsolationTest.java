@@ -1,6 +1,7 @@
 package com.moneyverse.catalogread;
 
 import com.moneyverse.api.domain.identity.service.UserAuthService;
+import com.moneyverse.api.domain.health.NativeBuildIdentity;
 import java.net.*;
 import java.net.http.*;
 import java.util.*;
@@ -10,6 +11,8 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -28,6 +31,11 @@ class CatalogReadIsolationTest {
     static volatile boolean denied,unavailable,wrongPrincipal;
     static final HttpClient http=HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NEVER).build();
     @TestConfiguration static class Fixture {
+        @Bean @Primary NativeBuildIdentity responseFixtureIdentity(){
+            // This HTTP boundary fixture does not certify the actual packaged release artifact.
+            return new NativeBuildIdentity(new ByteArrayResource(("build.runtimeKind=spring-native\n"
+                +"build.sourceRevision="+"a".repeat(40)+"\n").getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+        }
         @Bean JdbcTemplate jdbcTemplate(){
             JdbcTemplate jdbc=mock(JdbcTemplate.class);
             when(jdbc.queryForObject(anyString(),eq(String.class))).thenAnswer(call->{
@@ -99,6 +107,28 @@ class CatalogReadIsolationTest {
             assertEquals(403,http.send(request,HttpResponse.BodyHandlers.ofString()).statusCode());
         }
         assertTrue(sql.isEmpty());assertTrue(readOnly.isEmpty());
+    }
+    private static void privateResponse(HttpResponse<String> response,int status){
+        assertEquals(status,response.statusCode());
+        assertEquals("noindex, nofollow, noarchive",response.headers().firstValue("X-Robots-Tag").orElse(""));
+    }
+    @Test void everyPrivateReadAndRefusalResponseExcludesIndexing() throws Exception {
+        privateResponse(get("/api/v1/admin/shop/items","Cookie","__Host-mv_session="+COOKIE),200);
+        privateResponse(get("/api/v1/admin/shop/items"),401);
+        denied=true;
+        privateResponse(get("/api/v1/admin/shop/items","Cookie","__Host-mv_session="+COOKIE),401);
+        denied=false;unavailable=true;
+        privateResponse(get("/api/v1/admin/shop/items","Cookie","__Host-mv_session="+COOKIE),503);
+        privateResponse(get("/catalog-read-health"),503);
+        unavailable=false;
+        privateResponse(get("/catalog-read-version"),200);
+        privateResponse(get("/api/v1/admin/me"),403);
+        var post=HttpRequest.newBuilder(origin.resolve("/api/v1/admin/shop/items"))
+            .POST(HttpRequest.BodyPublishers.ofString("{}")).build();
+        privateResponse(http.send(post,HttpResponse.BodyHandlers.ofString()),403);
+        var head=HttpRequest.newBuilder(origin.resolve("/api/v1/admin/shop/items"))
+            .header("Cookie","__Host-mv_session="+COOKIE).method("HEAD",HttpRequest.BodyPublishers.noBody()).build();
+        privateResponse(http.send(head,HttpResponse.BodyHandlers.ofString()),200);
     }
     @Test void readRuntimeContainsNoSessionIssuerEconomicJobsSocketOrPresentationBeans(){
         for(String name:List.of("userAuthService","socketIOServer","marketTickerService","economyService","frontendSecurity","adminShopController","statusTruthService"))

@@ -1,4 +1,7 @@
 {
+  "currentEvidenceStatus": "HISTORICAL_NOT_CURRENT_FUNCTIONAL_ACCEPTANCE",
+  "currentAcceptanceLedger": "docs/qa/2026-11-21-native-rebuild-feature-ledger.md",
+  "currentWarning": "Historical VERIFIED_PASS/HTTP200 fields are preserved, not current function, runtime or stored-command acceptance. Public documents now serve approved maintenance.",
   "ownerDirective": "All web frontend must be Spring Boot: v2026.11.19.30",
   "scope": "Next route source inventory is NOT same as all live runtime URLs or full positive API tests",
   "totalSourceRoutes": 180,
