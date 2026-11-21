@@ -33,3 +33,7 @@ PC 작은 control 후보43개 중1개는 오류 화면이므로 비오류 렌더
 - 실제 브라우저의 계산 입력2사례와 위젯 탭/패널 관찰만 해당 범위 검증이다. 200%/AT/금융·전송 변경/모든 관리자 변경/동적 fixture/전체 번역은 통과로 표시하지 않았다.
 - 이번 작업은 문서·개인정보 없는 QA 증거만 변경한다. 앱/API/DB/Nginx/systemd·운영 release를 변경하지 않았다. docs-only CI의 runtime/Spring skip은 새 테스트 성공이 아니다.
 - GitHub 문서 PR/check와 main 통합 상태는 아래 최종 통합 기록에서 확인한다. 기존 전용 worktree를 재사용했으므로 타 작업 파일/서비스/브랜치를 정리하지 않는다.
+
+
+## 최종 통합 기록
+[PR3336](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3336)에 전체 보고서·원본 대조·개인정보 없는 증거를 올렸다. source head6f041876c2의 [CI44883711551](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/actions/runs/44883711551)은 classify/policy SUCCESS, runtime-check/spring-web-check SKIPPED(DOCS_ONLY)다. 24개 release-classifier 검사도0실패/0skip이다. 이 최종 기록 commit에도 docs-only CI를 다시 적용하며, main 통합의 실제 merge SHA/상태는 PR3336을 권위로 확인한다. main 재fetch에서 시작 SHA c895c0181d가 유지돼 충돌이 없었다. 통합 뒤에는 audit 전용 branch의 main 포함 여부·branch-only 추가 파일 부재를 확인하고 해당 branch만 정리한다. 재사용 worktree와 타 작업은 유지한다. 운영 application·설정·DB는 이 감사에서 변경하지 않는다.
