@@ -1,0 +1,666 @@
+{
+  "applicationSource": "98b5dec0283f77e4e0c488c4d8bfa23bf8c52de1",
+  "sourcePr": 3328,
+  "mainCi": 44846998303,
+  "mainCiJobs": {
+    "classify": "success",
+    "policy": "success",
+    "runtime-check": "success",
+    "spring-web-check": "success"
+  },
+  "localSpring": {
+    "exit": 0,
+    "counts": {
+      "tests": 570,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "nativeNode": {
+    "tests": 81,
+    "failures": 0
+  },
+  "fixtureLayouts": 80,
+  "fixtureZoomEquivalentReflow": 20,
+  "physicalBrowserZoomTested": false,
+  "authenticatedTest": {
+    "source": "98b5dec0283f77e4e0c488c4d8bfa23bf8c52de1",
+    "scope": "authenticated same-origin Test; two read-only admin screens",
+    "layouts": [
+      {
+        "bottomTabs": false,
+        "docWidth": 1425,
+        "logForm": false,
+        "logoTags": [
+          "IMG",
+          "IMG"
+        ],
+        "path": "/admin",
+        "sidebar": true,
+        "sourceMetrics": [
+          "23",
+          "10",
+          "7"
+        ],
+        "sourceUnavailable": false,
+        "width": 1440
+      },
+      {
+        "bottomTabs": false,
+        "docWidth": 1440,
+        "logForm": true,
+        "logoTags": [
+          "IMG",
+          "IMG"
+        ],
+        "path": "/admin/logs/system",
+        "sidebar": true,
+        "sourceMetrics": [],
+        "sourceUnavailable": false,
+        "width": 1440
+      },
+      {
+        "bottomTabs": false,
+        "docWidth": 1905,
+        "logForm": false,
+        "logoTags": [
+          "IMG",
+          "IMG"
+        ],
+        "path": "/admin",
+        "sidebar": true,
+        "sourceMetrics": [
+          "23",
+          "10",
+          "7"
+        ],
+        "sourceUnavailable": false,
+        "width": 1920
+      },
+      {
+        "bottomTabs": false,
+        "docWidth": 1920,
+        "logForm": true,
+        "logoTags": [
+          "IMG",
+          "IMG"
+        ],
+        "path": "/admin/logs/system",
+        "sidebar": true,
+        "sourceMetrics": [],
+        "sourceUnavailable": false,
+        "width": 1920
+      },
+      {
+        "bottomTabs": false,
+        "docWidth": 1009,
+        "logForm": false,
+        "logoTags": [
+          "IMG",
+          "IMG"
+        ],
+        "path": "/admin",
+        "sidebar": true,
+        "sourceMetrics": [
+          "23",
+          "10",
+          "7"
+        ],
+        "sourceUnavailable": false,
+        "width": 1024
+      },
+      {
+        "bottomTabs": false,
+        "docWidth": 1009,
+        "logForm": true,
+        "logoTags": [
+          "IMG",
+          "IMG"
+        ],
+        "path": "/admin/logs/system",
+        "sidebar": true,
+        "sourceMetrics": [],
+        "sourceUnavailable": false,
+        "width": 1024
+      },
+      {
+        "bottomTabs": true,
+        "docWidth": 753,
+        "logForm": false,
+        "logoTags": [
+          "IMG",
+          "IMG"
+        ],
+        "path": "/admin",
+        "sidebar": false,
+        "sourceMetrics": [
+          "23",
+          "10",
+          "7"
+        ],
+        "sourceUnavailable": false,
+        "width": 768
+      },
+      {
+        "bottomTabs": true,
+        "docWidth": 753,
+        "logForm": true,
+        "logoTags": [
+          "IMG",
+          "IMG"
+        ],
+        "path": "/admin/logs/system",
+        "sidebar": false,
+        "sourceMetrics": [],
+        "sourceUnavailable": false,
+        "width": 768
+      },
+      {
+        "bottomTabs": true,
+        "docWidth": 375,
+        "logForm": false,
+        "logoTags": [
+          "IMG",
+          "IMG"
+        ],
+        "path": "/admin",
+        "sidebar": false,
+        "sourceMetrics": [
+          "23",
+          "10",
+          "7"
+        ],
+        "sourceUnavailable": false,
+        "width": 390
+      },
+      {
+        "bottomTabs": true,
+        "docWidth": 375,
+        "logForm": true,
+        "logoTags": [
+          "IMG",
+          "IMG"
+        ],
+        "path": "/admin/logs/system",
+        "sidebar": false,
+        "sourceMetrics": [],
+        "sourceUnavailable": false,
+        "width": 390
+      },
+      {
+        "bottomTabs": true,
+        "docWidth": 305,
+        "logForm": false,
+        "logoTags": [
+          "IMG",
+          "IMG"
+        ],
+        "path": "/admin",
+        "sidebar": false,
+        "sourceMetrics": [
+          "23",
+          "10",
+          "7"
+        ],
+        "sourceUnavailable": false,
+        "width": 320
+      },
+      {
+        "bottomTabs": true,
+        "docWidth": 305,
+        "logForm": true,
+        "logoTags": [
+          "IMG",
+          "IMG"
+        ],
+        "path": "/admin/logs/system",
+        "sidebar": false,
+        "sourceMetrics": [],
+        "sourceUnavailable": false,
+        "width": 320
+      }
+    ],
+    "locales": [
+      {
+        "lang": "en",
+        "overflow": false,
+        "path": "/admin",
+        "title": "Dashboard · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 1440
+      },
+      {
+        "lang": "ko",
+        "overflow": false,
+        "path": "/admin",
+        "title": "대시보드 · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 1440
+      },
+      {
+        "lang": "ja",
+        "overflow": false,
+        "path": "/admin",
+        "title": "ダッシュボード · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 1440
+      },
+      {
+        "lang": "zh",
+        "overflow": false,
+        "path": "/admin",
+        "title": "控制面板 · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 1440
+      },
+      {
+        "lang": "vi",
+        "overflow": false,
+        "path": "/admin",
+        "title": "Bảng điều khiển · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 1440
+      },
+      {
+        "lang": "en",
+        "logDraft": "qa-unsent-locale-check",
+        "overflow": false,
+        "path": "/admin/logs/system",
+        "title": "System logs · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 1440
+      },
+      {
+        "lang": "ko",
+        "logDraft": "qa-unsent-locale-check",
+        "overflow": false,
+        "path": "/admin/logs/system",
+        "title": "시스템 로그 · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 1440
+      },
+      {
+        "lang": "ja",
+        "logDraft": "qa-unsent-locale-check",
+        "overflow": false,
+        "path": "/admin/logs/system",
+        "title": "システムログ · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 1440
+      },
+      {
+        "lang": "zh",
+        "logDraft": "qa-unsent-locale-check",
+        "overflow": false,
+        "path": "/admin/logs/system",
+        "title": "系统日志 · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 1440
+      },
+      {
+        "lang": "vi",
+        "logDraft": "qa-unsent-locale-check",
+        "overflow": false,
+        "path": "/admin/logs/system",
+        "title": "Nhật ký hệ thống · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 1440
+      },
+      {
+        "lang": "en",
+        "overflow": false,
+        "path": "/admin",
+        "title": "Dashboard · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 390
+      },
+      {
+        "lang": "ko",
+        "overflow": false,
+        "path": "/admin",
+        "title": "대시보드 · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 390
+      },
+      {
+        "lang": "ja",
+        "overflow": false,
+        "path": "/admin",
+        "title": "ダッシュボード · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 390
+      },
+      {
+        "lang": "zh",
+        "overflow": false,
+        "path": "/admin",
+        "title": "控制面板 · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 390
+      },
+      {
+        "lang": "vi",
+        "overflow": false,
+        "path": "/admin",
+        "title": "Bảng điều khiển · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 390
+      },
+      {
+        "lang": "en",
+        "logDraft": "qa-unsent-locale-check",
+        "overflow": false,
+        "path": "/admin/logs/system",
+        "title": "System logs · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 390
+      },
+      {
+        "lang": "ko",
+        "logDraft": "qa-unsent-locale-check",
+        "overflow": false,
+        "path": "/admin/logs/system",
+        "title": "시스템 로그 · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 390
+      },
+      {
+        "lang": "ja",
+        "logDraft": "qa-unsent-locale-check",
+        "overflow": false,
+        "path": "/admin/logs/system",
+        "title": "システムログ · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 390
+      },
+      {
+        "lang": "zh",
+        "logDraft": "qa-unsent-locale-check",
+        "overflow": false,
+        "path": "/admin/logs/system",
+        "title": "系统日志 · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 390
+      },
+      {
+        "lang": "vi",
+        "logDraft": "qa-unsent-locale-check",
+        "overflow": false,
+        "path": "/admin/logs/system",
+        "title": "Nhật ký hệ thống · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 390
+      }
+    ],
+    "logSources": [
+      {
+        "available": true,
+        "renderedLines": 10,
+        "rowCount": "10",
+        "source": "NGINX_ERROR"
+      },
+      {
+        "available": true,
+        "renderedLines": 10,
+        "rowCount": "10",
+        "source": "NGINX_ACCESS"
+      },
+      {
+        "available": true,
+        "renderedLines": 10,
+        "rowCount": "10",
+        "source": "SPRING_BACKEND"
+      },
+      {
+        "available": false,
+        "renderedLines": 0,
+        "rowCount": null,
+        "source": "FRONTEND"
+      },
+      {
+        "available": true,
+        "renderedLines": 5,
+        "rowCount": "5",
+        "source": "DISCORD_BOT"
+      },
+      {
+        "available": true,
+        "renderedLines": 3,
+        "rowCount": "3",
+        "source": "FRONTEND_ERRORS"
+      }
+    ]
+  },
+  "authenticatedProduction": {
+    "source": "98b5dec0283f77e4e0c488c4d8bfa23bf8c52de1",
+    "testStoppedIndependence": {
+      "heading": "Dashboard",
+      "logoCount": 2,
+      "logoLoaded": true,
+      "metricValues": [],
+      "path": "/admin",
+      "sourceUnavailable": false,
+      "title": "Dashboard · Woldeok Moneyverse"
+    },
+    "layouts": [
+      {
+        "hasLogForm": false,
+        "logos": [
+          {
+            "loaded": true,
+            "tag": "IMG"
+          },
+          {
+            "loaded": true,
+            "tag": "IMG"
+          }
+        ],
+        "overflow": false,
+        "path": "/admin",
+        "title": "Dashboard · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 1440
+      },
+      {
+        "hasLogForm": true,
+        "logos": [
+          {
+            "loaded": true,
+            "tag": "IMG"
+          },
+          {
+            "loaded": true,
+            "tag": "IMG"
+          }
+        ],
+        "overflow": false,
+        "path": "/admin/logs/system",
+        "title": "System logs · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 1440
+      },
+      {
+        "hasLogForm": false,
+        "logos": [
+          {
+            "loaded": true,
+            "tag": "IMG"
+          },
+          {
+            "loaded": true,
+            "tag": "IMG"
+          }
+        ],
+        "overflow": false,
+        "path": "/admin",
+        "title": "Dashboard · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 1024
+      },
+      {
+        "hasLogForm": true,
+        "logos": [
+          {
+            "loaded": true,
+            "tag": "IMG"
+          },
+          {
+            "loaded": true,
+            "tag": "IMG"
+          }
+        ],
+        "overflow": false,
+        "path": "/admin/logs/system",
+        "title": "System logs · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 1024
+      },
+      {
+        "hasLogForm": false,
+        "logos": [
+          {
+            "loaded": true,
+            "tag": "IMG"
+          },
+          {
+            "loaded": true,
+            "tag": "IMG"
+          }
+        ],
+        "overflow": false,
+        "path": "/admin",
+        "title": "Dashboard · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 390
+      },
+      {
+        "hasLogForm": true,
+        "logos": [
+          {
+            "loaded": true,
+            "tag": "IMG"
+          },
+          {
+            "loaded": true,
+            "tag": "IMG"
+          }
+        ],
+        "overflow": false,
+        "path": "/admin/logs/system",
+        "title": "System logs · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 390
+      },
+      {
+        "hasLogForm": false,
+        "logos": [
+          {
+            "loaded": true,
+            "tag": "IMG"
+          },
+          {
+            "loaded": true,
+            "tag": "IMG"
+          }
+        ],
+        "overflow": false,
+        "path": "/admin",
+        "title": "Dashboard · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 320
+      },
+      {
+        "hasLogForm": true,
+        "logos": [
+          {
+            "loaded": true,
+            "tag": "IMG"
+          },
+          {
+            "loaded": true,
+            "tag": "IMG"
+          }
+        ],
+        "overflow": false,
+        "path": "/admin/logs/system",
+        "title": "System logs · Woldeok Moneyverse",
+        "unavailable": false,
+        "width": 320
+      }
+    ],
+    "logSources": [
+      {
+        "available": true,
+        "renderedLines": 10,
+        "rowCount": "10",
+        "source": "NGINX_ERROR"
+      },
+      {
+        "available": true,
+        "renderedLines": 10,
+        "rowCount": "10",
+        "source": "NGINX_ACCESS"
+      },
+      {
+        "available": true,
+        "renderedLines": 10,
+        "rowCount": "10",
+        "source": "SPRING_BACKEND"
+      },
+      {
+        "available": false,
+        "renderedLines": 0,
+        "rowCount": null,
+        "source": "FRONTEND"
+      },
+      {
+        "available": true,
+        "renderedLines": 5,
+        "rowCount": "5",
+        "source": "DISCORD_BOT"
+      },
+      {
+        "available": true,
+        "renderedLines": 3,
+        "rowCount": "3",
+        "source": "FRONTEND_ERRORS"
+      }
+    ],
+    "filteredUnavailableSource": {
+      "source": "FRONTEND",
+      "filterRetained": true,
+      "unavailable": true,
+      "rowCount": null,
+      "renderedLines": 0
+    }
+  },
+  "unresolved": [
+    "FRONTEND legacy journal unit removed",
+    "full-backend controller and sourceAvailable runtime rollout",
+    "other administrator tool actions",
+    "prior separate Next QA five failures",
+    "existing financial/provenance gates",
+    "full linguistic/accessibility copy audit"
+  ],
+  "runtime": [
+    {
+      "unit": "moneyverse-native-admin-read-test-v20261121.service",
+      "active": "active",
+      "enabled": "enabled",
+      "source": "98b5dec0283f77e4e0c488c4d8bfa23bf8c52de1",
+      "jarSha256": "ff8e5cb97e6eed01c16f44b9ab1f6b52b140028cfee1cb42d3aa87aa265316c9",
+      "openJarInodeMatches": true,
+      "sourceOriginConfirmed": true
+    },
+    {
+      "unit": "moneyverse-native-admin-read-prod-v20261121.service",
+      "active": "active",
+      "enabled": "enabled",
+      "source": "98b5dec0283f77e4e0c488c4d8bfa23bf8c52de1",
+      "jarSha256": "ff8e5cb97e6eed01c16f44b9ab1f6b52b140028cfee1cb42d3aa87aa265316c9",
+      "openJarInodeMatches": true,
+      "sourceOriginConfirmed": true
+    }
+  ]
+}
