@@ -12,9 +12,9 @@ public class BoardDtos {
             String body,
             String category,
             String stockSymbol,
-            int viewCount,
-            int commentCount,
-            int likeCount,
+            Integer viewCount,
+            Integer commentCount,
+            Integer likeCount,
             String createdAt
     ) {}
 

@@ -33,59 +33,25 @@ class AdminChannelOtpTest {
     private AdminChannelOtpService otpService;
 
     @Test
-    @DisplayName("OTP 요청, 검증 및 1회용 즉시 소모 라이프사이클 검증")
-    void testOtpLifecycleAndSingleUse() throws Exception {
-        String actor = "test-admin-uuid-1";
-
-        // 1. OTP 요청
-        OtpRequest req = new OtpRequest("국고 출금 승인");
+    @DisplayName("OTP API는 사용자가 직접 기입한 actor 헤더만으로 동작하지 않는다")
+    void anonymousActorHeaderCannotStartOtp() throws Exception {
+        String unverifiedActor = "test-admin-uuid-1";
         mockMvc.perform(post("/api/admin/auth/channel-otp/request")
-                        .header("x-actor-user-id", actor)
+                        .header("x-actor-user-id", unverifiedActor)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true))
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.expiresAt").isNumber());
-
-        // 내부 서비스의 세션에서 코드 획득
-        // 잘못된 코드로 검증 시도
-        OtpVerifyRequest wrongReq = new OtpVerifyRequest("000000");
+                        .content(objectMapper.writeValueAsString(new OtpRequest("국고 승인"))))
+                .andExpect(status().isUnauthorized());
         mockMvc.perform(post("/api/admin/auth/channel-otp/verify")
-                        .header("x-actor-user-id", actor)
+                        .header("x-actor-user-id", unverifiedActor)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(wrongReq)))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.ok").value(false))
-                .andExpect(jsonPath("$.verified").value(false));
-
-        // 서비스 레벨에서 강제 생성 후 직접 검증
-        OtpRequestResponse generated = otpService.requestOtp(actor, "테스트 작업");
-        assertThat(generated.ok()).isTrue();
-
-        // status 엔드포인트 확인 (초기 미승격)
+                        .content(objectMapper.writeValueAsString(new OtpVerifyRequest("000000"))))
+                .andExpect(status().isUnauthorized());
         mockMvc.perform(get("/api/admin/auth/channel-otp/status")
-                        .header("x-actor-user-id", actor))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true))
-                .andExpect(jsonPath("$.elevated").value(false));
-
-        // revoke 호출 시 정상 처리
+                        .header("x-actor-user-id", unverifiedActor))
+                .andExpect(status().isUnauthorized());
         mockMvc.perform(post("/api/admin/auth/channel-otp/revoke")
-                        .header("x-actor-user-id", actor))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true))
-                .andExpect(jsonPath("$.revoked").value(true));
-
-        // test-ping 호출 시 포맷 검증
-        OtpTestPingRequest pingReq = new OtpTestPingRequest("all");
-        mockMvc.perform(post("/api/admin/auth/channel-otp/test-ping")
-                        .header("x-actor-user-id", actor)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(pingReq)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true))
-                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+                        .header("x-actor-user-id", unverifiedActor))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

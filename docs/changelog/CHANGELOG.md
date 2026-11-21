@@ -1,4 +1,7 @@
-﻿## v2026.11.13.2 — Spring risk review + artifact lifecycle (DRAFT / NO DEPLOY)
+## v2026.11.18.20 — Spring and frontend Test-only reliability repair (RELEASE HOLD)
+- Pension GET no-create and authenticated owner read, unverified finance mutation fails closed, Android 200 HTML fallback removed, truthful shop outage UI. Integrated committed API-v4 and frontend v17 source candidate. Spring 174/174 PASS; Next build PASS, 121 focused frontend PASS, **full frontend suite timed out with observed failures**. Internally restricted official Test Nginx 20 GET no 502, old Spring static UI remains. No Production deployment or DB mutation. [QA](../qa/2026-11-18-spring-frontend-test-recovery-v2026.11.18.20.md).
+
+## v2026.11.13.2 — Spring risk review + artifact lifecycle (DRAFT / NO DEPLOY)
 - Section-by-section R01–R10 warnings, staged G0–G6 domain acceptance, single DB-fenced finance writer, session/Android/bot parity and reversible Test/Production checks. New artifact/conditional Artifactory policy for JAR/OCI digests, SBOM/provenance, manifest, retention and recoverable rollback. No Java code/DB/Test/Production changes. [Details](2026-11-13-spring-migration-review-v2026.11.13.2.md) · [PR #3144](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3144).
 
 ## v2026.11.13.1 — Spring Boot full-backend migration architecture (DRAFT / RELEASE HOLD)

@@ -1,0 +1,37 @@
+{
+  "scope": "one delivery read page; nine administrator read routes now share the Nov18 shell; whole site open",
+  "source": "7d58568e30413e838315a2d5322abfd5366b074a",
+  "jarSha256": "be5e888e4c49915da419819154e520b0fb8de5dee6c243854b60b945b884fd42",
+  "testLayoutLocaleCases": 40,
+  "cssResizeCases": 5,
+  "clientAriaLocales": 5,
+  "productionLayoutLocaleCases": 15,
+  "priorEightBeforeCases": 16,
+  "priorEightAfterCases": 16,
+  "testStoppedIndependence": true,
+  "testRestored": true,
+  "observedRecentSample": {
+    "records": 30,
+    "unknown": 30,
+    "verifiedDelivered": 0
+  },
+  "controls": {
+    "refresh": true,
+    "language": true,
+    "menuEscapeFocus": true,
+    "tableKeyboardScroll": true,
+    "supportEscapeFocus": true,
+    "systemLink": true,
+    "lowHeightSidebar": true
+  },
+  "localSpringTests": 589,
+  "localSpringFailures": 0,
+  "nativeNodeTests": 82,
+  "separatePostgresCiRequired": true,
+  "prCi": "44863680840",
+  "exactMainCi": "44864420278",
+  "physicalDeviceQa": false,
+  "physicalZoomQa": false,
+  "wholeSiteAccepted": false,
+  "financialGateWaived": false
+}

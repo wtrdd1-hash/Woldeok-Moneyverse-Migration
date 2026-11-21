@@ -1,0 +1,1 @@
+<!doctype html><html xmlns:th="http://www.thymeleaf.org" th:replace="~{shared/admin-shell :: page(~{::main})}"><body><main id="main" tabindex="-1"><section class="admin-card"><h1 th:text="${denied ? uiCopy['adminAccessDenied'] : uiCopy['unavailable']}">Unavailable</h1><a href="/admin" class="admin-refresh" th:text="${uiCopy['retry']}">Retry</a></section></main></body></html>

@@ -11,6 +11,13 @@ export async function GET() {
 
   const feedItems = [
     {
+      title: '월덕 머니버스 - 17종 금융 계산기 & 절세 시뮬레이터 허브',
+      link: `${base}/calculators`,
+      description: '복리 계산기, 주식 물타기 평단가, 연봉 실수령액, 대출이자, 배당소득세, ISA, IRP 등 17종 금융 공학 도구.',
+      pubDate: now,
+      guid: `${base}/calculators`,
+    },
+    {
       title: '월덕 머니버스 - 글로벌 가상 금융 & 모의 주식 거래 플랫폼',
       link: `${base}/`,
       description: '실시간 가상 주식 거래소, 채굴 센터, 금융 계산기 및 디스코드 연동 경제 생태계.',

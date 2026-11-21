@@ -191,7 +191,7 @@ public class AdminGovernanceDtos {
 
         @JsonProperty("is_admin")
         @JsonAlias({"isAdmin", "is_admin"})
-        private boolean isAdmin;
+        private Boolean isAdmin;
 
         public AdminUserDto() {}
 
@@ -240,8 +240,8 @@ public class AdminGovernanceDtos {
         public String getLastAdminAt() { return lastAdminAt; }
         public void setLastAdminAt(String lastAdminAt) { this.lastAdminAt = lastAdminAt; }
 
-        public boolean getIsAdmin() { return isAdmin; }
-        public void setIsAdmin(boolean isAdmin) { this.isAdmin = isAdmin; }
+        public Boolean getIsAdmin() { return isAdmin; }
+        public void setIsAdmin(Boolean isAdmin) { this.isAdmin = isAdmin; }
     }
 
     public static class AdminUsersResponse {

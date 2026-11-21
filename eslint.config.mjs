@@ -3,7 +3,7 @@ import tseslint from 'typescript-eslint';
 import nextVitals from 'eslint-config-next/core-web-vitals';
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/.next/**', '**/node_modules/**', '**/generated/**', '.claude/**', '.worktrees/**', 'capture_*.js', 'bot/scripts/**', 'scripts/**', 'skills/**'] },
+  { ignores: ['**/dist/**', '**/.next/**', '**/node_modules/**', '**/generated/**', '.claude/**', '.worktrees/**', 'capture_*.js', 'bot/scripts/**', 'scripts/**', 'skills/**', 'spring-backend/src/main/resources/static/**'] },
   js.configs.recommended,
   ...nextVitals,
   ...tseslint.configs.recommended,

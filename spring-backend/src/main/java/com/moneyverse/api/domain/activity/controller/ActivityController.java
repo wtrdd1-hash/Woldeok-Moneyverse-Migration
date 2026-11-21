@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
+import java.util.*;
 
 @Tag(name = "Activity & Telemetry", description = "유저 클라이언트 활동 텔레메트리 수집 및 관리자 트래픽 분석 API")
 @RestController
@@ -55,13 +55,24 @@ public class ActivityController {
         return ResponseEntity.ok(activityService.trafficDashboard(granularity, periods));
     }
 
-    @GetMapping({"/api/admin/activity/logs", "/api/v1/admin/activity/logs"})
-    @Operation(summary = "관리자용 활동 로그 목록 조회")
+    @GetMapping("/api/admin/activity/logs")
+    @Operation(summary = "관리자용 활동 로그 목록 조회 (래퍼 응답)")
     public ResponseEntity<ActivityLogsResponse> listLogs(
             @RequestParam(value = "limit", defaultValue = "50") int limit,
             @RequestParam(value = "offset", defaultValue = "0") int offset,
             @RequestParam(value = "userId", required = false) UUID userId
     ) {
         return ResponseEntity.ok(activityService.getLogs(userId, limit, offset));
+    }
+
+    @GetMapping("/api/v1/admin/activity/logs")
+    @Operation(summary = "관리자용 활동 로그 목록 조회 (프론트엔드 직접 배열)")
+    public ResponseEntity<List<Map<String, Object>>> listLogsV1(
+            @RequestParam(value = "limit", defaultValue = "50") int limit,
+            @RequestParam(value = "offset", defaultValue = "0") int offset,
+            @RequestParam(value = "userId", required = false) UUID userId,
+            @RequestParam(value = "eventType", required = false) String eventType
+    ) {
+        return ResponseEntity.ok(activityService.getDirectLogs(userId, eventType, limit, offset));
     }
 }

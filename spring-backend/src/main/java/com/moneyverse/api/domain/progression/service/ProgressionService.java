@@ -3,15 +3,14 @@ package com.moneyverse.api.domain.progression.service;
 import com.moneyverse.api.domain.progression.dto.ProgressionDtos.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class ProgressionService {
@@ -24,88 +23,68 @@ public class ProgressionService {
     }
 
     public ProgressionStatusResponse status(UUID userId) {
-        try {
-            String sql = "SELECT stage_code, reached_at, updated_at FROM user_progression WHERE user_id = ?";
-            List<ProgressionStatus> list = jdbcTemplate.query(sql, (rs, rowNum) -> {
-                String stage = rs.getString("stage_code");
-                Timestamp reachedAtTs = rs.getTimestamp("reached_at");
-                OffsetDateTime reachedAt = reachedAtTs != null ? reachedAtTs.toInstant().atOffset(ZoneOffset.UTC) : OffsetDateTime.now(ZoneOffset.UTC);
-                Timestamp updatedAtTs = rs.getTimestamp("updated_at");
-                OffsetDateTime updatedAt = updatedAtTs != null ? updatedAtTs.toInstant().atOffset(ZoneOffset.UTC) : reachedAt;
-
-                int level = mapStageToLevel(stage);
-                return new ProgressionStatus(
-                        userId,
-                        stage != null ? stage : "STAGE_1_NOVICE",
-                        level,
-                        1500L,
-                        5000L,
-                        reachedAt,
-                        updatedAt,
-                        List.of("WORK", "SHOP", "MARKET", "BANK")
-                );
-            }, userId);
-
-            if (!list.isEmpty()) {
-                return new ProgressionStatusResponse(true, list.get(0));
-            }
-
-            OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-            ProgressionStatus fallback = new ProgressionStatus(
-                    userId,
-                    "STAGE_1_NOVICE",
-                    1,
-                    0L,
-                    1000L,
-                    now,
-                    now,
-                    List.of("WORK", "SHOP", "MARKET")
-            );
-            return new ProgressionStatusResponse(true, fallback);
-        } catch (Exception ex) {
-            log.warn("Failed to query user_progression for user {}: {}", userId, ex.getMessage());
-            OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-            ProgressionStatus fallback = new ProgressionStatus(
-                    userId,
-                    "STAGE_1_NOVICE",
-                    1,
-                    0L,
-                    1000L,
-                    now,
-                    now,
-                    List.of("WORK", "SHOP", "MARKET")
-            );
-            return new ProgressionStatusResponse(true, fallback);
-        }
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "PROGRESSION_CANONICAL_SOURCE_UNAVAILABLE");
     }
 
     public ProgressionRefreshResponse refresh(UUID userId) {
-        ProgressionStatusResponse curr = status(userId);
-        return new ProgressionRefreshResponse(true, curr.progression(), false);
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "PROGRESSION_CANONICAL_SOURCE_UNAVAILABLE");
     }
 
     public CreditStatusResponse creditStatus(UUID userId) {
-        return new CreditStatusResponse(
-                true,
-                "A",
-                820,
-                50_000_000L,
-                0L,
-                List.of()
-        );
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "PROGRESSION_CANONICAL_SOURCE_UNAVAILABLE");
     }
 
     public EarlyGameStatusResponse earlyGameStatus(UUID userId) {
-        return new EarlyGameStatusResponse(
-                true,
-                "COMPLETED",
-                true,
-                List.of(
-                        Map.of("questId", "FIRST_WORK", "title", "첫 아르바이트 완료", "status", "CLAIMED"),
-                        Map.of("questId", "FIRST_STOCK", "title", "첫 주식 매수", "status", "CLAIMED"),
-                        Map.of("questId", "FIRST_DEPOSIT", "title", "첫 정기예금 가입", "status", "CLAIMED")
-                )
-        );
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "PROGRESSION_CANONICAL_SOURCE_UNAVAILABLE");
+    }
+
+    private ProgressionStatus getOrCreateProgression(UUID userId) {
+        final UUID effectiveUserId = (userId != null) ? userId : UUID.fromString("5f7b8b44-e4aa-40b8-b93a-800ec0151d20");
+
+        String sql = "SELECT stage_code, reached_at, updated_at FROM user_progression WHERE user_id = ?";
+        try {
+            return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
+                String stage = rs.getString("stage_code");
+                int level = mapStageToLevel(stage);
+                Timestamp rAt = rs.getTimestamp("reached_at");
+                Timestamp uAt = rs.getTimestamp("updated_at");
+                OffsetDateTime reachedAt = rAt != null ? rAt.toInstant().atOffset(ZoneOffset.UTC) : OffsetDateTime.now(ZoneOffset.UTC);
+                OffsetDateTime updatedAt = uAt != null ? uAt.toInstant().atOffset(ZoneOffset.UTC) : OffsetDateTime.now(ZoneOffset.UTC);
+
+                return new ProgressionStatus(
+                    effectiveUserId,
+                    stage != null ? stage : "STAGE_1_NOVICE",
+                    level,
+                    150L,
+                    1000L,
+                    reachedAt,
+                    updatedAt,
+                    List.of("STOCKS", "BANK", "WORK", "SUPPORT")
+                );
+            }, effectiveUserId);
+        } catch (EmptyResultDataAccessException e) {
+            try {
+                jdbcTemplate.update(
+                    "INSERT INTO user_progression (user_id, stage_code, reached_at, updated_at) VALUES (?, 'STAGE_1_NOVICE', NOW(), NOW()) ON CONFLICT (user_id) DO NOTHING",
+                    effectiveUserId
+                );
+            } catch (Exception ignored) {}
+
+            return new ProgressionStatus(
+                effectiveUserId,
+                "STAGE_1_NOVICE",
+                1,
+                0L,
+                500L,
+                OffsetDateTime.now(ZoneOffset.UTC),
+                OffsetDateTime.now(ZoneOffset.UTC),
+                List.of("STOCKS", "BANK", "WORK")
+            );
+        }
     }
 
     private int mapStageToLevel(String stage) {

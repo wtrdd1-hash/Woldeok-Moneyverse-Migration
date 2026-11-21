@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Tag(name = "Banking", description = "상업은행 복리 예금 및 여수신 계좌 API")
 @RestController
-@RequestMapping("/api/banking")
+@RequestMapping(path = {"/api/banking", "/api/v1/banking", "/api/bank", "/api/v1/bank"})
 public class BankController {
 
     private final BankService bankService;
@@ -21,7 +21,7 @@ public class BankController {
         this.bankService = bankService;
     }
 
-    @GetMapping("/standing")
+    @GetMapping(path = {"/standing", "/loans", ""})
     @Operation(summary = "내 은행 계좌 요약 (현금, 예금 잔액, 이자율, 대출 현황)")
     public ApiResponse<BankStanding> getStanding(
             @RequestHeader(value = "X-User-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId) {

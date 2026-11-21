@@ -19,6 +19,8 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
 
 moneyverse:
+  storage:
+    path: ${java.io.tmpdir}/moneyverse-test-media-${random.uuid}
   security:
     internal-token: test-internal-token
   features:

@@ -3,125 +3,104 @@ package com.moneyverse.api.domain.business.service;
 import com.moneyverse.api.domain.business.dto.BusinessDtos.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
 public class BusinessService {
-
     private static final Logger log = LoggerFactory.getLogger(BusinessService.class);
     private final JdbcClient jdbcClient;
 
-    public BusinessService(JdbcClient jdbcClient) {
-        this.jdbcClient = jdbcClient;
+    public BusinessService(JdbcClient jdbcClient) { this.jdbcClient = jdbcClient; }
+
+    private UUID actor(String userId) {
+        try { return UUID.fromString(userId); }
+        catch (Exception e) { throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "SESSION_REQUIRED"); }
+    }
+
+    private ResponseStatusException unavailable(String source) {
+        log.warn("Business source unavailable: {}", source);
+        return new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "BUSINESS_SOURCE_UNAVAILABLE");
     }
 
     public BusinessCatalogResponse getCatalog() {
         try {
-            List<BusinessCatalogItem> items = jdbcClient.sql("SELECT type_id::text, name, description, category, base_price::text, daily_yield::text, max_tier FROM public.business_catalog()")
-                    .query((rs, rowNum) -> new BusinessCatalogItem(
-                            rs.getString("type_id"),
-                            rs.getString("name"),
-                            rs.getString("description"),
-                            rs.getString("category"),
-                            rs.getString("base_price"),
-                            rs.getString("daily_yield"),
-                            rs.getInt("max_tier")
-                    ))
+            List<BusinessCatalogItem> rows = jdbcClient.sql(
+                    "SELECT id::text AS type_id, name, description, purchase_cost::text AS base_price, " +
+                    "(daily_revenue - daily_operating_cost)::text AS daily_yield " +
+                    "FROM public.business_catalog()")
+                    .query((rs, n) -> new BusinessCatalogItem(
+                            rs.getString("type_id"), rs.getString("name"), rs.getString("description"),
+                            null, // source does not contain a category
+                            rs.getString("base_price"), rs.getString("daily_yield"),
+                            null)) // tier cap not available in authoritative source
                     .list();
-
-            return new BusinessCatalogResponse(true, items.isEmpty() ? fallbackCatalog() : items);
-        } catch (Exception e) {
-            log.warn("Failed to query business_catalog, returning fallback: {}", e.getMessage());
-            return new BusinessCatalogResponse(true, fallbackCatalog());
-        }
+            return new BusinessCatalogResponse(true, rows);
+        } catch (Exception e) { throw unavailable("catalog"); }
     }
 
     public BusinessOwnershipListResponse getMyBusinesses(String userId) {
-        String actor = (userId != null && !userId.isBlank()) ? userId.trim() : "5f7b8b44-e4aa-40b8-b93a-800ec0151d20";
+        UUID owner = actor(userId);
         try {
-            List<BusinessOwnershipItem> list = jdbcClient.sql("SELECT business_id::text, type_id::text, name, type_name, tier, daily_yield::text, uncollected_revenue::text, last_collected_at::text, created_at::text FROM public.business_my_ownerships_v2(?::uuid)")
-                    .param(actor)
-                    .query((rs, rowNum) -> new BusinessOwnershipItem(
-                            rs.getString("business_id"),
-                            rs.getString("type_id"),
-                            rs.getString("name"),
-                            rs.getString("type_name"),
-                            rs.getInt("tier"),
+            List<BusinessOwnershipItem> rows = jdbcClient.sql(
+                    "SELECT ownership_id::text AS business_id, business_type_id::text AS type_id, name, " +
+                    "(daily_revenue - daily_operating_cost)::text AS daily_yield, " +
+                    "last_settlement_date::text AS last_collected_at, purchased_at::text AS created_at " +
+                    "FROM public.business_my_ownerships_v2(?::uuid)")
+                    .param(owner)
+                    .query((rs, n) -> new BusinessOwnershipItem(
+                            rs.getString("business_id"), rs.getString("type_id"), rs.getString("name"),
+                            null, // source has no separate type display name
+                            null, // no canonical ownership tier in current function
                             rs.getString("daily_yield"),
-                            rs.getString("uncollected_revenue"),
-                            rs.getString("last_collected_at"),
-                            rs.getString("created_at")
-                    ))
+                            null, // uncollected revenue is not an authoritative source column
+                            rs.getString("last_collected_at"), rs.getString("created_at")))
                     .list();
-
-            return new BusinessOwnershipListResponse(true, list);
-        } catch (Exception e) {
-            log.warn("Failed to query business_my_ownerships_v2, returning empty list: {}", e.getMessage());
-            return new BusinessOwnershipListResponse(true, List.of());
-        }
+            return new BusinessOwnershipListResponse(true, rows);
+        } catch (Exception e) { throw unavailable("ownerships"); }
     }
 
     public BusinessPurchaseResponse purchaseBusiness(String userId, String typeId, String name) {
-        String actor = (userId != null && !userId.isBlank()) ? userId.trim() : "5f7b8b44-e4aa-40b8-b93a-800ec0151d20";
-        try {
-            String businessId = jdbcClient.sql("SELECT public.business_purchase(?::uuid, ?::uuid, ?::text)::text")
-                    .param(actor)
-                    .param(typeId)
-                    .param(name)
-                    .query(String.class)
-                    .optional()
-                    .orElse(UUID.randomUUID().toString());
+        return BusinessPurchaseResponse.fail("IDEMPOTENCY_KEY_REQUIRED");
+    }
 
-            return BusinessPurchaseResponse.ok(businessId);
+    public BusinessPurchaseResponse purchaseBusiness(String userId, String typeId, String name, UUID key) {
+        if (key == null) return BusinessPurchaseResponse.fail("IDEMPOTENCY_KEY_REQUIRED");
+        UUID owner = actor(userId);
+        try {
+            UUID businessType = UUID.fromString(typeId);
+            return jdbcClient.sql("SELECT ownership_id::text, transaction_id::text FROM public.business_purchase(?::uuid, ?::uuid, ?::uuid)")
+                    .param(key).param(owner).param(businessType)
+                    .query((rs, n) -> {
+                        String receipt = rs.getString("transaction_id");
+                        String ownershipId = rs.getString("ownership_id");
+                        return (receipt == null || ownershipId == null)
+                                ? BusinessPurchaseResponse.fail("PURCHASE_RECEIPT_MISSING")
+                                : BusinessPurchaseResponse.ok(ownershipId);
+                    })
+                    .optional().orElseGet(() -> BusinessPurchaseResponse.fail("PURCHASE_RECEIPT_MISSING"));
         } catch (Exception e) {
-            log.error("Failed to purchase business: {}", e.getMessage());
-            return BusinessPurchaseResponse.fail(e.getMessage());
+            log.warn("Business purchase could not produce an authoritative receipt");
+            return BusinessPurchaseResponse.fail("PURCHASE_SOURCE_UNAVAILABLE");
         }
     }
 
     public BusinessCollectResponse collectRevenue(String userId, String businessId) {
-        String actor = (userId != null && !userId.isBlank()) ? userId.trim() : "5f7b8b44-e4aa-40b8-b93a-800ec0151d20";
-        try {
-            return jdbcClient.sql("SELECT collected_amount::text, tax_deducted::text, net_received::text FROM public.business_settle_daily_v2(?::uuid, ?::uuid)")
-                    .param(actor)
-                    .param(businessId)
-                    .query((rs, rowNum) -> BusinessCollectResponse.ok(
-                            rs.getString("collected_amount"),
-                            rs.getString("tax_deducted"),
-                            rs.getString("net_received")
-                    ))
-                    .optional()
-                    .orElseGet(() -> BusinessCollectResponse.ok("10000", "1000", "9000"));
-        } catch (Exception e) {
-            log.error("Failed to collect business revenue: {}", e.getMessage());
-            return BusinessCollectResponse.fail(e.getMessage());
-        }
+        return BusinessCollectResponse.fail("SETTLEMENT_TAX_CONTRACT_NOT_VERIFIED");
     }
 
-    private List<BusinessCatalogItem> fallbackCatalog() {
-        return List.of(
-                new BusinessCatalogItem(
-                        "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-                        "무인 편의점",
-                        "24시간 자동화 결제로 안정적인 소액 현금흐름을 창출하는 기본 소매 사업장",
-                        "RETAIL",
-                        "500000",
-                        "15000",
-                        5
-                ),
-                new BusinessCatalogItem(
-                        "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
-                        "핀테크 데이터 솔루션 센터",
-                        "가상 주식 및 거시경제 시계열 데이터를 분석/제공하는 고부가가치 기술 사업장",
-                        "TECH",
-                        "3000000",
-                        "110000",
-                        10
-                )
-        );
+    public BusinessCollectResponse collectRevenue(String userId, String businessId, UUID key) {
+        // The DB function exposes operating costs but not a separately verified tax receipt.
+        // Do not advertise a 10% treasury tax transfer or perform an unchecked financial write.
+        if (key == null) return BusinessCollectResponse.fail("IDEMPOTENCY_KEY_REQUIRED");
+        actor(userId);
+        try { UUID.fromString(businessId); }
+        catch (Exception e) { return BusinessCollectResponse.fail("INVALID_OWNERSHIP_ID"); }
+        return BusinessCollectResponse.fail("SETTLEMENT_TAX_CONTRACT_NOT_VERIFIED");
     }
 }

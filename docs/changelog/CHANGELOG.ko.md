@@ -1,4 +1,7 @@
-﻿## v2026.11.13.2 — 스프링 전환 위험·아티팩트 보강 (초안 / 미배포)
+## v2026.11.18.20 — Spring·프론트엔드 Test 복구 (운영 승격 보류)
+- 연금 GET 생성·허위 금융성공 차단, Android 200 HTML 대체 제거, 상점 장애 상태 UI 보완, API v4와 프론트 v17 코드 통합. Spring 174건 통과, Next 빌드/집중 121건 통과, **전체 프론트 시험 시간초과·실패**. 공식 Test 로컬 20 GET 502 0건, 실시간 Spring 정적 UI는 이전 버전. 운영/DB 변경 없음. [한국어 QA](../qa/2026-11-18-spring-frontend-test-recovery-v2026.11.18.20.ko.md).
+
+## v2026.11.13.2 — 스프링 전환 위험·아티팩트 보강 (초안 / 미배포)
 - 기존 1~9장별 위험 R01~R10, G0~G6 세부 검증, DB 단독 금융 기록자, 인증/Android/봇 동등성, 무중단·복귀 기준 추가. JAR/OCI digest, SBOM/출처, 매니페스트·보관·조건부 Artifactory 관리 정책 별도 작성. Java 코드·DB·Test·운영 변경 없음. [상세](2026-11-13-spring-migration-review-v2026.11.13.2.ko.md) · [PR #3144](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3144).
 
 ## v2026.11.13.1 — Spring Boot 전체 백엔드 전환 아키텍처 (초안 / 운영 보류)

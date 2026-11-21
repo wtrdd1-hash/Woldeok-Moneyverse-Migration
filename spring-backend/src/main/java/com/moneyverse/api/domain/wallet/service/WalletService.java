@@ -4,6 +4,8 @@ import com.moneyverse.api.domain.wallet.dto.WalletDtos.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,56 +24,141 @@ public class WalletService {
 
     @Transactional(readOnly = true)
     public WalletOverview getOverview(String userId) {
-        String bal = "100000";
+        UUID uid;
         try {
-            BigDecimal b = jdbcTemplate.queryForObject(
-                "SELECT balance_wld FROM wallets WHERE user_id = ?::uuid",
-                BigDecimal.class,
-                userId
-            );
-            if (b != null) bal = b.toPlainString();
-        } catch (Exception ignored) {}
+            uid = UUID.fromString(userId.trim());
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid wallet owner identifier");
+        }
 
-        return new WalletOverview(bal, "0", "0", "WLD", userId, Collections.emptyList());
+        BigDecimal cashBalance = BigDecimal.ZERO;
+        BigDecimal bankBalance = BigDecimal.ZERO;
+        Set<String> verifiedAccountTypes = new HashSet<>();
+
+        try {
+            String sql = """
+                SELECT a.account_type, b.available_amount AS amount
+                FROM accounts a
+                LEFT JOIN account_balances b ON a.id = b.account_id
+                WHERE a.owner_user_id = ?
+            """;
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, uid);
+            for (Map<String, Object> r : rows) {
+                String type = String.valueOf(r.get("account_type"));
+                if (!"USER_CASH".equals(type) && !"USER_BANK".equals(type)) continue;
+                // A missing balance row is not proof of a 0-WLD balance.
+                Object reportedAmount = r.get("amount");
+                if (reportedAmount == null) throw new IllegalStateException("missing balance proof");
+                BigDecimal amount = new BigDecimal(String.valueOf(reportedAmount));
+                if (!verifiedAccountTypes.add(type)) throw new IllegalStateException("duplicate wallet account type");
+                if ("USER_CASH".equals(type)) cashBalance = amount;
+                else bankBalance = amount;
+            }
+        } catch (Exception e) {
+            log.warn("[WalletService] Authoritative wallet balance query unavailable");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "wallet balance source unavailable", e);
+        }
+        if (!verifiedAccountTypes.containsAll(Set.of("USER_CASH", "USER_BANK"))) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "wallet ownership/balance not verified");
+        }
+
+        BigDecimal total = cashBalance.add(bankBalance);
+
+        // Fetch recent postings with transaction details
+        List<Map<String, Object>> txs = new ArrayList<>();
+        try {
+            String txSql = """
+                SELECT lp.id::text AS id, lp.amount::text AS amount, lp.direction::text AS direction, lp.created_at,
+                       COALESCE(lt.type, 'TRANSFER') AS tx_type
+                FROM ledger_postings lp
+                JOIN accounts a ON lp.account_id = a.id
+                LEFT JOIN ledger_transactions lt ON lp.transaction_id = lt.id
+                WHERE a.owner_user_id = ?
+                ORDER BY lp.created_at DESC
+                LIMIT 10
+            """;
+            txs = jdbcTemplate.queryForList(txSql, uid);
+        } catch (Exception e) {
+            log.warn("[WalletService] Authoritative wallet postings query unavailable");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "wallet postings source unavailable", e);
+        }
+
+        return new WalletOverview(
+                total.toPlainString(),
+                cashBalance.toPlainString(),
+                bankBalance.toPlainString(),
+                "WLD",
+                uid.toString(),
+                txs
+        );
+    }
+
+    /** Legacy direct transfer has no replay-stable request key; never post twice on retry. */
+    public Map<String, Object> transfer(String fromUserId, String toUserId, Long amountWld, String memo) {
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "wallet transfer requires a verified idempotency receipt key");
     }
 
     @Transactional
-    public Map<String, Object> transfer(String fromUserId, String toUserId, Long amountWld, String memo) {
-        if (amountWld == null || amountWld <= 0) {
-            throw new IllegalArgumentException("amountWld must be greater than 0");
+    public Map<String, Object> transferWithIdempotencyKey(
+            String fromUserId, String toUserId, Long amountWld, String memo, UUID idempotencyKey) {
+        return transferCanonicalWithIdempotencyKey(fromUserId,toUserId,
+                amountWld==null?null:amountWld.toString(),memo,idempotencyKey);
+    }
+
+    @Transactional
+    public Map<String, Object> transferCanonicalWithIdempotencyKey(
+            String fromUserId, String toUserId, String amountWld, String memo, UUID idempotencyKey) {
+        if (idempotencyKey == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Idempotency-Key UUID required");
+        }
+        if (amountWld == null || !amountWld.matches("[1-9][0-9]{0,37}")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "positive canonical amountWld required");
         }
         if (fromUserId.equals(toUserId)) {
             throw new IllegalArgumentException("자신에게는 이체할 수 없습니다.");
         }
 
-        // 송금자 잔액 차감
-        int updated = jdbcTemplate.update("""
-            UPDATE wallets 
-            SET balance_wld = balance_wld - ?, updated_at = NOW() 
-            WHERE user_id = ?::uuid AND balance_wld >= ?
-            """, amountWld, fromUserId, amountWld);
-
-        if (updated == 0) {
-            throw new IllegalStateException("지갑 잔액이 부족합니다.");
+        UUID fromUid;
+        UUID toUid;
+        try {
+            fromUid = UUID.fromString(fromUserId.trim());
+            toUid = UUID.fromString(toUserId.trim());
+        } catch (Exception e) {
+            throw new IllegalArgumentException("유효하지 않은 유저 식별자 형식입니다.");
         }
 
-        // 수신자 잔액 증액 (없으면 생성)
-        jdbcTemplate.update("""
-            INSERT INTO wallets (id, user_id, balance_wld, created_at, updated_at)
-            VALUES (gen_random_uuid(), ?::uuid, ?, NOW(), NOW())
-            ON CONFLICT (user_id) 
-            DO UPDATE SET balance_wld = wallets.balance_wld + EXCLUDED.balance_wld,
-                          updated_at = NOW()
-            """, toUserId, amountWld);
+        // Key must be provided by the authenticated caller; retries reuse the same key.
+        try {
+            String sql = "SELECT public.economy_transfer(?::uuid, ?::uuid, ?::uuid, ?::numeric)";
+            UUID txId = jdbcTemplate.queryForObject(sql, UUID.class, idempotencyKey, fromUid, toUid, new BigDecimal(amountWld));
 
-        String txId = UUID.randomUUID().toString();
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("txId", txId);
-        res.put("fromUserId", fromUserId);
-        res.put("toUserId", toUserId);
-        res.put("amountWld", amountWld);
-        res.put("message", "P2P 지갑 전송이 안전하게 완료되었습니다.");
-        return res;
+            Map<String, Object> res = new LinkedHashMap<>();
+            res.put("success", true);
+            if (txId == null) throw new IllegalStateException("missing canonical posting receipt");
+            res.put("txId", txId.toString());
+            res.put("fromUserId", fromUserId);
+            res.put("toUserId", toUserId);
+            res.put("amount", amountWld);
+            res.put("currency", "WLD");
+            res.put("memo", memo != null ? memo : "");
+            res.put("message", "P2P 불변 복식부기 원장 이체가 성공적으로 집행되었습니다.");
+            return res;
+        } catch (Exception e) {
+            for (Throwable cause=e;cause!=null;cause=cause.getCause()) {
+                if(cause instanceof java.sql.SQLException sqlError) {
+                    String state=sqlError.getSQLState();
+                    if("22023".equals(state)||"23505".equals(state)) {
+                        throw new ResponseStatusException(HttpStatus.CONFLICT,"transfer request rejected");
+                    }
+                    if("28000".equals(state)) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"transfer receipt owner mismatch");
+                    }
+                }
+            }
+            log.warn("[WalletService] canonical economy transfer unavailable; no success receipt");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "canonical transfer receipt unavailable", e);
+        }
     }
 }

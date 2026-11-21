@@ -1,0 +1,41 @@
+<!doctype html><html xmlns:th="http://www.thymeleaf.org" th:replace="~{shared/admin-shell :: page(~{::main})}"><body>
+<main id="main" tabindex="-1">
+<section class="admin-card admin-read-intro">
+  <div><p class="admin-kicker" data-i18n="sourceOverview" th:text="${uiCopy['sourceOverview']}">Source-backed overview</p>
+  <h2 th:attr="data-i18n=${adminPageKey}" th:text="${uiCopy[adminPageKey]}">Administration</h2>
+  <p data-i18n="adminReadLead" th:text="${uiCopy['adminReadLead']}">View verified records with your current administrator permission.</p></div>
+  <a class="admin-refresh" th:href="${refreshPath}" data-i18n="refresh" th:text="${uiCopy['refresh']}">Refresh</a>
+</section>
+<section class="admin-card admin-read-query" th:if="${memberPage}">
+  <h2 data-i18n="adminReadMemberSearch" th:text="${uiCopy['adminReadMemberSearch']}">Search members</h2>
+  <form method="get" action="/admin/users" class="admin-member-query">
+    <label for="member-search"><span data-i18n="adminReadMemberSearch" th:text="${uiCopy['adminReadMemberSearch']}">Search members</span>
+      <input id="member-search" name="q" type="search" maxlength="80" th:value="${readQuery}"></label>
+    <label for="page-size"><span data-i18n="adminReadLimit" th:text="${uiCopy['adminReadLimit']}">Result limit</span>
+      <input id="page-size" name="limit" type="number" min="1" max="200" th:value="${readLimit}"></label>
+    <input id="admin-member-language" type="hidden" name="lang" th:value="${uiLanguage}">
+    <button type="submit" class="admin-refresh admin-read-submit" data-i18n="search" th:text="${uiCopy['search']}">Search</button>
+  </form>
+  <p class="admin-read-note" data-i18n="adminReadSearchScope" th:text="${uiCopy['adminReadSearchScope']}">Search applies only to the fetched source records, not all members.</p>
+</section>
+<section class="admin-card" th:if="${readInvalid}" role="alert"><h2 data-i18n="adminReadInvalid" th:text="${uiCopy['adminReadInvalid']}">Check the search and result limit.</h2></section>
+<section class="admin-card" th:if="${readUnavailable}" role="alert"><h2 th:attr="data-i18n=${readUnverified ? 'adminReadUnverified' : 'unavailable'}" th:text="${uiCopy[readUnverified ? 'adminReadUnverified' : 'unavailable']}">Unable to load data</h2></section>
+<section class="admin-card admin-read-results" th:if="${!readInvalid and !readUnavailable}">
+  <div class="admin-read-result-heading"><h2 data-i18n="adminReadResults" th:text="${uiCopy['adminReadResults']}">Verified results</h2>
+    <span class="admin-read-count"><span data-i18n="adminReadSourceRows" th:text="${uiCopy['adminReadSourceRows']}">Source records</span> <strong th:text="${sourceCount}">0</strong></span></div>
+  <p class="admin-read-note" th:if="${!reconciliation}" data-i18n="adminReadCountScope" th:text="${uiCopy['adminReadCountScope']}">Fetched records are not a site-wide total.</p>
+  <th:block th:if="${reconciliation}">
+    <p class="admin-read-note" th:if="${scenarioPage}" data-i18n="adminReadScenario" th:text="${uiCopy['adminReadScenario']}">This view reports the latest snapshot; it does not run a simulation.</p>
+    <p class="admin-read-status" th:attr="data-i18n=${reconciliationOk ? 'adminReadReportedOk' : 'adminReadCheckRequired'}" th:text="${uiCopy[reconciliationOk ? 'adminReadReportedOk' : 'adminReadCheckRequired']}">Check required</p>
+    <dl class="admin-read-metadata"><div><dt data-i18n="adminReadUpdated" th:text="${uiCopy['adminReadUpdated']}">Calculated at</dt><dd th:text="${snapshotAt}"></dd></div>
+      <div><dt data-i18n="adminReadSnapshot" th:text="${uiCopy['adminReadSnapshot']}">Snapshot ID</dt><dd th:text="${snapshotId}"></dd></div>
+      <div><dt data-i18n="adminReadMetricVersion" th:text="${uiCopy['adminReadMetricVersion']}">Metric version</dt><dd th:text="${metricVersion}"></dd></div></dl>
+  </th:block>
+  <div class="admin-read-table-scroll" tabindex="0" th:attr="aria-label=${uiCopy['adminReadResults']}">
+    <table class="admin-read-table"><thead><tr><th th:each="column : ${readColumns}" scope="col" th:attr="data-i18n=${column}" th:text="${uiCopy[column]}">Column</th></tr></thead>
+      <tbody><tr th:each="row : ${readRows}"><td th:each="cell,cellStat : ${row}" th:attr="data-i18n=${reconciliation and cellStat.index == 0 ? cell : null}" th:text="${reconciliation and cellStat.index == 0 ? uiCopy[cell] : cell}">Value</td></tr>
+        <tr th:if="${#lists.isEmpty(readRows)}"><td th:colspan="${#lists.size(readColumns)}" class="admin-read-empty" th:attr="data-i18n=${memberPage ? 'adminReadNoMembers' : 'empty'}" th:text="${uiCopy[memberPage ? 'adminReadNoMembers' : 'empty']}">Nothing to display</td></tr></tbody>
+    </table>
+  </div>
+</section>
+</main></body></html>

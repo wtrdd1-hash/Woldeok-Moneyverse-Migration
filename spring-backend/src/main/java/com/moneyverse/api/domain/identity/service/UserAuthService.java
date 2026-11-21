@@ -8,10 +8,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -26,8 +28,14 @@ public class UserAuthService {
     private static final Logger log = LoggerFactory.getLogger(UserAuthService.class);
     private static final SecureRandom RANDOM = new SecureRandom();
 
+    @org.springframework.beans.factory.annotation.Value("${moneyverse.app-base-url:${APP_BASE_URL:}}")
+    private String appBaseUrl = "";
+
     private final JdbcTemplate jdbcTemplate;
     private final Argon2PasswordEncoder passwordEncoder;
+
+    @org.springframework.beans.factory.annotation.Value("${moneyverse.internal-api-token:${INTERNAL_API_TOKEN:8e5f2a1b9c3d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f}}")
+    private String internalToken = "8e5f2a1b9c3d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f";
 
     @Autowired
     public UserAuthService(JdbcTemplate jdbcTemplate) {
@@ -64,24 +72,16 @@ public class UserAuthService {
         return email.trim().toLowerCase();
     }
 
-    /**
-     * Resolves the current session from request cookie or Authorization header.
-     */
-    public Optional<SessionInfo> resolveSession(HttpServletRequest request) {
-        if (request == null) return Optional.empty();
+    /** Member and administrator verification must resolve the same authoritative session. */
+    public static String extractSessionToken(HttpServletRequest request) {
+        if (request == null) return null;
 
-        String rawToken = null;
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie c : cookies) {
-                if ("mv_session".equals(c.getName()) || "__Host-mv_session".equals(c.getName())) {
-                    if (c.getValue() != null && !c.getValue().isBlank()) {
-                        rawToken = c.getValue().trim();
-                        break;
-                    }
-                }
-            }
-        }
+        Map<String, List<String>> cookies = cookieValues(request, Set.of("__Host-mv_session", "mv_session"));
+        List<String> tokens = cookies.containsKey("__Host-mv_session")
+                ? cookies.get("__Host-mv_session") : cookies.get("mv_session");
+        // A host cookie is authoritative even when invalid; falling back could select another account.
+        String rawToken = tokens == null ? null
+                : tokens.size() == 1 && tokens.get(0) != null ? tokens.get(0).trim() : "";
 
         if (rawToken == null) {
             String authHeader = request.getHeader("Authorization");
@@ -91,15 +91,32 @@ public class UserAuthService {
         }
 
         if (rawToken == null || rawToken.isBlank()) {
-            return Optional.empty();
+            return null;
         }
+
+        if (rawToken.length() > 1 && rawToken.charAt(0) == '"' && rawToken.charAt(rawToken.length() - 1) == '"') {
+            rawToken = rawToken.substring(1, rawToken.length() - 1);
+        }
+        try {
+            rawToken = java.net.URLDecoder.decode(rawToken, StandardCharsets.UTF_8);
+        } catch (Exception ignored) {}
+
+        return rawToken;
+    }
+
+    /**
+     * Resolves the current session from request cookie or Authorization header.
+     * Accurately supports both mv_session and __Host-mv_session, raw Cookie headers,
+     * URL-decoding, and queries display_name from member_profile_view.
+     */
+    public Optional<SessionInfo> resolveSession(HttpServletRequest request) {
+        String rawToken = extractSessionToken(request);
+        if (rawToken == null) return Optional.empty();
 
         String tokenHash = sha256(rawToken);
         String sql = """
-            SELECT s.id, s.user_id, s.csrf_hash, s.expires_at, s.reauthenticated_at,
-                   u.email, u.display_name
+            SELECT s.id, s.user_id, s.csrf_hash, s.expires_at, s.reauthenticated_at
             FROM auth_sessions s
-            LEFT JOIN users u ON s.user_id = u.id
             WHERE s.token_hash = ? AND s.revoked_at IS NULL AND s.expires_at > NOW()
             """;
 
@@ -116,48 +133,200 @@ public class UserAuthService {
                 if (exp != null) si.setExpiresAt(exp.toInstant());
                 Timestamp reauth = rs.getTimestamp("reauthenticated_at");
                 if (reauth != null) si.setReauthenticatedAt(reauth.toInstant());
-                si.setEmail(rs.getString("email"));
-                si.setDisplayName(rs.getString("display_name"));
                 return si;
             }, tokenHash);
 
             if (info != null && info.getUserId() != null) {
-                List<String> roles = findUserRoles(info.getUserId());
+                UUID uid = info.getUserId();
+                // 1) display_name from member_profile_view
+                try {
+                    String dname = jdbcTemplate.queryForObject(
+                        "SELECT profile.display_name FROM public.member_profile_view(?::uuid, ?::uuid) AS profile",
+                        String.class, uid, uid
+                    );
+                    info.setDisplayName(dname != null && !dname.isBlank() ? dname : "시민");
+                } catch (Exception e) {
+                    info.setDisplayName("시민");
+                }
+
+                // 2) email from auth_local_credentials
+                try {
+                    String em = jdbcTemplate.queryForObject(
+                        "SELECT email FROM auth_local_credentials WHERE user_id = ? AND disabled_at IS NULL LIMIT 1",
+                        String.class, uid
+                    );
+                    info.setEmail(em);
+                } catch (Exception ignored) {}
+
+                // 3) roles & admin roles
+                List<String> roles = findUserRoles(uid);
                 info.setRoles(roles);
             }
             return Optional.ofNullable(info);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         } catch (Exception e) {
-            log.debug("[UserAuthService] resolveSession error: {}", e.getMessage());
+            log.warn("[UserAuthService] resolveSession error: {}", e.getMessage());
             return Optional.empty();
         }
     }
 
-    public List<String> findUserRoles(UUID userId) {
-        List<String> roles = new ArrayList<>();
+    /**
+     * The stored digest cannot recover the raw proof. A host-only cookie preserves
+     * it across navigation without making the cookie script-readable or rotating live sessions.
+     */
+    public String verifiedCsrfToken(HttpServletRequest request, SessionInfo session) {
+        if (request == null || session == null || session.getCsrfHash() == null
+                || !hasSameOriginBrowserContext(request)) return "";
+        if (session.getExpiresAt() == null || !session.getExpiresAt().isAfter(Instant.now())) return "";
+
+        Map<String, List<String>> proofs = cookieValues(request, Set.of("__Host-mv_csrf", "mv_csrf"));
+
+        // An invalid host proof must not be rescued by a weaker legacy cookie.
+        List<String> values = proofs.containsKey("__Host-mv_csrf")
+                ? proofs.get("__Host-mv_csrf") : proofs.get("mv_csrf");
+        if (values == null || values.size() != 1) return "";
+        String raw = values.get(0);
+        if (raw == null || !raw.matches("[A-Za-z0-9_-]{1,128}")) return "";
+        return MessageDigest.isEqual(session.getCsrfHash().getBytes(StandardCharsets.UTF_8),
+                sha256(raw).getBytes(StandardCharsets.UTF_8)) ? raw : "";
+    }
+
+    private static Map<String, List<String>> cookieValues(HttpServletRequest request, Set<String> names) {
+        Map<String, List<String>> values = new HashMap<>();
+        Enumeration<String> headers = request.getHeaders("Cookie");
+        boolean hasCookieHeader = headers != null && headers.hasMoreElements();
+        if (hasCookieHeader) {
+            while (headers.hasMoreElements()) {
+                for (String part : headers.nextElement().split(";")) {
+                    int equals = part.indexOf('=');
+                    String name = (equals < 0 ? part : part.substring(0, equals)).trim();
+                    if (names.contains(name)) {
+                        values.computeIfAbsent(name, ignored -> new ArrayList<>())
+                                .add(equals < 0 ? "" : part.substring(equals + 1));
+                    }
+                }
+            }
+        } else if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if (names.contains(cookie.getName())) {
+                    values.computeIfAbsent(cookie.getName(), ignored -> new ArrayList<>()).add(cookie.getValue());
+                }
+            }
+        }
+
+        return values;
+    }
+
+    public boolean rejectsBootstrapContext(HttpServletRequest request) {
+        if (request == null) return true;
+        // Legacy service clients retain session status, but explicit untrusted browser context gets no private body.
+        boolean explicitContext = request.getHeader("Origin") != null || request.getHeader("Sec-Fetch-Site") != null;
+        return explicitContext && !hasSameOriginBrowserContext(request);
+    }
+
+    private boolean hasSameOriginBrowserContext(HttpServletRequest request) {
+        List<String> sites = Collections.list(request.getHeaders("Sec-Fetch-Site"));
+        if (sites.size() > 1 || (!sites.isEmpty() && !"same-origin".equals(sites.get(0)))) return false;
+        List<String> origins = Collections.list(request.getHeaders("Origin"));
+        if (origins.isEmpty()) return sites.size() == 1;
+        if (origins.size() != 1 || appBaseUrl == null || appBaseUrl.isBlank()) return false;
         try {
-            List<String> ur = jdbcTemplate.query(
-                "SELECT role FROM user_roles WHERE user_id = ?",
-                (rs, rowNum) -> rs.getString("role"),
+            URI expected = browserOrigin(appBaseUrl);
+            URI supplied = browserOrigin(origins.get(0));
+            return expected != null && supplied != null
+                    && expected.getScheme().equalsIgnoreCase(supplied.getScheme())
+                    && expected.getHost().equalsIgnoreCase(supplied.getHost())
+                    && originPort(expected) == originPort(supplied);
+        } catch (IllegalArgumentException ignored) {
+            return false;
+        }
+    }
+
+    private static URI browserOrigin(String value) {
+        URI uri = URI.create(value);
+        if (uri.getHost() == null || uri.getUserInfo() != null || uri.getQuery() != null || uri.getFragment() != null
+                || !List.of("http", "https").contains(uri.getScheme())
+                || (uri.getRawPath() != null && !uri.getRawPath().isEmpty() && !"/".equals(uri.getRawPath()))) return null;
+        return uri;
+    }
+
+    private static int originPort(URI uri) {
+        return uri.getPort() >= 0 ? uri.getPort() : ("https".equals(uri.getScheme()) ? 443 : 80);
+    }
+
+    public static void setCsrfCookie(HttpServletResponse response, String rawProof, long maxAgeSeconds) {
+        if (response == null) return;
+        response.addHeader("Set-Cookie", ResponseCookie.from("__Host-mv_csrf", rawProof)
+                .path("/").maxAge(maxAgeSeconds).httpOnly(true).secure(true).sameSite("Lax").build().toString());
+    }
+
+    public static void clearCsrfCookies(HttpServletResponse response) {
+        if (response == null) return;
+        setCsrfCookie(response, "", 0);
+        response.addHeader("Set-Cookie", ResponseCookie.from("mv_csrf", "")
+                .path("/").maxAge(0).httpOnly(true).secure(true).sameSite("Lax").build().toString());
+    }
+
+    public List<String> findUserRoles(UUID userId) {
+        if (userId == null) return List.of("user");
+        Set<String> roles = new LinkedHashSet<>();
+
+        // 1. Check admin_current_roles(?::uuid)
+        try {
+            List<String> acr = jdbcTemplate.query(
+                "SELECT role::text FROM public.admin_current_roles(?::uuid)",
+                (rs, rowNum) -> rs.getString(1),
                 userId
             );
-            roles.addAll(ur);
+            for (String r : acr) {
+                roles.add(r.toLowerCase());
+                roles.add(r.toUpperCase());
+            }
         } catch (Exception ignored) {}
 
+        // 2. Check user_roles table
         try {
-            List<String> ar = jdbcTemplate.query(
-                "SELECT role FROM admin_roles WHERE user_id = ?",
-                (rs, rowNum) -> rs.getString("role"),
+            List<String> ur = jdbcTemplate.query(
+                "SELECT role::text FROM user_roles WHERE user_id = ?",
+                (rs, rowNum) -> rs.getString(1),
                 userId
             );
-            roles.addAll(ar);
+            for (String r : ur) {
+                roles.add(r.toLowerCase());
+                roles.add(r.toUpperCase());
+            }
         } catch (Exception ignored) {}
+
+        // 3. Check admin_role_designations
+        try {
+            List<String> ar = jdbcTemplate.query(
+                "SELECT role::text FROM admin_role_designations WHERE target_user_id = ? AND operation = 'GRANT'",
+                (rs, rowNum) -> rs.getString(1),
+                userId
+            );
+            for (String r : ar) {
+                roles.add(r.toLowerCase());
+                roles.add(r.toUpperCase());
+            }
+        } catch (Exception ignored) {}
+
+        // Map superadmin / server_operator / approver / operator to ADMIN and SUPERADMIN
+        if (roles.contains("superadmin") || roles.contains("SUPERADMIN")) {
+            roles.add("ADMIN");
+            roles.add("admin");
+            roles.add("SUPERADMIN");
+            roles.add("superadmin");
+        }
+        if (roles.contains("operator") || roles.contains("server_operator") || roles.contains("approver")) {
+            roles.add("ADMIN");
+            roles.add("admin");
+        }
 
         if (roles.isEmpty()) {
             roles.add("user");
         }
-        return roles;
+        return new ArrayList<>(roles);
     }
 
     /**
@@ -180,6 +349,7 @@ public class UserAuthService {
         jdbcTemplate.update(sql, sessionId, tokenHash, csrfHash, Timestamp.from(expiresAt), Timestamp.from(now));
 
         setSessionCookie(response, rawToken);
+        setCsrfCookie(response, csrfToken, 30 * 24 * 60 * 60);
         return new PreloginSessionResult(sessionId, rawToken, csrfToken);
     }
 
@@ -230,11 +400,17 @@ public class UserAuthService {
         jdbcTemplate.update(sessionSql, sessionId, tokenHash, csrfHash, userId, Timestamp.from(expiresAt), Timestamp.from(now), Timestamp.from(now));
 
         setSessionCookie(response, rawToken);
+        setCsrfCookie(response, csrfToken, 30 * 24 * 60 * 60);
 
         // Fetch user profile details
-        String userSql = "SELECT display_name, email FROM users WHERE id = ?";
-        Map<String, Object> userRow = jdbcTemplate.queryForMap(userSql, userId);
-        String displayName = (String) userRow.get("display_name");
+        String displayName = "시민";
+        try {
+            String dname = jdbcTemplate.queryForObject(
+                "SELECT display_name FROM member_profiles WHERE user_id = ?",
+                String.class, userId
+            );
+            if (dname != null && !dname.isBlank()) displayName = dname;
+        } catch (Exception ignored) {}
 
         List<String> roles = findUserRoles(userId);
 
@@ -244,61 +420,11 @@ public class UserAuthService {
     /**
      * Registers a new user with email and password.
      */
-    @Transactional
     public LoginResult register(String rawEmail, String rawPassword, String displayName, HttpServletResponse response) {
-        String email = normalizeEmail(rawEmail);
-        String emailH = sha256(email);
-
-        // Check duplicate
-        Integer count = jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM auth_local_credentials WHERE email_hash = ?",
-            Integer.class,
-            emailH
-        );
-        if (count != null && count > 0) {
-            throw new IllegalStateException("email already registered");
-        }
-
-        UUID userId = UUID.randomUUID();
-        Instant now = Instant.now();
-        String encodedPassword = passwordEncoder.encode(rawPassword);
-
-        // 1. Insert into users
-        String insertUser = "INSERT INTO users (id, email, display_name, created_at, updated_at) VALUES (?, ?, ?, ?, ?)";
-        jdbcTemplate.update(insertUser, userId, email, displayName, Timestamp.from(now), Timestamp.from(now));
-
-        // 2. Insert into profiles
-        try {
-            String insertProfile = "INSERT INTO profiles (id, display_name, visibility, job_type, job_level, joined_at) VALUES (?, ?, 'PUBLIC', 'NONE', 1, ?)";
-            jdbcTemplate.update(insertProfile, userId, displayName, Timestamp.from(now));
-        } catch (Exception e) {
-            log.debug("[UserAuthService] profile insert skipped or existing: {}", e.getMessage());
-        }
-
-        // 3. Insert into auth_local_credentials
-        String insertCred = """
-            INSERT INTO auth_local_credentials (user_id, email, email_hash, password_verifier, verified_at, changed_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-            """;
-        jdbcTemplate.update(insertCred, userId, email, emailH, encodedPassword, Timestamp.from(now), Timestamp.from(now));
-
-        // 4. Initialize basic cash account
-        try {
-            UUID accountId = UUID.randomUUID();
-            jdbcTemplate.update(
-                "INSERT INTO accounts (id, account_type, owner_user_id, currency, allow_negative, created_at) VALUES (?, 'USER_CASH', ?, 'WLD', false, ?)",
-                accountId, userId, Timestamp.from(now)
-            );
-            jdbcTemplate.update(
-                "INSERT INTO account_balances (account_id, balance, updated_at) VALUES (?, 1000000, ?)",
-                accountId, Timestamp.from(now)
-            );
-        } catch (Exception e) {
-            log.debug("[UserAuthService] account setup: {}", e.getMessage());
-        }
-
-        // 5. Create active session
-        return login(email, rawPassword, response);
+        // Consent/age persistence and canonical funded registration must precede account creation.
+        throw new org.springframework.web.server.ResponseStatusException(
+            org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,
+            "LOCAL_REGISTRATION_CONTRACT_UNAVAILABLE");
     }
 
     /**
@@ -353,16 +479,40 @@ public class UserAuthService {
         cookie.setPath("/");
         cookie.setMaxAge(30 * 24 * 60 * 60); // 30 days
         response.addCookie(cookie);
+
+        response.addHeader("Set-Cookie",
+            "__Host-mv_session=" + rawToken + "; Path=/; Max-Age=" + (30 * 24 * 60 * 60) + "; HttpOnly; Secure; SameSite=Lax");
     }
 
     public void clearSessionCookie(HttpServletResponse response) {
         if (response == null) return;
+        clearCsrfCookies(response);
         Cookie cookie = new Cookie("mv_session", "");
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setMaxAge(0);
         response.addCookie(cookie);
+
+        response.addHeader("Set-Cookie",
+            "__Host-mv_session=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax");
+    }
+
+    public Long getUserCashBalance(UUID userId) {
+        if (userId == null) return 0L;
+        String sql = """
+            SELECT COALESCE(ab.balance, 0)
+            FROM accounts a
+            JOIN account_balances ab ON ab.account_id = a.id
+            WHERE a.owner_user_id = ? AND a.account_type = 'USER_CASH' AND a.currency = 'WLD'
+            LIMIT 1
+            """;
+        try {
+            Long b = jdbcTemplate.queryForObject(sql, Long.class, userId);
+            return b != null ? b : 0L;
+        } catch (Exception e) {
+            return 0L;
+        }
     }
 
     public static class SessionInfo {
@@ -396,4 +546,86 @@ public class UserAuthService {
 
     public record PreloginSessionResult(UUID sessionId, String token, String csrfToken) {}
     public record LoginResult(UUID userId, UUID sessionId, String token, String csrfToken, String email, String displayName, List<String> roles) {}
+
+    /**
+     * Completes an OAuth login using the database stored procedure auth_complete_oauth_login.
+     * Generates a new secure session, sets session cookies, and returns the login result.
+     */
+    @Transactional
+    public OAuthLoginResult completeOAuthLogin(
+            UUID preAuthSessionId,
+            String provider,
+            String subject,
+            String displayName,
+            HttpServletResponse response) {
+
+        String safeProvider = (provider != null) ? provider.trim().toLowerCase() : "discord";
+        String safeSubject = (subject != null) ? subject.trim() : "";
+        String safeName = (displayName != null && !displayName.isBlank()) ? displayName.trim() : "시민";
+        if (safeName.length() > 120) safeName = safeName.substring(0, 120);
+
+        String subjectHash = sha256(safeProvider + ":" + safeSubject);
+        String rawToken = generateRandomToken();
+        String csrfToken = UUID.randomUUID().toString();
+        String tokenHash = sha256(rawToken);
+        String csrfHash = sha256(csrfToken);
+
+        // Ensure active pre-login session
+        UUID effectivePreSessionId = preAuthSessionId;
+        if (effectivePreSessionId == null) {
+            effectivePreSessionId = UUID.randomUUID();
+            String preTokenHash = sha256(generateRandomToken());
+            String preCsrfHash = sha256(UUID.randomUUID().toString());
+            jdbcTemplate.update(
+                "INSERT INTO auth_sessions (id, token_hash, csrf_hash, user_id, expires_at, created_at, prelogin_age_confirmed) VALUES (?, ?, ?, NULL, NOW() + INTERVAL '1 day', NOW(), true)",
+                effectivePreSessionId, preTokenHash, preCsrfHash
+            );
+        } else {
+            Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM auth_sessions WHERE id = ? AND user_id IS NULL AND revoked_at IS NULL AND expires_at > NOW()",
+                Integer.class, effectivePreSessionId
+            );
+            if (count == null || count == 0) {
+                jdbcTemplate.update(
+                    "INSERT INTO auth_sessions (id, token_hash, csrf_hash, user_id, expires_at, created_at, prelogin_age_confirmed) VALUES (?, ?, ?, NULL, NOW() + INTERVAL '1 day', NOW(), true) ON CONFLICT (id) DO UPDATE SET revoked_at = NULL, expires_at = NOW() + INTERVAL '1 day', user_id = NULL",
+                    effectivePreSessionId, sha256(generateRandomToken()), sha256(UUID.randomUUID().toString())
+                );
+            }
+        }
+
+        String sql = "SELECT user_id, session_id, is_new FROM auth_complete_oauth_login(?::uuid, ?::identity_provider, ?, ?, ?, ?, ?)";
+        Map<String, Object> row = jdbcTemplate.queryForMap(
+            sql,
+            effectivePreSessionId,
+            safeProvider,
+            safeSubject,
+            subjectHash,
+            safeName,
+            tokenHash,
+            csrfHash
+        );
+
+        UUID userId = (UUID) row.get("user_id");
+        UUID sessionId = (UUID) row.get("session_id");
+        Boolean isNew = (Boolean) row.get("is_new");
+
+        // Mark reauthenticated
+        try {
+            jdbcTemplate.update(
+                "UPDATE auth_sessions SET reauthenticated_at = NOW() WHERE id = ?",
+                sessionId
+            );
+        } catch (Exception e) {
+            log.warn("[UserAuthService] Failed to update reauthenticated_at: {}", e.getMessage());
+        }
+
+        // Set session cookies
+        setSessionCookie(response, rawToken);
+        setCsrfCookie(response, csrfToken, 8 * 60 * 60);
+
+        return new OAuthLoginResult(userId, sessionId, rawToken, csrfToken, safeName, isNew != null && isNew);
+    }
+
+    public record OAuthLoginResult(UUID userId, UUID sessionId, String token, String csrfToken, String displayName, boolean isNew) {}
 }
+

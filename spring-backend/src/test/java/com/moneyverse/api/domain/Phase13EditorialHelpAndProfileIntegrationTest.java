@@ -41,9 +41,9 @@ public class Phase13EditorialHelpAndProfileIntegrationTest {
     @Test
     @DisplayName("3. SEO 상태 및 IndexNow 호스트 인증 키 서빙 200 OK")
     void testSeoEndpoints() throws Exception {
+        // SEO administrative crawler logs and diagnostics are never public.
         mockMvc.perform(get("/seo/status"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalCrawls").isNumber());
+                .andExpect(status().isUnauthorized());
 
         mockMvc.perform(get("/.well-known/indexnow.key"))
                 .andExpect(status().isOk())
@@ -75,11 +75,10 @@ public class Phase13EditorialHelpAndProfileIntegrationTest {
     }
 
     @Test
-    @DisplayName("6. 관리자 AI 경제 속보 설정 조회 200 OK")
+    @DisplayName("6. 관리자 AI 경제 속보 설정은 비로그인 계정에 401")
     void testAiNewsSettings() throws Exception {
         mockMvc.perform(get("/admin/ai-news/settings"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -104,9 +103,8 @@ public class Phase13EditorialHelpAndProfileIntegrationTest {
     @Test
     @DisplayName("9. 프로필 조회 - 내 프로필 조회 200 OK")
     void testProfileEndpoints() throws Exception {
-        mockMvc.perform(get("/profile/me"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
+        mockMvc.perform(get("/api/v1/profile/me"))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

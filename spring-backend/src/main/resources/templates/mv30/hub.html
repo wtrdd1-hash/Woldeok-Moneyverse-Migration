@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:lang="${uiLanguage}" th:attr="data-ui-language=${uiLanguage}">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" th:content="${uiCopy['publicText73']}">
+  <link rel="canonical" th:href="${isCompact} ? 'https://easy-scraping.com/tools' : 'https://easy-scraping.com/calculators'">
+  <link rel="alternate" hreflang="en-US" th:href="${'https://easy-scraping.com' + calculatorPath + '?lang=en'}">
+  <link rel="alternate" hreflang="ko-KR" th:href="${'https://easy-scraping.com' + calculatorPath + '?lang=ko'}">
+  <link rel="alternate" hreflang="ja" th:href="${'https://easy-scraping.com' + calculatorPath + '?lang=ja'}">
+<link rel="alternate" hreflang="zh" th:href="${'https://easy-scraping.com' + calculatorPath + '?lang=zh'}">
+<link rel="alternate" hreflang="vi" th:href="${'https://easy-scraping.com' + calculatorPath + '?lang=vi'}">
+<link rel="alternate" hreflang="x-default" th:href="${'https://easy-scraping.com' + calculatorPath}">
+  <meta property="og:type" content="website">
+  <meta property="og:title" th:content="${pageTitle} + ' | Woldeok Moneyverse'">
+  <meta property="og:description" th:content="${uiCopy['publicText74']}">
+  <meta name="twitter:card" content="summary">
+  <script type="application/ld+json" th:utext="${schemaJson}">{"@context":"https://schema.org","@type":"CollectionPage","name":"Woldeok Moneyverse financial calculators","mainEntity":{"@type":"ItemList","numberOfItems":17}}</script>
+<meta name="color-scheme" content="dark"><meta name="theme-color" content="#0C1020">
+<title th:attr="data-public-title=${publicTitleKey}" th:text="${pageTitle} + ' | Woldeok Moneyverse'">Woldeok Moneyverse</title>
+<link rel="stylesheet" href="/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31"><script src="/assets/mv39/i18n.js?v=67b80fde2fdda66f1e777d9d03a84821b46ed71e7c64e8efd4de08726e05d108" defer></script>
+<link rel="stylesheet" href="/assets/mv43/public.css?v=6a6a264de0f0c2e9d7daba2b10938d5743dc345a1acde077a0240b261236fa16"><script src="/assets/mv43/public.js?v=09919f3ac61d392224a14d7c20471093f0e1d122a6cf5c027c01ad919c2e90d1" defer></script>
+<th:block th:replace="~{shared/chrome :: commonHead}"></th:block>
+</head>
+<body th:attr="data-spring-page=${hubType},data-ui-release='v2026.11.19.30.1',data-total-tools=${toolCount},data-results=${resultCount}">
+<a class="skip-link" href="#main-content" data-i18n="publicSkip" th:text="${uiCopy['publicSkip']}">Skip to main content</a>
+<div class="app-shell"><th:block th:replace="~{shared/chrome :: sidebar}"></th:block><div class="app-main"><div class="app-inner"><th:block th:replace="~{shared/chrome :: pageHeader}"></th:block>
+<main id="main-content" class="public-main" tabindex="-1">
+  <nav class="crumbs" data-i18n-aria="publicBreadcrumb" th:attr="aria-label=${uiCopy['publicBreadcrumb']}"><a href="/" data-i18n="publicText46" th:text="${uiCopy['publicText46']}">Home</a><span aria-hidden="true">/</span><span th:attr="data-i18n=${publicTitleKey}" th:text="${pageTitle}">Tools</span></nav>
+  <section class="hero hub-hero" aria-labelledby="hub-title"><div class="hero-text">
+    <p class="eyebrow" data-i18n="publicPlatform" th:text="${uiCopy['publicPlatform']}">MONEYVERSE / SPRING NATIVE / WEB PLATFORM</p>
+    <h1 id="hub-title" th:attr="data-i18n=${isCompact ? 'publicHubHeroTools' : 'publicHubHeroCalculators'}" th:text="${#ctx.getVariable('uiCopy').get(isCompact ? 'publicHubHeroTools' : 'publicHubHeroCalculators')}">Explore financial tools</h1>
+    <p data-i18n="publicText75" th:text="${uiCopy['publicText75']}">Native Spring tools</p>
+    <div class="hero-tags"><span class="chip chip-primary" data-public-format="publicVerifiedFormat" th:attr="data-public-count=${verifiedCount}" th:text="${#ctx.getVariable('uiCopy').get('publicVerifiedFormat').replace('{count}',#strings.toString(verifiedCount))}">Count</span><span class="chip" data-public-format="publicToolFormat" th:attr="data-public-count=${toolCount}" th:text="${#ctx.getVariable('uiCopy').get('publicToolFormat').replace('{count}',#strings.toString(toolCount))}">Count</span></div>
+  </div><div class="hero-icon" aria-hidden="true"><span class="hero-icon-number">✦</span><span class="hero-icon-line"></span></div></section>
+  <section class="panel hub-controls" aria-labelledby="tools-filter-title"><div class="panel-header"><span class="panel-step">01</span><div><h2 id="tools-filter-title" data-i18n="publicText76" th:text="${uiCopy['publicText76']}">Find tools</h2><p data-i18n="publicText77" th:text="${uiCopy['publicText77']}">Native search</p></div></div>
+    <form class="hub-search" th:action="${calculatorPath}" method="get" role="search">
+      <input type="hidden" name="lang" th:value="${language}">
+      <div class="form-field"><label for="hub-q" data-i18n="publicText78" th:text="${uiCopy['publicText78']}">Search</label><input id="hub-q" name="q" type="search" maxlength="64" autocomplete="off" th:value="${searchTerm}" data-i18n-placeholder="publicText79" th:placeholder="${uiCopy['publicText79']}" aria-describedby="hub-search-help"><small id="hub-search-help" data-i18n="publicText80" th:text="${uiCopy['publicText80']}">Search</small></div>
+      <div class="form-field"><label for="hub-category" data-i18n="publicText81" th:text="${uiCopy['publicText81']}">Category</label><select id="hub-category" name="category"><option value="all" th:selected="${selectedCategory == 'all'}" data-i18n="publicText82" th:text="${uiCopy['publicText82']}">All</option><option value="investing" th:selected="${selectedCategory == 'investing'}" data-i18n="publicText83" th:text="${uiCopy['publicText83']}">Investing</option><option value="tax" th:selected="${selectedCategory == 'tax'}" data-i18n="publicText84" th:text="${uiCopy['publicText84']}">Taxes</option><option value="retirement" th:selected="${selectedCategory == 'retirement'}" data-i18n="publicText85" th:text="${uiCopy['publicText85']}">Retirement</option><option value="lending" th:selected="${selectedCategory == 'lending'}" data-i18n="publicText86" th:text="${uiCopy['publicText86']}">Loans</option><option value="simulation" th:selected="${selectedCategory == 'simulation'}" data-i18n="publicText87" th:text="${uiCopy['publicText87']}">Simulation</option></select></div>
+      <div class="form-field"><label for="hub-verified"><input id="hub-verified" type="checkbox" name="verified" value="true" th:checked="${verifiedOnly}"> <span data-i18n="publicText88" th:text="${uiCopy['publicText88']}">Show verified only</span></label></div>
+      <div class="hub-search-actions"><button class="primary-button" type="submit" data-i18n="publicText89" th:text="${uiCopy['publicText89']}">Search tools</button><a class="secondary-button" data-public-locale-link th:href="@{${calculatorPath}(lang=${language})}" data-i18n="publicText16" th:text="${uiCopy['publicText16']}">Reset</a></div>
+    </form>
+  </section>
+  <section class="hub-results" aria-labelledby="tools-results-title"><div class="hub-results-heading"><div><p class="eyebrow" data-i18n="publicCurated" th:text="${uiCopy['publicCurated']}">CURATED FINANCIAL UTILITIES</p><h2 id="tools-results-title" data-i18n="publicText90" th:text="${uiCopy['publicText90']}">Calculator library</h2></div><span class="hub-result-count" data-public-format="publicResultFormat" th:attr="data-public-count=${resultCount}" th:text="${#ctx.getVariable('uiCopy').get('publicResultFormat').replace('{count}',#strings.toString(resultCount))}">Count</span></div>
+    <p class="notice" th:if="${#lists.isEmpty(tools)}" data-i18n="publicText91" th:text="${uiCopy['publicText91']}">No tools found</p>
+    <ul class="hub-tool-grid" th:unless="${#lists.isEmpty(tools)}">
+      <li th:each="tool : ${tools}" th:attr="data-tool-id=${tool.id},data-status=${tool.status},data-category=${tool.category}">
+        <article class="hub-tool-card" th:classappend="${tool.verified} ? ' is-certified' : ' is-legacy'">
+          <div class="hub-card-head"><span class="hub-symbol" aria-hidden="true" th:text="${tool.verified} ? '✦' : '○'">✦</span><span class="hub-tool-state" th:classappend="${tool.verified} ? ' certified' : ' legacy'" th:attr="data-i18n=${tool.verified ? 'publicText92' : 'publicText93'}" th:text="${#ctx.getVariable('uiCopy').get(tool.verified ? 'publicText92' : 'publicText93')}">Status</span></div>
+          <h3 th:attr="data-i18n=${'publicTool_' + tool.id.replace('-','_')}" th:text="${#ctx.getVariable('uiCopy').get('publicTool_' + tool.id.replace('-','_'))}">Financial calculator</h3><p th:attr="data-i18n=${'publicToolDesc_' + tool.id.replace('-','_')}" th:text="${#ctx.getVariable('uiCopy').get('publicToolDesc_' + tool.id.replace('-','_'))}">Financial calculation</p>
+          <a class="hub-card-link" th:href="${tool.href()}" th:attr="data-i18n-aria=${'publicOpenTool_' + tool.id.replace('-','_')},aria-label=${#ctx.getVariable('uiCopy').get('publicOpenTool_' + tool.id.replace('-','_'))}" data-i18n="publicText94" th:text="${uiCopy['publicText94']}">Open calculator</a>
+        </article>
+      </li>
+    </ul>
+  </section>
+  <section class="panel hub-help" aria-labelledby="hub-help-title"><div class="panel-header"><span class="panel-step">02</span><div><h2 id="hub-help-title" data-i18n="publicText95" th:text="${uiCopy['publicText95']}">Reliability</h2><p data-i18n="publicText96" th:text="${uiCopy['publicText96']}">Verification</p></div></div>
+    <details><summary data-i18n="publicText97" th:text="${uiCopy['publicText97']}">Status details</summary><p data-i18n="publicText98" th:text="${uiCopy['publicText98']}">Explanation</p></details>
+    <div class="hub-quick-links"><a class="secondary-button" href="/stocks" data-i18n="publicText99" th:text="${uiCopy['publicText99']}">Stocks</a><a class="secondary-button" href="/status" data-i18n="publicText100" th:text="${uiCopy['publicText100']}">Status</a><a class="secondary-button" href="/support" data-i18n="publicText101" th:text="${uiCopy['publicText101']}">Support</a></div>
+  </section>
+</main>
+<th:block th:replace="~{shared/chrome :: footer}"></th:block></div></div></div>
+<th:block th:replace="~{shared/chrome :: mobileNavigation}"></th:block><th:block th:replace="~{shared/chrome :: support}"></th:block>
+<script defer src="/assets/mv43/tool-account.js?v=09fe7eb7e1da4d732f37664a3f5a0c8ae6c4576f0726608455ee87744363eb7d"></script>
+</body></html>

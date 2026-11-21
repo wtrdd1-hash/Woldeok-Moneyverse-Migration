@@ -1,0 +1,114 @@
+{
+  "compound": {
+    "expected": "1,210",
+    "actual": "1,210",
+    "passed": true
+  },
+  "stock": {
+    "expectedAverage": "150",
+    "expectedTarget": "165",
+    "average": "150",
+    "target": "165",
+    "passed": true
+  },
+  "browser200PercentZoom": {
+    "verified": false,
+    "reason": "Control+= did not change the measured CSS viewport; no zoom capability exposed",
+    "restored": true
+  },
+  "prototypeScreens": [
+    {
+      "articleLinks": 0,
+      "heading": "Cửa hàng",
+      "lang": "ko",
+      "legacyChat": true,
+      "path": "/shop",
+      "purchaseButtons": 0,
+      "questActions": 0,
+      "sampleDisclaimer": true,
+      "sampleGraph": true,
+      "sampleNumber": true,
+      "sampleRate": true,
+      "visibleContentInputs": 1
+    },
+    {
+      "articleLinks": 0,
+      "heading": "Cổ phiếu",
+      "lang": "ko",
+      "legacyChat": true,
+      "path": "/stocks",
+      "purchaseButtons": 0,
+      "questActions": 0,
+      "sampleDisclaimer": true,
+      "sampleGraph": true,
+      "sampleNumber": true,
+      "sampleRate": true,
+      "visibleContentInputs": 1
+    },
+    {
+      "articleLinks": 0,
+      "heading": "Nhiệm vụ",
+      "lang": "ko",
+      "legacyChat": true,
+      "path": "/quests",
+      "purchaseButtons": 0,
+      "questActions": 0,
+      "sampleDisclaimer": true,
+      "sampleGraph": true,
+      "sampleNumber": true,
+      "sampleRate": true,
+      "visibleContentInputs": 1
+    },
+    {
+      "articleLinks": 0,
+      "heading": "커뮤니티",
+      "lang": "ko",
+      "legacyChat": true,
+      "path": "/board",
+      "purchaseButtons": 0,
+      "questActions": 0,
+      "sampleDisclaimer": true,
+      "sampleGraph": true,
+      "sampleNumber": true,
+      "sampleRate": true,
+      "visibleContentInputs": 1
+    },
+    {
+      "articleLinks": 0,
+      "heading": "서비스 상태",
+      "lang": "ko",
+      "legacyChat": true,
+      "path": "/status",
+      "purchaseButtons": 0,
+      "questActions": 0,
+      "sampleDisclaimer": true,
+      "sampleGraph": true,
+      "sampleNumber": true,
+      "sampleRate": true,
+      "visibleContentInputs": 1
+    }
+  ],
+  "widgets": {
+    "legacyDmTab": {
+      "dmSubmitEnabled": true,
+      "dmTargetVisible": true,
+      "supportCategoryVisible": false
+    },
+    "legacySupportTab": {
+      "supportCategoryVisible": true,
+      "supportSubmitEnabled": true
+    },
+    "newPanel": {
+      "inputs": 0,
+      "links": [
+        "/support",
+        "/chat",
+        "/guide"
+      ],
+      "tabs": 0,
+      "visible": true
+    },
+    "realSendingExercised": false
+  },
+  "prototypeObservationCaveat": "Initial DOM observation before asynchronous hydration may show samples. Public inline source hydrates wallet and market; failed or unauthenticated responses retain the sample. This is not evidence that all settled values are fixed."
+}

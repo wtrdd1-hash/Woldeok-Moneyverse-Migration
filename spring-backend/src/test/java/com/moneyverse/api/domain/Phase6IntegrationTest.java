@@ -29,18 +29,14 @@ class Phase6IntegrationTest {
     }
 
     @Test
-    @DisplayName("마이 스페이스 목록 및 부동산 구역 조회 테스트")
+    @DisplayName("마이 스페이스는 위조 헤더로 접근 불가, 공개 구역 메타는 별도")
     void testSpaceEndpoints() throws Exception {
         mockMvc.perform(get("/api/space")
-                        .header("X-User-Id", "5f7b8b44-e4aa-40b8-b93a-800ec0151d20"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
-
+                        .header("X-User-Id", "00000000-0000-0000-0000-000000000101"))
+                .andExpect(status().isUnauthorized());
         mockMvc.perform(get("/api/space/my")
-                        .header("X-User-Id", "5f7b8b44-e4aa-40b8-b93a-800ec0151d20"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
-
+                        .header("X-User-Id", "00000000-0000-0000-0000-000000000101"))
+                .andExpect(status().isUnauthorized());
         mockMvc.perform(get("/api/spaces/real-estate/districts"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.districts").isArray());

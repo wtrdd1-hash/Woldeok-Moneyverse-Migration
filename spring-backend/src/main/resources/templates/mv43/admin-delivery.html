@@ -1,0 +1,18 @@
+<!doctype html><html xmlns:th="http://www.thymeleaf.org" th:replace="~{shared/admin-shell :: page(~{::main})}"><body>
+<main id="main" tabindex="-1">
+<section class="admin-card admin-read-intro"><div><p class="admin-kicker" data-i18n="sourceOverview" th:text="${uiCopy['sourceOverview']}">Source-backed overview</p>
+<h2 data-i18n="adminTool_logs_delivery" th:text="${uiCopy['adminTool_logs_delivery']}">Delivery log</h2>
+<p data-i18n="adminDeliveryScope" th:text="${uiCopy['adminDeliveryScope']}">Only the latest 30 source records, not all-time delivery or receipt confirmation.</p></div>
+<a class="admin-refresh" href="/admin/logs/delivery" data-i18n="refresh" th:text="${uiCopy['refresh']}">Refresh</a></section>
+<nav class="admin-card admin-read-intro" data-i18n-aria="logs" th:attr="aria-label=${uiCopy['logs']}"><a class="admin-refresh" href="/admin/logs" data-i18n="logs" th:text="${uiCopy['logs']}">Audit logs</a><a class="admin-refresh" href="/admin/logs/system" data-i18n="adminSystemLogs" th:text="${uiCopy['adminSystemLogs']}">System logs</a><a class="admin-refresh" href="/admin/discord" data-i18n="adminTool_discord" th:text="${uiCopy['adminTool_discord']}">Discord</a></nav>
+<section class="admin-card" th:if="${deliveryUnavailable}" role="alert"><h2 data-i18n="unavailable" th:text="${uiCopy['unavailable']}">Unable to load data</h2></section>
+<th:block th:if="${!deliveryUnavailable}">
+<section class="admin-card admin-read-results"><h2 data-i18n="adminDeliverySample" th:text="${uiCopy['adminDeliverySample']}">Recent sample</h2>
+<dl class="admin-read-metadata"><div th:each="metric : ${deliveryMetrics}"><dt th:attr="data-i18n=${metric.label}" th:text="${uiCopy[metric.label]}">Count</dt><dd th:attr="data-delivery-metric=${metric.name}"><strong th:text="${metric.count}">0</strong></dd></div></dl>
+<p class="admin-read-note" data-i18n="adminDeliveryUnknownNote" th:text="${uiCopy['adminDeliveryUnknownNote']}">Missing status is unknown, even with a completion timestamp. Retry history may overlap other counts.</p></section>
+<section class="admin-card admin-read-results"><h2 data-i18n="adminDeliveryRecords" th:text="${uiCopy['adminDeliveryRecords']}">Recent delivery records</h2>
+<div class="admin-read-table-scroll" tabindex="0" data-i18n-aria="adminDeliveryRecords" th:attr="aria-label=${uiCopy['adminDeliveryRecords']}"><table class="admin-read-table"><thead><tr>
+<th scope="col" data-i18n="adminDeliveryCreated" th:text="${uiCopy['adminDeliveryCreated']}">Created (UTC)</th><th scope="col" data-i18n="adminDeliveryType" th:text="${uiCopy['adminDeliveryType']}">Event type</th><th scope="col" data-i18n="status" th:text="${uiCopy['status']}">Status</th><th scope="col" data-i18n="adminDeliveryAttempts" th:text="${uiCopy['adminDeliveryAttempts']}">Attempts</th><th scope="col" data-i18n="adminDeliveryCompleted" th:text="${uiCopy['adminDeliveryCompleted']}">Recorded completion (UTC)</th></tr></thead>
+<tbody><tr th:each="row : ${deliveryRows}"><td th:text="${row.created}"></td><td th:text="${row.type}"></td><td th:attr="data-i18n=${row.stateKey}" th:text="${uiCopy[row.stateKey]}"></td><td th:text="${row.attempts}"></td><td th:text="${row.completed != null ? row.completed : '—'}"></td></tr>
+<tr th:if="${#lists.isEmpty(deliveryRows)}"><td colspan="5" class="admin-read-empty" data-i18n="empty" th:text="${uiCopy['empty']}">Nothing to display yet</td></tr></tbody></table></div></section>
+</th:block></main></body></html>

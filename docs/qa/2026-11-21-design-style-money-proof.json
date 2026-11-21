@@ -1,0 +1,87 @@
+[
+  {
+    "route": "/shop",
+    "openBraces": 78,
+    "closeBraces": 77,
+    "missingHeaderTitleClosure": true,
+    "unsafeBalanceNumberConversion": true,
+    "walletHydratesVia": "/api/v1/wallet/summary",
+    "marketHydratesVia": "/api/v1/stocks",
+    "hydrationFailureBehavior": "returns or catches without clearing initial sample",
+    "locations": {
+      "unclosedHeader": 150,
+      "nextSelector": 159,
+      "balanceNumber": 794,
+      "walletInitial": 600,
+      "chartSample": 619
+    }
+  },
+  {
+    "route": "/stocks",
+    "openBraces": 78,
+    "closeBraces": 77,
+    "missingHeaderTitleClosure": true,
+    "unsafeBalanceNumberConversion": true,
+    "walletHydratesVia": "/api/v1/wallet/summary",
+    "marketHydratesVia": "/api/v1/stocks",
+    "hydrationFailureBehavior": "returns or catches without clearing initial sample",
+    "locations": {
+      "unclosedHeader": 150,
+      "nextSelector": 159,
+      "balanceNumber": 794,
+      "walletInitial": 600,
+      "chartSample": 619
+    }
+  },
+  {
+    "route": "/quests",
+    "openBraces": 78,
+    "closeBraces": 77,
+    "missingHeaderTitleClosure": true,
+    "unsafeBalanceNumberConversion": true,
+    "walletHydratesVia": "/api/v1/wallet/summary",
+    "marketHydratesVia": "/api/v1/stocks",
+    "hydrationFailureBehavior": "returns or catches without clearing initial sample",
+    "locations": {
+      "unclosedHeader": 150,
+      "nextSelector": 159,
+      "balanceNumber": 794,
+      "walletInitial": 600,
+      "chartSample": 619
+    }
+  },
+  {
+    "route": "/board",
+    "openBraces": 78,
+    "closeBraces": 77,
+    "missingHeaderTitleClosure": true,
+    "unsafeBalanceNumberConversion": true,
+    "walletHydratesVia": "/api/v1/wallet/summary",
+    "marketHydratesVia": "/api/v1/stocks",
+    "hydrationFailureBehavior": "returns or catches without clearing initial sample",
+    "locations": {
+      "unclosedHeader": 150,
+      "nextSelector": 159,
+      "balanceNumber": 794,
+      "walletInitial": 600,
+      "chartSample": 619
+    }
+  },
+  {
+    "route": "/status",
+    "openBraces": 78,
+    "closeBraces": 77,
+    "missingHeaderTitleClosure": true,
+    "unsafeBalanceNumberConversion": true,
+    "walletHydratesVia": "/api/v1/wallet/summary",
+    "marketHydratesVia": "/api/v1/stocks",
+    "hydrationFailureBehavior": "returns or catches without clearing initial sample",
+    "locations": {
+      "unclosedHeader": 150,
+      "nextSelector": 159,
+      "balanceNumber": 794,
+      "walletInitial": 600,
+      "chartSample": 619
+    }
+  }
+]

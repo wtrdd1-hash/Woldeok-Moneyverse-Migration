@@ -76,12 +76,12 @@
 - **극소 환경 레이아웃 보존**:
   - `viewport` 메타: `width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover`.
   - CSS 불변식: `html, body { overflow-x: hidden !important; }` 전역 강제.
-  - **테이블 오버플로우 격리 구조**: 410.5px 폭의 10대 상장사 주식 테이블이 246px 폭의 `.table-scroll-wrapper` 내부에서만 안전하게 가로 스크롤되도록 격리되어, 문서 전체 레벨의 가로 스크롤 유발 0건(Zero Horizontal Overflow) 완벽 준수.
+  - **테이블 오버플로우 격리 구조**: 410.5px 폭의 10대 상장사 주식 테이블이 246px 폭의 `.table-scroll-wrapper` 내부에서만 안전하게 가로 스크롤되도록 격리되어, 페이지 레벨 수평 오버플로우 0px (Zero Horizontal Overflow) 실측 통과.
   - 하단 독: 305px 폭 내에서 5개 탭 모두 56x46px 크기를 유지하여 44px 터치 규격 100% 충족.
 
 ### 4.4 관리자 관제탑 및 보안 인가 (Admin Control Tower)
 - **보안 가드 검증**:
-  - 비인가 상태에서 `https://easy-scraping.com/admin` 접근 시 즉각 `https://easy-scraping.com/login?error=login_required`로 302/200 리다이렉트되어 Fail-Closed 인가 차단 정상 작동 확인.
+  - 비인가 상태에서 `https://easy-scraping.com/admin` 접근 시 즉각 `https://easy-scraping.com/login?error=login_required`로 302/200 리다이렉트되어 Fail-Closed 보안 인가 통과.
 - **관리자 콘솔 화면 (`/admin.html`, `/admin-preview`)**:
   - HTTP 200 OK 정상 로드.
   - 상단 상태바: `SYSTEM HEALTH: 100%`, 런타임 표기 `Spring Boot 3.3.5`.

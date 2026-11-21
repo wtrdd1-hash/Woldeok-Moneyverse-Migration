@@ -1,0 +1,560 @@
+# 2026-11-20-native-presentation-test-50
+
+Pre-release source44da60339c; UI templates/assets/locale content is byte-identical to CI; final main42422aab was separately rechecked. This is public guest coverage, not authenticated full-site acceptance.
+
+These are human-readable QA records, not application configuration.
+
+```json
+[
+  {
+    "path": "/",
+    "expectedLang": "en",
+    "width": 390,
+    "actualLang": "en",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "Home · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/tools",
+    "expectedLang": "en",
+    "width": 390,
+    "actualLang": "en",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "Financial tools · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/calculators",
+    "expectedLang": "en",
+    "width": 390,
+    "actualLang": "en",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "Calculator center · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/tools/compound-calculator",
+    "expectedLang": "en",
+    "width": 390,
+    "actualLang": "en",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "Compound interest calculator · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/tools/stock-calculator",
+    "expectedLang": "en",
+    "width": 390,
+    "actualLang": "en",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "Stock average price calculator · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/",
+    "expectedLang": "en",
+    "width": 1440,
+    "actualLang": "en",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "Home · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/tools",
+    "expectedLang": "en",
+    "width": 1440,
+    "actualLang": "en",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "Financial tools · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/calculators",
+    "expectedLang": "en",
+    "width": 1440,
+    "actualLang": "en",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "Calculator center · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/tools/compound-calculator",
+    "expectedLang": "en",
+    "width": 1440,
+    "actualLang": "en",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "Compound interest calculator · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/tools/stock-calculator",
+    "expectedLang": "en",
+    "width": 1440,
+    "actualLang": "en",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "Stock average price calculator · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/",
+    "expectedLang": "ko",
+    "width": 390,
+    "actualLang": "ko",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "홈 · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/tools",
+    "expectedLang": "ko",
+    "width": 390,
+    "actualLang": "ko",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "금융 도구 · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/calculators",
+    "expectedLang": "ko",
+    "width": 390,
+    "actualLang": "ko",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "금융 계산기 센터 · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/tools/compound-calculator",
+    "expectedLang": "ko",
+    "width": 390,
+    "actualLang": "ko",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "복리 계산기 · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/tools/stock-calculator",
+    "expectedLang": "ko",
+    "width": 390,
+    "actualLang": "ko",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "주식 평균단가 계산기 · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/",
+    "expectedLang": "ko",
+    "width": 1440,
+    "actualLang": "ko",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "홈 · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/tools",
+    "expectedLang": "ko",
+    "width": 1440,
+    "actualLang": "ko",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "금융 도구 · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/calculators",
+    "expectedLang": "ko",
+    "width": 1440,
+    "actualLang": "ko",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "금융 계산기 센터 · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/tools/compound-calculator",
+    "expectedLang": "ko",
+    "width": 1440,
+    "actualLang": "ko",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "복리 계산기 · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/tools/stock-calculator",
+    "expectedLang": "ko",
+    "width": 1440,
+    "actualLang": "ko",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "주식 평균단가 계산기 · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/",
+    "expectedLang": "ja",
+    "width": 390,
+    "actualLang": "ja",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "ホーム · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/tools",
+    "expectedLang": "ja",
+    "width": 390,
+    "actualLang": "ja",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "金融ツール · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/calculators",
+    "expectedLang": "ja",
+    "width": 390,
+    "actualLang": "ja",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "金融計算機センター · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/tools/compound-calculator",
+    "expectedLang": "ja",
+    "width": 390,
+    "actualLang": "ja",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "複利計算機 · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/tools/stock-calculator",
+    "expectedLang": "ja",
+    "width": 390,
+    "actualLang": "ja",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "株式平均取得単価計算機 · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/",
+    "expectedLang": "ja",
+    "width": 1440,
+    "actualLang": "ja",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "ホーム · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/tools",
+    "expectedLang": "ja",
+    "width": 1440,
+    "actualLang": "ja",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "金融ツール · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/calculators",
+    "expectedLang": "ja",
+    "width": 1440,
+    "actualLang": "ja",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "金融計算機センター · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/tools/compound-calculator",
+    "expectedLang": "ja",
+    "width": 1440,
+    "actualLang": "ja",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "複利計算機 · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/tools/stock-calculator",
+    "expectedLang": "ja",
+    "width": 1440,
+    "actualLang": "ja",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "株式平均取得単価計算機 · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/",
+    "expectedLang": "zh",
+    "width": 390,
+    "actualLang": "zh",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "首页 · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/tools",
+    "expectedLang": "zh",
+    "width": 390,
+    "actualLang": "zh",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "金融工具 · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/calculators",
+    "expectedLang": "zh",
+    "width": 390,
+    "actualLang": "zh",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "金融计算器中心 · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/tools/compound-calculator",
+    "expectedLang": "zh",
+    "width": 390,
+    "actualLang": "zh",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "复利计算器 · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/tools/stock-calculator",
+    "expectedLang": "zh",
+    "width": 390,
+    "actualLang": "zh",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "股票平均成本计算器 · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/",
+    "expectedLang": "zh",
+    "width": 1440,
+    "actualLang": "zh",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "首页 · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/tools",
+    "expectedLang": "zh",
+    "width": 1440,
+    "actualLang": "zh",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "金融工具 · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/calculators",
+    "expectedLang": "zh",
+    "width": 1440,
+    "actualLang": "zh",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "金融计算器中心 · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/tools/compound-calculator",
+    "expectedLang": "zh",
+    "width": 1440,
+    "actualLang": "zh",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "复利计算器 · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/tools/stock-calculator",
+    "expectedLang": "zh",
+    "width": 1440,
+    "actualLang": "zh",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "股票平均成本计算器 · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/",
+    "expectedLang": "vi",
+    "width": 390,
+    "actualLang": "vi",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "Trang chủ · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/tools",
+    "expectedLang": "vi",
+    "width": 390,
+    "actualLang": "vi",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "Công cụ tài chính · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/calculators",
+    "expectedLang": "vi",
+    "width": 390,
+    "actualLang": "vi",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "Trung tâm máy tính tài chính · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/tools/compound-calculator",
+    "expectedLang": "vi",
+    "width": 390,
+    "actualLang": "vi",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "Máy tính lãi kép · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/tools/stock-calculator",
+    "expectedLang": "vi",
+    "width": 390,
+    "actualLang": "vi",
+    "main": true,
+    "pageWidth": 375,
+    "smallTargets": 0,
+    "title": "Máy tính giá vốn cổ phiếu · W Moneyverse",
+    "viewport": 390
+  },
+  {
+    "path": "/",
+    "expectedLang": "vi",
+    "width": 1440,
+    "actualLang": "vi",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "Trang chủ · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/tools",
+    "expectedLang": "vi",
+    "width": 1440,
+    "actualLang": "vi",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "Công cụ tài chính · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/calculators",
+    "expectedLang": "vi",
+    "width": 1440,
+    "actualLang": "vi",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "Trung tâm máy tính tài chính · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/tools/compound-calculator",
+    "expectedLang": "vi",
+    "width": 1440,
+    "actualLang": "vi",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "Máy tính lãi kép · W Moneyverse",
+    "viewport": 1440
+  },
+  {
+    "path": "/tools/stock-calculator",
+    "expectedLang": "vi",
+    "width": 1440,
+    "actualLang": "vi",
+    "main": true,
+    "pageWidth": 1425,
+    "smallTargets": 0,
+    "title": "Máy tính giá vốn cổ phiếu · W Moneyverse",
+    "viewport": 1440
+  }
+]
+```

@@ -1,0 +1,29 @@
+{
+  "source": "e2fb487a1a7814e74abac1097814881801c4dd13",
+  "cases": [
+    {"path":"/admin","width":1440,"lang":"ko","title":"대시보드 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":null,"logoCount":2,"logosLoaded":true,"sidebarVisible":true,"bottomVisible":false},
+    {"path":"/admin/users","width":1440,"lang":"ko","title":"회원 디렉토리 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":"23","logoCount":2,"logosLoaded":true,"sidebarVisible":true,"bottomVisible":false},
+    {"path":"/admin/market","width":1440,"lang":"ko","title":"거래소 관제 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":"10","logoCount":2,"logosLoaded":true,"sidebarVisible":true,"bottomVisible":false},
+    {"path":"/admin/controls","width":1440,"lang":"ko","title":"킬스위치 제어 센터 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":"7","logoCount":2,"logosLoaded":true,"sidebarVisible":true,"bottomVisible":false},
+    {"path":"/admin/enterprises","width":1440,"lang":"ko","title":"공기업·지배구조 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":"9","logoCount":2,"logosLoaded":true,"sidebarVisible":true,"bottomVisible":false},
+    {"path":"/admin/economy","width":1440,"lang":"ko","title":"경제·원장 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":"1","logoCount":2,"logosLoaded":true,"sidebarVisible":true,"bottomVisible":false},
+    {"path":"/admin/economy/scenario-lab","width":1440,"lang":"ko","title":"시나리오 랩 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":"1","logoCount":2,"logosLoaded":true,"sidebarVisible":true,"bottomVisible":false},
+    {"path":"/admin/logs/system","width":1440,"lang":"ko","title":"시스템 로그 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":null,"logoCount":2,"logosLoaded":true,"sidebarVisible":true,"bottomVisible":false},
+    {"path":"/admin","width":390,"lang":"ko","title":"대시보드 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":null,"logoCount":2,"logosLoaded":true,"sidebarVisible":false,"bottomVisible":true},
+    {"path":"/admin/users","width":390,"lang":"ko","title":"회원 디렉토리 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":"23","logoCount":2,"logosLoaded":true,"sidebarVisible":false,"bottomVisible":true},
+    {"path":"/admin/market","width":390,"lang":"ko","title":"거래소 관제 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":"10","logoCount":2,"logosLoaded":true,"sidebarVisible":false,"bottomVisible":true},
+    {"path":"/admin/controls","width":390,"lang":"ko","title":"킬스위치 제어 센터 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":"7","logoCount":2,"logosLoaded":true,"sidebarVisible":false,"bottomVisible":true},
+    {"path":"/admin/enterprises","width":390,"lang":"ko","title":"공기업·지배구조 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":"9","logoCount":2,"logosLoaded":true,"sidebarVisible":false,"bottomVisible":true},
+    {"path":"/admin/economy","width":390,"lang":"ko","title":"경제·원장 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":"1","logoCount":2,"logosLoaded":true,"sidebarVisible":false,"bottomVisible":true},
+    {"path":"/admin/economy/scenario-lab","width":390,"lang":"ko","title":"시나리오 랩 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":"1","logoCount":2,"logosLoaded":true,"sidebarVisible":false,"bottomVisible":true},
+    {"path":"/admin/logs/system","width":390,"lang":"ko","title":"시스템 로그 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":null,"logoCount":2,"logosLoaded":true,"sidebarVisible":false,"bottomVisible":true},
+    {"path":"/admin","width":320,"lang":"ko","title":"대시보드 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":null,"logoCount":2,"logosLoaded":true,"sidebarVisible":false,"bottomVisible":true},
+    {"path":"/admin/users","width":320,"lang":"ko","title":"회원 디렉토리 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":"23","logoCount":2,"logosLoaded":true,"sidebarVisible":false,"bottomVisible":true},
+    {"path":"/admin/market","width":320,"lang":"ko","title":"거래소 관제 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":"10","logoCount":2,"logosLoaded":true,"sidebarVisible":false,"bottomVisible":true},
+    {"path":"/admin/controls","width":320,"lang":"ko","title":"킬스위치 제어 센터 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":"7","logoCount":2,"logosLoaded":true,"sidebarVisible":false,"bottomVisible":true},
+    {"path":"/admin/enterprises","width":320,"lang":"ko","title":"공기업·지배구조 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":"9","logoCount":2,"logosLoaded":true,"sidebarVisible":false,"bottomVisible":true},
+    {"path":"/admin/economy","width":320,"lang":"ko","title":"경제·원장 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":"1","logoCount":2,"logosLoaded":true,"sidebarVisible":false,"bottomVisible":true},
+    {"path":"/admin/economy/scenario-lab","width":320,"lang":"ko","title":"시나리오 랩 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":"1","logoCount":2,"logosLoaded":true,"sidebarVisible":false,"bottomVisible":true},
+    {"path":"/admin/logs/system","width":320,"lang":"ko","title":"시스템 로그 · Woldeok Moneyverse","overflow":false,"alerts":0,"support":1,"sourceCount":null,"logoCount":2,"logosLoaded":true,"sidebarVisible":false,"bottomVisible":true}
+  ]
+}

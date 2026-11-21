@@ -33,13 +33,8 @@ public class NewspaperController {
     @Operation(summary = "주간 경제 보고서 (검증된 지표 제공 전까지 가드)")
     @GetMapping(path = { "/api/v1/newspaper/weekly-brief", "/api/newspaper/weekly-brief" })
     public ResponseEntity<?> getWeeklyBrief() {
-        Map<String, Object> err = new LinkedHashMap<>();
-        err.put("type", "about:blank");
-        err.put("title", "Service Unavailable");
-        err.put("status", 503);
-        err.put("code", "NEWSPAPER_WEEKLY_BRIEF_UNVERIFIED");
-        err.put("detail", "Weekly economic report is unavailable until its statistics and leaderboards are verified.");
-        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(err);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Map.of("code", "NEWSPAPER_WEEKLY_BRIEF_UNVERIFIED"));
     }
 
     @Operation(summary = "진행 중인 가상시장 이벤트에 근거한 현재 시장 심리 조회")

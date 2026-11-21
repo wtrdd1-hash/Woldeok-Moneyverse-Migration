@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Tag(name = "Casino", description = "공정 검증(Provably Fair) 웹 카지노 및 미니게임 API")
 @RestController
-@RequestMapping("/api/casino")
+@RequestMapping({"/api/v1/casino", "/api/casino"})
 public class CasinoController {
 
     private final CasinoService casinoService;

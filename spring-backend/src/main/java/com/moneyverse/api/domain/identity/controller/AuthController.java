@@ -14,7 +14,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 @Tag(name = "Auth Session & Policy", description = "인증 세션 CSRF, 뷰어 상태 및 세션 초기화 API")
 @RestController
@@ -46,14 +45,73 @@ public class AuthController {
             "/api/v1/auth/session",
             "/api/auth/session"
     })
-    @Operation(summary = "현재 세션의 CSRF 토큰 조회 및 발급")
-    public Map<String, Object> session(HttpServletRequest request) {
+    @Operation(summary = "현재 세션의 CSRF 토큰 조회 및 로그인 상태 반환")
+    public Map<String, Object> session(HttpServletRequest request, HttpServletResponse response) {
+        response.setHeader("Cache-Control", "private, no-store");
+        response.addHeader("Vary", "Cookie");
+        if (authService.rejectsBootstrapContext(request)) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            return Map.of("success", false, "ok", false, "code", "same_origin_required");
+        }
         Optional<SessionInfo> session = authService.resolveSession(request);
         Map<String, Object> res = new LinkedHashMap<>();
+        boolean signedIn = session.isPresent() && session.get().isSignedIn();
         res.put("success", true);
         res.put("ok", true);
-        res.put("csrfToken", session.map(SessionInfo::getCsrfHash).orElse(UUID.randomUUID().toString()));
+        res.put("authenticated", signedIn);
+        res.put("signedIn", signedIn);
+        res.put("csrfToken", session.map(s -> authService.verifiedCsrfToken(request, s)).orElse(""));
+        if (signedIn) {
+            SessionInfo s = session.get();
+            Map<String, Object> u = new LinkedHashMap<>();
+            u.put("id", s.getUserId().toString());
+            u.put("userId", s.getUserId().toString());
+            u.put("username", s.getDisplayName() != null ? s.getDisplayName() : "회원");
+            u.put("name", s.getDisplayName() != null ? s.getDisplayName() : "회원");
+            u.put("displayName", s.getDisplayName() != null ? s.getDisplayName() : "회원");
+            u.put("email", s.getEmail());
+            u.put("roles", s.getRoles());
+            res.put("user", u);
+        } else {
+            res.put("user", null);
+        }
         return res;
+    }
+
+    @GetMapping(path = {
+            "/api/v1/auth/me",
+            "/api/auth/me"
+    })
+    @Operation(summary = "현재 로그인 사용자 상세 정보 및 원장 잔액 조회")
+    public ResponseEntity<Map<String, Object>> me(HttpServletRequest request) {
+        Optional<SessionInfo> session = authService.resolveSession(request);
+        if (session.isEmpty() || !session.get().isSignedIn()) {
+            Map<String, Object> unauth = new LinkedHashMap<>();
+            unauth.put("authenticated", false);
+            unauth.put("signedIn", false);
+            unauth.put("user", null);
+            unauth.put("message", "Unauthorized");
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).body(unauth);
+        }
+
+        SessionInfo s = session.get();
+        Map<String, Object> u = new LinkedHashMap<>();
+        u.put("id", s.getUserId().toString());
+        u.put("userId", s.getUserId().toString());
+        u.put("username", s.getDisplayName() != null ? s.getDisplayName() : "회원");
+        u.put("name", s.getDisplayName() != null ? s.getDisplayName() : "회원");
+        u.put("displayName", s.getDisplayName() != null ? s.getDisplayName() : "회원");
+        u.put("email", s.getEmail());
+        u.put("roles", s.getRoles());
+        u.put("authenticated", true);
+        u.put("signedIn", true);
+
+        Long balance = authService.getUserCashBalance(s.getUserId());
+        u.put("balanceWld", balance != null ? balance : 0L);
+
+        Map<String, Object> res = new LinkedHashMap<>(u);
+        res.put("user", u);
+        return ResponseEntity.ok(res);
     }
 
     @GetMapping(path = {
@@ -85,7 +143,7 @@ public class AuthController {
             res.put("displayName", s.getDisplayName() != null ? s.getDisplayName() : "시민");
             res.put("email", s.getEmail());
             res.put("roles", s.getRoles());
-            res.put("adminRoles", s.getRoles().stream().filter(r -> r.contains("admin")).toList());
+            res.put("adminRoles", s.getRoles().stream().filter(r -> r != null && r.toLowerCase().contains("admin")).toList());
         } else {
             res.put("signedIn", false);
             res.put("consentCurrent", true);

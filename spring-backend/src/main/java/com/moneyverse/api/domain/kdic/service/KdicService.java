@@ -31,8 +31,6 @@ public class KdicService {
         List<PremiumRecordDto> recentPremiums = fetchRecentPremiums();
         List<PayoutRecordDto> recentPayouts = fetchRecentPayouts();
 
-        // A missing denominator or no reported BIS values is UNKNOWN, not a
-        // fabricated healthy percentage.
         java.util.OptionalDouble bis = institutions.stream()
                 .filter(i -> i.getReportedBisRatioPct() != null)
                 .mapToDouble(InsuredInstitutionDto::getReportedBisRatioPct).average();
@@ -47,38 +45,26 @@ public class KdicService {
     }
 
     public KdicLedgerEvidenceDto getLedgerIntegrity() {
-        // No journal-backed implementation exists for this operation yet.
-        // Fail closed rather than returning fabricated financial evidence or success.
-        throw new org.springframework.web.server.ResponseStatusException(
-                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,
-                "KDIC ledger-backed operation is not implemented");
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "KDIC ledger evidence has not been reconciled with canonical postings");
     }
 
     @Transactional
     public Map<String, Object> assessPremiums(String actor) {
-        // No journal-backed implementation exists for this operation yet.
-        // Fail closed rather than returning fabricated financial evidence or success.
-        throw new org.springframework.web.server.ResponseStatusException(
-                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,
-                "KDIC ledger-backed operation is not implemented");
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "KDIC premium payment receipts are not verified");
     }
 
     @Transactional
     public Map<String, Object> injectEmergencyLiquidity(String institutionId, long amountWld, String actor) {
-        // No journal-backed implementation exists for this operation yet.
-        // Fail closed rather than returning fabricated financial evidence or success.
-        throw new org.springframework.web.server.ResponseStatusException(
-                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,
-                "KDIC ledger-backed operation is not implemented");
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "KDIC emergency funding requires canonical ledger posting");
     }
 
     @Transactional
     public Map<String, Object> executePayout(String institutionId, String reason, String actor) {
-        // No journal-backed implementation exists for this operation yet.
-        // Fail closed rather than returning fabricated financial evidence or success.
-        throw new org.springframework.web.server.ResponseStatusException(
-                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,
-                "KDIC ledger-backed operation is not implemented");
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "KDIC payouts require verified deposit-insurance receipts");
     }
 
     private KdicFundDto fetchFund() {
@@ -98,10 +84,12 @@ public class KdicService {
                     )
             );
         } catch (Exception e) {
+            log.warn("KDIC authoritative fund unavailable");
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
-                    "Verified KDIC fund source unavailable");
+                    "Verified KDIC reserve unavailable", e);
         }
     }
+
     private List<InsuredInstitutionDto> fetchInstitutions() {
         try {
             return jdbcTemplate.query(
@@ -117,10 +105,12 @@ public class KdicService {
                     )
             );
         } catch (Exception e) {
+            log.warn("KDIC institution source unavailable");
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
-                    "Verified KDIC institution source unavailable");
+                    "Verified insured institutions unavailable", e);
         }
     }
+
     private List<PremiumRecordDto> fetchRecentPremiums() {
         try {
             return jdbcTemplate.query(
@@ -137,9 +127,10 @@ public class KdicService {
             );
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
-                    "Verified KDIC premium receipt source unavailable");
+                    "Verified KDIC finance records unavailable", e);
         }
     }
+
     private List<PayoutRecordDto> fetchRecentPayouts() {
         try {
             return jdbcTemplate.query(
@@ -157,7 +148,7 @@ public class KdicService {
             );
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
-                    "Verified KDIC payout receipt source unavailable");
+                    "Verified KDIC finance records unavailable", e);
         }
     }
 }

@@ -48,6 +48,8 @@ moneyverse:
     bot-token: ${DISCORD_BOT_TOKEN:}
     log-channel-id: ${DISCORD_LOG_CHANNEL_ID:1542465347364589609}
     admin-user-id: ${DISCORD_ADMIN_ALERT_USER_ID:889085646768078850}
+    voice-guild-id: ${DISCORD_VOICE_GUILD_ID:1104015535592701984}
+    voice-channel-id: ${DISCORD_VOICE_CHANNEL_ID:1536572442422550538}
 
 management:
   endpoints:

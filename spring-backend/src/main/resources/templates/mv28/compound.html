@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:lang="${uiLanguage}" th:attr="data-ui-language=${uiLanguage}">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark"><meta name="theme-color" content="#0C1020">
+<title th:attr="data-public-title=${publicTitleKey}" th:text="${pageTitle} + ' | Woldeok Moneyverse'">Woldeok Moneyverse</title>
+<link rel="stylesheet" href="/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31"><script src="/assets/mv39/i18n.js?v=67b80fde2fdda66f1e777d9d03a84821b46ed71e7c64e8efd4de08726e05d108" defer></script>
+<link rel="stylesheet" href="/assets/mv43/public.css?v=6a6a264de0f0c2e9d7daba2b10938d5743dc345a1acde077a0240b261236fa16"><script src="/assets/mv43/public.js?v=09919f3ac61d392224a14d7c20471093f0e1d122a6cf5c027c01ad919c2e90d1" defer></script>
+<th:block th:replace="~{shared/chrome :: commonHead}"></th:block></head>
+<body data-spring-page="compound" data-ui-release="v2026.11.18.28.1">
+<a class="skip-link" href="#main-content" data-i18n="publicSkip" th:text="${uiCopy['publicSkip']}">Skip to main content</a>
+<div class="app-shell"><th:block th:replace="~{shared/chrome :: sidebar}"></th:block><div class="app-main"><div class="app-inner"><th:block th:replace="~{shared/chrome :: pageHeader}"></th:block>
+<main id="main-content" class="public-main" tabindex="-1">
+  <nav class="crumbs" data-i18n-aria="publicBreadcrumb" th:attr="aria-label=${uiCopy['publicBreadcrumb']}"><a href="/tools" data-i18n="publicText0" th:text="${uiCopy['publicText0']}">Tools</a><span aria-hidden="true">/</span><span th:attr="data-i18n=${publicTitleKey}" th:text="${pageTitle}">Compound interest calculator</span></nav>
+  <section class="hero" aria-labelledby="page-heading">
+    <div class="hero-text"><p class="eyebrow" data-i18n="publicLab" th:text="${uiCopy['publicLab']}">THE MONEYVERSE LAB / SPRING NATIVE</p><h1 id="page-heading" th:attr="data-i18n=${publicTitleKey}" th:text="${pageTitle}">Compound interest calculator</h1>
+      <p th:attr="data-i18n=${publicIntroKey}" th:text="${pageIntro}">Project compound growth with regular deposits and annual milestones.</p>
+      <div class="hero-tags"><span class="chip chip-primary" data-i18n="publicText1" th:text="${uiCopy['publicText1']}">No account needed</span><span class="chip" data-i18n="publicText2" th:text="${uiCopy['publicText2']}">No React hydration</span></div>
+    </div><div class="hero-icon" aria-hidden="true"><span class="hero-icon-number">%</span><span class="hero-icon-line"></span></div>
+  </section>
+  <div class="main-grid">
+    <section class="panel form-panel" aria-labelledby="calc-form-title"><div class="panel-header"><span class="panel-step">01</span><div><h2 id="calc-form-title" data-i18n="publicText3" th:text="${uiCopy['publicText3']}">Projection inputs</h2><p data-i18n="publicText4" th:text="${uiCopy['publicText4']}">Adjust inputs</p></div></div>
+      <div th:if="${error != null}" class="alert" role="alert"><strong data-i18n="publicInputError" th:text="${uiCopy['publicInputError']}">Please correct the input.</strong><span th:attr="data-i18n=${errorCopyKey}" th:text="${#ctx.getVariable('uiCopy').get(#ctx.getVariable('errorCopyKey'))}">Input error</span></div>
+      <form method="get" action="/tools/compound-calculator" aria-labelledby="calc-form-title" class="calculator-form">
+        <input type="hidden" name="lang" th:value="${language}">
+        <div class="form-field"><label for="principal" data-i18n="publicPrincipal" th:text="${uiCopy['publicPrincipal']}">Initial principal</label><input id="principal" name="principal" type="number" inputmode="decimal" min="0" max="1000000000000" step="0.01" required th:value="${values.principal}" value="100000"><small data-i18n="publicText7" th:text="${uiCopy['publicText7']}">Currency</small></div>
+        <div class="form-field"><label for="monthlyDeposit" data-i18n="publicText8" th:text="${uiCopy['publicText8']}">Monthly deposit</label><input id="monthlyDeposit" name="monthlyDeposit" type="number" inputmode="decimal" min="0" max="1000000000000" step="0.01" required th:value="${values.monthlyDeposit}" value="10000"></div>
+        <div class="field-row"><div class="form-field"><label for="annualRate" data-i18n="publicText9" th:text="${uiCopy['publicText9']}">Annual rate (%)</label><input id="annualRate" name="annualRate" type="number" inputmode="decimal" min="0" max="100" step="0.01" required th:value="${values.annualRate}" value="8.5"></div>
+          <div class="form-field"><label for="years" data-i18n="publicText10" th:text="${uiCopy['publicText10']}">Duration</label><input id="years" name="years" type="number" inputmode="numeric" min="1" max="50" step="1" required th:value="${values.years}" value="3"></div></div>
+        <div class="form-field"><label for="frequency" data-i18n="publicText11" th:text="${uiCopy['publicText11']}">Compounding frequency</label>
+          <select id="frequency" name="frequency"><option value="monthly" th:selected="${values.frequency == 'monthly'}" data-i18n="publicText12" th:text="${uiCopy['publicText12']}">Monthly</option><option value="daily" th:selected="${values.frequency == 'daily'}" data-i18n="publicText13" th:text="${uiCopy['publicText13']}">Daily</option><option value="annually" th:selected="${values.frequency == 'annually'}" data-i18n="publicText14" th:text="${uiCopy['publicText14']}">Annually</option></select></div>
+        <div class="form-actions"><button class="primary-button" type="submit" data-i18n="publicText15" th:text="${uiCopy['publicText15']}">Calculate projection</button><a class="secondary-button" data-public-locale-link th:href="@{/tools/compound-calculator(lang=${language})}" data-i18n="publicText16" th:text="${uiCopy['publicText16']}">Reset</a></div>
+      </form>
+    </section>
+    <section class="panel result-panel" aria-labelledby="calc-results-title" th:if="${error == null}"><div class="panel-header"><span class="panel-step">02</span><div><h2 id="calc-results-title" data-i18n="publicText17" th:text="${uiCopy['publicText17']}">Projection summary</h2><p data-i18n="publicText18" th:text="${uiCopy['publicText18']}">Results</p></div></div>
+      <p class="notice" data-i18n="publicSubmittedNotice" th:text="${uiCopy['publicSubmittedNotice']}">Results show the last submitted calculation.</p><div class="results-grid" role="status" aria-live="polite"><div class="result-card" th:each="metric : ${result.metrics()}" th:classappend="${metric.key() == 'total-final'} ? ' is-primary' : ''" th:attr="data-testid=${metric.key()}"><span class="result-label" th:attr="data-i18n=${'publicMetric_' + metric.key().replace('-','_')}" th:text="${#ctx.getVariable('uiCopy').get('publicMetric_' + metric.key().replace('-','_'))}">Metric</span><strong th:text="${metric.value()} + ${metric.suffix()}">0</strong></div></div>
+      <div class="notice" data-i18n="publicCompoundDescription" th:text="${uiCopy['publicCompoundDescription']}">Illustrative projection only.</div>
+    </section>
+  </div>
+  <section class="panel milestones" th:if="${error == null}" aria-labelledby="milestones-title"><div class="panel-header"><span class="panel-step">03</span><div><h2 id="milestones-title" data-i18n="publicText19" th:text="${uiCopy['publicText19']}">Year-by-year growth</h2><p data-i18n="publicText20" th:text="${uiCopy['publicText20']}">Milestones</p></div></div>
+    <div class="table-scroll" tabindex="0" role="region" aria-labelledby="milestones-title"><table><thead><tr><th scope="col" data-i18n="publicText21" th:text="${uiCopy['publicText21']}">Year</th><th scope="col" data-i18n="publicText22" th:text="${uiCopy['publicText22']}">Contributed</th><th scope="col" data-i18n="publicText23" th:text="${uiCopy['publicText23']}">Projected value</th><th scope="col" data-i18n="publicText24" th:text="${uiCopy['publicText24']}">Interest</th></tr></thead><tbody><tr th:each="m : ${result.yearly()}"><th scope="row" th:text="${m.year()}">1</th><td th:text="${m.contributed()}">0</td><td th:text="${m.projected()}">0</td><td th:text="${m.interest()}">0</td></tr></tbody></table></div>
+  </section>
+  <section class="faq panel"><h2 data-i18n="publicText25" th:text="${uiCopy['publicText25']}">How the calculation works</h2><details><summary data-i18n="publicText26" th:text="${uiCopy['publicText26']}">About compounding</summary><p data-i18n="publicText27" th:text="${uiCopy['publicText27']}">Explanation</p></details></section>
+</main><th:block th:replace="~{shared/chrome :: footer}"></th:block></div></div></div>
+<th:block th:replace="~{shared/chrome :: mobileNavigation}"></th:block><th:block th:replace="~{shared/chrome :: support}"></th:block>
+
+
+
+<script defer src="/assets/mv43/tool-account.js?v=09fe7eb7e1da4d732f37664a3f5a0c8ae6c4576f0726608455ee87744363eb7d"></script>
+</body></html>

@@ -40,7 +40,7 @@ export default async function AdminSystemLogsPage() {
         eyebrow="런타임 관제"
         title="🖥️ 시스템 & 런타임 로그"
       >
-        Nginx 웹서버 오류/접속 로그, Spring Boot 엔터프라이즈 백엔드 및 Next.js 프론트엔드의 실시간 런타임 로그를 모니터링합니다.
+        Nginx 웹서버 오류/접속 로그, 코어 API 백엔드 및 Next.js 프론트엔드의 실시간 런타임 로그를 모니터링합니다.
       </PageHeader>
 
       <LogsSubNav current="system" />

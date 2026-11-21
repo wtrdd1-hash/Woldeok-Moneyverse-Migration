@@ -1,0 +1,212 @@
+[
+  {
+    "href": "/admin/economy",
+    "category": "macro",
+    "labelKey": "adminTool_economy",
+    "categoryKey": "adminCategory_macro"
+  },
+  {
+    "href": "/admin/mint",
+    "category": "macro",
+    "labelKey": "adminTool_mint",
+    "categoryKey": "adminCategory_macro"
+  },
+  {
+    "href": "/admin/central-bank",
+    "category": "macro",
+    "labelKey": "adminTool_central_bank",
+    "categoryKey": "adminCategory_macro"
+  },
+  {
+    "href": "/admin/treasury",
+    "category": "macro",
+    "labelKey": "adminTool_treasury",
+    "categoryKey": "adminCategory_macro"
+  },
+  {
+    "href": "/admin/enterprises",
+    "category": "macro",
+    "labelKey": "adminTool_enterprises",
+    "categoryKey": "adminCategory_macro"
+  },
+  {
+    "href": "/admin/bonds",
+    "category": "macro",
+    "labelKey": "adminTool_bonds",
+    "categoryKey": "adminCategory_macro"
+  },
+  {
+    "href": "/admin/pension",
+    "category": "macro",
+    "labelKey": "adminTool_pension",
+    "categoryKey": "adminCategory_macro"
+  },
+  {
+    "href": "/admin/fx",
+    "category": "macro",
+    "labelKey": "adminTool_fx",
+    "categoryKey": "adminCategory_macro"
+  },
+  {
+    "href": "/admin/treasury/grants",
+    "category": "treasury",
+    "labelKey": "adminTool_treasury_grants",
+    "categoryKey": "adminCategory_treasury"
+  },
+  {
+    "href": "/admin/kdic",
+    "category": "treasury",
+    "labelKey": "adminTool_kdic",
+    "categoryKey": "adminCategory_treasury"
+  },
+  {
+    "href": "/admin/catalog",
+    "category": "treasury",
+    "labelKey": "adminTool_catalog",
+    "categoryKey": "adminCategory_treasury"
+  },
+  {
+    "href": "/admin/work",
+    "category": "treasury",
+    "labelKey": "adminTool_work",
+    "categoryKey": "adminCategory_treasury"
+  },
+  {
+    "href": "/admin/market",
+    "category": "market",
+    "labelKey": "adminTool_market",
+    "categoryKey": "adminCategory_market"
+  },
+  {
+    "href": "/admin/shop",
+    "category": "market",
+    "labelKey": "adminTool_shop",
+    "categoryKey": "adminCategory_market"
+  },
+  {
+    "href": "/admin/economy/scenario-lab",
+    "category": "market",
+    "labelKey": "adminTool_economy_scenario_lab",
+    "categoryKey": "adminCategory_market"
+  },
+  {
+    "href": "/admin/market/ai-news",
+    "category": "market",
+    "labelKey": "adminTool_market_ai_news",
+    "categoryKey": "adminCategory_market"
+  },
+  {
+    "href": "/admin/security",
+    "category": "security",
+    "labelKey": "adminTool_security",
+    "categoryKey": "adminCategory_security"
+  },
+  {
+    "href": "/admin/logs",
+    "category": "security",
+    "labelKey": "adminTool_logs",
+    "categoryKey": "adminCategory_security"
+  },
+  {
+    "href": "/admin/logs/errors",
+    "category": "security",
+    "labelKey": "adminTool_logs_errors",
+    "categoryKey": "adminCategory_security"
+  },
+  {
+    "href": "/admin/logs/system",
+    "category": "security",
+    "labelKey": "adminTool_logs_system",
+    "categoryKey": "adminCategory_security"
+  },
+  {
+    "href": "/admin/logs/integrity",
+    "category": "security",
+    "labelKey": "adminTool_logs_integrity",
+    "categoryKey": "adminCategory_security"
+  },
+  {
+    "href": "/admin/logs/delivery",
+    "category": "security",
+    "labelKey": "adminTool_logs_delivery",
+    "categoryKey": "adminCategory_security"
+  },
+  {
+    "href": "/admin/users",
+    "category": "users",
+    "labelKey": "adminTool_users",
+    "categoryKey": "adminCategory_users"
+  },
+  {
+    "href": "/admin/blog",
+    "category": "users",
+    "labelKey": "adminTool_blog",
+    "categoryKey": "adminCategory_users"
+  },
+  {
+    "href": "/admin/money-flow",
+    "category": "users",
+    "labelKey": "adminTool_money_flow",
+    "categoryKey": "adminCategory_users"
+  },
+  {
+    "href": "/admin/content",
+    "category": "users",
+    "labelKey": "adminTool_content",
+    "categoryKey": "adminCategory_users"
+  },
+  {
+    "href": "/admin/support",
+    "category": "users",
+    "labelKey": "adminTool_support",
+    "categoryKey": "adminCategory_users"
+  },
+  {
+    "href": "/admin/safety",
+    "category": "users",
+    "labelKey": "adminTool_safety",
+    "categoryKey": "adminCategory_users"
+  },
+  {
+    "href": "/admin/controls",
+    "category": "system",
+    "labelKey": "adminTool_controls",
+    "categoryKey": "adminCategory_system"
+  },
+  {
+    "href": "/admin/api-health",
+    "category": "system",
+    "labelKey": "adminTool_api_health",
+    "categoryKey": "adminCategory_system"
+  },
+  {
+    "href": "/admin/seo",
+    "category": "system",
+    "labelKey": "adminTool_seo",
+    "categoryKey": "adminCategory_system"
+  },
+  {
+    "href": "/admin/seo-audit",
+    "category": "system",
+    "labelKey": "adminTool_seo_audit",
+    "categoryKey": "adminCategory_system"
+  },
+  {
+    "href": "/admin/analytics",
+    "category": "system",
+    "labelKey": "adminTool_analytics",
+    "categoryKey": "adminCategory_system"
+  },
+  {
+    "href": "/admin/discord",
+    "category": "system",
+    "labelKey": "adminTool_discord",
+    "categoryKey": "adminCategory_system"
+  },
+  {
+    "href": "/admin/operations/storage",
+    "category": "system",
+    "labelKey": "adminTool_operations_storage",
+    "categoryKey": "adminCategory_system"
+  }
+]

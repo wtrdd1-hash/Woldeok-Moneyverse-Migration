@@ -4,6 +4,9 @@ import com.moneyverse.api.domain.pension.dto.PensionDtos.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,6 +65,26 @@ public class PensionService {
         } catch (Exception e) {
             log.warn("[PensionService] Failed to query overview, returning fallback: {}", e.getMessage());
             return new PensionOverview("0", 0L, 0L, "0", "5.20%", true, "50000000");
+        }
+    }
+
+    /**
+     * Pure read for GET: never create a pension account, fabricate a zero balance,
+     * or return records for a caller-supplied identity.
+     * Actor must be derived from the authenticated session in the controller.
+     */
+    @Transactional(readOnly = true)
+    public Optional<PensionAccountInfo> readExistingAccount(String verifiedUserId) {
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(
+                    "SELECT * FROM national_pension_accounts WHERE user_id = ?::uuid",
+                    (rs, rowNum) -> mapAccountRow(rs),
+                    verifiedUserId));
+        } catch (EmptyResultDataAccessException noAccount) {
+            return Optional.empty();
+        } catch (DataAccessException unavailable) {
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE, "PENSION_SOURCE_UNAVAILABLE", unavailable);
         }
     }
 

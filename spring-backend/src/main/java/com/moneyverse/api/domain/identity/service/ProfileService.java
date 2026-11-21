@@ -3,55 +3,76 @@ package com.moneyverse.api.domain.identity.service;
 import com.moneyverse.api.domain.identity.dto.IdentityDtos.UserProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
-import java.util.Map;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.UUID;
 
+/** Privacy-aware canonical member profile source, not the nonexistent legacy profiles table. */
 @Service
 public class ProfileService {
-
     private static final Logger log = LoggerFactory.getLogger(ProfileService.class);
     private final JdbcTemplate jdbcTemplate;
 
-    public ProfileService(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    public ProfileService(JdbcTemplate jdbcTemplate) { this.jdbcTemplate = jdbcTemplate; }
 
     @Transactional(readOnly = true)
     public UserProfile getProfile(String userId) {
-        String sql = """
-            SELECT p.*, u.email 
-            FROM profiles p
-            LEFT JOIN users u ON p.id = u.id
-            WHERE p.id = ?::uuid
-            """;
+        UUID subject = parseSubject(userId);
+        return getProfile(userId, subject);
+    }
+
+    /** The viewer is the verified server session actor, or null for an anonymous public profile. */
+    @Transactional(readOnly = true)
+    public UserProfile getProfile(String userId, UUID verifiedViewer) {
+        UUID subject = parseSubject(userId);
+        String sql = "SELECT display_name, image_url, joined_at, job_type::text, job_level, " +
+                "work_completions::text, visibility::text, featured_title " +
+                "FROM public.member_profile_view(?::uuid, ?::uuid)";
         try {
-            return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
-                UserProfile p = new UserProfile();
-                p.setId(rs.getString("id"));
-                p.setDisplayName(rs.getString("display_name"));
-                p.setEmail(rs.getString("email"));
-                p.setImageUrl(rs.getString("image_url"));
-                p.setJobType(rs.getString("job_type"));
-                p.setJobLevel(rs.getInt("job_level"));
-                p.setVisibility(rs.getString("visibility"));
-                p.setFeaturedTitle(rs.getString("featured_title"));
-                p.setJoinedAt(rs.getTimestamp("joined_at") != null ? rs.getTimestamp("joined_at").toInstant().toString() : Instant.now().toString());
-                return p;
-            }, userId);
+            UserProfile result = jdbcTemplate.queryForObject(sql, (rs, n) -> {
+                UserProfile profile = new UserProfile();
+                profile.setId(subject.toString());
+                profile.setDisplayName(rs.getString("display_name"));
+                profile.setImageUrl(rs.getString("image_url"));
+                profile.setJobType(rs.getString("job_type"));
+                profile.setJobLevel((Integer)rs.getObject("job_level"));
+                profile.setWorkCompletions(rs.getString("work_completions"));
+                profile.setVisibility(rs.getString("visibility"));
+                profile.setFeaturedTitle(rs.getString("featured_title"));
+                Timestamp joined = rs.getTimestamp("joined_at");
+                profile.setJoinedAt(joined == null ? null : joined.toInstant().toString());
+                // Email never comes from the public member_profile_view privacy boundary.
+                profile.setEmail(null);
+                return profile;
+            }, verifiedViewer, subject);
+            if (result == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "PROFILE_NOT_FOUND");
+            return result;
+        } catch (org.springframework.dao.EmptyResultDataAccessException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "PROFILE_NOT_FOUND");
+        } catch (ResponseStatusException e) {
+            throw e;
         } catch (Exception e) {
-            log.warn("[ProfileService] fallback for user {}: {}", userId, e.getMessage());
-            UserProfile fallback = new UserProfile();
-            fallback.setId(userId);
-            fallback.setDisplayName("시민");
-            fallback.setJobType("NONE");
-            fallback.setJobLevel(1);
-            fallback.setVisibility("PUBLIC");
-            fallback.setJoinedAt(Instant.now().toString());
-            return fallback;
+            // Canonical DB function raises SQLSTATE 28000 if viewer/subject cannot see the profile.
+            Throwable current=e;
+            while (current!=null) {
+                if (current instanceof SQLException sqlError && "28000".equals(sqlError.getSQLState())) {
+                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "PROFILE_NOT_VISIBLE");
+                }
+                current=current.getCause();
+            }
+            log.warn("[ProfileService] canonical member_profile_view unavailable");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "PROFILE_SOURCE_UNAVAILABLE");
         }
+    }
+
+    private static UUID parseSubject(String text) {
+        try { return UUID.fromString(text); }
+        catch (Exception e) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "INVALID_PROFILE_ID"); }
     }
 }

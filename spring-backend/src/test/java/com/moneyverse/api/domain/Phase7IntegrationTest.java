@@ -45,25 +45,26 @@ class Phase7IntegrationTest {
     }
 
     @Test
-    @DisplayName("AI 금융 비서 덕이 포트폴리오 진단 조회 테스트")
+    @DisplayName("금융 비서의 개인 진단은 임의 사용자 헤더만으로 조회 불가")
     void testAdvisorEndpoints() throws Exception {
         mockMvc.perform(get("/api/advisor/deoki/diagnose")
-                        .header("X-User-Id", "5f7b8b44-e4aa-40b8-b93a-800ec0151d20"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
+                        .header("X-User-Id", "00000000-0000-0000-0000-000000000101"))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
-    @DisplayName("커뮤니티 및 종목 토론 게시판 조회 테스트")
+    @DisplayName("게시판 원천 함수가 없는 H2 환경은 허위 200 대신 HTTP503으로 실패한다")
     void testBoardEndpoints() throws Exception {
+        // Integration H2 fixture intentionally lacks the PostgreSQL-only canonical
+        // public.member_board_public_list_with_stock(int) function.
+        // A successful 200 with fabricated `post-wld-*` records is a security/accuracy defect.
         mockMvc.perform(get("/api/board"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true))
-                .andExpect(jsonPath("$.posts").isArray());
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(result -> org.junit.jupiter.api.Assertions.assertFalse(
+                        result.getResponse().getContentAsString().contains("post-wld-")));
 
         mockMvc.perform(get("/api/board/stock-posts?stockSymbol=WDX"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
+                .andExpect(status().isServiceUnavailable());
     }
 
     @Test

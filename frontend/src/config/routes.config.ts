@@ -441,6 +441,16 @@ export const APP_ROUTES: readonly RouteDefinition[] = [
     group: 'public',
   },
   {
+    path: '/calculators',
+    label: { ko: '17종 금융 계산기 & 절세 시뮬레이터 센터', en: '17 Financial Calculators & Tax Simulators', ja: '17種金融計算機・節税シミュレーター', zh: '17种金融计算器与节税模拟器' },
+    isPublic: true,
+    authRequired: false,
+    indexable: true,
+    sitemapPriority: 1.0,
+    changeFrequency: 'daily',
+    group: 'public',
+  },
+  {
     path: '/tools',
     label: { ko: '금융 & 시뮬레이터 도구 허브', en: 'Financial Tools Hub', ja: '金融ツールハブ', zh: '金融工具导航' },
     isPublic: true,

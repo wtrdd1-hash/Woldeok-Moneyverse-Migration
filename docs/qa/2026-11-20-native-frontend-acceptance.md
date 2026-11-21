@@ -1,0 +1,136 @@
+# Native frontend implementation and acceptance ledger — 2026-11-20
+
+> Current observation: public presentation5-page Production promotion at2026-11-20 21:53:58KST, source42422aab0d3bed3399a27819c6eb774cfd1a933a, PR#3319/mainCI44736479741. Clean Spring542/Node276 passed without skips; source-equivalent Test50 and final Production10 browser cases passed. Full member/admin/backend/financial acceptance remains OPEN. Earlier totals and HOLD records below are historical.
+
+
+This page describes the November18 Spring MVC/Thymeleaf frontend migration. It is an implementation/QA ledger, not a statement that every existing page or production feature works.
+
+- Current task PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3319
+- Historical first integration PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3311
+- Design authority: ../planning/NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.ko.md
+- Detailed work/checkpoint history: ../worklog/2026-11-20-nov18-design-integrate.md
+- Source checkpoint44a773e942:394 isolated Spring tests,0 failures/errors/skips; bootJar successful;220 Node tests passed. CI checkpoint7cb9890d95 additionally passed9 actual-service PostgreSQL cases, with0 failures/errors/skips (run44689405118).
+- All task source work is on isolated MiniPC branches. The original checkout's unrelated uncommitted changes were not reset, stashed or overwritten.
+
+## Current scoped release gates — 2026-11-20 21:53KST
+
+| Gate | Evidence | Status |
+|---|---|---|
+| Exact current application source | Merged42422aab; mainCI44736479741 all4jobs successful; CI JAR/open-process hash match | PASS for public presentation |
+| No backend/DB dependency in new renderer | Real context with invalid DB URL; explicit-import runtime; denied API/member/admin/mutation routes; actual HTTP no session cookies | PASS |
+| Public Test | Exact final main frontend source, five native pages/noindex; private/API paths403 | PASS for this frontend only |
+| Browser/layout | Five locales ×390/1440px ×five pages50 source-equivalent cases; final Production10; no overflow/small effective targets | PASS for listed cases |
+| Actual site data integration | Existing API10stocks/2posts; new home8listed rows/cards and2posts; anonymous user/amount absent | PASS for public reads |
+| Legacy compatibility | Three asset version selectors; actual8-case mixed-version regression; default version policy preserved | PASS |
+| Availability/rollback | Graceful Nginx reload; old backend unchanged; frontend boot/restart protection; reviewed inverse config preserves concurrent actuator hardening and signup holds | PASS for scoped rollout |
+| Authenticated member/admin/economic actions | Current browser unsigned; no live trade/transfer/admin operation certified | OPEN / deferred |
+| Financial/migration provenance | Approved orphan correction not executed; ledger DML and manual346 drift unresolved | BLOCKED for full application promotion |
+| Entire route/language/a11y parity | Retained `/stocks` still an explicit sample design; native-speaker and full zoom/screen-reader QA incomplete | OPEN |
+
+[Detailed current receipt and remaining issues](../releases/2026-11-20-native-presentation-production.ko.md). The following table preserves the older pre-cutover state.
+
+## Historical release gates before this scoped cutover
+
+| Gate | Current evidence | Status |
+|---|---|---|
+| Approved source design | Authority, approved preview, native templates and exact palette used | Implemented for listed surfaces only |
+| Isolated Spring/API/UI tests |394 cases at44a773, zero failures/errors/skips; JAR built | PASS at that source only |
+| Node contracts |220 at44a773, no failure/cancellation/skip | PASS at that source only |
+| Real Java service/PostgreSQL behavior |9 actual-service CI cases at7cb9890d95,0 failures/errors/skips; rollback-only fixtures | PASS in disposable CI only |
+| Browser clicks, keyboard, computed layout |IAB recovered; production baseline screenshot/menu observed; native candidate preview pending | IN PROGRESS |
+| Responsive/zoom matrix |Authored CSS/HTTP/unit checks only;320–1920px and200% browser evidence absent | OPEN |
+| Human translation review |Five-locale catalog parity and rendered-copy checks; no native-speaker certification | OPEN |
+| Exact-source public Test |test.easy-scraping.com/api/version returns403 at15:25KST | BLOCKED |
+| Production availability |Root returnedHTTP200 at15:25KST; this does not identify the deployed source | Availability only |
+| Main promotion/rollback/session continuity |Current task has not passed Test/browser acceptance | HOLD |
+
+## Feature-family coverage
+
+| Surface | Implemented source behavior | Verified here | Still open |
+|---|---|---|---|
+| Home / and /index.html |Native SSR, shared sidebar/header/mobile nav, five locales, actual source-backed widgets and honest failures |HTTP/localization/cache/source contracts |Real browser rendering, production identity and every linked destination |
+| Administrator dashboard |Native rendering, actual source metrics,35 original tool links,6 categories/search and correct category counts8/4/4/6/6/7 |HTTP/catalog/filter contracts; no fake member rows/optimistic switch state |35 destination operations, real role/reauth/TOTP/elevation/action acceptance |
+| Wallet aliases |Verified private page, exact string balances/history, matching recipient/amount transfer receipt, CSRF, stable retry intent, CSV safety |Synthetic HTTP/JDBC boundary and client-state tests |Real financial mutation/concurrency/rollback, actual browser and Test |
+| Login/provider aliases |Native form with original Korean page copy, fixed same-origin login API and strict receipt, no arbitrary redirect, field preservation/clearing |HTTP five locales and client request/state contracts |Real browser/provider/session continuity |
+| Register aliases |Native presentation, original field bounds, unchecked acknowledgements |Disabled HTML/client submission guard |Server consent/age persistence; registration intentionally unavailable |
+| Recovery/reset/email verification/email change/account deletion |Native source-backed unavailable state; no invented mail or action success |HTTP/privacy/query nonreflection |Missing actual backend actions and delivery receipts |
+| Shared support launcher |One56px dialog launcher with focus return and help/contact/DM links |Client open/close/locale preservation and native SSR |Actual global conversation UI, memory-only draft retention across internal page navigation |
+| Support member API |Session/CSRF ownership, stable key,1000-codepoint validation, actual stored creation/reply receipts, no empty-success fallback |Isolated controller/service tests; real PostgreSQL CI9-case task passed at7cb9890d95 |Actual PostgreSQL owner/replay evidence, browser send/receive and administrator assignment/reply |
+| Member direct-message API |Verified session/CSRF, existing owner-scoped functions, stable keys/body receipts, sequence string, truthful read errors |Isolated boundary/service tests; real PostgreSQL CI9-case task passed at7cb9890d95 |Recipient/opening flow, browser conversation UI, realtime/read/archive/block/report parity |
+| Existing tools/calculators/status |Dedicated isolated presentation task in progress; native computation/status models retained |Worker regressions in progress; not yet integrated/certified |Independent review, integration and browser acceptance |
+| Other shop/bank/stocks/work/quests/community/account/legal/admin destinations |Existing source inventory retained; not all ported by this checkpoint |No blanket functional claim |Per-route native rendering, complete control/API/data/receipt coverage and full QA |
+
+## Acceptance procedure
+
+For each page record its source owner and canonical/alias routes, guest/member/admin role, ready/loading/empty/error/denied state, all interactive controls, exact API request and source receipt, five locales and manual preference, narrow/desktop/zoom/keyboard states. Mark unavailable backend actions explicitly. A navigation link and anHTTP200 do not certify the destination or an operation.
+
+For mutations, use an isolated test principal and fixture; verify owner, CSRF, stable retry key, exact intent and canonical receipt/readback. A repeated network request must not produce an additional effect. Money and chain sequences remain canonical strings. Never create illustrative balances/people/history as live data.
+
+The pre-migration source inventory contained290 static HTML files covering147 concepts and many captured Next artifacts;180 design concepts and92 original contract routes are different inventories. None is an implemented-feature count. Keep uncovered families open rather than subtracting navigation links from a total.
+
+## Known implementation limitations
+
+- The existing registration API was not changed by the auth UI task. Native registration stays blocked until server-side consent/age evidence exists.
+- Legacy sessions without a matching raw-proof cookie retain authentication but cannot bootstrap mutation proof. They require a valid new-session/proof path; no stored hash is rotated as a workaround.
+- Support creation's legacy SQL replay does not bind body/subject. The Java service verifies actual recent100 owner-thread metadata and initial message. A very old retry outside that receipt window can be unavailable; it is never relabelled with new input.
+- Unit/JDBC doubles cannot prove live grants/function parsing or concurrency. The separate CI-only9-case task passed actual service/function/app-role and sequential replay checks with rollback-only fixtures; simultaneous concurrency remains unverified.
+- Existing stock test logs show scheduled source-unavailable/raw-read warnings in H2. These are not a passing production market-feed test; stock/realtime feature acceptance remains open.
+- Earlier upload tests lacked storage isolation and may have written synthetic1×1 image fixtures into shared default media storage. The test profile now uses a temporary directory and enforces it; no unknown shared files were deleted. No shared database/financial mutation was performed.
+
+## Checklist
+
+- [x] Original design/spec/PR integration and task-branch checkpoints retained.
+- [x] Home/admin hub/wallet/auth foundation implemented and reviewed as recorded in worklog.
+- [x] Messaging controller/service fail-closed prerequisites implemented.
+- [x] Read actual9-case disposable PostgreSQL CI outcome:9/9,zero skips; run44689405118.
+- [ ] Integrate reviewed existing native public pages.
+- [ ] Implement and review remaining native route families and global conversation interaction.
+- [ ] Complete all browser/locale/responsive/admin/mutation acceptance rows.
+- [ ] Fresh whole-branch review and current-main integration.
+- [ ] Exact-source Test, session continuity/rollback and documented production release.
+
+## Current integrated checkpoint —2026-11-20 owner safety continuation
+This entry supersedes earlier per-slice totals only for the current isolated candidate; it is not full-site acceptance.
+| Gate | Evidence/state |
+|---|---|
+| Current-main integration | Main9635262fb2 plus reviewed messaging3fe753fc43; administrator network-credential shortcut removed; previous11 deleted admin regressions restored |
+| Ordinary Spring | Fresh clean469 tests/84 suites,0 failures/errors/skips, bootJar successful; unchanged source fingerprint cdae0616cc1f025c88872ee2ad1669e11b6989eb2be97f5aa0f27aba14d7f1bc |
+| Node |262 passed,0 failed/cancelled/skipped; native, admin, money, release, security guards |
+| Messaging source review | Scoped round1/5 APPROVED,3 findings addressed,0 open source findings; owner-stamped reads and post-send epoch checked |
+| Actual browser | Prior source8746:40 home locale/width cases no overflow/FAB overlap;7 link targets below44px and untranslated shared labels found. Candidate remediation implemented; rerun pending |
+| Actual PostgreSQL | Ancestor7cb CI44689405118 had9 passed/0 skips; latest-source CI pending |
+| Test/release | Public Test HTTP403 rechecked; production HOLD |
+| Remaining acceptance | Authenticated member/admin flows, full-page linguistic review,200%/keyboard/reduced motion, simultaneous concurrency, global cross-navigation drafts, remaining legacy pages OPEN |
+
+### Actual browser refinement — source4e10ee6f04
+- Home/login:80cases (2routepaths×5locales×8widths), no undersized44px controls, no overflow/FAB-bottomnavoverlap, correct localized titles,56px launcher. Checkbox targets measured using their associated clickable labels.
+- Tools/calculators/compound/stock:160cases, no undersized targets/overflow. All checks guest on isolatedH2; unavailable stock/board data is not a live-source failure claim.
+- Status source unavailable: actual Whitelabel503/no shell found and repaired after5logicalRED SSR failures;11focusedGREEN including truthpolicy. Actual after-fix status geometry and integrated whole-branch review pending.
+- Source8f0 whole-branch review2Important open, assigned original messaging implementer round2/5: shared generic localization overwrites dynamic state, and authenticated messaging header bypasses shared sizing/mobile classes.2minor labels/copy also assigned; rootbrand/helpwidth/titleminor addressed and browserverified.
+
+## Current authoritative checkpoint — reviewed integrated candidate
+| Gate | Current evidence |
+|---|---|
+| Source review | Messaging round2/5 approved0a64b35a46,2 Important plus M1/M3 resolved; root follow-up approved0 Critical/Important; patchd5e374b0b8fd |
+| Fresh ordinary verification | Spring479/84suites0failures/errors/skips +bootJar; Node2700failed/cancelled/skipped; source fingerprint8a0e75106ef6 stable before/after |
+| Actual PostgreSQL |8f0 CI44702880854 success, read9tests0failures/errors/skips; final-commit CI pending |
+| Actual guest browser |240 locale/width cases6routepaths at4e10; not authenticated or delivery proof |
+| Source-unavailable/status | Native503 shell/unknown/no invented0counts;5RED→11focusedGREEN and source review approved; latest actual-browser rerun OPEN due external SSH transport refusal |
+| Deployment | HOLD: exact-source public TestHTTP403; no production rollout |
+| Remaining | Authenticated member/admin QA, remaining legacy pages, full linguistic/accessibility/200% checks, global cross-navigation drafts and simultaneous concurrency OPEN |
+Earlier slice totals remain historical. Only the rows above describe this checkpoint; source code completion does not imply release acceptance.
+
+## Current OPEN findings after reviewed implementation
+| ID | Priority | Area | Evidence and remaining work |
+|---|---|---|---|
+| UI-STOCK-NATIVE | P1 | /stocks | Source review of PublicStocksReadOnlyPage.java: hand-built HTML, EN/KO only, separate styles/help anchor; lacks the shared native five-language shell. Preserve verified read-only market/canonical prices while migrating; real trading/chart parity is not certified. Source-backed unavailable response also needs native error-state acceptance. |
+| UI-GLOBAL-DRAFT | P1 | Cross-page messaging | In-page locale/focus changes retain memory-only drafts, but full-navigation global open-panel/private-draft retention remains unimplemented. No disk/localStorage workaround permitted. |
+| QA-MEMBER-ADMIN | P1 | Member/admin | Guest240 geometry cases and HTTP/service tests do not certify actual authenticated layouts, administrator step-up or real financial/message delivery.35 admin directory links do not certify35 workflows. |
+| QA-TEST-ACCESS | P1 | Test/release | Required public Test returns403; latest status after-fix browser rerun additionally lacks the external SSH preview tunnel. No direct production promotion. |
+| UI-LEGACY-PAGES | P1 | Remaining route families | Public tool hub links17 destinations; only2 calculator implementations are native verified in this slice.15 other tool destinations, other legacy/captured account/economy/game/community/admin screens need individual inventory and native functional acceptance. |
+| UI-COPY-ACCEPTANCE | P2 | Public copy and all5 locales | Public tools/status still show technical Spring/QA terminology inherited from the prior slice. Human linguistic review, unnatural words/typos and product wording decisions remain; no blanket translation certification. |
+| QA-A11Y-ALL | P2 | Full-site accessibility | Narrow menu/modal Escape/focus checks passed; actual200% zoom, complete keyboard/screenreader/reducedmotion/mobile-keyboard matrix remains OPEN. |
+| QA-CONCURRENCY | P2 | Support/DM mutations | Actual PostgreSQL9 cases cover sequential replay/ownership/contracts, not simultaneous production concurrency. |
+
+### Final functional-code CI evidence
+Functional SHA173e7255c753abd20523a914e6c68c16e826ecb3: CI44714457273 completed success for classify,policy,spring-web-check,runtime-check. Read log result: {"nativePostgresMessaging":{"tests":9,"failures":0,"errors":0,"skipped":0}}. Candidate build44714447977 was still building the frontend image when checked; build/Test/production acceptance is not asserted. This subsequent checkpoint modifies only these QA/worklog documents;479/270 test counts belong to the unchanged reviewed implementation. Production HOLD and all OPEN rows remain applicable.

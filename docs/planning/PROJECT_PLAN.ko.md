@@ -1,5 +1,27 @@
 # 월덕 머니버스 — Living Project Plan
 
+> **2026-11-21 15:55 KST 현재 — 통합 frontend26의 부분 수용:** source e45f57595415 동일 JAR의 DB-free Test/운영 한 쌍으로 공개5·관리자 조회10·회원3·인증8 UI/안전한 실패 상태를 통합했다. Test260조합/운영26·Test중지 독립성 및 old native11/QA Nginx2 정리를 검증했다. 관리자 원천4read·지갑 합계는 실제 조회다. 문의/쪽지 owner/DTO 미검증, 송금 CSRF, 가입/복구 hold·나머지 기능은 OPEN. 운영 전체 정적147 재검사 결과 사용자78 오류/차단·관리자 errors1, 동적33미검증. **전 기능 정상/180페이지 완료가 아니다.** [현재 운영/정리 증거](../releases/2026-11-21-frontend-consolidation-production.ko.md) · [현재 기능/경로 결함](../qa/2026-11-21-live-frontend-after.ko.md). 아래 다른 SHA/경로 수는 과거 수용 시점이다.
+
+> **2026-11-21 13:22 KST 현재 — 부분 적용:** 전달 로그1경로를 main7d58568e3041의 Nov18 공통 셸로 운영 전환해 관리자 조회9경로가 통일됐다. 이전8경로 e2fb/공개5경로93a3는 유지한다. 전달 Test40조합·운영15조합·기존8경로 전후16배치씩 및 Test 중지 독립성 확인. 나머지27관리자/전체 웹·변경 기능은 OPEN이다. API 관제 고정 정상 지표와 계정·문의·채팅403도 미해결이다. [최신 전달 수용](../releases/2026-11-21-nov18-admin-delivery-production.ko.md) / [미해결 결함](../qa/2026-11-21-nov18-unification-open-defects.ko.md). 아래8경로 등의 기록은 이전 수용 시점이다.
+
+
+> **2026-11-21 12:02 KST 프론트엔드 현재 상태 — 부분 적용:** 공개5경로/별칭은 기존93a3, 관리자 조회8경로는 main e2fb487a1a78의 Nov18 공통 PC·모바일 셸로 운영 반영했다. 실제 Test320조합·확대대응40개와 운영24배치 검증. 전체 웹/모든 관리자 변경 기능 통일은 미완료이며 계정·문의·채팅403/다른 페이지 계정 헤더/에러 로그·금융·기타 경로는 OPEN이다. [최신 운영 증거](../releases/2026-11-21-nov18-admin-unified-production.ko.md)와 [현재/변경 전 경로 원장](../qa/2026-11-21-nov18-frontend-route-ledger.ko.md)을 따른다. 아래 과거 상태는 당시 기록이다.
+
+> **2026-11-21 현재 검증된 구현 범위 — 부분 적용:** 11월 18일 디자인의 실제 favicon 및 공통 헤더를 공개 홈·도구·계산기 5개 경로와 index 별칭에 운영 반영했다. 애플리케이션 소스는 `93a3c8dbe8c04fda28689904ffe43a86992c73c1`이다. 전체 180페이지·관리자·금융 기능 완료가 아니며, 운영 샘플 화면·공통 계정 표시·관리자 정적 오류·금융 출처 문제는 OPEN이다. [현재 운영 증거](../releases/2026-11-21-favicon-public-production.ko.md)와 [세부 QA](../qa/2026-11-20-favicon-real-frontend-audit.ko.md)를 현재 상태 기준으로 사용한다. 기존 기획·과거 기록은 유지한다.
+
+
+## v2026.11.20.1 — 사용자 확정: 11월 18일 UI/UX·5개 언어·전 페이지 관리자 문의/회원 채팅 (문서 기획만)
+11월 18일 네이비/보라 PC·모바일 180개 시안 및 관리자 문의 디자인을 사이트 전체 Spring MVC+Thymeleaf 구현의 시각 기준으로 확정한다. 과거 '시안 전용'은 역사적 범위이며 이후 실제 구현 지시가 우선한다. 기본 영어와 한국어·일본어·중국어·베트남어 자동 감지 및 항상 수동 선택 가능; 비회원·회원·관리자 전 화면에 단일 원형 문의/채팅 버튼과 안전한 권한 분리. [상세 한국어 정본 대응](NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.ko.md) / [English](NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.md). Spring 문의의 신원 헤더 위조·고정 UUID·허위 성공 P0 해결 전 실제 전송 금지. 화면·API·권한·무중단 승격 증빙 필요. **문서만 갱신, 코드/Test/운영 변경 없음**. 착수 main `245489a1452a1f187af831f483c18ab2501a65c5`.
+
+
+## v2026.11.18.17 — Spring 프론트엔드 관리자 디자인·전역 채팅 코드 전환 (소스 검증 / 운영 HOLD)
+
+사용자가 승인한 관리자 디자인과 전역 문의 UI를 **실제 프론트엔드 소스**에 구현하되 기존 운영 화면은 유지한다. Spring 복구 브랜치 기반 독립 worktree에서 관리자 네이비/보라 공통 테마와 단일 56px 둥근 버튼을 구현했다. 관리자 /admin*에서는 인증 검증 전 **읽기 전용 지원 안내창**만 표시(문의/DM API 미연결), 일반 회원 화면에서는 기존 문의/1:1 채팅 위젯을 유지하며 접근성·모바일 세이프에어리어 개선. 금융/권한/API 로직은 변경하지 않음.
+
+[상세 기획 한국어](FRONTEND_ADMIN_CHAT_TRANSITION_v2026.11.18.17.ko.md) / [English](FRONTEND_ADMIN_CHAT_TRANSITION_v2026.11.18.17.md) · [QA 한국어](../qa/2026-11-18-spring-frontend-admin-chat-v17.ko.md) / [EN](../qa/2026-11-18-spring-frontend-admin-chat-v17.md) · [작업 기록](../worklog/2026-11-18-frontend-transition-v2026.11.18.17.ko.md).
+
+증빙: 집중 TDD 20개 PASS, 계약/타입 검사·Next 전체 빌드·Spring bootJar PASS, Spring 관리자 인증 단위 3 PASS, ESLint 오류 0/기존 경고 9. 전체 프론트 회귀는 105초 제한 및 광고·SEO 테스트 실패 관찰로 **미통과**. **Spring UI 운영 전환 BLOCKED:** Next /admin,/support는 동적 렌더링인데 Spring 정적 JAR은 기존 HTML을 탑재하므로 새로운 화면 미제공. Spring 문의/쪽지 신원 헤더·고정 UUID·허위 성공은 보안 P0. Test/운영 배포·DB 변경 없음.
+
 ## v2026.11.17.5 — Spring KDIC·출석 금융 보안 통합 수정안 (검토 중 / 운영 보류)
 main cd822aa09 기준 기존 #3218·#3215 수정 통합. 사용자 헤더 위조·도파민 중복 라우팅·근거 없는 WLD 성공·KDIC 금융 허위성공 제거. KDIC 관리자 조회/명령은 실제 DB 세션의 superadmin 권한을 확인하며, 원천 장애 시 가짜 기금 잔액·기관·보험료·지급 목록과 재무비율을 반환하지 않는다. Spring 격리 테스트 126개 전부 통과·실패 0, 실제 내장 HTTP 비인증 거부 검증. 운영 구버전 유지, DB/원장/WLD 변경 및 공식 Test·운영 배포 없음. SEC1, 정상 관리자 MFA/CSRF, 실제 원장 결제, 독립 복원 등 P0 남아 운영 승격 보류. [작업 기록](../worklog/2026-11-17-p0-finance-auth-integration-v2026.11.17.5.ko.md).
 

@@ -59,10 +59,7 @@ class TreasuryAdminControllerTest {
     @DisplayName("국고 총괄 현황 /api/v1/admin/treasury/overview 정상 조회")
     void getOverviewSucceeds() throws Exception {
         mockMvc.perform(get("/api/v1/admin/treasury/overview"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.vaults").isArray())
-                .andExpect(jsonPath("$.total_treasury_wld").value("10000000"))
-                .andExpect(jsonPath("$.available_wld").value("5000000"));
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -77,7 +74,7 @@ class TreasuryAdminControllerTest {
         mockMvc.perform(post("/api/v1/admin/treasury/mint-topup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isServiceUnavailable());
+                .andExpect(status().isUnauthorized());
         assertEquals("5000000", vaultRepository.findAll().get(0).getBalanceWld());
     }
 
@@ -92,7 +89,7 @@ class TreasuryAdminControllerTest {
         mockMvc.perform(post("/api/v1/admin/treasury/salary/disburse")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isServiceUnavailable());
+                .andExpect(status().isUnauthorized());
         assertEquals("5000000", vaultRepository.findAll().get(0).getBalanceWld());
     }
 
@@ -102,6 +99,6 @@ class TreasuryAdminControllerTest {
         mockMvc.perform(post("/api/v1/admin/treasury/swf/rebalance")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
-                .andExpect(status().isServiceUnavailable());
+                .andExpect(status().isUnauthorized());
     }
 }

@@ -20,8 +20,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping(path = {
         "/api/v1/admin/logs/system",
-        "/api/admin/logs/system",
-        "/admin/logs/system"
+        "/api/admin/logs/system"
 })
 public class SystemLogController {
 
@@ -35,11 +34,7 @@ public class SystemLogController {
     }
 
     private void verifyAdmin(HttpServletRequest request) {
-        String internalToken = request.getHeader("x-internal-token");
-        if (internalToken != null && !internalToken.trim().isEmpty()) {
-            return;
-        }
-
+        // Transport headers cannot identify the administrator reading private logs.
         Optional<UserAuthService.SessionInfo> sessionOpt = userAuthService.resolveSession(request);
         if (sessionOpt.isEmpty() || !sessionOpt.get().isSignedIn()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized: Sign in required");

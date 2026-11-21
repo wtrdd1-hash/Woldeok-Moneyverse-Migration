@@ -29,26 +29,21 @@ public class SystemLogControllerTest {
 
     @Test
     @DisplayName("내부 게이트웨이 토큰(x-internal-token) 보유 시 200 OK 및 로그 DTO 응답 통과")
-    void testInternalTokenAccess() throws Exception {
+    void rawHeaderCannotReadNginxLogs() throws Exception {
         mockMvc.perform(get("/api/v1/admin/logs/system")
                         .param("source", "NGINX_ERROR")
                         .param("lines", "50")
                         .header("x-internal-token", "gateway-internal-secret-token"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.source").value("nginx-error"))
-                .andExpect(jsonPath("$.status").exists())
-                .andExpect(jsonPath("$.lines").isArray());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     @DisplayName("Spring Boot 백엔드 소스 로그 조회 검증 (200 OK)")
-    void testSpringBootSourceLogs() throws Exception {
+    void rawHeaderCannotReadSpringLogs() throws Exception {
         mockMvc.perform(get("/api/v1/admin/logs/system")
                         .param("source", "SPRING_BACKEND")
                         .param("lines", "30")
                         .header("x-internal-token", "gateway-internal-secret-token"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.source").value("spring-backend"))
-                .andExpect(jsonPath("$.lines").isArray());
+                .andExpect(status().isUnauthorized());
     }
 }

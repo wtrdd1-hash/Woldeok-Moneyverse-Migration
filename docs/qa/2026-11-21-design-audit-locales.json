@@ -1,0 +1,3796 @@
+[
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 665,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 0,
+    "h1": "Home",
+    "height": 900,
+    "lang": "en",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 476,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/",
+    "requested": "/",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "Home · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "en"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 809,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 67,
+        "w": 305,
+        "x": 0,
+        "y": 833
+      }
+    ],
+    "cards": [],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 2,
+    "error": false,
+    "formCount": 0,
+    "h1": "API monitoring",
+    "height": 900,
+    "lang": "en",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 13,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "admin-locale",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 548,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/admin/api-health",
+    "requested": "/admin/api-health",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "API monitoring · Woldeok Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/admin",
+      "/admin/users",
+      "/admin/economy",
+      "/admin/shop",
+      "/admin/blog",
+      "/admin/market",
+      "/admin/enterprises",
+      "/admin/controls",
+      "/admin/api-health",
+      "/admin/analytics",
+      "/admin/logs",
+      "/admin/security",
+      "/admin/support",
+      "/",
+      "/account",
+      "/support",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": false,
+    "headerClass": "admin-topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": false,
+    "expectedLanguage": "en"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 1308,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 1,
+    "h1": "Compound interest calculator",
+    "height": 900,
+    "lang": "en",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 1079,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/tools/compound-calculator",
+    "requested": "/tools/compound-calculator",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "Compound interest calculator · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/tools",
+      "/tools/compound-calculator",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "en"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 454,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 1,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 1,
+    "h1": "Wallet",
+    "height": 900,
+    "lang": "en",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 263,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/wallet",
+    "requested": "/wallet",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "Wallet · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "en"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 408,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 320,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 3,
+    "h1": "Contact support",
+    "height": 900,
+    "lang": "en",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 248,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 208,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/support",
+    "requested": "/support",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "Contact support · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "en"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 521,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 320,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 1,
+    "h1": "Direct Messages",
+    "height": 900,
+    "lang": "en",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 248,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 320,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/chat",
+    "requested": "/chat",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "Direct Messages · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "en"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 751,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 1,
+    "h1": "Log in",
+    "height": 900,
+    "lang": "en",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 560,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/login",
+    "requested": "/login",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "Log in · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/register",
+      "/forgot-password",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 1,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "en"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 878,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 1,
+    "enabledButtonCount": 2,
+    "error": false,
+    "formCount": 1,
+    "h1": "Create account",
+    "height": 900,
+    "lang": "en",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 679,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/register",
+    "requested": "/register",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "Create account · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/register",
+      "/forgot-password",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "en"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 411,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 0,
+    "h1": "홈",
+    "height": 900,
+    "lang": "ko",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 271,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/",
+    "requested": "/",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "홈 · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "ko"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 538,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 67,
+        "w": 305,
+        "x": 0,
+        "y": 833
+      }
+    ],
+    "cards": [],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 2,
+    "error": false,
+    "formCount": 0,
+    "h1": "API 관제",
+    "height": 900,
+    "lang": "ko",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 13,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "admin-locale",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 360,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/admin/api-health",
+    "requested": "/admin/api-health",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "API 관제 · Woldeok Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/admin",
+      "/admin/users",
+      "/admin/economy",
+      "/admin/shop",
+      "/admin/blog",
+      "/admin/market",
+      "/admin/enterprises",
+      "/admin/controls",
+      "/admin/api-health",
+      "/admin/analytics",
+      "/admin/logs",
+      "/admin/security",
+      "/admin/support",
+      "/",
+      "/account",
+      "/support",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": false,
+    "headerClass": "admin-topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": false,
+    "expectedLanguage": "ko"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 717,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 1,
+    "h1": "복리 계산기",
+    "height": 900,
+    "lang": "ko",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 565,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/tools/compound-calculator",
+    "requested": "/tools/compound-calculator",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "복리 계산기 · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/tools",
+      "/tools/compound-calculator",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "ko"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 1158,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 5,
+    "enabledButtonCount": 5,
+    "error": false,
+    "formCount": 1,
+    "h1": "지갑",
+    "height": 900,
+    "lang": "ko",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 1012,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/wallet",
+    "requested": "/wallet",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "내 지갑 · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "ko"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 250,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 320,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 3,
+    "h1": "관리자 문의",
+    "height": 900,
+    "lang": "ko",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 248,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 105,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/support",
+    "requested": "/support",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "관리자 문의 · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "ko"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 306,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 320,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 1,
+    "h1": "쪽지함",
+    "height": 900,
+    "lang": "ko",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 248,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 163,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/chat",
+    "requested": "/chat",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "쪽지함 · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "ko"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 433,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 1,
+    "h1": "로그인",
+    "height": 900,
+    "lang": "ko",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 291,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/login",
+    "requested": "/login",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "로그인 · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/register",
+      "/forgot-password",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 1,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "ko"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 491,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 1,
+    "enabledButtonCount": 2,
+    "error": false,
+    "formCount": 1,
+    "h1": "회원가입",
+    "height": 900,
+    "lang": "ko",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 348,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/register",
+    "requested": "/register",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "회원가입 · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/register",
+      "/forgot-password",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "ko"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 394,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 4,
+    "error": false,
+    "formCount": 0,
+    "h1": "ホーム",
+    "height": 900,
+    "lang": "ja",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 257,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/",
+    "requested": "/",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "ホーム · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/admin",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar member-authenticated",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "ja"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 509,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 67,
+        "w": 305,
+        "x": 0,
+        "y": 833
+      }
+    ],
+    "cards": [],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 2,
+    "error": false,
+    "formCount": 0,
+    "h1": "API監視",
+    "height": 900,
+    "lang": "ja",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 13,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "admin-locale",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 337,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/admin/api-health",
+    "requested": "/admin/api-health",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "API監視 · Woldeok Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/admin",
+      "/admin/users",
+      "/admin/economy",
+      "/admin/shop",
+      "/admin/blog",
+      "/admin/market",
+      "/admin/enterprises",
+      "/admin/controls",
+      "/admin/api-health",
+      "/admin/analytics",
+      "/admin/logs",
+      "/admin/security",
+      "/admin/support",
+      "/",
+      "/account",
+      "/support",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": false,
+    "headerClass": "admin-topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": false,
+    "expectedLanguage": "ja"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 637,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 1,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 1,
+    "h1": "複利計算機",
+    "height": 900,
+    "lang": "ja",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 500,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/tools/compound-calculator",
+    "requested": "/tools/compound-calculator",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "複利計算機 · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/tools",
+      "/tools/compound-calculator",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "ja"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 268,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 1,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 1,
+    "h1": "ウォレット",
+    "height": 900,
+    "lang": "ja",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 133,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/wallet",
+    "requested": "/wallet",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "ウォレット · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "ja"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 235,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 320,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 3,
+    "h1": "管理者へのお問い合わせ",
+    "height": 900,
+    "lang": "ja",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 248,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 94,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/support",
+    "requested": "/support",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "管理者へのお問い合わせ · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "ja"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 272,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 320,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 1,
+    "h1": "メッセージ",
+    "height": 900,
+    "lang": "ja",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 248,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 136,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/chat",
+    "requested": "/chat",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "メッセージ · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "ja"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 418,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 1,
+    "h1": "ログイン",
+    "height": 900,
+    "lang": "ja",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 284,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/login",
+    "requested": "/login",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "ログイン · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/register",
+      "/forgot-password",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 1,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "ja"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 457,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 1,
+    "enabledButtonCount": 2,
+    "error": false,
+    "formCount": 1,
+    "h1": "アカウント作成",
+    "height": 900,
+    "lang": "ja",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 320,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/register",
+    "requested": "/register",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "アカウント作成 · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/register",
+      "/forgot-password",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "ja"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 627,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 0,
+    "h1": "首页",
+    "height": 900,
+    "lang": "zh",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 508,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/",
+    "requested": "/",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "首页 · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar member-authenticated",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "zh"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 460,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 67,
+        "w": 305,
+        "x": 0,
+        "y": 833
+      }
+    ],
+    "cards": [],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 2,
+    "error": false,
+    "formCount": 0,
+    "h1": "API监控",
+    "height": 900,
+    "lang": "zh",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 13,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "admin-locale",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 302,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/admin/api-health",
+    "requested": "/admin/api-health",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "API监控 · Woldeok Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/admin",
+      "/admin/users",
+      "/admin/economy",
+      "/admin/shop",
+      "/admin/blog",
+      "/admin/market",
+      "/admin/enterprises",
+      "/admin/controls",
+      "/admin/api-health",
+      "/admin/analytics",
+      "/admin/logs",
+      "/admin/security",
+      "/admin/support",
+      "/",
+      "/account",
+      "/support",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": false,
+    "headerClass": "admin-topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": false,
+    "expectedLanguage": "zh"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 556,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 1,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 1,
+    "h1": "复利计算器",
+    "height": 900,
+    "lang": "zh",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 431,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/tools/compound-calculator",
+    "requested": "/tools/compound-calculator",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "复利计算器 · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/tools",
+      "/tools/compound-calculator",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "zh"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 237,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 1,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 1,
+    "h1": "钱包",
+    "height": 900,
+    "lang": "zh",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 118,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/wallet",
+    "requested": "/wallet",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "钱包 · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "zh"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 181,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 320,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 3,
+    "h1": "联系管理员",
+    "height": 900,
+    "lang": "zh",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 248,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 59,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/support",
+    "requested": "/support",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "联系管理员 · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "zh"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 200,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 320,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 1,
+    "h1": "私信箱",
+    "height": 900,
+    "lang": "zh",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 248,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 79,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/chat",
+    "requested": "/chat",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "私信箱 · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "zh"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 323,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 1,
+    "h1": "登录",
+    "height": 900,
+    "lang": "zh",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 204,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/login",
+    "requested": "/login",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "登录 · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/register",
+      "/forgot-password",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 1,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "zh"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 357,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 1,
+    "enabledButtonCount": 2,
+    "error": false,
+    "formCount": 1,
+    "h1": "创建账户",
+    "height": 900,
+    "lang": "zh",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 236,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/register",
+    "requested": "/register",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "创建账户 · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/register",
+      "/forgot-password",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "zh"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 706,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 0,
+    "h1": "Trang chủ",
+    "height": 900,
+    "lang": "vi",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 463,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/",
+    "requested": "/",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "Trang chủ · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "vi"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 905,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 67,
+        "w": 305,
+        "x": 0,
+        "y": 833
+      }
+    ],
+    "cards": [],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 2,
+    "error": false,
+    "formCount": 0,
+    "h1": "Giám sát API",
+    "height": 900,
+    "lang": "vi",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 13,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "admin-locale",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 627,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/admin/api-health",
+    "requested": "/admin/api-health",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "Giám sát API · Woldeok Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/admin",
+      "/admin/users",
+      "/admin/economy",
+      "/admin/shop",
+      "/admin/blog",
+      "/admin/market",
+      "/admin/enterprises",
+      "/admin/controls",
+      "/admin/api-health",
+      "/admin/analytics",
+      "/admin/logs",
+      "/admin/security",
+      "/admin/support",
+      "/",
+      "/account",
+      "/support",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": false,
+    "headerClass": "admin-topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": false,
+    "expectedLanguage": "vi"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 1233,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 1,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 1,
+    "h1": "Máy tính lãi kép",
+    "height": 900,
+    "lang": "vi",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 980,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/tools/compound-calculator",
+    "requested": "/tools/compound-calculator",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "Máy tính lãi kép · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/tools",
+      "/tools/compound-calculator",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "vi"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 509,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      },
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 1,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 1,
+    "h1": "Ví",
+    "height": 900,
+    "lang": "vi",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 273,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/wallet",
+    "requested": "/wallet",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "Ví · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "vi"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 444,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 320,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 3,
+    "h1": "Liên hệ hỗ trợ",
+    "height": 900,
+    "lang": "vi",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 248,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 196,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/support",
+    "requested": "/support",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "Liên hệ hỗ trợ · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "vi"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 534,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 320,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 1,
+    "h1": "Tin nhắn riêng",
+    "height": 900,
+    "lang": "vi",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 248,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 285,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/chat",
+    "requested": "/chat",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "Tin nhắn riêng · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "vi"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 781,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 0,
+    "enabledButtonCount": 3,
+    "error": false,
+    "formCount": 1,
+    "h1": "Đăng nhập",
+    "height": 900,
+    "lang": "vi",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 538,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/login",
+    "requested": "/login",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "Đăng nhập · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/register",
+      "/forgot-password",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 1,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "vi"
+  },
+  {
+    "background": "rgb(12, 16, 32)",
+    "backgroundImage": "none",
+    "bodyChars": 866,
+    "bottomNav": [
+      {
+        "bottom": 900,
+        "h": 66,
+        "w": 305,
+        "x": 0,
+        "y": 834
+      }
+    ],
+    "cards": [
+      {
+        "background": "rgb(21, 29, 50)",
+        "image": "none",
+        "radius": "16px"
+      }
+    ],
+    "disabledButtonCount": 1,
+    "enabledButtonCount": 2,
+    "error": false,
+    "formCount": 1,
+    "h1": "Tạo tài khoản",
+    "height": 900,
+    "lang": "vi",
+    "launcher": {
+      "bottom": 820,
+      "h": 56,
+      "radius": "50%",
+      "w": 56,
+      "x": 233,
+      "y": 764
+    },
+    "launcherBottomGap": 14,
+    "legacyStatic": false,
+    "localeSelects": [
+      {
+        "id": "language-selector",
+        "languages": [
+          "auto",
+          "en",
+          "ko",
+          "ja",
+          "zh",
+          "vi"
+        ],
+        "visible": true
+      }
+    ],
+    "logoAll": 2,
+    "logoLoaded": 2,
+    "logoVisible": 0,
+    "mainChars": 619,
+    "newChrome": true,
+    "nextScripts": false,
+    "overflow": false,
+    "panelForms": 0,
+    "panelTabs": 0,
+    "path": "/register",
+    "requested": "/register",
+    "sidebarVisible": false,
+    "smallControlCount": 0,
+    "smallControls": [],
+    "title": "Tạo tài khoản · W Moneyverse",
+    "width": 320,
+    "staticLinks": [
+      "/",
+      "/wallet",
+      "/stocks",
+      "/quests",
+      "/shop",
+      "/board",
+      "/support",
+      "/account",
+      "/login",
+      "/terms",
+      "/privacy",
+      "/register",
+      "/forgot-password",
+      "/chat",
+      "/guide"
+    ],
+    "unrecordedLinkCount": 0,
+    "faviconHeadingPseudoVisible": true,
+    "headerClass": "topbar",
+    "visibleAsideCount": 0,
+    "faviconVisible": true,
+    "expectedLanguage": "vi"
+  }
+]

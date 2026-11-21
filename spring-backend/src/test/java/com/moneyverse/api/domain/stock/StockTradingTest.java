@@ -32,9 +32,9 @@ class StockTradingTest {
     @Test
     @DisplayName("GET /api/v1/stocks 호출 시 상장 종목 목록과 200 OK가 반환된다")
     void listStocksReturnsOk() throws Exception {
+        // Embedded H2 has no canonical stock_market_overview(), so no invented quotes.
         mockMvc.perform(get("/api/v1/stocks"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.stocks").isArray());
+                .andExpect(status().isServiceUnavailable());
     }
 
     @Test
@@ -53,11 +53,9 @@ class StockTradingTest {
     void candlesSupportedIntervalReturnsOk() throws Exception {
         String stockId = UUID.randomUUID().toString();
 
+        // Missing canonical PostgreSQL candle/range functions must not return fake prices.
         mockMvc.perform(get("/api/v1/stocks/" + stockId + "/candles?interval=86400"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.interval").value(86400))
-                .andExpect(jsonPath("$.candles").isArray())
-                .andExpect(jsonPath("$.range").exists());
+                .andExpect(status().isServiceUnavailable());
     }
 
     @Test
@@ -68,13 +66,11 @@ class StockTradingTest {
 
         OrderRequest request = new OrderRequest("buy", 10, idempotencyKey);
 
+        // The request is not signed in; it cannot receive a fabricated trade receipt.
         mockMvc.perform(post("/api/v1/stocks/" + stockId + "/orders")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.trade_id").exists())
-                .andExpect(jsonPath("$.unit_price").exists())
-                .andExpect(jsonPath("$.gross_amount").exists());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -89,11 +85,9 @@ class StockTradingTest {
     @Test
     @DisplayName("GET /api/v1/newspaper/pulse 호출 시 시장 심리 지수와 200 OK가 반환된다")
     void getNewspaperPulseReturnsOk() throws Exception {
+        // Stock prices are unavailable in H2: sentiment must not invent a financial index.
         mockMvc.perform(get("/api/v1/newspaper/pulse"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.sentimentScore").exists())
-                .andExpect(jsonPath("$.data.sentimentLabel").exists());
+                .andExpect(status().isServiceUnavailable());
     }
 
     @Test

@@ -1,5 +1,7 @@
 # Release Guide
 
+> **2026-11-21 combined presentation receipt:** The accepted native public/admin read lane is now composed with owner-verified member HTML and the existing pure authentication screens in `frontend-presentation`, without DB/session/job authority. The current slice is26 canonical screens, not all functionality. [Exact-source Test/Production, compatibility archive, retirement and rollback evidence](releases/2026-11-21-frontend-consolidation-production.ko.md) records the actual release. Existing full-backend/financial gates and blocked mutations remain in force.
+
 **English canonical** | [한국어](RELEASING.ko.md)
 
 > Version: v2026.09.23.404
@@ -171,3 +173,41 @@ For Production identity, require the resolved active release directory basename 
 
 ### v2026.10.31.1536 — Narrow approval for pre-existing financial DML
 The operator's v2026.10.29.1212 acceptance applies only to **existing** full INSERT/UPDATE/DELETE privileges on `accounts`, `account_balances`, `system_treasury_vaults` with actual database `woldeok_moneyverse_dev` and role `moneyverse_app`. The read-only preflight reports explicit `OPERATOR_ACCEPTED_EXISTING_DML` warnings, not silently clean permission flags. Changed or partial privilege shape, different DB/role, new ledger posting/transaction DML and journal imbalance remain BLOCKED. `READY_FOR_OTHER_RELEASE_GATES` means only this narrow projection/grants check passed; Treasury provenance, opening balances, funded settlements, exact authenticated Test, session continuity and Production promotion still require independent evidence. Never grant more rights to force this status.
+
+
+### 2026-11-20 — database-free public presentation lane
+
+The owner requested the implemented public frontend before the deferred backend repairs. This lane serves only the reviewed home/tool hubs/two calculators through `-Dmoneyverse.runtime-mode=presentation`. Explicit component imports exclude database, sessions, economic APIs, schedulers, sockets and bots. Retain existing API/auth/member/admin routes; expanding into those surfaces requires their independent gates above.
+
+Use the exact tested main native CI artifact, validate its manifest/JAR digest and fixed packaged source, stage new immutable Test/Production generations, and verify the actual systemd process directory/open JAR inode/generation freshness. The dedicated frontend must remain loopback-bound, stateless, credential-free and boot-enabled with restart protection. Verify real browser rendering against existing API contracts, not only HTML200 or a source header. The Next pair preflight is not evidence for a native-only process; retain its applicable source/freshness/Test/noindex/rollback requirements through scoped native artifact/process evidence.
+
+Production source attestation uses `/frontend-version?scope=public-presentation`. Preserve the unscoped legacy Referer/204/build-ID behavior: retained Next clients poll it and would otherwise refresh into a false stale-release warning. Version-isolate changed shared assets so old/unknown versions retain their old origin. Validate the full Nginx assembly, compare-and-swap current configuration, gracefully reload, check exact scoped source/pages/assets/API privacy and keep rollback. Preserve unrelated concurrent hardening when preparing inverse routing; never restore a stale whole configuration blindly.
+
+This lane does not certify full application/backend release, financial reconciliation, migration provenance, authenticated member actions or admin operations. See the [observed scoped release](releases/2026-11-20-native-presentation-production.ko.md) and [current baseline](CURRENT_RUNTIME_BASELINE.md).
+
+### 2026-11-21 — native public header follow-up and genuine Test privacy
+Use the exact-main CI native artifact and live open-JAR/process evidence for the public presentation lane. The observed first rollout covers only the five existing public pages and index alias. Preserve legacy/unknown asset versions, unscoped version semantics, private/admin/API traffic and current signup/actuator restrictions. Layout PASS is not authenticated action acceptance; the tool-account header gap stays OPEN.
+
+An HTTP-client403 can be a client-specific edge response rather than an access boundary. Verify actual external browser denial on both Test HTML and new assets. The protected Test origin now allows direct loopback operators and rejects Cloudflare-origin indicators so a local tunnel cannot turn an external request into trusted loopback. Confirm direct Test200/exactsource and external403 independently; retain noindex/no-store. Never record credentials or private responses.
+
+Separate trusted-operator management responses from external denial checks: the retained operator actuatorenv404 was not a new failure. The first attempt safely rolled back on this mistaken expectation; the final switch retained the measured baseline and was externally verified. Public inverse routing must retain newer Test protection and unrelated hardening. [Receipt](releases/2026-11-21-favicon-public-production.ko.md).
+
+### 2026-11-21 — narrowly authenticated admin read presentation
+
+The owner-approved first admin slice uses explicit admin-presentation imports, no database/session creation/jobs, and GET-only fixed loopback sources. Verify actual administrator cookies through the retained role authority at both edge and renderer; no actor/internal/bearer forwarding, redirects, fake counts or successful empty responses on source failure. Stage the exact-main CI artifact on isolated loopback Test and Production generations and verify open JAR/process/source identity before switching only reviewed admin HTML/assets. Protected same-origin preview is the Test lane; Production must ignore its selector and remain healthy while that Test process is stopped. Retain external Test denial and previous API/auth/financial boundaries.
+
+Coordinate existing release locks, revalidate all relevant live configuration hashes after probes and immediately before each replacement, verify backup bytes, syntax-check the full assembly, reload gracefully and verify authenticated changed flows/session continuity. Roll back only owned unchanged snippets; never restore an old whole config. Six exact public asset digests still depend on pinned public93a3 runtime4792; preserve it and4782, and verify all six bytes with an atomic route update before replacing that dependency. Successful assets may be immutable; 403/405/upstream failures must not receive immutable caching.
+
+This lane certifies only dashboard/system-log read UI. One legacy FRONTEND journal source is unavailable (removed1546 unit). Source-level controller/log-metadata fixes are not proof that the retained full backend executable was replaced. Other admin actions and financial/DB/provenance gates remain OPEN. See [scoped acceptance and rollback](releases/2026-11-21-admin-read-ui-production.ko.md).
+
+### 2026-11-21 — eight-route administrator read UI follow-up
+
+The database-free admin lane now additionally covers the six existing users/market/controls/enterprise/economy read workflows. Preserve the exact approver role on both economy screens; a general admin or superadmin is not a substitute. Resolve authorization/dispatch from the trusted matched Spring mapping and enumerate financial cases, never default an unknown/raw URI to finance. Real-HTTP encoded-path refusal is part of the regression gate.
+
+Bind both protected Test receipts to phase, exact source and JAR before Production. Check process generation freshness and open JAR, acquire coordinated release locks, and recheck every expected live hash immediately before changes. Before any inverse, validate ALL installed and unowned expected files, then recheck each restored file. A pre-mutation rejection must not reload Nginx. Production must remain independent when Test4812 stops. Its seven-path source gateway4813 retains existing4550/4632 authority; business/catalog is public, while other source reads require a real administrator cookie. Old4808/4792/4782 remain versioned-asset/rollback dependencies.
+
+This is eight read screens, not all-site or full-backend certification. Whole-site route ledger, physical zoom, authenticated actions, denied member paths, remaining Next pages and financial/provenance blockers remain open. [Scoped evidence and inverse targets](releases/2026-11-21-nov18-admin-unified-production.ko.md).
+
+
+### 2026-11-21 — delivery read-page follow-up
+The ninth shared-shell admin read route is `/admin/logs/delivery`, sourced from two exact cookie-authorized GETs on a separate loopback gateway. The prior eight routes keep their accepted generation. Bind release checks to the full active Nginx include inventory, stable MainPID/cwd/manifest/open-JAR/listener identity and packaged plus served asset hashes. Legacy null delivery outcomes remain Unknown; timestamps never become delivery acknowledgements. Retain source-bound protected Test and Test-stop Production independence. This is no financial, full-backend, all-admin-action or whole-site waiver. [Observed acceptance](releases/2026-11-21-nov18-admin-delivery-production.ko.md).

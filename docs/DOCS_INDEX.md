@@ -1,6 +1,22 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
-**DOC-2026.11.11.1500 — [최신 문서·권위·검증 현황](CURRENT_DOCUMENTATION_STATUS.ko.md) / [English](CURRENT_DOCUMENTATION_STATUS.md).** 아래 과거 기록은 현재 운영 기능 인증이 아님. 통합기획서와 실측 영수증을 우선하며, 기록 시점 테스트 버전 API는 HTTP 502였음. 문서만 변경.
+## v2026.11.20.1 — 18 November UI baseline + five-language/global support authority (docs only)
+[Official EN plan](planning/NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.md) / [한국어](planning/NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.ko.md): 18 Nov PC/mobile navy-violet design binding for all eventual Spring MVC+Thymeleaf website screens, manual+auto EN/KO/JA/ZH/VI and one safe admin support/member chat launcher everywhere. Old mockup-only scope and Next runtime plans do not override latest owner directive. Current runtime and Production **not** certified by this documentation-only update.
+
+
+## v2026.11.19.32.1 — 운영 홈페이지·승인 디자인 실제 불일치(P0 증거 / 배포 없음)
+
+\`/\`에서 실제 ‘신규 사용자 유입을 위한 홈 화면 3안’이 출력됨을 공개 HTTP·미니PC 정적 HTML로 확인. [한국어 상세 보고서+실제 GitHub 홈/관리자 이미지](findings/LIVE_HOME_APPROVED_UI_GAP_v2026.11.19.32.1.ko.md) / [EN](findings/LIVE_HOME_APPROVED_UI_GAP_v2026.11.19.32.1.md) · [Spring 구현 기준](planning/SPRING_HOME_VISUAL_IMPLEMENTATION_GATES_v2026.11.19.32.1.ko.md) · [QA](qa/2026-11-19-home-ui-design-gap-v32.ko.md). UI·API·DB·운영 미변경.
+
+## v2026.11.19.31 — Restored Design Image Handoff (DOCS ONLY / Spring UI IMPLEMENTATION PENDING)
+
+- [180 PC+mobile route PNG designs](design/all-pages-v2026.11.18.12/README.md) · [Administrator desktop/mobile PNG](design/admin-chat-v2026.11.18.13/README.md) · [EN handoff](design/UI_IMAGE_IMPLEMENTATION_HANDOFF_v2026.11.19.31.md) / [한국어](design/UI_IMAGE_IMPLEMENTATION_HANDOFF_v2026.11.19.31.ko.md). Source SVGs were recovered from closed unmerged PR #3268/#3270 and rasterized to pass fail-closed documentation CI. Spring UI implementation and Production deployment are not part of this documentation-only change.
+
+## v2026.11.18.17 — 관리자/전역 채팅 실제 UI 코드 전환 (격리 개발 / Spring 정적 연결·운영 보류)
+
+[상세 기획](planning/FRONTEND_ADMIN_CHAT_TRANSITION_v2026.11.18.17.ko.md) · [English](planning/FRONTEND_ADMIN_CHAT_TRANSITION_v2026.11.18.17.md) · [QA](qa/2026-11-18-spring-frontend-admin-chat-v17.ko.md) · [작업 기록](worklog/2026-11-18-frontend-transition-v2026.11.18.17.ko.md). 집중 테스트 20 통과, Next/Java 빌드 통과. /admin Next 동적 화면이 Spring 정적 JAR에 포함되지 않아 운영 전환 HOLD.
+
+**DOC-2026.11.11.1500 — [최신 문서·권위·검증 현황](CURRENT_DOCUMENTATION_STATUS.ko.md) / [English](CURRENT_DOCUMENTATION_STATUS.md).**[English](CURRENT_DOCUMENTATION_STATUS.md).** 아래 과거 기록은 현재 운영 기능 인증이 아님. 통합기획서와 실측 영수증을 우선하며, 기록 시점 테스트 버전 API는 HTTP 502였음. 문서만 변경.
 
 
 ## Search Console evidence detailed plan — v2026.10.15.688

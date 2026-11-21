@@ -1,0 +1,32 @@
+[
+  {
+    "origin": "loopback",
+    "status": 200,
+    "htmlSha256": "789d03204cb44644707513679a8b604afd88cf979b94278977434e59707c572c",
+    "inlineStyles": 1,
+    "inlineStyleSha256": [
+      "f6b59d2d7a8535b621a97d933d54548b198e1f9d000a4b0e481ba703f02ff42d"
+    ],
+    "csp": "",
+    "cspMeta": false,
+    "heroSelector": true,
+    "cache": "no-cache, must-revalidate",
+    "cfCache": null,
+    "inlineScripts": 1
+  },
+  {
+    "origin": "publicHTTPS",
+    "status": 200,
+    "htmlSha256": "aecb4bfde5b1113c5ea557f3f9093ff3bdd05ec1f251e62fde09fac397f79925",
+    "inlineStyles": 1,
+    "inlineStyleSha256": [
+      "f6b59d2d7a8535b621a97d933d54548b198e1f9d000a4b0e481ba703f02ff42d"
+    ],
+    "csp": "",
+    "cspMeta": false,
+    "heroSelector": true,
+    "cache": "no-cache, must-revalidate",
+    "cfCache": "DYNAMIC",
+    "inlineScripts": 1
+  }
+]

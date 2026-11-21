@@ -8,6 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -17,10 +20,10 @@ class WalletServiceTest {
     private WalletService walletService;
 
     @Test
-    @DisplayName("지갑 개요 조회 시 통화 및 가용 잔액이 정상 반환되어야 한다")
+    @DisplayName("실제 금융 원장 영수증이 미검증일 때 지갑 잔액을 임의 금액으로 채우지 않는다")
     void getOverviewTest() {
-        WalletOverview ov = walletService.getOverview("5f7b8b44-e4aa-40b8-b93a-800ec0151d20");
-        assertThat(ov).isNotNull();
-        assertThat(ov.getCurrency()).isEqualTo("WLD");
+        ResponseStatusException error = assertThrows(ResponseStatusException.class,
+                () -> walletService.getOverview("00000000-0000-0000-0000-000000000101"));
+        assertThat(error.getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
     }
 }

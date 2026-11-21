@@ -1,6 +1,36 @@
+## 2026-11-21 13:22 KST — delivery follow-up, nine admin read routes
+
+Delivery HTML now serves app main7d58568e30413e838315a2d5322abfd5366b074a on4818/Test4816/source4817. Prior8e2fb and public93a3 stay unchanged. Exact-main all4CI44864420278, authenticated Test40/Production15and prior8before/after16each passed; Test-stop independence and restored Test confirmed. Whole-site/other27admin/actions/backend/financial acceptance remains OPEN. [Evidence](releases/2026-11-21-nov18-admin-delivery-production.ko.md).
+
+## 2026-11-21 12:02 KST — observed eight-route administrator presentation
+
+Exact application source e2fb487a1a7814e74abac1097814881801c4dd13 serves eight read-only admin screens through unified Production4814, isolated Test4812 and GET-only source gateway4813. Existing public source93a3 and full backend/API authorities remain. MainCI44857905769 all four jobs passed; authenticated Test320locale/layout cases and Production24layouts passed, with same-session/Test-stop independence. Other administrator actions and whole-site unification remain OPEN. [Acceptance](releases/2026-11-21-nov18-admin-unified-production.ko.md).
+
+## 2026-11-21 — observed scoped administrator read UI
+
+Admin dashboard/system-log HTML now uses main98b5dec0283f via moneyverse-native-admin-read-prod-v20261121.service loopback4808; isolated same-artifact Test4806, fixed GET-only source gateway4807. Public presentation stays93a3 on4792 and legacy backend/API authorities remain. Existing login survived the switch; authenticated PC/mobile and Test independence verified. This is not a full-backend or all-admin-action acceptance; FRONTEND journal source remains unavailable because its legacy unit was removed. [Evidence](releases/2026-11-21-admin-read-ui-production.ko.md).
+
 # Current Runtime Baseline
 
-## 2026-11-10 v1949 — current independently verified Production runtime (OBSERVED CURRENT)
+## 2026-11-21 — current public favicon/header observation (SCOPED)
+
+At 00:22:17 KST the same five public home/tool/calculator routes plus index alias moved to application main `93a3c8dbe8c04fda28689904ffe43a86992c73c1`, PR #3325, exact-main CI 44759127347 (all 4 jobs SUCCESS). The official existing favicon is now the desktop/drawer/mobile mark; the 320px localized-header overflow is fixed. Boot-enabled `moneyverse-native-favicon-prod-v20261121.service` serves port 4792 from `/srv/moneyverse-data/releases/prod-native-favicon-v2026.11.21.1-93a3c8dbe8c0`; matching Test serves port 4794. Both use CI JAR `af0913b0546716871ad57e3fb49b893a4cb662b4a5078882db8707158b6b6cc0` with live-JAR/process evidence. Use `/frontend-version?scope=public-presentation`; preserve unscoped legacy behavior.
+
+Exact-main Test 125 browser cases and actual Production 25 layout checks passed; home authentication/account/wallet display survived. Four native tool routes still show a static login header and remain OPEN for account-display integration. Three new source-backed feature candidates remain inactive publicly. Existing backend/private/admin traffic is retained; 35 admin tool routes were inspected, not fully accepted. No data/grant/migration/ledger/balance write occurred; financial/manual migration 346 findings remain OPEN.
+
+Test privacy was corrected after actual-browser access disproved the earlier HTTP 403 interpretation. External Test home/favicon now return 403, while trusted MiniPC loopback serves the exact candidate. Old 42422aab remains active for rollback and legacy-version assets; it no longer serves these public HTML routes. [Current receipt](releases/2026-11-21-favicon-public-production.ko.md).
+
+
+## 2026-11-20 — previous public presentation observation (HISTORICAL)
+
+The public home, tool hubs and two native calculator routes now run the database-free Spring presentation mode from main `42422aab0d3bed3399a27819c6eb774cfd1a933a`, PR #3319, exact-main CI44736479741. Production unit `moneyverse-native-presentation-prod-v20261120.service` is active and boot-enabled; its immutable root is `/srv/moneyverse-data/releases/prod-native-v2026.11.20.1-42422aab0d3b`. Test uses the same CI JAR and source. The live open JAR matches SHA256 `e3d01bef2605147cfabae4ff4f45d33489c05550bb6f593cfc4f8f3315ee23b6`.
+
+This observation covers only `/`, `/tools`, `/calculators`, `/tools/compound-calculator`, `/tools/stock-calculator` and their documented aliases. The public source endpoint is `/frontend-version?scope=public-presentation`; unscoped legacy version behavior is deliberately preserved. Existing API/auth/socket/member/admin deployments are retained, not attested to this frontend SHA. The active legacy backend JAR has no reliable Git source metadata; do not infer its source from this presentation release or the old rows below.
+
+Current financial/provenance findings remain OPEN: an approved but unexecuted orphan projection correction, ledger application DML and manual346/function drift. Production data was not changed by this release. Older exact-SHA and financial totals below are historical snapshots, not proof of today's entire application. [Current scoped receipt](releases/2026-11-20-native-presentation-production.ko.md).
+
+
+## 2026-11-10 v1949 — previous independently verified runtime (HISTORICAL)
 - `https://easy-scraping.com` and `https://test.easy-scraping.com` both expose backend/frontend application SHA `727881420a491bb129a1a97258ea8ae67f62bbf8`, GitHub merged-main PR #3007 (branch full CI `42723307265` SUCCESS). Immutable Production `/srv/moneyverse-data/releases/prod-v2026.11.10.1949-727881420a49`, backend service `moneyverse-release-v1949-backend` 127.0.0.1:4594 and frontend `moneyverse-release-v1949-frontend` 127.0.0.1:4595; Nginx gracefully switched, both new services boot-enabled. Existing v1947 services 4574/4575 remain active rollback. Official Test immutable `test-v2026.11.10.1949.6-727881420a49`, backend 3100/frontend 3101; both host source/manifest/process/edge attestation verdict `ok:true,failures:[]`.
 - Real Production PostgreSQL17.11 has forward SQL345 with exact checksum `8c39e27ea9fa4b3f53e4e9f469b1fca8c83fce7756a80b509990d8cd265b3da0`. Treasury vault/canonical/journal/invalid new sources **30,000/30,000/30,000/0 WLD**, `finance_integrity_scan=CLEAN`, 0 new Treasury issuance settlement rows, 903 canonical ledger transactions and 6 mint certificates — *not modified by the deployment*. Three prior USER_DONATION events contributed the existing 30,000 WLD. Issuance freeze `false` was changed by separate administrator activity before deployment; deployment did not unfreeze or issue money.
 - Official Test actual app-role 100,000 WLD MINT→TREASURY issue/replay and unauthorized/freeze/mismatched-UUID denial all passed within ROLLBACK, leaving Test Treasury 0. Prod 30k restored into network-none PostgreSQL17.11 passed 100k simulated issue to 130k/130k/130k/0 and full ROLLBACK. Prod+Test precise runtime gates PASS; production HTTP home/health/Treasury/admin Treasury/blog 200, anonymous admin mutation 401, cross-origin 403. Live admin authenticated browser POST not independently observed; true securities SWF auto-invest execution is **not implemented** and stays fail-closed. Historical 552/744 financial archives remain unverified. Frontend `/blog/sitemap.xml` is still 404, the same as old v1947.

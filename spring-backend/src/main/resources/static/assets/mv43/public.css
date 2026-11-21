@@ -1,0 +1,51 @@
+/* Scoped native tools use the shared November18 tokens. */
+.public-main{min-width:0;overflow-wrap:anywhere}
+.public-main .crumbs{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:20px;color:var(--muted)}
+.public-main .crumbs a{display:inline-flex;align-items:center;min-height:44px;min-width:44px}
+.public-main .hero h1{font-size:clamp(22px,3vw,34px);line-height:1.3;margin:0 0 12px}
+.public-main .hero-text{min-width:0}.public-main .hero-icon{font-size:44px;color:var(--accent);flex-shrink:0}
+.public-main .hero-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.public-main .chip{display:inline-flex;border:1px solid var(--stroke);border-radius:20px;padding:6px 12px;color:var(--muted);font-size:12px}
+.public-main .chip-primary{color:var(--accent)}
+.public-main .panel{background:var(--surface);border:1px solid var(--stroke);border-radius:var(--radius);padding:24px;margin-bottom:20px;min-width:0}
+.public-main .panel-header{display:flex;gap:12px;margin-bottom:20px}.public-main .panel-header h2{font-size:19px;margin:0 0 8px}
+.public-main .panel-header p,.public-main small,.public-main .notice{color:var(--muted)}
+.public-main .panel-step{color:var(--accent);font-size:14px}
+.public-main .main-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+.public-main .calculator-form,.public-main .hub-search{display:grid;gap:18px}
+.public-main .form-field{display:grid;gap:8px;min-width:0}.public-main .form-field label{font-weight:600}
+.public-main .form-field input:not([type=checkbox]),.public-main .form-field select{width:100%;min-width:0;min-height:48px;padding:12px;border:1px solid var(--stroke);border-radius:10px;background:var(--bg);color:var(--text)}
+.public-main input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent);flex-shrink:0}
+.public-main label:has(input[type=checkbox]){display:flex;align-items:center;gap:10px;min-height:44px}
+.public-main .field-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.public-main fieldset{min-width:0;border:1px solid var(--stroke);border-radius:12px;padding:16px}.public-main legend{padding:0 8px;color:var(--muted)}
+.public-main .form-actions,.public-main .hub-search-actions,.public-main .hub-quick-links{display:flex;flex-wrap:wrap;gap:12px}
+.public-main .primary-button,.public-main .secondary-button,.public-main .hub-card-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;padding:12px 16px;border:1px solid var(--accent);border-radius:10px;background:var(--bg);color:var(--text);text-decoration:none;font:inherit}
+.public-main .primary-button{background:var(--accent);color:var(--bg);font-weight:700}
+.public-main .results-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.public-main .result-card{display:grid;gap:8px;padding:16px;border:1px solid var(--stroke);border-radius:12px;min-width:0}
+.public-main .result-card.is-primary{grid-column:1/-1;border-color:var(--accent)}
+.public-main .result-label{font-size:13px;color:var(--muted)}.public-main .result-card strong{font-size:clamp(20px,2.5vw,30px);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.public-main .notice{font-size:14px;line-height:1.7;margin-top:16px}.public-main .alert{display:grid;gap:8px;border:1px solid var(--rose);padding:16px;margin-bottom:16px;border-radius:10px}
+.public-main table{border-collapse:collapse;min-width:480px;width:100%;font-variant-numeric:tabular-nums}
+.public-main td,.public-main th{text-align:left;padding:12px;border-bottom:1px solid var(--stroke)}
+.public-main summary{min-height:44px;padding:12px 0;cursor:pointer;font-weight:600}.public-main details p{color:var(--muted);line-height:1.8}
+.public-main .hub-results-heading{display:flex;justify-content:space-between;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:16px}
+.public-main .hub-tool-grid,.public-main .status-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;list-style:none;margin:0 0 24px;padding:0}
+.public-main .hub-tool-grid>li,.public-main .status-card{min-width:0}
+.public-main .hub-tool-card,.public-main .status-card{height:100%;padding:20px;border:1px solid var(--stroke);border-radius:var(--radius);background:var(--surface)}
+.public-main .hub-tool-card{display:flex;flex-direction:column;gap:12px}.public-main .hub-tool-card h3{margin:0;font-size:18px}.public-main .hub-tool-card p{color:var(--muted);flex:1}
+.public-main .hub-card-head,.public-main .status-card-heading{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.public-main .hub-symbol,.public-main .source-icon{color:var(--accent)}.public-main .hub-tool-state,.public-main .status-pill{display:inline-flex;padding:6px 10px;border:1px solid var(--stroke);border-radius:20px;font-size:12px;max-width:100%}
+.public-main .certified{color:var(--accent)}.public-main .legacy,.public-main .source-freshness{color:var(--muted)}
+.public-main .source-state,.public-main .source-observed{display:grid;gap:10px;margin-top:16px}
+.public-main .source-observed time{font-size:12px;overflow-wrap:anywhere}
+.public-main .state-operational{color:var(--green)}.public-main .state-outage{color:var(--rose)}
+.public-main .state-degraded,.public-main .state-maintenance{color:var(--accent2)}
+.public-main .state-unknown{color:var(--muted)}
+.public-main a:focus-visible,.public-main input:focus-visible,.public-main select:focus-visible,.public-main button:focus-visible,.public-main summary:focus-visible{outline:2px solid var(--accent2);outline-offset:3px}
+@media(max-width:1200px){.public-main .hub-tool-grid,.public-main .status-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.public-main .main-grid,.public-main .hub-tool-grid,.public-main .status-cards{grid-template-columns:minmax(0,1fr)}.public-main .panel{padding:18px}.public-main .hero-icon{display:none}}
+@media(max-width:430px){.public-main .field-row,.public-main .results-grid{grid-template-columns:minmax(0,1fr)}.public-main .form-actions>a,.public-main .form-actions>button{width:100%}}
+@media(prefers-reduced-motion:reduce){.public-main *{animation:none;transition:none}}
+.public-main{padding-bottom:env(safe-area-inset-bottom,0px)}

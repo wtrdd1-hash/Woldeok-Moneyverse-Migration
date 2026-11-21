@@ -43,22 +43,22 @@ public class EngagementService {
             }
             return status;
         } catch (Exception e) {
-            log.warn("Failed to query verified user streak status: {}", e.getClass().getSimpleName());
+            log.warn("Authoritative streak query unavailable; rejecting fabricated balances");
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
-                    "Verified streak status unavailable");
+                    "Verified streak source is unavailable", e);
         }
     }
 
     public ClaimStreakResponse claimStreak(UUID userId) {
-        // No idempotent, ledger-backed reward writer is implemented in Spring.
+        // A streak payout requires a durable idempotent WLD posting receipt.
         throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
-                "Streak reward requires canonical PostgreSQL settlement");
+                "Verified streak posting receipt is unavailable");
     }
 
     public DopamineStatusResponse getDopamineStatus(UUID userId) {
-        // Do not invent owner-specific progress, quests or spin availability.
+        // A UI can only show verified member-specific quests; never a fabricated daily fixture.
         throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
-                "Verified engagement feature status unavailable");
+                "Verified member quest progress is unavailable");
     }
 
     public BullBearVoteResponse submitBullBearVote(UUID userId, BullBearVoteRequest req) {

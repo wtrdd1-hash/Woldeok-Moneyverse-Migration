@@ -28,12 +28,8 @@ public class PocketController {
 
     private Optional<String> resolveUserId(HttpServletRequest request) {
         Optional<SessionInfo> session = authService.resolveSession(request);
-        if (session.isPresent() && session.get().isSignedIn()) {
+        if (session.isPresent() && session.get().isSignedIn() && session.get().getUserId() != null) {
             return Optional.of(session.get().getUserId().toString());
-        }
-        String headerUid = request.getHeader("X-User-Id");
-        if (headerUid != null && !headerUid.isBlank()) {
-            return Optional.of(headerUid);
         }
         return Optional.empty();
     }

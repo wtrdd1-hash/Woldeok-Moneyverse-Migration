@@ -1,0 +1,8 @@
+# v2026.11.18.25 → .25.1 → .25.2 — API Truth, Privacy and Scoped Production Promotion
+
+**2026-11-18 KST · PARTIAL Production read-only; full release HOLD.**
+
+- **v25:** intermediate 455 parameterless GET Test matrix (190×200/237×401/28×503), superseded by v25.2 final matrix (156×200/271×401/28×503, no 500/502/504), frontend RSC HTML response and external Test403 detected. Real Production guest privacy exposures and fabricated financial/SEO data identified; Nginx P0 emergency holds/backups and source DB session guard; wallet/SEO false-success removed.
+- **v25.1:** Support/chat owner-only PostgreSQL functions replace direct base tables; Prod/Test chat arity5/4 and numeric type differences normalized. Test synthetic owner support/chat 200, forged actor403, writes blocked. DB schema/app-role function execution verified. TDD RED→GREEN, full Spring207 tests passed.
+- **v25.2:** Personal spaces, progression/credit and advisor bearer/session gate and false fabricated source results fail closed; final Spring210/210 JUnit PASS + bootJar. Official internal Test upgraded to v25.2, 14 selected endpoints PASS. Separate read-only Production Spring canary; only support/chat GET + honest SEO crawl-audit GET (`UNKNOWN/0` not fake HEALTHY18) promoted with old Production JVM live and Nginx rollback backups. Other personal/finance writes still blocked.
+- **HOLD:** Full 899/903 parity, 28 source503 GET aliases, authentication/MFA/CSRF and money posting positive E2E, React RSC/hydration+mobile browser, external Test403, actual signed-in Production support/chat, Discord voice and rollback drill. Never mark full frontend or all API working.

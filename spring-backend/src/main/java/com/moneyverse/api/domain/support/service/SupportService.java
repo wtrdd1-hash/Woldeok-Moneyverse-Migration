@@ -1,171 +1,136 @@
 package com.moneyverse.api.domain.support.service;
 
 import com.moneyverse.api.domain.support.dto.SupportDtos.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.moneyverse.api.domain.messaging.MessageContract;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.sql.Timestamp;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
 public class SupportService {
-
-    private static final Logger log = LoggerFactory.getLogger(SupportService.class);
     private final JdbcTemplate jdbcTemplate;
-
-    public SupportService(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    private static final Set<String> STATES=Set.of("open","waiting_user","resolved");
+    public SupportService(JdbcTemplate jdbcTemplate) { this.jdbcTemplate=jdbcTemplate; }
+    private static String state(String state) {
+        if(state==null||!STATES.contains(state))throw MessageContract.unavailable();
+        return state;
     }
-
-    public ThreadListResponse listThreads(UUID userId, String status) {
-        try {
-            String sql;
-            Object[] params;
-
-            if (status != null && !status.isBlank()) {
-                sql = "SELECT id, user_id, subject, status, created_at, updated_at, last_message_at " +
-                        "FROM support_threads WHERE user_id = ? AND status = ? " +
-                        "ORDER BY last_message_at DESC LIMIT 50";
-                params = new Object[]{userId, status.trim()};
-            } else {
-                sql = "SELECT id, user_id, subject, status, created_at, updated_at, last_message_at " +
-                        "FROM support_threads WHERE user_id = ? " +
-                        "ORDER BY last_message_at DESC LIMIT 50";
-                params = new Object[]{userId};
-            }
-
-            List<SupportThreadItem> threads = jdbcTemplate.query(sql, (rs, rowNum) -> {
-                UUID id = (UUID) rs.getObject("id");
-                UUID uid = (UUID) rs.getObject("user_id");
-                String subj = rs.getString("subject");
-                String st = rs.getString("status");
-                Timestamp catTs = rs.getTimestamp("created_at");
-                OffsetDateTime cat = catTs != null ? catTs.toInstant().atOffset(ZoneOffset.UTC) : OffsetDateTime.now(ZoneOffset.UTC);
-                Timestamp uatTs = rs.getTimestamp("updated_at");
-                OffsetDateTime uat = uatTs != null ? uatTs.toInstant().atOffset(ZoneOffset.UTC) : cat;
-                Timestamp lmatTs = rs.getTimestamp("last_message_at");
-                OffsetDateTime lmat = lmatTs != null ? lmatTs.toInstant().atOffset(ZoneOffset.UTC) : cat;
-
-                return new SupportThreadItem(id, uid, subj, st, cat, uat, lmat);
-            }, params);
-
-            return new ThreadListResponse(true, threads, threads.size());
-        } catch (Exception ex) {
-            log.warn("Failed to query support_threads for user {}: {}", userId, ex.getMessage());
-            return new ThreadListResponse(true, List.of(), 0);
-        }
+    private static SupportThreadItem thread(Map<String,Object> row,UUID actor) {
+        if(!(row.get("subject") instanceof String subject)||subject.isBlank())throw MessageContract.unavailable();
+        if(!(row.get("updated_at") instanceof Timestamp updated)||!(row.get("last_message_at") instanceof Timestamp last))
+            throw MessageContract.unavailable();
+        return new SupportThreadItem(MessageContract.receiptId(row,"thread_id"),actor,subject,state((String)row.get("status")),
+            MessageContract.receiptDate(row),MessageContract.date(updated),MessageContract.date(last));
     }
-
-    public ThreadSummaryResponse summary(UUID userId) {
+    private List<SupportThreadItem> recentOwnerThreads(UUID actor) {
+        return jdbcTemplate.query("""
+            SELECT thread_id, subject, status, created_at, updated_at, last_message_at
+            FROM public.support_my_threads(?::uuid, 100)
+            """,(rs,n)->{
+                UUID id=(UUID)rs.getObject("thread_id");String subject=rs.getString("subject");
+                if(id==null||subject==null||subject.isBlank())throw MessageContract.unavailable();
+                return new SupportThreadItem(id,actor,subject,state(rs.getString("status")),
+                    MessageContract.date(rs.getTimestamp("created_at")),MessageContract.date(rs.getTimestamp("updated_at")),
+                    MessageContract.date(rs.getTimestamp("last_message_at")));
+            },actor);
+    }
+    public ThreadListResponse listThreads(UUID actor,String status) {
+        MessageContract.actor(actor);
+        if(status!=null&&!status.isBlank()&&!STATES.contains(status))throw MessageContract.invalid("INVALID_THREAD_STATUS");
         try {
-            Integer total = jdbcTemplate.queryForObject(
-                    "SELECT COUNT(*) FROM support_threads WHERE user_id = ?",
-                    Integer.class,
-                    userId
-            );
-            Integer open = jdbcTemplate.queryForObject(
-                    "SELECT COUNT(*) FROM support_threads WHERE user_id = ? AND status = 'open'",
-                    Integer.class,
-                    userId
-            );
-            Integer waiting = jdbcTemplate.queryForObject(
-                    "SELECT COUNT(*) FROM support_threads WHERE user_id = ? AND status = 'waiting_user'",
-                    Integer.class,
-                    userId
-            );
-            Integer resolved = jdbcTemplate.queryForObject(
-                    "SELECT COUNT(*) FROM support_threads WHERE user_id = ? AND status = 'resolved'",
-                    Integer.class,
-                    userId
-            );
-
-            return new ThreadSummaryResponse(
-                    true,
-                    total != null ? total : 0,
-                    open != null ? open : 0,
-                    waiting != null ? waiting : 0,
-                    resolved != null ? resolved : 0
-            );
-        } catch (Exception ex) {
-            log.warn("Failed to query support summary for user {}: {}", userId, ex.getMessage());
-            return new ThreadSummaryResponse(true, 0, 0, 0, 0);
-        }
+            List<SupportThreadItem> items=recentOwnerThreads(actor).stream()
+                .filter(item->status==null||status.isBlank()||status.equals(item.status())).limit(50).toList();
+            return new ThreadListResponse(true,items,items.size());
+        } catch(Exception error) { throw MessageContract.failure(error); }
+    }
+    /** This is a recent-100 owner sample, not an all-time total. */
+    public ThreadSummaryResponse summary(UUID actor) {
+        MessageContract.actor(actor);
+        try {
+            List<SupportThreadItem> recent=recentOwnerThreads(actor);
+            return new ThreadSummaryResponse(true,recent.size(),
+                (int)recent.stream().filter(x->"open".equals(x.status())).count(),
+                (int)recent.stream().filter(x->"waiting_user".equals(x.status())).count(),
+                (int)recent.stream().filter(x->"resolved".equals(x.status())).count());
+        } catch(Exception error) { throw MessageContract.failure(error); }
+    }
+    @Transactional
+    public ThreadCreateResponse createThread(UUID actor,NewThreadRequest request) {
+        MessageContract.actor(actor);
+        if(request==null)throw MessageContract.invalid("INVALID_MESSAGE");
+        UUID key=MessageContract.key(request.idempotencyKey());
+        String subject=MessageContract.text(request.subject(),120,false);
+        String body=MessageContract.text(request.body(),1000,false);
+        try {
+            Map<String,Object> result=jdbcTemplate.queryForMap(
+                "SELECT thread_id,status,created_at FROM public.support_create_thread(?::uuid,?::uuid,?::text,?::text)",
+                actor,key,subject,body);
+            UUID id=MessageContract.receiptId(result,"thread_id");
+            state((String)result.get("status"));MessageContract.receiptDate(result);
+            // The legacy creation function replays by owner/key alone. Verify the
+            // stored subject and initial body so a changed retry is never relabelled.
+            Map<String,Object> stored=jdbcTemplate.queryForMap("""
+                SELECT thread_id,subject,status,created_at,updated_at,last_message_at
+                FROM public.support_my_threads(?::uuid,100) WHERE thread_id=?::uuid
+                """,actor,id);
+            SupportThreadItem item=thread(stored,actor);
+            if(!id.equals(item.id()))throw MessageContract.unavailable();
+            Map<String,Object> first=jdbcTemplate.queryForMap("""
+                SELECT message_id,sender_kind,body,created_at
+                FROM public.support_thread_messages(?::uuid,?::uuid,500)
+                ORDER BY created_at ASC,message_id ASC LIMIT 1
+                """,actor,id);
+            MessageContract.receiptId(first,"message_id");MessageContract.receiptDate(first);
+            if(!"user".equals(first.get("sender_kind")))throw MessageContract.unavailable();
+            if(!subject.equals(item.subject())||!body.equals(first.get("body")))
+                throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.CONFLICT,"MESSAGE_REQUEST_REFUSED");
+            return new ThreadCreateResponse(true,item);
+        } catch(Exception error) { throw MessageContract.failure(error); }
+    }
+    public MessageListResponse listMessages(UUID actor,UUID threadId) {
+        MessageContract.actor(actor);
+        if(threadId==null)throw MessageContract.invalid("INVALID_THREAD");
+        try {
+            List<SupportMessageItem> rows=jdbcTemplate.query("""
+                SELECT message_id,sender_kind,body,created_at
+                FROM public.support_thread_messages(?::uuid,?::uuid,500)
+                """,(rs,n)->{
+                    UUID id=(UUID)rs.getObject("message_id");
+                    String kind=rs.getString("sender_kind"),body=rs.getString("body");
+                    if(id==null||body==null||!("user".equals(kind)||"admin".equals(kind)))throw MessageContract.unavailable();
+                    return new SupportMessageItem(id,threadId,"user".equals(kind)?actor:null,kind,body,
+                        MessageContract.date(rs.getTimestamp("created_at")));
+                },actor,threadId);
+            return new MessageListResponse(true,rows);
+        } catch(Exception error) { throw MessageContract.failure(error); }
     }
 
     @Transactional
-    public ThreadCreateResponse createThread(UUID userId, NewThreadRequest req) {
-        UUID threadId = UUID.randomUUID();
-        UUID createKey = UUID.randomUUID();
-        if (req.idempotencyKey() != null && !req.idempotencyKey().isBlank()) {
-            try {
-                createKey = UUID.fromString(req.idempotencyKey().trim());
-            } catch (Exception ignored) {}
-        }
-
+    public MessageCreateResponse addMessage(UUID actor,UUID threadId,NewMessageRequest request) {
+        MessageContract.actor(actor);
+        if(threadId==null||request==null)throw MessageContract.invalid("INVALID_THREAD");
+        UUID key=MessageContract.key(request.idempotencyKey());
+        String body=MessageContract.text(request.body(),1000,false);
         try {
-            OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-            jdbcTemplate.update(
-                    "INSERT INTO support_threads (id, user_id, subject, status, create_key, created_at, updated_at, last_message_at) " +
-                            "VALUES (?, ?, ?, 'open', ?, NOW(), NOW(), NOW())",
-                    threadId,
-                    userId,
-                    req.subject() != null ? req.subject() : "고객 문의",
-                    createKey
-            );
-
-            if (req.body() != null && !req.body().isBlank()) {
-                UUID msgId = UUID.randomUUID();
-                jdbcTemplate.update(
-                        "INSERT INTO support_messages (id, thread_id, sender_user_id, sender_kind, body, idempotency_key, created_at) " +
-                                "VALUES (?, ?, ?, 'user', ?, ?, NOW())",
-                        msgId,
-                        threadId,
-                        userId,
-                        req.body(),
-                        createKey
-                );
-            }
-
-            SupportThreadItem item = new SupportThreadItem(threadId, userId, req.subject(), "open", now, now, now);
-            return new ThreadCreateResponse(true, item);
-        } catch (Exception ex) {
-            log.warn("Failed to create support thread for user {}: {}", userId, ex.getMessage());
-            OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-            SupportThreadItem fallback = new SupportThreadItem(threadId, userId, req.subject(), "open", now, now, now);
-            return new ThreadCreateResponse(true, fallback);
-        }
-    }
-
-    public MessageListResponse listMessages(UUID userId, UUID threadId) {
-        try {
-            String sql = "SELECT m.id, m.thread_id, m.sender_user_id, m.sender_kind, m.body, m.created_at " +
-                    "FROM support_messages m " +
-                    "JOIN support_threads t ON m.thread_id = t.id " +
-                    "WHERE t.id = ? AND t.user_id = ? " +
-                    "ORDER BY m.created_at ASC";
-
-            List<SupportMessageItem> messages = jdbcTemplate.query(sql, (rs, rowNum) -> {
-                UUID id = (UUID) rs.getObject("id");
-                UUID tid = (UUID) rs.getObject("thread_id");
-                UUID senderUid = (UUID) rs.getObject("sender_user_id");
-                String kind = rs.getString("sender_kind");
-                String body = rs.getString("body");
-                Timestamp catTs = rs.getTimestamp("created_at");
-                OffsetDateTime cat = catTs != null ? catTs.toInstant().atOffset(ZoneOffset.UTC) : OffsetDateTime.now(ZoneOffset.UTC);
-
-                return new SupportMessageItem(id, tid, senderUid, kind, body, cat);
-            }, threadId, userId);
-
-            return new MessageListResponse(true, messages);
-        } catch (Exception ex) {
-            log.warn("Failed to query messages for thread {}: {}", threadId, ex.getMessage());
-            return new MessageListResponse(true, List.of());
-        }
+            Map<String,Object> sent=jdbcTemplate.queryForMap(
+                "SELECT message_id,sender_kind,body,created_at FROM public.support_add_message(?::uuid,?::uuid,?::uuid,?::text)",
+                actor,key,threadId,body);
+            UUID id=MessageContract.receiptId(sent,"message_id");
+            if(!"user".equals(sent.get("sender_kind"))||!body.equals(sent.get("body")))throw MessageContract.unavailable();
+            MessageContract.receiptDate(sent);
+            Map<String,Object> stored=jdbcTemplate.queryForMap(
+                "SELECT message_id,sender_kind,body,created_at FROM public.support_my_message_receipt(?::uuid,?::uuid,?::uuid)",
+                actor,threadId,id);
+            if(!id.equals(MessageContract.receiptId(stored,"message_id"))||!"user".equals(stored.get("sender_kind"))
+                ||!body.equals(stored.get("body")))throw MessageContract.unavailable();
+            return new MessageCreateResponse(true,new SupportMessageItem(id,threadId,actor,"user",body,
+                MessageContract.receiptDate(stored)));
+        } catch(Exception error) { throw MessageContract.failure(error); }
     }
 }

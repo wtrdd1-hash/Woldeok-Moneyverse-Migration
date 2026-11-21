@@ -26,9 +26,9 @@ interface SystemLogsViewerProps {
 const SOURCES = [
   { id: 'NGINX_ERROR', label: 'Nginx 오류 로그', icon: AlertTriangle, desc: '/var/log/nginx/error.log' },
   { id: 'NGINX_ACCESS', label: 'Nginx 액세스 로그', icon: Globe, desc: '/var/log/nginx/access.log' },
-  { id: 'SPRING_BACKEND', label: 'Spring Boot 백엔드', icon: Server, desc: 'moneyverse-spring-backend (:4550)' },
-  { id: 'FRONTEND', label: 'Spring 내장 프론트엔드', icon: Radio, desc: 'Spring Boot WebMvc (:4550)' },
-  { id: 'DISCORD_BOT', label: 'Spring Discord 봇', icon: Radio, desc: 'Discord4J Daemon (:4550)' },
+  { id: 'SPRING_BACKEND', label: '코어 API 백엔드', icon: Server, desc: 'moneyverse-spring-backend (:4550)' },
+  { id: 'FRONTEND', label: 'Next.js 프론트엔드', icon: Radio, desc: 'moneyverse-release-v1546-frontend (:4501)' },
+  { id: 'FRONTEND_ERRORS', label: '화면 로드 실패 전수 로그', icon: AlertTriangle, desc: '화면 튕김/로드 예외 상세 원인 기록' },
 ] as const;
 
 const LINE_OPTIONS = [50, 100, 200, 500] as const;
@@ -149,7 +149,19 @@ export function SystemLogsViewer({ initialData }: SystemLogsViewerProps) {
       <Card>
         <CardHeader className="py-3 px-4 border-b">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
+            {source === 'FRONTEND_ERRORS' && (
+        <div className="flex items-center justify-between p-3.5 rounded-xl border border-red-500/40 bg-red-950/20 text-xs">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-red-400 shrink-0" />
+            <span className="text-red-200 font-medium">화면 로드 실패 및 장애 로그를 시간별·날짜별·오류코드별 구조화 테이블로 정밀 분석할 수 있습니다.</span>
+          </div>
+          <Button asChild size="sm" variant="outline" className="h-7 text-xs border-red-500/50 text-red-300 hover:bg-red-500/20">
+            <a href="/admin/logs/errors">구조화 장애 원장 바로가기 →</a>
+          </Button>
+        </div>
+      )}
+
+      <div className="flex items-center gap-2">
               <Terminal className="h-4 w-4 text-primary" />
               <CardTitle className="text-base font-semibold">
                 {SOURCES.find((s) => s.id === source)?.label ?? source}

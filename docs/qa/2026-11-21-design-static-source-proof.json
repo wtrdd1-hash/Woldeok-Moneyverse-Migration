@@ -1,0 +1,57 @@
+[
+  {
+    "route": "/shop",
+    "file": "/srv/moneyverse-data/frontend-static/shop.html",
+    "fileSha256": "789d03204cb44644707513679a8b604afd88cf979b94278977434e59707c572c",
+    "servedSha256": "789d03204cb44644707513679a8b604afd88cf979b94278977434e59707c572c",
+    "exactFileServed": true,
+    "http": 200,
+    "containsPrototypeGraph": true,
+    "sample12580": true,
+    "sampleRate": true
+  },
+  {
+    "route": "/stocks",
+    "file": "/srv/moneyverse-data/frontend-static/stocks.html",
+    "fileSha256": "8ee3993b3f1aac0ede9f3556303a4d47bac909f052096a49c1d13bcf20601d75",
+    "servedSha256": "8ee3993b3f1aac0ede9f3556303a4d47bac909f052096a49c1d13bcf20601d75",
+    "exactFileServed": true,
+    "http": 200,
+    "containsPrototypeGraph": true,
+    "sample12580": true,
+    "sampleRate": true
+  },
+  {
+    "route": "/quests",
+    "file": "/srv/moneyverse-data/frontend-static/quests.html",
+    "fileSha256": "643f3276d8b8cbac2b37c7ec67cad0bb3c4e52e289cabd39db70fe3ad8586490",
+    "servedSha256": "643f3276d8b8cbac2b37c7ec67cad0bb3c4e52e289cabd39db70fe3ad8586490",
+    "exactFileServed": true,
+    "http": 200,
+    "containsPrototypeGraph": true,
+    "sample12580": true,
+    "sampleRate": true
+  },
+  {
+    "route": "/board",
+    "file": "/srv/moneyverse-data/frontend-static/board.html",
+    "fileSha256": "31ddec31c14ec0bf756e0033dd3e80d2bdfc4d86b04f99a7640f98c75d964622",
+    "servedSha256": "31ddec31c14ec0bf756e0033dd3e80d2bdfc4d86b04f99a7640f98c75d964622",
+    "exactFileServed": true,
+    "http": 200,
+    "containsPrototypeGraph": true,
+    "sample12580": true,
+    "sampleRate": true
+  },
+  {
+    "route": "/status",
+    "file": "/srv/moneyverse-data/frontend-static/status.html",
+    "fileSha256": "eed94b9fc165489a220cecab4b3fc7fed4578fe8ccf5b0f9a8305aba819ae57f",
+    "servedSha256": "eed94b9fc165489a220cecab4b3fc7fed4578fe8ccf5b0f9a8305aba819ae57f",
+    "exactFileServed": true,
+    "http": 200,
+    "containsPrototypeGraph": true,
+    "sample12580": true,
+    "sampleRate": true
+  }
+]

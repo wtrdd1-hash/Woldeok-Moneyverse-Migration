@@ -26,8 +26,11 @@ public class MediaController {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @GetMapping("/media/{key}")
-    @Operation(summary = "발행된 사진 바이너리 스트리밍 (1년 캐시 및 불변 헤더)")
+    @GetMapping(path = {
+            "/media/{key}",
+            "/media/profile/{key}"
+    })
+    @Operation(summary = "발행된 사진 및 프로필 아바타 바이너리 스트리밍 (1년 캐시 및 불변 헤더)")
     public ResponseEntity<byte[]> getMedia(@PathVariable("key") String key) {
         Optional<byte[]> bytes = storageService.read(key);
         if (bytes.isEmpty()) {

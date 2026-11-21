@@ -2,13 +2,19 @@ package com.moneyverse.api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-@EnableScheduling
 public class MoneyverseSpringApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(MoneyverseSpringApplication.class, args);
+        String mode=System.getProperty("moneyverse.runtime-mode", "application");
+        Class<?> application=switch(mode) {
+            case "application" -> MoneyverseSpringApplication.class;
+            case "admin-presentation" -> com.moneyverse.adminpresentation.NativeAdminApplication.class;
+            case "presentation" -> com.moneyverse.presentation.NativePresentationApplication.class;
+            case "frontend-presentation" -> com.moneyverse.frontendpresentation.UnifiedFrontendApplication.class;
+            default -> throw new IllegalArgumentException("Unknown Moneyverse runtime mode");
+        };
+        SpringApplication.run(application, args);
     }
 }
