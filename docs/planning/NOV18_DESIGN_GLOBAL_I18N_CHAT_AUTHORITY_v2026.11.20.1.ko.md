@@ -1,5 +1,7 @@
 # 11월 18일 디자인 기준 확정 — 전 페이지 다국어·관리자 문의·채팅 통합 명세
 
+> **2026-11-21 현재 운영: 프론트엔드 재구축 점검 중.** 사용자 명시 승인으로 main93a31e3e44의 Nginx 문서 전용503 안내를 운영 적용하고, DB-free frontend-presentation 운영/Test 두 unit을 중지·비활성화했다. 공유 API/DB/session은 유지한다. 아래 native26 활성화 기록은 이전 시점이다. 새 전체 프론트엔드는 아직 승격하지 않았다. [적용·검증·복원 기록](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md).
+
 > **2026-11-21 후속 운영 수정 — canonical5 표시 무결성:** shop/stocks/quests/board/status의 CSS 닫힘·큰 정수 금액·초기/실패 샘플 잔류·합성 curve를 source8ba9139b2fcd로 수정했다. Test75/운영10 해당 검사 통과. **실제 업무 기능·전체 Nov18 통일은 여전히 미완료**이며 초기 즉시 언어 클릭도 미수용이다. [수용·실패·미해결 기록](../releases/2026-11-21-prototype-integrity-production.ko.md). 아래 전체 감사는 수정 전 시점의 역사 증거다.
 
 > **2026-11-21 전체 운영 재감사 — 미완료:** 정적147경로 PC/mobile 관찰에서 신규 공통 셸26, 시안/기존42, 오류·차단79가 혼재한다. 시안5개 화면의 CSS 닫힘 누락·잔액 Number 변환·샘플 잔류, 관리자mobile 로고10개/문의 간격·번역 차이가 OPEN이다. 전체 기능 정상/Nov18 전체 통일 판정 불가. [현재 경로별 보고서](../qa/2026-11-21-full-frontend-design-functionality-audit.ko.md). 이 감사는 운영 변경/새 배포가 아니다.
