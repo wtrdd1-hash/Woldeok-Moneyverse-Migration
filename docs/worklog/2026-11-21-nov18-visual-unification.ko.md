@@ -128,3 +128,21 @@ Parent approved extending the brief to latest138 announcement fields: genuine is
 2026-11-22: 공용 flock·worker1·heap384m으로 전체 Spring `test bootJar` 성공.104개JUnit suite654건/실패0/오류0/표시skip0. 신규 정본4·실제HTTP10·기존 Phase13의 정상/장애11건 포함. nativeNode351건, release/security188건 모두 실패·skip0. 보안/control 검사와 diff-check도 통과했다. 실제 PostgreSQL24건은 로컬에서 제외되며 신규 게시물6건도 컴파일만 완료했다. CI실행 전에는 통과로 주장하지 않는다. 기존 Gradle/JDK/unchecked 경고와 H2 stock/ticker 원천 미가용 메시지는 유지된다.
 자체검토: 기존 definer함수만 사용, 실제 boolean 고정·nullable 이미지 쌍, UUID/시각/텍스트/URI 검증, 중복·미래 기록 거부, 본문/alt 이스케이프, 확인된 이미지 host만 CSP허용, 브라우저 자격/actor/query 미전달, 제한된 GET/HEAD 별칭, frontend DB/session/job 부재와5언어 mirror/digest 확인. 공유 템플릿은 자산digest만 변경했고 부모 에이전트의 병행 shell/locale 수정은 통합 때 보존한다. 최신main72714c3efd 변경 없음.
 체크리스트: [x]착수/RED [x]구현 [x]전체소스검증 [x]자체검토 [ ]부모독립검토 [ ]실제SQL CI [ ]정확아티팩트 browser/Test [ ]최종통합·배포. 로컬 커밋만 생성하며 push/PR/merge/배포·마이그레이션·권한변경·외부이미지 서버조회·운영데이터 접근 없음. 구 backend API를 이번 작업으로 교체하지 않았고 정본 backend 채택 전에는 native화면이 정직하게503을 표시한다. 전체 rebuild와 운영 점검은 계속 미완료다.
+
+
+## Before work — real-read canary operational helpers
+Prepare only reviewed source helpers/tests for an exact protected catalog path and a loopback canonical backend, retaining public maintenance/current API authority. Same current app-role connection may be reused only in a root0600 external environment; no credentials logged or committed. The eventual installer must verify owned current QA and exact CI artifact, enforce read-only/closed-header boundaries and independent inverse. Current18SQL CI remains pending; no new unit, credential file or route is installed by helper development. Detailed plan appended before code.
+
+
+## In progress — 보호된 catalog canary 설치·역전 소스
+2026-11-22: 격리 branch subtask/native-catalog-canary-20261122, BASE592cc87819c062fe00a7c2936f2ff8f77d03d39c. 승인 Task2 운영계획·공유 메모리 대체 규칙·안전 규칙을 재확인했다. fetch한 main은692957c23630f7e34272876760ffba2370dc0a3b로 전진했고 중간 재확인 때도 같았다. 통합·실제 운영행위는 부모 담당이다.
+체크: [x]착수계획/4개기존helper [x]설치13RED [x]구현·회귀 [x]자체검토 [ ]최종검증 [ ]부모독립검토 [ ]실제CI artifact/root prepare/browser 승인. 임시 파일·생성한 일회용 입력으로 canary30/기존QA7/maintenance4, nativeNode347/security-releaseNode201 모두 실패·skip0. 실제 자격증명 읽기·root stage·service/Nginx/DB·push/배포는 수행하지 않았다.
+부모확정결정: prepare/apply는 최신main·정확CI를 강제하되 rollback은 main 전진 후에도 보호된 소스·파일inode·PID·JAR 증명으로 수행 가능해야 한다. 비정상 시작의 정리에는 응답 없는 HTTP 대신 실제 취득파일·고정JAR hash·명령/cwd/openJAR를 검증한다. 정상 readiness/source gate는 유지한다. 비밀파일은 umask022에서도 첫 생성부터0600이며 기존TLS hostname/sslmode를 보존한다.
+
+
+## Finished — catalog canary 운영 소스 단계 / 실제 운영 승인은 미완료
+2026-11-22: root-private prepare/apply 및 영속 소유권 기반 일반 rollback 구현. canary35(기본·config5/installer30), 기존QA7/maintenance4, nativeNode347, security-releaseNode201 모두 실패·skip0. Python컴파일·repository/control검사·diff-check는 허가된 로컬 커밋 직전에 다시 수행한다. Python·격리 Nginx/systemd-analyze·Node 검사에서 새 경고는 없었다. 전체 애플리케이션/SQL/Gradle은 부모 담당이며 실제 자격증명 읽기·root stage·service/Nginx/DB·push/배포를 수행하지 않았다.
+자체검토에서 공유CAS의 stat이 이동한 원본inode를 가리키는 새 symlink를 따라가는 결함을 실제 임시파일RED로 재현했다. 필요한 한 줄만 lstat으로 변경해GREEN, 기존QA7도 유지했다. private umask 제거 mutation은 첫 생성644 RED를 재현했고 복원 후0600 GREEN. source/실제port·archive identity·journal/진단 저장 실패도 RED→GREEN. 저널 저장 자체가 실패하면 메모리에 남은 실제 취득 소유권을 사용하고, 진단 저장 실패가 backend/비밀 정리를 건너뛰지 않는다. 외부 교체 자원은 보존한다.
+체크: [x]계획/기준/RED [x]구현 [x]범위별 소스검증 [x]자체검토 [ ]부모독립검토 [ ]최신main의 실제성공CI artifact/root prepare [ ]실제readonly DB/session/browser/source-positive [ ]전체 frontend/Test/Production승격. main이 전진해도 보호된 일반역전은 가능해야 한다는 부모결정을 유지했다. 운영소스와 앱소스를 구분하며 local build 배포·가짜artifact·권한/마이그레이션/API변경은 없다. 이번 격리소스 커밋은 push/merge/배포되지 않았고 실제 설치는 전부 대기 중이다. ADMIN_PREVIEW_ONLY를 전체 사이트 승인으로 주장하지 않는다.
+
+커밋 직전 최종검증 완료: Python35+7+4=46/실패·skip0, native/security/release 합산Node548/실패·skip0. Python컴파일·실제repository security/control-byte·staged diff-check 모두 성공. 마지막main fetch692957c23630f7e34272876760ffba2370dc0a3b 유지. 새 경고 없음. 전체앱/SQL/Gradle·실제운영·브라우저 승인은 이 worker에서 실행하지 않았다.

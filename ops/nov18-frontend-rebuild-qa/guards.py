@@ -40,7 +40,7 @@ class OwnedFiles:
             with temp.open('xb') as output:
                 identity=(os.fstat(output.fileno()).st_dev,os.fstat(output.fileno()).st_ino);output.write(data);output.flush();os.fsync(output.fileno());os.fchmod(output.fileno(),mode)
             if expected is not None and digest(path.read_bytes())!=expected:raise ValueError('Owned compare-and-swap bytes changed')
-            if expected_identity is not None and tuple(expected_identity)!=(path.stat().st_dev,path.stat().st_ino):raise ValueError('Owned compare-and-swap inode changed')
+            if expected_identity is not None and tuple(expected_identity)!=(path.lstat().st_dev,path.lstat().st_ino):raise ValueError('Owned compare-and-swap inode changed')
             if replace:os.replace(temp,path)
             else:os.link(temp,path)
         finally:
