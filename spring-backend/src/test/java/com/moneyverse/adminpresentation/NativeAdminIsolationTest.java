@@ -228,4 +228,138 @@ class NativeAdminIsolationTest {
         assertEquals(503,get("/admin/logs/system?filter=xyz",ADMIN).statusCode());
     }
 
+
+    static void readPageFixtures() throws Exception {
+        overrides.put("/api/v1/admin/me",new Reply(200,"application/json","{\"roles\":[\"superadmin\",\"approver\"]}"));
+        var user=new com.moneyverse.api.domain.admin.dto.AdminGovernanceDtos.AdminUserDto();
+        user.setUserId("00000000-0000-4000-8000-000000000001");user.setStatus("active");
+        user.setDisplayName("<script>qaName</script>");user.setCreatedAt("2026-11-21T00:00:00Z");
+        overrides.put("/api/v1/admin/users",new Reply(200,"application/json",new com.fasterxml.jackson.databind.ObjectMapper()
+            .writeValueAsString(new com.moneyverse.api.domain.admin.dto.AdminGovernanceDtos.AdminUsersResponse(List.of(user),Map.of()))));
+        overrides.put("/api/v1/business/catalog",new Reply(200,"application/json",new com.fasterxml.jackson.databind.ObjectMapper()
+            .writeValueAsString(new com.moneyverse.api.domain.business.dto.BusinessDtos.BusinessCatalogResponse(true,List.of(
+                new com.moneyverse.api.domain.business.dto.BusinessDtos.BusinessCatalogItem("fixture-type","Fixture enterprise","Fixture","test",
+                    "9007199254740993","1234",1))))));
+        var truth=new com.moneyverse.api.domain.admin.dto.AdminGovernanceDtos.EconomyReconciliationHealthDto();
+        truth.setAvailable(true);truth.setSnapshotId("00000000-0000-4000-8000-000000000003");truth.setMetricVersion("qa");
+        truth.setCalculatedAt("2026-11-21T00:00:00Z");
+        var integrity=new com.moneyverse.api.domain.admin.dto.AdminGovernanceDtos.EconomyReconciliationHealthDto.IntegrityDto();
+        integrity.setOk(false);integrity.setLedgerTransactionCount("9007199254740993");integrity.setLedgerPostingCount("1960");
+        integrity.setBalanceTotalDeltaAmount("-9007199254740993");truth.setIntegrity(integrity);
+        overrides.put("/api/v1/admin/economy/reconciliations/latest",new Reply(200,"application/json",
+            new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(truth)));
+    }
+    static final List<String> READ_ROUTES=List.of("/admin/users","/admin/market","/admin/controls",
+        "/admin/enterprises","/admin/economy","/admin/economy/scenario-lab");
+
+    @Test void sixExistingReadScreensUseTheSameNativeShellAndFavicon() throws Exception {
+        readPageFixtures();
+        for(String route:READ_ROUTES){
+            var response=get(route,ADMIN);
+            assertEquals(200,response.statusCode(),route);
+            assertTrue(response.body().contains("class=\"admin-sidebar\""),route);
+            assertTrue(response.body().contains("/assets/mv39/favicon.ico?v="),route);
+            assertEquals(1,response.body().split("id=\"mv-support-launcher\"",-1).length-1,route);
+            assertTrue(response.body().contains("private") || response.headers().firstValue("Cache-Control").orElse("").equals("private, no-store"));
+            assertFalse(response.body().contains("/_next/"),route);
+            assertTrue(response.body().contains("aria-current=\"page\""),route);
+        }
+    }
+    @Test void sixReadScreensRequireActualSessionAndNeverUseForgedHeaders() throws Exception {
+        for(String route:READ_ROUTES){
+            paths.clear();
+            assertEquals(302,get(route,null,"X-User-Id","forged","X-Internal-Token","forged").statusCode(),route);
+            assertTrue(paths.isEmpty(),route);
+        }
+    }
+    @Test void economyReadPagesPreserveTheAdditionalExactApproverRole() throws Exception {
+        readPageFixtures();
+        for(String roles:List.of("[\"superadmin\"]","[\"operator\"]","[\"admin\"]")){
+            overrides.put("/api/v1/admin/me",new Reply(200,"application/json","{\"roles\":"+roles+"}"));
+            for(String route:List.of("/admin/economy","/admin/economy/scenario-lab")){
+                paths.clear();assertEquals(403,get(route,ADMIN).statusCode(),route);
+                assertEquals(List.of("/api/v1/admin/me"),paths,"No financial source read without the exact approver role");
+            }
+        }
+        overrides.put("/api/v1/admin/me",new Reply(200,"application/json","{\"roles\":[\"approver\"]}"));
+        assertEquals(200,get("/admin/economy",ADMIN).statusCode());
+    }
+    @Test void memberSearchRemainsBoundedEscapedAndExplicitlyWithinFetchedRows() throws Exception {
+        readPageFixtures();
+        var result=get("/admin/users?limit=201&q=%3Cscript%3E",ADMIN);
+        assertEquals(200,result.statusCode());assertTrue(paths.contains("/api/v1/admin/users?limit=200"));
+        assertTrue(result.body().contains("&lt;script&gt;qaName&lt;/script&gt;"));
+        assertFalse(result.body().contains("<script>qaName</script>"));
+        assertTrue(result.body().contains("id=\"member-search\""));
+        assertTrue(result.body().contains("value=\"200\""));
+        assertTrue(result.body().contains("not all members"));
+        result=get("/admin/users?limit=0&q=no-matching-user",ADMIN);
+        assertEquals(200,result.statusCode());assertTrue(paths.contains("/api/v1/admin/users?limit=1"));
+        assertTrue(result.body().contains("No matching members"));
+        assertEquals(400,get("/admin/users?limit=not-an-integer",ADMIN).statusCode());
+    }
+    @Test void readScreensKeepMoneyPrecisionAndEscapeSourceText() throws Exception {
+        readPageFixtures();
+        var market=get("/admin/market",ADMIN);
+        assertEquals(200,market.statusCode());assertTrue(market.body().contains("9,007,199,254,740,993"));
+        var enterprise=get("/admin/enterprises",ADMIN);
+        assertEquals(200,enterprise.statusCode());assertTrue(enterprise.body().contains("9,007,199,254,740,993"));
+        var economy=get("/admin/economy",ADMIN);
+        assertEquals(200,economy.statusCode());assertTrue(economy.body().contains("-9,007,199,254,740,993"));
+        assertTrue(economy.body().contains("Check required"));
+        assertFalse(economy.body().contains("Reported OK"));
+    }
+    @Test void missingOrUnverifiedReadSourcesNeverProduceHealthyTables() throws Exception {
+        readPageFixtures();
+        for(var item:List.of(Map.entry("/admin/users","/api/v1/admin/users"),
+            Map.entry("/admin/market","/api/v1/admin/stocks"),Map.entry("/admin/controls","/api/v1/admin/controls"),
+            Map.entry("/admin/enterprises","/api/v1/business/catalog"),
+            Map.entry("/admin/economy","/api/v1/admin/economy/reconciliations/latest"))){
+            Reply old=overrides.put(item.getValue(),new Reply(200,"application/json","{}"));
+            assertEquals(503,get(item.getKey(),ADMIN).statusCode(),item.getKey());
+            if(old==null)overrides.remove(item.getValue());else overrides.put(item.getValue(),old);
+        }
+        overrides.put("/api/v1/admin/economy/reconciliations/latest",new Reply(200,"application/json","{\"available\":false}"));
+        var result=get("/admin/economy",ADMIN);assertEquals(503,result.statusCode());
+        assertTrue(result.body().contains("Unverified"));assertFalse(result.body().contains("Reported OK"));
+    }
+    @Test void allReadPageTitlesAndControlsKeepFiveLanguagesAndPrivateResponses() throws Exception {
+        readPageFixtures();
+        for(String lang:List.of("en","ko","ja","zh","vi"))for(String route:READ_ROUTES){
+            var response=get(route,ADMIN+"; wdmv_locale="+lang);
+            assertEquals(200,response.statusCode(),route+" "+lang);
+            assertEquals(lang,response.headers().firstValue("Content-Language").orElse(""));
+            assertEquals("private, no-store",response.headers().firstValue("Cache-Control").orElse(""));
+            assertTrue(response.headers().allValues("Set-Cookie").isEmpty());
+            assertTrue(response.headers().firstValue("X-Robots-Tag").orElse("").contains("noindex"));
+            assertFalse(response.body().contains("null</"),route+" "+lang);
+        }
+    }
+
+
+    @Test void conflictingOptionalMemberFieldsCannotBeSilentlyPresentedAsMissing() throws Exception {
+        overrides.put("/api/v1/admin/users",new Reply(200,"application/json",
+            "{\"users\":[{\"user_id\":\"00000000-0000-4000-8000-000000000001\",\"status\":\"active\",\"display_name\":\"one\",\"displayName\":\"two\"}]}"));
+        assertEquals(503,get("/admin/users",ADMIN).statusCode());
+    }
+    @Test void moneyFormattingSupportsAllThirtyEightDigitsWithoutNumericConversion() {
+        String amount="12345678901234567890123456789012345678";
+        assertEquals("12,345,678,901,234,567,890,123,456,789,012,345,678",AdminReadPageController.formatInteger(amount));
+        assertEquals("-12,345,678,901,234,567,890,123,456,789,012,345,678",AdminReadPageController.formatInteger("-"+amount));
+        assertThrows(AdminSourceClient.SourceFailure.class,()->AdminReadPageController.formatInteger("-0"));
+        assertThrows(AdminSourceClient.SourceFailure.class,()->AdminReadPageController.formatInteger("1e30"));
+    }
+
+
+    @Test void encodedEconomyMappingsCannotBypassTheApproverRequirement() throws Exception {
+        readPageFixtures();
+        overrides.put("/api/v1/admin/me",new Reply(200,"application/json","{\"roles\":[\"superadmin\"]}"));
+        for(String route:List.of("/admin/%65conomy","/admin/e%63onomy","/admin/%65conomy/scenario-lab")){
+            paths.clear();var response=get(route,ADMIN);
+            assertFalse(paths.stream().anyMatch(p->p.startsWith("/api/v1/admin/economy/")),
+                "Encoded route must not cause a financial source read without approver: "+route);
+            assertTrue(Set.of(400,403).contains(response.statusCode()),route);
+        }
+    }
+
 }

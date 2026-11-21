@@ -1,0 +1,23 @@
+/* The read workflows use the shipped Nov18 administrator shell at every breakpoint. */
+.admin-read-intro{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
+.admin-read-intro h2{font-size:clamp(22px,3vw,32px);margin:8px 0 12px}
+.admin-read-intro p,.admin-read-note{color:#A8BCD8;line-height:1.6;overflow-wrap:anywhere}
+.admin-read-intro .admin-refresh{flex-shrink:0}
+.admin-read-query,.admin-read-results{margin-top:20px}
+.admin-member-query{display:grid;grid-template-columns:minmax(0,3fr) minmax(100px,1fr) auto;align-items:end;gap:16px;margin:16px 0}
+.admin-member-query label{display:grid;gap:8px;min-width:0;color:#A8BCD8}
+.admin-member-query input{box-sizing:border-box;width:100%;min-width:0;min-height:44px;padding:12px;background:#0C1020;color:#E9F1FF;border:1px solid #A8BCD866;border-radius:12px;font:inherit}
+.admin-read-submit{min-height:46px;font:inherit;cursor:pointer}
+.admin-read-result-heading{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.admin-read-count{color:#A8BCD8;font-variant-numeric:tabular-nums}.admin-read-count strong{color:#E9F1FF;margin-inline-start:8px}
+.admin-read-table-scroll{max-width:100%;overflow:auto;border:1px solid #A8BCD833;border-radius:12px;margin-top:16px}
+.admin-read-table{width:100%;border-collapse:collapse;font-size:14px}
+.admin-read-table td,.admin-read-table th{text-align:start;padding:14px 16px;border-bottom:1px solid #A8BCD833;overflow-wrap:anywhere;min-width:110px}
+.admin-read-table th{color:#A8BCD8;font-weight:600;background:#0C102055}
+.admin-read-table td{font-variant-numeric:tabular-nums}.admin-read-table tr:last-child td{border-bottom:0}
+.admin-read-empty{text-align:center;padding:28px!important}
+.admin-read-metadata{display:grid;gap:12px;margin:16px 0}.admin-read-metadata>div{display:grid;grid-template-columns:minmax(120px,1fr) minmax(0,3fr);gap:16px}
+.admin-read-metadata dt{color:#A8BCD8}.admin-read-metadata dd{margin:0;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.admin-read-status{font-weight:650;color:#E9F1FF}.admin-read-query h2,.admin-read-results h2{margin:0}
+.admin-member-query input:focus-visible,.admin-read-submit:focus-visible,.admin-read-table-scroll:focus-visible{outline:3px solid #64B7FF;outline-offset:3px}
+@media(max-width:767px){.admin-member-query{grid-template-columns:minmax(0,1fr)}.admin-read-intro{flex-wrap:wrap}.admin-read-metadata>div{grid-template-columns:minmax(0,1fr);gap:6px}.admin-read-table td,.admin-read-table th{padding:12px}}

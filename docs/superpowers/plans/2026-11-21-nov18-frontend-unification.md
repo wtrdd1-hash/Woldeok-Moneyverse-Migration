@@ -21,13 +21,13 @@
 - Search is within fetched rows, handles malicious strings/empty results and preserves unsent inputs on language change.
 - Language changes,320px/low-height desktop and old/new asset generations preserve navigation and source identity.
 
-## Task1: Live typed read-screen contracts
+## Task1: Live validated read-screen contracts
 Files: adminpresentation/AdminSourceClient.java, new AdminReadPageController.java, shared AdminUiResponses.java, existing AdminUiController.java; NativeAdminApplication.java; NativeAdminIsolationTest.java.
-- [ ] Verify unchanged baseline Spring/native Node.
-- [ ] Add real-HTTP RED tests for all six page routes, no-cookie/forged/role/source failures, exact approver deny before data request, canonical DTO and integer precision, bounded member query/limit, escaped results and unavailable reconciliation.
-- [ ] Add only two fixed source paths for business/catalog and admin/economy/reconciliations/latest. Role proof must support an additional exact-role assertion. Share response headers/failure rendering without importing backend services.
-- [ ] Implement dedicated typed table view models and members GET form; preserve source counts, status and existing read-only scope. Money grouping must be string-based; test 38digits and negative delta.
-- [ ] Focused tests GREEN then full Spring/native suite; record checkpoint.
+- [x] Verify unchanged baseline Spring/native Node.
+- [x] Add real-HTTP RED tests for all six page routes, no-cookie/forged/role/source failures, exact approver deny before data request, canonical DTO and integer precision, bounded member query/limit, escaped results and unavailable reconciliation.
+- [x] Add only two fixed source paths for business/catalog and admin/economy/reconciliations/latest. Role proof must support an additional exact-role assertion. Share response headers/failure rendering without importing backend services.
+- [x] Implement dedicated validated table models and members GET form; preserve source counts, status and existing read-only scope. Money grouping must be string-based; test 38digits and negative delta.
+- [x] Focused tests GREEN then full Spring/native suite; record checkpoint.
 
 ## Task2: Common shell, copy and responsive UI
 Files: templates/shared/admin-shell.html, new templates/mv43/admin-read.html, static/assets/mv43/admin-read.css, static/assets/mv40/admin.js, ui/mv43-copy.json, static/assets/mv39/i18n.js, scripts/native-admin-live.test.mjs.

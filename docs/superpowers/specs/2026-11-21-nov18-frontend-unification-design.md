@@ -11,7 +11,7 @@ Reuse Spring MVC/Thymeleaf shared/admin-shell for the six already read-only admi
 For other routes, preserve working actions while migrating families to shared Spring templates after their actual API, role/CSRF/idempotency and error-state contracts are known. Do not replace those pages by generic read-only tables, old HTML wrappers or false healthy values. Existing 290 classpath HTML resources are not290 accepted live routes.
 
 ## Current stage
-- New typed row/view models retain canonical integer strings. Display formatting groups decimal digits without numeric conversion.
+- New validated table models retain canonical integer strings. Display formatting groups decimal digits without numeric conversion.
 - Member GET search is limited to the requested1–200 source rows, explicitly not a sitewide search. q is bounded80 characters; preserve drafts during locale changes.
 - Stock/feature/catalog/reconciliation reads validate actual DTO fields before presenting data. Missing/malformed/unauthorized source is not zero. Reconciliation unavailable remains unverified and503.
 - Same favicon, desktop sidebar, header, mobile drawer/bottom tabs, support launcher, status/card/form/table/focus/reduced-motion behavior and route-aware active navigation.

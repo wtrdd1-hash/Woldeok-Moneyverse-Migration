@@ -15,10 +15,10 @@ function ui(){
     focus(){document.activeElement=this;}
     querySelectorAll(){return [];}
   }
-  const ids=Object.fromEntries(['admin-locale','admin-log-language','admin-menu-open','admin-menu-close','admin-backdrop','admin-drawer','admin-log-filter','admin-log-lines','admin-log-source'].map(id=>[id,new Element()]));
+  const ids=Object.fromEntries(['admin-locale','admin-log-language','admin-menu-open','admin-menu-close','admin-backdrop','admin-drawer','admin-log-filter','admin-log-lines','admin-log-source','admin-member-language','member-search','page-size'].map(id=>[id,new Element()]));
   ids['admin-log-filter'].value='keep unsent query';ids['admin-log-lines'].value='50';ids['admin-log-source'].value='NGINX_ACCESS';
   const title=new Element();title.dataset.i18n='adminSystemLogs';
-  document.getElementById=id=>ids[id]||null;document.querySelector=()=>title;document.querySelectorAll=()=>[title];
+  document.getElementById=id=>ids[id]||null;document.querySelector=()=>title;document.querySelectorAll=selector=>selector.includes('input')?[ids['admin-log-language'],ids['admin-member-language']]:[title];
   runInNewContext(source,{document,window});
   return {window,document,ids,setLanguage:lang=>{language=lang;window.dispatchEvent(new Event('mv39-language-change'));}};
 }
@@ -39,4 +39,12 @@ test('expanded admin menu keeps a translated close label and Escape restores foc
   assert.equal(page.ids['admin-drawer'].hidden,true);
   assert.equal(page.ids['admin-menu-open'].attrs['aria-expanded'],'false');
   assert.equal(page.document.activeElement,page.ids['admin-menu-open']);
+});
+
+test('admin locale changes preserve unsubmitted member searches and update their submitted language',()=>{
+  const page=ui();page.ids['member-search'].value='unsent member query';page.ids['page-size'].value='200';
+  page.setLanguage('ja');
+  assert.equal(page.ids['admin-member-language'].value,'ja');
+  assert.equal(page.ids['member-search'].value,'unsent member query');
+  assert.equal(page.ids['page-size'].value,'200');
 });

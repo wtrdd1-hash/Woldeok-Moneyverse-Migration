@@ -17,7 +17,8 @@ public final class AdminSourceClient {
     private static final int MAX_BODY=2*1024*1024;
     private static final Set<String> ROLES=Set.of("superadmin","admin","operator","approver","server_operator");
     private static final Set<String> PATHS=Set.of("/api/v1/admin/me","/api/v1/admin/users","/api/v1/admin/stocks",
-        "/api/v1/admin/controls","/api/v1/admin/logs/system");
+        "/api/v1/admin/controls","/api/v1/admin/logs/system",
+        "/api/v1/business/catalog","/api/v1/admin/economy/reconciliations/latest");
     private final URI origin;
     private final ObjectMapper mapper;
     private final HttpClient http=HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2))
@@ -52,13 +53,18 @@ public final class AdminSourceClient {
         if(value.isEmpty()||value.length()>4096||value.chars().anyMatch(c->c<33||c>126||c==';'||c==','||c=='"'||c=='\\'))return null;
         return name+"="+value;
     }
-    public void verifyAdmin(String cookie) {
+    public void verifyAdmin(String cookie) {verifyAdmin(cookie,null);}
+    public void verifyAdmin(String cookie,String requiredRole) {
         JsonNode proof=read("/api/v1/admin/me",cookie);
         JsonNode roles=proof.path("roles");
         if(!roles.isArray()||roles.isEmpty())throw new SourceFailure(403);
         boolean allowed=false;
         for(JsonNode role:roles)if(role.isTextual()&&ROLES.contains(role.textValue().toLowerCase(Locale.ROOT)))allowed=true;
         if(!allowed)throw new SourceFailure(403);
+        if(requiredRole!=null){
+            boolean exact=false;for(JsonNode role:roles)if(role.isTextual()&&requiredRole.equalsIgnoreCase(role.textValue()))exact=true;
+            if(!exact)throw new SourceFailure(403);
+        }
     }
     public JsonNode read(String path,String cookie) {
         URI relative=URI.create(path);

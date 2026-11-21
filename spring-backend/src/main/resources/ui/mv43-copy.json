@@ -1,4 +1,200 @@
 {
+  "adminReadLead": [
+    "View verified records with your current administrator permission.",
+    "현재 관리자 권한으로 확인된 기록을 조회합니다.",
+    "現在の管理者権限で確認済みの記録を表示します。",
+    "使用当前管理员权限查看已核实的记录。",
+    "Xem bản ghi đã xác minh bằng quyền quản trị viên hiện tại."
+  ],
+  "adminReadName": [
+    "Name",
+    "이름",
+    "名前",
+    "名称",
+    "Tên"
+  ],
+  "adminReadId": [
+    "ID",
+    "ID",
+    "ID",
+    "ID",
+    "ID"
+  ],
+  "adminReadJoined": [
+    "Joined",
+    "가입일",
+    "登録日",
+    "注册日期",
+    "Ngày tham gia"
+  ],
+  "adminReadFeature": [
+    "Feature",
+    "기능",
+    "機能",
+    "功能",
+    "Tính năng"
+  ],
+  "adminReadReason": [
+    "Reason",
+    "사유",
+    "理由",
+    "原因",
+    "Lý do"
+  ],
+  "adminReadCost": [
+    "Purchase cost (WLD)",
+    "구매 비용 (WLD)",
+    "購入費用 (WLD)",
+    "购买费用 (WLD)",
+    "Chi phí mua (WLD)"
+  ],
+  "adminReadDailyYield": [
+    "Daily net estimate (WLD)",
+    "일일 순수익 추정 (WLD)",
+    "1日の純収益見積 (WLD)",
+    "预计每日净收益 (WLD)",
+    "Ước tính thu nhập ròng mỗi ngày (WLD)"
+  ],
+  "adminReadMemberSearch": [
+    "Search members",
+    "회원 검색",
+    "会員検索",
+    "搜索成员",
+    "Tìm thành viên"
+  ],
+  "adminReadLimit": [
+    "Result limit",
+    "조회 상한",
+    "取得上限",
+    "结果上限",
+    "Giới hạn kết quả"
+  ],
+  "adminReadSearchScope": [
+    "Search applies only to the fetched source records, not all members.",
+    "검색은 조회된 결과에서만 수행됩니다. 전체 검색이 아닙니다.",
+    "検索対象は取得済みの記録のみです。全会員検索ではありません。",
+    "仅搜索已获取的记录，不是所有成员。",
+    "Chỉ tìm trong các bản ghi đã tải, không phải tất cả thành viên."
+  ],
+  "adminReadResults": [
+    "Verified results",
+    "확인된 조회 결과",
+    "確認済みの結果",
+    "已核实的结果",
+    "Kết quả đã xác minh"
+  ],
+  "adminReadSourceRows": [
+    "Source records",
+    "원천 기록",
+    "取得記録",
+    "源记录",
+    "Bản ghi nguồn"
+  ],
+  "adminReadCountScope": [
+    "Fetched records are not a site-wide total.",
+    "조회된 원천 기록이며 전체 합계가 아닙니다.",
+    "取得済みの記録であり、サイト全体の合計ではありません。",
+    "已获取的记录并非全站总数。",
+    "Các bản ghi đã tải không phải tổng số toàn trang."
+  ],
+  "adminReadInvalid": [
+    "Check the search and result limit.",
+    "검색어와 조회 상한을 확인해 주세요.",
+    "検索語と取得上限を確認してください。",
+    "请检查搜索词和结果上限。",
+    "Kiểm tra từ khóa và giới hạn kết quả."
+  ],
+  "adminReadNoMembers": [
+    "No matching members in this verified result set.",
+    "현재 조회 범위에서 일치하는 회원이 없습니다.",
+    "取得済みの記録に一致する会員はいません。",
+    "当前查询范围内没有匹配的成员。",
+    "Không có thành viên phù hợp trong phạm vi kết quả này."
+  ],
+  "adminReadUnverified": [
+    "Unverified source — no healthy status can be inferred.",
+    "원천 미검증 — 정상 상태로 판단할 수 없습니다.",
+    "取得元が未検証のため、正常と判断できません。",
+    "来源未经核实，无法判断为正常。",
+    "Nguồn chưa xác minh, không thể kết luận trạng thái bình thường."
+  ],
+  "adminReadReportedOk": [
+    "Reported OK",
+    "원천 보고: 정상",
+    "取得元の報告：正常",
+    "来源报告：正常",
+    "Nguồn báo cáo: bình thường"
+  ],
+  "adminReadCheckRequired": [
+    "Check required",
+    "확인 필요",
+    "確認が必要",
+    "需要检查",
+    "Cần kiểm tra"
+  ],
+  "adminReadScenario": [
+    "This view reports the latest snapshot; it does not run a simulation.",
+    "최신 스냅샷을 조회하는 화면이며 시뮬레이션을 실행하지 않습니다.",
+    "最新スナップショットの表示であり、シミュレーションは実行しません。",
+    "此页面显示最新快照，不执行模拟。",
+    "Màn hình hiển thị ảnh chụp dữ liệu mới nhất, không chạy mô phỏng."
+  ],
+  "adminReadMetric": [
+    "Metric",
+    "지표",
+    "指標",
+    "指标",
+    "Chỉ số"
+  ],
+  "adminReadValue": [
+    "Value",
+    "값",
+    "値",
+    "数值",
+    "Giá trị"
+  ],
+  "adminReadTransactions": [
+    "Transactions",
+    "거래 건수",
+    "取引件数",
+    "交易数量",
+    "Số giao dịch"
+  ],
+  "adminReadPostings": [
+    "Postings",
+    "분개 건수",
+    "仕訳件数",
+    "分录数量",
+    "Số bút toán"
+  ],
+  "adminReadDelta": [
+    "Balance delta (WLD)",
+    "잔액 차이 (WLD)",
+    "残高差額 (WLD)",
+    "余额差额 (WLD)",
+    "Chênh lệch số dư (WLD)"
+  ],
+  "adminReadUpdated": [
+    "Calculated at",
+    "계산 시각",
+    "算出日時",
+    "计算时间",
+    "Thời điểm tính"
+  ],
+  "adminReadSnapshot": [
+    "Snapshot ID",
+    "스냅샷 ID",
+    "スナップショット ID",
+    "快照 ID",
+    "ID ảnh chụp"
+  ],
+  "adminReadMetricVersion": [
+    "Metric version",
+    "지표 버전",
+    "指標バージョン",
+    "指标版本",
+    "Phiên bản chỉ số"
+  ],
   "adminAccessDenied": [
     "Administrator permission is required",
     "관리자 권한이 필요합니다",
