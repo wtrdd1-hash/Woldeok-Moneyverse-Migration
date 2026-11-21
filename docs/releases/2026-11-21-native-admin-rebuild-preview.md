@@ -30,3 +30,7 @@ Real interactions: mobile menu open/close; help dialog open; Escape closes it an
 6. Independent full Test/data fixtures, authenticated source-positive/browser tests, normal preview-retirement inverse, remaining feature matrix and final Production cutover remain separate gates.
 
 API anonymous baselines remained stocks200/auth401/admin401 JSON with no maintenance response; public HTML stayed503/no-store. The frontend-only preview contains no JDBC/session/job beans. Do not stop retained shared or unclassified legacy JVMs based on their names: read-only process inspection found29 application/default-mode Java services and no further explicit DB-free presentation modes. Their dependency/worker ownership is not certified by that count.
+
+
+## 2026-11-22 source checkpoint / 소스 진행 상태
+PR3350 merged as bca23a8607. Exact main CI44920156614 succeeded, including all18 disposable PostgreSQL cases. The JPA composition defect and expired synthetic-session fixture are corrected in source. Shared administrator first-paint locale labels are corrected in source. None of these changes is yet installed in the live application72714c3efd preview; its positive catalog test remains BLOCKED. Public publications source is separately under integration, with24 tagged SQL cases pending its own CI. This checkpoint does not supersede the deployed identity or claim full Test/Production acceptance.

@@ -97,6 +97,12 @@ tasks.register<Test>("postgresMessagingTest") {
                 "com.moneyverse.catalogread.CatalogReadPostgresIntegrationTest", "--minimum", "4",
                 layout.buildDirectory.file("test-results/postgresMessagingTest/TEST-com.moneyverse.catalogread.CatalogReadPostgresIntegrationTest.xml").get().asFile.absolutePath)
         }.result.get().assertNormalExitValue()
+        providers.exec {
+            workingDir(rootDir.parentFile)
+            commandLine("python3", "scripts/release/verify-native-pg-results.py", "--class",
+                "com.moneyverse.api.domain.content.ContentPublicationPostgresIntegrationTest", "--minimum", "6",
+                layout.buildDirectory.file("test-results/postgresMessagingTest/TEST-com.moneyverse.api.domain.content.ContentPublicationPostgresIntegrationTest.xml").get().asFile.absolutePath)
+        }.result.get().assertNormalExitValue()
     }
 }
 

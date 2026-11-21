@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:lang="${uiLanguage}" th:attr="data-ui-language=${uiLanguage}">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta th:if="${sourceUnavailable}" name="robots" content="noindex,nofollow"><meta name="color-scheme" content="dark"><meta name="theme-color" content="#0C1020">
+<title th:attr="data-public-title=${publicTitleKey}" th:text="${uiCopy[publicTitleKey]} + ' | Woldeok Moneyverse'">Woldeok Moneyverse</title>
+<link rel="stylesheet" href="/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31"><script defer src="/assets/mv39/i18n.js?v=affa377ed54bf915fdad892f6d334653ed00c2b2abdb1e13bf339dcd0bb19390"></script>
+<link rel="stylesheet" href="/assets/mv43/public.css?v=6a6a264de0f0c2e9d7daba2b10938d5743dc345a1acde077a0240b261236fa16"><script defer src="/assets/mv43/public.js?v=0058c4f7f01a179219b2eced9d24058e65e278ecb9634c661e97f26c09a95980"></script>
+<link rel="stylesheet" href="/assets/mv46/publications.css?v=5d1d49511a8bc5b7895d2b148ee965ced62fa2534efefa94853729331ce19c3d"><th:block th:replace="~{shared/chrome :: commonHead}"></th:block></head>
+<body data-spring-page="announcements"><a class="skip-link" href="#main-content" data-i18n="publicSkip" th:text="${uiCopy['publicSkip']}">Skip to main content</a>
+<div class="app-shell"><th:block th:replace="~{shared/chrome :: sidebar}"></th:block><div class="app-main"><div class="app-inner"><th:block th:replace="~{shared/chrome :: pageHeader}"></th:block>
+<main id="main-content" class="public-main publications-main" tabindex="-1">
+<section class="hero"><div class="hero-text"><h1 th:attr="data-i18n=${publicTitleKey}" th:text="${uiCopy[publicTitleKey]}">Publications</h1><p data-i18n="publicationLead" th:text="${uiCopy['publicationLead']}">Published community records.</p></div></section>
+<p class="notice" role="status" th:if="${sourceUnavailable}" data-i18n="unavailable" th:text="${uiCopy['unavailable']}">Data unavailable.</p>
+<section class="panel publication-panel" th:unless="${sourceUnavailable}" aria-labelledby="publication-search">
+<form method="get" th:attr="action=${'/' + family}" class="publication-search"><input type="hidden" name="lang" th:value="${language}"><label id="publication-search" for="publication-query" data-i18n="search" th:text="${uiCopy['search']}">Search</label>
+<input type="search" name="q" id="publication-query" maxlength="160" th:value="${query}"><button class="primary-button" type="submit" data-i18n="search" th:text="${uiCopy['search']}">Search</button><a class="secondary-button" th:href="${'/' + family + '?lang=' + language}" data-public-locale-link data-i18n="refresh" th:text="${uiCopy['refresh']}">Refresh</a></form>
+<p class="publication-scope" data-public-format="publicationScope" th:attr="data-public-count=${window},data-public-limit=${limit}" th:text="${uiCopy['publicationScope'].replace('{count}',#strings.toString(window)).replace('{limit}',#strings.toString(limit))}">Search applies to this verified window.</p>
+<p class="notice" data-publication-empty th:if="${#lists.isEmpty(rows)}" data-i18n="publicationEmpty" th:text="${uiCopy['publicationEmpty']}">No matching publications.</p>
+<div class="publication-list"><article class="publication-record" th:each="r : ${rows}" th:attr="data-publication-id=${r.id}"><details><summary><span class="chip chip-primary" data-publication-pinned th:if="${r.isPinned}" data-i18n="publicationPinned" th:text="${uiCopy['publicationPinned']}">Pinned</span> <span class="publication-title" th:text="${r.title}">Title</span><time th:datetime="${r.publishedAt}" th:text="${r.publishedAt}">Publication time</time></summary><figure class="publication-image" th:if="${r.imageUrl != null}"><img th:src="${r.imageUrl}" th:alt="${r.imageAltText}" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="640" height="480"></figure><p class="publication-body" th:text="${r.body}">Full body</p></details></article></div>
+</section></main><th:block th:replace="~{shared/chrome :: footer}"></th:block></div></div></div>
+<th:block th:replace="~{shared/chrome :: mobileNavigation}"></th:block><th:block th:replace="~{shared/chrome :: support}"></th:block>
+<script defer src="/assets/mv43/tool-account.js?v=09fe7eb7e1da4d732f37664a3f5a0c8ae6c4576f0726608455ee87744363eb7d"></script></body></html>

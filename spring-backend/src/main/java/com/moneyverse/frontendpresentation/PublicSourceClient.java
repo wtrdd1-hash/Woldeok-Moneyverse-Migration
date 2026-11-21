@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 /** Public document reads carry no browser credentials, actor headers or transport secrets. */
 public final class PublicSourceClient {
-    private static final Set<String> READS=Set.of("/api/v1/status");
+    private static final Set<String> READS=Set.of("/api/v1/status","/api/v1/announcements","/api/v1/content/photos");
     private final URI origin;
     private final ObjectMapper mapper;
     private final HttpClient http=HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).followRedirects(HttpClient.Redirect.NEVER).build();

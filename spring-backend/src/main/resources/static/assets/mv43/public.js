@@ -17,6 +17,7 @@
       document.querySelectorAll('[data-public-format]').forEach(element=>{
         element.textContent=locale.tx(element.dataset.publicFormat)
           .replaceAll('{count}',element.dataset.publicCount||'')
+          .replaceAll('{limit}',element.dataset.publicLimit||'')
           .replaceAll('{stale}',element.dataset.publicStale||'');
       });
       document.querySelectorAll('input[name="lang"]').forEach(element=>{element.value=locale.current();});

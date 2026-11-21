@@ -15,37 +15,20 @@ import java.util.*;
         "/announcements"
 })
 public class AppContentController {
-
+    private final com.moneyverse.api.domain.content.service.ContentPublicationService publications;
+    private final com.moneyverse.api.domain.status.StatusTruthService statusTruth;
+    public AppContentController(com.moneyverse.api.domain.content.service.ContentPublicationService publications,
+            com.moneyverse.api.domain.status.StatusTruthService statusTruth){this.publications=publications;this.statusTruth=statusTruth;}
     @GetMapping(path = {"", "/", "/announcements"})
-    public ResponseEntity<Map<String, Object>> announcements() {
-        return ResponseEntity.ok(Map.of(
-                "announcements", List.of(
-                        Map.of(
-                                "id", "ann-01",
-                                "title", "제1회 월덱 가상주식 챔피언십 리그 개최 안내",
-                                "createdAt", new Date().toInstant().toString(),
-                                "isPinned", true
-                        )
-                )
-        ));
+    public ResponseEntity<Map<String,Object>> announcements(@RequestParam(required=false) String limit){
+        return ResponseEntity.ok(Map.of("announcements",publications.announcements(limit)));
     }
-
     @GetMapping("/photos")
-    public ResponseEntity<Map<String, Object>> photos() {
-        return ResponseEntity.ok(Map.of(
-                "photos", Collections.emptyList()
-        ));
+    public ResponseEntity<Map<String,Object>> photos(@RequestParam(required=false) String limit){
+        return ResponseEntity.ok(Map.of("photos",publications.photos(limit)));
     }
-
     @GetMapping("/status")
-    public ResponseEntity<Map<String, Object>> status() {
-        return ResponseEntity.ok(Map.of(
-                "status", Map.of(
-                        "systemOperational", true,
-                        "tradingEngine", "ONLINE",
-                        "bankingEngine", "ONLINE",
-                        "checkedAt", new Date().toInstant().toString()
-                )
-        ));
+    public ResponseEntity<com.moneyverse.api.domain.status.StatusSourceTruthPolicy.StatusResponse> status(){
+        return ResponseEntity.ok(statusTruth.publicStatus());
     }
 }
