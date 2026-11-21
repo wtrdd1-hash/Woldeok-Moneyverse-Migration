@@ -457,4 +457,24 @@ class NativeAdminIsolationTest {
         }
     }
 
+
+    @Test void deliveryRejectsMidnightNormalizationInBothSourceTimestamps() throws Exception {
+        String start=deliveryRow(1,null,null).replace("2026-11-20T00:00:00Z","2026-11-20T24:00:00Z");
+        String end=deliveryRow(1,"delivered","2026-11-20T24:00:00Z");
+        assertAll(java.util.stream.Stream.of(start,end).map(row->(org.junit.jupiter.api.function.Executable)()->{
+            deliveryReply("{\"events\":["+row+"]}");var response=get("/admin/logs/delivery",ADMIN);
+            assertEquals(503,response.statusCode());assertFalse(response.body().contains("data-delivery-metric="));
+        }));
+    }
+    @Test void deliveryAccessibleLabelsShareTheCurrentLanguageWithTheVisibleHeadings() throws Exception {
+        deliveryReply("{\"events\":[]}");
+        var response=get("/admin/logs/delivery",ADMIN+"; wdmv_locale=ko");
+        var copy=new com.fasterxml.jackson.databind.ObjectMapper().readTree(
+            NativeAdminIsolationTest.class.getResourceAsStream("/ui/mv43-copy.json"));
+        assertEquals(200,response.statusCode());
+        assertTrue(response.body().contains("aria-label=\""+copy.path("logs").get(1).asText()+"\""));
+        assertTrue(response.body().contains("data-i18n-aria=\"logs\""));
+        assertTrue(response.body().contains("data-i18n-aria=\"adminDeliveryRecords\""));
+    }
+
 }

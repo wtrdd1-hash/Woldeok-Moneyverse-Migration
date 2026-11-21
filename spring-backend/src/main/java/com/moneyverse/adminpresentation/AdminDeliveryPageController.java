@@ -87,10 +87,9 @@ public final class AdminDeliveryPageController {
         JsonNode value=row.path(key);if(!value.isTextual())throw unavailable();return value.textValue();
     }
     private static Instant timestamp(String value,Instant latest){
-        if(!value.matches("[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,9})?Z"))throw unavailable();
+        if(!value.matches("[0-9]{4}-[0-9]{2}-[0-9]{2}T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,9})?Z"))throw unavailable();
         Instant parsed=Instant.parse(value);
-        // Instant.parse normalizes a leap-second token; do not silently change source evidence.
-        if(value.substring(17,19).equals("60")||parsed.isAfter(latest))throw unavailable();
+        if(parsed.isAfter(latest))throw unavailable();
         return parsed;
     }
     private static AdminSourceClient.SourceFailure unavailable(){return new AdminSourceClient.SourceFailure(503);}
