@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.resource.PathResourceResolver;
@@ -66,6 +67,16 @@ public class SpaWebMvcConfig implements WebMvcConfigurer {
                 || normalized.startsWith(".well-known")
                 || normalized.startsWith("v3/api-docs") || normalized.startsWith("swagger-ui")
                 || normalized.equals("health") || normalized.startsWith("actuator");
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOriginPatterns("http://localhost:[*]", "http://127.0.0.1:[*]", "https://easy-scraping.com", "https://*.easy-scraping.com")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD")
+                .allowedHeaders("*")
+                .allowCredentials(true)
+                .maxAge(3600);
     }
 
     @Override
