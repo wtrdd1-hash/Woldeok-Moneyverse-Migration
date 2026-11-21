@@ -1,7 +1,7 @@
 # 시안 프론트엔드 표시 무결성 복구 — Test/운영 기록
 
 ## 현재 상태
-소스 main 통합 완료, exact-main CI와 격리 Test/운영 수용 진행 중이다. 아직 운영 적용 완료가 아니다. source PR[3338](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3338), application source `8ba9139b2fcd577253ee83a24040091be218d64b`, main CI[44890241945](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/actions/runs/44890241945).
+**2026-11-21 운영 canonical5개 경로의 표시 무결성 복구 완료. 전체 기능/Nov18 전체 통일 완료가 아니다.** exact-main CI4job SUCCESS, 보호된 Test75조합과 운영10조합의 해당 범위를 수용했다. source PR[3338](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3338), application source `8ba9139b2fcd577253ee83a24040091be218d64b`, main CI[44890241945](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/actions/runs/44890241945).
 
 ## 수정 범위
 
@@ -16,14 +16,44 @@
 
 초기170검사에서140실패를 직접 관찰한 뒤 GREEN. 독립 리뷰가 찾은 언어40실패, 최신 로그아웃20실패도 각각 RED→GREEN. 최종 native335/335와 Spring605/605,0실패/0error/0skip, bootJar SUCCESS. 이는 실행된 해당 suite의 결과이며 별도로 제외된 PostgreSQL messaging tag, 실제 금융/계정 변경, 전체 웹 QA를 성공으로 표시하지 않는다.
 
-PR CI44889225161의 classify/policy/spring-web-check/runtime-check 네 job은 SUCCESS. main source는 별도 exact-main CI와 해당 CI artifact/source manifest·JAR 및 packaged HTML=Git source 증명을 통과해야 Test/운영에 사용한다.
+PR CI44889225161의 classify/policy/spring-web-check/runtime-check 네 job은 SUCCESS. main CI44890241945도 classify/policy/spring-web-check/runtime-check 네 job 모두 SUCCESS다. JAR SHA256 `7ba6312babb4aba0cba29fc1f67cf712008fe949d7886884aeef9c9d971d1bf9`,158,336,658byte. 이 CI artifact의 source manifest·packaged build info·JAR hash와 HTML10개=Git source bytes를 확인한 뒤 사용했다.
 
 ## 운영 절차 및 롤백 준비
 
 기존 원본이나 전체 release 디렉터리를 덮어쓰지 않고 task 전용 root 소유 `/var/lib/moneyverse-frontend-integrity-20261121` 아래에 source별 정적 bundle과0700 task stage를 준비한다. 새 API·DB·worker·세션 발급·경제 쓰기를 만들지 않는다. 기존 통합26화면 source e45와 DB/API authority를 새 source로 relabel하지 않는다.
 
-정적5개만 별도 scope/source 응답 헤더와 private no-store/noindex로 묶는 제안이다. 보호된 `/frontend-ui-preview/prototype/{name}`는 기존 관리자 세션 guard를 재사용하고 GET/HEAD만 허용한다. Test 브라우저는 실제 해당 URI에서 확인하며 authenticated response header를 캡처한 것처럼 꾸미지 않는다. root 소유 routing hash·configured source header·artifact 파일 hash와 실제 DOM/URI를 연결해 기록한다. Test의 기존 외부403 경계는 유지한다.
+정적5개를 별도 scope/source 응답 헤더와 private no-store/noindex로 묶었다. 보호된 `/frontend-ui-preview/prototype/{name}`는 기존 관리자 세션 guard를 재사용하고 GET/HEAD만 허용한다. Test 브라우저는 실제 해당 URI에서 확인하며 authenticated response header를 캡처한 것처럼 꾸미지 않는다. root 소유 routing hash·configured source header·artifact 파일 hash와 실제 DOM/URI를 연결해 기록한다. Test의 기존 외부403 경계는 유지한다.
 
 운영은 public canonical5 alias만 바꾸며 legacy 내부4400·전체 API/회원/관리자 경로·source gateway는 유지한다. 전체 활성 Nginx inventory·파일 hash, 기존 release lock, remote main, 제안 bytes를 단계별 검사한다. 복구는 invalid config를 다시 파싱하지 않고 known hash와 디렉터리 항목을 확인한 뒤 task 소유 변경만 복원한다. 실제 reload가 없었던 실패는 불필요하게 reload하지 않는다.
 
-별도 운영 제안 script SHA256 `23ad46cd9067bab917ca1c4e7d7a78cea9109161626df9021717008a276dc5d4`. 독립 리뷰 Important2를 고쳤고 invalid nginx 실패 주입 RED→GREEN을 포함한5개 안전성 검사는 독립 재실행에서도 PASS다. 아직 실제 Test/운영 수용 증거는 후속 기록에서 추가한다.
+최종 운영 script SHA256 `033cfb492f433124f12b6b28292468a179b2e7cf658b5f6e7576290b33e35f1f`. 독립 리뷰 시점23ad46 버전 뒤에 응답 준비 조건1개를 보완했다. 독립 리뷰 Important2를 고쳤고 invalid nginx 실패 주입 RED→GREEN을 포함한5개 안전성 검사는 독립 재실행에서도 PASS다. 최종6개 운영 검사(기존5+새 generation 대기1)가 PASS다. 실제 수용은 아래 별도 브라우저/HTTP 증거다.
+
+
+## 실제 Test / 운영 수용
+
+- 보호된 Test:5경로×1440/390/320px×EN/KO/JA/ZH/VI=75조합. 실제 UI로 언어 메뉴를 선택했다. 전체75에서 wallet/market 읽기 available, 해당 금액/률 형식 정상, 새 상태 문구 언어 일치, 합성 curve 없음, document 가로 넘침0. PC는 hero flex/padding24px28px와 bento grid 복구. mobile은 기존 prototype 메뉴 stack을 유지하며 업무 기능 수용으로 세지 않았다.
+- 운영:실제 canonical5×PC1440/mobile390=10조합, 한국어. 모두 해당 표시 계약 PASS, wallet/market available로 기존 로그인 세션의 조회 연속성 확인. 실제 계정명·잔액·API body를 증거에 저장하지 않았다. source-binding을 위해 Test는 root 보호된 활성 alias/configured source header·artifact 파일 hash와 실제 browser URI/DOM을 연결했으며 authenticated HTTP header를 캡처했다고 쓰지 않았다.
+- 공개 HTTPS5경로에서 HTTP200, `X-MV-Frontend-Source=8ba9139b2fcd577253ee83a24040091be218d64b`, scope=prototype-integrity, private no-store, Cloudflare DYNAMIC. CSS와 실제 hydration script가 CI artifact와 일치했다. Cloudflare 추가 script로 전체 body hash가 달라질 수 있으므로 공용 edge 전체 byte equality를 주장하지 않는다. loopback의5파일 body hash는 artifact 파일과 같다.
+- 보호 preview 비로그인 거부·위조 actor/bearer header 거부·POST405, canonical GET/HEAD/POST405, Test origin 외부403, 기존14개 공개/회원/관리자/API/차단 경로의 status/cache/location 경계가 전후 동일했다. 금융·원장·DB·세션 발급·worker·기존 native26 runtime은 교체하지 않았다.
+
+[집계](../qa/2026-11-21-prototype-integrity-summary.json) / [Test75](../qa/2026-11-21-prototype-integrity-test-cases.json) / [운영10](../qa/2026-11-21-prototype-integrity-production-cases.json) / [public HTTPS proof](../qa/2026-11-21-prototype-integrity-public-proof.json) / [Test routing](../qa/2026-11-21-prototype-integrity-test-routing.json) / [운영 routing](../qa/2026-11-21-prototype-integrity-production-routing.json).
+
+실제 운영의 개인정보 없는 chart crop. 합성 그래프를 지웠으며 아직 실제 추이 source가 없어 조회 불가로 표시한다. 이것을 실제 차트 기능 구현으로 해석하지 않는다.
+
+![운영 카드 복구와 실제 추이 source 미연결 상태](../qa/2026-11-21-prototype-integrity-production-chart.png)
+
+## 실패·미수용 기록
+
+첫 preview 적용 직후의 준비 검사에서 새 경로가403으로 보여 exact owned inverse로 복구했고 원래 config hash를 확인했다. 기존 admin guard 자체는401→302 정상임을 따로 확인했다. 새 worker 응답이 준비되는 조건을 최대10초 확인하도록 보완한 뒤 같은 고정 제안 재적용이 통과했다. 첫 실패/rollback은 root stage의 preview-attempt1-rollback.json에 보존한다. 준비 대기 중403을 성공으로 수용한 것은 아니다.
+
+운영 첫 언어 버튼 자동화 두 번은 초기 조회 완료 전에 클릭한 뒤 모달이 생기지 않아 deadline으로 종료됐다. 조회 완료·새 AX 상태 확인 뒤에는 실제 메뉴 선택과 운영10조합이 통과했다. 제품 초기화/배치 시점과 자동화 타이밍 중 원인을 확정하지 않았으므로 **초기 진입 즉시 클릭 시나리오는 미수용**이다. 준비된 화면 검사 결과로 이 실패를 숨기지 않는다.
+
+작업 중 기존 .worktrees 작업 폴더와 local branch가 외부 정리로 두 차례 사라졌다. 매번 원격 checkpoint로 복구했으며 원인을 특정하지 않았다. root 보호된 runtime/Test 자료와 Windows의 개인정보 없는 QA 증거는 보존됐다. 문서 마무리는 별도 MiniPC 외부 worktree를 사용해 shared main의 타 작업 수정에 손대지 않았다.
+
+전체 구매·매매·보상·게시/상태 추이, mobile 메뉴 실기능, 관리자 로고/문의 위젯/다른 테마, 초기 즉시 클릭, 동적 fixture·전체 번역·접근성·실제 금융/메시지/삭제 변경은 OPEN이다. 현재 data available은 source 응답·표시 계약이며 원장/재무 전체 정확성을 새로 인증한 것이 아니다.
+
+## 보존 및 롤백
+
+root stage `/var/lib/moneyverse-frontend-integrity-20261121/tasks/8ba9139b2fcd`의 source artifact, manifest, before/after3config, preview/production receipts, 첫 rollback, browser acceptance, public proof를 보존한다. source별 root 소유 정적 bundle도 보존한다. 프로세스 추가·중지나 기존 artifact 삭제는 없다.
+
+역변경 전에 전체 현행 inventory·known hash·디렉터리 항목과 task 소유 대상의 installed hash를 재확인하고 정확한 before bytes만 복원한다. 타 작업이나 후속 변경이 있으면 덮어쓰지 않는다. nginx syntax 확인 후 graceful reload와 현재 경계/5경로 상태 검사를 반복한다. 과거 전체 설정을 통째로 복원하거나 DB·잔액을 롤백하는 절차가 아니다.
