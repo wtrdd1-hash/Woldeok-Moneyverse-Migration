@@ -52,3 +52,5 @@
 - [ ] exact-main Test→단일 경로 운영 전환 및 기록
 ### 종료 상태
 후속 전달 화면은 아직 미구현·미배포다. 기존8경로 운영은 유지한다.
+
+후속 소스 검증: 실제 HTTP7개 RED(미허용 native 경로403)→37개 focused GREEN, 전체 Spring587개 실패/오류/skip0 및 bootJar 통과. 로컬 default test가 제외하는 PostgreSQL messaging은 별도 CI gate로 남긴다. native Node 전체78개 통과. 번역 JSON/JS 동일성 검사가 키 순서 차이로 한 차례 실패하여 같은 새 키를 같은 순서로 정렬하고 재실행했다. 분류/검사를 완화하지 않았다. 쿼리 lang만으로 언어가 정해진다는 QA 가정을 기존 cookie 기반 UiLocale 계약에 맞게 수정했다. 후속 화면은 아직 Test/운영 미배포다.

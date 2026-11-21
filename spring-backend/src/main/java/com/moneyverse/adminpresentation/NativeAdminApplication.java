@@ -20,10 +20,10 @@ import org.springframework.web.servlet.config.annotation.*;
 @Configuration(proxyBeanMethods=false)
 @EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class,JdbcTemplateAutoConfiguration.class,
     HibernateJpaAutoConfiguration.class,UserDetailsServiceAutoConfiguration.class})
-@Import({AdminSourceClient.class,AdminUiController.class,AdminReadPageController.class,UiLocale.class,UiPageRenderer.class,AdminNavigation.class,NativeBuildIdentity.class})
+@Import({AdminSourceClient.class,AdminUiController.class,AdminReadPageController.class,AdminDeliveryPageController.class,UiLocale.class,UiPageRenderer.class,AdminNavigation.class,NativeBuildIdentity.class})
 public class NativeAdminApplication implements WebMvcConfigurer {
     @Bean SecurityFilterChain adminUiSecurity(HttpSecurity http) throws Exception {
-        String[] reads={"/admin","/admin/","/admin/logs/system","/admin/users","/admin/market","/admin/controls",
+        String[] reads={"/admin","/admin/","/admin/logs/system","/admin/logs/delivery","/admin/users","/admin/market","/admin/controls",
             "/admin/enterprises","/admin/economy","/admin/economy/scenario-lab","/admin-ui-health","/admin-ui-version",
             "/assets/mv39/**","/assets/mv40/**","/assets/mv43/**"};
         http.csrf(csrf->csrf.disable())

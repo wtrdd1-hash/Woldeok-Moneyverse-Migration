@@ -51,7 +51,7 @@ The eight-route read UI is accepted at maine2fb487a1a78 after Test320locale/layo
 
 ## Task4: Delivery log source contract and Nov18 presentation
 Files: new `spring-backend/src/main/java/com/moneyverse/adminpresentation/AdminDeliveryPageController.java`, existing AdminSourceClient.java/NativeAdminApplication.java, new templates/mv43/admin-delivery.html, shared/admin-shell.html, ui/mv43-copy.json/static/assets/mv39/i18n.js and NativeAdminIsolationTest.java.
-- [ ] Real HTTP RED tests: current canonical status/null DTO, valid empty, known outcomes/counts, malformed/duplicate/over30/attempt/timestamp/alias cases, auth rejection before reads, five locale/private headers and no mutation exposure. Expected: missing route404 before implementation.
+- [ ] Real HTTP RED tests: current canonical status/null DTO, valid empty, known outcomes/counts, malformed/duplicate/over30/attempt/timestamp/alias cases, auth rejection before reads, five locale/private headers and no mutation exposure. Expected: missing route403 from the native allowlist before implementation.
 - [ ] Minimal controller and dedicated source validation, shared shell/table styles, translated labels/statuses/sample notice and refresh/log links. No invented delivery acknowledgement and no message sending. Expected: focused tests GREEN.
 - [ ] Full Spring + native Node suites, bootJar, security/control-byte/whitespace guards; independent whole-branch review. Expected: zero failures; excluded PostgreSQL tests identified separately and CI coverage required.
 
