@@ -22,7 +22,7 @@
       --mv-blue: #64b7ff;
       --mv-green: #4ade80;
       --mv-rose: #fb7185;
-      --mv-text: #ffffff;
+      --mv-text: #e9f1ff;
       --mv-muted: #a8bcd8;
     }
 
@@ -581,18 +581,18 @@
       <section class="kpi-split-card" aria-label="주요 현황">
         <div class="kpi-split-col">
           <span class="kpi-title">가상 자산</span>
-          <div class="kpi-value" id="kpi-wallet-val">12,580 WLD</div>
-          <span class="kpi-sample-tag">샘플</span>
+          <div class="kpi-value" id="kpi-wallet-val">—</div>
+          <span class="kpi-sample-tag" id="kpi-wallet-state" aria-live="polite">—</span>
         </div>
         <div class="kpi-split-col">
           <span class="kpi-title">최근 변동</span>
-          <div class="kpi-value text-green" id="kpi-change-val">+2.41%</div>
-          <span class="kpi-sample-tag">샘플</span>
+          <div class="kpi-value" id="kpi-change-val">—</div>
+          <span class="kpi-sample-tag" id="kpi-change-state" aria-live="polite">—</span>
         </div>
         <div class="kpi-split-col">
           <span class="kpi-title">활동</span>
-          <div class="kpi-value" id="kpi-status-val">진행 중</div>
-          <span class="kpi-sample-tag">샘플</span>
+          <div class="kpi-value" id="kpi-status-val">—</div>
+          <span class="kpi-sample-tag" id="kpi-status-state" aria-live="polite">—</span>
         </div>
       </section>
 
@@ -600,18 +600,8 @@
       <section class="bento-grid-2col">
         <!-- Left: Trend Polyline Chart -->
         <div class="bento-chart-card">
-          <h3 class="bento-card-title">현황 추이 / 예시 데이터</h3>
-          <div class="chart-box">
-            <svg viewBox="0 0 500 120" preserveAspectRatio="none">
-              <polyline
-                fill="none"
-                stroke="#34d399"
-                stroke-width="3"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                points="0,95 70,88 140,68 210,82 280,72 350,55 420,62 500,28"
-              />
-            </svg>
+          <h3 class="bento-card-title">현황 추이</h3>
+          <div class="chart-box"><p id="chart-status" role="status">—</p>
           </div>
         </div>
 
@@ -729,13 +719,13 @@
   <!-- Dynamic Session & Real Data Hydration Script -->
   <script>
     (function() {
+      'use strict';
       function escapeHtml(str) {
         if (!str) return '';
         return String(str).replace(/[&<>'"]/g, function(tag) {
           return { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag;
         });
       }
-
       window.executeLogout = async function() {
         try {
           await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'same-origin' });
@@ -744,18 +734,55 @@
           window.location.href = '/api/v1/auth/reset';
         }
       };
-
+      const labels = {"en":{"loading":"Loading","unavailable":"Unavailable","guest":"Sign in required","available":"API response"},"ko":{"loading":"\uc870\ud68c \uc911","unavailable":"\uc870\ud68c \ubd88\uac00","guest":"\ub85c\uadf8\uc778 \ud544\uc694","available":"API \uc751\ub2f5"},"ja":{"loading":"\u8aad\u8fbc\u4e2d","unavailable":"\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093","guest":"\u30ed\u30b0\u30a4\u30f3\u304c\u5fc5\u8981","available":"API \u5fdc\u7b54"},"zh":{"loading":"\u52a0\u8f7d\u4e2d","unavailable":"\u65e0\u6cd5\u83b7\u53d6","guest":"\u8bf7\u5148\u767b\u5f55","available":"API \u54cd\u5e94"},"vi":{"loading":"\u0110ang t\u1ea3i","unavailable":"Kh\u00f4ng kh\u1ea3 d\u1ee5ng","guest":"C\u1ea7n \u0111\u0103ng nh\u1eadp","available":"Ph\u1ea3n h\u1ed3i API"}};
+      const states = {wallet:'loading',change:'loading',status:'unavailable'};
+      const authContainer = document.getElementById('auth-action-container');
+      const initialAuth = authContainer ? authContainer.innerHTML : '';
+      let sessionRevision = 0, marketRevision = 0;
+      function refreshStateLabels() {
+        const lang = document.documentElement.lang || (window.MVI18n ? window.MVI18n.getLocale() : 'en');
+        const copy = labels[lang] || labels.en;
+        for (const key of Object.keys(states)) {
+          const el = document.getElementById('kpi-' + key + '-state');
+          if (el) el.textContent = copy[states[key]];
+        }
+        const chart = document.getElementById('chart-status');
+        if (chart) chart.textContent = copy.unavailable;
+      }
+      function metric(key,value,state) {
+        states[key] = state;
+        const el = document.getElementById('kpi-' + key + '-val');
+        if (el) {
+          el.textContent = value === null ? '\u2014' : value;
+          el.dataset.sourceState = state;
+          el.style.color = key === 'change' && value !== null ? (value.startsWith('-') ? '#fb7185' : '#4ade80') : '';
+        }
+        refreshStateLabels();
+      }
+      function integer(value) {
+        return typeof value === 'string' && /^(0|[1-9][0-9]{0,37})$/.test(value) ? value : null;
+      }
+      async function read(path) {
+        const res = await fetch(path,{credentials:'same-origin',cache:'no-store',redirect:'error',signal:AbortSignal.timeout(5000)});
+        if (!res.ok) { const error = new Error('Source unavailable'); error.status = res.status; throw error; }
+        return res.json();
+      }
       async function hydrateHomeSession() {
+        const revision = ++sessionRevision;
+        let sessionVerified = false;
+        metric('wallet',null,'loading');
         try {
-          const res = await fetch('/api/v1/auth/session', { credentials: 'same-origin' });
-          if (!res.ok) return;
-          const data = await res.json();
-          if (data && (data.authenticated === true || data.signedIn === true) && data.user) {
-            const authContainer = document.getElementById('auth-action-container');
-            const displayName = data.user.displayName || data.user.username || '회원';
-            const roles = data.user.roles || [];
-            const isAdmin = roles.some(function(r) { return r && r.toLowerCase().indexOf('admin') !== -1; });
-
+          const data = await read('/api/v1/auth/session');
+          if (revision !== sessionRevision) return;
+          if (!data || !(data.authenticated === true || data.signedIn === true) || !data.user) {
+            if (authContainer) authContainer.innerHTML = initialAuth;
+            metric('wallet',null,'guest');
+            return;
+          }
+          sessionVerified = true;
+          const displayName = data.user.displayName || data.user.username || 'Member';
+          const roles = Array.isArray(data.user.roles) ? data.user.roles : [];
+          const isAdmin = roles.some(function(r) { return typeof r === 'string' && r.toLowerCase().indexOf('admin') !== -1; });
             if (authContainer) {
               authContainer.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 6px;">
@@ -768,51 +795,68 @@
                 </div>
               `;
             }
-
-            // Real Wallet balance binding
-            try {
-              const wRes = await fetch('/api/v1/wallet/summary', { credentials: 'same-origin' });
-              if (wRes.ok) {
-                const wData = await wRes.json();
-                if (wData && wData.totalAvailableAmount !== undefined && wData.totalAvailableAmount !== null) {
-                  const num = Number(wData.totalAvailableAmount);
-                  const el = document.getElementById('kpi-wallet-val');
-                  if (el) el.textContent = isNaN(num) ? wData.totalAvailableAmount + ' WLD' : num.toLocaleString('ko-KR') + ' WLD';
-                }
-              }
-            } catch (ignored) {}
+          const wallet = await read('/api/v1/wallet/summary');
+          if (revision !== sessionRevision) return;
+          if (wallet && wallet.signedIn === false) {
+            if (authContainer) authContainer.innerHTML = initialAuth;
+            metric('wallet',null,'guest');
+            return;
           }
-        } catch (e) {}
+          const amount = wallet && wallet.signedIn === true ? integer(wallet.totalAvailableAmount) : null;
+          if (amount === null) throw new Error('Canonical wallet amount required');
+          metric('wallet',amount.replace(/\B(?=([0-9]{3})+(?![0-9]))/g,',') + ' WLD','available');
+        } catch (error) {
+          if (revision !== sessionRevision) return;
+          if ((!sessionVerified || error.status === 401) && authContainer) authContainer.innerHTML = initialAuth;
+          metric('wallet',null,error.status === 401 ? 'guest' : 'unavailable');
+        }
       }
-
-      // Real Market Change percentage binding
+      function gcd(a,b) {
+        a = a < 0n ? -a : a;
+        while (b) { const next = a % b; a = b; b = next; }
+        return a;
+      }
+      function price(value) {
+        // Legacy JSON prices are accepted only if their number representation is exact.
+        if (typeof value === 'number' && Number.isSafeInteger(value)) value = String(value);
+        const canonical = integer(value);
+        if (canonical === null || canonical === '0') throw new Error('Verified positive price required');
+        return BigInt(canonical);
+      }
+      function marketChange(stocks) {
+        if (!Array.isArray(stocks) || !stocks.length || stocks.length > 1000) throw new Error('Verified market rows required');
+        let numerator = 0n, denominator = 1n;
+        for (const stock of stocks) {
+          const current = price(stock.current_price), opening = price(stock.day_open_price);
+          numerator = numerator * opening + (current - opening) * denominator;
+          denominator *= opening;
+          const divisor = gcd(numerator,denominator);
+          numerator /= divisor; denominator /= divisor;
+        }
+        denominator *= BigInt(stocks.length);
+        const scaled = (numerator < 0n ? -numerator : numerator) * 10000n;
+        const rounded = (scaled * 2n + denominator) / (denominator * 2n);
+        const sign = numerator < 0n && rounded !== 0n ? '-' : '+';
+        return sign + String(rounded / 100n) + '.' + String(rounded % 100n).padStart(2,'0') + '%';
+      }
       async function hydrateMarketChange() {
+        const revision = ++marketRevision;
+        metric('change',null,'loading');
         try {
-          const res = await fetch('/api/v1/stocks');
-          if (!res.ok) return;
-          const data = await res.json();
-          const stocks = data.stocks || [];
-          if (stocks.length > 0) {
-            let totalPct = 0;
-            stocks.forEach(function(s) {
-              const cur = Number(s.current_price) || 0;
-              const open = Number(s.day_open_price) || cur;
-              if (open > 0) totalPct += ((cur - open) / open) * 100;
-            });
-            const avg = (totalPct / stocks.length).toFixed(2);
-            const isPos = avg >= 0;
-            const el = document.getElementById('kpi-change-val');
-            if (el) {
-              el.textContent = (isPos ? '+' : '') + avg + '%';
-              el.style.color = isPos ? '#4ade80' : '#fb7185';
-            }
-          }
-        } catch (e) {}
+          const data = await read('/api/v1/stocks');
+          if (revision !== marketRevision) return;
+          metric('change',marketChange(data && data.stocks),'available');
+        } catch (error) {
+          if (revision === marketRevision) metric('change',null,'unavailable');
+        }
       }
-
+      refreshStateLabels();
+      window.addEventListener('moneyverse:localeChanged',refreshStateLabels);
+      document.addEventListener('DOMContentLoaded',refreshStateLabels);
+      if (typeof MutationObserver === 'function') new MutationObserver(refreshStateLabels).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
       hydrateHomeSession();
       hydrateMarketChange();
-      setInterval(hydrateMarketChange, 15000);
+      setInterval(function() { return Promise.all([hydrateHomeSession(),hydrateMarketChange()]); },15000);
     })();
   </script>
 </body>
