@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Tag(name="Direct Chat & Messages")
 @RestController
-@RequestMapping({"/api/chat","/api/v1/chat"})
+@RequestMapping({"/api/chat", "/api/v1/chat", "/app-api/chat", "/app-api/v1/chat"})
 public class ChatController {
     private final ChatService chatService;
     private final MemberApiGuard guard;

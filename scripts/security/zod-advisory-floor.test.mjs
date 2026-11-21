@@ -26,7 +26,7 @@ test('backend Zod dependency declares GHSA-mrhx-c7xc-m3w5 patched floor', () => 
 });
 
 test('backend lockfile pins Zod at GHSA-mrhx-c7xc-m3w5 patched floor', () => {
-  const lock = readFileSync(resolve(root, 'pnpm-lock.yaml'), 'utf8');
+  const lock = readFileSync(resolve(root, 'pnpm-lock.yaml'), 'utf8').replace(/\r\n/g, '\n');
   const backendImporter = lock.split('\n  backend:\n')[1]?.split(/\n  (?=\S)/)[0];
   assert.ok(backendImporter, 'backend importer must exist');
   const zod = backendImporter.match(/^      zod:\n        specifier: (\S+)\n        version: (\S+)/m);
