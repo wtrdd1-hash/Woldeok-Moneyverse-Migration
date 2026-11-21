@@ -26,14 +26,14 @@ import org.springframework.web.servlet.config.annotation.*;
 @Import({NativeHomeController.class,SpringNativeToolHubController.class,SpringNativeCalculatorsController.class,
     UiLocale.class,UiPageRenderer.class,AdminNavigation.class,NativeBuildIdentity.class,NativePresentationIdentityController.class,
     AdminSourceClient.class,AdminShopPageController.class,AdminUiController.class,AdminReadPageController.class,AdminDeliveryPageController.class,
-    FrontendIdentityController.class,MemberPresentationPageController.class,AdminProbePageController.class,NativeAuthPageController.class})
+    PublicSourceClient.class,StatusPresentationPageController.class,FrontendIdentityController.class,MemberPresentationPageController.class,AdminProbePageController.class,NativeAuthPageController.class})
 public class UnifiedFrontendApplication implements WebMvcConfigurer {
     private static final String[] READS={"/","/index.html","/tools","/calculators","/tools/compound-calculator","/tools/stock-calculator",
         "/admin","/admin/","/admin/shop","/admin/shop/","/admin/shop.html","/admin/shop/index.html","/admin/users","/admin/market","/admin/controls","/admin/enterprises","/admin/economy",
         "/admin/economy/scenario-lab","/admin/logs/system","/admin/logs/delivery","/admin/api-health",
         "/wallet","/wallet/","/wallet.html","/wallet/index.html","/support","/support/","/support.html","/support/index.html",
         "/chat","/chat/","/chat.html","/chat/index.html",
-        "/frontend-version","/presentation-health","/admin-ui-health","/admin-ui-version","/frontend-ui-health","/frontend-ui-version",
+        "/status","/status/","/status.html","/status/index.html","/frontend-version","/presentation-health","/admin-ui-health","/admin-ui-version","/frontend-ui-health","/frontend-ui-version",
         "/assets/mv39/**","/assets/mv40/**","/assets/mv43/**","/assets/mv46/**"};
     private static final String[] AUTH_PAGES=authPages();
     private static String[] authPages(){

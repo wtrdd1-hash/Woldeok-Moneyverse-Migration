@@ -113,3 +113,5 @@ docs/worklog/*internal*.md
 docs/changelog/*internal*.md
 
 ops/nov18-frontend-maintenance/__pycache__/
+
+ops/nov18-frontend-rebuild-qa/__pycache__/
