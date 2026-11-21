@@ -25,6 +25,7 @@ class FakeSystem:
         self.states = {m.FRONT_UNIT: self.loaded(m.FRONT_FILE, '101')}
         self.fail = None
         self.calls = []
+        self.generations={m.FRONT_UNIT:'old.jar'}
     def loaded(self, path, pid='0'):
         return dict(LoadState='loaded', ActiveState='active' if pid != '0' else 'inactive',
                     MainPID=pid, FragmentPath=str(path), DropInPaths='')
@@ -42,7 +43,9 @@ class FakeSystem:
         self.calls.append(('start',unit))
         if self.fail == 'backend-start' and unit == self.m.API_UNIT:
             raise RuntimeError('Synthetic backend start failure')
-        self.states[unit]['MainPID'] = '202' if unit == self.m.API_UNIT else '303'
+        old=unit==self.m.FRONT_UNIT and self.m.FRONT_FILE.read_bytes()==b'old frontend unit'
+        self.generations[unit]='old.jar' if old else 'new.jar'
+        self.states[unit]['MainPID'] = '202' if unit == self.m.API_UNIT else '404' if old else '303'
         self.states[unit]['ActiveState'] = 'active'
     def stop(self, unit):
         self.calls.append(('stop',unit))
@@ -53,6 +56,7 @@ class FakeSystem:
         if expected_pid is not None and state['MainPID'] != str(expected_pid):
             raise ValueError('Synthetic foreign PID')
         if state['MainPID']=='0': raise ValueError('No process')
+        if self.generations.get(unit)!=jar.name:raise ValueError('Synthetic wrong open JAR generation')
         return state['MainPID']
     def ready(self, unit, source):
         if self.fail=='front-readiness' and unit==self.m.FRONT_UNIT and source=='b'*40:
@@ -130,7 +134,7 @@ class InstallTests(unittest.TestCase):
         self.system.fail='front-readiness'
         with self.assertRaises(RuntimeError):self.run_apply()
         self.assert_old()
-        self.assertEqual(self.system.state(self.m.FRONT_UNIT)['MainPID'],'303')
+        self.assertEqual(self.system.state(self.m.FRONT_UNIT)['MainPID'],'404')
 
     def test_real_boundary_probe_supports_write_refusal_without_changing_shared_helper(self):
         m=self.m
@@ -341,6 +345,149 @@ class InstallTests(unittest.TestCase):
         self.assertTrue(outcome['errors'])
         self.assertTrue(outcome['backendRemoved']);self.assertTrue(outcome['environmentRemoved'])
 
+    def test_owned_pid_zero_backend_auto_restart_is_canceled_before_removal(self):
+        original=self.system.ready
+        def fail(unit,source):
+            if unit==self.m.API_UNIT:
+                self.system.states[unit].update(MainPID='0',ActiveState='activating',SubState='auto-restart')
+                raise RuntimeError('Synthetic pending restart')
+            original(unit,source)
+        self.system.ready=fail
+        self.system.substate=lambda unit:self.system.state(unit).get('SubState','dead')
+        actual_stop=self.system.stop
+        def stop(unit):
+            actual_stop(unit);self.system.states[unit].pop('SubState',None)
+        self.system.stop=stop
+        with self.assertRaises(RuntimeError):self.run_apply()
+        self.assert_old()
+        self.assertIn(('stop',self.m.API_UNIT),self.system.calls)
+        self.assertEqual(json.loads((self.stage/'rollback-outcome.json').read_text())['errors'],[])
+
+    def test_owned_pid_zero_frontend_auto_restart_is_canceled_before_restoration(self):
+        original=self.system.ready
+        def fail(unit,source):
+            if unit==self.m.FRONT_UNIT and source==self.manifest['applicationSource']:
+                self.system.states[unit].update(MainPID='0',ActiveState='activating',SubState='auto-restart')
+                raise RuntimeError('Synthetic frontend pending restart')
+            original(unit,source)
+        self.system.ready=fail
+        self.system.substate=lambda unit:self.system.state(unit).get('SubState','dead')
+        actual_stop=self.system.stop
+        def stop(unit):
+            actual_stop(unit);self.system.states[unit].pop('SubState',None)
+        self.system.stop=stop
+        with self.assertRaises(RuntimeError):self.run_apply()
+        self.assert_old()
+        self.assertEqual(json.loads((self.stage/'rollback-outcome.json').read_text())['errors'],[])
+
+    def interrupted_old_restore(self,mode):
+        self.run_apply();failed=False
+        original_prove=self.system.prove;original_start=self.system.start;original_save=self.m.save
+        def prove(unit,jar,source,expected_pid=None,check_version=True):
+            nonlocal failed
+            if mode in {'proof','process-proof'} and source==self.manifest['oldSource'] and check_version==(mode=='proof') and not failed:
+                failed=True;raise ValueError('Synthetic one-shot old version failure')
+            return original_prove(unit,jar,source,expected_pid,check_version)
+        def start(unit):
+            nonlocal failed
+            original_start(unit)
+            if mode=='start' and unit==self.m.FRONT_UNIT and self.m.FRONT_FILE.read_bytes()==b'old frontend unit' and not failed:
+                failed=True;raise RuntimeError('Synthetic start completed before error')
+        def save(path,value):
+            nonlocal failed
+            if path.name=='journal.json' and not failed:
+                restoring=tuple(value.get('owned',{}).get(str(self.m.FRONT_FILE),[]))
+                if mode=='checkpoint' and value.get('inverse',{}).get('frontendRestored'):
+                    failed=True;raise OSError('Synthetic completed-checkpoint failure')
+                if mode=='file-checkpoint' and restoring and restoring[2]==self.manifest['files']['front.before']:
+                    failed=True;raise OSError('Synthetic restored-file checkpoint failure')
+            return original_save(path,value)
+        self.system.prove=prove;self.system.start=start;self.m.save=save
+        first=self.m.rollback(self.stage,self.manifest,self.system)
+        self.assertTrue(first['errors']);self.assertTrue(failed)
+        self.assertEqual(self.m.FRONT_FILE.read_bytes(),b'old frontend unit')
+        # This call intentionally reloads the on-disk journal, never in-memory ownership.
+        second=self.m.rollback(self.stage,self.manifest,self.system)
+        self.assertTrue(second['complete'],second['errors']);self.assert_old()
+        persisted=json.loads((self.stage/'journal.json').read_text())
+        self.assertIn('frontendInverse',persisted)
+        self.assertEqual(persisted['frontendInverse']['phase'],'verified-old')
+        self.assertEqual(persisted['frontendInverse']['pid'],'404')
+
+    def test_persisted_inverse_resumes_after_old_version_proof_failure(self):
+        self.interrupted_old_restore('proof')
+
+    def test_persisted_inverse_resumes_after_old_process_proof_failure(self):
+        self.interrupted_old_restore('process-proof')
+
+    def test_persisted_inverse_resumes_after_old_start_succeeded_then_failed(self):
+        self.interrupted_old_restore('start')
+
+    def test_persisted_inverse_resumes_after_completed_frontend_checkpoint_failure(self):
+        self.interrupted_old_restore('checkpoint')
+
+    def test_persisted_inverse_resumes_after_restored_file_checkpoint_failure(self):
+        self.interrupted_old_restore('file-checkpoint')
+
+    def race_replacement(self,action):
+        m=self.m;target=self.root/'raced-target';owner=m.OwnedFiles();owner.write(target,b'identical',mode=0o600)
+        expected=owner.created[str(target)];foreign=self.root/'foreign-candidate';foreign.write_bytes(b'identical');foreign.chmod(0o600)
+        foreign_inode=foreign.stat().st_ino;injected=False;actual_replace=os.replace;actual_unlink=Path.unlink
+        actual_move=getattr(m.guards,'_rename_noreplace',None)
+        def inject():
+            nonlocal injected
+            if not injected:actual_replace(foreign,target);injected=True
+        def replace(a,b):
+            if Path(b)==target:inject()
+            return actual_replace(a,b)
+        def unlink(path,*args,**kwargs):
+            if path==target:inject()
+            return actual_unlink(path,*args,**kwargs)
+        def move(a,b):
+            if Path(a)==target:inject()
+            return actual_move(a,b)
+        with patch.object(m.guards.os,'replace',replace),patch.object(Path,'unlink',unlink):
+            if actual_move is not None:
+                with patch.object(m.guards,'_rename_noreplace',move):
+                    with self.assertRaises(ValueError):
+                        if action=='write':owner.write(target,b'new',0o600,True,expected[2],expected[:2])
+                        else:owner.remove(target)
+            else:
+                with self.assertRaises(ValueError):
+                    if action=='write':owner.write(target,b'new',0o600,True,expected[2],expected[:2])
+                    else:owner.remove(target)
+        self.assertTrue(injected);self.assertEqual(target.stat().st_ino,foreign_inode)
+        self.assertEqual(target.read_bytes(),b'identical');self.assertFalse(owner.owns(target))
+
+    def test_replacement_action_window_preserves_identical_foreign_inode(self):
+        self.race_replacement('write')
+
+    def test_removal_action_window_preserves_identical_foreign_inode(self):
+        self.race_replacement('remove')
+
+    def test_blocked_foreign_restore_retains_both_foreign_files_in_private_recovery(self):
+        m=self.m
+        self.assertTrue(hasattr(m.guards,'_rename_noreplace'),'Ownership actions must use a no-replace recovery protocol')
+        target=self.root/'blocked-target';owner=m.OwnedFiles();owner.write(target,b'owned',mode=0o600)
+        first=self.root/'first';first.write_bytes(b'foreign first');first.chmod(0o600);first_inode=first.stat().st_ino
+        second=self.root/'second';second.write_bytes(b'foreign second');second.chmod(0o600);second_inode=second.stat().st_ino
+        actual_move=m.guards._rename_noreplace;actual_replace=os.replace;injected=False
+        def race(a,b):
+            nonlocal injected
+            if Path(a)==target and not injected:
+                actual_replace(first,target);injected=True
+            elif Path(b)==target and injected and second.exists():
+                os.link(second,target)
+            return actual_move(a,b)
+        with patch.object(m.guards,'_rename_noreplace',race):
+            with self.assertRaises(ValueError):owner.remove(target)
+        self.assertEqual(target.stat().st_ino,second_inode)
+        recoveries=[p for p in self.root.rglob('*') if p.is_file() and p.stat().st_ino==first_inode]
+        self.assertEqual(len(recoveries),1);self.assertEqual(recoveries[0].read_bytes(),b'foreign first')
+        self.assertEqual(recoveries[0].stat().st_mode&0o777,0o600)
+        self.assertEqual(recoveries[0].parent.stat().st_mode&0o777,0o700)
+        self.assertTrue(any(item['status']=='restore-blocked' for item in owner.recoveries))
+
     def test_backend_start_failure_preserves_original_front_and_include(self):
         self.system.fail='backend-start'
         with self.assertRaises(RuntimeError):self.run_apply()
@@ -371,7 +518,7 @@ class InstallTests(unittest.TestCase):
         self.m.current_main=lambda source:(_ for _ in ()).throw(AssertionError('Rollback must not query main'))
         self.m.rollback(self.stage,self.manifest,self.system)
         self.assert_old()
-        self.assertEqual(self.system.state(self.m.FRONT_UNIT)['MainPID'],'303')
+        self.assertEqual(self.system.state(self.m.FRONT_UNIT)['MainPID'],'404')
 
     def test_nginx_failure_during_inverse_still_cleans_owned_backend_and_secret(self):
         self.run_apply();self.system.fail='nginx'
@@ -413,15 +560,15 @@ class InstallTests(unittest.TestCase):
 
     def test_secrets_are_private_from_the_first_write_under_umask_022(self):
         observed=[]
-        actual_open=Path.open
-        def inspect(path,*args,**kwargs):
-            stream=actual_open(path,*args,**kwargs)
-            if path.name.startswith(self.m.ENVIRONMENT.name+'.nov18-qa-') and args and args[0]=='xb':
-                observed.append(os.fstat(stream.fileno()).st_mode & 0o777)
-            return stream
+        actual_open=os.open
+        def inspect(path,flags,*args,**kwargs):
+            descriptor=actual_open(path,flags,*args,**kwargs)
+            if Path(path).name.startswith(self.m.ENVIRONMENT.name+'.nov18-qa-') and flags&os.O_CREAT:
+                observed.append(os.fstat(descriptor).st_mode&0o777)
+            return descriptor
         old=os.umask(0o022)
         try:
-            with patch.object(Path,'open',inspect):self.run_apply()
+            with patch.object(self.m.os,'open',inspect):self.run_apply()
         finally:os.umask(old)
         self.assertEqual(observed,[0o600])
         self.assertEqual(self.m.ENVIRONMENT.stat().st_mode & 0o777,0o600)

@@ -146,3 +146,15 @@ Prepare only reviewed source helpers/tests for an exact protected catalog path a
 체크: [x]계획/기준/RED [x]구현 [x]범위별 소스검증 [x]자체검토 [ ]부모독립검토 [ ]최신main의 실제성공CI artifact/root prepare [ ]실제readonly DB/session/browser/source-positive [ ]전체 frontend/Test/Production승격. main이 전진해도 보호된 일반역전은 가능해야 한다는 부모결정을 유지했다. 운영소스와 앱소스를 구분하며 local build 배포·가짜artifact·권한/마이그레이션/API변경은 없다. 이번 격리소스 커밋은 push/merge/배포되지 않았고 실제 설치는 전부 대기 중이다. ADMIN_PREVIEW_ONLY를 전체 사이트 승인으로 주장하지 않는다.
 
 커밋 직전 최종검증 완료: Python35+7+4=46/실패·skip0, native/security/release 합산Node548/실패·skip0. Python컴파일·실제repository security/control-byte·staged diff-check 모두 성공. 마지막main fetch692957c23630f7e34272876760ffba2370dc0a3b 유지. 새 경고 없음. 전체앱/SQL/Gradle·실제운영·브라우저 승인은 이 worker에서 실행하지 않았다.
+
+
+## In progress — canary 운영 검토 fix round1
+BASE5b625c3898c470ff8e6a9c468293040cbac5246a. 부모 검토의 Important3건을 읽고 실패 원인을 재현했다. fetch main925f725d2836c5ebe88311e2f2ff8ab17b052144 전진은 기록만 하며 통합은 부모 담당이다. I1의 PID0/activating/auto-restart2 RED 후 소유fragment·drop-in 부재를 검증해 pending restart를 취소하고 inactive를 확인한다. I2 old 복구·start/proof/checkpoint4 RED 후 단계와 old PID를 영속 기록하여 다음 명시rollback이 old generation을 증명한다. 테스트 process fixture도 old/new JAR·PID를 구별하도록 보완했다.
+I3 check/action 실제 경계의 동일내용 새inode replacement/removal2 RED와 restore-blocked1 RED를 확인했다. 공유guard는 Linux RENAME_NOREPLACE로 실제 점유자를 새0700 복구디렉터리에 이동한 뒤 실제inode/hash를 검사하고, 불일치는 빈 target에만 복원한다. 새파일은 exclusive hardlink로 취득한다. staging/quarantine 파일 자동unlink·덮어쓰기는 없으며, 불확실한 원본을 보호된 경로에 보존하고 명시적 미완료 결과를 남긴다. 저널/receipt에 복구경로·상태·identity가 기록된다. 잠깐 target이 비는 소유권 프로토콜이며 atomic CAS로 주장하지 않는다.
+체크 [x]검토/RED [x]I1/I2/I3 구현 [ ]최종검증 [ ]로컬fix커밋 [ ]부모재검토. 실제자격/root-stage/service/Nginx/DB/browser 작업은 전부 미수행·OPEN이다.
+
+
+## Finished — canary 운영 fix round1 소스
+I1/I2/I3 구현·자체검토 후 범위재검토 대기. 최종 canary45/기존QA7/maintenance4=Python56, native/security/releaseNode548 모두 실패·skip0. Python5파일컴파일·repository-security/control-byte·diff-check 성공, 새경고 없음. old/new JAR·PID를 구별하는 fixture와 old-process proof 실패 후 재개하는 다섯 번째I2 검증도 통과했다. Linux no-replace rename/실제 임시파일 race를 실행했으나 root/service 작업은 없다. 마지막main925f725d2836c5ebe88311e2f2ff8ab17b052144 유지.
+I3 복구디렉터리는0700이며 candidate·이동원본·메타데이터와0600 비밀사본을 의도적으로 보존한다. 자동unlink/덮어쓰기 purge를 하지 않는다. 동시에 들어온 충돌 target은 건드리지 않고 이동된 바이트는 비공개로 보존해 명시적 미완료를 남긴다. check+rename/unlink를 atomic으로 주장하지 않는다. 잠깐 path가 비는 동안은 중지·통제된 소유파일에 한정하며 include 설치 후에만 Nginx reload한다. 부모가 I3에 맞는 보존프로토콜임을 확인했다.
+체크 [x]RED/GREEN [x]I1 pending-restart [x]I2 old단계/PID 재개 [x]I3 실제점유자/비덮어쓰기 [x]최종검증/자체검토 [ ]부모범위재검토. 로컬fix커밋만 하며 push/merge/배포·실제자격/rootstage/DB/service/Nginx/browser는 전부 미수행·OPEN이다.

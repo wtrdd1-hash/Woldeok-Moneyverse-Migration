@@ -310,6 +310,9 @@ class System:
                                        '-p','MainPID','-p','FragmentPath','-p','DropInPaths'],
                                        text=True,stderr=subprocess.PIPE)
         return dict(line.split('=',1) for line in output.splitlines())
+    def substate(self,unit):
+        return subprocess.check_output(['systemctl','show',unit,'-p','SubState','--value'],
+                                       text=True,stderr=subprocess.PIPE).strip()
     def free(self,port):
         if subprocess.check_output(['ss','-H','-ltn','sport','=',':'+str(port)],text=True).strip():return False
         try:
@@ -498,6 +501,7 @@ def validate_stage(stage,forward=False):
 
 def journal_save(stage,journal,owned):
     journal['owned']={path:list(info) for path,info in owned.created.items()}
+    journal['recoveries']=owned.recoveries
     save(stage/'journal.json',journal)
 
 
@@ -554,7 +558,7 @@ def transact(stage,manifest,system):
         journal_save(stage,journal,owned)
         receipt={'scope':'ADMIN_PREVIEW_ONLY','applicationSource':manifest['applicationSource'],
                  'operationalSource':manifest.get('operationalSource'),'pids':journal['pids'],
-                 'owned':journal['owned'],'jarIdentity':snapshot(Path(manifest['jar'])),
+                 'owned':journal['owned'],'recoveries':journal['recoveries'],'jarIdentity':snapshot(Path(manifest['jar'])),
                  'productionMaintenance':True,'bootEnabled':False,'browserAcceptance':'PENDING'}
         save(stage/'apply-receipt.json',receipt)
         return receipt
@@ -580,6 +584,13 @@ def stop_acquired(unit,path,jar,source,system,owned,journal,jar_sha):
         # immutable packaged bytes and /proc proof still authorize its cleanup.
         system.prove(unit,jar,source,journal['pids'].get(unit),check_version=False)
         system.stop(unit)
+        loaded_inactive(system,unit,path)
+    elif state.get('LoadState')=='loaded' and state.get('ActiveState')=='activating' and system.substate(unit)=='auto-restart':
+        # PID zero does not mean a Restart=on-failure job is canceled. The
+        # acquired fragment and absent drop-ins prove whose pending job to stop.
+        if not owned.owns(path):raise ValueError('Owned restart fragment changed')
+        system.stop(unit)
+        loaded_inactive(system,unit,path)
     elif state.get('LoadState')!='loaded' or state.get('ActiveState') not in {'inactive','failed'}:
         raise ValueError('Owned manager state is uncertain')
 
@@ -591,6 +602,7 @@ def rollback(stage,manifest,system,journal=None,owned=None):
     if owned is None:
         owned=OwnedFiles()
         owned.created={path:tuple(info) for path,info in journal['owned'].items()}
+        owned.recoveries=journal.get('recoveries',[])
     outcome={'frontendRestored':False,'includeRestored':False,'nginxReloaded':False,
              'backendRemoved':False,'environmentRemoved':False,'errors':[]}
     completed=journal.setdefault('inverse',{})
@@ -608,27 +620,61 @@ def rollback(stage,manifest,system,journal=None,owned=None):
             outcome[name]=True
         except Exception as error:
             outcome['errors'].append(name+':'+type(error).__name__)
+            if name=='frontendRestored':completed.pop(name,None)
+            try:journal_save(stage,journal,owned)
+            except Exception as checkpoint:
+                outcome['errors'].append(name+'Checkpoint:'+type(checkpoint).__name__)
         record_outcome()
     def restore_front():
-        if str(FRONT_FILE) in owned.created:
-            stop_acquired(FRONT_UNIT,FRONT_FILE,Path(manifest['jar']),manifest['applicationSource'],system,owned,journal,manifest['jarSha256'])
-            old=manifest['targets'][str(FRONT_FILE)]
-            identity=owned.created[str(FRONT_FILE)]
-            owned.write(FRONT_FILE,(stage/'front.before').read_bytes(),old['mode'],True,identity[2],identity[:2])
-            journal_save(stage,journal,owned)
-            system.reload()
-            loaded_inactive(system,FRONT_UNIT,FRONT_FILE)
-            if not system.free(4830):raise ValueError('Cannot restore old QA onto an occupied port')
-            system.start(FRONT_UNIT)
+        phase=journal.setdefault('frontendInverse',{'phase':'new-generation','pid':None})
+        tracked=str(FRONT_FILE) in owned.created
+        old_hash=manifest['files']['front.before']
+        if tracked:
+            # Once the restored inode has been checkpointed, every subsequent
+            # proof concerns the old generation, including a second invocation.
+            if owned.created[str(FRONT_FILE)][2]!=old_hash:
+                phase.update(phase='stopping-new',pid=None)
+                journal_save(stage,journal,owned)
+                stop_acquired(FRONT_UNIT,FRONT_FILE,Path(manifest['jar']),manifest['applicationSource'],system,owned,journal,manifest['jarSha256'])
+                phase['phase']='installing-old-file'
+                journal_save(stage,journal,owned)
+                old=manifest['targets'][str(FRONT_FILE)]
+                identity=owned.created[str(FRONT_FILE)]
+                try:
+                    owned.write(FRONT_FILE,(stage/'front.before').read_bytes(),old['mode'],True,identity[2],identity[:2])
+                finally:
+                    if owned.owns(FRONT_FILE) and owned.created[str(FRONT_FILE)][2]==old_hash:
+                        phase['phase']='old-file-installed'
+                    journal_save(stage,journal,owned)
+            if not owned.owns(FRONT_FILE):raise ValueError('Restored old frontend file changed')
         else:
             check_snapshot(FRONT_FILE,manifest['targets'][str(FRONT_FILE)])
-            if journal['frontStopped'] and system.state(FRONT_UNIT).get('MainPID')=='0':
-                loaded_inactive(system,FRONT_UNIT,FRONT_FILE)
-                if not system.free(4830):raise ValueError('Cannot restart old QA onto occupied port')
+            if not journal['frontStopped']:phase['pid']=manifest['oldPid']
+        if digest(Path(manifest['oldJar']).read_bytes())!=manifest['oldJarSha256']:
+            raise ValueError('Preserved old frontend generation changed')
+        system.reload()
+        if system.state(FRONT_UNIT).get('MainPID')=='0':
+            loaded_inactive(system,FRONT_UNIT,FRONT_FILE)
+            if not system.free(4830):raise ValueError('Cannot restore old QA onto an occupied port')
+            phase.update(phase='starting-old',pid=None)
+            journal_save(stage,journal,owned)
+            try:
                 system.start(FRONT_UNIT)
+            finally:
+                # start may succeed before the client reports an error. Record
+                # its old-JAR identity before readiness or version HTTP can fail.
+                if system.state(FRONT_UNIT).get('MainPID')!='0':
+                    phase['pid']=system.prove(FRONT_UNIT,Path(manifest['oldJar']),manifest['oldSource'],check_version=False)
+                    phase['phase']='started-old'
+                    journal_save(stage,journal,owned)
+        else:
+            phase['pid']=system.prove(FRONT_UNIT,Path(manifest['oldJar']),manifest['oldSource'],phase.get('pid'),check_version=False)
+            phase['phase']='started-old'
+            journal_save(stage,journal,owned)
         system.ready(FRONT_UNIT,manifest['oldSource'])
-        system.prove(FRONT_UNIT,Path(manifest['oldJar']),manifest['oldSource'],
-                     None if journal['frontStopped'] else manifest['oldPid'])
+        system.prove(FRONT_UNIT,Path(manifest['oldJar']),manifest['oldSource'],phase['pid'])
+        phase['phase']='verified-old'
+        journal_save(stage,journal,owned)
     component('frontendRestored',restore_front)
     def restore_include():
         if not outcome['frontendRestored']:raise ValueError('Restore prior QA before its route')
