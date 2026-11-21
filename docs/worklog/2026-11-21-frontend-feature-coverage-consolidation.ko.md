@@ -53,3 +53,6 @@
 - DB-free native11개 stop/부팅 해제, obsolete loopback QA Nginx2개 pidfd 종료. source/JAR/config/MainPID/부팅 상태 재검증, 새 Test는 복구한 active/enabled 상태. API/DB/경제AI/worker/MCP 서비스 불변. 최종 stop 전후 HTTP/config 동일.
 - 자동 승인 초기 정리 거절은 범위/의존성 읽기 전용 증명 후 해결. --check prefix의 dash-mount 옵션 및 kernel virtual-file 처리 실패를 안전하게 수정했다. 실제 hidden QA 소비자2개를 먼저 정리한 뒤228activeunit/460record 검사 통과한6개만 적용했다. 정리명령은 기본 읽기 전용, 명시 --apply에서만 동작한다.
 - 계정403/잔여78/관리자 오류로그·나머지29관리자·동적33fixture·금융/실DB/실제메시지/변경기능은 해결완료로 올리지 않았다. 상세 현재결함/수용/rollback/판단비용은 docs/releases/2026-11-21-frontend-consolidation-production.ko.md에 기록했다. GitHub 문서 evidence branch에서 required policy/분류 검사와 정상 PR 통합을 마친 뒤 해당 branch만 ancestry 확인 후 정리한다.
+
+## 문서 통합 검사 보완
+증거 PR3335 classify는 release 폴더의 JSON을 UNKNOWN으로 거부했다. 런타임 실패가 아니다. classifier를 완화하지 않고 증거 JSON을 기존 허용 위치 docs/qa/2026-11-21-consolidated-runtime-proof.json으로 옮겼다. 실패한 classify와 그로 인한 skip는 통과로 세지 않는다.
