@@ -149,3 +149,9 @@ Separate out-of-scope observation: backend file removal before failed daemon-rel
 
 ## Before work — backend inverse retry continuation
 New isolated source taska200 addresses the separate backend remove/reload retry observation with persisted ownership/phase and foreign-resource negatives. Only install.py/test_install.py plus paired logs; no actual credentials, root stage/service/Nginx/DB or deployment. Parent sourceheader/QA/currentmain work remains separate. Baseline, RED, minimal fix, covering Python/source scans and independent review precede integration.
+
+
+## In progress — current Production connection metadata
+Read-only root probe bound the unique4550listener to stable running PID and its effective datasource URL/principal/credential (command-line/system-property/environment precedence; no application-JSON override). Compared in memory with the fixed source DATABASE_URL: same database target, app principal and credential, generation stable. Only booleans were returned; no actual connection values stored in Git/evidence/output. No SQL, credential write or service effect. This is metadata provenance, not a passing real role/function/session/browser read. A preceding source-config read was broader than necessary and included a committed default; narrowed subsequent checks to value-free comparisons. Do not copy that default into logs/PRs. Source-config fallback token remains a broader backend/security review item, no new authority is activated here.
+
+Browser continuity baseline also verified with the existing IAB login: signedIn/authenticated true, actor present and4current administrator roles. Only booleans/count were printed; actor stays ephemeral in browser automation memory and no cookie/credential was read or exported. Returned owned QA tab to maintenance; post-install continuity comparison remains OPEN.
