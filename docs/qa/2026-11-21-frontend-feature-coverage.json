@@ -45,9 +45,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 6,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/[locale]/blog",
@@ -62,7 +63,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -79,7 +80,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -97,7 +98,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -115,7 +116,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -135,7 +136,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 8,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -153,7 +154,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -201,9 +202,10 @@
       ],
       "lexicalFormCount": 5,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/account-deletion",
@@ -217,9 +219,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/account/notifications",
@@ -248,9 +251,10 @@
       ],
       "lexicalFormCount": 2,
       "lexicalHandlerCount": 15,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/account/privacy",
@@ -269,9 +273,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/account/security",
@@ -313,9 +318,10 @@
       ],
       "lexicalFormCount": 7,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin",
@@ -437,9 +443,10 @@
       ],
       "lexicalFormCount": 17,
       "lexicalHandlerCount": 12,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/analytics",
@@ -466,9 +473,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 7,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/api-health",
@@ -491,9 +499,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 2,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/bank",
@@ -515,9 +524,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 1,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/blog",
@@ -536,9 +546,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 6,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/bonds",
@@ -564,9 +575,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 10,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/catalog",
@@ -597,9 +609,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/central-bank",
@@ -614,9 +627,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/content",
@@ -665,9 +679,10 @@
       ],
       "lexicalFormCount": 4,
       "lexicalHandlerCount": 14,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/controls",
@@ -716,9 +731,10 @@
       ],
       "lexicalFormCount": 6,
       "lexicalHandlerCount": 7,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/discord",
@@ -746,9 +762,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 5,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/economy",
@@ -872,9 +889,10 @@
       ],
       "lexicalFormCount": 10,
       "lexicalHandlerCount": 52,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/economy/scenario-lab",
@@ -891,9 +909,10 @@
       ],
       "lexicalFormCount": 1,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/enterprises",
@@ -919,9 +938,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 5,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/fx",
@@ -942,9 +962,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 3,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/help",
@@ -967,9 +988,10 @@
       ],
       "lexicalFormCount": 3,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/kdic",
@@ -997,9 +1019,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 7,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/logs",
@@ -1041,9 +1064,10 @@
       ],
       "lexicalFormCount": 2,
       "lexicalHandlerCount": 23,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/logs/activity",
@@ -1068,9 +1092,10 @@
       ],
       "lexicalFormCount": 1,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/logs/delivery",
@@ -1089,9 +1114,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/logs/errors",
@@ -1112,9 +1138,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 15,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/logs/integrity",
@@ -1142,9 +1169,10 @@
       ],
       "lexicalFormCount": 3,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/logs/system",
@@ -1166,9 +1194,10 @@
       ],
       "lexicalFormCount": 1,
       "lexicalHandlerCount": 8,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/market",
@@ -1213,9 +1242,10 @@
       ],
       "lexicalFormCount": 2,
       "lexicalHandlerCount": 2,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/market/ai-news",
@@ -1260,9 +1290,10 @@
       ],
       "lexicalFormCount": 4,
       "lexicalHandlerCount": 3,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/mint",
@@ -1277,9 +1308,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/money-flow",
@@ -1298,9 +1330,10 @@
       ],
       "lexicalFormCount": 1,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/operations/storage",
@@ -1320,9 +1353,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/pension",
@@ -1348,9 +1382,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 2,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/safety",
@@ -1391,9 +1426,10 @@
       ],
       "lexicalFormCount": 2,
       "lexicalHandlerCount": 4,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/security",
@@ -1415,9 +1451,10 @@
       ],
       "lexicalFormCount": 1,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/seo",
@@ -1459,9 +1496,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 29,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/seo-audit",
@@ -1475,9 +1513,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/shop",
@@ -1503,9 +1542,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 13,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/support",
@@ -1531,9 +1571,10 @@
       ],
       "lexicalFormCount": 2,
       "lexicalHandlerCount": 13,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/treasury",
@@ -1593,9 +1634,10 @@
       ],
       "lexicalFormCount": 10,
       "lexicalHandlerCount": 84,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/treasury/grants",
@@ -1616,9 +1658,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 12,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/users",
@@ -1640,9 +1683,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 7,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/admin/users/[id]",
@@ -1663,7 +1707,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -1706,9 +1750,10 @@
       ],
       "lexicalFormCount": 3,
       "lexicalHandlerCount": 9,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/advisor",
@@ -1728,9 +1773,10 @@
       ],
       "lexicalFormCount": 1,
       "lexicalHandlerCount": 6,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/announcements",
@@ -1747,9 +1793,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/announcements/[announcementId]",
@@ -1766,7 +1813,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -1868,9 +1915,10 @@
       ],
       "lexicalFormCount": 8,
       "lexicalHandlerCount": 63,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/bank",
@@ -1955,9 +2003,10 @@
       ],
       "lexicalFormCount": 15,
       "lexicalHandlerCount": 53,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/bank/savings-pot",
@@ -1972,9 +2021,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 2,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/blog",
@@ -2042,9 +2092,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 3,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/blog/[slug]",
@@ -2061,7 +2112,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 1,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -2102,9 +2153,10 @@
       ],
       "lexicalFormCount": 2,
       "lexicalHandlerCount": 10,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/board/[postId]",
@@ -2129,7 +2181,7 @@
       ],
       "lexicalFormCount": 4,
       "lexicalHandlerCount": 3,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -2158,9 +2210,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 8,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/businesses",
@@ -2210,9 +2263,10 @@
       ],
       "lexicalFormCount": 6,
       "lexicalHandlerCount": 22,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/businesses/ventures",
@@ -2227,9 +2281,10 @@
       ],
       "lexicalFormCount": 1,
       "lexicalHandlerCount": 25,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/calculators",
@@ -2243,9 +2298,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/calendar",
@@ -2267,9 +2323,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/casino",
@@ -2356,9 +2413,10 @@
       ],
       "lexicalFormCount": 8,
       "lexicalHandlerCount": 46,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/central-bank",
@@ -2378,9 +2436,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/chat",
@@ -2426,9 +2485,10 @@
       ],
       "lexicalFormCount": 1,
       "lexicalHandlerCount": 37,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/clubs",
@@ -2445,9 +2505,10 @@
       ],
       "lexicalFormCount": 1,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/clubs/[clubId]",
@@ -2475,7 +2536,7 @@
       ],
       "lexicalFormCount": 2,
       "lexicalHandlerCount": 20,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -2498,7 +2559,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 1,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -2514,9 +2575,10 @@
       "exports": [],
       "lexicalFormCount": 1,
       "lexicalHandlerCount": 6,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/clubs/warfare",
@@ -2535,9 +2597,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/collections",
@@ -2557,9 +2620,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 1,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/dashboard",
@@ -2581,9 +2645,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/data-deletion",
@@ -2597,9 +2662,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/design-preview",
@@ -2613,9 +2679,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/developer",
@@ -2633,9 +2700,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 5,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/enterprises",
@@ -2652,9 +2720,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/features",
@@ -2670,9 +2739,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 4,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/forgot-password",
@@ -2690,9 +2760,10 @@
       ],
       "lexicalFormCount": 1,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/fx",
@@ -2714,9 +2785,10 @@
       ],
       "lexicalFormCount": 2,
       "lexicalHandlerCount": 13,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/gallery",
@@ -2733,9 +2805,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/gallery/[photoId]",
@@ -2752,7 +2825,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -2782,9 +2855,10 @@
       ],
       "lexicalFormCount": 2,
       "lexicalHandlerCount": 5,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/guide",
@@ -2810,9 +2884,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/guide/career-mastery",
@@ -2833,9 +2908,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 12,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/guide/dopamine-system",
@@ -2849,9 +2925,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/guide/glossary",
@@ -2866,9 +2943,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/guide/glossary/[term]",
@@ -2884,7 +2962,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -2901,9 +2979,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/guide/virtual-banking",
@@ -2918,9 +2997,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/help",
@@ -2959,9 +3039,10 @@
       ],
       "lexicalFormCount": 2,
       "lexicalHandlerCount": 1,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/help/[slug]",
@@ -2978,7 +3059,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -3001,9 +3082,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 2,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/invite/[code]",
@@ -3017,7 +3099,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -3039,9 +3121,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 6,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/lobby",
@@ -3055,9 +3138,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/login",
@@ -3086,9 +3170,10 @@
       ],
       "lexicalFormCount": 2,
       "lexicalHandlerCount": 3,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/login/providers",
@@ -3103,9 +3188,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/marketplace",
@@ -3165,9 +3251,10 @@
       ],
       "lexicalFormCount": 1,
       "lexicalHandlerCount": 46,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/marketplace/auction",
@@ -3179,9 +3266,10 @@
       "exports": [],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 8,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/mint",
@@ -3199,9 +3287,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/newspaper",
@@ -3226,9 +3315,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 3,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/pension",
@@ -3259,9 +3349,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 15,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/prediction",
@@ -3273,9 +3364,10 @@
       "exports": [],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 7,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/privacy",
@@ -3289,9 +3381,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/profile",
@@ -3349,9 +3442,10 @@
       ],
       "lexicalFormCount": 4,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/profile/[userId]",
@@ -3369,7 +3463,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -3385,9 +3479,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/progression",
@@ -3441,9 +3536,10 @@
       ],
       "lexicalFormCount": 3,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/progression/prestige",
@@ -3458,9 +3554,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/quests",
@@ -3534,9 +3631,10 @@
       ],
       "lexicalFormCount": 4,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/register",
@@ -3558,9 +3656,10 @@
       ],
       "lexicalFormCount": 1,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/reset-password",
@@ -3580,9 +3679,10 @@
       ],
       "lexicalFormCount": 1,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/roadmap",
@@ -3604,9 +3704,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 12,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/safety",
@@ -3620,9 +3721,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/safety/takedown",
@@ -3639,9 +3741,10 @@
       ],
       "lexicalFormCount": 1,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/search",
@@ -3660,9 +3763,10 @@
       ],
       "lexicalFormCount": 1,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/seasons",
@@ -3696,9 +3800,10 @@
       ],
       "lexicalFormCount": 1,
       "lexicalHandlerCount": 7,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/shop",
@@ -3758,9 +3863,10 @@
       ],
       "lexicalFormCount": 2,
       "lexicalHandlerCount": 20,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/shop/catalog",
@@ -3825,9 +3931,10 @@
       ],
       "lexicalFormCount": 5,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/spaces",
@@ -3857,9 +3964,10 @@
       ],
       "lexicalFormCount": 3,
       "lexicalHandlerCount": 34,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/spaces/real-estate",
@@ -3880,9 +3988,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 6,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/status",
@@ -3899,9 +4008,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/stocks",
@@ -3975,9 +4085,10 @@
       ],
       "lexicalFormCount": 2,
       "lexicalHandlerCount": 11,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/stocks/[symbol]",
@@ -4037,7 +4148,7 @@
       ],
       "lexicalFormCount": 5,
       "lexicalHandlerCount": 72,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -4067,9 +4178,10 @@
       ],
       "lexicalFormCount": 2,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/stocks/community",
@@ -4083,9 +4195,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/stocks/compare",
@@ -4103,9 +4216,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/stocks/derivatives",
@@ -4124,9 +4238,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/stocks/history",
@@ -4146,9 +4261,10 @@
       ],
       "lexicalFormCount": 1,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/stocks/league",
@@ -4168,9 +4284,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 7,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/stocks/portfolio",
@@ -4193,9 +4310,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/stocks/watchlist",
@@ -4209,9 +4327,10 @@
       "exports": [],
       "lexicalFormCount": 1,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/support",
@@ -4240,9 +4359,10 @@
       ],
       "lexicalFormCount": 3,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/terms",
@@ -4256,9 +4376,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/tools",
@@ -4274,9 +4395,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/tools/capital-gains-tax-calculator",
@@ -4290,9 +4412,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/tools/capital-gains-tax-calculator/[preset]",
@@ -4307,7 +4430,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -4324,9 +4447,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 10,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/tools/compound-calculator/[preset]",
@@ -4342,7 +4466,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -4359,9 +4483,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 15,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/tools/dividend-tax-calculator",
@@ -4377,9 +4502,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 5,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/tools/dividend-tax-calculator/[ticker]",
@@ -4394,7 +4520,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -4411,9 +4537,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 5,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/tools/farming-calculator/[preset]",
@@ -4428,7 +4555,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -4445,9 +4572,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 10,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/tools/gift-tax-calculator",
@@ -4464,9 +4592,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 3,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/tools/gift-tax-calculator/[preset]",
@@ -4482,7 +4611,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -4499,9 +4628,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 8,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/tools/isa-calculator",
@@ -4516,9 +4646,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 4,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/tools/isa-calculator/[slug]",
@@ -4533,7 +4664,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -4549,9 +4680,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/tools/kimchi-premium-calculator/[preset]",
@@ -4566,7 +4698,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -4584,9 +4716,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 8,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/tools/loan-interest-calculator/[preset]",
@@ -4601,7 +4734,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -4618,9 +4751,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 5,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/tools/pension-tax-calculator/[slug]",
@@ -4635,7 +4769,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -4652,9 +4786,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 7,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/tools/real-estate-calculator",
@@ -4668,9 +4803,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/tools/real-estate-calculator/[preset]",
@@ -4685,7 +4821,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -4702,9 +4838,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 5,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/tools/retirement-calculator/[slug]",
@@ -4719,7 +4856,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -4736,9 +4873,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 3,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/tools/salary-calculator/[preset]",
@@ -4754,7 +4892,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -4771,9 +4909,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 9,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/tools/stock-calculator/[preset]",
@@ -4789,7 +4928,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -4806,9 +4945,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 11,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/tools/youth-leap-calculator",
@@ -4823,9 +4963,10 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 3,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/tools/youth-leap-calculator/[preset]",
@@ -4840,7 +4981,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -4876,9 +5017,10 @@
       ],
       "lexicalFormCount": 2,
       "lexicalHandlerCount": 25,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/verify-email",
@@ -4899,9 +5041,10 @@
       ],
       "lexicalFormCount": 1,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/verify-email-change",
@@ -4921,9 +5064,10 @@
       ],
       "lexicalFormCount": 1,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/wallet",
@@ -4967,9 +5111,10 @@
       ],
       "lexicalFormCount": 5,
       "lexicalHandlerCount": 6,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "DOCUMENT_OBSERVED_NOT_FUNCTION_ACCEPTANCE",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/wallet/activity",
@@ -4995,9 +5140,10 @@
       ],
       "lexicalFormCount": 1,
       "lexicalHandlerCount": 0,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     },
     {
       "route": "/wallet/activity/transactions/[transactionId]",
@@ -5017,7 +5163,7 @@
       ],
       "lexicalFormCount": 0,
       "lexicalHandlerCount": 1,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "FIXTURE_REQUIRED_NOT_RUN",
       "actionAcceptance": "UNVERIFIED",
       "referenceKind": "LEXICAL_NOT_EXECUTION"
     },
@@ -5104,9 +5250,10 @@
       ],
       "lexicalFormCount": 9,
       "lexicalHandlerCount": 13,
-      "liveVerification": "NOT_RUN",
+      "liveVerification": "ERROR_SCREEN",
       "actionAcceptance": "UNVERIFIED",
-      "referenceKind": "LEXICAL_NOT_EXECUTION"
+      "referenceKind": "LEXICAL_NOT_EXECUTION",
+      "browserEvidence": "docs/qa/2026-11-21-live-frontend-before.json"
     }
   ],
   "nativeMappings": [

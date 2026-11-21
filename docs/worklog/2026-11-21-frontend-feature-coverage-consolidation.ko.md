@@ -38,3 +38,11 @@
 ## 리뷰 수정 체크포인트
 - 독립 소스 리뷰 Important1건: 정상 로그인 신원은 있어도 CSRF proof가 비어 있을 수 있다. 계정 표시까지 실패로 버리던 것을 수정해 이름/계정 링크는 유지하고 로그아웃만 비활성화한다. 초기/fresh 조회2개 회귀 RED→GREEN, native 전체95/95. 전체 Spring605/605·skip0 이전 실행 증거는 유지하며 최종 리소스 변경 뒤 재검증 중이다. 첫 foreground 재실행은 원격 명령60초 제한으로 완료 증거가 없어 통과로 세지 않고 백그라운드 재실행했다.
 - 소스 리뷰 제외 항목은 별도 수용: 운영/worker/Nginx/rollback과 자산 bytes는 Task4 독립 운영 리뷰로, 브라우저/5언어/반응형/owner flow는 실제 Test로 확인한다. 실DB/실제 금융·메시지 변경은 이 조회/표시 전환 승인으로 정상 판정하지 않는다. 전체 기능 inventory는 참조 목록이며 실행 인증이 아니다.
+
+## 진행 체크포인트4 — 전체 정적 화면·main·운영 제안
+- 실제 로그인 브라우저 정적147개(사용자108/관리자39)를 열어 개인정보 없는 DOM 증거를 남겼다. 사용자87개 오류/차단, 관리자 errors1개 오류 안내. 동적33개는 fixture 필요로 미실행. 버튼 수는 성공 횟수가 아니다. `docs/qa/2026-11-21-live-frontend-before.ko.md`와 JSON 참조.
+- 소스 PR3334 정상 병합, 현재 main e45f57595415f132eedf36c13748564b93a1d918. exact-main CI44873490927의 classify/policy/spring-web-check/runtime-check 모두 SUCCESS. 공식 JAR SHA256 e11ebcddba4ec70afe987a6a52ecf333f38292c983e27654bb4f93f9d0cab08a 및 packaged build identity 확인. 최종 local native95/Spring605 실패·skip0, bootJar SUCCESS.
+- 독립 운영 리뷰 Important4: login non-GET 호환, 예측가능 preview selector의 직접 권한 검증, localhost/IPv6/env/drop-in/process/연결/예약작업 의존성, 설치/승격 직전 current main 재조회. 각 회귀 RED→GREEN 후 운영 검사14개·격리 Nginx gateway51 case 통과. 소스/DB/금융변경·실브라우저/실행 후 수용은 리뷰 제외로 실제 별도 gate를 유지한다. 운영 login POST는 리뷰 read-only 범위를 넘어 자동승인이 거절되었고, 재시도 대신 격리 Nginx에서 method/body 원형 보존을 증명했다.
+- 검증된6개 source/JAR의 assets23경로를 root-owned 정적 archive로 추출, 역사 hash 호환·private admin 자산 권한·error no-store 보존. 초기 proposal은 map_hash 초기화 순서 오류로 nginx-t 거부되어 적용하지 않았고, 정렬상 첫00-global include로 고친 제안은 Test/운영 모두 nginx-t PASS. 기존 실서비스 include/bytes는 아직 변경 전이다.
+- 단일 frontend-presentation Test4820/운영4822 동일 JAR를 loopback-only·DB/worker/session 생성 없는 systemd unit으로 설치했다. 아직 운영 트래픽 전환 전이다. fixed GET gateway4821, protected preview/Test 적용 및 실제 로그인/5언어/PC모바일 수용이 남아 있다.
+- 원본 source branch는 PR3334에 통합되었으며 후속 문서 증거는 같은 task의 docs/frontend-feature-coverage-consolidation-evidence-20261121에서 유지한다. 다른 branch/worktree와 API·재무·worker runtime은 보존한다.
