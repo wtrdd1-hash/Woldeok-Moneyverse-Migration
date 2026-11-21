@@ -111,3 +111,5 @@ docs/internal/
 docs/updates/*internal*.md
 docs/worklog/*internal*.md
 docs/changelog/*internal*.md
+
+ops/nov18-frontend-maintenance/__pycache__/

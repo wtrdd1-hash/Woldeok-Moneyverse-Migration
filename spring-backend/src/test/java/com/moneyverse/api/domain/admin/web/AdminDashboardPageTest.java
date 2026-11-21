@@ -15,6 +15,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class AdminDashboardPageTest {
+    private static String faviconDigest() {
+        try(var icon=new org.springframework.core.io.ClassPathResource("static/favicon.ico").getInputStream()) {
+            return java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(icon.readAllBytes()));
+        }catch(Exception unavailable){throw new AssertionError("Current favicon must be packaged",unavailable);}
+    }
+
     private final AdminAuthService auth=mock(AdminAuthService.class);
     private final AdminGovernanceService governance=mock(AdminGovernanceService.class);
     private final AdminDashboardPage dashboard=new AdminDashboardPage(auth,governance,pages(),new AdminNavigation(new com.fasterxml.jackson.databind.ObjectMapper(),new com.moneyverse.api.domain.web.UiLocale(new com.fasterxml.jackson.databind.ObjectMapper())));
@@ -99,7 +105,7 @@ class AdminDashboardPageTest {
         var logos=java.util.regex.Pattern.compile("<img\\b[^>]*class=\"brand-mark\"[^>]*>").matcher(html)
             .results().map(java.util.regex.MatchResult::group).toList();
         assertEquals(2,logos.size(),"Admin sidebar and drawer must use the site favicon");
-        for(String logo:logos) assertTrue(logo.contains("src=\"/assets/mv39/favicon.ico?v=9ce0a8f10cafff52d1d2f7aa451b3e9162944162f61258842e13aa8546f98e78\"") && logo.contains("alt=\"\""));
+        for(String logo:logos) assertTrue(logo.contains("src=\"/assets/mv39/favicon.ico?v="+faviconDigest()+"\"") && logo.contains("alt=\"\""));
     }
 
     @Test void malformedSourceListsStayUnavailable() {

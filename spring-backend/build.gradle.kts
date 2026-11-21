@@ -65,7 +65,7 @@ tasks.withType<Test> {
 }
 
 tasks.named<Test>("test") {
-    useJUnitPlatform { excludeTags("postgres-messaging") }
+    useJUnitPlatform { excludeTags("postgres-messaging", "postgres-shop") }
 }
 
 tasks.register<Test>("postgresMessagingTest") {
@@ -73,7 +73,29 @@ tasks.register<Test>("postgresMessagingTest") {
     group = "verification"
     testClassesDirs = sourceSets["test"].output.classesDirs
     classpath = sourceSets["test"].runtimeClasspath
-    useJUnitPlatform { includeTags("postgres-messaging") }
+    // Keep the established CI entry point while certifying both canonical native services.
+    useJUnitPlatform { includeTags("postgres-messaging", "postgres-shop") }
+    doLast {
+        val xml = layout.buildDirectory.file("test-results/postgresMessagingTest/TEST-com.moneyverse.api.domain.shop.AdminShopPostgresIntegrationTest.xml").get().asFile.readText()
+        fun count(name: String): Int = Regex(name + "=\\\"([0-9]+)\\\"").find(xml)?.groupValues?.get(1)?.toIntOrNull()
+            ?: error("Native PostgreSQL shop result field is missing: " + name)
+        val shopTests = count("tests")
+        val shopFailures = count("failures")
+        val shopErrors = count("errors")
+        val shopSkipped = count("skipped")
+        check(shopTests >= 5 && shopFailures == 0 && shopErrors == 0 && shopSkipped == 0) {
+            "Native PostgreSQL shop coverage is incomplete"
+        }
+        println("Native PostgreSQL shop: tests=$shopTests failures=$shopFailures errors=$shopErrors skipped=$shopSkipped")
+    }
+}
+
+tasks.register<Test>("postgresShopTest") {
+    description = "Verify native administrator shop against the explicitly configured disposable CI PostgreSQL"
+    group = "verification"
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
+    useJUnitPlatform { includeTags("postgres-shop") }
 }
 
 tasks.register<JavaExec>("nativeUiPreview") {

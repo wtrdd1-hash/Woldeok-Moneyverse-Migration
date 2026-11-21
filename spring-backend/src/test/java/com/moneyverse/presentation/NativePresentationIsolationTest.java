@@ -23,6 +23,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     "spring.datasource.url=not-a-database","spring.datasource.username=unused","server.address=127.0.0.1"})
 @AutoConfigureMockMvc
 class NativePresentationIsolationTest {
+    private static String faviconDigest() {
+        try(var icon=new org.springframework.core.io.ClassPathResource("static/favicon.ico").getInputStream()) {
+            return java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(icon.readAllBytes()));
+        }catch(Exception unavailable){throw new AssertionError("Current favicon must be packaged",unavailable);}
+    }
+
     @Autowired ApplicationContext context;
     @Autowired MockMvc mvc;
     @LocalServerPort int port;
@@ -49,13 +55,13 @@ class NativePresentationIsolationTest {
         var logos=java.util.regex.Pattern.compile("<img\\b[^>]*class=\"brand-mark\"[^>]*>").matcher(html)
             .results().map(java.util.regex.MatchResult::group).toList();
         assertEquals(2,logos.size(),"Desktop and mobile brand links must show the actual favicon");
-        for(String logo:logos) for(String attribute:new String[]{"src=\"/assets/mv39/favicon.ico?v=9ce0a8f10cafff52d1d2f7aa451b3e9162944162f61258842e13aa8546f98e78\"",
+        for(String logo:logos) for(String attribute:new String[]{"src=\"/assets/mv39/favicon.ico?v="+faviconDigest()+"\"",
             "alt=\"\"","width=\"32\"","height=\"32\""})
             assertTrue(logo.contains(attribute),"Logo must preserve accessible fixed-size favicon markup: "+attribute);
         var icons=java.util.regex.Pattern.compile("<link[^>]*rel=\"icon\"[^>]*>").matcher(html)
             .results().map(java.util.regex.MatchResult::group).toList();
         assertEquals(1,icons.size(),"Tab branding must declare exactly one favicon");
-        assertTrue(icons.get(0).contains("href=\"/assets/mv39/favicon.ico?v=9ce0a8f10cafff52d1d2f7aa451b3e9162944162f61258842e13aa8546f98e78\""));
+        assertTrue(icons.get(0).contains("href=\"/assets/mv39/favicon.ico?v="+faviconDigest()+"\""));
     }
     @ParameterizedTest @ValueSource(strings={"/api/version","/api/v1/auth/local/login",
         "/api/treasury/overview","/wallet","/admin","/socket.io/","/login","/actuator/health"})
@@ -71,7 +77,7 @@ class NativePresentationIsolationTest {
         var expected=new ClassPathResource("static/assets/mv39/i18n.js").getContentAsByteArray();
         mvc.perform(get("/assets/mv39/i18n.js")).andExpect(status().isOk()).andExpect(content().bytes(expected));
         assertNotEquals(200,mvc.perform(get("/assets/mv39/missing.js")).andReturn().getResponse().getStatus());
-        mvc.perform(get("/assets/mv39/favicon.ico?v=9ce0a8f10cafff52d1d2f7aa451b3e9162944162f61258842e13aa8546f98e78")).andExpect(status().isOk())
+        mvc.perform(get("/assets/mv39/favicon.ico?v="+faviconDigest())).andExpect(status().isOk())
             .andExpect(header().doesNotExist("Set-Cookie"))
             .andExpect(content().bytes(new ClassPathResource("static/assets/mv39/favicon.ico").getContentAsByteArray()));
     }
