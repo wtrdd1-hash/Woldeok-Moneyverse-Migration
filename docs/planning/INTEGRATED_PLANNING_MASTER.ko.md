@@ -1,5 +1,7 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+> **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
+
 ## v2026.11.21.2234 — AgentMemory 영상/도구 영구 참고 및 기록 공유 (PLANNING / 문서만)
 
 [지정 릴스](https://www.instagram.com/reel/DfZgpiWtX1z/)와 [공식 코드](https://github.com/rohitg00/agentmemory)를 [국문 기준](../development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md) / [영문 정본](../development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md)에 저장한다. 매 작업 전 최신 통합기획/메인 SHA 재조회, 비밀값 없는 시작·중간·종료 이력 공유, 다음 작업자 이어받기를 필수로 한다. 자동 기억 수집은 격리 보안·공동도구 호환·보존/복원 검증 전 비활성이고 외부 도구 **미설치** 상태다. 코드·DB·Test/운영 변경 없음. 최초 main `a341ee3784bf611801efbcdef68e60ae38246dec`; 최종 통합 직전 재검증.

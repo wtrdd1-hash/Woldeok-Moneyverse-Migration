@@ -1,5 +1,7 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+> **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
+
 ## v2026.11.21.2234 — AgentMemory link retained for all future work handoffs (PLANNING; DOCS ONLY)
 
 [Source reel](https://www.instagram.com/reel/DfZgpiWtX1z/) and [upstream code](https://github.com/rohitg00/agentmemory) are permanently referenced by the [EN guidance](../development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md) / [KO](../development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md). Effective now: use current authoritative plans and versioned GitHub start/mid/end worklogs as safe shared history; no automatic third-party memory capture until isolated security, agent interoperability, retention and backup gates have passed. No service installed; no Test, Production, UI or DB change. Work started from remote main `a341ee3784bf611801efbcdef68e60ae38246dec`; check main again before integration.

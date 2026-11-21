@@ -4,7 +4,7 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow">
 <meta name="color-scheme" content="dark"><meta name="theme-color" content="#0C1020">
-<title th:attr="data-public-title=${publicTitleKey}" th:text="${pageTitle} + ' | Woldeok Moneyverse'">Woldeok Moneyverse</title>
+<title th:attr="data-public-title=${publicTitleKey}" th:text="${uiCopy[publicTitleKey]} + ' | Woldeok Moneyverse'">Woldeok Moneyverse</title>
 <link rel="stylesheet" href="/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31"><script src="/assets/mv39/i18n.js?v=ac0273f576a13961d4d1ab79667b1968cc588247571dbd34063448258bf7c0d8" defer></script>
 <link rel="stylesheet" href="/assets/mv43/public.css?v=6a6a264de0f0c2e9d7daba2b10938d5743dc345a1acde077a0240b261236fa16"><script src="/assets/mv43/public.js?v=09919f3ac61d392224a14d7c20471093f0e1d122a6cf5c027c01ad919c2e90d1" defer></script>
 <th:block th:replace="~{shared/chrome :: commonHead}"></th:block>
@@ -13,10 +13,10 @@
 <a class="skip-link" href="#main-content" data-i18n="publicSkip" th:text="${uiCopy['publicSkip']}">Skip to main content</a>
 <div class="app-shell"><th:block th:replace="~{shared/chrome :: sidebar}"></th:block><div class="app-main"><div class="app-inner"><th:block th:replace="~{shared/chrome :: pageHeader}"></th:block>
 <main id="main-content" class="public-main" tabindex="-1">
-  <nav class="crumbs" data-i18n-aria="publicBreadcrumb" th:attr="aria-label=${uiCopy['publicBreadcrumb']}"><a href="/" data-i18n="publicText46" th:text="${uiCopy['publicText46']}">Home</a><span aria-hidden="true">/</span><span th:attr="data-i18n=${publicTitleKey}" th:text="${pageTitle}">Service status</span></nav>
+  <nav class="crumbs" data-i18n-aria="publicBreadcrumb" th:attr="aria-label=${uiCopy['publicBreadcrumb']}"><a href="/" data-i18n="publicText46" th:text="${uiCopy['publicText46']}">Home</a><span aria-hidden="true">/</span><span th:attr="data-i18n=${publicTitleKey}" th:text="${uiCopy[publicTitleKey]}">Service status</span></nav>
   <section class="hero"><div class="hero-text">
     <p class="eyebrow" data-i18n="publicObservability" th:text="${uiCopy['publicObservability']}">SOURCE-BACKED OBSERVABILITY / SPRING NATIVE</p>
-    <h1 th:attr="data-i18n=${publicTitleKey}" th:text="${pageTitle}">Service status</h1>
+    <h1 th:attr="data-i18n=${publicTitleKey}" th:text="${uiCopy[publicTitleKey]}">Service status</h1>
     <p data-i18n="publicText47" th:text="${uiCopy['publicText47']}">Only real records.</p>
     <div class="hero-tags"><span class="chip chip-primary" data-i18n="publicText48" th:text="${uiCopy['publicText48']}">No invented health claims</span><span class="chip" data-i18n="publicText49" th:text="${uiCopy['publicText49']}">Database-backed snapshots</span></div>
   </div><div class="hero-icon" aria-hidden="true"><span class="hero-icon-number">●</span><span class="hero-icon-line"></span></div></section>
@@ -38,7 +38,7 @@
       </li>
     </ul>
   </section>
-  <section class="panel faq"><h2 data-i18n="publicText68" th:text="${uiCopy['publicText68']}">Understanding status</h2><details><summary data-i18n="publicText69" th:text="${uiCopy['publicText69']}">Why?</summary><p data-i18n="publicText70" th:text="${uiCopy['publicText70']}">Explanation</p></details><p class="notice" data-i18n="publicText71" th:text="${uiCopy['publicText71']}">Info</p><a class="secondary-button refresh-link" data-public-locale-link th:href="@{/status(lang=${language})}" data-i18n="publicText72" th:text="${uiCopy['publicText72']}">Refresh</a></section>
+  <section class="panel faq"><h2 data-i18n="publicText68" th:text="${uiCopy['publicText68']}">Understanding status</h2><details><summary data-i18n="publicText69" th:text="${uiCopy['publicText69']}">Why?</summary><p data-i18n="publicText70" th:text="${uiCopy['publicText70']}">Explanation</p></details><p class="notice" data-i18n="publicText71" th:text="${uiCopy['publicText71']}">Info</p><a class="secondary-button refresh-link" data-public-locale-link th:href="${'/status?lang=' + language}" data-i18n="publicText72" th:text="${uiCopy['publicText72']}">Refresh</a></section>
 </main>
 <th:block th:replace="~{shared/chrome :: footer}"></th:block></div></div></div>
 <th:block th:replace="~{shared/chrome :: mobileNavigation}"></th:block><th:block th:replace="~{shared/chrome :: support}"></th:block>

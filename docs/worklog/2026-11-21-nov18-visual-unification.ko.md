@@ -67,3 +67,9 @@ Protected-preview ops review: four Important findings corrected in one pass. 1) 
 Ruling on preview scope: ADMIN_PREVIEW_ONLY on the public origin behind the existing real administrator auth_request, separate loopback DB-free unit. It is deliberately not a weakening of Test-host admission and not independent full Test/DB/finance acceptance. Public documents stay503; old dedicated frontends stay disabled; no API rewrites or Production frontend activation. Actual signed-in browser/layout/live source compatibility are still pending. Cost if misread is a false release acceptance, so final promotion gates remain independently open.
 
 Exact-main a341ee3784 CI44909624205 now has classify/policy/spring-web-check/runtime-check all SUCCESS; canonical shop5 and messaging9 SQL passed in approved CI. PR3347 runtime suite retained117skips (not passed). The separate new public status source is still uncommitted: full standard Spring628/0failure/0error/0reportedskip and native347/0failure/0skip; its independent source review and final release evidence remain open.
+
+
+## 2026-11-21 continuation / before work and in progress
+새 AgentMemory EN/KO 프로토콜과 최신 정본 기획/계획/작업로그를 재조회했다. 외부 기억 도구는 설치·사용하지 않는다. 문서 전용 main7ba38df5f8을 충돌 없이 bb8542bef7로 통합했다. a341 아티팩트로 미리보기를 준비하려던 명령은 최신 main 불일치를 변경 전에 차단했으며 새 unit/설정/스테이지는 설치되지 않았다. 엄격한 exact-main 게이트를 유지하고, 독립 검토 중인 status 런타임 소스를 정상 통합해 새 CI 아티팩트를 받기로 결정했다. 영문 정본 작업 handoff를 추가했고 기획서 상단의 과거 운영 표시를 현재 점검 상태와 구별했다. 현재 전체 작업은 진행 중이며 운영 앱 전환은 미완료다.
+
+독립 status 검토: 언어 query 무시, 오래된 관측/age0 수용을 Important로 분류했다. trailing JSON도 두 번째 장애 문서가 무시될 수 있어 Important로 재분류했다. 실제 HTTP3회귀 RED(10건 중3실패)→GREEN, 공개 언어 cookie/query/header 우선순위·관측/age10초 허용 지연·trailing token 거부 수정. focused54, full standard Spring631/0실패/0오류/0표시skip; 로컬 제외 PostgreSQL14건은 통과 주장하지 않는다. nativeNode343, security/release185, ops7 통과 및 민감정보/control scan/diff clean. 초기 과거 shell scan 경로 부재는 현재 CI Node entrypoint로 교정했고 실제 scan 통과. 기존 JDK/Gradle 경고는 유지. 앱 운영 변경은 없다.

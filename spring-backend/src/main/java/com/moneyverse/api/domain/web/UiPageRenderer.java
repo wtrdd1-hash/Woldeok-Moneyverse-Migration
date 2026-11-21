@@ -17,8 +17,14 @@ public class UiPageRenderer {
         this.templates=templates; this.locale=locale;
     }
     public String language(HttpServletRequest request) { return locale.resolve(request); }
+    public String publicLanguage(HttpServletRequest request) { return locale.resolvePublic(request); }
     public String render(String template, HttpServletRequest request, Map<String,Object> attributes) {
-        String language=language(request);
+        return renderLanguage(template,language(request),attributes);
+    }
+    public String renderPublic(String template, HttpServletRequest request, Map<String,Object> attributes) {
+        return renderLanguage(template,publicLanguage(request),attributes);
+    }
+    private String renderLanguage(String template,String language,Map<String,Object> attributes) {
         Map<String,Object> model=new HashMap<>(attributes);
         model.put("uiLanguage",language);
         model.put("uiCopy",locale.labels(language));

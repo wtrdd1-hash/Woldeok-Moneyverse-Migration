@@ -1,5 +1,7 @@
 # Release Guide
 
+> **Current maintenance frontdoor — 2026-11-21:** Owner-approved document-only maintenance is live; the previously accepted presentation pair below is stopped. No rebuilt application has replaced maintenance. A protected administrator-only preview is not independent full Test/financial acceptance. [Current receipt](releases/2026-11-21-frontend-rebuild-maintenance.ko.md).
+
 > **2026-11-21 combined presentation receipt:** The accepted native public/admin read lane is now composed with owner-verified member HTML and the existing pure authentication screens in `frontend-presentation`, without DB/session/job authority. The current slice is26 canonical screens, not all functionality. [Exact-source Test/Production, compatibility archive, retirement and rollback evidence](releases/2026-11-21-frontend-consolidation-production.ko.md) records the actual release. Existing full-backend/financial gates and blocked mutations remain in force.
 
 **English canonical** | [한국어](RELEASING.ko.md)

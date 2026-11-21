@@ -1,5 +1,7 @@
 # Woldeok Moneyverse — Living Project Plan
 
+> **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
+
 ## v2026.11.21.2234 — Saved AgentMemory development reference and task-handoff protocol (PLANNING; not installed)
 
 Owner-designated [Instagram reference](https://www.instagram.com/reel/DfZgpiWtX1z/) (publisher caption; video playback unverified) and [upstream repository](https://github.com/rohitg00/agentmemory) are retained in the [EN shared-memory protocol](../development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md) / [KO](../development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md). The repeatable obligation is to consult current source-of-truth documents and record safe work handoffs across agents using GitHub logs. External persistent-memory installation and cross-client testing remain unverified and blocked pending security gates; the current planning hierarchy and all Test/Production release controls are unchanged. **DOCS ONLY.**
