@@ -1,5 +1,7 @@
 # November 18 Design Baseline — Global Language and Support/Chat Implementation Authority
 
+> **Observed frontend checkpoint, 2026-11-21 12:02 KST — partial:** Public five-route presentation remains93a3; eight administrator read screens now use the common Nov18 desktop/responsive shell at exact sourcee2fb487a1a78. Authenticated Test320locale/layout cases plus40CSS reflows and Production24layouts passed. Whole-site and other administrator actions remain OPEN. Stable home login hydration was rechecked successfully; account/support/chat403, other header coverage, error-log load failures and financial/provenance gates remain separate findings. [Current acceptance](../releases/2026-11-21-nov18-admin-unified-production.ko.md) and [route ledger](../qa/2026-11-21-nov18-frontend-route-ledger.ko.md) supersede historical frontend status below.
+
 Version: v2026.11.20.1 | Status: OWNER-APPROVED DESIGN / IMPLEMENTATION REQUIRED / RELEASE NOT VERIFIED
 Korean: [한국어](NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.ko.md)
 Initial main: `245489a1452a1f187af831f483c18ab2501a65c5` (2026-11-20 KST). This specification adopts the [180-screen PC/mobile design from November 18](ALL_PAGES_RESPONSIVE_REDESIGN_v2026.11.18.12.md) and [administrator/global-chat concepts](ADMIN_GLOBAL_CHAT_DESIGN_v2026.11.18.13.md) as the **visual baseline** for the website. It supersedes the historical “mockups only / no development” restriction **for future authorized implementation**, not as a retroactive claim that implementation or release occurred.
