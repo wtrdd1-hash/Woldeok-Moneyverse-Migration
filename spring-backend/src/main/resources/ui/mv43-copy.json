@@ -1,4 +1,179 @@
 {
+  "adminShopLead": [
+    "Inspect verified catalog items, prices, stock and availability.",
+    "확인된 상품 목록과 가격, 재고, 판매 상태를 조회합니다.",
+    "確認済みの商品、価格、在庫、販売状況を確認します。",
+    "查看已核实的商品、价格、库存及销售状态。",
+    "Xem sản phẩm, giá, tồn kho và trạng thái bán đã xác minh."
+  ],
+  "adminShopSearch": [
+    "Search by name, code or category",
+    "이름·코드·분류로 검색",
+    "名前・コード・分類で検索",
+    "按名称、代码或分类搜索",
+    "Tìm theo tên, mã hoặc danh mục"
+  ],
+  "adminShopCategory": [
+    "Category",
+    "분류",
+    "分類",
+    "分类",
+    "Danh mục"
+  ],
+  "adminShopAllCategories": [
+    "All categories",
+    "전체 분류",
+    "すべての分類",
+    "全部分类",
+    "Tất cả danh mục"
+  ],
+  "adminShopCount": [
+    "Shown / verified records",
+    "표시 / 확인된 상품",
+    "表示 / 確認済み商品",
+    "显示 / 已核实商品",
+    "Hiển thị / sản phẩm đã xác minh"
+  ],
+  "adminShopSourceScope": [
+    "Search and counts apply only to this verified catalog response.",
+    "검색과 집계는 이번에 확인한 상품 목록에 한정됩니다.",
+    "検索と件数は今回確認できた商品一覧に限ります。",
+    "搜索与计数仅限本次已核实的商品列表。",
+    "Tìm kiếm và số lượng chỉ áp dụng cho danh sách sản phẩm vừa xác minh."
+  ],
+  "adminShopEmpty": [
+    "The verified catalog contains no items.",
+    "조회에 성공했으며 등록된 상품이 없습니다.",
+    "取得に成功しました。登録商品はありません。",
+    "查询成功，暂无已登记商品。",
+    "Truy vấn thành công, chưa có sản phẩm."
+  ],
+  "adminShopNoMatch": [
+    "No matching items in this catalog.",
+    "현재 목록에서 일치하는 상품이 없습니다.",
+    "この一覧に一致する商品はありません。",
+    "当前列表中没有匹配的商品。",
+    "Không có sản phẩm phù hợp trong danh sách này."
+  ],
+  "adminShopLoading": [
+    "Loading the verified catalog…",
+    "상품 목록을 확인하는 중입니다…",
+    "商品一覧を確認中です…",
+    "正在核实商品列表…",
+    "Đang xác minh danh sách sản phẩm…"
+  ],
+  "adminShopUnavailable": [
+    "Unable to verify the catalog. Refresh to try again.",
+    "상품 목록을 확인하지 못했습니다. 새로고침해 다시 조회해 주세요.",
+    "商品一覧を確認できませんでした。更新して再度お試しください。",
+    "无法核实商品列表，请刷新重试。",
+    "Không thể xác minh danh sách sản phẩm. Hãy tải lại để thử lại."
+  ],
+  "adminShopDenied": [
+    "Your current account cannot access this catalog.",
+    "현재 계정으로 상품 관리 목록에 접근할 수 없습니다.",
+    "現在のアカウントでは商品管理一覧にアクセスできません。",
+    "当前账户无权访问商品管理列表。",
+    "Tài khoản hiện tại không có quyền xem danh sách quản lý sản phẩm."
+  ],
+  "adminShopSession": [
+    "Your session has expired. Sign in again before refreshing.",
+    "로그인이 만료됐습니다. 다시 로그인한 뒤 새로고침해 주세요.",
+    "セッションの有効期限が切れました。再ログインして更新してください。",
+    "登录已过期，请重新登录后刷新。",
+    "Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại rồi tải lại."
+  ],
+  "adminShopRate": [
+    "Too many requests. Wait a moment before refreshing.",
+    "조회 요청이 많습니다. 잠시 기다린 뒤 새로고침해 주세요.",
+    "リクエストが多すぎます。少し待ってから更新してください。",
+    "请求过于频繁，请稍后刷新。",
+    "Có quá nhiều yêu cầu. Hãy chờ một lát rồi tải lại."
+  ],
+  "adminShopChanged": [
+    "The signed-in account changed. Refresh to verify access again.",
+    "로그인 계정이 바뀌었습니다. 새로고침해 권한을 다시 확인해 주세요.",
+    "ログイン中のアカウントが変わりました。更新して権限を再確認してください。",
+    "登录账户已更改，请刷新以重新验证权限。",
+    "Tài khoản đăng nhập đã thay đổi. Hãy tải lại để xác minh quyền."
+  ],
+  "adminShopVerified": [
+    "Catalog verified with your current administrator permission.",
+    "현재 관리자 권한으로 상품 목록을 확인했습니다.",
+    "現在の管理者権限で商品一覧を確認しました。",
+    "已使用当前管理员权限核实商品列表。",
+    "Đã xác minh danh sách sản phẩm bằng quyền quản trị hiện tại."
+  ],
+  "adminShopCode": [
+    "Item code",
+    "상품 코드",
+    "商品コード",
+    "商品代码",
+    "Mã sản phẩm"
+  ],
+  "adminShopPrice": [
+    "Price (WLD)",
+    "가격 (WLD)",
+    "価格 (WLD)",
+    "价格 (WLD)",
+    "Giá (WLD)"
+  ],
+  "adminShopStock": [
+    "Available stock",
+    "남은 재고",
+    "残り在庫",
+    "剩余库存",
+    "Tồn kho còn lại"
+  ],
+  "adminShopUnlimited": [
+    "Unlimited",
+    "무제한",
+    "無制限",
+    "不限",
+    "Không giới hạn"
+  ],
+  "adminShopActive": [
+    "On sale",
+    "판매 중",
+    "販売中",
+    "在售",
+    "Đang bán"
+  ],
+  "adminShopInactive": [
+    "Not on sale",
+    "판매 중지",
+    "販売停止",
+    "停售",
+    "Ngừng bán"
+  ],
+  "adminShopDetails": [
+    "View details",
+    "상세 보기",
+    "詳細を見る",
+    "查看详情",
+    "Xem chi tiết"
+  ],
+  "adminShopRarity": [
+    "Rarity",
+    "희귀도",
+    "レア度",
+    "稀有度",
+    "Độ hiếm"
+  ],
+  "adminShopPurchaseLimit": [
+    "Purchase limit",
+    "구매 제한",
+    "購入制限",
+    "购买限制",
+    "Giới hạn mua"
+  ],
+  "adminShopReadOnly": [
+    "Item changes will be available after the required security checks are verified.",
+    "상품 변경은 필요한 보안 검증을 마친 뒤 제공됩니다.",
+    "商品の変更は必要なセキュリティ検証が完了した後に利用できます。",
+    "商品修改将在完成必要的安全验证后开放。",
+    "Chức năng thay đổi sản phẩm sẽ được mở sau khi hoàn tất xác minh bảo mật cần thiết."
+  ],
   "adminProbeTitle": [
     "Read-source checks",
     "조회 원천 점검",

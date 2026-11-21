@@ -1,5 +1,12 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+> **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
+
+## v2026.11.21.2234 — AgentMemory 영상/도구 영구 참고 및 기록 공유 (PLANNING / 문서만)
+
+[지정 릴스](https://www.instagram.com/reel/DfZgpiWtX1z/)와 [공식 코드](https://github.com/rohitg00/agentmemory)를 [국문 기준](../development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md) / [영문 정본](../development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md)에 저장한다. 매 작업 전 최신 통합기획/메인 SHA 재조회, 비밀값 없는 시작·중간·종료 이력 공유, 다음 작업자 이어받기를 필수로 한다. 자동 기억 수집은 격리 보안·공동도구 호환·보존/복원 검증 전 비활성이고 외부 도구 **미설치** 상태다. 코드·DB·Test/운영 변경 없음. 최초 main `a341ee3784bf611801efbcdef68e60ae38246dec`; 최종 통합 직전 재검증.
+
+
 > **2026-11-21 15:55 KST 현재 — 통합 frontend26의 부분 수용:** source e45f57595415 동일 JAR의 DB-free Test/운영 한 쌍으로 공개5·관리자 조회10·회원3·인증8 UI/안전한 실패 상태를 통합했다. Test260조합/운영26·Test중지 독립성 및 old native11/QA Nginx2 정리를 검증했다. 관리자 원천4read·지갑 합계는 실제 조회다. 문의/쪽지 owner/DTO 미검증, 송금 CSRF, 가입/복구 hold·나머지 기능은 OPEN. 운영 전체 정적147 재검사 결과 사용자78 오류/차단·관리자 errors1, 동적33미검증. **전 기능 정상/180페이지 완료가 아니다.** [현재 운영/정리 증거](../releases/2026-11-21-frontend-consolidation-production.ko.md) · [현재 기능/경로 결함](../qa/2026-11-21-live-frontend-after.ko.md). 아래 다른 SHA/경로 수는 과거 수용 시점이다.
 
 > **2026-11-21 13:22 KST 현재 — 부분 적용:** 전달 로그1경로를 main7d58568e3041의 Nov18 공통 셸로 운영 전환해 관리자 조회9경로가 통일됐다. 이전8경로 e2fb/공개5경로93a3는 유지한다. 전달 Test40조합·운영15조합·기존8경로 전후16배치씩 및 Test 중지 독립성 확인. 나머지27관리자/전체 웹·변경 기능은 OPEN이다. API 관제 고정 정상 지표와 계정·문의·채팅403도 미해결이다. [최신 전달 수용](../releases/2026-11-21-nov18-admin-delivery-production.ko.md) / [미해결 결함](../qa/2026-11-21-nov18-unification-open-defects.ko.md). 아래8경로 등의 기록은 이전 수용 시점이다.

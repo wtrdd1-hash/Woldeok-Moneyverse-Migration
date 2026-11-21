@@ -65,4 +65,14 @@
 }
 
 /* Keep the official mark visible when the sidebar and hero emblem are hidden. */
-@media(max-width:1023px){.topbar h1::before{content:"";display:inline-block;width:24px;height:24px;margin-inline-end:8px;vertical-align:middle;background:url('/assets/mv39/favicon.ico?v=9ce0a8f10cafff52d1d2f7aa451b3e9162944162f61258842e13aa8546f98e78') center/contain no-repeat}}
+@media(max-width:1023px){.topbar h1::before{content:"";display:inline-block;width:24px;height:24px;margin-inline-end:8px;vertical-align:middle;background:url('/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5') center/contain no-repeat}}
+
+/* Both native navigation variants leave the same safe gap above their actual height. */
+:root{--mv-bottom-navigation-height:66px;--mv-support-navigation-gap:16px}
+.admin-v40{--mv-bottom-navigation-height:67px}
+.admin-mobile-brand{display:none}
+@media(max-width:1023px){
+  .support-fab{bottom:calc(var(--mv-bottom-navigation-height) + var(--mv-support-navigation-gap) + env(safe-area-inset-bottom,0px))}
+  .admin-mobile-brand{display:flex;flex:0 0 44px;min-width:44px;min-height:44px;align-items:center;justify-content:center;border-radius:11px}
+  .admin-mobile-brand img{display:block;width:32px;height:32px;object-fit:contain}
+}

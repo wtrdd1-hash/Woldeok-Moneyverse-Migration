@@ -1,0 +1,22 @@
+<!doctype html><html xmlns:th="http://www.thymeleaf.org" th:replace="~{shared/admin-shell :: page(~{::main})}"><body>
+<main id="main" tabindex="-1">
+<section class="admin-card admin-read-intro">
+  <div><p class="admin-kicker" data-i18n="sourceOverview" th:text="${uiCopy['sourceOverview']}">Source-backed overview</p>
+  <h2 data-i18n="adminTool_shop" th:text="${uiCopy['adminTool_shop']}">Shop</h2>
+  <p data-i18n="adminShopLead" th:text="${uiCopy['adminShopLead']}">Inspect the verified item catalog, prices, stock and availability.</p></div>
+  <button id="admin-shop-refresh" type="button" class="admin-refresh" data-i18n="refresh" th:text="${uiCopy['refresh']}">Refresh</button>
+</section>
+<section class="admin-card admin-shop-filters" aria-labelledby="admin-shop-query-title">
+  <h2 id="admin-shop-query-title" data-i18n="adminShopSearch" th:text="${uiCopy['adminShopSearch']}">Search catalog</h2>
+  <div class="admin-shop-query">
+    <label for="admin-shop-search"><span data-i18n="adminShopSearch" th:text="${uiCopy['adminShopSearch']}">Name, code or category</span><input id="admin-shop-search" type="search" maxlength="80" autocomplete="off" disabled></label>
+    <label for="admin-shop-category"><span data-i18n="adminShopCategory" th:text="${uiCopy['adminShopCategory']}">Category</span><select id="admin-shop-category" disabled><option value="" data-i18n="adminShopAllCategories" th:text="${uiCopy['adminShopAllCategories']}">All categories</option></select></label>
+  </div>
+  <p class="admin-read-note" data-i18n="adminShopSourceScope" th:text="${uiCopy['adminShopSourceScope']}">Search and counts apply only to the verified catalog response.</p>
+</section>
+<p id="admin-shop-status" class="admin-shop-status" role="status" aria-live="polite" data-i18n="adminShopLoading" th:text="${uiCopy['adminShopLoading']}">Loading verified catalog…</p>
+<section aria-labelledby="admin-shop-results-title" class="admin-shop-results"><div class="admin-read-result-heading"><h2 id="admin-shop-results-title" data-i18n="adminReadResults" th:text="${uiCopy['adminReadResults']}">Verified results</h2><span id="admin-shop-count" class="admin-read-count"></span></div>
+<div id="admin-shop-catalog" th:attr="data-catalog-endpoint=${adminCatalogPath}" class="admin-shop-grid" aria-busy="true"></div></section>
+<section class="admin-card admin-shop-command-note" role="note"><p data-i18n="adminShopReadOnly" th:text="${uiCopy['adminShopReadOnly']}">Item changes will be available after the required security checks are verified.</p></section>
+<dialog id="admin-shop-detail" class="admin-shop-dialog" aria-labelledby="admin-shop-detail-title"><div class="admin-shop-dialog-heading"><h2 id="admin-shop-detail-title"></h2><button id="admin-shop-detail-close" type="button" class="admin-refresh" data-i18n="close" th:text="${uiCopy['close']}">Close</button></div><p id="admin-shop-detail-description"></p><dl id="admin-shop-detail-fields"></dl></dialog>
+</main></body></html>

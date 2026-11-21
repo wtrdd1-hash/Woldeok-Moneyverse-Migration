@@ -1,5 +1,10 @@
 # Woldeok Moneyverse 프로젝트 메모리 (PROJECT_MEMORY.md)
 
+## 2026-11-21 shared agent-memory reference (PLANNING / no installed service)
+
+The owner-designated AgentMemory reel and upstream README are preserved in [EN](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md) / [KO](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md). Every task must recall latest plans/worklogs and record sanitized start/mid/finish decisions; this is GitHub-document based until an isolated, reviewed external memory service has been actually installed and verified. No runtime or production change was made under v2026.11.21.2234.
+
+
 - **최종 갱신일:** 2026-10-14 (전사 아키텍처 및 불변 규칙 최신화 쇄신판)
 - **관리 주체:** Woldeok Moneyverse Core Architecture & Operations
 - **문서 상태:** 활성 정본 (Active Single Source of Truth Memory)

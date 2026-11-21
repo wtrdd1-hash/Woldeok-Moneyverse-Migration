@@ -1,5 +1,7 @@
 ## 2026-11-21 13:22 KST — delivery follow-up, nine admin read routes
 
+> **2026-11-21 현재 운영: 프론트엔드 재구축 점검 중.** 사용자 명시 승인으로 main93a31e3e44의 Nginx 문서 전용503 안내를 운영 적용하고, DB-free frontend-presentation 운영/Test 두 unit을 중지·비활성화했다. 공유 API/DB/session은 유지한다. 아래 native26 활성화 기록은 이전 시점이다. 새 전체 프론트엔드는 아직 승격하지 않았다. [적용·검증·복원 기록](releases/2026-11-21-frontend-rebuild-maintenance.ko.md).
+
 Delivery HTML now serves app main7d58568e30413e838315a2d5322abfd5366b074a on4818/Test4816/source4817. Prior8e2fb and public93a3 stay unchanged. Exact-main all4CI44864420278, authenticated Test40/Production15and prior8before/after16each passed; Test-stop independence and restored Test confirmed. Whole-site/other27admin/actions/backend/financial acceptance remains OPEN. [Evidence](releases/2026-11-21-nov18-admin-delivery-production.ko.md).
 
 ## 2026-11-21 12:02 KST — observed eight-route administrator presentation

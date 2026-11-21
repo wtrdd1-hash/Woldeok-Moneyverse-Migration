@@ -10,6 +10,7 @@ public class MoneyverseSpringApplication {
         String mode=System.getProperty("moneyverse.runtime-mode", "application");
         Class<?> application=switch(mode) {
             case "application" -> MoneyverseSpringApplication.class;
+            case "catalog-read" -> com.moneyverse.catalogread.CatalogReadApplication.class;
             case "admin-presentation" -> com.moneyverse.adminpresentation.NativeAdminApplication.class;
             case "presentation" -> com.moneyverse.presentation.NativePresentationApplication.class;
             case "frontend-presentation" -> com.moneyverse.frontendpresentation.UnifiedFrontendApplication.class;

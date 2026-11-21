@@ -1,5 +1,7 @@
 # What this deployment actually is
 
+> **2026-11-21 현재 운영: 프론트엔드 재구축 점검 중.** 사용자 명시 승인으로 main93a31e3e44의 Nginx 문서 전용503 안내를 운영 적용하고, DB-free frontend-presentation 운영/Test 두 unit을 중지·비활성화했다. 공유 API/DB/session은 유지한다. 아래 native26 활성화 기록은 이전 시점이다. 새 전체 프론트엔드는 아직 승격하지 않았다. [적용·검증·복원 기록](releases/2026-11-21-frontend-rebuild-maintenance.ko.md).
+
 > **Native frontend scope — 2026-11-21:** Source `e45f57595415f132eedf36c13748564b93a1d918` now serves the explicit 26-screen presentation slice through one database-free `frontend-presentation` Production/Test pair (4822/4820), with a fixed cookie-only read gateway4821. Eleven superseded native renderers and two obsolete loopback QA Nginx masters were retired after dependency and continuity checks. Existing legacy HTML/API, financial and worker authorities remain separate; this is not a whole-stack upgrade. See [measured frontend release and remaining failures](releases/2026-11-21-frontend-consolidation-production.ko.md).
 
 > [!IMPORTANT]
