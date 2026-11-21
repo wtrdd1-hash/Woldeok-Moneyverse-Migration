@@ -1,0 +1,22 @@
+# Frontend Feature Coverage and Runtime Consolidation
+
+The owner requests verification of all administrator/user functions, connection to the implemented Nov18 frontend, and cleanup of accumulated running instances. Prior design/implementation/Test/Production approvals and the explicit no-repeated-questions directive persist. Reuse the approved Nov18 navy/violet PC-first responsive design and favicon; do not redesign or label read-only prototypes as complete mutation support.
+
+## Observed baseline
+Main c5c3c9d7c2f73ab6a05c2ab067d94535f328b8b5, public5on4792, admin8on4814, delivery1on4818, legacy assets4782/4808 and retained backend/API authorities. Nine admin pages are read-only. The unactivated native stocks/shop/board candidates provide reads, not complete trading/purchase workflows. Member wallet/support/chat templates and owner-bound client logic exist; support/chat are edge403. The old API-health source invents route metrics and treats failed DB probes as healthy.
+
+## Runtime consolidation
+Add one credential-free database-free `frontend-presentation` mode with explicit imports of the accepted public5 and admin9 controllers and common assets. Do not component-scan backend services or import the incomplete public feature candidates. Keep financial APIs/jobs/bots/session issuance in existing authority. One exact-main immutable Production/Test pair replaces multiple native renderers only after real functional/asset compatibility acceptance. Stage old asset bytes by exact digest from verified immutable JARs so old client versions no longer require old JVMs. Unknown-version behavior and private-asset authorization/cache semantics must remain measured and explicit.
+
+## Feature coverage and member connection
+Inventory actual frontend routes, actions, API calls and controls. Distinguish source presence, supported contract, live read acceptance, mutation acceptance, gated/disabled, unsupported and untested. No claim of whole-site completion from route count or source tests. Preserve working legacy mutation screens until equivalent new flows are verified.
+
+Connect the existing wallet/support/chat templates through a new cookie-authorized presentation controller only if the real retained owner APIs meet their existing strict contracts. Server verification uses fixed GET auth/me, never actor/internal/bearer headers or a hardcoded owner. Validate real UUID/signed-in proof, reject ambiguous cookies/redirects/HTML and fail closed. Do not render the unsafe numeric balance from auth/me; the wallet client uses its own canonical-string/owner receipt. Keep same-origin CSRF/idempotency/owner-race guards and current backend feature holds. Do not send real messages or perform financial/account-deletion actions as an implied QA shortcut. Those flows require their designated disposable Test/CI evidence or user handoff. Account/security settings with missing equivalents stay explicitly OPEN, not replaced by a reduced fake profile.
+
+Fix tool-page account-header continuity using the existing session contract without overriding the dedicated home/wallet/messaging controllers. A source failure is not proof of signed-out state. Add a source-backed admin diagnostics view with actual bounded read probes; never display hardcoded route availability/latency/success rates or claim a DB/host/backup measurement from those probes.
+
+## Cleanup
+First retire only the five inspected unreferenced database-free old Test renderers after stable-PID/mode/ports/dependents/config-inventory and HTTP-baseline checks. Preserve immutable roots and audit evidence. For other old instances, trace Nginx and local consumers/jobs first. Stop/disable only after byte-compatible routing replacement; do not delete releases, unknown workers or rollback data. Restore exact prior active/enabled states if unrelated probes change.
+
+## Acceptance
+TDD actual HTTP/isolation and client behavior; full authoritative exact-source CI including real disposable PostgreSQL messaging; independent source/operations review. Protected same-origin exact-main Test, actual owner browser PC/mobile/five-locale/keyboard/read/form state checks, old/new asset bytes and auth negatives. Production ignores preview selectors and survives Test stop. Full Nginx include inventory/CAS/owned rollback and stable process/cwd/JAR/manifest/listener identity. Record feature gaps, production identity and instance cleanup both on host and GitHub. No SQL/grants/ledger/balance correction or full-backend rollout is included.
