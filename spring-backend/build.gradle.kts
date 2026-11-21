@@ -75,6 +75,10 @@ tasks.register<Test>("postgresMessagingTest") {
     classpath = sourceSets["test"].runtimeClasspath
     // Keep the established CI entry point while certifying both canonical native services.
     useJUnitPlatform { includeTags("postgres-messaging", "postgres-shop") }
+    testLogging {
+        events("failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
     doLast {
         val xml = layout.buildDirectory.file("test-results/postgresMessagingTest/TEST-com.moneyverse.api.domain.shop.AdminShopPostgresIntegrationTest.xml").get().asFile.readText()
         fun count(name: String): Int = Regex(name + "=\\\"([0-9]+)\\\"").find(xml)?.groupValues?.get(1)?.toIntOrNull()
@@ -87,6 +91,12 @@ tasks.register<Test>("postgresMessagingTest") {
             "Native PostgreSQL shop coverage is incomplete"
         }
         println("Native PostgreSQL shop: tests=$shopTests failures=$shopFailures errors=$shopErrors skipped=$shopSkipped")
+        providers.exec {
+            workingDir(rootDir.parentFile)
+            commandLine("python3", "scripts/release/verify-native-pg-results.py", "--class",
+                "com.moneyverse.catalogread.CatalogReadPostgresIntegrationTest", "--minimum", "4",
+                layout.buildDirectory.file("test-results/postgresMessagingTest/TEST-com.moneyverse.catalogread.CatalogReadPostgresIntegrationTest.xml").get().asFile.absolutePath)
+        }.result.get().assertNormalExitValue()
     }
 }
 

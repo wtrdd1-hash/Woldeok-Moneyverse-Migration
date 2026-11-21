@@ -6,7 +6,7 @@ const root=new URL('../spring-backend/src/main/resources/static/assets/mv46/',im
 const item=(id,name)=>({id,code:name.toUpperCase(),name,description:'<script>untrusted()</script>',category:'title',base_price:'9007199254740993',rarity:'rare',max_stock:100,current_stock:4,is_limited:true,active:true,purchase_limit:'once'});
 const rows=[item('00000000-0000-4000-8000-000000000101','Alpha'),item('00000000-0000-4000-8000-000000000102','Beta')];
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
-function ui(){
+function ui({endpoint}={}){
   const document=new EventTarget(),window=new EventTarget();document.readyState='complete';document.hidden=false;let language='en',loads=0,read=async()=>({owner:'qa-owner',items:rows});
   class Element extends EventTarget {
     constructor(tag='div'){super();this.tagName=tag;this.children=[];this.attrs={};this.dataset={};this.value='';this.disabled=false;this.open=false;this.isConnected=true;this.ownText='';}
@@ -23,12 +23,12 @@ function ui(){
     close(){this.open=false;this.dispatchEvent(new Event('close'));}
   }
   const names=['catalog','search','category','refresh','status','count','detail','detail-close','detail-title','detail-description','detail-fields'];
-  const ids=Object.fromEntries(names.map(name=>['admin-shop-'+name,new Element()]));document.getElementById=id=>ids[id]||null;document.createElement=tag=>new Element(tag);
+  const ids=Object.fromEntries(names.map(name=>['admin-shop-'+name,new Element()]));ids['admin-shop-catalog'].dataset.catalogEndpoint=endpoint;const endpoints=[];document.getElementById=id=>ids[id]||null;document.createElement=tag=>new Element(tag);
   window.fetch=async()=>{throw Error('Unexpected direct fetch');};window.MV39Locale={tx:key=>language+':'+key,current:()=>language};
   runInNewContext(readFileSync(new URL('admin-shop-core.js',root),'utf8'),{window,BigInt,AbortController,setTimeout,clearTimeout});
-  window.MV46AdminShop={...window.MV46AdminShop,load:async()=>{loads++;return read();}};
+  window.MV46AdminShop={...window.MV46AdminShop,load:async(_fetcher,path)=>{loads++;endpoints.push(path);return read();}};
   runInNewContext(readFileSync(new URL('admin-shop.js',root),'utf8'),{document,window,Intl});
-  return {window,document,ids,loads:()=>loads,setRead:fn=>{read=fn;},setLanguage:lang=>{language=lang;window.dispatchEvent(new Event('mv39-language-change'));}};
+  return {window,document,ids,loads:()=>loads,endpoints,setRead:fn=>{read=fn;},setLanguage:lang=>{language=lang;window.dispatchEvent(new Event('mv39-language-change'));}};
 }
 test('verified catalog supports search and real detail dialog, keeping query and dialog across locale changes',async()=>{
   const page=ui();await tick();const ids=page.ids,grid=ids['admin-shop-catalog'];assert.equal(grid.children.length,2);assert.equal(ids['admin-shop-search'].disabled,false);
@@ -68,4 +68,9 @@ test('same-owner refresh restores search only after proof, while account change 
   page.ids['admin-shop-refresh'].dispatchEvent(new Event('click'));await tick();assert.equal(page.ids['admin-shop-search'].value,'alpha');
   page.setRead(async()=>({owner:'different-qa-owner',items:[rows[1]]}));page.ids['admin-shop-refresh'].dispatchEvent(new Event('click'));await tick();
   assert.equal(page.ids['admin-shop-search'].value,'');assert.match(page.ids['admin-shop-catalog'].textContent,/Beta/);
+});
+
+test('native view hands only the trusted HTML read binding to the owner-validating core',async()=>{
+ const path='/_mv/nov18-rebuild-qa/catalog',page=ui({endpoint:path});await tick();
+ assert.equal(page.endpoints[0],path);assert.equal(page.ids['admin-shop-catalog'].children.length,2);
 });

@@ -50,7 +50,7 @@
     async function load(){
       const current=++epoch,filters={owner:currentOwner,query:search.value,category:category.value};busy=true;refresh.disabled=true;clear();pendingFilters=filters;grid.setAttribute('aria-busy','true');statusText('adminShopLoading');
       try{
-        const result=await core.load(window.fetch.bind(window));if(current!==epoch)return;rows=result.items;
+        const result=await core.load(window.fetch.bind(window),grid.dataset.catalogEndpoint);if(current!==epoch)return;rows=result.items;
         const sameOwner=filters.owner!==null&&filters.owner===result.owner;
         const previous=sameOwner?filters.category:'';if(sameOwner)search.value=filters.query;currentOwner=result.owner;forgetFilters();category.replaceChildren();const all=node('option','',t('adminShopAllCategories'));all.value='';category.append(all);
         for(const value of [...new Set(rows.map(row=>row.category))].sort()){const option=node('option','',value);option.value=value;category.append(option);}
