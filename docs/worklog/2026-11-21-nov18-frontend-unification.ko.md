@@ -57,3 +57,12 @@
 
 독립 후속 소스 리뷰: 24:00 시각이 Instant.parse에서 익일 자정으로 정규화되는 결함을 찾았다. 생성·완료 시각 각각503기대/실제200을 RED로 확인하고 시·분·초 범위를 엄격히 제한했다. 새 화면의 aria 언어 불일치도 사용자5언어 요구에 따라 함께 수정했다. 두 회귀 테스트 RED→전체 Spring589개 실패/오류/skip0·bootJar GREEN. 기본 task에서 제외한 PostgreSQL messaging은 CI 별도 gate다. 미배포 후보에서 수정했으며 기존 운영 취약점으로 소급하지 않는다.
 배포 준비는 단일 전달 경로만 후속 세대로 전환하고 기존8개 경로는 수용된 e2fb 세대를 유지한다. 보호된 Test4816/운영4818, 두 GET만 허용하는4817gateway 후보를 별도 root0700에 만들었고 실제 설치/전환은 아직 없다. 전체 Nginx 구문과 격리 라우팅114건 통과. gateway 테스트는 과거7GET 기대를 그대로 재사용해 처음 실패했으며, 두 GET 허용/나머지 기존6GET 거부라는 더 좁은 계획에 맞게 수정해20건 통과했다. gateway를 넓혀 테스트를 맞추지 않았다.
+
+## 전달 로그 배포 준비 체크포인트
+- 소스 PR3332는 freeze f202aab04cb3의 classify/policy/spring-web-check/runtime-check4job 모두SUCCESS 및 required3check PASS 후 일반 병합했다. main7d58568e30413e838315a2d5322abfd5366b074a의 app source diff는 비어 있다.
+- 정확한 main CI44864420278의 native artifact를 검증했다. JAR SHA256 be5e888e4c49915da419819154e520b0fb8de5dee6c243854b60b945b884fd42, packaged source/main manifest 일치. main 전체 runtime CI는 이 체크포인트에서 아직 진행 중이며 운영 승격 승인이 아니다.
+- 별도 root 불변 Test4816/운영4818 unit만 선행 배치했다. active/enabled, 실제 cwd·release/source manifest·JAR sha·open inode·시작 시각·소스4817·포트 소유 PID·HTTP version 이후 MainPID 재확인을 통과했다. 아직 nginx live 변경이나 원천 gateway 설치는 없다.
+- 독립 운영 스크립트 리뷰의3개 Important(새 include 파일 검출, 동일 실행 세대 증거, JAR 기반 asset hash)를 수정했다. 보호 회귀8개 RED→GREEN에는 실제 격리 Nginx include 추가 시 변경 전 거부, 재시작/PID·listener·cwd·manifest 불일치 거부 및 packaged source mismatch가 포함된다. JAR에서 번역 digest를 읽고 실제 제공 bytes도 비교한다.
+- 최종 main 후보 전체 Nginx syntax 및 격리 routing114/gateway20건 실패0. 새gateway는 me/outbox 두 GET만 허용하고 다른 기존 관리자 GET도 거부한다. 이전8경로·public·API·보안 차단과 과거 asset 세대는 유지한다.
+- [추가 실제 결함](../qa/2026-11-21-nov18-unification-open-defects.ko.md): API 관제의 미측정 안내/고정 정상 수치 모순, 숨김파일 regex의 일반경로403을 별도 격리 재현했다. 광범위 규칙 해제나 전체 backend 승격을 하지 않았다.
+- 다음: exact-main CI 전부 성공→보호 Test 로그인 QA→단일 전달 경로 운영→증거/문서 종료. 현재는 기존8경로만 운영 수용이며 전달 화면은 미전환이다.
