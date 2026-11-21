@@ -13,6 +13,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
 
 /** A single canonical read authority reuses existing sessions without importing any issuer or worker. */
 @Configuration(proxyBeanMethods=false)
@@ -22,7 +23,9 @@ public class CatalogReadApplication {
     @Bean SecurityFilterChain catalogReadSecurity(HttpSecurity http) throws Exception {
         String[] paths={"/api/v1/admin/shop/items","/catalog-read-health","/catalog-read-version"};
         http.csrf(csrf->csrf.disable()).sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .requestCache(c->c.disable()).authorizeHttpRequests(a->a.requestMatchers(HttpMethod.GET,paths).permitAll()
+            .requestCache(c->c.disable())
+            .headers(h->h.addHeaderWriter(new StaticHeadersWriter("X-Robots-Tag","noindex, nofollow, noarchive")))
+            .authorizeHttpRequests(a->a.requestMatchers(HttpMethod.GET,paths).permitAll()
                 .requestMatchers(HttpMethod.HEAD,paths).permitAll().anyRequest().denyAll())
             .exceptionHandling(e->e.authenticationEntryPoint((req,res,error)->res.setStatus(403))
                 .accessDeniedHandler((req,res,error)->res.setStatus(403)));

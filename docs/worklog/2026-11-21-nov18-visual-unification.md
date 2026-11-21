@@ -97,3 +97,12 @@ Fresh read-only origin recheck: public / and/admin503 maintenance; protected pre
 ## Finished — publication source integration; deployment remains OPEN
 PR3351 merged925f725d2836c5ebe88311e2f2ff8ab17b052144 after exact91f753bf8b CI44923868917 all four checks and Build Test Candidate44923833095 succeeded. Actual PostgreSQL task and strict catalog/publication XML gates passed; printed messaging9 has0failures/0errors/0skips. New main artifact/real source-positive browser/Test remain required. No runtime was installed. Current route ledger preserves180OPEN full-functional rows; historical QA fields remain byte-value compatible with a current-authority warning, not retroactive PASS.
 Canary ops source5b625c3898 is independently reviewed. Reviewer identified inverse auto-restart/PID0 and interrupted-frontend-restore resumability gaps. Do not install; fix loop and re-review required.
+
+
+## Before work — catalog private response noindex
+The merged read runtime's earlier source review left X-Robots-Tag as a documented Minor. Resolve it with a real HTTP regression and one mode-scoped security header writer before live use; no auth/route/data/ops change. Parent owns these two application files while the sole child fixes independent operational inverse findings. Shared Gradle lock remains mandatory. Approved design/private-noindex contract supplies scope; exact source CI/artifact still required.
+
+
+## Finished — private catalog response header source milestone
+Actual HTTP noindex regression observed RED6cases/1failure (header absent). Mode-scoped StaticHeadersWriter now covers successful catalog GET/HEAD, anonymous/roleless401, source/health503, version200 and denied sibling/POST403 without changing statuses/routes/auth. First GREEN attempt exposed missing classpath build metadata in this ordinary HTTP test fixture, so version correctly503; retain strict200 coverage using a test-only real NativeBuildIdentity with an explicit external ByteArrayResource. No production identity fallback or assertion relaxation. Final focused isolation+real datasource composition7 passed.
+Fresh full standard Spring test+bootJar660/104suites/0failures/0errors/0reportedskips, Node552/0failures/0skips.24PostgreSQL tags excluded locally, not counted as passes; source CI remains required. Existing Gradle/JDK native-access/Unsafe/unchecked and H2 stock-source log noise remains, no new functional failure. Actual artifact/process identity and source-positive browser are independent OPEN gates. Source review requested before integration/deployment.
