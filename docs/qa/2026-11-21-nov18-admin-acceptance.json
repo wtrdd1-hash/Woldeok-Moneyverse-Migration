@@ -1,0 +1,178 @@
+{
+  "source": "e2fb487a1a7814e74abac1097814881801c4dd13",
+  "jarSha256": "5aced41aebe87e325792bcab55977743edec4e1d811fdfc8f90e91d8decce8c5",
+  "ci": {
+    "run": 44857905769,
+    "jobs": {
+      "classify": "success",
+      "policy": "success",
+      "spring-web-check": "success",
+      "runtime-check": "success"
+    }
+  },
+  "springTests": {
+    "tests": 580,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "nativeNode": {
+    "tests": 82,
+    "failures": 0
+  },
+  "test": {
+    "layoutLocaleCases": 320,
+    "cssReflowCases": 40,
+    "physicalBrowserZoomTested": false,
+    "functional": {
+      "drafts": [
+        {
+          "lang": "en",
+          "queryKept": true,
+          "limit": "50"
+        },
+        {
+          "lang": "ko",
+          "queryKept": true,
+          "limit": "50"
+        },
+        {
+          "lang": "ja",
+          "queryKept": true,
+          "limit": "50"
+        },
+        {
+          "lang": "zh",
+          "queryKept": true,
+          "limit": "50"
+        },
+        {
+          "lang": "vi",
+          "queryKept": true,
+          "limit": "50"
+        }
+      ],
+      "submittedSearch": {
+        "alerts": 0,
+        "empty": true,
+        "limit": "50",
+        "path": "/admin/users",
+        "query": "qa-unsent-member-query-20261121",
+        "sourceCount": "23"
+      },
+      "submittedLanguage": {
+        "lang": "ko",
+        "submittedMatchesLanguage": true
+      },
+      "singleRow": {
+        "sourceCount": "1",
+        "rows": 1
+      },
+      "menuOpen": {
+        "expanded": "true",
+        "focus": "admin-menu-close",
+        "open": true
+      },
+      "menuClosed": {
+        "closed": true,
+        "focus": "admin-menu-open"
+      },
+      "help": {
+        "count": 1,
+        "focus": "mv-support-close",
+        "open": true
+      },
+      "shortDesktop": {
+        "focusHref": "/",
+        "focusVisible": true,
+        "height": 600,
+        "sidebarOverflow": "auto",
+        "sidebarScrolled": true
+      },
+      "clickedRoutes": [
+        {
+          "path": "/admin/users",
+          "alerts": 0,
+          "background": "rgb(12, 16, 32)"
+        },
+        {
+          "path": "/admin/market",
+          "alerts": 0,
+          "background": "rgb(12, 16, 32)"
+        },
+        {
+          "path": "/admin/controls",
+          "alerts": 0,
+          "background": "rgb(12, 16, 32)"
+        },
+        {
+          "path": "/admin/enterprises",
+          "alerts": 0,
+          "background": "rgb(12, 16, 32)"
+        },
+        {
+          "path": "/admin/economy",
+          "alerts": 0,
+          "background": "rgb(12, 16, 32)"
+        },
+        {
+          "path": "/admin/economy/scenario-lab",
+          "alerts": 0,
+          "background": "rgb(12, 16, 32)"
+        },
+        {
+          "path": "/admin/logs/system",
+          "alerts": 0,
+          "background": "rgb(12, 16, 32)"
+        }
+      ]
+    }
+  },
+  "production": {
+    "accepted": true,
+    "phase": "production",
+    "source": "e2fb487a1a7814e74abac1097814881801c4dd13",
+    "jarSha256": "5aced41aebe87e325792bcab55977743edec4e1d811fdfc8f90e91d8decce8c5",
+    "actualLayouts": 24,
+    "locales": 5,
+    "testStoppedIndependenceRoutes": 8,
+    "sameSessionContinuity": true,
+    "runtime": [
+      {
+        "unit": "moneyverse-native-admin-unified-test-v20261121.service",
+        "port": 4812,
+        "source": "e2fb487a1a7814e74abac1097814881801c4dd13",
+        "jarSha256": "5aced41aebe87e325792bcab55977743edec4e1d811fdfc8f90e91d8decce8c5",
+        "openJarMatches": true,
+        "active": true,
+        "enabled": true,
+        "errorPriorityEntriesSinceCutover": 0
+      },
+      {
+        "unit": "moneyverse-native-admin-unified-prod-v20261121.service",
+        "port": 4814,
+        "source": "e2fb487a1a7814e74abac1097814881801c4dd13",
+        "jarSha256": "5aced41aebe87e325792bcab55977743edec4e1d811fdfc8f90e91d8decce8c5",
+        "openJarMatches": true,
+        "active": true,
+        "enabled": true,
+        "errorPriorityEntriesSinceCutover": 0
+      }
+    ],
+    "allSiteAccepted": false,
+    "fullBackendRelease": false,
+    "sqlOrDataMutation": false
+  },
+  "wholeSiteUnified": false,
+  "followupObservations": {
+    "stableHomeAfterHydration": {
+      "profileLinks": 1,
+      "loginLinks": 0,
+      "logoutButtons": 1,
+      "adminNavigationLinks": 2
+    },
+    "actualProfileLinkAccountResult": 403,
+    "adminSlashAliasHealthy": true,
+    "directAuthSessionNavigationNotAFetchFailureProof": true
+  }
+}

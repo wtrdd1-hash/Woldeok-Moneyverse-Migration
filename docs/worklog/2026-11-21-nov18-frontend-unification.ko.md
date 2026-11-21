@@ -12,8 +12,8 @@
 - [ ] 공통 디자인 전환을 RED→GREEN 및 실제 browser로 검증. 정상 기능/권한/금융 불일치 은폐 금지.
 - [ ] 독립 리뷰·정확한 CI/Test·한 범위씩 운영 전환과 증거 기록.
 
-## Finished
-아직 완료하지 않았다. 전체180디자인 대상과 실제 운영 기능 수용은 구분한다. 원시 로그/쿠키/회원ID/개별잔액은 기록하지 않는다.
+## Finished — 현재 단계
+관리자 조회8경로의 공통 디자인 운영 전환을 완료했다. 전체 프론트엔드 통일 목표는 미완료이며 남은28개 관리자/사용자 경로·기능은 경로 원장에 OPEN으로 유지한다. 전체180디자인 대상과 실제 운영 기능 수용을 구분한다. 원시 로그/쿠키/회원ID/개별잔액은 기록하지 않는다.
 
 ### Implementation checkpoint
 - 운영 관리자36경로(홈+도구35) 및 사용자/정책13경로를 실제 브라우저로 열어 디자인·언어·오류 상태를 분류했다. 회원 검색 버튼 실제 동작/부분 결과 범위도 확인했다. 개인ID/잔액/원시로그는 저장하지 않았다. [경로 원장](../qa/2026-11-21-nov18-frontend-route-ledger.ko.md).
@@ -22,3 +22,17 @@
 - 독립 전체 소스 리뷰 Important1건: raw URI와 Spring 매핑 차이로 인코딩된 경제 경로가 추가 권한검사를 건너뛰고 정합성 원천을 읽었다. 실제 HTTP RED로 재현 후 trusted matched mapping+명시적 경제 경로로 수정했다. 관련30GREEN, 리뷰 확인 완료. 이 문제는 아직 미배포 후보에 있었으며 기존 운영 취약점으로 확대하지 않는다.
 - 최종 전체 Spring580건 실패/오류/skip0 및 bootJar 성공, native Node82건 통과. 기본 test task 제외 PostgreSQL messaging은 로컬 통과로 보고하지 않으며 CI 게이트를 따른다. repository-security/control-byte/diff-check 통과. source freeze에서 main1d9539 유지 확인.
 - 아직 실제 후보 브라우저/Test·CI 아티팩트·운영 승격 전이다. 전체 프론트엔드 통일 목표와 다른 경로/권한·금융·문의/계정403/에러 로그 문제는 OPEN으로 유지한다.
+
+### Scoped release acceptance
+- PR3330 정상 병합 main e2fb487a1a7814e74abac1097814881801c4dd13. PR 정본 CI44856831244의4job 및 required3check PASS. 사용하지 않는 별도 컨테이너 build 진행과 native CI artifact를 구분했다.
+- main CI44857905769 정확한 JAR5aced41a…를 불변 Test4812/운영4814에 설치했다. main native CI 성공 후 먼저 Test에 배치했으며, main 전체4job SUCCESS와 실제 Test 수용 이후에만 12:02:08 KST 운영 기본8경로를 전환했다. DB/쓰기/스케줄러 import 없음.
+- 실제 로그인 Test320개(8경로×8너비×5언어) 및 CSS 확대 대응40개 실패0. 실제 검색/상한1/빈 결과/언어 전환 중 입력 유지/제출 언어, 메뉴·Escape·문의 패널·낮은 PC sidebar Tab 접근 확인. 물리 줌·실기기는 미검증이다.
+- 운영24배치와 회원5언어/검색 통과. Test unit 중지 상태에서도 기존 선택 cookie가 남은 같은 세션으로 운영8경로/버전e2를 수신했다. Test 복원, 양 unit enabled/active/openJAR 일치, 관찰 시점 error-priority journal0.
+- 실제 격리 Nginx116라우팅/39gateway 통과. source/phase/JAR에 묶인 Test 영수증을 운영 선결로 검사한다. 배포 script 리뷰의 stale receipt 및 부분 inverse 가능성은 binding·전체해시 사전검사·변경 전 거부시 no-reload로 보강했다.
+- 신규 gateway4813의 공개 business/catalog guest200과 비공개 관리자 guest401, 모든 mutation/외부 경로403 구분. API권위4550/4632, 이전 공개93a3/자산4792·4782·4808, 기존 holds/외부Test403 보존.
+- [상세 운영 영수증](../releases/2026-11-21-nov18-admin-unified-production.ko.md). 계정/문의/채팅403·회원헤더 상태·에러로그 불러오기 실패·FRONTEND journal 원천·기존 금융 게이트·Next QA5실패·다른 관리자 변경 기능은 해결/면제하지 않았다.
+
+### Stable-home correction and exact alias check
+- 첫 로딩 guest 링크 관찰만으로 홈 로그인 상태가 계속 잘못된다고 판정하지 않았다. 실제 `.auth-profile`이 visible이 될 때까지 기다린 재검사에서 profile1/login0/logout1/admin-nav2를 확인했다. 직접 auth/session URL 탐색의 same_origin_required는 same-origin fetch의 실패 증거가 아니다. 이 추측으로 code/auth guard를 바꾸지 않았다.
+- 안정된 홈에서 실제 프로필 링크를 클릭하면 /account403은 여전히 재현된다. /admin/ 별칭은 같은 새 운영 source의 정상 화면(브랜드IMG2/오류0)을 확인했다.
+- 최종 수용 문서 독립 리뷰: material overclaim/unsafe inverse finding 없음. CSV320/24의 개수·유일 조합·통과 필드와 링크 및 repository-security/control-byte/whitespace 검증 통과. 전체 목표 미완료/남은28관리 경로와 backend/금융 게이트를 명시했다.

@@ -31,16 +31,19 @@ Files: adminpresentation/AdminSourceClient.java, new AdminReadPageController.jav
 
 ## Task2: Common shell, copy and responsive UI
 Files: templates/shared/admin-shell.html, new templates/mv43/admin-read.html, static/assets/mv43/admin-read.css, static/assets/mv40/admin.js, ui/mv43-copy.json, static/assets/mv39/i18n.js, scripts/native-admin-live.test.mjs.
-- [ ] Add rendered and actual JS RED tests for five-language headings/columns/labels, route-active menus, shared single support launcher, localized form hiddenlang without erasing draft, known current template shape.
-- [ ] Build all six pages from the shared shell; server-driven columns/rows are escaped text. Status is explicit and refresh is a normal GET.
-- [ ] PC tables scroll internally, sidebar remains reachable at600px height, mobile form becomes one column, focus targets44px; no fake empty overlay or hidden controls.
-- [ ] Sync exact asset digests across native templates and run asset/copy checks.
-- [ ] Actual browser layout/locale/input/keyboard/source-error matrix, full suite and one independent whole-branch review; RED/GREEN any important findings.
+- [x] Add rendered and actual JS RED tests for five-language headings/columns/labels, route-active menus, shared single support launcher, localized form hiddenlang without erasing draft, known current template shape.
+- [x] Build all six pages from the shared shell; server-driven columns/rows are escaped text. Status is explicit and refresh is a normal GET.
+- [x] PC tables scroll internally, sidebar remains reachable at600px height, mobile form becomes one column, focus targets44px; no fake empty overlay or hidden controls.
+- [x] Sync exact asset digests across native templates and run asset/copy checks.
+- [x] Actual browser layout/locale/input/keyboard/source-error matrix, full suite and one independent whole-branch review; RED/GREEN any important findings.
 
 ## Task3: Exact-source Test and scoped promotion
 Files: docs/worklog/2026-11-21-nov18-frontend-unification.ko.md, docs/qa/2026-11-21-nov18-frontend-route-ledger.ko.md, release receipt and current baseline.
-- [ ] Fetch main again; normal reviewed PR and required CI. Download exact-main artifact and verify manifest/open-JAR identity in immutable new Test/Production units.
-- [ ] Extend only fixed gateway routes (GET/HEAD; preserve existing actual authority), exact private HTML/assets preview, all unchanged boundary/hash baselines and protected Test.
-- [ ] Actual signed-in Test8routes PC/mobile/five-language/search/filtered-empty/source-failure/financial-role checks; preview cookie must not leak into Production routing.
-- [ ] After acceptance, coordinated CAS/reload/owned rollback of exact reviewed routes/assets; existing session preserved; actual Production checks and screenshots.
-- [ ] Documentation checkpoints on task branch/GitHub, final route statuses (other families OPEN), integration and owned-only cleanup after ancestry proof.
+- [x] Fetch main again; normal reviewed PR and required CI. Download exact-main artifact and verify manifest/open-JAR identity in immutable new Test/Production units.
+- [x] Extend only fixed gateway routes (GET/HEAD; preserve existing actual authority), exact private HTML/assets preview, all unchanged boundary/hash baselines and protected Test.
+- [x] Actual signed-in Test8routes PC/mobile/five-language/search/filtered-empty/source-failure/financial-role checks; preview cookie must not leak into Production routing.
+- [x] After acceptance, coordinated CAS/reload/owned rollback of exact reviewed routes/assets; existing session preserved; actual Production checks and screenshots.
+- [x] Documentation checkpoints on task branch/GitHub, final route statuses (other families OPEN), integration and owned-only cleanup after ancestry proof.
+
+## Current stage acceptance
+The eight-route read UI is accepted at maine2fb487a1a78 after Test320locale/layout cases+40CSS zoom-equivalent reflows, Production24layouts, actual search/menu/language checks and exact-main all4CI. Physical browser zoom/device QA and all other route families remain OPEN. This plan covers the safe current stage and is not whole-site completion. Final evidence/docs integration and owned cleanup receipts are retained on the host.
