@@ -20,6 +20,11 @@ public class Phase13EditorialHelpAndProfileIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @org.springframework.boot.test.mock.mockito.MockBean
+    private org.springframework.jdbc.core.JdbcTemplate publicationJdbc;
+    @org.springframework.boot.test.mock.mockito.MockBean
+    private com.moneyverse.api.domain.status.StatusTruthService statusSource;
+
     @Test
     @DisplayName("1. 개인정보 DSR 요청 비인가 세션 401 Unauthorized 차단")
     void testPrivacyUnauthorized() throws Exception {
@@ -82,15 +87,40 @@ public class Phase13EditorialHelpAndProfileIntegrationTest {
     }
 
     @Test
-    @DisplayName("7. 앱 공지사항 및 시스템 운영 현황 보드 200 OK")
+    @DisplayName("Verified publication and status source fixtures retain successful API contracts")
     void testAppContent() throws Exception {
+        var result=org.mockito.Mockito.mock(java.sql.ResultSet.class);
+        org.mockito.Mockito.when(result.getString(org.mockito.ArgumentMatchers.anyString())).thenAnswer(call->switch((String)call.getArgument(0)){
+            case "announcement_id"->"00000000-0000-4000-8000-000000000125";case "title"->"QA publication";case "body"->"QA verified body";default->null;});
+        org.mockito.Mockito.when(result.getObject("is_pinned",Boolean.class)).thenReturn(false);
+        org.mockito.Mockito.when(result.getTimestamp("published_at")).thenReturn(java.sql.Timestamp.from(java.time.Instant.parse("2026-01-01T00:00:00Z")));
+        org.mockito.Mockito.when(publicationJdbc.query(org.mockito.ArgumentMatchers.contains("content_list_published_announcements"),org.mockito.ArgumentMatchers.any(org.springframework.jdbc.core.RowMapper.class),org.mockito.ArgumentMatchers.any(Object[].class))).thenAnswer(call->{
+            org.springframework.jdbc.core.RowMapper<?> mapper=call.getArgument(1);return java.util.List.of(mapper.mapRow(result,0));});
+        var observed=java.time.Instant.parse("2026-01-01T00:00:00Z");
+        var stale=com.moneyverse.api.domain.status.StatusSourceTruthPolicy.evaluate("qa-public","QA public","operational",observed,180,observed.plusSeconds(181));
+        org.mockito.Mockito.when(statusSource.publicStatus()).thenReturn(new com.moneyverse.api.domain.status.StatusSourceTruthPolicy.StatusResponse(java.util.List.of(stale)));
         mockMvc.perform(get("/content/announcements"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.announcements").isArray());
-
+                .andExpect(jsonPath("$.announcements[0].announcementId").value("00000000-0000-4000-8000-000000000125"))
+                .andExpect(jsonPath("$.announcements[0].body").value("QA verified body"))
+                .andExpect(jsonPath("$.announcements[0].isPinned").value(false));
         mockMvc.perform(get("/content/status"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status.systemOperational").value(true));
+                .andExpect(jsonPath("$.status[0].sourceKey").value("qa-public"))
+                .andExpect(jsonPath("$.status[0].state").value("unknown"))
+                .andExpect(jsonPath("$.status[0].freshnessState").value("stale"))
+                .andExpect(jsonPath("$.status[0].policyVersion").value("status-v1"))
+                .andExpect(jsonPath("$.status.systemOperational").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("Publication and status source outages remain explicit unavailable responses")
+    void testAppContentSourceUnavailable() throws Exception {
+        var unavailable=new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,"QA_SOURCE_UNAVAILABLE");
+        org.mockito.Mockito.when(publicationJdbc.query(org.mockito.ArgumentMatchers.contains("content_list_published_announcements"),org.mockito.ArgumentMatchers.any(org.springframework.jdbc.core.RowMapper.class),org.mockito.ArgumentMatchers.any(Object[].class))).thenThrow(new IllegalStateException("QA source unavailable"));
+        org.mockito.Mockito.when(statusSource.publicStatus()).thenThrow(unavailable);
+        mockMvc.perform(get("/content/announcements")).andExpect(status().isServiceUnavailable()).andExpect(jsonPath("$.announcements").doesNotExist());
+        mockMvc.perform(get("/content/status")).andExpect(status().isServiceUnavailable()).andExpect(jsonPath("$.status.systemOperational").doesNotExist());
     }
 
     @Test
