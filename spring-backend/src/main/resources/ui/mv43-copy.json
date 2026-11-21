@@ -1,4 +1,46 @@
 {
+  "publicationAnnouncements": [
+    "Announcements",
+    "운영 소식",
+    "お知らせ",
+    "公告",
+    "Thông báo"
+  ],
+  "publicationGallery": [
+    "Gallery",
+    "사진",
+    "ギャラリー",
+    "图库",
+    "Thư viện ảnh"
+  ],
+  "publicationLead": [
+    "Browse published community records.",
+    "공개된 커뮤니티 기록을 확인하세요.",
+    "公開済みのコミュニティ記録を確認できます。",
+    "浏览已发布的社区记录。",
+    "Xem các bản ghi cộng đồng đã xuất bản."
+  ],
+  "publicationScope": [
+    "Search applies only to this verified window: {count} records, up to {limit} publications.",
+    "검색은 확인된 조회 범위 {count}건에만 적용됩니다. 게시물 최대 {limit}건입니다.",
+    "検索は確認済みの取得範囲{count}件のみが対象です。公開記録を最大{limit}件表示します。",
+    "仅搜索此已验证窗口中的{count}条记录，最多获取{limit}条发布记录。",
+    "Chỉ tìm trong cửa sổ đã xác minh gồm {count} bản ghi, tối đa {limit} mục xuất bản."
+  ],
+  "publicationEmpty": [
+    "The verified window contains no matching publications.",
+    "확인된 조회 범위에 조건에 맞는 게시물이 없습니다.",
+    "確認済みの取得範囲に一致する公開記録はありません。",
+    "已验证窗口中没有匹配的发布记录。",
+    "Không có mục xuất bản phù hợp trong cửa sổ đã xác minh."
+  ],
+  "publicationPinned": [
+    "Pinned",
+    "상단 고정",
+    "固定",
+    "置顶",
+    "Đã ghim"
+  ],
   "adminShopLead": [
     "Inspect verified catalog items, prices, stock and availability.",
     "확인된 상품 목록과 가격, 재고, 판매 상태를 조회합니다.",
