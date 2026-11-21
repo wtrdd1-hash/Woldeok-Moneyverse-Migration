@@ -36,3 +36,6 @@
 - 첫 로딩 guest 링크 관찰만으로 홈 로그인 상태가 계속 잘못된다고 판정하지 않았다. 실제 `.auth-profile`이 visible이 될 때까지 기다린 재검사에서 profile1/login0/logout1/admin-nav2를 확인했다. 직접 auth/session URL 탐색의 same_origin_required는 same-origin fetch의 실패 증거가 아니다. 이 추측으로 code/auth guard를 바꾸지 않았다.
 - 안정된 홈에서 실제 프로필 링크를 클릭하면 /account403은 여전히 재현된다. /admin/ 별칭은 같은 새 운영 source의 정상 화면(브랜드IMG2/오류0)을 확인했다.
 - 최종 수용 문서 독립 리뷰: material overclaim/unsafe inverse finding 없음. CSV320/24의 개수·유일 조합·통과 필드와 링크 및 repository-security/control-byte/whitespace 검증 통과. 전체 목표 미완료/남은28관리 경로와 backend/금융 게이트를 명시했다.
+
+### Evidence-format CI correction
+- 문서 PR3331의 classifier가 exit2/UNKNOWN으로 중단됐다. 실제 로컬 재현에서 신규 QA CSV2개가 기존 문서 허용 형식에 없음을 확인했다. 정책/테스트를 완화하지 않고 같은320/24개 증거를 이미 허용된 docs/qa/*.json 형식으로 보존했다. CSV 원본은 호스트 QA/기존 commit에 남는다. 운영 source/설정은 바꾸지 않았다.

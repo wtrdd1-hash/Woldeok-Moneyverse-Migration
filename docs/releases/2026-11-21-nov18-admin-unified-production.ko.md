@@ -58,7 +58,7 @@ gateway는 GET/HEAD7경로만 허용한다: me/controls/logs/reconciliation은45
 - 회원 화면 캡처는 QA 검색어의 실제 빈 결과를 사용해 회원ID·개별잔액을 노출하지 않았다. 원시 로그/세션/개인정보를 증거에 남기지 않았다.
 - 일부 viewport-only 캡처가 도구의 화면 맞춤 축소로375×360에 잘리는 문제가 있어 최종 모바일 증거는 전체 페이지 캡처로 대체하고 실제 CSS width/font15px/내부 입력 폭을 별도로 확인했다. 이를 UI 결함 또는 실기기 증거로 혼동하지 않는다.
 
-[320개 Test 케이스](../qa/2026-11-21-nov18-admin-test-cases.csv), [운영24개 케이스](../qa/2026-11-21-nov18-admin-production-cases.csv), [수용 요약](../qa/2026-11-21-nov18-admin-acceptance.json).
+[320개 Test 케이스](../qa/2026-11-21-nov18-admin-test-cases.json), [운영24개 케이스](../qa/2026-11-21-nov18-admin-production-cases.json), [수용 요약](../qa/2026-11-21-nov18-admin-acceptance.json).
 
 ## 변경·역전환
 
