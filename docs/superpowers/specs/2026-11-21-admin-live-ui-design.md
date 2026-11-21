@@ -9,3 +9,5 @@ The dashboard consumes actual users/stocks/switch responses. Logs consume the ex
 
 ## Acceptance
 Real PC layouts at1440/1920; responsive widths1024/768/430/390/360/320 and zoom200%. All five existing locales, keyboard/focus and menu; real dashboard values and log reads, filters, empty/error statuses. Negative tests cover forged identity/internal headers, guest/nonadmin, malformed/oversized JSON, timeout/redirect, script-like logs and lost session. Exact-source CI artifact and protected Test precede scoped Production cutover. Old API/auth/private/financial routes remain their existing authority.
+
+Review refinement: stock/feature/user fields are validated against the actual serialized AdminGovernanceDtos contracts, with aliases accepted only when nonconflicting. The log UI reads and validates an unfiltered bounded source window before applying its own text filter. Legacy Discord EMPTY without explicit sourceAvailable cannot certify a successful read. The backend source separately preserves read status before filtering; its deployed state is distinct from the new UI renderer.

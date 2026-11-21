@@ -1,4 +1,137 @@
 {
+  "adminAccessDenied": [
+    "Administrator permission is required",
+    "관리자 권한이 필요합니다",
+    "管理者権限が必要です",
+    "需要管理员权限",
+    "Cần quyền quản trị viên"
+  ],
+  "adminSystemLogs": [
+    "System logs",
+    "시스템 로그",
+    "システムログ",
+    "系统日志",
+    "Nhật ký hệ thống"
+  ],
+  "adminLogsLead": [
+    "Read current system logs with the existing administrator permission.",
+    "현재 관리자 권한으로 시스템 로그를 조회합니다.",
+    "現在の管理者権限でシステムログを確認します。",
+    "使用当前管理员权限查看系统日志。",
+    "Xem nhật ký hệ thống bằng quyền quản trị viên hiện tại."
+  ],
+  "adminLogsQuery": [
+    "Log query",
+    "로그 조회",
+    "ログ検索",
+    "查询日志",
+    "Truy vấn nhật ký"
+  ],
+  "adminLogsSource": [
+    "Source",
+    "로그 소스",
+    "ログソース",
+    "日志来源",
+    "Nguồn nhật ký"
+  ],
+  "adminLogsLines": [
+    "Maximum lines",
+    "최대 줄 수",
+    "最大行数",
+    "最大行数",
+    "Số dòng tối đa"
+  ],
+  "adminLogsFilter": [
+    "Contains text",
+    "포함할 내용",
+    "含める文字列",
+    "包含文本",
+    "Chứa văn bản"
+  ],
+  "adminLogsLoad": [
+    "Load logs",
+    "로그 조회",
+    "ログを取得",
+    "加载日志",
+    "Tải nhật ký"
+  ],
+  "adminLogsInvalid": [
+    "Choose a supported source, 10–500 lines and a filter up to 100 characters.",
+    "지원하는 소스와 10~500줄, 100자 이하의 검색어를 입력해 주세요.",
+    "対応するソース、10〜500行、100文字以内の検索語を指定してください。",
+    "请选择支持的来源、10–500行及不超过100字的筛选文本。",
+    "Chọn nguồn được hỗ trợ, 10–500 dòng và bộ lọc tối đa 100 ký tự."
+  ],
+  "adminLogsResults": [
+    "Source results",
+    "조회 결과",
+    "取得結果",
+    "查询结果",
+    "Kết quả truy vấn"
+  ],
+  "adminLogsReturned": [
+    "Returned lines",
+    "조회된 줄 수",
+    "取得行数",
+    "返回行数",
+    "Số dòng trả về"
+  ],
+  "adminLogsUpdated": [
+    "Read at",
+    "조회 시각",
+    "取得日時",
+    "读取时间",
+    "Thời điểm đọc"
+  ],
+  "adminLogsTruncated": [
+    "The source reached the requested limit; older entries may exist.",
+    "요청한 줄 수에 도달했습니다. 이전 로그가 더 있을 수 있습니다.",
+    "指定行数に達しました。さらに古いログがある可能性があります。",
+    "已达到请求行数，可能还有更早的日志。",
+    "Đã đạt giới hạn yêu cầu; có thể còn các mục cũ hơn."
+  ],
+  "adminLogsSource_NGINX_ERROR": [
+    "Nginx errors",
+    "Nginx 오류",
+    "Nginxエラー",
+    "Nginx错误",
+    "Lỗi Nginx"
+  ],
+  "adminLogsSource_NGINX_ACCESS": [
+    "Nginx access",
+    "Nginx 접근",
+    "Nginxアクセス",
+    "Nginx访问",
+    "Truy cập Nginx"
+  ],
+  "adminLogsSource_SPRING_BACKEND": [
+    "Spring backend",
+    "Spring 백엔드",
+    "Springバックエンド",
+    "Spring后端",
+    "Backend Spring"
+  ],
+  "adminLogsSource_FRONTEND": [
+    "Frontend",
+    "프론트엔드",
+    "フロントエンド",
+    "前端",
+    "Frontend"
+  ],
+  "adminLogsSource_DISCORD_BOT": [
+    "Discord bot",
+    "Discord 봇",
+    "Discordボット",
+    "Discord机器人",
+    "Bot Discord"
+  ],
+  "adminLogsSource_FRONTEND_ERRORS": [
+    "Frontend errors",
+    "프론트엔드 오류",
+    "フロントエンドエラー",
+    "前端错误",
+    "Lỗi frontend"
+  ],
   "home": [
     "Home",
     "홈",

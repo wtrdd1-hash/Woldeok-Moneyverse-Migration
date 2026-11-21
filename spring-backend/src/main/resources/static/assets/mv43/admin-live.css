@@ -1,0 +1,11 @@
+/* Desktop query workspace collapses in place so every control remains available on mobile. */
+.admin-log-controls{display:grid;grid-template-columns:minmax(160px,1fr) minmax(100px,.55fr) minmax(200px,1.4fr) auto;align-items:end;gap:16px}
+.admin-log-controls label{display:grid;gap:8px;min-width:0;color:#A8BCD8}.admin-log-controls input,.admin-log-controls select{box-sizing:border-box;width:100%;min-width:0;min-height:44px;padding:10px 12px;border:1px solid #A8BCD866;border-radius:10px;background:#0C1020;color:#E9F1FF;font:inherit}
+.admin-log-controls button{min-height:44px;font:inherit;white-space:normal}.admin-log-controls :focus-visible,.admin-log-output:focus-visible{outline:2px solid #64B7FF;outline-offset:3px}
+.admin-log-results{margin-top:24px}.admin-log-meta{display:flex;gap:24px;flex-wrap:wrap}.admin-log-meta dt{color:#A8BCD8;font-size:13px}.admin-log-meta dd{margin:4px 0 0;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.admin-log-output{min-width:0;max-width:100%;max-height:65vh;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid #A8BCD844;border-radius:12px;background:#0C1020;color:#E9F1FF;padding:16px;font:12px/1.7 ui-monospace,monospace;tab-size:2}
+.admin-log-output code{font:inherit}.admin-log-results .admin-section-head{flex-wrap:wrap}
+@media(max-width:1199px){.admin-log-controls{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){.admin-log-controls{grid-template-columns:minmax(0,1fr)}.admin-log-controls button{width:100%}.admin-log-output{padding:12px}}
+
+/* A short desktop must still expose the final navigation item without leaving the PC shell. */
+.admin-sidebar{overflow-y:auto;overscroll-behavior-y:contain}

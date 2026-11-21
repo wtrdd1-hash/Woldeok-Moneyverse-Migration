@@ -11,12 +11,18 @@
       if(el.dataset.i18n)el.textContent=locale.tx(el.dataset.i18n);
     });
     if(select){select.value=locale.preference();select.setAttribute('aria-label',locale.tx('selectLanguage'));}
-    document.title=locale.tx('dashboard')+' · Woldeok Moneyverse';
+    const toggle=$('admin-menu-open'),drawer=$('admin-drawer');
+    if(toggle)toggle.setAttribute('aria-label',locale.tx(drawer&&!drawer.hidden?'close':'menu'));
+    $('admin-menu-close')?.setAttribute('aria-label',locale.tx('close'));
+    const heading=document.querySelector('.admin-heading h1[data-i18n]');
+    document.title=locale.tx(heading?.dataset.i18n||'dashboard')+' · Woldeok Moneyverse';
+    const language=$('admin-log-language');if(language)language.value=locale.current();
   }
   function menu(open){
     const drawer=$('admin-drawer'), backdrop=$('admin-backdrop'),toggle=$('admin-menu-open');
     if(!drawer||!backdrop||!toggle)return;
     drawer.hidden=!open;backdrop.hidden=!open;toggle.setAttribute('aria-expanded',String(open));
+    toggle.setAttribute('aria-label',locale.tx(open?'close':'menu'));
     document.body.classList.toggle('menu-open',open);
     if(open)$('admin-menu-close')?.focus();else toggle.focus();
   }

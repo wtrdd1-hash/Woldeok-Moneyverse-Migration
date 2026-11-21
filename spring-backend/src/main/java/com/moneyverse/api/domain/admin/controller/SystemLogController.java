@@ -34,11 +34,7 @@ public class SystemLogController {
     }
 
     private void verifyAdmin(HttpServletRequest request) {
-        String internalToken = request.getHeader("x-internal-token");
-        if (internalToken != null && !internalToken.trim().isEmpty()) {
-            return;
-        }
-
+        // Transport headers cannot identify the administrator reading private logs.
         Optional<UserAuthService.SessionInfo> sessionOpt = userAuthService.resolveSession(request);
         if (sessionOpt.isEmpty() || !sessionOpt.get().isSignedIn()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized: Sign in required");
