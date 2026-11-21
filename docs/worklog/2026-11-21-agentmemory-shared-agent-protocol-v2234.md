@@ -1,0 +1,9 @@
+# v2026.11.21.2234 — Shared agent memory reference: work log (EN)
+
+- **Start (2026-11-21 22:34 KST):** Owner submitted the MIRLABS Instagram reel `DfZgpiWtX1z` with a directive to save it for ongoing use. Read `AGENTS.md`, `PROJECT_MEMORY.md`, `DOCS_INDEX.md`, integrated planning masters, and current mini-PC repository status before modifying files.
+- **Evidence:** Instagram HTTP 200 metadata identifies the reel as the 2026-11-06 MIRLABS introduction to `rohitg00/agentmemory`. Upstream `main` README reached over HTTPS. Actual video playback/transcript was not independently verified; caption and upstream README are the source of the findings.
+- **Safety/status:** AgentMemory executable and `~/.agentmemory` storage are not installed in the inspected mini-PC user account. No tool integration or permanent daemon may be claimed without installation, security review and tests. This change documents a required human/agent memory workflow and a guarded integration roadmap; no user data, token, or financial records are sent to external services.
+- **Isolation:** Original checkout remains on the separate `feat/v111-owasp-stripe-nist-security-hardening-20261121` branch. New isolated worktree `/home/debian/mv-agentmemory-protocol-20261121` and branch `docs/agentmemory-shared-agent-protocol-v2026.11.21.2234` start from observed remote `origin/main` SHA `a341ee3784bf611801efbcdef68e60ae38246dec`.
+- **Checklist:** [x] Identify source and verify upstream. [x] Inspect master and agent rules. [ ] Publish reference + EN/KO protocol. [ ] Cross-reference integrated masters and agent entrypoints. [ ] Validate links, document scope, secret filters and status. [ ] Refresh main and check for conflicts. [ ] Push branch and create review PR.
+- **Midpoint:** Pending.
+- **Finish:** Pending. Documentation-only. No Test/Production deployment, database mutation, or agent-memory service activation is authorized by this commit.
