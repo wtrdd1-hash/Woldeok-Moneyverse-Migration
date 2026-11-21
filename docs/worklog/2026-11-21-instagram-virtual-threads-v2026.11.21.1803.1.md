@@ -19,5 +19,10 @@
 - Official Java/Spring reference URLs used for independent technical context, not a substitute for the Reel audiovisual transcript.
 
 ## FINISH / acceptance
-- Pending final verification, PR link, and resulting commit records.
-- Test/Production: NOT EXECUTED (documentation-only). No rollout or automatic virtual-thread activation.
+- Remote `main` SHA rechecked after documentation edits and after PR creation: `52a18d59cb71470128fa0b7739af434ad94b5ac6` (unchanged).
+- Created paired EN/KO findings, worklog, changelog, GitHub/public update and internal update, plus updated EN/KO document catalog: **12 changed Markdown files, six bilingual pairs**.
+- GitHub draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3337
+- Read back all 12 documents on the dedicated branch: **PASS**; 0 unresolved local Markdown links, 0 possible credential markers in the 10 new documents.
+- Independent original Reel audiovisual validation: **NOT VERIFIED**; public metadata was verified.
+- Application unit/E2E/load tests and Test/Production: **NOT EXECUTED** (no code/config/runtime changes). No active Java virtual-thread enablement or release.
+- Integration: PR draft, not merged into main; any future integration must recheck upstream main and preserve other contributors' work.
