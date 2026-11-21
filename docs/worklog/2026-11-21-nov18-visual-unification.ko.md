@@ -158,3 +158,21 @@ I3 check/action 실제 경계의 동일내용 새inode replacement/removal2 RED�
 I1/I2/I3 구현·자체검토 후 범위재검토 대기. 최종 canary45/기존QA7/maintenance4=Python56, native/security/releaseNode548 모두 실패·skip0. Python5파일컴파일·repository-security/control-byte·diff-check 성공, 새경고 없음. old/new JAR·PID를 구별하는 fixture와 old-process proof 실패 후 재개하는 다섯 번째I2 검증도 통과했다. Linux no-replace rename/실제 임시파일 race를 실행했으나 root/service 작업은 없다. 마지막main925f725d2836c5ebe88311e2f2ff8ab17b052144 유지.
 I3 복구디렉터리는0700이며 candidate·이동원본·메타데이터와0600 비밀사본을 의도적으로 보존한다. 자동unlink/덮어쓰기 purge를 하지 않는다. 동시에 들어온 충돌 target은 건드리지 않고 이동된 바이트는 비공개로 보존해 명시적 미완료를 남긴다. check+rename/unlink를 atomic으로 주장하지 않는다. 잠깐 path가 비는 동안은 중지·통제된 소유파일에 한정하며 include 설치 후에만 Nginx reload한다. 부모가 I3에 맞는 보존프로토콜임을 확인했다.
 체크 [x]RED/GREEN [x]I1 pending-restart [x]I2 old단계/PID 재개 [x]I3 실제점유자/비덮어쓰기 [x]최종검증/자체검토 [ ]부모범위재검토. 로컬fix커밋만 하며 push/merge/배포·실제자격/rootstage/DB/service/Nginx/browser는 전부 미수행·OPEN이다.
+
+
+## Before work — backend 역전 reload 재시도 한정 작업
+2026-11-22: 격리 branch subtask/native-catalog-backend-inverse-20261122, BASEa200554628d21643b58c50d38027801f81e7f858. 승인된 한정 brief·저장소 안전규칙·living plan 첫머리·영한 로그·공유기억 대체규칙을 읽었다. fetch한 origin/main925f725d2836c5ebe88311e2f2ff8ab17b052144, 통합·독립승인은 부모 담당이다. installer 기준40개 실패·skip0.
+원인: 소유 backend 파일을 비공개 복구경로에 이동한 뒤 daemon-reload가 실패하면 완료 전인데도 원래 경로가 없어, 다음 영속 역전에서 삭제된 경로의 소유권을 요구한다. 계획 [ ]영속 reload 재시도 RED [ ]외부 경로/PID/drop-in·저장 경계 거부 [ ]installer만 최소 단계·복구증명 기록 [ ]관련 Python/컴파일/보안/control/diff검증 [ ]로컬커밋/보고. 공유 guard는 읽기 전용이며 종료한 I1/I2/I3 재검토를 열지 않는다.
+실제자격 읽기·rootstage·service/Nginx/DB/browser·artifact다운로드·push·배포 없음. 부모 독립검토 전 실제설치는 금지 상태다.
+
+
+## In progress — backend 역전 단계·복구증명
+installer 기준40통과. 실제 임시파일의 영속 재시도·외부자원 거부 추가 후54실행에서 예상RED6건(reload 전/후 효과, remove 후 오류, 단계/checkpoint3경계)을 확인했다. installer만 수정해 중지된 manager·소유inode/hash·새0700 no-replace 복구디렉터리/메타데이터를 이동 전에 기록한다. 원래경로 부재만으로 소유권을 인정하지 않으며 이동된 실제inode 증명이 필요하다. 재시도는 새 PID/path/drop-in/fragment를 채택·중지하지 않고 reload뒤 경로부재·manager not-found도 확인한다.
+54GREEN 후 completed-checkpoint OSError 회귀는 구 완료flag처리로60중1RED(외부경로 재시도에 거짓완료)를 재현했다. backend 완료도 저장실패 때 지워 다음 역전이 증명하도록 보완한다. 복구파일/디렉터리/JAR·reload뒤 외부경로/manager 거부도 검증한다. 공유guard 변경 없음. [x]기준/RED [x]최소구현 [ ]최종한정검증 [ ]로컬커밋/보고 [ ]부모독립검토. 실제운영 gate는 미수행이며 설치승인 없음.
+
+
+## Finished — backend 역전 재시도 소스 단계 / 독립승인 미완료
+2026-11-22: 중지된 소유파일 이동 전에 통제된 제거의도를 기록하고, 비공개 복구경로의 실제inode/hash/메타데이터·manager 상태를 검증한다. 파일부재만 채택하지 않고 보존된 소유증명으로 daemon-reload를 재시도하며, 완료 전 경로부재·manager not-found를 재확인한다. remove/reload 효과 뒤 오류 및 checkpoint 전후 process loss도 디스크저널만 읽는 두 번째 명시역전으로 재개한다. 완료checkpoint 오류는 backend 완료flag를 지워 외부경로에 거짓완료하지 않는다.
+최종한정검증: canary67(installer62+기존5), 변경없는 QA7·maintenance4 = Python78/실패·오류·skip0. Python5파일 컴파일·실제repository-security/control검사·변경 Python/docs 추가control검사·diff-check 성공, 새경고 없음. 기준40, 첫RED6/54·완료checkpoint RED1/60의 가림처리 임시로그는 부모보고에 기록한다. 최종fetch main925f725d2836c5ebe88311e2f2ff8ab17b052144 변경없음.
+자체검토: 효과전 checkpoint·실제 no-replace 이동·증명없는 부재 거부·동일내용 새inode/symlink 보존·외부PID/restart/drop-in/fragment 거부·보존파일/0700디렉터리/JAR·reload후 검증·frontend 우선 include복구·독립 env정리를 확인했다. 공유guard·그외소스 변경 없음. 잠깐 원래경로가 비는 보존프로토콜이며 atomic CAS/자동purge로 주장하지 않는다.
+체크 [x]기준/RED [x]installer/test최소수정 [x]저장경계/외부자원거부 [x]한정검증 [x]자체검토 [x]로컬소스인계준비 [ ]부모독립검토 [ ]실제prepare/artifact/service/DB/browser/Test/release승인. 로컬커밋만 하고 branch/worktree 보존한다. push/PR/merge/배포·실제자격읽기/rootstage변경/artifact다운로드/service/Nginx/DB/browser 없음. 한정brief에 따라 전체앱/Gradle/SQL은 미실행이며 부모 통합/CI 담당이다. 독립승인 전 실제설치는 금지 상태다.

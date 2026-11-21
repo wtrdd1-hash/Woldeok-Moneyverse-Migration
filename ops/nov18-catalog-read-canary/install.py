@@ -16,6 +16,7 @@ from pathlib import Path
 import re
 import shlex
 import socket
+import stat
 import subprocess
 import time
 import urllib.error
@@ -620,7 +621,7 @@ def rollback(stage,manifest,system,journal=None,owned=None):
             outcome[name]=True
         except Exception as error:
             outcome['errors'].append(name+':'+type(error).__name__)
-            if name=='frontendRestored':completed.pop(name,None)
+            if name in {'frontendRestored','backendRemoved'}:completed.pop(name,None)
             try:journal_save(stage,journal,owned)
             except Exception as checkpoint:
                 outcome['errors'].append(name+'Checkpoint:'+type(checkpoint).__name__)
@@ -693,10 +694,65 @@ def rollback(stage,manifest,system,journal=None,owned=None):
         system.nginx('test');system.nginx('reload')
     component('nginxReloaded',restore_nginx)
     def remove_backend():
-        if str(API_FILE) in owned.created:
+        if str(API_FILE) not in owned.created:return
+        identity=list(owned.created[str(API_FILE)])
+        absent={'LoadState':'not-found','ActiveState':'inactive','MainPID':'0','FragmentPath':'','DropInPaths':''}
+        inactive={**absent,'LoadState':'loaded','FragmentPath':str(API_FILE)}
+        allowed=[absent,inactive,{**inactive,'ActiveState':'failed'}]
+        phase=journal.get('backendInverse')
+        if phase is None:
             stop_acquired(API_UNIT,API_FILE,Path(manifest['jar']),manifest['applicationSource'],system,owned,journal,manifest['jarSha256'])
-            owned.remove(API_FILE)
-            system.reload()
+            manager=system.state(API_UNIT)
+            if manager not in allowed:raise ValueError('Stopped backend manager identity is uncertain')
+            directory,recovery=owned._recovery(API_FILE,'remove',identity)
+            current=directory.lstat()
+            phase={'phase':'removing','identity':identity,'manager':manager,'directory':str(directory),
+                   'directoryIdentity':[current.st_dev,current.st_ino,current.st_mode,current.st_uid],
+                   'metadata':snapshot(directory/'recovery.json')}
+            journal['backendInverse']=phase
+            # Persist the controlled destination before the no-replace move.
+            # Its actual held inode can prove an effect whose reply was lost.
+            journal_save(stage,journal,owned)
+        directory=Path(phase['directory'])
+        slot=directory/'displaced'
+        current=directory.lstat()
+        if (phase.get('phase') not in {'removing','reload-pending'} or phase.get('identity')!=identity
+            or phase.get('manager') not in allowed or directory.parent!=API_FILE.parent
+            or not re.fullmatch(r'\.'+re.escape(API_FILE.name)+r'\.nov18-qa-[0-9a-f]{32}',directory.name)
+            or not stat.S_ISDIR(current.st_mode) or current.st_mode&0o777!=0o700
+            or current.st_uid!=os.geteuid()
+            or [current.st_dev,current.st_ino,current.st_mode,current.st_uid]!=phase['directoryIdentity']
+            or any(parent.is_symlink() for parent in directory.parents)):
+            raise ValueError('Backend removal recovery identity changed')
+        check_snapshot(directory/'recovery.json',phase['metadata'])
+        recovery=next((r for r in owned.recoveries if r['directory']==str(directory)),None)
+        if recovery is None or recovery['target']!=str(API_FILE) or recovery['action']!='remove' or recovery['expected']!=identity:
+            raise ValueError('Backend removal recovery receipt changed')
+        jar=Path(manifest['jar'])
+        if jar.is_symlink() or digest(jar.read_bytes())!=manifest['jarSha256']:
+            raise ValueError('Stopped backend packaged generation changed')
+        def pending():
+            if system.state(API_UNIT) not in [phase['manager'],absent]:
+                raise ValueError('Stopped backend manager changed before reload')
+        pending()
+        if API_FILE.exists() or API_FILE.is_symlink():
+            if phase['phase']!='removing' or slot.exists() or slot.is_symlink() or not owned.owns(API_FILE):
+                raise ValueError('Backend removal target was occupied concurrently')
+            try:
+                owned._displace(API_FILE,slot,identity,recovery)
+                recovery['status']='removed-held'
+            finally:
+                journal_save(stage,journal,owned)
+        def removed():
+            if API_FILE.exists() or API_FILE.is_symlink() or not owned._matches(slot,identity):
+                raise ValueError('Backend removal requires target absence and retained owned inode')
+        removed()
+        phase['phase']='reload-pending'
+        journal_save(stage,journal,owned)
+        pending();removed()
+        system.reload()
+        removed()
+        if system.state(API_UNIT)!=absent:raise ValueError('Backend manager removal is incomplete')
     component('backendRemoved',remove_backend)
     def remove_environment():
         if str(ENVIRONMENT) in owned.created:
