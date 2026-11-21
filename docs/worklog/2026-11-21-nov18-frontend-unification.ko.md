@@ -66,3 +66,12 @@
 - 최종 main 후보 전체 Nginx syntax 및 격리 routing114/gateway20건 실패0. 새gateway는 me/outbox 두 GET만 허용하고 다른 기존 관리자 GET도 거부한다. 이전8경로·public·API·보안 차단과 과거 asset 세대는 유지한다.
 - [추가 실제 결함](../qa/2026-11-21-nov18-unification-open-defects.ko.md): API 관제의 미측정 안내/고정 정상 수치 모순, 숨김파일 regex의 일반경로403을 별도 격리 재현했다. 광범위 규칙 해제나 전체 backend 승격을 하지 않았다.
 - 다음: exact-main CI 전부 성공→보호 Test 로그인 QA→단일 전달 경로 운영→증거/문서 종료. 현재는 기존8경로만 운영 수용이며 전달 화면은 미전환이다.
+
+## 종료 체크포인트 — 이번9조회 UI 단계
+- exact-main CI44864420278 네 job 모두SUCCESS 후 Test13:16:35/운영13:22:14 전환했다. 새 전달 원천은4817두GET, 전달 Test4816/운영4818이다. 이전8e2fb/공개93a3 및 기존 자산·전체 backend/API를 유지한다.
+- 실제 사용자 로그인으로 전달 Test40개 언어/배치+5CSSresize+5client aria, 운영15개(Test중지 상태) 및 이전8경로 전/후16배치씩을 확인했다. Test복원/동일 세션/최근30미확인 표시/메뉴·표 스크롤·문의·언어·실제 링크·저해상도 키보드를 확인했다.
+-13:25관찰에서 실제 source/PID/cwd/listener/openJar/manifest/freshness 일치·enabled/active·config전체include/해시·nginx syntax 통과, cutover 후 두unit error journal0건. 순간 관찰이며 장기 가동 보증이 아니다.
+- [후속 운영 수용](../releases/2026-11-21-nov18-admin-delivery-production.ko.md), JSON케이스와 [남은 실제 결함](../qa/2026-11-21-nov18-unification-open-defects.ko.md)을 기록했다. 나머지27관리자/전체웹/변경기능·물리기기/확대·모국어/전체접근성·금융/DB/provenance/backup gates는 OPEN이다. 메시지·금융·DB·계정 보정/삭제/전체backend 승격은 하지 않았다.
+- 판단 기록: 기존 읽기 화면을 단계적으로 전환하고 동작 화면을 표로 없애지 않는다(비용: 전역 통일은 아직 부분). 언어 QA는 기존 cookie기반계약을 따른다(비용: query단독언어 의미 변경 없음). 새 aria언어 결함을 사용자5언어 요구의 Important로 처리했다(비용: 번역 속성2개). 이전8은 별도 수용 세대를 유지한다(비용: 새 artifact가8개를 자동 인증하지 않음).
+- 리뷰 보류 영역의 판단: exactCI/Test/Prod와routing/assets는 실제 후속 검증으로 종료; 원천 수신·DB/경제/SQL/grant·전송/워커·auth발급/TOTP/역할설계는 변경하지 않고 별도 gate 유지(비용: 조회 통과가 운영/금융/발송 승인 아님). 전체 다른화면·403·fullhistory/비율·모국어/실기기·기존전체접근성은 명시적OPEN(비용: 전체 정상 주장을 할 수 없음). 성공 후 수동live rollback은 미실행(비용: 역전환 준비/자동실패 역전환 검토를 실행 증거로 주장하지 않음).
+- 문서 PR3333의 최종 CI/일반 병합·owned branch 정리는 다음 기록에서 확인한다. 이번 애플리케이션 운영 수용과 문서 main SHA를 혼동하지 않는다.

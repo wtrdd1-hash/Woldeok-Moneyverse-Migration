@@ -57,7 +57,9 @@ Files: new `spring-backend/src/main/java/com/moneyverse/adminpresentation/AdminD
 
 ## Task5: Delivery exact-source Test/Production
 Files: same worklog/route ledger and new release receipt. Operational scripts outside git must use root-only immutable staging and CAS/owned rollback.
-- [ ] Main fetch/normal PR/required exact-HEAD CI; immutable exact-main artifact and process/open-JAR/source evidence.
-- [ ] Source gateway admits only one extra fixed GET; scoped protected same-origin Test preview, actual authenticated delivery UI + five locales and PC/mobile/keyboard. No existing eight-route promotion by implication.
-- [ ] Exact-source Test receipt + main all4CI, narrow Production cutover; source/API/privacy/old asset generation checks, Test-independence observation.
-- [ ] Record source status unknown separately from unavailable, remaining27admin routes/all member/action scope OPEN; push docs checkpoints, normal integration and owned cleanup.
+- [x] Main fetch/normal PR/required exact-HEAD CI; immutable exact-main artifact and process/open-JAR/source evidence.
+- [x] Source gateway admits only one extra fixed GET; scoped protected same-origin Test preview, actual authenticated delivery UI + five locales and PC/mobile/keyboard. No existing eight-route promotion by implication.
+- [x] Exact-source Test receipt + main all4CI, narrow Production cutover; source/API/privacy/old asset generation checks, Test-independence observation.
+- [ ] Record source status unknown separately from unavailable, remaining27admin routes/all member/action scope OPEN; push final docs checkpoint, then verify normal integration and owned cleanup from actual GitHub/host state.
+
+Follow-up runtime accepted: delivery main7d58568e3041, Test40+5CSSresize/client5aria, Production15withTeststopped/restored, prior8before/after16each. Full site remains OPEN; final docs integration/owned cleanup is recorded separately.

@@ -1,3 +1,7 @@
+## 2026-11-21 13:22 KST — delivery follow-up, nine admin read routes
+
+Delivery HTML now serves app main7d58568e30413e838315a2d5322abfd5366b074a on4818/Test4816/source4817. Prior8e2fb and public93a3 stay unchanged. Exact-main all4CI44864420278, authenticated Test40/Production15and prior8before/after16each passed; Test-stop independence and restored Test confirmed. Whole-site/other27admin/actions/backend/financial acceptance remains OPEN. [Evidence](releases/2026-11-21-nov18-admin-delivery-production.ko.md).
+
 ## 2026-11-21 12:02 KST — observed eight-route administrator presentation
 
 Exact application source e2fb487a1a7814e74abac1097814881801c4dd13 serves eight read-only admin screens through unified Production4814, isolated Test4812 and GET-only source gateway4813. Existing public source93a3 and full backend/API authorities remain. MainCI44857905769 all four jobs passed; authenticated Test320locale/layout cases and Production24layouts passed, with same-session/Test-stop independence. Other administrator actions and whole-site unification remain OPEN. [Acceptance](releases/2026-11-21-nov18-admin-unified-production.ko.md).

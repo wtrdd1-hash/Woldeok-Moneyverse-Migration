@@ -1,0 +1,442 @@
+{
+  "source": "7d58568e30413e838315a2d5322abfd5366b074a",
+  "phase": "production",
+  "cases": [
+    {
+      "activeSideLinks": [
+        "/admin/logs"
+      ],
+      "alerts": 0,
+      "background": "rgb(12, 16, 32)",
+      "bottomVisible": false,
+      "heading": "Delivery logs",
+      "lang": "en",
+      "logos": [
+        {
+          "loaded": true,
+          "tag": "IMG"
+        },
+        {
+          "loaded": true,
+          "tag": "IMG"
+        }
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "readSourceCount": null,
+      "readTable": true,
+      "rowCount": 30,
+      "sidebarVisible": true,
+      "support": 1,
+      "title": "Delivery logs · Woldeok Moneyverse",
+      "width": 1440
+    },
+    {
+      "activeSideLinks": [
+        "/admin/logs"
+      ],
+      "alerts": 0,
+      "background": "rgb(12, 16, 32)",
+      "bottomVisible": true,
+      "heading": "Delivery logs",
+      "lang": "en",
+      "logos": [
+        {
+          "loaded": true,
+          "tag": "IMG"
+        },
+        {
+          "loaded": true,
+          "tag": "IMG"
+        }
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "readSourceCount": null,
+      "readTable": true,
+      "rowCount": 30,
+      "sidebarVisible": false,
+      "support": 1,
+      "title": "Delivery logs · Woldeok Moneyverse",
+      "width": 390
+    },
+    {
+      "activeSideLinks": [
+        "/admin/logs"
+      ],
+      "alerts": 0,
+      "background": "rgb(12, 16, 32)",
+      "bottomVisible": true,
+      "heading": "Delivery logs",
+      "lang": "en",
+      "logos": [
+        {
+          "loaded": true,
+          "tag": "IMG"
+        },
+        {
+          "loaded": true,
+          "tag": "IMG"
+        }
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "readSourceCount": null,
+      "readTable": true,
+      "rowCount": 30,
+      "sidebarVisible": false,
+      "support": 1,
+      "title": "Delivery logs · Woldeok Moneyverse",
+      "width": 320
+    },
+    {
+      "activeSideLinks": [
+        "/admin/logs"
+      ],
+      "alerts": 0,
+      "background": "rgb(12, 16, 32)",
+      "bottomVisible": false,
+      "heading": "배송·전송 로그",
+      "lang": "ko",
+      "logos": [
+        {
+          "loaded": true,
+          "tag": "IMG"
+        },
+        {
+          "loaded": true,
+          "tag": "IMG"
+        }
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "readSourceCount": null,
+      "readTable": true,
+      "rowCount": 30,
+      "sidebarVisible": true,
+      "support": 1,
+      "title": "배송·전송 로그 · Woldeok Moneyverse",
+      "width": 1440
+    },
+    {
+      "activeSideLinks": [
+        "/admin/logs"
+      ],
+      "alerts": 0,
+      "background": "rgb(12, 16, 32)",
+      "bottomVisible": true,
+      "heading": "배송·전송 로그",
+      "lang": "ko",
+      "logos": [
+        {
+          "loaded": true,
+          "tag": "IMG"
+        },
+        {
+          "loaded": true,
+          "tag": "IMG"
+        }
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "readSourceCount": null,
+      "readTable": true,
+      "rowCount": 30,
+      "sidebarVisible": false,
+      "support": 1,
+      "title": "배송·전송 로그 · Woldeok Moneyverse",
+      "width": 390
+    },
+    {
+      "activeSideLinks": [
+        "/admin/logs"
+      ],
+      "alerts": 0,
+      "background": "rgb(12, 16, 32)",
+      "bottomVisible": true,
+      "heading": "배송·전송 로그",
+      "lang": "ko",
+      "logos": [
+        {
+          "loaded": true,
+          "tag": "IMG"
+        },
+        {
+          "loaded": true,
+          "tag": "IMG"
+        }
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "readSourceCount": null,
+      "readTable": true,
+      "rowCount": 30,
+      "sidebarVisible": false,
+      "support": 1,
+      "title": "배송·전송 로그 · Woldeok Moneyverse",
+      "width": 320
+    },
+    {
+      "activeSideLinks": [
+        "/admin/logs"
+      ],
+      "alerts": 0,
+      "background": "rgb(12, 16, 32)",
+      "bottomVisible": false,
+      "heading": "配信・転送ログ",
+      "lang": "ja",
+      "logos": [
+        {
+          "loaded": true,
+          "tag": "IMG"
+        },
+        {
+          "loaded": true,
+          "tag": "IMG"
+        }
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "readSourceCount": null,
+      "readTable": true,
+      "rowCount": 30,
+      "sidebarVisible": true,
+      "support": 1,
+      "title": "配信・転送ログ · Woldeok Moneyverse",
+      "width": 1440
+    },
+    {
+      "activeSideLinks": [
+        "/admin/logs"
+      ],
+      "alerts": 0,
+      "background": "rgb(12, 16, 32)",
+      "bottomVisible": true,
+      "heading": "配信・転送ログ",
+      "lang": "ja",
+      "logos": [
+        {
+          "loaded": true,
+          "tag": "IMG"
+        },
+        {
+          "loaded": true,
+          "tag": "IMG"
+        }
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "readSourceCount": null,
+      "readTable": true,
+      "rowCount": 30,
+      "sidebarVisible": false,
+      "support": 1,
+      "title": "配信・転送ログ · Woldeok Moneyverse",
+      "width": 390
+    },
+    {
+      "activeSideLinks": [
+        "/admin/logs"
+      ],
+      "alerts": 0,
+      "background": "rgb(12, 16, 32)",
+      "bottomVisible": true,
+      "heading": "配信・転送ログ",
+      "lang": "ja",
+      "logos": [
+        {
+          "loaded": true,
+          "tag": "IMG"
+        },
+        {
+          "loaded": true,
+          "tag": "IMG"
+        }
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "readSourceCount": null,
+      "readTable": true,
+      "rowCount": 30,
+      "sidebarVisible": false,
+      "support": 1,
+      "title": "配信・転送ログ · Woldeok Moneyverse",
+      "width": 320
+    },
+    {
+      "activeSideLinks": [
+        "/admin/logs"
+      ],
+      "alerts": 0,
+      "background": "rgb(12, 16, 32)",
+      "bottomVisible": false,
+      "heading": "投递与传输日志",
+      "lang": "zh",
+      "logos": [
+        {
+          "loaded": true,
+          "tag": "IMG"
+        },
+        {
+          "loaded": true,
+          "tag": "IMG"
+        }
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "readSourceCount": null,
+      "readTable": true,
+      "rowCount": 30,
+      "sidebarVisible": true,
+      "support": 1,
+      "title": "投递与传输日志 · Woldeok Moneyverse",
+      "width": 1440
+    },
+    {
+      "activeSideLinks": [
+        "/admin/logs"
+      ],
+      "alerts": 0,
+      "background": "rgb(12, 16, 32)",
+      "bottomVisible": true,
+      "heading": "投递与传输日志",
+      "lang": "zh",
+      "logos": [
+        {
+          "loaded": true,
+          "tag": "IMG"
+        },
+        {
+          "loaded": true,
+          "tag": "IMG"
+        }
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "readSourceCount": null,
+      "readTable": true,
+      "rowCount": 30,
+      "sidebarVisible": false,
+      "support": 1,
+      "title": "投递与传输日志 · Woldeok Moneyverse",
+      "width": 390
+    },
+    {
+      "activeSideLinks": [
+        "/admin/logs"
+      ],
+      "alerts": 0,
+      "background": "rgb(12, 16, 32)",
+      "bottomVisible": true,
+      "heading": "投递与传输日志",
+      "lang": "zh",
+      "logos": [
+        {
+          "loaded": true,
+          "tag": "IMG"
+        },
+        {
+          "loaded": true,
+          "tag": "IMG"
+        }
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "readSourceCount": null,
+      "readTable": true,
+      "rowCount": 30,
+      "sidebarVisible": false,
+      "support": 1,
+      "title": "投递与传输日志 · Woldeok Moneyverse",
+      "width": 320
+    },
+    {
+      "activeSideLinks": [
+        "/admin/logs"
+      ],
+      "alerts": 0,
+      "background": "rgb(12, 16, 32)",
+      "bottomVisible": false,
+      "heading": "Nhật ký chuyển giao",
+      "lang": "vi",
+      "logos": [
+        {
+          "loaded": true,
+          "tag": "IMG"
+        },
+        {
+          "loaded": true,
+          "tag": "IMG"
+        }
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "readSourceCount": null,
+      "readTable": true,
+      "rowCount": 30,
+      "sidebarVisible": true,
+      "support": 1,
+      "title": "Nhật ký chuyển giao · Woldeok Moneyverse",
+      "width": 1440
+    },
+    {
+      "activeSideLinks": [
+        "/admin/logs"
+      ],
+      "alerts": 0,
+      "background": "rgb(12, 16, 32)",
+      "bottomVisible": true,
+      "heading": "Nhật ký chuyển giao",
+      "lang": "vi",
+      "logos": [
+        {
+          "loaded": true,
+          "tag": "IMG"
+        },
+        {
+          "loaded": true,
+          "tag": "IMG"
+        }
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "readSourceCount": null,
+      "readTable": true,
+      "rowCount": 30,
+      "sidebarVisible": false,
+      "support": 1,
+      "title": "Nhật ký chuyển giao · Woldeok Moneyverse",
+      "width": 390
+    },
+    {
+      "activeSideLinks": [
+        "/admin/logs"
+      ],
+      "alerts": 0,
+      "background": "rgb(12, 16, 32)",
+      "bottomVisible": true,
+      "heading": "Nhật ký chuyển giao",
+      "lang": "vi",
+      "logos": [
+        {
+          "loaded": true,
+          "tag": "IMG"
+        },
+        {
+          "loaded": true,
+          "tag": "IMG"
+        }
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "readSourceCount": null,
+      "readTable": true,
+      "rowCount": 30,
+      "sidebarVisible": false,
+      "support": 1,
+      "title": "Nhật ký chuyển giao · Woldeok Moneyverse",
+      "width": 320
+    }
+  ],
+  "rawPersonalData": false
+}
