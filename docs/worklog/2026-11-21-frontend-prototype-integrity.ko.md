@@ -18,3 +18,10 @@
 
 ## 진행2 — GREEN 및 독립 리뷰 보완
 원본10개(root5+alias5)에 CSS 닫힘, 정수 문자열 그룹화, 합성 그래프 제거와 초기/오류 em dash, 검증된 시가만 반영하는 BigInt 유리수 평균 반올림을 구현했다.170검사 모두 GREEN. 독립 리뷰의 두 언어 엔진 불일치를40검사 RED→GREEN으로 수정해 실제 document locale을 우선했다. 세션 조회 후 wallet signedIn:false/401의 최신 로그아웃 증거를 놓치는20실패도 재현 후 수정했으며, 일반 wallet500은 확인된 회원 표시를 보존한다. 전체 native335/0실패/0skip 통과. 첫 Spring test/bootJar SUCCESS(605/0실패/0error/0skip); 최종 source의 변경된 resource를 반영해 재실행 예정. 별도 Test와 실제 렌더 검증 없이는 운영 완료라고 하지 않는다.
+
+## 진행3 — 소스 main 통합 / 운영 준비
+PR3338이 main8ba9139b2fcd577253ee83a24040091be218d64b로 통합됐다. branch CI44889225161의 classify/policy/spring-web-check/runtime-check 네 job이 모두 SUCCESS이며 후보 workflow의 추가 verify도 통과했다. 최종 local native335 및 Spring605는0실패/0skip, bootJar SUCCESS다. 실제 운영 /shop 재관찰은 hero block/padding0/grid block/합성 curve 존재로 수정 전 RED를 확인했다. 새 main CI44890241945의 exact-source 결과를 기다려 그 artifact로만 격리 Test를 준비한다. 운영5개 경로는 아직 변경 전이다.
+
+독립 source 리뷰의 언어·로그아웃 상태2건을 재현하고 수정했다. 운영 제안 리뷰의 Important2(상위 Debian 소유 release 경로의 교체 가능성, invalid nginx 설정을 다시 파싱하며 복구가 막히는 문제)도 수정했다. 별도 /var/lib/moneyverse-frontend-integrity-20261121 root 소유 parent와0700 task stage를 사용하고, 복구는 이미 아는 파일 hash·디렉터리 항목을 검사한 뒤 원상복원한다. 실패 주입 RED→GREEN 포함 실제 격리 Nginx·CAS/CI거부·route 중복 검사5개 모두 PASS, reviewer도 독립 재실행5PASS/0FAIL을 확인했다. 별도 보호된 preview의 실제 PC/mobile URI·candidate hash를 수용 증거에 묶는다.
+
+Ruling: source PR 통합 뒤의 배포·검증 증거는 docs/frontend-prototype-integrity-release-20261121 branch에서 기록하여 application source SHA와 문서 commit을 혼동하지 않는다. 재사용 작업 폴더가 이전에 외부 정리된 사실 때문에 main 및 타 작업을 건드리지 않고 이 task 전용 폴더를 유지한다.
