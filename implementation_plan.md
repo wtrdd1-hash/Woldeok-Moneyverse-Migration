@@ -5314,3 +5314,29 @@ eserves: 대한민국 외환보유액 통합계정)
 - **Phase 3 (Candidate Validation)**: 독립 Verifier 에이전트가 오탐(False Positive) 제거.
 - **Phase 4 & 5 (Structured Output & Re-verify)**: `findings.json` 스키마 검증 및 소스 재확인.
 - **Phase 6 (Reporting)**: 종합 리포트(`SECURITY-AUDIT-REPORT.md`) 발행 및 즉각 보안 패치 적용.
+
+
+---
+## 🛡️ [v111 Specification] 글로벌 공인 보안 표준(OWASP Top 10, Stripe 멱등성, NIST SP 800-63B) 전격 강화
+- **반영 일시**: 2026-11-21
+- **요청 사항**: 사용자 승인에 따라 글로벌 표준(OWASP API Security Top 10, Stripe Financial Concurrency, NIST SP 800-63B)에 기반한 심층 보안 방어벽 전면 강화.
+- **핵심 목표**:
+  1. **OWASP API1:2023 BOLA / Actor 위조 전역 차단 (SensitiveApiBoundaryFilter.java)**:
+     - 기존 필터 누락 경로(/api/casino, /api/shop, /api/work, /api/stocks, /api/bonds, /api/arena, /api/market, /api/mint, /api/season)를 isMemberPrivatePath에 전수 등록하여 클라이언트가 보낸 임의의 X-User-Id 주입을 필터 레벨에서 100% 차단하고 DB 세션 유효성 검증 강제.
+  2. **OWASP API3:2023 BOPLA 및 음수 금액 조작 방어 (CasinoDtos.java)**:
+     - 베팅 및 결제 DTO(betAmountWld)에 Bean Validation @Positive, @Min(1) 어노테이션을 부여하여 음수/0원 조작 공격 원천 차단.
+  3. **NIST SP 800-63B 오픈 리다이렉트 방어**:
+     - 인증 및 콜백 처리 시 리다이렉트 URL에서 외부 도메인(http://, https://, //)을 거부하고 순수 내부 상대 경로(/)만 허용.
+
+### 1. 세부 구현 대상 파일 및 변경점
+- SensitiveApiBoundaryFilter.java:
+  - isMemberPrivatePath에 비즈니스 및 금융 엔드포인트 전수 등록.
+- CasinoDtos.java:
+  - CasinoPlayRequest의 betAmountWld에 @Positive 및 @Min(1) 적용.
+- Brand.tsx:
+  - 상단 헤더 브랜드 심볼을 구식 SVG에서 승인된 공식 엠블럼 아이콘(/images/woldeok-official-icon.png)으로 교체.
+
+### 2. 검증 계획
+- Gradle 컴파일 및 단위/보안 테스트 수행 (./gradlew compileJava test).
+- SensitiveApiBoundaryFilterTest 또는 curl 검증으로 위조 헤더 차단 확인.
+- 원격 운영 서버 배포 및 서비스 정상 가동 확인.

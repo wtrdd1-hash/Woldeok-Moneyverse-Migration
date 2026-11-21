@@ -26,14 +26,14 @@ export function Brand({
         className,
       )}
     >
-      <div className="relative flex size-9 shrink-0 items-center justify-center rounded-[13px] bg-primary text-primary-foreground shadow-[0_10px_28px_rgba(248,198,92,0.2)] ring-1 ring-primary/40 sm:size-10">
-        <svg viewBox="0 0 24 24" fill="none" className="size-4.5 sm:size-5" aria-hidden="true">
-          <path
-            d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1Z"
-            fill="currentColor"
-          />
-          <circle cx="16.5" cy="7.5" r="1.5" fill="currentColor" opacity="0.8" />
-        </svg>
+      <div className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-[13px] shadow-[0_4px_16px_rgba(168,85,247,0.35)] ring-1 ring-purple-500/30 sm:size-10">
+        <img
+          src="/images/woldeok-official-icon.png"
+          alt="Woldeok Official Logo"
+          width={40}
+          height={40}
+          className="size-full object-cover transition-transform group-hover:scale-105"
+        />
       </div>
       <span className="inline-flex items-center gap-1 whitespace-nowrap text-xs min-[400px]:text-sm sm:text-base font-extrabold">
         {locale === 'en' ? (
