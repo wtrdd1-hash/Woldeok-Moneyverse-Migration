@@ -1,0 +1,82 @@
+{
+  "source": "e45f57595415f132eedf36c13748564b93a1d918",
+  "jarSha256": "e11ebcddba4ec70afe987a6a52ecf333f38292c983e27654bb4f93f9d0cab08a",
+  "ciRun": "44873490927",
+  "runtimeProof": [
+    {
+      "unit": "moneyverse-frontend-consolidated-test-v20261121.service",
+      "pid": "3110875",
+      "root": "/srv/moneyverse-data/releases/test-frontend-consolidated-v2026.11.21.1-e45f57595415",
+      "source": "e45f57595415f132eedf36c13748564b93a1d918",
+      "jarSha256": "e11ebcddba4ec70afe987a6a52ecf333f38292c983e27654bb4f93f9d0cab08a",
+      "port": 4820
+    },
+    {
+      "unit": "moneyverse-frontend-consolidated-prod-v20261121.service",
+      "pid": "3091835",
+      "root": "/srv/moneyverse-data/releases/prod-frontend-consolidated-v2026.11.21.1-e45f57595415",
+      "source": "e45f57595415f132eedf36c13748564b93a1d918",
+      "jarSha256": "e11ebcddba4ec70afe987a6a52ecf333f38292c983e27654bb4f93f9d0cab08a",
+      "port": 4822
+    }
+  ],
+  "testIndependent": {
+    "accepted": true,
+    "source": "e45f57595415f132eedf36c13748564b93a1d918",
+    "jarSha256": "e11ebcddba4ec70afe987a6a52ecf333f38292c983e27654bb4f93f9d0cab08a",
+    "testStateDuringBrowserObservation": "inactive",
+    "productionBrowserRoutes": 26,
+    "walletSourceSumVerified": true,
+    "adminProbesRead": 4
+  },
+  "retiredNativeUnits": 11,
+  "retiredQaNginx": 2,
+  "backendFinancialWorkerAuthoritiesChanged": false,
+  "databaseMigrationsApplied": false,
+  "ledgerBalanceCorrections": false,
+  "archivePaths": 23,
+  "archiveByteVersions": 30,
+  "configSha256": {
+    "/etc/nginx/snippets/moneyverse-frontend-v24-pages.conf": "0255a582fb239780044196be1617ab57f848345024c483310749020260fd1235",
+    "/etc/nginx/snippets/moneyverse-frontend-v24-static-public.conf": "0309209f118f6e1726ea5bc5c8faf08b808bb17a1e53d3b48b09d9ce027b28e9",
+    "/etc/nginx/conf.d/moneyverse-admin-delivery-source-v20261121.conf": "477eaa709cba9ec26b485c39530358150354214711e428dc7faba20adc826add",
+    "/etc/nginx/snippets/moneyverse-seo-node-bridge-v2026.11.17.2.conf": "b80f579ae925236732e3cb9992502cb6e8fb7350631bdab70c75fe42dabd01dd",
+    "/etc/nginx/snippets/moneyverse-p0-admin-ui-frontend-v20261118.conf": "6abde19574ae9c1d5e530f4e0c269e870e9002d24ca1654b2a7fd047b55f644a",
+    "/etc/nginx/snippets/moneyverse-native-registration-hold-v20261120.conf": "366ac3e3ea0eb0d012cbc6152a86a0d1dc1bf79d4ab68328e96002919046cc04",
+    "/etc/nginx/conf.d/moneyverse-admin-read-source-v20261121.conf": "b7fa718a365bc4198e9de7278f556bb8c4d9f190221a9348ebb301ebbd16295d",
+    "/etc/nginx/snippets/moneyverse-discord-oauth-node-bridge-v2026.11.17.4.conf": "e88da36e4b72825ac5b5f000ec05d24565011de12747b916c557b7369797b57e",
+    "/etc/nginx/snippets/moneyverse-native-presentation-qa-closed-v20261120.conf": "d0912c511bd7b86f90b64b599ceeb1003cb30c1af1c5889cff95d8ef95572636",
+    "/etc/nginx/conf.d/moneyverse-spring-routes.conf": "ffa65c0375a838d785aff87ec4d2ca5a3527a8679e58dad94d5dbb3102f0887e",
+    "/etc/nginx/snippets/moneyverse-native-favicon-prod-pages-v20261121-93a3c8dbe8c0.conf": "b54be9ee3f8ccb8dabe662c973a5c0dbd7221aeda67eb8ebfa45e11128029c02",
+    "/etc/nginx/snippets/moneyverse-discord-oauth-canonical-start-v2026.11.17.4.conf": "62729669bbdfc1277fa15866dc9b03ea7d4b0854c0918dfe5019498b703fb04e",
+    "/etc/nginx/conf.d/proxy_upgrade.conf": "068f223ed1b11c58ac25c58dc31bfd3da490568ac619fb619d12fce05ff92600",
+    "/etc/nginx/snippets/moneyverse-spring-web-preview-v20261118.conf": "7d2c68ee34b37a54a82e8741881796ae2f19929d37e425cf65e376ce3570f3cb",
+    "/etc/nginx/mime.types": "b12cd90b120d4b97e76a7b857eb4a2bf0b6df37c4b246d471f37e6493dc191ac",
+    "/etc/nginx/snippets/moneyverse-pentagi-scanner-shield.conf": "624fd0b95bf29d2bfa14dea0d8b565360585295515ab89d7c4d2aaa71692d9ec",
+    "/etc/nginx/conf.d/moneyverse-admin-unified-source-v20261121.conf": "476c0c07be8cd460da0835c466ca1f01b4bb46c8259cf752394bed64be616550",
+    "/etc/nginx/conf.d/00-moneyverse-frontend-consolidated-v20261121.conf": "849c064b8dab5304b59a6c48262a90b473c066c953e168ec5b4560205fd1f6de",
+    "/etc/nginx/snippets/moneyverse-security-headers-strip.conf": "ad28f0c392c629b5a93b08278c6a5177a3fefcd720ddeba47ae00593d335ff2e",
+    "/etc/nginx/snippets/moneyverse-seo-v3-edge-auth.conf": "c6a2642e748c88d1e94bb90f2682d4b7dc0c0950d6f233d78524a2a14edeb74a",
+    "/etc/nginx/snippets/moneyverse-frontend-v24-static-internal.conf": "ae5309509b38adc57f30b46eb96a24a99b8e0968c7d93b39d8a67002237d168f",
+    "/etc/nginx/nginx.conf": "c66fbe205bf46b5d125502e35605938ed37feef6e2b24325b1c088665caaf477",
+    "/etc/nginx/snippets/moneyverse-stock-admin-public-edge-bridge-v2026.11.17.1.conf": "6e12e0a81a654f1f27ca6041bc06701d0972a7c9d9d380bf4d354c2f9ac13433",
+    "/etc/nginx/sites-enabled/moneyverse": "57ead5b60d0308953c9fb6e2a11dbe37d28d3ae8d351a5e79290a10c7069a726",
+    "/etc/nginx/snippets/moneyverse-stock-admin-auth-bridge-v2026.11.17.1.conf": "43d19979ced0579f4f4a0e4853c8a19800439c4478eae4ee5dd414113ff781d1",
+    "/etc/nginx/snippets/moneyverse-native-favicon-prod-assets-v20261121-93a3c8dbe8c0.conf": "23ef9c27def630de2aa3ca4134c81688764a0044764f4d48f857860b693a62c8"
+  },
+  "finalRetirementMemory": {
+    "before": {
+      "MemFree": "442096 kB",
+      "MemAvailable": "1073720 kB",
+      "SwapFree": "15242180 kB"
+    },
+    "after": {
+      "MemFree": "631824 kB",
+      "MemAvailable": "1272492 kB",
+      "SwapFree": "16660580 kB"
+    }
+  },
+  "retirementScript": "retire-v3.py",
+  "retirementScriptSha256": "386b3015ad26c0001316516579503961636c87088a9726567083e9c8dcf1851c",
+  "allFeaturesAccepted": false
+}

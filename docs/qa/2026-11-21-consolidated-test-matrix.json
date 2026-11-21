@@ -1,0 +1,5235 @@
+{
+  "source": "e45f57595415f132eedf36c13748564b93a1d918",
+  "phase": "test",
+  "accepted": true,
+  "scope": "presentation and safe failure states; no whole-site or mutation acceptance",
+  "pc": {
+    "en": 26,
+    "ko": 26,
+    "ja": 26,
+    "zh": 26,
+    "vi": 26
+  },
+  "mobile": {
+    "en": 26,
+    "ko": 26,
+    "ja": 26,
+    "zh": 26,
+    "vi": 26
+  },
+  "horizontalOverflow": 0,
+  "brokenLogos": 0,
+  "walletSums": [
+    {
+      "lang": "ko",
+      "width": 1440,
+      "exact": true
+    },
+    {
+      "lang": "ja",
+      "width": 1440,
+      "exact": true
+    },
+    {
+      "lang": "zh",
+      "width": 1440,
+      "exact": true
+    },
+    {
+      "lang": "vi",
+      "width": 1440,
+      "exact": true
+    },
+    {
+      "lang": "en",
+      "width": 1440,
+      "exact": true
+    },
+    {
+      "lang": "ko",
+      "width": 390,
+      "exact": true
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "exact": true
+    },
+    {
+      "lang": "ja",
+      "width": 390,
+      "exact": true
+    },
+    {
+      "lang": "zh",
+      "width": 390,
+      "exact": true
+    },
+    {
+      "lang": "vi",
+      "width": 390,
+      "exact": true
+    }
+  ],
+  "interactions": {
+    "compound1210": true,
+    "stockAverage150Target165": true,
+    "calculatorDraftLocalePreserved": true,
+    "faqOpened": true,
+    "adminSearchZeroMatch": true,
+    "adminSearchDraftLocalePreserved": true,
+    "mobileDrawerEscapeAndFocusRestore": true,
+    "supportPanelOpenClose": true,
+    "actualSessionHeader": true
+  },
+  "blocked": {
+    "walletTransfer": "current session has no verified CSRF proof",
+    "support": "retained readonly API lacks verifiable source contract; no sending",
+    "chat": "retained readonly API lacks verifiable source contract; no sending",
+    "authRecoveryAndRegistration": "existing backend/consent holds retained",
+    "otherAdminWrites": "not accepted",
+    "financialMutations": "not exercised"
+  },
+  "rows": [
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "홈",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/",
+      "probes": [],
+      "requested": "/",
+      "status": [],
+      "title": "홈 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "금융 도구",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools",
+      "probes": [],
+      "requested": "/tools",
+      "status": [],
+      "title": "금융 도구 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "금융 계산기 센터",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/calculators",
+      "probes": [],
+      "requested": "/calculators",
+      "status": [],
+      "title": "금융 계산기 센터 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "복리 계산기",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools/compound-calculator",
+      "probes": [],
+      "requested": "/tools/compound-calculator",
+      "status": [
+        "실제 데이터 조회 중…",
+        "예상 최종 자산537,357총 납입금460,000예상 복리 수익77,357단리 비교 수익71,400복리 추가 이익5,957"
+      ],
+      "title": "복리 계산기 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "주식 평균단가 계산기",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools/stock-calculator",
+      "probes": [],
+      "requested": "/tools/stock-calculator",
+      "status": [
+        "실제 데이터 조회 중…",
+        "변경 후 평균 매입가44총 주식 수250총 가상 투자원가11,000초기 매수가 대비 평균 변동-12%목표 매도가50.63예상 수수료 차감 수익1,651"
+      ],
+      "title": "주식 평균단가 계산기 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "대시보드",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin",
+      "probes": [],
+      "requested": "/admin",
+      "status": [],
+      "title": "대시보드 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "회원 디렉토리",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/users",
+      "probes": [],
+      "requested": "/admin/users",
+      "status": [],
+      "title": "회원 디렉토리 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "거래소 관제",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/market",
+      "probes": [],
+      "requested": "/admin/market",
+      "status": [],
+      "title": "거래소 관제 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "킬스위치 제어 센터",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/controls",
+      "probes": [],
+      "requested": "/admin/controls",
+      "status": [],
+      "title": "킬스위치 제어 센터 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "공기업·지배구조",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/enterprises",
+      "probes": [],
+      "requested": "/admin/enterprises",
+      "status": [],
+      "title": "공기업·지배구조 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "경제·원장",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/economy",
+      "probes": [],
+      "requested": "/admin/economy",
+      "status": [],
+      "title": "경제·원장 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "시나리오 랩",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/economy/scenario-lab",
+      "probes": [],
+      "requested": "/admin/economy/scenario-lab",
+      "status": [],
+      "title": "시나리오 랩 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "시스템 로그",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/logs/system",
+      "probes": [],
+      "requested": "/admin/logs/system",
+      "status": [],
+      "title": "시스템 로그 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "배송·전송 로그",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "probes": [],
+      "requested": "/admin/logs/delivery",
+      "status": [],
+      "title": "배송·전송 로그 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "API 관제",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/api-health",
+      "probes": [
+        {
+          "key": "users",
+          "state": "read"
+        },
+        {
+          "key": "stocks",
+          "state": "read"
+        },
+        {
+          "key": "controls",
+          "state": "read"
+        },
+        {
+          "key": "catalog",
+          "state": "read"
+        }
+      ],
+      "requested": "/admin/api-health",
+      "status": [],
+      "title": "API 관제 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 5,
+      "forms": 1,
+      "h1": "지갑",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/wallet",
+      "probes": [],
+      "requested": "/wallet",
+      "status": [
+        "본인 인증 세션이 확인된 경우에만 거래 내역을 표시합니다.",
+        "송금 전에 인증 상태를 다시 확인해주세요."
+      ],
+      "title": "내 지갑 · W Moneyverse",
+      "width": 1440,
+      "walletExact": true
+    },
+    {
+      "disabledButtons": 4,
+      "forms": 3,
+      "h1": "관리자 문의",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/support",
+      "probes": [],
+      "requested": "/support",
+      "status": [
+        "기록을 확인할 수 없습니다. 메시지가 없다는 뜻은 아닙니다. 전송은 일시 중지됩니다."
+      ],
+      "title": "관리자 문의 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 9,
+      "forms": 1,
+      "h1": "쪽지함",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/chat",
+      "probes": [],
+      "requested": "/chat",
+      "status": [
+        "기록을 확인할 수 없습니다. 메시지가 없다는 뜻은 아닙니다. 전송은 일시 중지됩니다."
+      ],
+      "title": "쪽지함 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "로그인",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/login",
+      "probes": [],
+      "requested": "/login",
+      "status": [
+        "이메일과 비밀번호를 입력하고 동의 사항을 확인해 주세요."
+      ],
+      "title": "로그인 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "로그인",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/login/providers",
+      "probes": [],
+      "requested": "/login/providers",
+      "status": [
+        "이메일과 비밀번호를 입력하고 동의 사항을 확인해 주세요."
+      ],
+      "title": "로그인 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "회원가입",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/register",
+      "probes": [],
+      "requested": "/register",
+      "status": [
+        "서비스에서 약관 동의와 연령 확인을 기록할 수 있을 때까지 회원가입을 이용할 수 없습니다."
+      ],
+      "title": "회원가입 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "비밀번호 찾기",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/forgot-password",
+      "probes": [],
+      "requested": "/forgot-password",
+      "status": [
+        "현재 이 기능을 이용할 수 없습니다. 변경된 내용이 없으며 이메일 발송도 확인되지 않았습니다."
+      ],
+      "title": "비밀번호 찾기 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "비밀번호 재설정",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/reset-password",
+      "probes": [],
+      "requested": "/reset-password",
+      "status": [
+        "현재 이 기능을 이용할 수 없습니다. 변경된 내용이 없으며 이메일 발송도 확인되지 않았습니다."
+      ],
+      "title": "비밀번호 재설정 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "이메일 확인",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/verify-email",
+      "probes": [],
+      "requested": "/verify-email",
+      "status": [
+        "현재 이 기능을 이용할 수 없습니다. 변경된 내용이 없으며 이메일 발송도 확인되지 않았습니다."
+      ],
+      "title": "이메일 확인 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "이메일 변경 확인",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/verify-email-change",
+      "probes": [],
+      "requested": "/verify-email-change",
+      "status": [
+        "현재 이 기능을 이용할 수 없습니다. 변경된 내용이 없으며 이메일 발송도 확인되지 않았습니다."
+      ],
+      "title": "이메일 변경 확인 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "계정 삭제",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/account-deletion",
+      "probes": [],
+      "requested": "/account-deletion",
+      "status": [
+        "현재 이 기능을 이용할 수 없습니다. 변경된 내용이 없으며 이메일 발송도 확인되지 않았습니다."
+      ],
+      "title": "계정 삭제 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "ホーム",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/",
+      "probes": [],
+      "requested": "/",
+      "status": [],
+      "title": "ホーム · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "金融ツール",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools",
+      "probes": [],
+      "requested": "/tools",
+      "status": [],
+      "title": "金融ツール · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "金融計算機センター",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/calculators",
+      "probes": [],
+      "requested": "/calculators",
+      "status": [],
+      "title": "金融計算機センター · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "複利計算機",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools/compound-calculator",
+      "probes": [],
+      "requested": "/tools/compound-calculator",
+      "status": [
+        "データ取得中…",
+        "予測最終資産537,357払込総額460,000予測複利収益77,357単利比較収益71,400複利による追加利益5,957"
+      ],
+      "title": "複利計算機 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "株式平均取得単価計算機",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools/stock-calculator",
+      "probes": [],
+      "requested": "/tools/stock-calculator",
+      "status": [
+        "データ取得中…",
+        "変更後の平均取得単価44総株数250総シミュレーション原価11,000初回単価からの変化-12%目標売却価格50.63手数料控除後の予測利益1,651"
+      ],
+      "title": "株式平均取得単価計算機 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "ダッシュボード",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin",
+      "probes": [],
+      "requested": "/admin",
+      "status": [],
+      "title": "ダッシュボード · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "会員一覧",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/users",
+      "probes": [],
+      "requested": "/admin/users",
+      "status": [],
+      "title": "会員一覧 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "市場監視",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/market",
+      "probes": [],
+      "requested": "/admin/market",
+      "status": [],
+      "title": "市場監視 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "機能制御",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/controls",
+      "probes": [],
+      "requested": "/admin/controls",
+      "status": [],
+      "title": "機能制御 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "公企業・ガバナンス",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/enterprises",
+      "probes": [],
+      "requested": "/admin/enterprises",
+      "status": [],
+      "title": "公企業・ガバナンス · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "経済・台帳",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/economy",
+      "probes": [],
+      "requested": "/admin/economy",
+      "status": [],
+      "title": "経済・台帳 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "シナリオ実験室",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/economy/scenario-lab",
+      "probes": [],
+      "requested": "/admin/economy/scenario-lab",
+      "status": [],
+      "title": "シナリオ実験室 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "システムログ",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/logs/system",
+      "probes": [],
+      "requested": "/admin/logs/system",
+      "status": [],
+      "title": "システムログ · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "配信・転送ログ",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "probes": [],
+      "requested": "/admin/logs/delivery",
+      "status": [],
+      "title": "配信・転送ログ · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "API監視",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/api-health",
+      "probes": [
+        {
+          "key": "users",
+          "state": "read"
+        },
+        {
+          "key": "stocks",
+          "state": "read"
+        },
+        {
+          "key": "controls",
+          "state": "read"
+        },
+        {
+          "key": "catalog",
+          "state": "read"
+        }
+      ],
+      "requested": "/admin/api-health",
+      "status": [],
+      "title": "API監視 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 5,
+      "forms": 1,
+      "h1": "ウォレット",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/wallet",
+      "probes": [],
+      "requested": "/wallet",
+      "status": [
+        "本人認証後のみ取引を表示します。",
+        "送金前にログイン認証を再確認してください。"
+      ],
+      "title": "マイウォレット · W Moneyverse",
+      "width": 1440,
+      "walletExact": true
+    },
+    {
+      "disabledButtons": 4,
+      "forms": 3,
+      "h1": "管理者へのお問い合わせ",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/support",
+      "probes": [],
+      "requested": "/support",
+      "status": [
+        "記録を確認できません。メッセージがないという意味ではありません。送信を停止しています。"
+      ],
+      "title": "管理者へのお問い合わせ · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 9,
+      "forms": 1,
+      "h1": "メッセージ",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/chat",
+      "probes": [],
+      "requested": "/chat",
+      "status": [
+        "記録を確認できません。メッセージがないという意味ではありません。送信を停止しています。"
+      ],
+      "title": "メッセージ · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "ログイン",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/login",
+      "probes": [],
+      "requested": "/login",
+      "status": [
+        "認証情報を入力し、確認事項を選択してください。"
+      ],
+      "title": "ログイン · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "ログイン",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/login/providers",
+      "probes": [],
+      "requested": "/login/providers",
+      "status": [
+        "認証情報を入力し、確認事項を選択してください。"
+      ],
+      "title": "ログイン · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "アカウント作成",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/register",
+      "probes": [],
+      "requested": "/register",
+      "status": [
+        "規約同意と年齢確認をサービスで記録できるまで登録は利用できません。"
+      ],
+      "title": "アカウント作成 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "パスワードを忘れた場合",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/forgot-password",
+      "probes": [],
+      "requested": "/forgot-password",
+      "status": [
+        "現在この操作は利用できません。変更は行われず、メール送信も確認されていません。"
+      ],
+      "title": "パスワードを忘れた場合 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "パスワード再設定",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/reset-password",
+      "probes": [],
+      "requested": "/reset-password",
+      "status": [
+        "現在この操作は利用できません。変更は行われず、メール送信も確認されていません。"
+      ],
+      "title": "パスワード再設定 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "メール確認",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/verify-email",
+      "probes": [],
+      "requested": "/verify-email",
+      "status": [
+        "現在この操作は利用できません。変更は行われず、メール送信も確認されていません。"
+      ],
+      "title": "メール確認 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "メール変更の確認",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/verify-email-change",
+      "probes": [],
+      "requested": "/verify-email-change",
+      "status": [
+        "現在この操作は利用できません。変更は行われず、メール送信も確認されていません。"
+      ],
+      "title": "メール変更の確認 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "アカウント削除",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/account-deletion",
+      "probes": [],
+      "requested": "/account-deletion",
+      "status": [
+        "現在この操作は利用できません。変更は行われず、メール送信も確認されていません。"
+      ],
+      "title": "アカウント削除 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "首页",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/",
+      "probes": [],
+      "requested": "/",
+      "status": [],
+      "title": "首页 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "金融工具",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools",
+      "probes": [],
+      "requested": "/tools",
+      "status": [],
+      "title": "金融工具 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "金融计算器中心",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/calculators",
+      "probes": [],
+      "requested": "/calculators",
+      "status": [],
+      "title": "金融计算器中心 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "复利计算器",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools/compound-calculator",
+      "probes": [],
+      "requested": "/tools/compound-calculator",
+      "status": [
+        "正在读取真实数据…",
+        "预计最终资产537,357累计投入460,000预计复利收益77,357单利对比收益71,400复利额外收益5,957"
+      ],
+      "title": "复利计算器 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "股票平均成本计算器",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools/stock-calculator",
+      "probes": [],
+      "requested": "/tools/stock-calculator",
+      "status": [
+        "正在读取真实数据…",
+        "新的平均买入价44总股数250总模拟投资成本11,000相对初始买价的平均变化-12%目标卖出价50.63预计扣除手续费后收益1,651"
+      ],
+      "title": "股票平均成本计算器 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "控制面板",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin",
+      "probes": [],
+      "requested": "/admin",
+      "status": [],
+      "title": "控制面板 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "成员目录",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/users",
+      "probes": [],
+      "requested": "/admin/users",
+      "status": [],
+      "title": "成员目录 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "市场监控",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/market",
+      "probes": [],
+      "requested": "/admin/market",
+      "status": [],
+      "title": "市场监控 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "功能控制",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/controls",
+      "probes": [],
+      "requested": "/admin/controls",
+      "status": [],
+      "title": "功能控制 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "公共企业与治理",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/enterprises",
+      "probes": [],
+      "requested": "/admin/enterprises",
+      "status": [],
+      "title": "公共企业与治理 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "经济与账本",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/economy",
+      "probes": [],
+      "requested": "/admin/economy",
+      "status": [],
+      "title": "经济与账本 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "情景实验室",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/economy/scenario-lab",
+      "probes": [],
+      "requested": "/admin/economy/scenario-lab",
+      "status": [],
+      "title": "情景实验室 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "系统日志",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/logs/system",
+      "probes": [],
+      "requested": "/admin/logs/system",
+      "status": [],
+      "title": "系统日志 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "投递与传输日志",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "probes": [],
+      "requested": "/admin/logs/delivery",
+      "status": [],
+      "title": "投递与传输日志 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "API监控",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/api-health",
+      "probes": [
+        {
+          "key": "users",
+          "state": "read"
+        },
+        {
+          "key": "stocks",
+          "state": "read"
+        },
+        {
+          "key": "controls",
+          "state": "read"
+        },
+        {
+          "key": "catalog",
+          "state": "read"
+        }
+      ],
+      "requested": "/admin/api-health",
+      "status": [],
+      "title": "API监控 · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 5,
+      "forms": 1,
+      "h1": "钱包",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/wallet",
+      "probes": [],
+      "requested": "/wallet",
+      "status": [
+        "仅在验证您的登录后显示交易记录。",
+        "转账前请重新确认登录认证。"
+      ],
+      "title": "我的钱包 · W Moneyverse",
+      "width": 1440,
+      "walletExact": true
+    },
+    {
+      "disabledButtons": 4,
+      "forms": 3,
+      "h1": "联系管理员",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/support",
+      "probes": [],
+      "requested": "/support",
+      "status": [
+        "无法验证记录。这不表示没有消息。发送已暂停。"
+      ],
+      "title": "联系管理员 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 9,
+      "forms": 1,
+      "h1": "私信箱",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/chat",
+      "probes": [],
+      "requested": "/chat",
+      "status": [
+        "无法验证记录。这不表示没有消息。发送已暂停。"
+      ],
+      "title": "私信箱 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "登录",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/login",
+      "probes": [],
+      "requested": "/login",
+      "status": [
+        "请输入登录信息并确认各项声明。"
+      ],
+      "title": "登录 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "登录",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/login/providers",
+      "probes": [],
+      "requested": "/login/providers",
+      "status": [
+        "请输入登录信息并确认各项声明。"
+      ],
+      "title": "登录 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "创建账户",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/register",
+      "probes": [],
+      "requested": "/register",
+      "status": [
+        "在服务能够记录条款同意和年龄确认之前，注册暂不可用。"
+      ],
+      "title": "创建账户 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "忘记密码",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/forgot-password",
+      "probes": [],
+      "requested": "/forgot-password",
+      "status": [
+        "此操作暂不可用。未进行任何更改，也未确认邮件已发送。"
+      ],
+      "title": "忘记密码 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "重置密码",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/reset-password",
+      "probes": [],
+      "requested": "/reset-password",
+      "status": [
+        "此操作暂不可用。未进行任何更改，也未确认邮件已发送。"
+      ],
+      "title": "重置密码 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "验证邮箱",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/verify-email",
+      "probes": [],
+      "requested": "/verify-email",
+      "status": [
+        "此操作暂不可用。未进行任何更改，也未确认邮件已发送。"
+      ],
+      "title": "验证邮箱 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "确认邮箱变更",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/verify-email-change",
+      "probes": [],
+      "requested": "/verify-email-change",
+      "status": [
+        "此操作暂不可用。未进行任何更改，也未确认邮件已发送。"
+      ],
+      "title": "确认邮箱变更 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "删除账户",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/account-deletion",
+      "probes": [],
+      "requested": "/account-deletion",
+      "status": [
+        "此操作暂不可用。未进行任何更改，也未确认邮件已发送。"
+      ],
+      "title": "删除账户 · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Trang chủ",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/",
+      "probes": [],
+      "requested": "/",
+      "status": [],
+      "title": "Trang chủ · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "Công cụ tài chính",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools",
+      "probes": [],
+      "requested": "/tools",
+      "status": [],
+      "title": "Công cụ tài chính · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "Trung tâm máy tính tài chính",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/calculators",
+      "probes": [],
+      "requested": "/calculators",
+      "status": [],
+      "title": "Trung tâm máy tính tài chính · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "Máy tính lãi kép",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools/compound-calculator",
+      "probes": [],
+      "requested": "/tools/compound-calculator",
+      "status": [
+        "Số dư dự kiến537,357Tổng vốn đã góp460,000Lãi dự kiến77,357Lãi đơn để so sánh71,400Lợi thế lãi kép5,957"
+      ],
+      "title": "Máy tính lãi kép · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "Máy tính giá vốn cổ phiếu",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools/stock-calculator",
+      "probes": [],
+      "requested": "/tools/stock-calculator",
+      "status": [
+        "Đang tải dữ liệu thực…",
+        "Giá vốn bình quân mới44Tổng số cổ phiếu250Tổng giá vốn mô phỏng11,000Biến động so với giá mua đầu-12%Giá bán mục tiêu50.63Lợi nhuận ròng dự kiến1,651"
+      ],
+      "title": "Máy tính giá vốn cổ phiếu · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Bảng điều khiển",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin",
+      "probes": [],
+      "requested": "/admin",
+      "status": [],
+      "title": "Bảng điều khiển · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "Danh bạ thành viên",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/users",
+      "probes": [],
+      "requested": "/admin/users",
+      "status": [],
+      "title": "Danh bạ thành viên · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Giám sát thị trường",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/market",
+      "probes": [],
+      "requested": "/admin/market",
+      "status": [],
+      "title": "Giám sát thị trường · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Điều khiển tính năng",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/controls",
+      "probes": [],
+      "requested": "/admin/controls",
+      "status": [],
+      "title": "Điều khiển tính năng · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Doanh nghiệp công và quản trị",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/enterprises",
+      "probes": [],
+      "requested": "/admin/enterprises",
+      "status": [],
+      "title": "Doanh nghiệp công và quản trị · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Kinh tế và sổ cái",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/economy",
+      "probes": [],
+      "requested": "/admin/economy",
+      "status": [],
+      "title": "Kinh tế và sổ cái · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Phòng thử nghiệm kịch bản",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/economy/scenario-lab",
+      "probes": [],
+      "requested": "/admin/economy/scenario-lab",
+      "status": [],
+      "title": "Phòng thử nghiệm kịch bản · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "Nhật ký hệ thống",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/logs/system",
+      "probes": [],
+      "requested": "/admin/logs/system",
+      "status": [],
+      "title": "Nhật ký hệ thống · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Nhật ký chuyển giao",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "probes": [],
+      "requested": "/admin/logs/delivery",
+      "status": [],
+      "title": "Nhật ký chuyển giao · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Giám sát API",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/api-health",
+      "probes": [
+        {
+          "key": "users",
+          "state": "read"
+        },
+        {
+          "key": "stocks",
+          "state": "read"
+        },
+        {
+          "key": "controls",
+          "state": "read"
+        },
+        {
+          "key": "catalog",
+          "state": "read"
+        }
+      ],
+      "requested": "/admin/api-health",
+      "status": [],
+      "title": "Giám sát API · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 5,
+      "forms": 1,
+      "h1": "Ví",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/wallet",
+      "probes": [],
+      "requested": "/wallet",
+      "status": [
+        "Chỉ hiển thị giao dịch sau khi xác minh tài khoản.",
+        "Xác minh phiên đăng nhập trước khi chuyển tiền."
+      ],
+      "title": "Ví của tôi · W Moneyverse",
+      "width": 1440,
+      "walletExact": true
+    },
+    {
+      "disabledButtons": 4,
+      "forms": 3,
+      "h1": "Liên hệ hỗ trợ",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/support",
+      "probes": [],
+      "requested": "/support",
+      "status": [
+        "Không xác minh được nguồn. Điều này không có nghĩa là không có tin nhắn. Tạm dừng gửi."
+      ],
+      "title": "Liên hệ hỗ trợ · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 9,
+      "forms": 1,
+      "h1": "Tin nhắn riêng",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/chat",
+      "probes": [],
+      "requested": "/chat",
+      "status": [
+        "Không xác minh được nguồn. Điều này không có nghĩa là không có tin nhắn. Tạm dừng gửi."
+      ],
+      "title": "Tin nhắn riêng · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "Đăng nhập",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/login",
+      "probes": [],
+      "requested": "/login",
+      "status": [
+        "Nhập thông tin đăng nhập và đánh dấu các xác nhận."
+      ],
+      "title": "Đăng nhập · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "Đăng nhập",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/login/providers",
+      "probes": [],
+      "requested": "/login/providers",
+      "status": [
+        "Nhập thông tin đăng nhập và đánh dấu các xác nhận."
+      ],
+      "title": "Đăng nhập · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "Tạo tài khoản",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/register",
+      "probes": [],
+      "requested": "/register",
+      "status": [
+        "Chưa thể đăng ký cho đến khi dịch vụ lưu được sự đồng ý và xác nhận tuổi."
+      ],
+      "title": "Tạo tài khoản · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Quên mật khẩu",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/forgot-password",
+      "probes": [],
+      "requested": "/forgot-password",
+      "status": [
+        "Thao tác này hiện chưa khả dụng. Chưa có thay đổi và chưa xác nhận email được gửi."
+      ],
+      "title": "Quên mật khẩu · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Đặt lại mật khẩu",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/reset-password",
+      "probes": [],
+      "requested": "/reset-password",
+      "status": [
+        "Thao tác này hiện chưa khả dụng. Chưa có thay đổi và chưa xác nhận email được gửi."
+      ],
+      "title": "Đặt lại mật khẩu · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Xác minh email",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/verify-email",
+      "probes": [],
+      "requested": "/verify-email",
+      "status": [
+        "Thao tác này hiện chưa khả dụng. Chưa có thay đổi và chưa xác nhận email được gửi."
+      ],
+      "title": "Xác minh email · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Xác nhận đổi email",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/verify-email-change",
+      "probes": [],
+      "requested": "/verify-email-change",
+      "status": [
+        "Thao tác này hiện chưa khả dụng. Chưa có thay đổi và chưa xác nhận email được gửi."
+      ],
+      "title": "Xác nhận đổi email · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Xóa tài khoản",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/account-deletion",
+      "probes": [],
+      "requested": "/account-deletion",
+      "status": [
+        "Thao tác này hiện chưa khả dụng. Chưa có thay đổi và chưa xác nhận email được gửi."
+      ],
+      "title": "Xóa tài khoản · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Home",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/",
+      "probes": [],
+      "requested": "/",
+      "status": [],
+      "title": "Home · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "Financial tools",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools",
+      "probes": [],
+      "requested": "/tools",
+      "status": [],
+      "title": "Financial tools · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "Calculator center",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/calculators",
+      "probes": [],
+      "requested": "/calculators",
+      "status": [],
+      "title": "Calculator center · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "Compound interest calculator",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools/compound-calculator",
+      "probes": [],
+      "requested": "/tools/compound-calculator",
+      "status": [
+        "Loading verified data…",
+        "Projected balance537,357Total contributed460,000Projected interest77,357Simple interest comparison71,400Compound advantage5,957"
+      ],
+      "title": "Compound interest calculator · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "Stock average price calculator",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools/stock-calculator",
+      "probes": [],
+      "requested": "/tools/stock-calculator",
+      "status": [
+        "Loading verified data…",
+        "New average price44Total shares250Total simulated cost11,000Average change vs initial-12%Target sale price50.63Estimated net profit1,651"
+      ],
+      "title": "Stock average price calculator · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Dashboard",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin",
+      "probes": [],
+      "requested": "/admin",
+      "status": [],
+      "title": "Dashboard · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "Member directory",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/users",
+      "probes": [],
+      "requested": "/admin/users",
+      "status": [],
+      "title": "Member directory · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Market monitoring",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/market",
+      "probes": [],
+      "requested": "/admin/market",
+      "status": [],
+      "title": "Market monitoring · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Feature controls",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/controls",
+      "probes": [],
+      "requested": "/admin/controls",
+      "status": [],
+      "title": "Feature controls · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Public enterprises & governance",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/enterprises",
+      "probes": [],
+      "requested": "/admin/enterprises",
+      "status": [],
+      "title": "Public enterprises & governance · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Economy & ledger",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/economy",
+      "probes": [],
+      "requested": "/admin/economy",
+      "status": [],
+      "title": "Economy & ledger · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Scenario lab",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/economy/scenario-lab",
+      "probes": [],
+      "requested": "/admin/economy/scenario-lab",
+      "status": [],
+      "title": "Scenario lab · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "System logs",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/logs/system",
+      "probes": [],
+      "requested": "/admin/logs/system",
+      "status": [],
+      "title": "System logs · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Delivery logs",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "probes": [],
+      "requested": "/admin/logs/delivery",
+      "status": [],
+      "title": "Delivery logs · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "API monitoring",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/api-health",
+      "probes": [
+        {
+          "key": "users",
+          "state": "read"
+        },
+        {
+          "key": "stocks",
+          "state": "read"
+        },
+        {
+          "key": "controls",
+          "state": "read"
+        },
+        {
+          "key": "catalog",
+          "state": "read"
+        }
+      ],
+      "requested": "/admin/api-health",
+      "status": [],
+      "title": "API monitoring · Woldeok Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 5,
+      "forms": 1,
+      "h1": "Wallet",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/wallet",
+      "probes": [],
+      "requested": "/wallet",
+      "status": [
+        "Transactions only appear after your account is verified.",
+        "Verify your authenticated session before sending."
+      ],
+      "title": "My wallet · W Moneyverse",
+      "width": 1440,
+      "walletExact": true
+    },
+    {
+      "disabledButtons": 4,
+      "forms": 3,
+      "h1": "Contact support",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/support",
+      "probes": [],
+      "requested": "/support",
+      "status": [
+        "The source could not be verified. This does not mean there are no messages. Sending is paused."
+      ],
+      "title": "Contact support · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 9,
+      "forms": 1,
+      "h1": "Direct Messages",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/chat",
+      "probes": [],
+      "requested": "/chat",
+      "status": [
+        "The source could not be verified. This does not mean there are no messages. Sending is paused."
+      ],
+      "title": "Direct Messages · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "Log in",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/login",
+      "probes": [],
+      "requested": "/login",
+      "status": [
+        "Enter your credentials and check the acknowledgements to continue."
+      ],
+      "title": "Log in · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "Log in",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/login/providers",
+      "probes": [],
+      "requested": "/login/providers",
+      "status": [
+        "Enter your credentials and check the acknowledgements to continue."
+      ],
+      "title": "Log in · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "Create account",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/register",
+      "probes": [],
+      "requested": "/register",
+      "status": [
+        "Registration is unavailable until consent and age confirmation can be recorded by the service."
+      ],
+      "title": "Create account · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Forgot password",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/forgot-password",
+      "probes": [],
+      "requested": "/forgot-password",
+      "status": [
+        "This action is currently unavailable. No change has been made and no email delivery has been confirmed."
+      ],
+      "title": "Forgot password · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Reset password",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/reset-password",
+      "probes": [],
+      "requested": "/reset-password",
+      "status": [
+        "This action is currently unavailable. No change has been made and no email delivery has been confirmed."
+      ],
+      "title": "Reset password · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Verify email",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/verify-email",
+      "probes": [],
+      "requested": "/verify-email",
+      "status": [
+        "This action is currently unavailable. No change has been made and no email delivery has been confirmed."
+      ],
+      "title": "Verify email · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Confirm email change",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/verify-email-change",
+      "probes": [],
+      "requested": "/verify-email-change",
+      "status": [
+        "This action is currently unavailable. No change has been made and no email delivery has been confirmed."
+      ],
+      "title": "Confirm email change · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Account deletion",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/account-deletion",
+      "probes": [],
+      "requested": "/account-deletion",
+      "status": [
+        "This action is currently unavailable. No change has been made and no email delivery has been confirmed."
+      ],
+      "title": "Account deletion · W Moneyverse",
+      "width": 1440,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "홈",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/",
+      "probes": [],
+      "requested": "/",
+      "status": [],
+      "title": "홈 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "금융 도구",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools",
+      "probes": [],
+      "requested": "/tools",
+      "status": [],
+      "title": "금융 도구 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "금융 계산기 센터",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/calculators",
+      "probes": [],
+      "requested": "/calculators",
+      "status": [],
+      "title": "금융 계산기 센터 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "복리 계산기",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools/compound-calculator",
+      "probes": [],
+      "requested": "/tools/compound-calculator",
+      "status": [
+        "실제 데이터 조회 중…",
+        "예상 최종 자산537,357총 납입금460,000예상 복리 수익77,357단리 비교 수익71,400복리 추가 이익5,957"
+      ],
+      "title": "복리 계산기 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "주식 평균단가 계산기",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools/stock-calculator",
+      "probes": [],
+      "requested": "/tools/stock-calculator",
+      "status": [
+        "실제 데이터 조회 중…",
+        "변경 후 평균 매입가44총 주식 수250총 가상 투자원가11,000초기 매수가 대비 평균 변동-12%목표 매도가50.63예상 수수료 차감 수익1,651"
+      ],
+      "title": "주식 평균단가 계산기 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "대시보드",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin",
+      "probes": [],
+      "requested": "/admin",
+      "status": [],
+      "title": "대시보드 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "회원 디렉토리",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/users",
+      "probes": [],
+      "requested": "/admin/users",
+      "status": [],
+      "title": "회원 디렉토리 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "거래소 관제",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/market",
+      "probes": [],
+      "requested": "/admin/market",
+      "status": [],
+      "title": "거래소 관제 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "킬스위치 제어 센터",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/controls",
+      "probes": [],
+      "requested": "/admin/controls",
+      "status": [],
+      "title": "킬스위치 제어 센터 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "공기업·지배구조",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/enterprises",
+      "probes": [],
+      "requested": "/admin/enterprises",
+      "status": [],
+      "title": "공기업·지배구조 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "경제·원장",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/economy",
+      "probes": [],
+      "requested": "/admin/economy",
+      "status": [],
+      "title": "경제·원장 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "시나리오 랩",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/economy/scenario-lab",
+      "probes": [],
+      "requested": "/admin/economy/scenario-lab",
+      "status": [],
+      "title": "시나리오 랩 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "시스템 로그",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/logs/system",
+      "probes": [],
+      "requested": "/admin/logs/system",
+      "status": [],
+      "title": "시스템 로그 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "배송·전송 로그",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "probes": [],
+      "requested": "/admin/logs/delivery",
+      "status": [],
+      "title": "배송·전송 로그 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "API 관제",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/api-health",
+      "probes": [
+        {
+          "key": "users",
+          "state": "read"
+        },
+        {
+          "key": "stocks",
+          "state": "read"
+        },
+        {
+          "key": "controls",
+          "state": "read"
+        },
+        {
+          "key": "catalog",
+          "state": "read"
+        }
+      ],
+      "requested": "/admin/api-health",
+      "status": [],
+      "title": "API 관제 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 5,
+      "forms": 1,
+      "h1": "지갑",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/wallet",
+      "probes": [],
+      "requested": "/wallet",
+      "status": [
+        "본인 인증 세션이 확인된 경우에만 거래 내역을 표시합니다.",
+        "송금 전에 인증 상태를 다시 확인해주세요."
+      ],
+      "title": "내 지갑 · W Moneyverse",
+      "width": 390,
+      "walletExact": true
+    },
+    {
+      "disabledButtons": 4,
+      "forms": 3,
+      "h1": "관리자 문의",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/support",
+      "probes": [],
+      "requested": "/support",
+      "status": [
+        "기록을 확인할 수 없습니다. 메시지가 없다는 뜻은 아닙니다. 전송은 일시 중지됩니다."
+      ],
+      "title": "관리자 문의 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 9,
+      "forms": 1,
+      "h1": "쪽지함",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/chat",
+      "probes": [],
+      "requested": "/chat",
+      "status": [
+        "기록을 확인할 수 없습니다. 메시지가 없다는 뜻은 아닙니다. 전송은 일시 중지됩니다."
+      ],
+      "title": "쪽지함 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "로그인",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/login",
+      "probes": [],
+      "requested": "/login",
+      "status": [
+        "이메일과 비밀번호를 입력하고 동의 사항을 확인해 주세요."
+      ],
+      "title": "로그인 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "로그인",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/login/providers",
+      "probes": [],
+      "requested": "/login/providers",
+      "status": [
+        "이메일과 비밀번호를 입력하고 동의 사항을 확인해 주세요."
+      ],
+      "title": "로그인 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "회원가입",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/register",
+      "probes": [],
+      "requested": "/register",
+      "status": [
+        "서비스에서 약관 동의와 연령 확인을 기록할 수 있을 때까지 회원가입을 이용할 수 없습니다."
+      ],
+      "title": "회원가입 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "비밀번호 찾기",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/forgot-password",
+      "probes": [],
+      "requested": "/forgot-password",
+      "status": [
+        "현재 이 기능을 이용할 수 없습니다. 변경된 내용이 없으며 이메일 발송도 확인되지 않았습니다."
+      ],
+      "title": "비밀번호 찾기 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "비밀번호 재설정",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/reset-password",
+      "probes": [],
+      "requested": "/reset-password",
+      "status": [
+        "현재 이 기능을 이용할 수 없습니다. 변경된 내용이 없으며 이메일 발송도 확인되지 않았습니다."
+      ],
+      "title": "비밀번호 재설정 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "이메일 확인",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/verify-email",
+      "probes": [],
+      "requested": "/verify-email",
+      "status": [
+        "현재 이 기능을 이용할 수 없습니다. 변경된 내용이 없으며 이메일 발송도 확인되지 않았습니다."
+      ],
+      "title": "이메일 확인 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "이메일 변경 확인",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/verify-email-change",
+      "probes": [],
+      "requested": "/verify-email-change",
+      "status": [
+        "현재 이 기능을 이용할 수 없습니다. 변경된 내용이 없으며 이메일 발송도 확인되지 않았습니다."
+      ],
+      "title": "이메일 변경 확인 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "계정 삭제",
+      "lang": "ko",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/account-deletion",
+      "probes": [],
+      "requested": "/account-deletion",
+      "status": [
+        "현재 이 기능을 이용할 수 없습니다. 변경된 내용이 없으며 이메일 발송도 확인되지 않았습니다."
+      ],
+      "title": "계정 삭제 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Home",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/",
+      "probes": [],
+      "requested": "/",
+      "status": [],
+      "title": "Home · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "Financial tools",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools",
+      "probes": [],
+      "requested": "/tools",
+      "status": [],
+      "title": "Financial tools · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "Calculator center",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/calculators",
+      "probes": [],
+      "requested": "/calculators",
+      "status": [],
+      "title": "Calculator center · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "Compound interest calculator",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools/compound-calculator",
+      "probes": [],
+      "requested": "/tools/compound-calculator",
+      "status": [
+        "Loading verified data…",
+        "Projected balance537,357Total contributed460,000Projected interest77,357Simple interest comparison71,400Compound advantage5,957"
+      ],
+      "title": "Compound interest calculator · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "Stock average price calculator",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools/stock-calculator",
+      "probes": [],
+      "requested": "/tools/stock-calculator",
+      "status": [
+        "Loading verified data…",
+        "New average price44Total shares250Total simulated cost11,000Average change vs initial-12%Target sale price50.63Estimated net profit1,651"
+      ],
+      "title": "Stock average price calculator · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Dashboard",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin",
+      "probes": [],
+      "requested": "/admin",
+      "status": [],
+      "title": "Dashboard · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "Member directory",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/users",
+      "probes": [],
+      "requested": "/admin/users",
+      "status": [],
+      "title": "Member directory · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Market monitoring",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/market",
+      "probes": [],
+      "requested": "/admin/market",
+      "status": [],
+      "title": "Market monitoring · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Feature controls",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/controls",
+      "probes": [],
+      "requested": "/admin/controls",
+      "status": [],
+      "title": "Feature controls · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Public enterprises & governance",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/enterprises",
+      "probes": [],
+      "requested": "/admin/enterprises",
+      "status": [],
+      "title": "Public enterprises & governance · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Economy & ledger",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/economy",
+      "probes": [],
+      "requested": "/admin/economy",
+      "status": [],
+      "title": "Economy & ledger · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Scenario lab",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/economy/scenario-lab",
+      "probes": [],
+      "requested": "/admin/economy/scenario-lab",
+      "status": [],
+      "title": "Scenario lab · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "System logs",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/logs/system",
+      "probes": [],
+      "requested": "/admin/logs/system",
+      "status": [],
+      "title": "System logs · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Delivery logs",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "probes": [],
+      "requested": "/admin/logs/delivery",
+      "status": [],
+      "title": "Delivery logs · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "API monitoring",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/api-health",
+      "probes": [
+        {
+          "key": "users",
+          "state": "read"
+        },
+        {
+          "key": "stocks",
+          "state": "read"
+        },
+        {
+          "key": "controls",
+          "state": "read"
+        },
+        {
+          "key": "catalog",
+          "state": "read"
+        }
+      ],
+      "requested": "/admin/api-health",
+      "status": [],
+      "title": "API monitoring · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 5,
+      "forms": 1,
+      "h1": "Wallet",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/wallet",
+      "probes": [],
+      "requested": "/wallet",
+      "status": [
+        "Transactions only appear after your account is verified.",
+        "Verify your authenticated session before sending."
+      ],
+      "title": "My wallet · W Moneyverse",
+      "width": 390,
+      "walletExact": true
+    },
+    {
+      "disabledButtons": 4,
+      "forms": 3,
+      "h1": "Contact support",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/support",
+      "probes": [],
+      "requested": "/support",
+      "status": [
+        "The source could not be verified. This does not mean there are no messages. Sending is paused."
+      ],
+      "title": "Contact support · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 9,
+      "forms": 1,
+      "h1": "Direct Messages",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/chat",
+      "probes": [],
+      "requested": "/chat",
+      "status": [
+        "The source could not be verified. This does not mean there are no messages. Sending is paused."
+      ],
+      "title": "Direct Messages · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "Log in",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/login",
+      "probes": [],
+      "requested": "/login",
+      "status": [
+        "Enter your credentials and check the acknowledgements to continue."
+      ],
+      "title": "Log in · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "Log in",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/login/providers",
+      "probes": [],
+      "requested": "/login/providers",
+      "status": [
+        "Enter your credentials and check the acknowledgements to continue."
+      ],
+      "title": "Log in · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "Create account",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/register",
+      "probes": [],
+      "requested": "/register",
+      "status": [
+        "Registration is unavailable until consent and age confirmation can be recorded by the service."
+      ],
+      "title": "Create account · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Forgot password",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/forgot-password",
+      "probes": [],
+      "requested": "/forgot-password",
+      "status": [
+        "This action is currently unavailable. No change has been made and no email delivery has been confirmed."
+      ],
+      "title": "Forgot password · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Reset password",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/reset-password",
+      "probes": [],
+      "requested": "/reset-password",
+      "status": [
+        "This action is currently unavailable. No change has been made and no email delivery has been confirmed."
+      ],
+      "title": "Reset password · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Verify email",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/verify-email",
+      "probes": [],
+      "requested": "/verify-email",
+      "status": [
+        "This action is currently unavailable. No change has been made and no email delivery has been confirmed."
+      ],
+      "title": "Verify email · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Confirm email change",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/verify-email-change",
+      "probes": [],
+      "requested": "/verify-email-change",
+      "status": [
+        "This action is currently unavailable. No change has been made and no email delivery has been confirmed."
+      ],
+      "title": "Confirm email change · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Account deletion",
+      "lang": "en",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/account-deletion",
+      "probes": [],
+      "requested": "/account-deletion",
+      "status": [
+        "This action is currently unavailable. No change has been made and no email delivery has been confirmed."
+      ],
+      "title": "Account deletion · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "ホーム",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/",
+      "probes": [],
+      "requested": "/",
+      "status": [],
+      "title": "ホーム · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "金融ツール",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools",
+      "probes": [],
+      "requested": "/tools",
+      "status": [],
+      "title": "金融ツール · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "金融計算機センター",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/calculators",
+      "probes": [],
+      "requested": "/calculators",
+      "status": [],
+      "title": "金融計算機センター · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "複利計算機",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools/compound-calculator",
+      "probes": [],
+      "requested": "/tools/compound-calculator",
+      "status": [
+        "データ取得中…",
+        "予測最終資産537,357払込総額460,000予測複利収益77,357単利比較収益71,400複利による追加利益5,957"
+      ],
+      "title": "複利計算機 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "株式平均取得単価計算機",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools/stock-calculator",
+      "probes": [],
+      "requested": "/tools/stock-calculator",
+      "status": [
+        "データ取得中…",
+        "変更後の平均取得単価44総株数250総シミュレーション原価11,000初回単価からの変化-12%目標売却価格50.63手数料控除後の予測利益1,651"
+      ],
+      "title": "株式平均取得単価計算機 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "ダッシュボード",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin",
+      "probes": [],
+      "requested": "/admin",
+      "status": [],
+      "title": "ダッシュボード · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "会員一覧",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/users",
+      "probes": [],
+      "requested": "/admin/users",
+      "status": [],
+      "title": "会員一覧 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "市場監視",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/market",
+      "probes": [],
+      "requested": "/admin/market",
+      "status": [],
+      "title": "市場監視 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "機能制御",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/controls",
+      "probes": [],
+      "requested": "/admin/controls",
+      "status": [],
+      "title": "機能制御 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "公企業・ガバナンス",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/enterprises",
+      "probes": [],
+      "requested": "/admin/enterprises",
+      "status": [],
+      "title": "公企業・ガバナンス · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "経済・台帳",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/economy",
+      "probes": [],
+      "requested": "/admin/economy",
+      "status": [],
+      "title": "経済・台帳 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "シナリオ実験室",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/economy/scenario-lab",
+      "probes": [],
+      "requested": "/admin/economy/scenario-lab",
+      "status": [],
+      "title": "シナリオ実験室 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "システムログ",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/logs/system",
+      "probes": [],
+      "requested": "/admin/logs/system",
+      "status": [],
+      "title": "システムログ · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "配信・転送ログ",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "probes": [],
+      "requested": "/admin/logs/delivery",
+      "status": [],
+      "title": "配信・転送ログ · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "API監視",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/api-health",
+      "probes": [
+        {
+          "key": "users",
+          "state": "read"
+        },
+        {
+          "key": "stocks",
+          "state": "read"
+        },
+        {
+          "key": "controls",
+          "state": "read"
+        },
+        {
+          "key": "catalog",
+          "state": "read"
+        }
+      ],
+      "requested": "/admin/api-health",
+      "status": [],
+      "title": "API監視 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 5,
+      "forms": 1,
+      "h1": "ウォレット",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/wallet",
+      "probes": [],
+      "requested": "/wallet",
+      "status": [
+        "本人認証後のみ取引を表示します。",
+        "送金前にログイン認証を再確認してください。"
+      ],
+      "title": "マイウォレット · W Moneyverse",
+      "width": 390,
+      "walletExact": true
+    },
+    {
+      "disabledButtons": 4,
+      "forms": 3,
+      "h1": "管理者へのお問い合わせ",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/support",
+      "probes": [],
+      "requested": "/support",
+      "status": [
+        "記録を確認できません。メッセージがないという意味ではありません。送信を停止しています。"
+      ],
+      "title": "管理者へのお問い合わせ · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 9,
+      "forms": 1,
+      "h1": "メッセージ",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/chat",
+      "probes": [],
+      "requested": "/chat",
+      "status": [
+        "記録を確認できません。メッセージがないという意味ではありません。送信を停止しています。"
+      ],
+      "title": "メッセージ · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "ログイン",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/login",
+      "probes": [],
+      "requested": "/login",
+      "status": [
+        "認証情報を入力し、確認事項を選択してください。"
+      ],
+      "title": "ログイン · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "ログイン",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/login/providers",
+      "probes": [],
+      "requested": "/login/providers",
+      "status": [
+        "認証情報を入力し、確認事項を選択してください。"
+      ],
+      "title": "ログイン · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "アカウント作成",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/register",
+      "probes": [],
+      "requested": "/register",
+      "status": [
+        "規約同意と年齢確認をサービスで記録できるまで登録は利用できません。"
+      ],
+      "title": "アカウント作成 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "パスワードを忘れた場合",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/forgot-password",
+      "probes": [],
+      "requested": "/forgot-password",
+      "status": [
+        "現在この操作は利用できません。変更は行われず、メール送信も確認されていません。"
+      ],
+      "title": "パスワードを忘れた場合 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "パスワード再設定",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/reset-password",
+      "probes": [],
+      "requested": "/reset-password",
+      "status": [
+        "現在この操作は利用できません。変更は行われず、メール送信も確認されていません。"
+      ],
+      "title": "パスワード再設定 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "メール確認",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/verify-email",
+      "probes": [],
+      "requested": "/verify-email",
+      "status": [
+        "現在この操作は利用できません。変更は行われず、メール送信も確認されていません。"
+      ],
+      "title": "メール確認 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "メール変更の確認",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/verify-email-change",
+      "probes": [],
+      "requested": "/verify-email-change",
+      "status": [
+        "現在この操作は利用できません。変更は行われず、メール送信も確認されていません。"
+      ],
+      "title": "メール変更の確認 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "アカウント削除",
+      "lang": "ja",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/account-deletion",
+      "probes": [],
+      "requested": "/account-deletion",
+      "status": [
+        "現在この操作は利用できません。変更は行われず、メール送信も確認されていません。"
+      ],
+      "title": "アカウント削除 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "首页",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/",
+      "probes": [],
+      "requested": "/",
+      "status": [],
+      "title": "首页 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "金融工具",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools",
+      "probes": [],
+      "requested": "/tools",
+      "status": [],
+      "title": "金融工具 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "金融计算器中心",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/calculators",
+      "probes": [],
+      "requested": "/calculators",
+      "status": [],
+      "title": "金融计算器中心 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "复利计算器",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools/compound-calculator",
+      "probes": [],
+      "requested": "/tools/compound-calculator",
+      "status": [
+        "正在读取真实数据…",
+        "预计最终资产537,357累计投入460,000预计复利收益77,357单利对比收益71,400复利额外收益5,957"
+      ],
+      "title": "复利计算器 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "股票平均成本计算器",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools/stock-calculator",
+      "probes": [],
+      "requested": "/tools/stock-calculator",
+      "status": [
+        "正在读取真实数据…",
+        "新的平均买入价44总股数250总模拟投资成本11,000相对初始买价的平均变化-12%目标卖出价50.63预计扣除手续费后收益1,651"
+      ],
+      "title": "股票平均成本计算器 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "控制面板",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin",
+      "probes": [],
+      "requested": "/admin",
+      "status": [],
+      "title": "控制面板 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "成员目录",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/users",
+      "probes": [],
+      "requested": "/admin/users",
+      "status": [],
+      "title": "成员目录 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "市场监控",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/market",
+      "probes": [],
+      "requested": "/admin/market",
+      "status": [],
+      "title": "市场监控 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "功能控制",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/controls",
+      "probes": [],
+      "requested": "/admin/controls",
+      "status": [],
+      "title": "功能控制 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "公共企业与治理",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/enterprises",
+      "probes": [],
+      "requested": "/admin/enterprises",
+      "status": [],
+      "title": "公共企业与治理 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "经济与账本",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/economy",
+      "probes": [],
+      "requested": "/admin/economy",
+      "status": [],
+      "title": "经济与账本 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "情景实验室",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/economy/scenario-lab",
+      "probes": [],
+      "requested": "/admin/economy/scenario-lab",
+      "status": [],
+      "title": "情景实验室 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "系统日志",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/logs/system",
+      "probes": [],
+      "requested": "/admin/logs/system",
+      "status": [],
+      "title": "系统日志 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "投递与传输日志",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "probes": [],
+      "requested": "/admin/logs/delivery",
+      "status": [],
+      "title": "投递与传输日志 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "API监控",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/api-health",
+      "probes": [
+        {
+          "key": "users",
+          "state": "read"
+        },
+        {
+          "key": "stocks",
+          "state": "read"
+        },
+        {
+          "key": "controls",
+          "state": "read"
+        },
+        {
+          "key": "catalog",
+          "state": "read"
+        }
+      ],
+      "requested": "/admin/api-health",
+      "status": [],
+      "title": "API监控 · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 5,
+      "forms": 1,
+      "h1": "钱包",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/wallet",
+      "probes": [],
+      "requested": "/wallet",
+      "status": [
+        "仅在验证您的登录后显示交易记录。",
+        "转账前请重新确认登录认证。"
+      ],
+      "title": "我的钱包 · W Moneyverse",
+      "width": 390,
+      "walletExact": true
+    },
+    {
+      "disabledButtons": 4,
+      "forms": 3,
+      "h1": "联系管理员",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/support",
+      "probes": [],
+      "requested": "/support",
+      "status": [
+        "无法验证记录。这不表示没有消息。发送已暂停。"
+      ],
+      "title": "联系管理员 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 9,
+      "forms": 1,
+      "h1": "私信箱",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/chat",
+      "probes": [],
+      "requested": "/chat",
+      "status": [
+        "无法验证记录。这不表示没有消息。发送已暂停。"
+      ],
+      "title": "私信箱 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "登录",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/login",
+      "probes": [],
+      "requested": "/login",
+      "status": [
+        "请输入登录信息并确认各项声明。"
+      ],
+      "title": "登录 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "登录",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/login/providers",
+      "probes": [],
+      "requested": "/login/providers",
+      "status": [
+        "请输入登录信息并确认各项声明。"
+      ],
+      "title": "登录 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "创建账户",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/register",
+      "probes": [],
+      "requested": "/register",
+      "status": [
+        "在服务能够记录条款同意和年龄确认之前，注册暂不可用。"
+      ],
+      "title": "创建账户 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "忘记密码",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/forgot-password",
+      "probes": [],
+      "requested": "/forgot-password",
+      "status": [
+        "此操作暂不可用。未进行任何更改，也未确认邮件已发送。"
+      ],
+      "title": "忘记密码 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "重置密码",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/reset-password",
+      "probes": [],
+      "requested": "/reset-password",
+      "status": [
+        "此操作暂不可用。未进行任何更改，也未确认邮件已发送。"
+      ],
+      "title": "重置密码 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "验证邮箱",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/verify-email",
+      "probes": [],
+      "requested": "/verify-email",
+      "status": [
+        "此操作暂不可用。未进行任何更改，也未确认邮件已发送。"
+      ],
+      "title": "验证邮箱 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "确认邮箱变更",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/verify-email-change",
+      "probes": [],
+      "requested": "/verify-email-change",
+      "status": [
+        "此操作暂不可用。未进行任何更改，也未确认邮件已发送。"
+      ],
+      "title": "确认邮箱变更 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "删除账户",
+      "lang": "zh",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/account-deletion",
+      "probes": [],
+      "requested": "/account-deletion",
+      "status": [
+        "此操作暂不可用。未进行任何更改，也未确认邮件已发送。"
+      ],
+      "title": "删除账户 · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Trang chủ",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/",
+      "probes": [],
+      "requested": "/",
+      "status": [],
+      "title": "Trang chủ · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "Công cụ tài chính",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools",
+      "probes": [],
+      "requested": "/tools",
+      "status": [],
+      "title": "Công cụ tài chính · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "Trung tâm máy tính tài chính",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/calculators",
+      "probes": [],
+      "requested": "/calculators",
+      "status": [],
+      "title": "Trung tâm máy tính tài chính · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "Máy tính lãi kép",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools/compound-calculator",
+      "probes": [],
+      "requested": "/tools/compound-calculator",
+      "status": [
+        "Đang tải dữ liệu thực…",
+        "Số dư dự kiến537,357Tổng vốn đã góp460,000Lãi dự kiến77,357Lãi đơn để so sánh71,400Lợi thế lãi kép5,957"
+      ],
+      "title": "Máy tính lãi kép · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "Máy tính giá vốn cổ phiếu",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/tools/stock-calculator",
+      "probes": [],
+      "requested": "/tools/stock-calculator",
+      "status": [
+        "Đang tải dữ liệu thực…",
+        "Giá vốn bình quân mới44Tổng số cổ phiếu250Tổng giá vốn mô phỏng11,000Biến động so với giá mua đầu-12%Giá bán mục tiêu50.63Lợi nhuận ròng dự kiến1,651"
+      ],
+      "title": "Máy tính giá vốn cổ phiếu · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Bảng điều khiển",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin",
+      "probes": [],
+      "requested": "/admin",
+      "status": [],
+      "title": "Bảng điều khiển · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "Danh bạ thành viên",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/users",
+      "probes": [],
+      "requested": "/admin/users",
+      "status": [],
+      "title": "Danh bạ thành viên · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Giám sát thị trường",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/market",
+      "probes": [],
+      "requested": "/admin/market",
+      "status": [],
+      "title": "Giám sát thị trường · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Điều khiển tính năng",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/controls",
+      "probes": [],
+      "requested": "/admin/controls",
+      "status": [],
+      "title": "Điều khiển tính năng · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Doanh nghiệp công và quản trị",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/enterprises",
+      "probes": [],
+      "requested": "/admin/enterprises",
+      "status": [],
+      "title": "Doanh nghiệp công và quản trị · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Kinh tế và sổ cái",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/economy",
+      "probes": [],
+      "requested": "/admin/economy",
+      "status": [],
+      "title": "Kinh tế và sổ cái · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Phòng thử nghiệm kịch bản",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/economy/scenario-lab",
+      "probes": [],
+      "requested": "/admin/economy/scenario-lab",
+      "status": [],
+      "title": "Phòng thử nghiệm kịch bản · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "Nhật ký hệ thống",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/logs/system",
+      "probes": [],
+      "requested": "/admin/logs/system",
+      "status": [],
+      "title": "Nhật ký hệ thống · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Nhật ký chuyển giao",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/logs/delivery",
+      "probes": [],
+      "requested": "/admin/logs/delivery",
+      "status": [],
+      "title": "Nhật ký chuyển giao · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Giám sát API",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/admin/api-health",
+      "probes": [
+        {
+          "key": "users",
+          "state": "read"
+        },
+        {
+          "key": "stocks",
+          "state": "read"
+        },
+        {
+          "key": "controls",
+          "state": "read"
+        },
+        {
+          "key": "catalog",
+          "state": "read"
+        }
+      ],
+      "requested": "/admin/api-health",
+      "status": [],
+      "title": "Giám sát API · Woldeok Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 5,
+      "forms": 1,
+      "h1": "Ví",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/wallet",
+      "probes": [],
+      "requested": "/wallet",
+      "status": [
+        "Chỉ hiển thị giao dịch sau khi xác minh tài khoản.",
+        "Xác minh phiên đăng nhập trước khi chuyển tiền."
+      ],
+      "title": "Ví của tôi · W Moneyverse",
+      "width": 390,
+      "walletExact": true
+    },
+    {
+      "disabledButtons": 4,
+      "forms": 3,
+      "h1": "Liên hệ hỗ trợ",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/support",
+      "probes": [],
+      "requested": "/support",
+      "status": [
+        "Không xác minh được nguồn. Điều này không có nghĩa là không có tin nhắn. Tạm dừng gửi."
+      ],
+      "title": "Liên hệ hỗ trợ · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 9,
+      "forms": 1,
+      "h1": "Tin nhắn riêng",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/chat",
+      "probes": [],
+      "requested": "/chat",
+      "status": [
+        "Không xác minh được nguồn. Điều này không có nghĩa là không có tin nhắn. Tạm dừng gửi."
+      ],
+      "title": "Tin nhắn riêng · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "Đăng nhập",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/login",
+      "probes": [],
+      "requested": "/login",
+      "status": [
+        "Nhập thông tin đăng nhập và đánh dấu các xác nhận."
+      ],
+      "title": "Đăng nhập · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 1,
+      "h1": "Đăng nhập",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/login/providers",
+      "probes": [],
+      "requested": "/login/providers",
+      "status": [
+        "Nhập thông tin đăng nhập và đánh dấu các xác nhận."
+      ],
+      "title": "Đăng nhập · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 1,
+      "forms": 1,
+      "h1": "Tạo tài khoản",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/register",
+      "probes": [],
+      "requested": "/register",
+      "status": [
+        "Chưa thể đăng ký cho đến khi dịch vụ lưu được sự đồng ý và xác nhận tuổi."
+      ],
+      "title": "Tạo tài khoản · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Quên mật khẩu",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/forgot-password",
+      "probes": [],
+      "requested": "/forgot-password",
+      "status": [
+        "Thao tác này hiện chưa khả dụng. Chưa có thay đổi và chưa xác nhận email được gửi."
+      ],
+      "title": "Quên mật khẩu · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Đặt lại mật khẩu",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/reset-password",
+      "probes": [],
+      "requested": "/reset-password",
+      "status": [
+        "Thao tác này hiện chưa khả dụng. Chưa có thay đổi và chưa xác nhận email được gửi."
+      ],
+      "title": "Đặt lại mật khẩu · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Xác minh email",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/verify-email",
+      "probes": [],
+      "requested": "/verify-email",
+      "status": [
+        "Thao tác này hiện chưa khả dụng. Chưa có thay đổi và chưa xác nhận email được gửi."
+      ],
+      "title": "Xác minh email · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Xác nhận đổi email",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/verify-email-change",
+      "probes": [],
+      "requested": "/verify-email-change",
+      "status": [
+        "Thao tác này hiện chưa khả dụng. Chưa có thay đổi và chưa xác nhận email được gửi."
+      ],
+      "title": "Xác nhận đổi email · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    },
+    {
+      "disabledButtons": 0,
+      "forms": 0,
+      "h1": "Xóa tài khoản",
+      "lang": "vi",
+      "logos": [
+        true,
+        true
+      ],
+      "overflow": false,
+      "path": "/account-deletion",
+      "probes": [],
+      "requested": "/account-deletion",
+      "status": [
+        "Thao tác này hiện chưa khả dụng. Chưa có thay đổi và chưa xác nhận email được gửi."
+      ],
+      "title": "Xóa tài khoản · W Moneyverse",
+      "width": 390,
+      "walletExact": null
+    }
+  ],
+  "jarSha256": "e11ebcddba4ec70afe987a6a52ecf333f38292c983e27654bb4f93f9d0cab08a"
+}
