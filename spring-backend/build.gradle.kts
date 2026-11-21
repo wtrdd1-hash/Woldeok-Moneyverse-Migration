@@ -87,6 +87,12 @@ tasks.register<Test>("postgresMessagingTest") {
             "Native PostgreSQL shop coverage is incomplete"
         }
         println("Native PostgreSQL shop: tests=$shopTests failures=$shopFailures errors=$shopErrors skipped=$shopSkipped")
+        providers.exec {
+            workingDir(rootDir.parentFile)
+            commandLine("python3", "scripts/release/verify-native-pg-results.py", "--class",
+                "com.moneyverse.catalogread.CatalogReadPostgresIntegrationTest", "--minimum", "4",
+                layout.buildDirectory.file("test-results/postgresMessagingTest/TEST-com.moneyverse.catalogread.CatalogReadPostgresIntegrationTest.xml").get().asFile.absolutePath)
+        }.result.get().assertNormalExitValue()
     }
 }
 
