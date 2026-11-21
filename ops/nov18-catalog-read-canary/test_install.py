@@ -112,6 +112,212 @@ class InstallTests(unittest.TestCase):
         self.assertFalse(self.m.API_FILE.exists())
         self.assertFalse(self.m.ENVIRONMENT.exists())
 
+    def interrupted_backend_inverse(self,mode='reload-before'):
+        self.run_apply()
+        original_reload=self.system.reload
+        original_rename=self.m.guards._rename_noreplace
+        original_save=self.m.save
+        failed=False
+        def reload():
+            nonlocal failed
+            if mode.startswith('reload-') and not self.m.API_FILE.exists() and not failed:
+                failed=True
+                if mode=='reload-after':original_reload()
+                raise RuntimeError('Synthetic one-shot backend daemon reload failure')
+            original_reload()
+        def rename(source,destination):
+            nonlocal failed
+            if mode=='remove-before' and source==self.m.API_FILE and not failed:
+                failed=True
+                raise SystemExit('Synthetic process loss after removal intent checkpoint')
+            original_rename(source,destination)
+            if mode=='remove-after' and source==self.m.API_FILE and not failed:
+                failed=True
+                raise OSError('Synthetic removal completed before error')
+        def save(path,value):
+            nonlocal failed
+            phase=value.get('backendInverse') if path.name=='journal.json' else None
+            if phase and not failed:
+                stop=mode=='checkpoint-before-remove' and self.m.API_FILE.exists()
+                removed=mode=='checkpoint-after-remove' and not self.m.API_FILE.exists()
+                completed=mode in {'checkpoint-after-reload','completed-checkpoint-error'} and value.get('inverse',{}).get('backendRemoved')
+                if stop or removed or completed:
+                    failed=True
+                    if mode=='completed-checkpoint-error':raise OSError('Synthetic completed checkpoint failure')
+                    raise SystemExit('Synthetic process loss before checkpoint')
+            return original_save(path,value)
+        self.system.reload=reload
+        with patch.object(self.m.guards,'_rename_noreplace',rename),patch.object(self.m,'save',save):
+            if mode.startswith('checkpoint-') or mode=='remove-before':
+                with self.assertRaises(SystemExit):self.m.rollback(self.stage,self.manifest,self.system)
+            else:
+                first=self.m.rollback(self.stage,self.manifest,self.system)
+                self.assertFalse(first['complete']);self.assertFalse(first['backendRemoved'])
+                self.assertTrue(first['environmentRemoved'])
+        self.assertTrue(failed)
+        self.assertEqual(self.m.FRONT_FILE.read_bytes(),b'old frontend unit')
+        self.assertEqual(self.m.INCLUDE.read_bytes(),b'old include')
+        if mode not in {'checkpoint-before-remove','remove-before'}:self.assertFalse(self.m.API_FILE.exists())
+        self.assertEqual(self.system.state(self.m.API_UNIT)['MainPID'],'0')
+        self.assertEqual(self.system.calls.count(('stop',self.m.API_UNIT)),1)
+        # A second explicit inverse must load the actual persisted journal.
+        self.system.reload=original_reload
+
+    def assert_backend_retry_complete(self):
+        second=self.m.rollback(self.stage,self.manifest,self.system)
+        self.assertTrue(second['complete'],second['errors'])
+        self.assert_old()
+        self.assertEqual(self.system.state(self.m.API_UNIT),dict(LoadState='not-found',ActiveState='inactive',
+                        MainPID='0',FragmentPath='',DropInPaths=''))
+        self.assertEqual(self.system.calls.count(('stop',self.m.API_UNIT)),1)
+
+    def test_persisted_backend_inverse_resumes_reload_after_owned_file_removal(self):
+        self.interrupted_backend_inverse()
+        self.assert_backend_retry_complete()
+
+    def test_persisted_backend_inverse_resumes_reload_that_took_effect_before_error(self):
+        self.interrupted_backend_inverse('reload-after')
+        self.assert_backend_retry_complete()
+
+    def test_persisted_backend_inverse_recovers_removal_that_took_effect_before_error(self):
+        self.interrupted_backend_inverse('remove-after')
+        self.assert_backend_retry_complete()
+
+    def test_persisted_backend_inverse_resumes_before_removal_checkpoint(self):
+        self.interrupted_backend_inverse('checkpoint-before-remove')
+        self.assert_backend_retry_complete()
+
+    def test_persisted_backend_inverse_recovers_removal_before_its_checkpoint(self):
+        self.interrupted_backend_inverse('checkpoint-after-remove')
+        self.assert_backend_retry_complete()
+
+    def test_persisted_backend_inverse_recovers_reload_before_completed_checkpoint(self):
+        self.interrupted_backend_inverse('checkpoint-after-reload')
+        self.assert_backend_retry_complete()
+
+    def assert_backend_retry_refused(self):
+        calls=list(self.system.calls)
+        with patch.object(self.system,'reload',side_effect=AssertionError('Uncertain backend must not reload')):
+            result=self.m.rollback(self.stage,self.manifest,self.system)
+        self.assertFalse(result['complete']);self.assertFalse(result['backendRemoved'])
+        self.assertIn('backendRemoved:ValueError',result['errors'])
+        self.assertTrue(result['environmentRemoved'])
+        self.assertEqual(self.system.calls,calls)
+
+    def test_backend_reload_retry_preserves_identical_foreign_recreated_file(self):
+        self.interrupted_backend_inverse()
+        self.m.API_FILE.write_bytes(b'new backend unit')
+        identity=self.m.snapshot(self.m.API_FILE)
+        self.assert_backend_retry_refused()
+        self.assertEqual(self.m.snapshot(self.m.API_FILE),identity)
+
+    def test_backend_reload_retry_preserves_foreign_symlink(self):
+        self.interrupted_backend_inverse()
+        target=self.root/'foreign';target.write_bytes(b'new backend unit')
+        self.m.API_FILE.symlink_to(target)
+        self.assert_backend_retry_refused()
+        self.assertTrue(self.m.API_FILE.is_symlink());self.assertEqual(target.read_bytes(),b'new backend unit')
+
+    def test_backend_reload_retry_refuses_foreign_active_pid(self):
+        self.interrupted_backend_inverse()
+        self.system.states[self.m.API_UNIT].update(MainPID='909',ActiveState='active')
+        self.assert_backend_retry_refused()
+        self.assertEqual(self.system.state(self.m.API_UNIT)['MainPID'],'909')
+
+    def test_backend_reload_retry_refuses_pid_zero_pending_restart(self):
+        self.interrupted_backend_inverse()
+        self.system.states[self.m.API_UNIT].update(ActiveState='activating')
+        self.assert_backend_retry_refused()
+
+    def test_backend_reload_retry_refuses_foreign_dropin(self):
+        self.interrupted_backend_inverse()
+        self.system.states[self.m.API_UNIT]['DropInPaths']='/synthetic/foreign.conf'
+        self.assert_backend_retry_refused()
+
+    def test_backend_reload_retry_refuses_foreign_manager_fragment(self):
+        self.interrupted_backend_inverse()
+        self.system.states[self.m.API_UNIT]['FragmentPath']='/synthetic/foreign.service'
+        self.assert_backend_retry_refused()
+
+    def test_backend_reload_retry_requires_retained_exact_removed_inode(self):
+        self.interrupted_backend_inverse()
+        journal=json.loads((self.stage/'journal.json').read_text())
+        recovery=next(r for r in journal['recoveries'] if r['target']==str(self.m.API_FILE) and r['action']=='remove')
+        held=Path(recovery['directory'])/'displaced'
+        replacement=self.root/'identical-held';replacement.write_bytes(held.read_bytes())
+        os.replace(replacement,held)
+        self.assert_backend_retry_refused()
+
+    def test_backend_inverse_resumes_checkpointed_intent_before_removal_effect(self):
+        self.interrupted_backend_inverse('remove-before')
+        self.assert_backend_retry_complete()
+
+    def test_backend_checkpointed_intent_preserves_identical_foreign_recreated_file(self):
+        self.interrupted_backend_inverse('remove-before')
+        foreign=self.root/'foreign-unit';foreign.write_bytes(b'new backend unit')
+        os.replace(foreign,self.m.API_FILE)
+        identity=self.m.snapshot(self.m.API_FILE)
+        self.assert_backend_retry_refused()
+        self.assertEqual(self.m.snapshot(self.m.API_FILE),identity)
+
+    def test_backend_completed_checkpoint_failure_cannot_skip_foreign_retry_checks(self):
+        self.interrupted_backend_inverse('completed-checkpoint-error')
+        self.m.API_FILE.write_bytes(b'new backend unit')
+        identity=self.m.snapshot(self.m.API_FILE)
+        self.assert_backend_retry_refused()
+        self.assertEqual(self.m.snapshot(self.m.API_FILE),identity)
+
+    def test_backend_reload_retry_requires_retained_recovery_file(self):
+        self.interrupted_backend_inverse()
+        journal=json.loads((self.stage/'journal.json').read_text())
+        recovery=next(r for r in journal['recoveries'] if r['target']==str(self.m.API_FILE) and r['action']=='remove')
+        (Path(recovery['directory'])/'displaced').unlink()
+        self.assert_backend_retry_refused()
+
+    def test_backend_reload_retry_requires_unchanged_private_recovery_directory(self):
+        self.interrupted_backend_inverse()
+        journal=json.loads((self.stage/'journal.json').read_text())
+        recovery=next(r for r in journal['recoveries'] if r['target']==str(self.m.API_FILE) and r['action']=='remove')
+        Path(recovery['directory']).chmod(0o755)
+        self.assert_backend_retry_refused()
+
+    def test_backend_reload_retry_requires_unchanged_packaged_generation(self):
+        self.interrupted_backend_inverse()
+        self.newjar.write_bytes(b'foreign immutable generation')
+        self.assert_backend_retry_refused()
+
+    def test_backend_reload_cannot_report_complete_with_a_new_foreign_file(self):
+        self.interrupted_backend_inverse()
+        actual=self.system.reload
+        def reload():
+            actual()
+            self.m.API_FILE.write_bytes(b'new backend unit')
+        self.system.reload=reload
+        result=self.m.rollback(self.stage,self.manifest,self.system)
+        self.assertFalse(result['complete']);self.assertFalse(result['backendRemoved'])
+        self.assertEqual(self.m.API_FILE.read_bytes(),b'new backend unit')
+        self.assertEqual(self.system.calls.count(('stop',self.m.API_UNIT)),1)
+
+    def test_backend_reload_cannot_report_complete_with_an_uncertain_manager(self):
+        self.interrupted_backend_inverse()
+        actual=self.system.reload
+        def reload():
+            actual()
+            self.system.states[self.m.API_UNIT]=self.system.loaded(self.m.API_FILE,'909')
+        self.system.reload=reload
+        result=self.m.rollback(self.stage,self.manifest,self.system)
+        self.assertFalse(result['complete']);self.assertFalse(result['backendRemoved'])
+        self.assertEqual(self.system.state(self.m.API_UNIT)['MainPID'],'909')
+        self.assertEqual(self.system.calls.count(('stop',self.m.API_UNIT)),1)
+
+    def test_backend_missing_target_without_checkpointed_removal_is_not_ownership(self):
+        self.run_apply()
+        self.m.API_FILE.unlink()
+        result=self.m.rollback(self.stage,self.manifest,self.system)
+        self.assertFalse(result['complete']);self.assertFalse(result['backendRemoved'])
+        self.assertFalse(self.m.ENVIRONMENT.exists())
+        self.assertNotIn(('stop',self.m.API_UNIT),self.system.calls)
+
     def test_post_link_backend_failure_before_daemon_reload_is_removed(self):
         actual=self.m.os.link
         def interrupted(a,b):

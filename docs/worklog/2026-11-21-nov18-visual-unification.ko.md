@@ -209,3 +209,25 @@ I3 복구디렉터리는0700이며 candidate·이동원본·메타데이터와06
 읽기 전용 root 검사로4550의 단일 리스너·동일 실행 PID와 실제 우선순위 데이터소스 설정을 확인했습니다. 애플리케이션 JSON 우회 없이 고정 DATABASE_URL과 DB 대상·앱 계정·접속 정보가 메모리 안에서 모두 일치했습니다. 결과는 불리언만 보관했고 실제 값은 Git·증거·출력에 기록하지 않았습니다. SQL·자격 변경·서비스 변경은 없습니다. 실제 역할·함수·세션·브라우저 조회 성공을 대신하지 않습니다. 앞선 설정 소스 읽기 범위가 넓어 저장소 기본값까지 출력한 점은 좁은 비교 검사로 바로잡았으며 기본값을 로그·PR에 복사하지 않습니다. 소스의 토큰 기본값은 전체 백엔드 보안 검토 항목으로 남기고 신규 권한을 활성화하지 않습니다.
 
 기존 IAB 로그인 기준도 확인했습니다. signedIn/authenticated 참, 사용자 식별자 존재, 관리자 역할4개이며 불리언·개수만 출력했습니다. 식별자는 자동화 메모리에만 두고 쿠키·자격은 읽거나 내보내지 않았습니다. 소유 QA탭은 점검 화면으로 돌렸고 설치 후 연속성 대조는 OPEN입니다.
+
+## Before work — backend 역전 reload 재시도 한정 작업
+2026-11-22: 격리 branch subtask/native-catalog-backend-inverse-20261122, BASEa200554628d21643b58c50d38027801f81e7f858. 승인된 한정 brief·저장소 안전규칙·living plan 첫머리·영한 로그·공유기억 대체규칙을 읽었다. fetch한 origin/main925f725d2836c5ebe88311e2f2ff8ab17b052144, 통합·독립승인은 부모 담당이다. installer 기준40개 실패·skip0.
+원인: 소유 backend 파일을 비공개 복구경로에 이동한 뒤 daemon-reload가 실패하면 완료 전인데도 원래 경로가 없어, 다음 영속 역전에서 삭제된 경로의 소유권을 요구한다. 계획 [ ]영속 reload 재시도 RED [ ]외부 경로/PID/drop-in·저장 경계 거부 [ ]installer만 최소 단계·복구증명 기록 [ ]관련 Python/컴파일/보안/control/diff검증 [ ]로컬커밋/보고. 공유 guard는 읽기 전용이며 종료한 I1/I2/I3 재검토를 열지 않는다.
+실제자격 읽기·rootstage·service/Nginx/DB/browser·artifact다운로드·push·배포 없음. 부모 독립검토 전 실제설치는 금지 상태다.
+
+
+## In progress — backend 역전 단계·복구증명
+installer 기준40통과. 실제 임시파일의 영속 재시도·외부자원 거부 추가 후54실행에서 예상RED6건(reload 전/후 효과, remove 후 오류, 단계/checkpoint3경계)을 확인했다. installer만 수정해 중지된 manager·소유inode/hash·새0700 no-replace 복구디렉터리/메타데이터를 이동 전에 기록한다. 원래경로 부재만으로 소유권을 인정하지 않으며 이동된 실제inode 증명이 필요하다. 재시도는 새 PID/path/drop-in/fragment를 채택·중지하지 않고 reload뒤 경로부재·manager not-found도 확인한다.
+54GREEN 후 completed-checkpoint OSError 회귀는 구 완료flag처리로60중1RED(외부경로 재시도에 거짓완료)를 재현했다. backend 완료도 저장실패 때 지워 다음 역전이 증명하도록 보완한다. 복구파일/디렉터리/JAR·reload뒤 외부경로/manager 거부도 검증한다. 공유guard 변경 없음. [x]기준/RED [x]최소구현 [ ]최종한정검증 [ ]로컬커밋/보고 [ ]부모독립검토. 실제운영 gate는 미수행이며 설치승인 없음.
+
+
+## Finished — backend 역전 재시도 소스 단계 / 독립승인 미완료
+2026-11-22: 중지된 소유파일 이동 전에 통제된 제거의도를 기록하고, 비공개 복구경로의 실제inode/hash/메타데이터·manager 상태를 검증한다. 파일부재만 채택하지 않고 보존된 소유증명으로 daemon-reload를 재시도하며, 완료 전 경로부재·manager not-found를 재확인한다. remove/reload 효과 뒤 오류 및 checkpoint 전후 process loss도 디스크저널만 읽는 두 번째 명시역전으로 재개한다. 완료checkpoint 오류는 backend 완료flag를 지워 외부경로에 거짓완료하지 않는다.
+최종한정검증: canary67(installer62+기존5), 변경없는 QA7·maintenance4 = Python78/실패·오류·skip0. Python5파일 컴파일·실제repository-security/control검사·변경 Python/docs 추가control검사·diff-check 성공, 새경고 없음. 기준40, 첫RED6/54·완료checkpoint RED1/60의 가림처리 임시로그는 부모보고에 기록한다. 최종fetch main925f725d2836c5ebe88311e2f2ff8ab17b052144 변경없음.
+자체검토: 효과전 checkpoint·실제 no-replace 이동·증명없는 부재 거부·동일내용 새inode/symlink 보존·외부PID/restart/drop-in/fragment 거부·보존파일/0700디렉터리/JAR·reload후 검증·frontend 우선 include복구·독립 env정리를 확인했다. 공유guard·그외소스 변경 없음. 잠깐 원래경로가 비는 보존프로토콜이며 atomic CAS/자동purge로 주장하지 않는다.
+체크 [x]기준/RED [x]installer/test최소수정 [x]저장경계/외부자원거부 [x]한정검증 [x]자체검토 [x]로컬소스인계준비 [ ]부모독립검토 [ ]실제prepare/artifact/service/DB/browser/Test/release승인. 로컬커밋만 하고 branch/worktree 보존한다. push/PR/merge/배포·실제자격읽기/rootstage변경/artifact다운로드/service/Nginx/DB/browser 없음. 한정brief에 따라 전체앱/Gradle/SQL은 미실행이며 부모 통합/CI 담당이다. 독립승인 전 실제설치는 금지 상태다.
+
+
+## 완료 — 백엔드 복구 재시도 소스 통합
+독립 검토는2e420bba를 Critical0/Important0/Minor0으로 승인했습니다. 한영 로그 충돌은 모든 기준 이력을 순서대로 보존하고 자식 추가 기록 전체를 이어 해결했습니다. 설치기·테스트는 검토된 소스와 바이트가 같고 공유 guard는 그대로입니다. 부모 실행 Python67+7+4=78개 실패0/제외0, 컴파일·보안·제어문자·diff 검사를 통과했습니다. 애플리케이션은 b061의660개/JAR 검증 소스와 동일하고 JS/정책 소스도552개 성공 당시와 같습니다. Python만 바뀌어 무거운 애플리케이션 검사는 반복하지 않으며 최종 HEAD CI는 필수입니다.
+이 제한된 소스의 미해결 검토 결함은 없습니다. 실제 서비스·root준비·DB·세션·카탈로그·브라우저·정상 복구는 아직 미수행입니다. 헤더·운영 소스의 최종 CI를 진행하고 전체180경로 기능 수용은 OPEN으로 유지합니다.
