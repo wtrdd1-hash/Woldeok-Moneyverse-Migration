@@ -1,5 +1,10 @@
 # 코딩 에이전트 규칙 및 설정 가이드라인 (GEMINI.md)
 
+## Permanent project task-memory handoff (v2026.11.21.2234)
+
+Before every task, consult the current project plan, integrated master, and versioned GitHub worklog. Record a sanitized start/mid/finish handoff in the task's branch. Shared external AgentMemory is **not installed or approved for automatic capture**; until its isolated security gates pass, the repository documentation remains the real persistence mechanism. See [EN](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md) / [KO](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md). Do not capture secrets, personal records or live ledgers.
+
+
 > [!NOTE]
 > **[전역 자가 잠금 장치 완화 - Global Self-Guardrail Relaxed]**
 > **에이전트는 사용자가 메시지를 입력하여 세션이 구동되거나 매 작업을 수행할 때, 자기 자신인 이 전역 프롬프트 파일(C:\Users\Administrator\.gemini\GEMINI.md)의 모든 지침을 완벽하게 읽고 이해하고 있어야 하며, 이를 현재 대화 세션에 완벽히 기억하고 인지하고 있어야 합니다.**
