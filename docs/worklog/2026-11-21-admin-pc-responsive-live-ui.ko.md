@@ -8,14 +8,14 @@
 - 원인: 관리자 홈은 실제 Spring 데이터이며 일부 하위 화면은 정적 Next 오류 HTML/다른 렌더러. 시스템 로그 API는 정상 응답한 이력이 있어 UI 오류와 백엔드 오류를 구분한다.
 
 ## In progress
-- [ ] 관리자 홈·시스템 로그를 동일한 PC/반응형 셸과 실제 API로 제공.
-- [ ] 새 관리자 UI 실행 범위를 명시적으로 격리하고 기존 서버의 검증된 관리자 쿠키/역할 조회를 사용. DB·원장·세션 생성·관리자 변경 작업 없음.
-- [ ] RED→GREEN, 전체 Spring/관련 Node, 익명·위조 헤더·장애·이전 요청·다국어 검증.
-- [ ] PC 1440/1920 및 1024/768/430/390/360/320, 200% 확대, 메뉴·검색·로그 조회/빈 화면/장애를 실제 검사.
-- [ ] 독립 리뷰, 정확한 main CI, 보호된 Test 및 동일 artifact 운영 승격·롤백·기록.
+- [x] 관리자 홈·시스템 로그를 동일한 PC/반응형 셸과 실제 API로 제공.
+- [x] 새 관리자 UI 실행 범위를 명시적으로 격리하고 기존 서버의 검증된 관리자 쿠키/역할 조회를 사용. DB·원장·세션 생성·관리자 변경 작업 없음.
+- [x] RED→GREEN, 전체 Spring/관련 Node, 익명·위조 헤더·장애·이전 요청·다국어 검증.
+- [x] PC 1440/1920 및 1024/768/430/390/360/320, 확대 대응 재배치(물리 줌은 미검증), 메뉴·검색·로그 조회/빈 화면/장애를 실제 검사.
+- [x] 독립 리뷰, 정확한 main CI, 보호된 Test 및 동일 artifact 운영 승격·롤백·기록.
 
 ## Finished
-아직 완료/배포하지 않았다. 전체 35개 도구의 변경 기능을 이번 두 화면의 완료로 판정하지 않는다.
+관리자 대시보드·시스템 로그 조회 화면의 1차 운영 전환 완료. 전체 35개 도구의 변경 기능 완료는 아니다. 아래 초기 checkpoint의 미배포 표현은 당시 역사 기록이며 최종 상태는 마지막 운영 수용 기록을 따른다.
 
 ### Source implementation checkpoint
 - 공통 관리자 셸을 실제 Thymeleaf fragment로 추출해 홈·로그·실패 화면에서 공유한다. 홈 값은 검증된 기존 관리자 API의 응답이며 금융 숫자는 문자열로 유지한다.
@@ -52,3 +52,11 @@
 - 불변 개발 사본의 실제 Chromium80배치+200% 대응 CSS폭/deviceScaleFactor2 재배치20건, 실패0. 물리 브라우저의 줌 메뉴 조작 증거로 확대 보고하지 않는다. PC 높이600/768/900에서 사이드바 마지막 메뉴 접근도 수정 후통과.
 - 실제 로그인 브라우저에서 원천 users/stocks/controls의 snake_case 필드, 회원 identity/status 존재, 모든 주가 canonical string을 확인했다. 개인 식별자·잔액 원문 미기록.
 - [35개 관리자 도구 검증 원장](../qa/2026-11-21-admin-functional-ledger.ko.md)에 미검증·다른 셸·금융 게이트를 OPEN으로 고정했다. 아직 운영 승격 전이다.
+
+### Final scoped Production acceptance
+- PR #3328 main98b5dec0283f 및 정확한 main CI44846998303 네 job SUCCESS. 기존 사용자 승인에 따라 2026-11-21 10:48:33 KST 운영 기본 경로를 전환했다.
+- 실제 로그인 Test12배치/20언어 조합과 운영8배치, 실제 로그6종 버튼, 기존 세션 연속성, Test 중지 상태에서도 운영 독립 제공 확인. favicon 및 CSS403은 exact public asset 라우팅으로 수정했다.
+- 로그5종 정상 조회, FRONTEND는 제거된 v1546 unit 참조로 UNAVAILABLE/OPEN. backend controller/metadata 방어 소스 수정은 병합됐지만 기존 전체 backend runtime 승격은 OPEN. 가짜 정상/0/빈 목록으로 감추지 않는다.
+- 전체 Spring570/0fail/0error/0skip 및 native Node81 통과, 별도 PostgreSQL은 main CI 증거로 구분. 기존 Next QA5실패·금융 게이트는 유지한다.
+- [운영 전환 영수증](../releases/2026-11-21-admin-read-ui-production.ko.md), [기능 원장](../qa/2026-11-21-admin-functional-ledger.ko.md). 아직 못 한 physical zoom/전문구 언어 교정/다른 관리자 변경 기능은 완료로 표시하지 않는다.
+- 최종 문서 독립 리뷰에서 material overclaim/unsafe rollback finding 없음. 운영 FRONTEND에 불일치 필터를 넣어도 unavailable:true/rowCount:null 유지 실측. 마지막 문서 변경에 repository-security/control-byte/diff-check 및 QA 증거 개수·링크 검사 통과.

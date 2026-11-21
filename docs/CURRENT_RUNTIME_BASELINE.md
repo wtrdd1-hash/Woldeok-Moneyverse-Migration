@@ -1,3 +1,7 @@
+## 2026-11-21 — observed scoped administrator read UI
+
+Admin dashboard/system-log HTML now uses main98b5dec0283f via moneyverse-native-admin-read-prod-v20261121.service loopback4808; isolated same-artifact Test4806, fixed GET-only source gateway4807. Public presentation stays93a3 on4792 and legacy backend/API authorities remain. Existing login survived the switch; authenticated PC/mobile and Test independence verified. This is not a full-backend or all-admin-action acceptance; FRONTEND journal source remains unavailable because its legacy unit was removed. [Evidence](releases/2026-11-21-admin-read-ui-production.ko.md).
+
 # Current Runtime Baseline
 
 ## 2026-11-21 — current public favicon/header observation (SCOPED)
