@@ -146,3 +146,7 @@
 6. P2: 모바일 로고/최소16px 간격/44px 조작부/키보드와 focus·200% zoom·8개뷰포트·실기기·문장별5언어를 재검증한다.
 
 현재 산출물은 **실제 검사한 범위와 실패·차단·미실행을 남긴 감사 결과**다. 모든 기능의 양성/음성 여정·실제DB·다국어·접근성 QA가 끝났거나, 모든 결함을 해결했거나, 운영 승격이 승인/완료됐다는 문서가 아니다.
+
+## 10. 문서 검증·검토 기록
+
+두 독립 source review(admin/CI, member)를 거쳐 alias 전체 경로·read allowlist 주체·관찰 송금 UI와 canonical API 구현 구분·제한된 history/disabled 기능을 보완했다. 현행 문서 security/control-byte/classifier tests32 pass/0fail/0skip, repository secret/control-byte scan 및 QA JSON/identifier check 성공. [감사 PR #3341](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3341)의 e33b6971 checkpoint CI44899027820는 classify/policy 성공, runtime/spring skip(DOCS_ONLY)이었다. 최종head 검사/병합 결과는 해당PR에서 확인한다. 앱/DB/운영 설정 변경과 배포는 없다.
