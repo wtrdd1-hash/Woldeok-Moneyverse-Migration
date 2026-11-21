@@ -808,14 +808,24 @@
       }
     }
 
-    /* 10대 상장사 모바일 테이블 텍스트 꺾임 방지 */
-    .stocks-table-container, .stock-table-wrapper, table {
+    /* 10대 상장사 모바일 테이블 텍스트 꺾임 방지 및 320px 가로 스크롤 격리 */
+    .table-scroll-wrapper, .stocks-table-container, .stock-table-wrapper {
       width: 100% !important;
+      max-width: 100% !important;
       overflow-x: auto !important;
       -webkit-overflow-scrolling: touch !important;
+      scrollbar-width: thin;
+      display: block !important;
     }
-    table th, table td {
+    .custom-table, table {
+      width: 100% !important;
+      min-width: 520px !important;
+      border-collapse: collapse !important;
+    }
+    .custom-table th, .custom-table td, table th, table td {
       white-space: nowrap !important;
+      word-break: keep-all !important;
+      padding: 10px 8px !important;
     }
     .stock-corp-name, .stock-corp-sector {
       white-space: nowrap !important;

@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Tag(name = "Notification System", description = "Verified owner's in-app notifications")
 @RestController
-@RequestMapping({"/api/notifications", "/api/v1/notifications"})
+@RequestMapping({"/api/notifications", "/api/v1/notifications", "/app-api/notifications", "/app-api/v1/notifications"})
 public class NotificationController {
     private final NotificationService notificationService;
     private final MemberApiGuard memberApiGuard;

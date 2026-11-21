@@ -5253,3 +5253,33 @@ eserves: 대한민국 외환보유액 통합계정)
 - **웹 콘솔 접속**: SSH 포트포워딩(`ssh -L 8443:127.0.0.1:8443 ...`) 경유 `https://localhost:8443` 접속.
 - **AI 엔진 연동**: 대시보드 Settings에서 보유 중인 LLM API 키(OpenAI, Anthropic, Gemini, Groq, Ollama 등)를 입력하여 에이전트 활성화.
 - **점검 실행**: 대상 타깃 `https://easy-scraping.com` 입력 후 자율 취약점 점검 실행 및 리포트 수집.
+---
+## 🚀 [v109 Specification] 320px 모바일 UI 최적화, BFF 404 해소, 플로팅 버튼 여백 보강 및 공식 아이콘 동기화
+- **반영 일시**: 2026-11-21
+- **요청 사항**: 사용자 첨부 스크린샷 7종 분석 및 긴급 점검 과제 전수 해결
+  1. 320px 극소 모바일 화면에서 10대 상장사 주식 테이블 글자 꺾임('치\n무\n전\n자') 현상 해결.
+  2. 브라우저 콘솔 에러 `GET https://easy-scraping.com/app-api/v1/chat/unread-count 404 (Not Found)` 원천 차단.
+  3. 플로팅 버튼(초록색 온보딩 선물 0/7, 보라색 지원 독, 노란색 오디오 가이드)이 하단 계정 탈퇴/삭제 버튼 및 가이드 텍스트를 가리는 현상 해결.
+  4. 사용자 지정 공식 아이콘(보라색 네온 W 로고: 왕관 + 다이아몬드 + 궤도 타원 링 + 월계관) 정적 자산 전수 최신화.
+  5. 로컬 및 원격 저장소 main 브랜치 통합 및 디스크 여유 공간(46GB+) 보존.
+
+### 1. Spring Boot 백엔드 컨트롤러 BFF 엔드포인트 확장
+- **ChatController**: `@RequestMapping({"/api/chat", "/api/v1/chat", "/app-api/chat", "/app-api/v1/chat"})` 추가로 프론트엔드 15초/30초 주기 `/app-api/v1/chat/unread-count` 폴링 404 원천 차단.
+- **SupportController**: `@RequestMapping({"/api/support", "/api/v1/support", "/app-api/support", "/app-api/v1/support"})` 추가로 1:1 고객지원 스레드 호출 경로 완벽 보장.
+- **NotificationController**: `@RequestMapping({"/api/notifications", "/api/v1/notifications", "/app-api/notifications", "/app-api/v1/notifications"})` 추가.
+
+### 2. 320px 극소 모바일 10대 상장사 테이블 오버플로우 격리
+- `.table-scroll-wrapper`: `display: block !important; width: 100% !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; scrollbar-width: thin;`
+- `.custom-table, table`: `min-width: 520px !important; width: 100% !important; border-collapse: collapse !important;`
+- 셀 패딩 및 텍스트 래핑: `white-space: nowrap !important; word-break: keep-all !important;` 적용으로 320px 화면에서 한 글자 단위 세로 줄바꿈 완벽 방지 및 매끄러운 가로 스크롤 제공.
+
+### 3. 모바일 하단 플로팅 버튼 및 안전 여백 확보
+- `frontend/src/app/account/page.tsx`: `<main className="space-y-6 pb-36 sm:pb-24">` 적용으로 스크롤 끝단에서 '서비스 탈퇴 및 계정 삭제' 체크박스 및 버튼이 플로팅 버튼 위로 50px 이상 온전히 노출되도록 보장.
+- `frontend/src/app/guide/stock-trading/page.tsx` 및 `frontend/src/app/guide/page.tsx`: 최상위 컨테이너에 `pb-36 sm:pb-24` 안전 패딩 적용으로 노란색 헤드셋 가이드 및 선물 버튼에 본문이 가려지지 않도록 보호.
+
+### 4. 공식 브랜드 아이콘 동기화
+- 사용자 제공 공식 심볼 이미지(`media_1795159207265_81ddf180.jpg`)를 아래 4개 핵심 경로에 전수 동기화:
+  - `spring-backend/src/main/resources/static/images/woldeok-symbol.png`
+  - `spring-backend/src/main/resources/static/favicon.png`
+  - `spring-backend/src/main/resources/static/favicon.ico`
+  - `frontend/public/favicon.png` 및 `frontend/public/favicon.ico`

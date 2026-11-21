@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Tag(name="Customer Support")
 @RestController
-@RequestMapping({"/api/support","/api/v1/support"})
+@RequestMapping({"/api/support", "/api/v1/support", "/app-api/support", "/app-api/v1/support"})
 public class SupportController {
     private final SupportService supportService;
     private final MemberApiGuard guard;
