@@ -47,3 +47,17 @@ Files: docs/worklog/2026-11-21-nov18-frontend-unification.ko.md, docs/qa/2026-11
 
 ## Current stage acceptance
 The eight-route read UI is accepted at maine2fb487a1a78 after Test320locale/layout cases+40CSS zoom-equivalent reflows, Production24layouts, actual search/menu/language checks and exact-main all4CI. Physical browser zoom/device QA and all other route families remain OPEN. This plan covers the safe current stage and is not whole-site completion. Final evidence/docs integration and owned cleanup receipts are retained on the host.
+
+
+## Task4: Delivery log source contract and Nov18 presentation
+Files: new `spring-backend/src/main/java/com/moneyverse/adminpresentation/AdminDeliveryPageController.java`, existing AdminSourceClient.java/NativeAdminApplication.java, new templates/mv43/admin-delivery.html, shared/admin-shell.html, ui/mv43-copy.json/static/assets/mv39/i18n.js and NativeAdminIsolationTest.java.
+- [ ] Real HTTP RED tests: current canonical status/null DTO, valid empty, known outcomes/counts, malformed/duplicate/over30/attempt/timestamp/alias cases, auth rejection before reads, five locale/private headers and no mutation exposure. Expected: missing route404 before implementation.
+- [ ] Minimal controller and dedicated source validation, shared shell/table styles, translated labels/statuses/sample notice and refresh/log links. No invented delivery acknowledgement and no message sending. Expected: focused tests GREEN.
+- [ ] Full Spring + native Node suites, bootJar, security/control-byte/whitespace guards; independent whole-branch review. Expected: zero failures; excluded PostgreSQL tests identified separately and CI coverage required.
+
+## Task5: Delivery exact-source Test/Production
+Files: same worklog/route ledger and new release receipt. Operational scripts outside git must use root-only immutable staging and CAS/owned rollback.
+- [ ] Main fetch/normal PR/required exact-HEAD CI; immutable exact-main artifact and process/open-JAR/source evidence.
+- [ ] Source gateway admits only one extra fixed GET; scoped protected same-origin Test preview, actual authenticated delivery UI + five locales and PC/mobile/keyboard. No existing eight-route promotion by implication.
+- [ ] Exact-source Test receipt + main all4CI, narrow Production cutover; source/API/privacy/old asset generation checks, Test-independence observation.
+- [ ] Record source status unknown separately from unavailable, remaining27admin routes/all member/action scope OPEN; push docs checkpoints, normal integration and owned cleanup.

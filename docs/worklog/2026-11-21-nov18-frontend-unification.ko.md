@@ -39,3 +39,16 @@
 
 ### Evidence-format CI correction
 - 문서 PR3331의 classifier가 exit2/UNKNOWN으로 중단됐다. 실제 로컬 재현에서 신규 QA CSV2개가 기존 문서 허용 형식에 없음을 확인했다. 정책/테스트를 완화하지 않고 같은320/24개 증거를 이미 허용된 docs/qa/*.json 형식으로 보존했다. CSV 원본은 호스트 QA/기존 commit에 남는다. 운영 source/설정은 바꾸지 않았다.
+
+
+## 후속 조회 화면 — 전달 로그
+### 작업 전
+- 8경로 운영 반영은 main e2fb487a1a78이며 증거 문서 PR3331은 main fb38940c5529에 일반 병합했다. 문서 분류의 CSV 실패는 같은 내용을 승인된 JSON 형식으로 바꾸어 해결했으며 분류기는 변경하지 않았다. 문서 CI의 runtime 검사는 DOCS_ONLY라 skip이며 새 runtime 통과로 주장하지 않는다.
+- 실제 `/admin/logs/delivery`는 조회 불가. 실제 인증 API는30행과 `status`필드를 반환하고 기존 UI는 `delivery_status`만 요구한다. 관찰30행 status는 모두 null이고2행에는 완료 시각만 있다. 성공으로 추정하지 않고 미확인으로 표시할 후속 공통 셸 화면을 구현한다.
+- `/account`·`/support`·`/chat`403은 upstream 직접 요청200/edge403으로 경계를 좁혔다. scanner-shield의 숨김파일 regex가 일반 경로도 매칭할 가능성이 있으나 광범위 해제는 기존 비인증 HTML 노출 검증 전 실행하지 않는다. 원인 재현/인증 검토는 OPEN이다.
+### 진행 중
+- [ ] 전달 로그 실제 DTO·미확인 상태·권한·실패 RED→GREEN
+- [ ] Nov18 공통 셸·5언어·반응형·리뷰/전체 테스트
+- [ ] exact-main Test→단일 경로 운영 전환 및 기록
+### 종료 상태
+후속 전달 화면은 아직 미구현·미배포다. 기존8경로 운영은 유지한다.
