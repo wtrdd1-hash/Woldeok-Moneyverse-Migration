@@ -165,3 +165,37 @@ PR3351은91f753bf8b의 CI44923868917 네 검사와 후보 빌드44923833095 성�
 
 ## 진행 중 — 응답 헤더 검토 및 운영 복구 체크포인트
 응답 헤더 소스 검토는 Critical0/Important0으로 승인됐습니다. Minor인 기존 주식·ticker 경고는 전체 실행 구성·테스트 격리 문제로 남기며 실제 시장 기능 성공으로 보지 않습니다. 별도 Minor인 이번 소스 단계의 중간 로그 제목 누락은 현재 검토·통합 상태를 기록해 보완합니다. 구현 전에 이 문단을 썼다고 소급 주장하지 않습니다.660/552개 소스 증거는 그대로이며 운영 미배포, 복구 수정1차 재검토는 OPEN입니다.
+
+## In progress — 보호된 catalog canary 설치·역전 소스
+2026-11-22: 격리 branch subtask/native-catalog-canary-20261122, BASE592cc87819c062fe00a7c2936f2ff8f77d03d39c. 승인 Task2 운영계획·공유 메모리 대체 규칙·안전 규칙을 재확인했다. fetch한 main은692957c23630f7e34272876760ffba2370dc0a3b로 전진했고 중간 재확인 때도 같았다. 통합·실제 운영행위는 부모 담당이다.
+체크: [x]착수계획/4개기존helper [x]설치13RED [x]구현·회귀 [x]자체검토 [ ]최종검증 [ ]부모독립검토 [ ]실제CI artifact/root prepare/browser 승인. 임시 파일·생성한 일회용 입력으로 canary30/기존QA7/maintenance4, nativeNode347/security-releaseNode201 모두 실패·skip0. 실제 자격증명 읽기·root stage·service/Nginx/DB·push/배포는 수행하지 않았다.
+부모확정결정: prepare/apply는 최신main·정확CI를 강제하되 rollback은 main 전진 후에도 보호된 소스·파일inode·PID·JAR 증명으로 수행 가능해야 한다. 비정상 시작의 정리에는 응답 없는 HTTP 대신 실제 취득파일·고정JAR hash·명령/cwd/openJAR를 검증한다. 정상 readiness/source gate는 유지한다. 비밀파일은 umask022에서도 첫 생성부터0600이며 기존TLS hostname/sslmode를 보존한다.
+
+
+## Finished — catalog canary 운영 소스 단계 / 실제 운영 승인은 미완료
+2026-11-22: root-private prepare/apply 및 영속 소유권 기반 일반 rollback 구현. canary35(기본·config5/installer30), 기존QA7/maintenance4, nativeNode347, security-releaseNode201 모두 실패·skip0. Python컴파일·repository/control검사·diff-check는 허가된 로컬 커밋 직전에 다시 수행한다. Python·격리 Nginx/systemd-analyze·Node 검사에서 새 경고는 없었다. 전체 애플리케이션/SQL/Gradle은 부모 담당이며 실제 자격증명 읽기·root stage·service/Nginx/DB·push/배포를 수행하지 않았다.
+자체검토에서 공유CAS의 stat이 이동한 원본inode를 가리키는 새 symlink를 따라가는 결함을 실제 임시파일RED로 재현했다. 필요한 한 줄만 lstat으로 변경해GREEN, 기존QA7도 유지했다. private umask 제거 mutation은 첫 생성644 RED를 재현했고 복원 후0600 GREEN. source/실제port·archive identity·journal/진단 저장 실패도 RED→GREEN. 저널 저장 자체가 실패하면 메모리에 남은 실제 취득 소유권을 사용하고, 진단 저장 실패가 backend/비밀 정리를 건너뛰지 않는다. 외부 교체 자원은 보존한다.
+체크: [x]계획/기준/RED [x]구현 [x]범위별 소스검증 [x]자체검토 [ ]부모독립검토 [ ]최신main의 실제성공CI artifact/root prepare [ ]실제readonly DB/session/browser/source-positive [ ]전체 frontend/Test/Production승격. main이 전진해도 보호된 일반역전은 가능해야 한다는 부모결정을 유지했다. 운영소스와 앱소스를 구분하며 local build 배포·가짜artifact·권한/마이그레이션/API변경은 없다. 이번 격리소스 커밋은 push/merge/배포되지 않았고 실제 설치는 전부 대기 중이다. ADMIN_PREVIEW_ONLY를 전체 사이트 승인으로 주장하지 않는다.
+
+커밋 직전 최종검증 완료: Python35+7+4=46/실패·skip0, native/security/release 합산Node548/실패·skip0. Python컴파일·실제repository security/control-byte·staged diff-check 모두 성공. 마지막main fetch692957c23630f7e34272876760ffba2370dc0a3b 유지. 새 경고 없음. 전체앱/SQL/Gradle·실제운영·브라우저 승인은 이 worker에서 실행하지 않았다.
+
+
+## In progress — canary 운영 검토 fix round1
+BASE5b625c3898c470ff8e6a9c468293040cbac5246a. 부모 검토의 Important3건을 읽고 실패 원인을 재현했다. fetch main925f725d2836c5ebe88311e2f2ff8ab17b052144 전진은 기록만 하며 통합은 부모 담당이다. I1의 PID0/activating/auto-restart2 RED 후 소유fragment·drop-in 부재를 검증해 pending restart를 취소하고 inactive를 확인한다. I2 old 복구·start/proof/checkpoint4 RED 후 단계와 old PID를 영속 기록하여 다음 명시rollback이 old generation을 증명한다. 테스트 process fixture도 old/new JAR·PID를 구별하도록 보완했다.
+I3 check/action 실제 경계의 동일내용 새inode replacement/removal2 RED와 restore-blocked1 RED를 확인했다. 공유guard는 Linux RENAME_NOREPLACE로 실제 점유자를 새0700 복구디렉터리에 이동한 뒤 실제inode/hash를 검사하고, 불일치는 빈 target에만 복원한다. 새파일은 exclusive hardlink로 취득한다. staging/quarantine 파일 자동unlink·덮어쓰기는 없으며, 불확실한 원본을 보호된 경로에 보존하고 명시적 미완료 결과를 남긴다. 저널/receipt에 복구경로·상태·identity가 기록된다. 잠깐 target이 비는 소유권 프로토콜이며 atomic CAS로 주장하지 않는다.
+체크 [x]검토/RED [x]I1/I2/I3 구현 [ ]최종검증 [ ]로컬fix커밋 [ ]부모재검토. 실제자격/root-stage/service/Nginx/DB/browser 작업은 전부 미수행·OPEN이다.
+
+
+## Finished — canary 운영 fix round1 소스
+I1/I2/I3 구현·자체검토 후 범위재검토 대기. 최종 canary45/기존QA7/maintenance4=Python56, native/security/releaseNode548 모두 실패·skip0. Python5파일컴파일·repository-security/control-byte·diff-check 성공, 새경고 없음. old/new JAR·PID를 구별하는 fixture와 old-process proof 실패 후 재개하는 다섯 번째I2 검증도 통과했다. Linux no-replace rename/실제 임시파일 race를 실행했으나 root/service 작업은 없다. 마지막main925f725d2836c5ebe88311e2f2ff8ab17b052144 유지.
+I3 복구디렉터리는0700이며 candidate·이동원본·메타데이터와0600 비밀사본을 의도적으로 보존한다. 자동unlink/덮어쓰기 purge를 하지 않는다. 동시에 들어온 충돌 target은 건드리지 않고 이동된 바이트는 비공개로 보존해 명시적 미완료를 남긴다. check+rename/unlink를 atomic으로 주장하지 않는다. 잠깐 path가 비는 동안은 중지·통제된 소유파일에 한정하며 include 설치 후에만 Nginx reload한다. 부모가 I3에 맞는 보존프로토콜임을 확인했다.
+체크 [x]RED/GREEN [x]I1 pending-restart [x]I2 old단계/PID 재개 [x]I3 실제점유자/비덮어쓰기 [x]최종검증/자체검토 [ ]부모범위재검토. 로컬fix커밋만 하며 push/merge/배포·실제자격/rootstage/DB/service/Nginx/browser는 전부 미수행·OPEN이다.
+
+
+## 진행 중 — 조회 카나리 복구 수정 통합
+격리 운영 소스592..a200을 부모에 통합하되 재검토 전 커밋은 보류합니다. 추가 기록만 겹친 계획·한영 로그는 공통 부분과 부모·자식 전체 추가 이력을 보존해 해결했습니다. 운영 파일은 자식 최종 소스와 같고 부모 응답 헤더 수정은 유지합니다. 통합 Python56/Node552개 소스 검증을 진행하며 실제 root 준비·비밀 설정·실행 경로는 변경하지 않았습니다.
+
+
+## 완료 — 조회 카나리 검토 소스 통합 단계
+수정1차 재검토에서 I1/I2/I3 해결, 신규 Critical/Important/Minor0입니다. 운영 파일은 a200554628와 바이트가 같으며 통합 Python45+7+4=56개·Node552개 실패0/제외0입니다. 보안·제어문자·컴파일·diff 검사도 통과했습니다. 애플리케이션은660개 검증 b061 소스 그대로입니다. 추가 계획·한영 로그 충돌은 양쪽 이력을 보존했고 통합 중 끝 빈 줄1개를 수정했습니다. 실제 설정·서비스·비밀·DB 변경은 없습니다.
+별도 범위 밖 관찰인 백엔드 파일 제거 후 daemon-reload 실패 재시도 문제는 종료한 수정 라운드의 네 번째 결함으로 늘리지 않고 새 제한 작업으로 기록해 설치 전에 해결합니다. 실제 운영 수용은 OPEN입니다.
