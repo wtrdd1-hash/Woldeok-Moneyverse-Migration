@@ -28,3 +28,7 @@ Nginx에는 미리보기 include1줄만 추가했다. 변경 후 SHA는7a80aba9d
 6. 독립 전체 Test·정상 데이터/browser·미리보기 정상 종료 inverse·나머지 기능 수용표·최종 운영 전환은 별도 미완료 게이트다.
 
 익명 API stocks200/auth401/admin401 JSON과 HTML503/no-store를 전후 확인했다. 추가 JVM29개는 명시적 DB-free 모드가 아닌 기존 application/default 모드여서 이름만으로 프론트엔드라 판단해 중지하지 않았다. 실제 의존성/작업자 소유권 점검 전까지 보존한다.
+
+
+## 2026-11-22 source checkpoint / 소스 진행 상태
+PR3350 merged as bca23a8607. Exact main CI44920156614 succeeded, including all18 disposable PostgreSQL cases. The JPA composition defect and expired synthetic-session fixture are corrected in source. Shared administrator first-paint locale labels are corrected in source. None of these changes is yet installed in the live application72714c3efd preview; its positive catalog test remains BLOCKED. Public publications source is separately under integration, with24 tagged SQL cases pending its own CI. This checkpoint does not supersede the deployed identity or claim full Test/Production acceptance.

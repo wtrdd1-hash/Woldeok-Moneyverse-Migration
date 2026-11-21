@@ -128,3 +128,13 @@ Parent approved extending the brief to latest138 announcement fields: genuine is
 2026-11-22: 공용 flock·worker1·heap384m으로 전체 Spring `test bootJar` 성공.104개JUnit suite654건/실패0/오류0/표시skip0. 신규 정본4·실제HTTP10·기존 Phase13의 정상/장애11건 포함. nativeNode351건, release/security188건 모두 실패·skip0. 보안/control 검사와 diff-check도 통과했다. 실제 PostgreSQL24건은 로컬에서 제외되며 신규 게시물6건도 컴파일만 완료했다. CI실행 전에는 통과로 주장하지 않는다. 기존 Gradle/JDK/unchecked 경고와 H2 stock/ticker 원천 미가용 메시지는 유지된다.
 자체검토: 기존 definer함수만 사용, 실제 boolean 고정·nullable 이미지 쌍, UUID/시각/텍스트/URI 검증, 중복·미래 기록 거부, 본문/alt 이스케이프, 확인된 이미지 host만 CSP허용, 브라우저 자격/actor/query 미전달, 제한된 GET/HEAD 별칭, frontend DB/session/job 부재와5언어 mirror/digest 확인. 공유 템플릿은 자산digest만 변경했고 부모 에이전트의 병행 shell/locale 수정은 통합 때 보존한다. 최신main72714c3efd 변경 없음.
 체크리스트: [x]착수/RED [x]구현 [x]전체소스검증 [x]자체검토 [ ]부모독립검토 [ ]실제SQL CI [ ]정확아티팩트 browser/Test [ ]최종통합·배포. 로컬 커밋만 생성하며 push/PR/merge/배포·마이그레이션·권한변경·외부이미지 서버조회·운영데이터 접근 없음. 구 backend API를 이번 작업으로 교체하지 않았고 정본 backend 채택 전에는 native화면이 정직하게503을 표시한다. 전체 rebuild와 운영 점검은 계속 미완료다.
+
+
+## Before work — real-read canary operational helpers
+Prepare only reviewed source helpers/tests for an exact protected catalog path and a loopback canonical backend, retaining public maintenance/current API authority. Same current app-role connection may be reused only in a root0600 external environment; no credentials logged or committed. The eventual installer must verify owned current QA and exact CI artifact, enforce read-only/closed-header boundaries and independent inverse. Current18SQL CI remains pending; no new unit, credential file or route is installed by helper development. Detailed plan appended before code.
+
+
+## 진행 중 — 공지·갤러리 통합 및 최신 main 검증
+공개 게시물 소스의 명세·코드 품질 검토에서 차단 결함은 없었습니다.592cc87819와 최신 main692957c236를625311069a에 정상 통합했습니다. 실제 API 보안 경계와 공식 브랜드 변경과 충돌이 없었습니다. 공유 잠금으로 Spring test+bootJar 재실행:104개 스위트659개 검사,실패0/오류0/보고된 제외0. Node539개 성공,실패0/제외0. PostgreSQL 태그24개는 로컬 실행 대상에서 제외됐으며 공지·갤러리6개를 포함한 실제 CI 실행은 별도 필수입니다.
+PR3350은 mainbca23a8607로 병합됐고 main CI44920156614의 네 검사가 모두 성공했습니다. 실제 일회용 PostgreSQL18개(카탈로그4/상점5/문의9)는 소스 CI 근거입니다. 운영 보호 미리보기는 여전히72714c3efd이며 기존 가짜 카탈로그를 거부하는 상태입니다. 신규 조회 백엔드/경로는 설치되지 않았고 관리자 언어 수정도 아직 배포되지 않았습니다. 전체 구축·실데이터 브라우저 성공·독립 Test·최종 전환은 OPEN입니다.
+운영 조회 카나리 설치기는 격리 작업공간에서 별도 구현·검토 중입니다. 미검토 도구를 배포 완료로 포함하지 않습니다. 공개 점검 화면과 기존 API 권한은 유지합니다.
