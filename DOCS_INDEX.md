@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.21.2234 — Saved AgentMemory reel and mandatory shared task-handoff notes (DOCS ONLY)
+- [EN source + ongoing workflow](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md) / [한국어](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md) · [Worklog KO](docs/worklog/2026-11-21-agentmemory-shared-agent-protocol-v2234.ko.md) · [GitHub update EN](docs/updates/v2026.11.21.2234-agentmemory-reference-github.md). Source reel verified by public caption metadata, upstream README retrieved; actual AgentMemory installation/automatic capture and video playback not verified. GitHub worklogs remain durable fallback; no app/Test/Production changes.
+
+
 ## v2026.11.19.39 — Spring safety remediation: scoped Production privacy HOTFIX, full frontend release HOLD
 - [QA EN](docs/qa/2026-11-19-spring-safety-and-frontend-release-v39.md) / [QA KO](docs/qa/2026-11-19-spring-safety-and-frontend-release-v39.ko.md) · [Worklog KO](docs/worklog/2026-11-19-mv39-production-readiness.ko.md) · [GitHub notes](docs/updates/v2026.11.19.39-github.md). Real public Nginx protection for anonymous wallet/pension and spoofed headers (10/10); separate immutable read-only Spring Test API 21/21 and 243/243 Java tests. Full 180-route/5-pass/official-Test/signed-in Finance QA NOT complete; backend/full new UI Production not promoted.
 

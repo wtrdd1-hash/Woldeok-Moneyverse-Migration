@@ -1,5 +1,10 @@
 # AGENTS.md
 
+## Persistent agent task handoff (v2026.11.21.2234)
+
+On every task, **recall the latest approved plan and relevant versioned worklogs before making changes**, then record sanitized start/checkpoint/finish decisions for the next contributor. Use the established GitHub worklog fallback now; do **not** assume the external AgentMemory service is installed. No credentials or member/financial records may enter agent memory. Read [shared memory protocol](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md) and its [Korean counterpart](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md). Worktree ownership, current main and CI always outrank recalled history.
+
+
 Working notes for anyone — human or agent — changing this repository.
 
 This is the rebuild of Woldeok Moneyverse, a Korean community virtual economy.

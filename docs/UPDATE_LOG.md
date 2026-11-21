@@ -1,4 +1,8 @@
 ## v2026.11.10.1948 — National Mint UI/monetary policy verified in real Production v1947
+
+## v2026.11.21.2234 — Permanent AgentMemory coding-reference preservation and safe task memory (DOCUMENTATION ONLY)
+The owner-provided Instagram reel source and upstream readme were captured in English/Korean protocol. Every task reads current plan/main and writes sanitized start/mid/end worklog. Actual third-party agent-memory server was not installed or integration-tested. [Details](development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md) / [KO](development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md). No code, DB, Test or Production changes.
+
 PR #3000 merged SHA `a13a18cd70709a6f4df320d4d76ea834baae2331`, CI/Test/Production exact runtime PASSED. Fixed async approved order selection, unsupported MINT/TREASURY proposal 500 and mobile form; SQL344 guard routines handle admin policies/certificates without direct app certificate INSERT. Production BFF uses new 4574 backend; public Treasury 0 WLD/verified, user money unchanged; full before/after backups and SHA attestation. Two automatic rollback attempts recorded before verified v1947 Nginx 4574/4575 promotion. Certificate is not funded canonical WLD issuance. [Proof](releases/v2026.11.10.1948-mint-ui-prod.md).
 
 ## v2026.11.09.1946.3 — Mixed-verification publication CI hardening / Test-only evidence

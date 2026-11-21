@@ -1,5 +1,10 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.11.21.2234 — AgentMemory 영상 영구 참고 및 작업 이어받기 규칙 (PLANNING / 미설치)
+
+사용자 지정 [Instagram 원본](https://www.instagram.com/reel/DfZgpiWtX1z/)과 [공식 저장소](https://github.com/rohitg00/agentmemory)를 [한국어 규칙](../development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md) / [영문 정본](../development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md)에 보관한다. 릴스 설명/메타데이터는 확인했으나 영상 본편 재생은 미확인. 개발 작업마다 최신 기획서 재조회, 비밀값 제거한 시작·중간·종료 기록, 다른 작업자의 브랜치 충돌 회피를 의무화한다. 외부 자동 기억 서버 설치 및 두 AI 도구 간 공유 테스트는 아직 미실시이며 보안검토 전 활성화 금지. **문서 전용, Test/운영 변경 없음.**
+
+
 > **2026-11-21 15:55 KST 현재 — 통합 frontend26의 부분 수용:** source e45f57595415 동일 JAR의 DB-free Test/운영 한 쌍으로 공개5·관리자 조회10·회원3·인증8 UI/안전한 실패 상태를 통합했다. Test260조합/운영26·Test중지 독립성 및 old native11/QA Nginx2 정리를 검증했다. 관리자 원천4read·지갑 합계는 실제 조회다. 문의/쪽지 owner/DTO 미검증, 송금 CSRF, 가입/복구 hold·나머지 기능은 OPEN. 운영 전체 정적147 재검사 결과 사용자78 오류/차단·관리자 errors1, 동적33미검증. **전 기능 정상/180페이지 완료가 아니다.** [현재 운영/정리 증거](../releases/2026-11-21-frontend-consolidation-production.ko.md) · [현재 기능/경로 결함](../qa/2026-11-21-live-frontend-after.ko.md). 아래 다른 SHA/경로 수는 과거 수용 시점이다.
 
 > **2026-11-21 13:22 KST 현재 — 부분 적용:** 전달 로그1경로를 main7d58568e3041의 Nov18 공통 셸로 운영 전환해 관리자 조회9경로가 통일됐다. 이전8경로 e2fb/공개5경로93a3는 유지한다. 전달 Test40조합·운영15조합·기존8경로 전후16배치씩 및 Test 중지 독립성 확인. 나머지27관리자/전체 웹·변경 기능은 OPEN이다. API 관제 고정 정상 지표와 계정·문의·채팅403도 미해결이다. [최신 전달 수용](../releases/2026-11-21-nov18-admin-delivery-production.ko.md) / [미해결 결함](../qa/2026-11-21-nov18-unification-open-defects.ko.md). 아래8경로 등의 기록은 이전 수용 시점이다.
