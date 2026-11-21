@@ -5283,3 +5283,34 @@ eserves: 대한민국 외환보유액 통합계정)
   - `spring-backend/src/main/resources/static/favicon.png`
   - `spring-backend/src/main/resources/static/favicon.ico`
   - `frontend/public/favicon.png` 및 `frontend/public/favicon.ico`
+---
+## 🛡️ [v110 Specification] Cloudflare 보안 감사 도구 기반 전사 취약점 정밀 진단 및 다계층 방어 체계 구축
+- **반영 일시**: 2026-11-21
+- **요청 사항**: 인스타그램 릴스(@reels_mon01)에서 소개된 Cloudflare 오픈소스 보안 감사 스킬(`cloudflare/security-audit-skill`) 및 AI 생성 코드 취약점 대응 기법을 서비스 전반에 실전 적용.
+  - "일단 돌아가게만 해줘"로 개발된 AI 코드의 6대 위험(인증 누락, 데이터 격리 실패, 동시성 이중 출금, PII 노출, SSRF, 인젝션) 전수 점검.
+  - 생성자(Builder)와 공격자/검증자(Auditor/Hunter/Verifier)를 분리하는 멀티 에이전트 교차 검증 파이프라인 가동.
+
+### 1. 정밀 감사 대상 영역 (Target Surfaces & Trust Boundaries)
+1. **금융 원장 및 트랜잭션 동시성 (Financial Ledger & Race Condition)**:
+   - 대상: `WalletService`, `StockTradeService`, `CasinoService`
+   - 취약점: 밀리초 단위 동시 요청 시 WLD 잔액 초과 인출(TOCTOU), 마이너스 잔고 버그, 멱등성 키(`Idempotency-Key`) 누락.
+   - 방어: PostgreSQL 복식부기 비관적 락(`SELECT ... FOR UPDATE`), 원장 정합성 불변성 검증.
+2. **인증 및 권한 상승 방어 (Authentication & Authorization Guard)**:
+   - 대상: `MemberApiGuard`, `ChatController`, `SupportController`, `AdminMeController`
+   - 취약점: 클라이언트 위조 헤더(`X-User-Id`, `x-actor-user-id`)를 통한 타인 계정 사칭, 비인증 관리자 API 접근.
+   - 방어: Nginx 헤더 스트리핑 재확인, Spring Security 세션 쿠키 단일 소스 검증.
+3. **개인정보 및 데이터 소거 안전성 (PII Leakage & Account Deletion Safety)**:
+   - 대상: `/account`, `/account-deletion`, `ProfileCanonicalSource`
+   - 취약점: 계정 삭제 후에도 캐시/관계 테이블에 평문 이메일·프로필 잔존, API 응답에 내부 식별자 불필요 노출.
+   - 방어: 탈퇴 시 민감 데이터 완전 마스킹 및 즉시 무효화, DTO 화이트리스트 직렬화.
+4. **SSRF 및 외부 호출 격리 (Server-Side Request Forgery Defense)**:
+   - 대상: 미디어 업로드, 웹훅, 외부 환율/뉴스 크롤러
+   - 취약점: 내부 메타데이터 서버(`169.254.169.254`) 또는 로컬 내부망(`127.0.0.1:8443` PentAGI 등) 비인가 접근.
+   - 방어: DNS Pinning, 사설 IP 대역(RFC 1918) 송신 차단, Safe HTTP 클라이언트 바인딩.
+
+### 2. Cloudflare Security Audit 6단계 워크플로우 가동 계획
+- **Phase 1 (Reconnaissance)**: 전체 라우트/DTO 맵핑 및 `coverage-ledger.json` 생성.
+- **Phase 2 (Coverage-Led Hunting)**: 보안 전문 Hunter 에이전트가 취약점 후보 탐색.
+- **Phase 3 (Candidate Validation)**: 독립 Verifier 에이전트가 오탐(False Positive) 제거.
+- **Phase 4 & 5 (Structured Output & Re-verify)**: `findings.json` 스키마 검증 및 소스 재확인.
+- **Phase 6 (Reporting)**: 종합 리포트(`SECURITY-AUDIT-REPORT.md`) 발행 및 즉각 보안 패치 적용.
