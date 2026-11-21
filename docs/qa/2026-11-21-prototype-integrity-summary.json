@@ -1,0 +1,53 @@
+{
+  "source": "8ba9139b2fcd577253ee83a24040091be218d64b",
+  "sourcePr": 3338,
+  "mainCi": 44890241945,
+  "mainCiJobs": {
+    "classify": "success",
+    "policy": "success",
+    "spring-web-check": "success",
+    "runtime-check": "success"
+  },
+  "artifact": {
+    "source": "8ba9139b2fcd577253ee83a24040091be218d64b",
+    "jarSha256": "7ba6312babb4aba0cba29fc1f67cf712008fe949d7886884aeef9c9d971d1bf9",
+    "filesMatchGit": 10,
+    "jarBytes": 158336658
+  },
+  "scope": "prototype integrity,5 canonical pages; no complete business workflow certification",
+  "productionCanonicalRoutes": [
+    "/shop",
+    "/stocks",
+    "/quests",
+    "/board",
+    "/status"
+  ],
+  "sourceAliasPagesFixedButNotCertifiedLive": 5,
+  "testBrowserCases": 75,
+  "productionBrowserCases": 10,
+  "failed": 0,
+  "walletAndMarketReadsObservedAvailable": true,
+  "balancesOrPrivateIdentityRetained": false,
+  "unrelatedResponseBoundariesPreserved": true,
+  "externalTest403Retained": true,
+  "rootOwnedReleaseParent": "/var/lib/moneyverse-frontend-integrity-20261121",
+  "operationalScriptSha256": "033cfb492f433124f12b6b28292468a179b2e7cf658b5f6e7576290b33e35f1f",
+  "operationalTests": {
+    "finalLocalPass": 6,
+    "independentPassBeforeReadinessFollowup": 5
+  },
+  "sourceTests": {
+    "nativePass": 335,
+    "nativeFailed": 0,
+    "nativeSkipped": 0,
+    "springPass": 605,
+    "springFailed": 0,
+    "springErrors": 0,
+    "springSkipped": 0,
+    "bootJar": "SUCCESS",
+    "postgresMessagingTagNotPartOfLocalSpringSuite": true
+  },
+  "wholeSiteAccepted": false,
+  "mobileBusinessWorkflowsAccepted": false,
+  "initialImmediateLanguageClickAccepted": false
+}
