@@ -25,19 +25,9 @@ public class AdminUiController {
     public AdminUiController(AdminSourceClient source,ObjectMapper mapper,UiPageRenderer pages,AdminNavigation navigation,NativeBuildIdentity identity){
         this.source=source;this.mapper=mapper;this.pages=pages;this.navigation=navigation;this.identity=identity;
     }
-    private HttpHeaders headers(HttpServletRequest request){
-        var headers=new HttpHeaders();headers.setContentType(MediaType.parseMediaType("text/html;charset=UTF-8"));
-        headers.set("Cache-Control","private, no-store");headers.set("X-Robots-Tag","noindex, nofollow, noarchive");
-        headers.set("X-MV-Renderer","Spring-MVC-Thymeleaf");headers.set("Content-Language",pages.language(request));
-        headers.set("X-Frame-Options","DENY");headers.set("X-Content-Type-Options","nosniff");headers.set("Referrer-Policy","no-referrer");
-        headers.set("Content-Security-Policy","default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'");
-        return headers;
-    }
+    private HttpHeaders headers(HttpServletRequest request){return AdminUiResponses.headers(pages,request);}
     private ResponseEntity<String> failure(HttpServletRequest request,int status){
-        var headers=headers(request);
-        if(status==401){headers.setLocation(URI.create("/login?next="+URLEncoder.encode(request.getRequestURI(),StandardCharsets.UTF_8)));
-            return new ResponseEntity<>("",headers,HttpStatus.FOUND);}
-        return new ResponseEntity<>(pages.render("mv43/admin-unavailable",request,Map.of("denied",status==403)),headers,HttpStatus.valueOf(status));
+        return AdminUiResponses.failure(pages,request,status,"dashboard");
     }
     @GetMapping(value={"/admin","/admin/"},produces=MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<String> dashboard(HttpServletRequest request){
@@ -62,12 +52,12 @@ public class AdminUiController {
         return new ResponseEntity<>(pages.render("mv43/admin",request,model),headers(request),partial?HttpStatus.SERVICE_UNAVAILABLE:HttpStatus.OK);
     }
 
-    private static JsonNode field(JsonNode row,String canonical,String alias){
+    static JsonNode field(JsonNode row,String canonical,String alias){
         if(row.has(canonical)&&row.has(alias)&&!row.get(canonical).equals(row.get(alias)))
-            return com.fasterxml.jackson.databind.node.MissingNode.getInstance();
+            throw new AdminSourceClient.SourceFailure(503);
         return row.has(canonical)?row.get(canonical):row.path(alias);
     }
-    private static boolean validRows(String kind,JsonNode rows){
+    static boolean validRows(String kind,JsonNode rows){
         if(!rows.isArray())return false;
         for(JsonNode row:rows){
             if(!row.isObject())return false;

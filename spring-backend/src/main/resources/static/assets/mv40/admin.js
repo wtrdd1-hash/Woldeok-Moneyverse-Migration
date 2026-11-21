@@ -16,7 +16,8 @@
     $('admin-menu-close')?.setAttribute('aria-label',locale.tx('close'));
     const heading=document.querySelector('.admin-heading h1[data-i18n]');
     document.title=locale.tx(heading?.dataset.i18n||'dashboard')+' · Woldeok Moneyverse';
-    const language=$('admin-log-language');if(language)language.value=locale.current();
+    document.querySelectorAll('input[name="lang"]').forEach(input=>{input.value=locale.current();});
+    document.querySelectorAll('[data-i18n-aria]').forEach(el=>{if(el.dataset.i18nAria)el.setAttribute('aria-label',locale.tx(el.dataset.i18nAria));});
   }
   function menu(open){
     const drawer=$('admin-drawer'), backdrop=$('admin-backdrop'),toggle=$('admin-menu-open');
