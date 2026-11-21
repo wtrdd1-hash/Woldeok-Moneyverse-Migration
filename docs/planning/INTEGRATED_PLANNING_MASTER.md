@@ -1,5 +1,10 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.11.21.2234 — AgentMemory link retained for all future work handoffs (PLANNING; DOCS ONLY)
+
+[Source reel](https://www.instagram.com/reel/DfZgpiWtX1z/) and [upstream code](https://github.com/rohitg00/agentmemory) are permanently referenced by the [EN guidance](../development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md) / [KO](../development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md). Effective now: use current authoritative plans and versioned GitHub start/mid/end worklogs as safe shared history; no automatic third-party memory capture until isolated security, agent interoperability, retention and backup gates have passed. No service installed; no Test, Production, UI or DB change. Work started from remote main `a341ee3784bf611801efbcdef68e60ae38246dec`; check main again before integration.
+
+
 > **2026-11-21 13:22 KST current, scoped:** The delivery log now uses main7d58568e3041 and the Nov18 shared shell. Nine observed administrator read routes are unified; the prior eight remain e2fb and public5remain93a3. Delivery Test40cases/Production15cases, prior8before-and-after16layouts each and Test-stop independence passed. The other27administrator routes, whole site and mutations remain OPEN, including misleading API-health metrics and account/support/chat403. [Delivery acceptance](../releases/2026-11-21-nov18-admin-delivery-production.ko.md). Earlier eight-route records below are historical acceptance snapshots.
 
 

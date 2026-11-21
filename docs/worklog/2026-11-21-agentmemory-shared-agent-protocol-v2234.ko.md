@@ -1,0 +1,9 @@
+# v2026.11.21.2234 — AI 공동 기억 저장 참고자료: 작업 기록 (KO)
+
+- **시작 (2026-11-21 22:34 KST):** 소유자가 MIRLABS 인스타그램 릴스 `DfZgpiWtX1z`를 제시하고 계속 사용할 수 있게 저장하도록 지시. 변경 전에 `AGENTS.md`, `PROJECT_MEMORY.md`, `DOCS_INDEX.md`, 통합 기획 마스터와 미니PC Git 상태 확인.
+- **출처 확인:** Instagram HTTP 200 메타데이터에서 2026-11-06 게시된 `rohitg00/agentmemory` 소개와 본문 확인. 오픈소스 `main` README HTTPS 확인. 영상 본편 재생/발언은 별도 검증하지 못했으므로 출처는 영상 설명과 공식 README로 구분.
+- **보안/현재 상태:** 미니PC 점검 계정에 AgentMemory 실행 파일과 `~/.agentmemory` 저장소 미설치. 보안검토·격리 설치·검증 전 영구 메모리 서비스가 동작한다고 주장하지 않음. 이번 변경은 필수 기록·재조회 운영 규칙 및 향후 도입 게이트를 문서화하며 비밀, 회원/금융 원장과 개인정보를 외부 전송하지 않음.
+- **충돌 격리:** 기존 개발 체크아웃 `feat/v111-owasp-stripe-nist-security-hardening-20261121` 변경 없음. 새 워크트리 `/home/debian/mv-agentmemory-protocol-20261121`, 브랜치 `docs/agentmemory-shared-agent-protocol-v2026.11.21.2234`를 확인한 원격 main SHA `a341ee3784bf611801efbcdef68e60ae38246dec`에서 생성.
+- **체크리스트:** [x] 영상 설명·공식 원본 검증. [x] 통합 문서·에이전트 규칙 확인. [x] EN/KO 상세 참고자료. [x] 통합 마스터·진입 규칙 연결. [x] 신규 상대링크42개·보안·미설치 상태 검증. [x] main 재조회·충돌 확인(변동 없음). [x] 분리 브랜치 푸시·PR #3348 생성.
+- **중간 (2026-11-21 22:40 KST):** 영문·국문 AgentMemory 세부 규칙/출처 저장, AGENTS/GEMINI/프로젝트 메모리·정식 기획서/통합 마스터·문서 인덱스·변경로그에 양방향 참조 추가. 원격 main 중간 재조회 SHA `a341ee3784bf611801efbcdef68e60ae38246dec`(착수와 동일). 내부용 갱신기록 미니PC 로컬에 따로 작성. 전체 기존 파일 링크 검증 시 PROJECT_MEMORY에 있던 무관한 오래된 상대 링크 3건을 발견했으나 본 작업 변경으로 생긴 문제가 아님; 신규 변경분만 다시 검사 예정.
+- **종료 (2026-11-21 22:43 KST):** 문서 브랜치 푸시와 검토 [PR #3348](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3348) 개설. git diff --check 통과, 관련 문서/에이전트 지침 17파일만 변경, 신규 상대링크42개 유효, 영·한 원본 URL·미설치 명시 검증. 최초/중간/마지막 main SHA a341ee3784bf611801efbcdef68e60ae38246dec. 기존 PROJECT_MEMORY의 무관한 깨진 링크3개는 이번 변경 밖. 작성 시점 GitHub Actions CI는 대기 중, 병합·통과로 표현 금지. **문서만 변경; 코드 빌드, Test·운영 배포, DB, 회원 데이터, AgentMemory 설치/자동수집 없음.** 이후 검사·병합 상태는 PR 기준.
