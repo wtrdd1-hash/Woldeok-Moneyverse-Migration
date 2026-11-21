@@ -1,113 +1,50 @@
 package com.moneyverse.api.domain.shop.controller;
 
-import com.moneyverse.api.domain.identity.service.UserAuthService;
+import com.moneyverse.api.domain.admin.service.AdminAuthService;
+import com.moneyverse.api.domain.shop.service.AdminShopService;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import java.util.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.*;
-
+/** Reads use the canonical database boundary; unsupported commands never manufacture receipts. */
 @RestController
-@RequestMapping(path = {
-        "/api/v1/admin/shop",
-        "/api/admin/shop",
-        "/admin/shop"
-})
+@RequestMapping({"/api/v1/admin/shop","/api/admin/shop","/admin/shop"})
 public class AdminShopController {
-
-    private final UserAuthService userAuthService;
-
-    @Autowired
-    public AdminShopController(UserAuthService userAuthService) {
-        this.userAuthService = userAuthService;
+    private final AdminAuthService auth;
+    private final AdminShopService shop;
+    public AdminShopController(AdminAuthService auth,AdminShopService shop){this.auth=auth;this.shop=shop;}
+    private static ResponseEntity<?> error(int status,String code){
+        return ResponseEntity.status(status).header("Cache-Control","private, no-store").header("Vary","Cookie")
+            .body(Map.of("success",false,"code",code));
     }
-
-    private void verifyAdmin(HttpServletRequest request) {
-        Optional<UserAuthService.SessionInfo> sessionOpt = userAuthService.resolveSession(request);
-        if (sessionOpt.isEmpty() || !sessionOpt.get().isSignedIn()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
-        }
-        List<String> roles = sessionOpt.get().getRoles();
-        boolean hasAdmin = roles != null && roles.stream().anyMatch(r -> "SUPERADMIN".equalsIgnoreCase(r) || "ADMIN".equalsIgnoreCase(r));
-        if (!hasAdmin) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Forbidden: Admin access required");
-        }
-    }
-
     @GetMapping("/items")
-    public ResponseEntity<Map<String, Object>> listAdminItems(
-            HttpServletRequest request,
-            @RequestParam(name = "category", required = false) String category) {
-        verifyAdmin(request);
-        List<Map<String, Object>> items = List.of(
-                Map.of(
-                        "id", "item-gold-pass",
-                        "code", "PASS_GOLD_MONTHLY",
-                        "name", "월간 골드 멤버십 패스",
-                        "category", "PASS",
-                        "basePrice", "150000",
-                        "rarity", "EPIC",
-                        "isLimited", false,
-                        "currentStock", 99999
-                ),
-                Map.of(
-                        "id", "item-custom-title",
-                        "code", "TITLE_SPECIAL_TYCOON",
-                        "name", "한정 칭호: 전설의 대부호",
-                        "category", "TITLE",
-                        "basePrice", "500000",
-                        "rarity", "LEGENDARY",
-                        "isLimited", true,
-                        "currentStock", 42
-                )
-        );
-        return ResponseEntity.ok(Map.of("items", items, "total", items.size()));
+    public ResponseEntity<?> listAdminItems(HttpServletRequest request,@RequestParam(name="category",required=false) String category){
+        var actor=auth.resolveVerifiedAdminActor(request);
+        if(actor.isEmpty())return error(401,"SESSION_REQUIRED");
+        try{
+            var items=shop.list(actor.get(),category);
+            return ResponseEntity.ok().header("Cache-Control","private, no-store").header("Vary","Cookie")
+                .header("X-MV-Owner",actor.get().toString()).body(Map.of("items",items));
+        }catch(ResponseStatusException failure){return error(failure.getStatusCode().value(),failure.getReason());}
     }
-
+    private ResponseEntity<?> unavailableCommand(HttpServletRequest request,String code){
+        if(auth.resolveVerifiedAdminActor(request).isEmpty())return error(401,"SESSION_REQUIRED");
+        if(!auth.hasVerifiedSessionCsrf(request))return error(403,"CSRF_REQUIRED");
+        // Migration168 has no complete native step-up/idempotency/audit command contract.
+        return error(503,code);
+    }
     @PostMapping("/items")
-    public ResponseEntity<Map<String, Object>> createItem(
-            HttpServletRequest request,
-            @RequestBody(required = false) Map<String, Object> body) {
-        verifyAdmin(request);
-        if (body == null || !body.containsKey("name") || !body.containsKey("basePrice")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "name and basePrice are required");
-        }
-
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("id", "item-" + UUID.randomUUID());
-        res.put("name", body.get("name"));
-        res.put("basePrice", body.get("basePrice"));
-        res.put("createdAt", new Date().toInstant().toString());
-        return ResponseEntity.status(HttpStatus.CREATED).body(res);
+    public ResponseEntity<?> createItem(HttpServletRequest request,@RequestBody(required=false) Map<String,Object> body){
+        return unavailableCommand(request,"CANONICAL_SHOP_CREATE_UNAVAILABLE");
     }
-
     @PatchMapping("/items/{id}")
-    public ResponseEntity<Map<String, Object>> updateItem(
-            HttpServletRequest request,
-            @PathVariable("id") String id,
-            @RequestBody(required = false) Map<String, Object> body) {
-        verifyAdmin(request);
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("id", id);
-        res.put("updatedFields", body != null ? body.keySet() : Collections.emptySet());
-        res.put("updatedAt", new Date().toInstant().toString());
-        return ResponseEntity.ok(res);
+    public ResponseEntity<?> updateItem(HttpServletRequest request,@PathVariable("id") UUID id,@RequestBody(required=false) Map<String,Object> body){
+        return unavailableCommand(request,"ADMIN_SHOP_STEP_UP_UNAVAILABLE");
     }
-
     @DeleteMapping("/items/{id}")
-    public ResponseEntity<Map<String, Object>> deleteItem(
-            HttpServletRequest request,
-            @PathVariable("id") String id) {
-        verifyAdmin(request);
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("deletedId", id);
-        res.put("deletedAt", new Date().toInstant().toString());
-        return ResponseEntity.ok(res);
+    public ResponseEntity<?> deleteItem(HttpServletRequest request,@PathVariable("id") UUID id){
+        return unavailableCommand(request,"CANONICAL_SHOP_DELETE_UNAVAILABLE");
     }
 }

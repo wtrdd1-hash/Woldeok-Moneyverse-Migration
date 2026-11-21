@@ -8,10 +8,10 @@ import { fileURLToPath } from 'node:url';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../spring-backend/src/main/resources');
 test('native template asset versions match their actual content rather than a stale release label',()=>{
   let references=0;
-  for(const family of ['mv43','shared','mv28','mv29','mv30']) {
+  for(const family of ['mv43','shared','mv28','mv29','mv30','mv46']) {
     for(const entry of readdirSync(resolve(root,'templates',family)).filter(file=>file.endsWith('.html'))) {
       const html=readFileSync(resolve(root,'templates',family,entry),'utf8');
-      for(const match of html.matchAll(/(?:src|href)="(\/assets\/(?:mv39|mv40|mv43)\/[^"?]+)(?:\?v=([^"]+))?"/g)) {
+      for(const match of html.matchAll(/(?:src|href)="(\/assets\/(?:mv39|mv40|mv43|mv46)\/[^"?]+)(?:\?v=([^"]+))?"/g)) {
         const file=resolve(root,'static','.'+match[1]);
         const expected=createHash('sha256').update(readFileSync(file)).digest('hex');
         assert.equal(match[2],expected,family+'/'+entry+': '+match[1]);references++;

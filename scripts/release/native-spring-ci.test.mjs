@@ -26,3 +26,16 @@ test('native Spring UI has an isolated source-bound CI test and artifact gate', 
   assert.match(job,/sha256/);
   assert.doesNotMatch(job,/GH_TOKEN|secrets\.|sudo|systemctl|nginx|deployments: write|packages: write/);
 });
+
+test('canonical native administrator shop joins the existing disposable PostgreSQL gate without skipped proof',()=>{
+  const ci=readFileSync(new URL('../../.github/workflows/ci.yml',import.meta.url),'utf8');
+  const gradle=readFileSync(new URL('../../spring-backend/build.gradle.kts',import.meta.url),'utf8');
+  const gate=gradle.split('tasks.register<Test>("postgresMessagingTest")')[1]?.split('tasks.register<Test>("postgresShopTest")')[0];
+  assert.ok(gate,'Existing disposable PostgreSQL task must remain available');
+  assert.match(gradle,/excludeTags\([^\n]*"postgres-shop"/);
+  assert.match(gate,/includeTags\("postgres-messaging", "postgres-shop"\)/);
+  assert.match(gate,/AdminShopPostgresIntegrationTest\.xml/);
+  assert.match(gate,/shopTests >= 5/);
+  assert.match(gate,/shopFailures == 0 && shopErrors == 0 && shopSkipped == 0/);
+  assert.match(ci,/"postgresMessagingTest","--no-daemon"/);
+});
