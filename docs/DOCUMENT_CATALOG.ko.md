@@ -1,5 +1,9 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
+## v2026.11.21.1803.1 — Instagram Java 가상 스레드 참고자료 (DRAFT / 문서 전용)
+- [국문 자료 검토](findings/2026-11-21-instagram-java-virtual-threads-reference-v2026.11.21.1803.1.ko.md) / [영문](findings/2026-11-21-instagram-java-virtual-threads-reference-v2026.11.21.1803.1.md) · [작업기록](worklog/2026-11-21-instagram-virtual-threads-v2026.11.21.1803.1.ko.md) · [GitHub](updates/v2026.11.21.1803.1-github.ko.md) · [내부](updates/v2026.11.21.1803.1-internal.ko.md). Java 21+ 가상 스레드 자료를 등록. 현행 Spring Java 17 컴파일 소스, 영상·음성 미확인. 통합기획 채택 또는 앱/Test/Production 변경 아님.
+
+
 **DOC-2026.11.11.1500 — [최신 문서·권위·검증 현황](CURRENT_DOCUMENTATION_STATUS.ko.md) / [English](CURRENT_DOCUMENTATION_STATUS.md).** 아래 과거 기록은 현재 운영 기능 인증이 아님. 통합기획서와 실측 영수증을 우선하며, 기록 시점 테스트 버전 API는 HTTP 502였음. 문서만 변경.
 
 
