@@ -82,7 +82,13 @@ class CatalogReadPostgresIntegrationTest {
         assertEquals(200,get("/catalog-read-health",null).statusCode());
     }
     @Test void realMemberExpiredSessionAndForgedActorAreRefused() throws Exception {
-        for(String token:List.of(memberSession,expiredSession))assertEquals(401,get("/api/v1/admin/shop/items",token).statusCode());
+        for(var sample:Map.of("ordinary-member",memberSession,"expired-session",expiredSession).entrySet()) {
+            var response=get("/api/v1/admin/shop/items",sample.getValue());
+            String code;
+            try{var body=json.readTree(response.body());code=body==null?"empty":body.path("code").asText("absent");}
+            catch(Exception malformed){code="non-json";}
+            assertEquals(401,response.statusCode(),sample.getKey()+" refusal code="+code);
+        }
         assertEquals(401,get("/api/v1/admin/shop/items",null,"X-User-Id",actor.toString()).statusCode());
     }
     @Test void commandsCannotWriteAndReadsNeverUpdateExistingSessions() throws Exception {

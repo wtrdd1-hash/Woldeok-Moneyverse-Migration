@@ -52,6 +52,27 @@ class NativeShopIsolationTest {
         }
         assertFalse(app.containsBean("dataSource"));
     }
+    @Test void trustedServerBindingHasClosedDefaultsAndCannotBeChosenByTheRequest() throws Exception {
+        assertTrue(get("/admin/shop?catalogPath=https://example.com", "__Host-mv_session=qa-admin","en").body()
+            .contains("data-catalog-endpoint=\"/api/v1/admin/shop/items\""));
+        try(var preview=(ServletWebServerApplicationContext)new SpringApplicationBuilder(UnifiedFrontendApplication.class)
+            .properties("moneyverse.admin.source-origin=http://127.0.0.1:"+source.getAddress().getPort(),"spring.main.banner-mode=off")
+            .run("--server.port=0","--server.address=127.0.0.1","--moneyverse.admin.catalog-read-path=/_mv/nov18-rebuild-qa/catalog")) {
+            var request=HttpRequest.newBuilder(URI.create("http://127.0.0.1:"+preview.getWebServer().getPort()+"/admin/shop?catalogPath=/api/v1/admin/users"))
+                .header("Cookie","__Host-mv_session=qa-admin").GET().build();
+            var response=client.send(request,HttpResponse.BodyHandlers.ofString());assertEquals(200,response.statusCode());
+            assertTrue(response.body().contains("data-catalog-endpoint=\"/_mv/nov18-rebuild-qa/catalog\""));
+        }
+    }
+    @Test void foreignServerBindingIsRefusedAtStartup() {
+        var started=new java.util.concurrent.atomic.AtomicReference<ServletWebServerApplicationContext>();
+        try {
+            assertThrows(org.springframework.beans.factory.BeanCreationException.class,()->started.set(
+                (ServletWebServerApplicationContext)new SpringApplicationBuilder(UnifiedFrontendApplication.class)
+                    .properties("spring.main.banner-mode=off").run("--server.port=0","--server.address=127.0.0.1",
+                        "--moneyverse.admin.catalog-read-path=https://example.com/catalog")));
+        }finally{if(started.get()!=null)started.get().close();}
+    }
     @Test void anonymousAndMemberCannotReadAdministratorScreen() throws Exception {
         assertEquals(302,get("/admin/shop",null,"en").statusCode());
         assertEquals(403,get("/admin/shop","__Host-mv_session=qa-member","en").statusCode());

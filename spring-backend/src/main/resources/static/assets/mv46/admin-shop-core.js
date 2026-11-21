@@ -29,7 +29,8 @@
     for(const row of [proof,proof.user])for(const key of ['id','userId'])if(Object.hasOwn(row,key)&&row[key]!==id)fail('source_unverified');
     return id.toLowerCase();
   }
-  async function load(fetcher){
+  async function load(fetcher,catalogPath='/api/v1/admin/shop/items'){
+    if(!['/api/v1/admin/shop/items','/_mv/nov18-rebuild-qa/catalog'].includes(catalogPath))fail('source_unverified');
     const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),10000);
     try{
       async function read(path){
@@ -39,7 +40,7 @@
         return {body:await response.json(),owner:response.headers.get('X-MV-Owner')};
       }
       const owner=identity((await read('/api/v1/auth/me')).body);
-      const data=await read('/api/v1/admin/shop/items');
+      const data=await read(catalogPath);
       if(data.owner!==owner)fail('source_unverified');
       const items=parseCatalog(data.body);
       if(identity((await read('/api/v1/auth/me')).body)!==owner)fail('account_changed');

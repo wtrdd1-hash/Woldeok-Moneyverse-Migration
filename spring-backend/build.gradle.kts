@@ -75,6 +75,10 @@ tasks.register<Test>("postgresMessagingTest") {
     classpath = sourceSets["test"].runtimeClasspath
     // Keep the established CI entry point while certifying both canonical native services.
     useJUnitPlatform { includeTags("postgres-messaging", "postgres-shop") }
+    testLogging {
+        events("failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
     doLast {
         val xml = layout.buildDirectory.file("test-results/postgresMessagingTest/TEST-com.moneyverse.api.domain.shop.AdminShopPostgresIntegrationTest.xml").get().asFile.readText()
         fun count(name: String): Int = Regex(name + "=\\\"([0-9]+)\\\"").find(xml)?.groupValues?.get(1)?.toIntOrNull()

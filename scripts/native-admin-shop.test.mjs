@@ -15,3 +15,15 @@ test('API errors, missing owner proof and mid-read account switch cannot become 
 test('loading requires explicit successful JSON and refuses contradictory identity proof',async()=>{const api=core();await assert.rejects(api.load(async()=>reply(200,{signedIn:false,authenticated:true,user:{id:owner}})),/auth_required|source_unverified/);await assert.rejects(api.load(async()=>({...reply(200,session()),headers:{get:()=> 'text/html'}})),/unavailable/);});
 
 test('Vietnamese grouping preserves the exact large price without numeric conversion',()=>{assert.equal(core().formatPrice('9007199254740993','vi'),'9.007.199.254.740.993');});
+
+test('protected preview read uses only its fixed same-origin authority and still binds the actual owner',async()=>{
+ const api=core(),calls=[];const path='/_mv/nov18-rebuild-qa/catalog';
+ const result=await api.load(async(url)=>{calls.push(url);return reply(200,url==='/api/v1/auth/me'?session():{items:[item()]});},path);
+ assert.equal(result.owner,owner);assert.equal(calls.join(','),'/api/v1/auth/me,'+path+',/api/v1/auth/me');
+});
+test('unapproved catalog paths cannot send any session or catalog request',async()=>{
+ const api=core();let calls=0;
+ for(const path of ['https://example.com/catalog','//example.com/api/v1/admin/shop/items','/api/v1/admin/users','/_mv/nov18-rebuild-qa/catalog?actor=other',''])
+  await assert.rejects(api.load(async()=>{calls++;return reply(200,session());},path),/source_unverified/);
+ assert.equal(calls,0);
+});
