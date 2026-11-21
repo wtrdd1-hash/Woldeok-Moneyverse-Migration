@@ -1,0 +1,60 @@
+{
+  "note": "Read after AX-state synchronization; not network-idle or authenticated API value validation. Initial sample can be replaced by wallet/market hydration; only booleans retained.",
+  "rows": [
+    {
+      "gridDisplay": "block",
+      "heroDisplay": "block",
+      "heroPadding": "0px",
+      "lang": "ko",
+      "purchaseTradeRewardControls": 0,
+      "route": "/shop",
+      "sampleGraph": true,
+      "sampleRateStillShown": false,
+      "sampleWalletStillShown": false
+    },
+    {
+      "gridDisplay": "block",
+      "heroDisplay": "block",
+      "heroPadding": "0px",
+      "lang": "ko",
+      "purchaseTradeRewardControls": 0,
+      "route": "/stocks",
+      "sampleGraph": true,
+      "sampleRateStillShown": true,
+      "sampleWalletStillShown": true
+    },
+    {
+      "gridDisplay": "block",
+      "heroDisplay": "block",
+      "heroPadding": "0px",
+      "lang": "ko",
+      "purchaseTradeRewardControls": 0,
+      "route": "/quests",
+      "sampleGraph": true,
+      "sampleRateStillShown": true,
+      "sampleWalletStillShown": true
+    },
+    {
+      "gridDisplay": "block",
+      "heroDisplay": "block",
+      "heroPadding": "0px",
+      "lang": "ko",
+      "purchaseTradeRewardControls": 0,
+      "route": "/board",
+      "sampleGraph": true,
+      "sampleRateStillShown": true,
+      "sampleWalletStillShown": true
+    },
+    {
+      "gridDisplay": "block",
+      "heroDisplay": "block",
+      "heroPadding": "0px",
+      "lang": "ko",
+      "purchaseTradeRewardControls": 0,
+      "route": "/status",
+      "sampleGraph": true,
+      "sampleRateStillShown": true,
+      "sampleWalletStillShown": true
+    }
+  ]
+}

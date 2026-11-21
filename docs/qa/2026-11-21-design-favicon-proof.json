@@ -1,0 +1,19 @@
+[
+  {
+    "path": "/favicon.ico",
+    "status": 200,
+    "bytes": 11781,
+    "sha256": "9ce0a8f10cafff52d1d2f7aa451b3e9162944162f61258842e13aa8546f98e78"
+  },
+  {
+    "path": "/assets/mv39/favicon.ico",
+    "errorType": "HTTPError",
+    "status": 403
+  },
+  {
+    "path": "/assets/mv39/favicon.ico?v=9ce0a8f10cafff52d1d2f7aa451b3e9162944162f61258842e13aa8546f98e78",
+    "status": 200,
+    "bytes": 11781,
+    "sha256": "9ce0a8f10cafff52d1d2f7aa451b3e9162944162f61258842e13aa8546f98e78"
+  }
+]

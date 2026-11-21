@@ -1,5 +1,7 @@
 # 프론트엔드 기능 지원 행렬 — 조사 착수
 
+> **현재 전체 운영 재감사:** [2026-11-21 디자인·기능 보고서](2026-11-21-full-frontend-design-functionality-audit.ko.md)가 경로별 최신 관찰이다. 아래 표는 조사 착수 시점이며 현재 전체 정상 판정이 아니다.
+
 현재 신규 운영 공통 셸은 관리자 조회9개·공개5개이며 전체 기능 지원이 아니다. [정적 소스 참조 원장](2026-11-21-frontend-feature-coverage.json)은 Next page 후보 180개와 Spring HTML mapping 후보 79개를 수집했다. 동적 fixture·import·서버 action·API 문자열은 실제 동작 증거가 아니므로 기본 NOT_RUN/UNVERIFIED다. route 개수나 export/form 수를 지원 기능 수로 계산하지 않는다.
 
 | 영역 | 확인된 현재 지원 | 미완료/추가 확인 |
