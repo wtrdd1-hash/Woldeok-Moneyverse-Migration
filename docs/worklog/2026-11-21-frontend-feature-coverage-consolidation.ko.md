@@ -6,15 +6,15 @@
 현재 운영은 공개5경로93a3/관리자8경로e2fb/전달1경로7d로 나뉘고 이전4782/4808 자산 의존성이 남아 있다. 다수 old Test/preview도 실행되어 MemAvailable 약926MB. 현재 신규 관리자는 조회9개이며 모든 변경 기능 지원이 아니다. 비활성 native stocks/shop/board는 조회 시안이므로 매매·구매 대체로 전환하지 않는다. 사용자 wallet/support/chat 소스와 owner-safe 클라이언트는 있지만 실서비스 연결·API 계약 검증이 필요하다. 계정 설정은 축소된 프로필로 몰래 대체하지 않는다.
 
 ## 진행 중
-- [ ] 기능/실행/라우팅 기준선과 실제 지원 행렬
-- [ ] 미참조·DB-free로 확인된 old Test5개 우선 stop/부팅 해제 및 역전환 증거
-- [ ] 단일 frontend-presentation mode와 실제 소유자 사용자 화면 연결
-- [ ] 도구 계정 헤더·실제 관리자 원천 점검
-- [ ] 구버전 자산 bytes 보존, exact-main Test/운영·잔여 프로세스 정리
-- [ ] 코드/브라우저/보안 검증·GitHub 문서/병합/브랜치 정리
+- [x] 기능/실행/라우팅 기준선과 실제 지원 행렬
+- [x] 미참조·DB-free로 확인된 old Test5개 우선 stop/부팅 해제 및 역전환 증거
+- [x] 단일 frontend-presentation mode와 실제 소유자 사용자 화면 연결
+- [x] 도구 계정 헤더·실제 관리자 원천 점검
+- [x] 구버전 자산 bytes 보존, exact-main Test/운영·잔여 프로세스 정리
+- [x] 코드/브라우저/보안 검증·GitHub 문서/병합/브랜치 정리
 
 ## 종료 상태
-아직 착수/조사 단계이며 신규 코드·운영 전환·서비스 정리는 실행 전이다. 전체 기능 정상으로 판정하지 않는다. SQL/grant/원장/잔액/세션 보정·메시지 발송·전체 backend 승격은 이 frontend 단계에 포함하지 않는다.
+구현·한정 화면 운영 전환·중복 실행 정리를 완료했다. 전체 기능 정상으로 판정하지 않는다. 운영 정적147개 중 회원78오류/차단·관리자 오류1, 동적33미검증 및 메시지/송금/가입/복구/관리자 mutation gate는 OPEN이다. SQL/grant/원장/잔액/세션 보정·메시지 발송·전체 backend 승격은 수행하지 않았다. 문서 최종 통합 상태는 후속 evidence PR의 GitHub MERGED/mergeCommit을 따른다.
 
 ## 진행 체크포인트1
 - 미참조 DB-free old Test5개 중지·가능한 부팅 해제 완료. ports4780/4790/4806/4812/4816은 실제 nginx-T 참조 목록에 없고 각 unit의 mode·PID·listener·RequiredBy/TriggeredBy를 확인했다. 전체 include/bytes 및 공개/관리자/사용자/API guest HTTP14경로 전후 동일. release 파일은 삭제하지 않았다.
@@ -46,3 +46,10 @@
 - 검증된6개 source/JAR의 assets23경로를 root-owned 정적 archive로 추출, 역사 hash 호환·private admin 자산 권한·error no-store 보존. 초기 proposal은 map_hash 초기화 순서 오류로 nginx-t 거부되어 적용하지 않았고, 정렬상 첫00-global include로 고친 제안은 Test/운영 모두 nginx-t PASS. 기존 실서비스 include/bytes는 아직 변경 전이다.
 - 단일 frontend-presentation Test4820/운영4822 동일 JAR를 loopback-only·DB/worker/session 생성 없는 systemd unit으로 설치했다. 아직 운영 트래픽 전환 전이다. fixed GET gateway4821, protected preview/Test 적용 및 실제 로그인/5언어/PC모바일 수용이 남아 있다.
 - 원본 source branch는 PR3334에 통합되었으며 후속 문서 증거는 같은 task의 docs/frontend-feature-coverage-consolidation-evidence-20261121에서 유지한다. 다른 branch/worktree와 API·재무·worker runtime은 보존한다.
+
+## finished — 2026-11-21 15:55 KST
+- 같은 e45f57595415/JAR로 Test260조합·Test 중지 운영26조합, 실제 계산/검색/언어 draft/menu/패널 및 지갑 합계 확인. 생산 트래픽26 UI/안전 실패 상태를 새 frontend로 전환했다.
+- 운영 정적147개 전체를 다시 열어 현재 회원78/관리자1오류를 기록했다. 문의/쪽지 API JSON실데이터가 있어도 source contract 검증 실패는 비워진 목록이 아니라 전송 중지로 유지. 인증7개의 기존 hold 및 실제 credential 제출/메일 미검증을 명시했다.
+- DB-free native11개 stop/부팅 해제, obsolete loopback QA Nginx2개 pidfd 종료. source/JAR/config/MainPID/부팅 상태 재검증, 새 Test는 복구한 active/enabled 상태. API/DB/경제AI/worker/MCP 서비스 불변. 최종 stop 전후 HTTP/config 동일.
+- 자동 승인 초기 정리 거절은 범위/의존성 읽기 전용 증명 후 해결. --check prefix의 dash-mount 옵션 및 kernel virtual-file 처리 실패를 안전하게 수정했다. 실제 hidden QA 소비자2개를 먼저 정리한 뒤228activeunit/460record 검사 통과한6개만 적용했다. 정리명령은 기본 읽기 전용, 명시 --apply에서만 동작한다.
+- 계정403/잔여78/관리자 오류로그·나머지29관리자·동적33fixture·금융/실DB/실제메시지/변경기능은 해결완료로 올리지 않았다. 상세 현재결함/수용/rollback/판단비용은 docs/releases/2026-11-21-frontend-consolidation-production.ko.md에 기록했다. GitHub 문서 evidence branch에서 required policy/분류 검사와 정상 PR 통합을 마친 뒤 해당 branch만 ancestry 확인 후 정리한다.

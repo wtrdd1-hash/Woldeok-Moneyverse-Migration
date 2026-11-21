@@ -1,5 +1,7 @@
 # Release Guide
 
+> **2026-11-21 combined presentation receipt:** The accepted native public/admin read lane is now composed with owner-verified member HTML and the existing pure authentication screens in `frontend-presentation`, without DB/session/job authority. The current slice is26 canonical screens, not all functionality. [Exact-source Test/Production, compatibility archive, retirement and rollback evidence](releases/2026-11-21-frontend-consolidation-production.ko.md) records the actual release. Existing full-backend/financial gates and blocked mutations remain in force.
+
 **English canonical** | [한국어](RELEASING.ko.md)
 
 > Version: v2026.09.23.404

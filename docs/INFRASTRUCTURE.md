@@ -1,5 +1,7 @@
 # What this deployment actually is
 
+> **Native frontend scope — 2026-11-21:** Source `e45f57595415f132eedf36c13748564b93a1d918` now serves the explicit 26-screen presentation slice through one database-free `frontend-presentation` Production/Test pair (4822/4820), with a fixed cookie-only read gateway4821. Eleven superseded native renderers and two obsolete loopback QA Nginx masters were retired after dependency and continuity checks. Existing legacy HTML/API, financial and worker authorities remain separate; this is not a whole-stack upgrade. See [measured frontend release and remaining failures](releases/2026-11-21-frontend-consolidation-production.ko.md).
+
 > [!IMPORTANT]
 >
 > **Current runtime authority — 2026-09-23 / v2026.09.23.404**
