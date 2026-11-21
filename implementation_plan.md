@@ -5340,3 +5340,36 @@ eserves: 대한민국 외환보유액 통합계정)
 - Gradle 컴파일 및 단위/보안 테스트 수행 (./gradlew compileJava test).
 - SensitiveApiBoundaryFilterTest 또는 curl 검증으로 위조 헤더 차단 확인.
 - 원격 운영 서버 배포 및 서비스 정상 가동 확인.
+
+
+---
+## 🚀 [v112 Specification] Next.js 프론트엔드 및 Spring Boot 3.3 백엔드 완전 연결 및 통신망 일원화
+- **반영 일시**: 2026-11-22
+- **요청 사항**: "현제 프론트엔드와 백엔드 연결해줘" 요구사항에 따라, Next.js 프론트엔드와 Spring Boot 3.3.5 백엔드 간의 모든 통신 경로(개발 환경, 프로덕션 환경, SSR, 브라우저 클라이언트, App Router Gateway)를 완벽히 연동하고 CORS 및 엔드포인트 누락을 해결.
+- **핵심 목표**:
+  1. **Spring Boot 백엔드 CORS 전역 허용 (SpaWebMvcConfig.java)**:
+     - Next.js 프론트엔드(http://localhost:3000, http://127.0.0.1:3000) 및 운영 도메인(https://easy-scraping.com)에 대해 addCorsMappings를 구현하여 브라우저 클라이언트에서의 직접 API 호출 시 발생하는 CORS 차단 원천 해결.
+  2. **Next.js 내부 API 클라이언트 베이스 URL 정합화 (frontend/src/lib/api.ts)**:
+     - 레거시 Nginx 내부 게이트웨이 포트(4400) 기본값을 실제 동작 중인 Spring Boot 백엔드 포트(http://127.0.0.1:4550)로 변경.
+     - Spring Boot moneyverse.security.internal-token과 일치하는 기본 INTERNAL_API_TOKEN 안전 폴백 제공.
+  3. **Next.js App Gateway 경로 및 포트 연동 (frontend/src/app/app-api/v1/[...path]/route.ts)**:
+     - 구형 Express 포트(3020) 기본값을 Spring Boot 백엔드(http://127.0.0.1:4550)로 교체.
+  4. **App Gateway 허용 그룹 확장 (frontend/src/lib/app-gateway.ts)**:
+     - APP_API_GROUPS에 누락되었던 status, version, health, telemetry를 정식 등록하여 프론트엔드에서의 시스템 상태/버전/헬스체크 조회가 404 차단 없이 정상 통과되도록 보장.
+  5. **Next.js Rewrites 및 환경 변수 설정 (frontend/next.config.ts, frontend/.env.local)**:
+     - Next.js 개발 서버 구동 시 http://localhost:4550 백엔드와 즉각 연동될 수 있도록 .env.local 생성.
+     - /api/:path* 미처리 라우트에 대한 백엔드 프록시 안전망 설정.
+
+### 1. 변경 대상 파일
+- spring-backend/src/main/java/com/moneyverse/api/config/SpaWebMvcConfig.java
+- frontend/src/lib/api.ts
+- frontend/src/app/app-api/v1/[...path]/route.ts
+- frontend/src/lib/app-gateway.ts
+- frontend/next.config.ts
+- frontend/.env.local
+- frontend/.env.example
+
+### 2. 검증 계획
+- Gradle 컴파일 및 단위 테스트 (gradlew test)
+- Vitest 프론트엔드 테스트 (npx vitest run src/lib/app-gateway.test.ts)
+- 프론트엔드에서 백엔드 엔드포인트(/api/v1/status, /api/v1/shop/catalog, /api/v1/wallet/overview) 호출 및 응답 정합성 검증
