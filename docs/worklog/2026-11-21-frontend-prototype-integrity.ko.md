@@ -32,3 +32,6 @@ main8ba의 CI44890241945 네 job SUCCESS, source-bound JAR7ba6312b.../HTML10=Git
 첫preview403은 owned inverse로 복구 후 generation 준비조건을 보완해 통과했다. 독립 ops5PASS 이후 readiness1을 더해 최종6PASS. 언어 메뉴 초기화 전 자동화2회 실패는 조회 완료 뒤 재검사했고 초기 즉시 클릭은 미수용으로 별도 기록했다. 문서 worktree가 다시 외부에서 사라져 원격15b checkpoint에서 off-repo /home/debian/mv-prototype-integrity-docs-20261121로 복구했다. shared main의 implementation_plan.md 수정은 건드리지 않았다.
 
 [실제 수용·실패·롤백·미해결 상세](../releases/2026-11-21-prototype-integrity-production.ko.md). 전체 기능 완료가 아니며 FE-AUDIT-01 및 다른 관리자/언어/위젯/접근성/동적/금융 게이트는 OPEN이다. FE-AUDIT-02/03/04는 이번5개 canonical 화면의 검증된 범위만 수정됐으며 다른 기존 화면까지 해결됐다고 하지 않는다. source PR3338과 별도 docs 최종 PR의 main 통합 여부를 확인하고 이 task의 포함된 branch만 정리한다.
+
+## 최종 문서 통합 중 main 전진
+문서 PR3340 생성 시 다른 작업 PR3339(v109 mobile/unread-count/icon)가 main37053df900b86d6f7ff5e0f3275cd1454dae715b로 먼저 통합된 것을 확인했다. runtime/icon 등14경로의 변경을 덮어쓰지 않고 origin/main을 문서 branch에 충돌 없이 merge했다. 이번 운영 수용은 당시 current-main으로 검증·적용한8ba source의 canonical5개 범위이며, v109의 새 runtime/icon 변경을 이85개 관찰이나605검사의 수용으로 합산하지 않는다. 최종 docs diff는 새 main37053df 대비 DOCS_ONLY로 다시 확인한다. 운영 artifact나 source 표기를 문서 main commit으로 바꾸지 않는다.

@@ -57,3 +57,7 @@ PR CI44889225161의 classify/policy/spring-web-check/runtime-check 네 job은 SU
 root stage `/var/lib/moneyverse-frontend-integrity-20261121/tasks/8ba9139b2fcd`의 source artifact, manifest, before/after3config, preview/production receipts, 첫 rollback, browser acceptance, public proof를 보존한다. source별 root 소유 정적 bundle도 보존한다. 프로세스 추가·중지나 기존 artifact 삭제는 없다.
 
 역변경 전에 전체 현행 inventory·known hash·디렉터리 항목과 task 소유 대상의 installed hash를 재확인하고 정확한 before bytes만 복원한다. 타 작업이나 후속 변경이 있으면 덮어쓰지 않는다. nginx syntax 확인 후 graceful reload와 현재 경계/5경로 상태 검사를 반복한다. 과거 전체 설정을 통째로 복원하거나 DB·잔액을 롤백하는 절차가 아니다.
+
+
+## 동시 작업의 후속 main
+운영 수용 이후 문서 통합 단계에서 PR3339의 v109 mobile/unread-count/icon 변경이 main37053df로 전진했다. 문서 branch는 이를 보존해 충돌 없이 통합했다. 본 기록의 runtime source8ba·CI44890241945·canonical5 수용은 그대로이며, v109 변경의 배포·기능·로고 수용을 대신하지 않는다.
