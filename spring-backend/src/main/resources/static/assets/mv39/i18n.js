@@ -11,6 +11,16 @@
   ];
   // Keep every supported language in this table. A missing key must fall back to English, not a mock.
   const dictionary = {
+    "adminProbeTitle":["Read-source checks", "조회 원천 점검", "取得元の確認", "查询来源检查", "Kiểm tra nguồn truy vấn"],
+    "adminProbeScope":["This snapshot checks the listed reads only. It does not certify all features, database, host, backups or message delivery.", "아래 조회 원천만 현재 요청에서 확인합니다. 전체 기능·DB·호스트·백업·메시지 전달의 정상 판정이 아닙니다.", "この時点の一覧にある取得元のみ確認します。全機能・DB・ホスト・バックアップ・メッセージ配信の正常性は保証しません。", "此快照仅检查下列查询来源，不代表全部功能、数据库、主机、备份或消息送达均正常。", "Ảnh chụp này chỉ kiểm tra các truy vấn được liệt kê, không chứng nhận mọi tính năng, cơ sở dữ liệu, máy chủ, bản sao lưu hay việc gửi tin nhắn."],
+    "adminProbeObserved":["Observed checks", "실제 관찰 결과", "実際の確認結果", "实际观察结果", "Kết quả quan sát thực tế"],
+    "adminProbeAt":["Checked at (UTC)", "관찰 시각 (UTC)", "確認日時 (UTC)", "检查时间 (UTC)", "Thời điểm kiểm tra (UTC)"],
+    "adminProbeNoRate":["No historical success rate is measured. Record counts cover only this response.", "기간별 성공률은 측정하지 않습니다. 행 수는 이번 응답에 한정됩니다.", "期間全体の成功率は測定していません。件数は今回の応答のみです。", "未测量历史成功率，记录数仅限本次响应。", "Không đo tỷ lệ thành công trong quá khứ. Số bản ghi chỉ thuộc phản hồi này."],
+    "adminProbePartial":["Some read sources could not be verified.", "일부 조회 원천을 확인하지 못했습니다.", "一部の取得元を確認できませんでした。", "部分查询来源无法验证。", "Không thể xác minh một số nguồn truy vấn."],
+    "adminProbePath":["Read source", "조회 원천", "取得元", "查询来源", "Nguồn truy vấn"],
+    "adminProbeElapsed":["Elapsed (ms)", "소요 시간 (ms)", "所要時間 (ms)", "耗时 (ms)", "Thời gian (ms)"],
+    "adminProbeRead":["Read verified", "조회 확인", "取得を確認", "已确认查询", "Đã xác minh truy vấn"],
+    "adminProbeUnknown":["Unable to verify", "검증 불가", "確認不可", "无法验证", "Không thể xác minh"],
     "adminDeliveryScope":["Latest 30 source records only; not all-time delivery rates or confirmation of Discord receipt.", "원천의 최근 최대 30건만 표시합니다. 전체 전달률이나 실제 Discord 수신 확인이 아닙니다.", "直近最大30件の記録です。全期間の配信率やDiscordでの受信確認ではありません。", "仅显示来源中最近最多30条记录，不代表全部送达率或Discord实际接收确认。", "Chỉ hiển thị tối đa 30 bản ghi gần nhất; không phải tỷ lệ gửi toàn kỳ hay xác nhận nhận trên Discord."],
     "adminDeliverySample":["Recent sample", "최근 조회 표본", "直近の取得記録", "最近查询样本", "Mẫu bản ghi gần đây"],
     "adminDeliveryRecent":["Recent records", "최근 기록", "直近の記録", "最近记录", "Bản ghi gần đây"],

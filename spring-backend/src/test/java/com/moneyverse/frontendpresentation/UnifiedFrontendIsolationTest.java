@@ -137,4 +137,33 @@ class UnifiedFrontendIsolationTest {
         for(String path:List.of("/w%61llet","/s%75pport","/ch%61t"))assertEquals(200,get(path,COOKIE).statusCode(),path);
     }
 
+
+    @Test void existingNativeAuthenticationScreensCanShareTheRendererWithoutIssuingSessions() throws Exception {
+        for(String path:List.of("/login","/login/providers","/register","/forgot-password","/reset-password","/verify-email","/verify-email-change","/account-deletion")){
+            var response=get(path,null);assertEquals(200,response.statusCode(),path);assertTrue(response.body().contains("/assets/mv43/auth.js?v="));
+            assertTrue(response.headers().allValues("Set-Cookie").isEmpty());assertTrue(response.headers().firstValue("X-Robots-Tag").orElse("").contains("noindex"));
+        }
+        assertTrue(sourcePaths.isEmpty(),"Rendering the existing auth forms must not call an identity or mutation endpoint");
+    }
+    @Test void administratorDiagnosticsMeasureActualValidatedReadsInsteadOfInventedHealthMetrics() throws Exception {
+        var response=get("/admin/api-health",COOKIE);assertEquals(200,response.statusCode());
+        assertTrue(response.body().contains("class=\"admin-sidebar\""));
+        for(String key:List.of("users","stocks","controls","catalog"))assertTrue(response.body().contains("data-probe-key=\""+key+"\" data-probe-state=\"read\""),key);
+        assertEquals(List.of("/api/v1/admin/me","/api/v1/admin/users","/api/v1/admin/stocks","/api/v1/admin/controls","/api/v1/business/catalog"),sourcePaths);
+        assertFalse(response.body().contains("OPERATIONAL"));assertFalse(response.body().contains("globalSuccessRate"));assertFalse(response.body().contains("ROUTE_METRICS"));
+        assertTrue(response.body().contains("data-i18n=\"adminProbeScope\""));assertTrue(response.body().contains("data-probe-duration="));
+    }
+    @Test void malformedProbeEvidenceIsUnavailableNotAHealthyZeroOrGlobalFailureClaim() throws Exception {
+        bodies.put("/api/v1/admin/stocks","{\"stocks\":\"wrong-shape\",\"secretFixture\":\"not-rendered\"}");
+        var response=get("/admin/api-health",COOKIE);assertEquals(200,response.statusCode());
+        assertTrue(response.body().contains("data-probe-key=\"stocks\" data-probe-state=\"unavailable\""));
+        assertTrue(response.body().contains("data-probe-key=\"users\" data-probe-state=\"read\""));
+        assertFalse(response.body().contains("not-rendered"));assertTrue(response.body().contains("data-i18n=\"adminProbePartial\""));
+    }
+    @Test void diagnosticReadsStayPrivateAndKeepTheRequiredAdministratorBoundary() throws Exception {
+        assertEquals(302,get("/admin/api-health",null).statusCode());assertTrue(sourcePaths.isEmpty());
+        bodies.put("/api/v1/admin/me","{\"roles\":[\"member\"]}");assertEquals(403,get("/admin/api-health",COOKIE).statusCode());
+        assertEquals(List.of("/api/v1/admin/me"),sourcePaths);
+    }
+
 }

@@ -8,7 +8,7 @@
   ],
   "summary": {
     "nextPageCandidates": 180,
-    "nativeHtmlMappingCandidates": 79,
+    "nativeHtmlMappingCandidates": 92,
     "lexicalForms": 206,
     "lexicalHandlers": 1146
   },
@@ -5195,6 +5195,12 @@
       "productionAcceptance": "UNVERIFIED"
     },
     {
+      "route": "/admin/api-health",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/adminpresentation/AdminProbePageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
       "route": "/admin/controls",
       "sourceFile": "spring-backend/src/main/java/com/moneyverse/adminpresentation/AdminReadPageController.java",
       "requiresFixture": false,
@@ -5303,8 +5309,20 @@
       "productionAcceptance": "UNVERIFIED"
     },
     {
+      "route": "/chat",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/frontendpresentation/MemberPresentationPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
       "route": "/chat.html",
       "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeMessagingPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/chat.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/frontendpresentation/MemberPresentationPageController.java",
       "requiresFixture": false,
       "productionAcceptance": "UNVERIFIED"
     },
@@ -5315,8 +5333,20 @@
       "productionAcceptance": "UNVERIFIED"
     },
     {
+      "route": "/chat/",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/frontendpresentation/MemberPresentationPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
       "route": "/chat/index.html",
       "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeMessagingPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/chat/index.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/frontendpresentation/MemberPresentationPageController.java",
       "requiresFixture": false,
       "productionAcceptance": "UNVERIFIED"
     },
@@ -5477,8 +5507,20 @@
       "productionAcceptance": "UNVERIFIED"
     },
     {
+      "route": "/support",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/frontendpresentation/MemberPresentationPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
       "route": "/support.html",
       "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeMessagingPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/support.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/frontendpresentation/MemberPresentationPageController.java",
       "requiresFixture": false,
       "productionAcceptance": "UNVERIFIED"
     },
@@ -5489,8 +5531,20 @@
       "productionAcceptance": "UNVERIFIED"
     },
     {
+      "route": "/support/",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/frontendpresentation/MemberPresentationPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
       "route": "/support/index.html",
       "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeMessagingPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/support/index.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/frontendpresentation/MemberPresentationPageController.java",
       "requiresFixture": false,
       "productionAcceptance": "UNVERIFIED"
     },
@@ -5567,8 +5621,20 @@
       "productionAcceptance": "UNVERIFIED"
     },
     {
+      "route": "/wallet",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/frontendpresentation/MemberPresentationPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
       "route": "/wallet.html",
       "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeWalletController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/wallet.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/frontendpresentation/MemberPresentationPageController.java",
       "requiresFixture": false,
       "productionAcceptance": "UNVERIFIED"
     },
@@ -5579,8 +5645,20 @@
       "productionAcceptance": "UNVERIFIED"
     },
     {
+      "route": "/wallet/",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/frontendpresentation/MemberPresentationPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
       "route": "/wallet/index.html",
       "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeWalletController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/wallet/index.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/frontendpresentation/MemberPresentationPageController.java",
       "requiresFixture": false,
       "productionAcceptance": "UNVERIFIED"
     }
