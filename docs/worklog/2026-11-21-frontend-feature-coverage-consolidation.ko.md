@@ -34,3 +34,7 @@
 - 도구 화면 계정 헤더는 실제 session proof를 사용하며 실패를 비회원으로 바꾸지 않는다. 언어 전환 시 계산 입력을 유지하고 오래된 계정 응답을 폐기한다. 로그아웃은 현재 소유자와 새 CSRF를 재확인한 뒤 실제 세션 해제까지 확인한다. 운영 로그인 계정에 로그아웃 실험은 하지 않는다.
 - 새 관제/인증4개와 도구 헤더7개 RED→GREEN. 전체 native Node93개 실패0·skip0, Spring 전체 test/bootJar BUILD SUCCESSFUL. XML 집계는 다음 체크포인트/PR에 기록한다. Spring H2 fixture에서 기존 스케줄러 missing-table 경고가 있었으며 신규 frontend mode에서는 해당 bean 부재를 테스트한다. 실DB 검사는 이 local suite가 아니다.
 - current main c5c3c9d7 재fetch 확인. 실제 관리자 메뉴36경로 현황을 브라우저에서 수집 중이며 상태/입력/버튼 수를 기능 실행 성공으로 간주하지 않는다. 아직 신규 운영 전환 전이다.
+
+## 리뷰 수정 체크포인트
+- 독립 소스 리뷰 Important1건: 정상 로그인 신원은 있어도 CSRF proof가 비어 있을 수 있다. 계정 표시까지 실패로 버리던 것을 수정해 이름/계정 링크는 유지하고 로그아웃만 비활성화한다. 초기/fresh 조회2개 회귀 RED→GREEN, native 전체95/95. 전체 Spring605/605·skip0 이전 실행 증거는 유지하며 최종 리소스 변경 뒤 재검증 중이다. 첫 foreground 재실행은 원격 명령60초 제한으로 완료 증거가 없어 통과로 세지 않고 백그라운드 재실행했다.
+- 소스 리뷰 제외 항목은 별도 수용: 운영/worker/Nginx/rollback과 자산 bytes는 Task4 독립 운영 리뷰로, 브라우저/5언어/반응형/owner flow는 실제 Test로 확인한다. 실DB/실제 금융·메시지 변경은 이 조회/표시 전환 승인으로 정상 판정하지 않는다. 전체 기능 inventory는 참조 목록이며 실행 인증이 아니다.

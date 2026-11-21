@@ -55,3 +55,14 @@ test('logout uses fresh CSRF proof and requires a verified signed-out session',a
 test('a success receipt without session revocation never becomes a guest header',async()=>{
   const h=harness(async(url,options)=>response(options.method==='POST'?{ok:true,success:true}:member()));await settle();h.find('logout').click();await settle();assert.equal(h.find('login'),undefined);assert.ok(h.find('retry'));
 });
+test('proven members retain their identity while missing CSRF disables logout',async()=>{
+ for(const csrf of ['',null,'bad token']){
+  const calls=[],h=harness(async(url,options)=>{calls.push({url,options});return response(member(idA,'Alice',csrf));});await settle();
+  assert.equal(h.find('profile')?.textContent,'Alice');assert.equal(h.find('logout')?.disabled,true);assert.equal(h.find('login'),undefined);
+  h.find('logout').click();await settle();assert.equal(calls.filter(x=>x.options.method==='POST').length,0);
+ }
+});
+test('a fresh identity without CSRF stops logout without hiding its owner',async()=>{
+ let reads=0;const calls=[],h=harness(async(url,options)=>{calls.push({url,options});return response(member(idA,'Alice',++reads===1?'fixture-proof':''));});await settle();h.find('logout').click();await settle();
+ assert.equal(calls.filter(x=>x.options.method==='POST').length,0);assert.equal(h.find('profile')?.textContent,'Alice');assert.equal(h.find('logout')?.disabled,true);
+});
