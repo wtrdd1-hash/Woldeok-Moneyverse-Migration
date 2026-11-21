@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Living Project Plan
 
+> **2026-11-21 13:22 KST current, scoped:** The delivery log now uses main7d58568e3041 and the Nov18 shared shell. Nine observed administrator read routes are unified; the prior eight remain e2fb and public5remain93a3. Delivery Test40cases/Production15cases, prior8before-and-after16layouts each and Test-stop independence passed. The other27administrator routes, whole site and mutations remain OPEN, including misleading API-health metrics and account/support/chat403. [Delivery acceptance](../releases/2026-11-21-nov18-admin-delivery-production.ko.md). Earlier eight-route records below are historical acceptance snapshots.
+
+
 > **Observed frontend checkpoint, 2026-11-21 12:02 KST — partial:** Public five-route presentation remains93a3; eight administrator read screens now use the common Nov18 desktop/responsive shell at exact sourcee2fb487a1a78. Authenticated Test320locale/layout cases plus40CSS reflows and Production24layouts passed. Whole-site and other administrator actions remain OPEN. Stable home login hydration was rechecked successfully; account/support/chat403, other header coverage, error-log load failures and financial/provenance gates remain separate findings. [Current acceptance](../releases/2026-11-21-nov18-admin-unified-production.ko.md) and [route ledger](../qa/2026-11-21-nov18-frontend-route-ledger.ko.md) supersede historical frontend status below.
 
 ## v2026.11.20.1 — OWNER APPROVED: November 18 UI/UX visual authority, five-language choice, global admin support/chat (PLANNING ONLY)
