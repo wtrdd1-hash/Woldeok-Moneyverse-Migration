@@ -22,7 +22,7 @@
 - Probe diagnostics must reflect actual read attempts, not fake global/DB/host/backup health.
 
 ## Task1: Coverage baseline and safe early cleanup
-Files: docs/worklog/2026-11-21-frontend-feature-coverage-consolidation.ko.md; docs/qa/2026-11-21-frontend-feature-coverage.json and .ko.md; source inventory helper scripts/qa/frontend-feature-coverage.mjs with its .test.mjs. Operational receipts outside git.
+Files: docs/worklog/2026-11-21-frontend-feature-coverage-consolidation.ko.md; docs/qa/2026-11-21-frontend-feature-coverage.json and .ko.md; source inventory helper scripts/qa/frontend-feature-coverage.mjs and scripts/native-feature-coverage.test.mjs (included by the existing native CI glob). Operational receipts outside git.
 - [ ] Capture current main/runtime/unit/route dependency snapshots; preserve credentials/PII.
 - [ ] Retire five specifically proven unreferenced database-free Test renderers with PID/config/mode/dependent checks, prior-state rollback and before/after HTTP baselines. Record memory and exact retained dependencies.
 - [ ] RED→inventory helper that distinguishes routes/actions/API expressions without claiming execution; generate actual source coverage and actual browser metadata for administrator/member routes.
