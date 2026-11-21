@@ -1,0 +1,5588 @@
+{
+  "schemaVersion": 1,
+  "method": "source reference inventory, not runtime or feature acceptance",
+  "warnings": [
+    "Imports, runtime expressions, generated routes, server actions and authorization require separate tracing.",
+    "A source export, form or API string does not prove that an enabled browser action succeeds.",
+    "Native mappings are source candidates; release routing and authenticated acceptance remain independent."
+  ],
+  "summary": {
+    "nextPageCandidates": 180,
+    "nativeHtmlMappingCandidates": 79,
+    "lexicalForms": 206,
+    "lexicalHandlers": 1146
+  },
+  "pages": [
+    {
+      "route": "/",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/actions.ts",
+        "frontend/src/app/error.tsx",
+        "frontend/src/app/global-error.tsx",
+        "frontend/src/app/layout.tsx",
+        "frontend/src/app/not-found.tsx",
+        "frontend/src/app/opengraph-image.tsx",
+        "frontend/src/app/page.tsx",
+        "frontend/src/app/robots.ts",
+        "frontend/src/app/sitemap.ts"
+      ],
+      "apiReferences": [
+        "/api/v1/auth/logout",
+        "/api/v1/auth/session",
+        "/api/v1/stocks",
+        "/api/v1/telemetry/client-error"
+      ],
+      "exports": [
+        "STOCK_SYMBOLS",
+        "alt",
+        "contentType",
+        "generateMetadata",
+        "logout",
+        "revalidate",
+        "size",
+        "viewport"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 6,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/[locale]/blog",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/[locale]/blog/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "dynamic",
+        "generateMetadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/[locale]/blog/[slug]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/[locale]/blog/[slug]/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "dynamic",
+        "generateMetadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/[locale]/guide/glossary",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/[locale]/guide/glossary/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata",
+        "generateStaticParams",
+        "revalidate"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/[locale]/guide/glossary/[term]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/[locale]/guide/glossary/[term]/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata",
+        "generateStaticParams",
+        "revalidate"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/[locale]/tools/compound-interest-calculator",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/[locale]/tools/compound-interest-calculator/compound-calculator-client.tsx",
+        "frontend/src/app/[locale]/tools/compound-interest-calculator/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "CompoundCalculatorClient",
+        "generateMetadata",
+        "generateStaticParams",
+        "revalidate"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 8,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/[locale]/tools/compound-interest-calculator/[preset]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/[locale]/tools/compound-interest-calculator/[preset]/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata",
+        "generateStaticParams",
+        "revalidate"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/account",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/account/account-forms.tsx",
+        "frontend/src/app/account/account-verification-notices.ts",
+        "frontend/src/app/account/actions.ts",
+        "frontend/src/app/account/identity-provider.ts",
+        "frontend/src/app/account/loading.tsx",
+        "frontend/src/app/account/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/account",
+        "/api/v1/account/identities",
+        "/api/v1/account/identities/${identityId}",
+        "/api/v1/account/identities/${provider}/link",
+        "/api/v1/account/security/sessions",
+        "/api/v1/auth/${provider}/reauthentication",
+        "/api/v1/auth/logout",
+        "/api/v1/auth/providers",
+        "/api/v1/auth/session",
+        "/api/v1/privacy/requests",
+        "/api/v1/profile"
+      ],
+      "exports": [
+        "DeleteAccountForm",
+        "LinkButton",
+        "PrivacyRequestForm",
+        "ReauthButton",
+        "UnlinkButton",
+        "accountLinkedNotice",
+        "accountReauthNotice",
+        "canUnlinkOAuthIdentity",
+        "createPrivacyRequest",
+        "deleteAccount",
+        "dynamic",
+        "isLinkableOAuthProvider",
+        "metadata",
+        "startLink",
+        "startReauthentication",
+        "unlinkIdentity"
+      ],
+      "lexicalFormCount": 5,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/account-deletion",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/account-deletion/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/account/notifications",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/account/notifications/actions.ts",
+        "frontend/src/app/account/notifications/notification-search-client.ts",
+        "frontend/src/app/account/notifications/notification-search-panel.tsx",
+        "frontend/src/app/account/notifications/notification-tabs-bar.tsx",
+        "frontend/src/app/account/notifications/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/notifications",
+        "/api/notifications/search",
+        "/api/notifications?",
+        "/api/v1/engagement",
+        "/api/v1/engagement/preferences"
+      ],
+      "exports": [
+        "NotificationSearchPanel",
+        "NotificationTabsBar",
+        "dynamic",
+        "metadata",
+        "parseNotificationSearch",
+        "saveGoalNotifications"
+      ],
+      "lexicalFormCount": 2,
+      "lexicalHandlerCount": 15,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/account/privacy",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/account/privacy/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/privacy/requests",
+        "/api/v1/privacy/requests?type=${selectedType}"
+      ],
+      "exports": [
+        "dynamic",
+        "fetchCache",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/account/security",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/account/security/account-security-evidence.ts",
+        "frontend/src/app/account/security/actions.ts",
+        "frontend/src/app/account/security/credential-receipts.ts",
+        "frontend/src/app/account/security/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/account/identities",
+        "/api/v1/account/security/events",
+        "/api/v1/account/security/events?",
+        "/api/v1/account/security/sessions",
+        "/api/v1/account/security/sessions/${encodeURIComponent(sessionId)}",
+        "/api/v1/account/security/sessions/revoke-others",
+        "/api/v1/auth/${provider}/reauthentication",
+        "/api/v1/auth/local/email-change/request",
+        "/api/v1/auth/local/password/change",
+        "/api/v1/auth/local/reauthentication",
+        "/api/v1/auth/logout",
+        "/api/v1/auth/session"
+      ],
+      "exports": [
+        "beginSecurityReauthentication",
+        "changeLocalPassword",
+        "dynamic",
+        "isVerifiedCredentialReceipt",
+        "metadata",
+        "parseLinkedIdentities",
+        "parseSecurityEvents",
+        "parseSecuritySessions",
+        "reauthenticateWithLocalPassword",
+        "requestLocalEmailChange",
+        "terminateAllSessions",
+        "terminateOtherSessions",
+        "terminateSession"
+      ],
+      "lexicalFormCount": 7,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/action-feedback.tsx",
+        "frontend/src/app/admin/actions.ts",
+        "frontend/src/app/admin/admin-back.tsx",
+        "frontend/src/app/admin/admin-cockpit-evidence.ts",
+        "frontend/src/app/admin/admin-forms.tsx",
+        "frontend/src/app/admin/admin-quick-search.tsx",
+        "frontend/src/app/admin/areas.ts",
+        "frontend/src/app/admin/console-gate.tsx",
+        "frontend/src/app/admin/console-session-receipt.ts",
+        "frontend/src/app/admin/layout.tsx",
+        "frontend/src/app/admin/loading.tsx",
+        "frontend/src/app/admin/page.tsx",
+        "frontend/src/app/admin/security-abuse-forms.tsx",
+        "frontend/src/app/admin/security-actions.ts",
+        "frontend/src/app/admin/step-up-field.tsx",
+        "frontend/src/app/admin/step-up.ts",
+        "frontend/src/app/admin/types.ts"
+      ],
+      "apiReferences": [
+        "/api/admin/auth/channel-otp/request",
+        "/api/v1/admin/business-types",
+        "/api/v1/admin/business-types/${encodeURIComponent(businessId)}",
+        "/api/v1/admin/controls",
+        "/api/v1/admin/economy/bulk-payouts",
+        "/api/v1/admin/economy/reconciliations/latest",
+        "/api/v1/admin/economy/transactions/${encodeURIComponent(transactionId)}/reversal",
+        "/api/v1/admin/messages/send",
+        "/api/v1/admin/season-events",
+        "/api/v1/admin/season-events/${encodeURIComponent(eventId)}",
+        "/api/v1/admin/security/forced-logouts",
+        "/api/v1/admin/security/ip-blocks",
+        "/api/v1/admin/security/ip-blocks/${encodeURIComponent(blockId)}",
+        "/api/v1/admin/security/sessions",
+        "/api/v1/admin/security/users/${encodeURIComponent(userId)}/permanent-suspension",
+        "/api/v1/admin/stocks",
+        "/api/v1/admin/stocks/${encodeURIComponent(stockId)}",
+        "/api/v1/admin/stocks/${encodeURIComponent(stockId)}/corporate-actions",
+        "/api/v1/admin/stocks/${encodeURIComponent(stockId)}/price",
+        "/api/v1/admin/stocks/market-events",
+        "/api/v1/admin/stocks/market-events/${encodeURIComponent(eventId)}",
+        "/api/v1/admin/treasury/budget/distribute",
+        "/api/v1/admin/treasury/buyback/burn",
+        "/api/v1/admin/treasury/disburse/dividend",
+        "/api/v1/admin/treasury/disburse/grant",
+        "/api/v1/admin/treasury/disburse/targeted",
+        "/api/v1/admin/treasury/drain",
+        "/api/v1/admin/treasury/inject",
+        "/api/v1/admin/treasury/tax/wealth",
+        "/api/v1/admin/users",
+        "/api/v1/admin/users/${encodeURIComponent(userId)}/restriction",
+        "/api/v1/auth/session"
+      ],
+      "exports": [
+        "ADMIN_AREAS",
+        "ActionFeedback",
+        "AdminAdjustmentDialog",
+        "AdminBack",
+        "AdminDirectMessageDialog",
+        "AdminQuickUserSearch",
+        "CloseConsole",
+        "CorporateActionDialog",
+        "DeleteStockDialog",
+        "ForceLogoutDialog",
+        "IpBlockDialog",
+        "LiftIpBlockDialog",
+        "NewSeasonEventForm",
+        "NewStockForm",
+        "OpenConsole",
+        "PermanentSuspensionDialog",
+        "RestrictionDialog",
+        "STEP_UP_CODE",
+        "SetPriceDialog",
+        "StepUpField",
+        "ToggleActive",
+        "absorbTreasuryFunds",
+        "adminArea",
+        "adminAreaFor",
+        "applyCorporateAction",
+        "blockIpAddress",
+        "cancelMarketEvent",
+        "closeConsole",
+        "consoleReturnPath",
+        "createSeasonEvent",
+        "createStock",
+        "deleteStock",
+        "disburseCitizenDividendAction",
+        "disburseGrantAction",
+        "disburseTargetedSubsidyAction",
+        "distributeBudgetRuleAction",
+        "dynamic",
+        "executeMarketBuybackBurnAction",
+        "executeWealthTaxAction",
+        "forceLogout",
+        "getCockpitEvidence",
+        "haltStockAndSettle",
+        "injectTreasuryFunds",
+        "liftIpAddressBlock",
+        "metadata",
+        "openConsole",
+        "payoutToUser",
+        "permanentlySuspendUser",
+        "publishMarketEvent",
+        "retryHaltSettlement",
+        "reverseUserTransaction",
+        "sendAdminDirectMessage",
+        "setBusinessActive",
+        "setSeasonEventActive",
+        "setStockActive",
+        "setStockPrice",
+        "setUserRestriction",
+        "spendSecondFactorCode",
+        "verifiedConsoleClose",
+        "verifiedConsoleOpen"
+      ],
+      "lexicalFormCount": 17,
+      "lexicalHandlerCount": 12,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/analytics",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/analytics/analytics-client-view.tsx",
+        "frontend/src/app/admin/analytics/analytics-evidence.ts",
+        "frontend/src/app/admin/analytics/analytics-money.ts",
+        "frontend/src/app/admin/analytics/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/api-health/status",
+        "/api/v1/admin/stocks",
+        "/api/v1/admin/users",
+        "/api/v1/seo/status/admin"
+      ],
+      "exports": [
+        "AnalyticsClientView",
+        "calculateSampleMoney",
+        "dynamic",
+        "metadata",
+        "parseAnalyticsApiHealth",
+        "parseAnalyticsSeo"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 7,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/api-health",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/api-health/api-health-dashboard.tsx",
+        "frontend/src/app/admin/api-health/backup-evidence.ts",
+        "frontend/src/app/admin/api-health/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/admin/api-health/backup-inventory",
+        "/api/admin/api-health/status",
+        "/api/v1/admin/api-health/status"
+      ],
+      "exports": [
+        "ApiHealthDashboard",
+        "metadata",
+        "parseBackupEvidence",
+        "parseBackupInventory"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 2,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/bank",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/bank/bank-evidence.ts",
+        "frontend/src/app/admin/bank/bank-risk-dashboard.tsx",
+        "frontend/src/app/admin/bank/loading.tsx",
+        "frontend/src/app/admin/bank/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/bank"
+      ],
+      "exports": [
+        "BankRiskDashboard",
+        "dynamic",
+        "metadata",
+        "validateAdminBankResponse"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 1,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/blog",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/blog/admin-blog-client.tsx",
+        "frontend/src/app/admin/blog/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/blog-verified"
+      ],
+      "exports": [
+        "AdminBlogClient",
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 6,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/bonds",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/bonds/bond-control-tower.tsx",
+        "frontend/src/app/admin/bonds/bond-evidence.ts",
+        "frontend/src/app/admin/bonds/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/admin/bonds/distribute-coupons",
+        "/api/admin/bonds/issues",
+        "/api/admin/bonds/overview",
+        "/api/v1/admin/bonds/coupon-logs?limit=30",
+        "/api/v1/admin/bonds/list",
+        "/api/v1/admin/bonds/overview"
+      ],
+      "exports": [
+        "BondControlTower",
+        "dynamic",
+        "metadata",
+        "parseBondEvidence"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 10,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/catalog",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/catalog/catalog-evidence.ts",
+        "frontend/src/app/admin/catalog/catalog-mutation-evidence.ts",
+        "frontend/src/app/admin/catalog/loading.tsx",
+        "frontend/src/app/admin/catalog/page.tsx",
+        "frontend/src/app/admin/catalog/season-event-reauth-help.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/business-types",
+        "/api/v1/admin/season-events"
+      ],
+      "exports": [
+        "SeasonEventReauthenticationHelp",
+        "businessStateConfirmed",
+        "catalogUuid",
+        "changedCatalogReceipt",
+        "createdCatalogId",
+        "createdEventConfirmed",
+        "dynamic",
+        "eventStateConfirmed",
+        "metadata",
+        "parseBusinessCatalog",
+        "parseSeasonCatalog"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/central-bank",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/central-bank/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/content",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/content/actions.ts",
+        "frontend/src/app/admin/content/content-evidence.ts",
+        "frontend/src/app/admin/content/content-forms.tsx",
+        "frontend/src/app/admin/content/loading.tsx",
+        "frontend/src/app/admin/content/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/${kind}/${encodeURIComponent(id)}/publication",
+        "/api/v1/admin/announcements",
+        "/api/v1/admin/announcements/",
+        "/api/v1/admin/announcements/${encodeURIComponent(announcementId)}",
+        "/api/v1/admin/photos",
+        "/api/v1/admin/photos/${encodeURIComponent(photoId)}",
+        "/api/v1/admin/photos/${encodeURIComponent(photoId)}/approval",
+        "/api/v1/admin/photos/metadata",
+        "/api/v1/admin/photos/submissions",
+        "/api/v1/auth/session"
+      ],
+      "exports": [
+        "AnnouncementEditor",
+        "AnnouncementManagementTable",
+        "PhotoEditor",
+        "PhotoManagementGrid",
+        "PhotoReviewQueue",
+        "PublicationEditor",
+        "approvePhotoAction",
+        "changePublication",
+        "deleteAnnouncementAction",
+        "dynamic",
+        "metadata",
+        "parseAdminAnnouncements",
+        "parseAdminPhotos",
+        "parsePendingPhotos",
+        "rejectPhotoAction",
+        "saveAnnouncement",
+        "savePhoto",
+        "toggleAnnouncementPinAction",
+        "toggleAnnouncementPublicationAction",
+        "togglePhotoPublicationAction",
+        "updateAnnouncementAction"
+      ],
+      "lexicalFormCount": 4,
+      "lexicalHandlerCount": 14,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/controls",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/controls/actions.ts",
+        "frontend/src/app/admin/controls/controls-evidence.ts",
+        "frontend/src/app/admin/controls/controls-forms.tsx",
+        "frontend/src/app/admin/controls/emergency-kill-switch-card.tsx",
+        "frontend/src/app/admin/controls/hot-time-management-card.tsx",
+        "frontend/src/app/admin/controls/loading.tsx",
+        "frontend/src/app/admin/controls/page.tsx",
+        "frontend/src/app/admin/controls/policy-version-card.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/controls",
+        "/api/v1/admin/controls/consent-versions",
+        "/api/v1/admin/controls/feature-switches/${encodeURIComponent(featureKey)}",
+        "/api/v1/admin/controls/policies",
+        "/api/v1/admin/controls/policies/activations",
+        "/api/v1/admin/controls/policies/rollbacks",
+        "/api/v1/admin/controls/role-revocations",
+        "/api/v1/admin/controls/roles"
+      ],
+      "exports": [
+        "ActivateDuePoliciesForm",
+        "EmergencyKillSwitchCard",
+        "FeatureSwitchDialog",
+        "HotTimeManagementCard",
+        "NewPolicyVersionForm",
+        "PolicyRollbackDialog",
+        "PolicyVersionCard",
+        "RoleDesignationForm",
+        "SwitchStateBadge",
+        "activateDuePolicies",
+        "createPolicyVersion",
+        "dynamic",
+        "grantRole",
+        "metadata",
+        "parseControlsOverview",
+        "parsePublishedPolicy",
+        "publishConsentVersionAction",
+        "revokeRole",
+        "rollbackPolicy",
+        "setFeatureSwitch"
+      ],
+      "lexicalFormCount": 6,
+      "lexicalHandlerCount": 7,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/discord",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/discord/admin-discord-broadcast-test-button.tsx",
+        "frontend/src/app/admin/discord/admin-discord-dm-test-button.tsx",
+        "frontend/src/app/admin/discord/discord-dm-readiness.ts",
+        "frontend/src/app/admin/discord/discord-evidence.ts",
+        "frontend/src/app/admin/discord/loading.tsx",
+        "frontend/src/app/admin/discord/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/admin/discord/test-dm",
+        "/api/discord/broadcast",
+        "/api/v1/admin/discord"
+      ],
+      "exports": [
+        "AdminDiscordBroadcastTestButton",
+        "AdminDiscordDmTestButton",
+        "dynamic",
+        "getAdminDmReadiness",
+        "metadata",
+        "parseDiscordEvidence"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 5,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/economy",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/economy/actions.ts",
+        "frontend/src/app/admin/economy/admin-control-center-v2.tsx",
+        "frontend/src/app/admin/economy/admin-national-treasury-control-card.tsx",
+        "frontend/src/app/admin/economy/admin-tax-policy-card.tsx",
+        "frontend/src/app/admin/economy/ai-status-card.tsx",
+        "frontend/src/app/admin/economy/casino-economy-dashboard.tsx",
+        "frontend/src/app/admin/economy/council-debate-card.tsx",
+        "frontend/src/app/admin/economy/economy-forms.tsx",
+        "frontend/src/app/admin/economy/economy-parts.tsx",
+        "frontend/src/app/admin/economy/economy-sink-card.tsx",
+        "frontend/src/app/admin/economy/economy.ts",
+        "frontend/src/app/admin/economy/faucet-sink-gauge.tsx",
+        "frontend/src/app/admin/economy/loading.tsx",
+        "frontend/src/app/admin/economy/macro-v2-types.ts",
+        "frontend/src/app/admin/economy/monetary-bureau-card.tsx",
+        "frontend/src/app/admin/economy/monetary-velocity-card.tsx",
+        "frontend/src/app/admin/economy/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/admin/economy/tax-policy",
+        "/api/admin/economy/tax-policy/auto-adjust",
+        "/api/v1/admin/controls/auto-policy",
+        "/api/v1/admin/controls/auto-policy/knobs/${encodeURIComponent(knobKey)}",
+        "/api/v1/admin/controls/auto-policy/runs",
+        "/api/v1/admin/economy",
+        "/api/v1/admin/economy/ai-status",
+        "/api/v1/admin/economy/alerts/${encodeURIComponent(alertId)}/acknowledgements",
+        "/api/v1/admin/economy/alerts?limit=${ALERT_LIMIT}",
+        "/api/v1/admin/economy/bulk-payouts",
+        "/api/v1/admin/economy/bulk-payouts/${payoutId}/report",
+        "/api/v1/admin/economy/bulk-payouts/previews",
+        "/api/v1/admin/economy/council-debate",
+        "/api/v1/admin/economy/killswitch",
+        "/api/v1/admin/economy/knobs-v2",
+        "/api/v1/admin/economy/macro-v2",
+        "/api/v1/admin/economy/monetary/ai-council/propose-policy",
+        "/api/v1/admin/economy/monetary/ai-council/recommendation",
+        "/api/v1/admin/economy/monetary/auto-regulation/run",
+        "/api/v1/admin/economy/monetary/auto-regulation/status",
+        "/api/v1/admin/economy/monetary/auto-regulation/update",
+        "/api/v1/admin/economy/monetary/certificates/mints",
+        "/api/v1/admin/economy/monetary/certificates/retirements",
+        "/api/v1/admin/economy/monetary/freeze",
+        "/api/v1/admin/economy/monetary/orders",
+        "/api/v1/admin/economy/monetary/orders/${orderId}/approve",
+        "/api/v1/admin/economy/monetary/orders/propose",
+        "/api/v1/admin/economy/monetary/telemetry",
+        "/api/v1/admin/economy/monetary/unfreeze",
+        "/api/v1/admin/economy/reconciliations/latest",
+        "/api/v1/admin/economy/stats",
+        "/api/v1/admin/economy/users/${encodeURIComponent(targetUserId)}/override-v2",
+        "/api/v1/admin/economy/users/${encodeURIComponent(trimmed)}/inspect-v2",
+        "/api/v1/admin/economy/velocity"
+      ],
+      "exports": [
+        "AcknowledgeAlertDialog",
+        "AdjustmentLine",
+        "AdminControlCenterV2",
+        "AdminNationalTreasuryControlCard",
+        "AdminTaxPolicyCard",
+        "AlertItem",
+        "BulkPayoutConsole",
+        "CasinoEconomyDashboard",
+        "CouncilDebateCard",
+        "EconomyAiStatusCard",
+        "EconomySinkCard",
+        "FaucetSinkGauge",
+        "Figure",
+        "HealthFigures",
+        "IssuanceFigures",
+        "KnobDialog",
+        "KnobItem",
+        "MonetaryBureauCard",
+        "MonetaryVelocityCard",
+        "PayoutReportTable",
+        "PreviewPanel",
+        "ProposalPanel",
+        "ReconciliationBadge",
+        "RunAutoPolicyDialog",
+        "SupplyFigures",
+        "acknowledgeAlert",
+        "acknowledgeMessage",
+        "adjustmentDirection",
+        "alertKindLabel",
+        "autoPolicyRunMessage",
+        "blockedLabel",
+        "compareDecimalText",
+        "dynamic",
+        "executeBulkPayout",
+        "inspectUserAction",
+        "knobRangeLabel",
+        "knobSettingMessage",
+        "knobValueLabel",
+        "memberCount",
+        "metadata",
+        "numericText",
+        "outcomeLabel",
+        "overrideUserAssetAction",
+        "parseMemberIds",
+        "payoutDetailLabel",
+        "payoutMessage",
+        "percentFromRatio",
+        "plainCount",
+        "previewBulkPayout",
+        "previewMessage",
+        "proposalState",
+        "reconciliationState",
+        "ruleLabel",
+        "runAutoPolicy",
+        "setPolicyKnob",
+        "severityLabel",
+        "toggleKillswitchAction",
+        "trimDecimalText",
+        "unpayableCount",
+        "updateKnobsV2Action"
+      ],
+      "lexicalFormCount": 10,
+      "lexicalHandlerCount": 52,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/economy/scenario-lab",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/economy/scenario-lab/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/economy/scenario-lab/preview?${query}"
+      ],
+      "exports": [
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 1,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/enterprises",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/enterprises/enterprise-control-tower.tsx",
+        "frontend/src/app/admin/enterprises/enterprise-evidence.ts",
+        "frontend/src/app/admin/enterprises/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/admin/enterprises/harvest",
+        "/api/admin/enterprises/status",
+        "/api/v1/admin/enterprises/dividend-logs",
+        "/api/v1/admin/enterprises/overview",
+        "/api/v1/admin/enterprises/private",
+        "/api/v1/admin/enterprises/soes"
+      ],
+      "exports": [
+        "EnterpriseControlTower",
+        "dynamic",
+        "metadata",
+        "parseEnterpriseEvidence"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 5,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/fx",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/fx/fx-control-tower.tsx",
+        "frontend/src/app/admin/fx/fx-evidence.ts",
+        "frontend/src/app/admin/fx/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/fx/status"
+      ],
+      "exports": [
+        "FxControlTower",
+        "dynamic",
+        "metadata",
+        "parseFxStatusResponse"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 3,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/help",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/help/actions.ts",
+        "frontend/src/app/admin/help/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/help/articles",
+        "/api/v1/admin/help/articles/${encodeURIComponent(id)}/${action}",
+        "/api/v1/auth/session"
+      ],
+      "exports": [
+        "createVerifiedHelpDraft",
+        "dynamic",
+        "metadata",
+        "publishVerifiedHelp",
+        "retractVerifiedHelp"
+      ],
+      "lexicalFormCount": 3,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/kdic",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/kdic/kdic-control-tower.tsx",
+        "frontend/src/app/admin/kdic/kdic-evidence.ts",
+        "frontend/src/app/admin/kdic/kdic-fixture.ts",
+        "frontend/src/app/admin/kdic/kdic-ledger-evidence.ts",
+        "frontend/src/app/admin/kdic/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/admin/kdic/ledger-integrity",
+        "/api/admin/kdic/overview",
+        "/api/v1/admin/kdic/ledger-integrity",
+        "/api/v1/admin/kdic/overview"
+      ],
+      "exports": [
+        "KdicControlTower",
+        "dynamic",
+        "fixture",
+        "metadata",
+        "parseKdicLedgerIntegrity",
+        "parseKdicOverview"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 7,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/logs",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/logs/actions.ts",
+        "frontend/src/app/admin/logs/audit-export-csv.ts",
+        "frontend/src/app/admin/logs/audit-logs-filter-form.tsx",
+        "frontend/src/app/admin/logs/audit-logs-view.tsx",
+        "frontend/src/app/admin/logs/audit-search-evidence.ts",
+        "frontend/src/app/admin/logs/loading.tsx",
+        "frontend/src/app/admin/logs/logs-forms.tsx",
+        "frontend/src/app/admin/logs/logs-sub-nav.tsx",
+        "frontend/src/app/admin/logs/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/audit/dispositions",
+        "/api/v1/admin/audit/events${searchQuery(backendFilters, paged ? cursor : undefined)}",
+        "/api/v1/admin/audit/events/${encodeURIComponent(auditId)}/reveal",
+        "/api/v1/admin/audit/retention/${encodeURIComponent(category)}",
+        "/api/v1/admin/audit/verify",
+        "/api/v1/admin/users"
+      ],
+      "exports": [
+        "AuditLogsFilterForm",
+        "AuditLogsView",
+        "LogsSubNav",
+        "RevealDisclosure",
+        "auditCsvCell",
+        "auditCsvDocument",
+        "dynamic",
+        "metadata",
+        "parseAuditSearchResponse",
+        "recordAuditDisposition",
+        "resolveAuditIdentity",
+        "revealAuditEvent",
+        "setAuditRetention",
+        "verifyAuditChain"
+      ],
+      "lexicalFormCount": 2,
+      "lexicalHandlerCount": 23,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/logs/activity",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/logs/activity/activity-query.ts",
+        "frontend/src/app/admin/logs/activity/page.tsx",
+        "frontend/src/app/admin/logs/activity/traffic-dashboard.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/activity/logs?${query.toString()}",
+        "/api/v1/admin/activity/traffic?granularity=${granularity}&periods=${periods}",
+        "/api/v1/admin/users"
+      ],
+      "exports": [
+        "TrafficDashboard",
+        "dynamic",
+        "metadata",
+        "parseActivityLogs",
+        "parseActivityQuery",
+        "resolveActivityMember"
+      ],
+      "lexicalFormCount": 1,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/logs/delivery",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/logs/delivery/delivery-evidence.ts",
+        "frontend/src/app/admin/logs/delivery/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/discord-outbox-events"
+      ],
+      "exports": [
+        "dynamic",
+        "metadata",
+        "parseDeliveryEvidence"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/logs/errors",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/logs/errors/actions.ts",
+        "frontend/src/app/admin/logs/errors/error-logs-viewer.tsx",
+        "frontend/src/app/admin/logs/errors/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/logs/system?source=FRONTEND_ERRORS&lines=1000"
+      ],
+      "exports": [
+        "ErrorLogsViewer",
+        "dynamic",
+        "fetchStructuredErrorLogsAction",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 15,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/logs/integrity",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/logs/integrity/integrity-evidence.ts",
+        "frontend/src/app/admin/logs/integrity/integrity-forms.tsx",
+        "frontend/src/app/admin/logs/integrity/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/audit/dispositions",
+        "/api/v1/admin/audit/retention",
+        "/api/v1/admin/audit/verifications"
+      ],
+      "exports": [
+        "DispositionForm",
+        "RetentionPolicyDialog",
+        "VerificationBadge",
+        "VerifyChainForm",
+        "dynamic",
+        "metadata",
+        "parseAuditDispositions",
+        "parseAuditRetention",
+        "parseAuditVerifications"
+      ],
+      "lexicalFormCount": 3,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/logs/system",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/logs/system/actions.ts",
+        "frontend/src/app/admin/logs/system/page.tsx",
+        "frontend/src/app/admin/logs/system/system-logs-viewer.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/logs/system?${query.toString()}",
+        "/api/v1/admin/logs/system?source=NGINX_ERROR&lines=100"
+      ],
+      "exports": [
+        "SystemLogsViewer",
+        "dynamic",
+        "fetchSystemLogsAction",
+        "metadata"
+      ],
+      "lexicalFormCount": 1,
+      "lexicalHandlerCount": 8,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/market",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/market/admin-market-halt-dialog.tsx",
+        "frontend/src/app/admin/market/limit-policy-guard-card.tsx",
+        "frontend/src/app/admin/market/loading.tsx",
+        "frontend/src/app/admin/market/market-event-reauth-help.tsx",
+        "frontend/src/app/admin/market/market-events.tsx",
+        "frontend/src/app/admin/market/market-evidence.ts",
+        "frontend/src/app/admin/market/market-metrics.ts",
+        "frontend/src/app/admin/market/page.tsx",
+        "frontend/src/app/admin/market/strengths.ts"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/stocks",
+        "/api/v1/admin/stocks/${encodeURIComponent(stock.id)}/halt-settlement",
+        "/api/v1/admin/stocks/dynamics",
+        "/api/v1/admin/stocks/market-events"
+      ],
+      "exports": [
+        "CancelMarketEventButton",
+        "HaltSettlementStatusDialog",
+        "HaltStockDialog",
+        "LimitPolicyGuardCard",
+        "MarketEventReauthenticationHelp",
+        "PublishMarketEventDialog",
+        "STRENGTHS",
+        "dynamic",
+        "formatMarketGap",
+        "formatMarketTrend",
+        "formatMarketVolatility",
+        "formatStockTrend",
+        "hasUnverifiedMarketEvidence",
+        "metadata",
+        "parseMarketDynamics",
+        "parseMarketEvents",
+        "parseMarketStocks",
+        "stockTrendDirection",
+        "strengthLabel"
+      ],
+      "lexicalFormCount": 2,
+      "lexicalHandlerCount": 2,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/market/ai-news",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/market/ai-news/actions.ts",
+        "frontend/src/app/admin/market/ai-news/ai-news-console.tsx",
+        "frontend/src/app/admin/market/ai-news/ai-news-evidence.ts",
+        "frontend/src/app/admin/market/ai-news/auto-generate-receipt.ts",
+        "frontend/src/app/admin/market/ai-news/page.tsx",
+        "frontend/src/app/admin/market/ai-news/sentences.ts"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/ai-news/auto-generate",
+        "/api/v1/admin/ai-news/batches",
+        "/api/v1/admin/ai-news/batches/latest",
+        "/api/v1/admin/ai-news/models",
+        "/api/v1/admin/ai-news/scenarios/${encodeURIComponent(scenarioId)}/discard",
+        "/api/v1/admin/ai-news/scenarios/${encodeURIComponent(scenarioId)}/publish",
+        "/api/v1/admin/ai-news/settings"
+      ],
+      "exports": [
+        "AI_NEWS_SENTENCES",
+        "AiNewsAutoGenerateCard",
+        "AiNewsGenerateForm",
+        "AiNewsSettingsForm",
+        "ScenarioCard",
+        "aiNewsSentence",
+        "autoGenerateAiNews",
+        "cleanseAiNewsText",
+        "decideAiNewsScenario",
+        "dynamic",
+        "engineLabel",
+        "generateAiNews",
+        "metadata",
+        "parseAiNewsLatestResponse",
+        "parseAiNewsModelsResponse",
+        "parseAiNewsSettingsResponse",
+        "parseAutoGenerateReceipt",
+        "safeRunningSeconds",
+        "saveAiNewsSettings"
+      ],
+      "lexicalFormCount": 4,
+      "lexicalHandlerCount": 3,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/mint",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/mint/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/money-flow",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/money-flow/money-flow-data.ts",
+        "frontend/src/app/admin/money-flow/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/treasury/user-money-flows?${queryParams.toString()}"
+      ],
+      "exports": [
+        "dynamic",
+        "metadata",
+        "validateMoneyFlowResponse"
+      ],
+      "lexicalFormCount": 1,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/operations/storage",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/operations/storage/page.tsx",
+        "frontend/src/app/admin/operations/storage/storage-view.ts"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/operations/storage"
+      ],
+      "exports": [
+        "dynamic",
+        "formatStorageBytes",
+        "metadata",
+        "validateStorageSnapshot"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/pension",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/pension/page.tsx",
+        "frontend/src/app/admin/pension/pension-control-tower.tsx",
+        "frontend/src/app/admin/pension/pension-evidence.ts"
+      ],
+      "apiReferences": [
+        "/api/admin/pension/distribute",
+        "/api/admin/pension/overview",
+        "/api/admin/pension/recent-payouts",
+        "/api/v1/admin/pension/overview",
+        "/api/v1/admin/pension/recent-payouts?limit=30"
+      ],
+      "exports": [
+        "PensionControlTower",
+        "dynamic",
+        "metadata",
+        "parsePensionOverview",
+        "parsePensionPayoutLogs"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 2,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/safety",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/safety/actions.ts",
+        "frontend/src/app/admin/safety/chat-moderation-receipt.ts",
+        "frontend/src/app/admin/safety/chat-report-action-dialog.tsx",
+        "frontend/src/app/admin/safety/chat-report-evidence-dialog.tsx",
+        "frontend/src/app/admin/safety/moderation-queue.ts",
+        "frontend/src/app/admin/safety/page.tsx",
+        "frontend/src/app/admin/safety/takedown-action-dialog.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/safety/chat-reports/${encodeURIComponent(reportId)}",
+        "/api/v1/admin/safety/chat-reports/${encodeURIComponent(reportId)}/action",
+        "/api/v1/admin/safety/chat-reports?limit=50&offset=",
+        "/api/v1/admin/safety/takedowns/${encodeURIComponent(caseId)}/action",
+        "/api/v1/admin/safety/takedowns?limit=50&offset="
+      ],
+      "exports": [
+        "ChatReportActionDialog",
+        "ChatReportEvidenceDialog",
+        "MODERATION_MAX_OFFSET",
+        "MODERATION_PAGE_SIZE",
+        "TakedownActionDialog",
+        "actionChatReport",
+        "actionTakedown",
+        "dynamic",
+        "getChatReportDetailAction",
+        "metadata",
+        "moderationPageHref",
+        "parseChatQueue",
+        "parseTakedownQueue",
+        "readModerationOffset",
+        "safeTargetHref",
+        "verifyChatModerationReceipt"
+      ],
+      "lexicalFormCount": 2,
+      "lexicalHandlerCount": 4,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/security",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/security/ip-block-inventory.ts",
+        "frontend/src/app/admin/security/page.tsx",
+        "frontend/src/app/admin/security/security-evidence.ts"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/security/ip-blocks"
+      ],
+      "exports": [
+        "ADMIN_BLOCK_UUID",
+        "dynamic",
+        "metadata",
+        "parseAdminIpBlocks",
+        "verifiedIpBlocks"
+      ],
+      "lexicalFormCount": 1,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/seo",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/seo/ad-monetization-card.tsx",
+        "frontend/src/app/admin/seo/gsc-analytics-card.tsx",
+        "frontend/src/app/admin/seo/indexing-api-card.tsx",
+        "frontend/src/app/admin/seo/page.tsx",
+        "frontend/src/app/admin/seo/seo-client-view.tsx",
+        "frontend/src/app/admin/seo/seo-funnel-card.tsx",
+        "frontend/src/app/admin/seo/seo-observation.ts",
+        "frontend/src/app/admin/seo/seo-submit-evidence.ts",
+        "frontend/src/app/admin/seo/twitter-publisher-card.tsx"
+      ],
+      "apiReferences": [
+        "/api/admin/seo/gsc-sitemap-submit",
+        "/api/admin/seo/indexing-submit",
+        "/api/admin/seo/status",
+        "/api/admin/seo/twitter",
+        "/api/seo/crawl-audit",
+        "/api/seo/gsc",
+        "/api/seo/gsc/digest-report",
+        "/api/seo/submit",
+        "/api/v1/seo/status/admin"
+      ],
+      "exports": [
+        "AdMonetizationCard",
+        "GscAnalyticsCard",
+        "IndexingApiCard",
+        "SeoClientView",
+        "SeoFunnelCard",
+        "TwitterPublisherCard",
+        "dynamic",
+        "metadata",
+        "parseIndexNowSubmissionReceipt",
+        "parseSeoObservation",
+        "unavailableSeoObservation"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 29,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/seo-audit",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/seo-audit/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/shop",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/shop/actions.ts",
+        "frontend/src/app/admin/shop/admin-shop-view.tsx",
+        "frontend/src/app/admin/shop/page.tsx",
+        "frontend/src/app/admin/shop/shop-evidence.ts"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/shop/items",
+        "/api/v1/admin/shop/items/${encodeURIComponent(input.id)}"
+      ],
+      "exports": [
+        "AdminShopView",
+        "dynamic",
+        "metadata",
+        "parseShopCatalog",
+        "updateShopItem",
+        "validShopPrice",
+        "validShopStock"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 13,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/support",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/support/actions.ts",
+        "frontend/src/app/admin/support/admin-support-view.tsx",
+        "frontend/src/app/admin/support/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/support/threads${status ? ",
+        "/api/v1/admin/support/threads/${encodeURIComponent(id)}/messages",
+        "/api/v1/admin/support/threads/${encodeURIComponent(id)}/status",
+        "/api/v1/admin/support/threads/${encodeURIComponent(selected)}/messages",
+        "/api/v1/auth/session"
+      ],
+      "exports": [
+        "AdminSupportView",
+        "adminSupportReply",
+        "adminSupportStatus",
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 2,
+      "lexicalHandlerCount": 13,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/treasury",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/treasury/admin-mint-topup-dialog.tsx",
+        "frontend/src/app/admin/treasury/admin-salary-disburse-dialog.tsx",
+        "frontend/src/app/admin/treasury/admin-treasury-funding-card.tsx",
+        "frontend/src/app/admin/treasury/page.tsx",
+        "frontend/src/app/admin/treasury/swf-control-panel.tsx",
+        "frontend/src/app/admin/treasury/swf-evidence.ts",
+        "frontend/src/app/admin/treasury/treasury-budget-dialog.tsx",
+        "frontend/src/app/admin/treasury/treasury-buyback-dialog.tsx",
+        "frontend/src/app/admin/treasury/treasury-disburse-dialog.tsx",
+        "frontend/src/app/admin/treasury/treasury-force-refresh-button.tsx",
+        "frontend/src/app/admin/treasury/treasury-operations-dialog.tsx",
+        "frontend/src/app/admin/treasury/treasury-view.tsx",
+        "frontend/src/app/admin/treasury/treasury-wealth-tax-dialog.tsx"
+      ],
+      "apiReferences": [
+        "/api/admin/auth/channel-otp/request",
+        "/api/admin/treasury/mint-topup",
+        "/api/admin/treasury/salary/disburse",
+        "/api/admin/treasury/swf",
+        "/api/admin/treasury/swf/liquidate",
+        "/api/admin/treasury/swf/rebalance",
+        "/api/admin/treasury/swf?_t=${Date.now()}",
+        "/api/discord/broadcast",
+        "/api/treasury/donate",
+        "/api/v1/admin/treasury/expenditure",
+        "/api/v1/admin/treasury/ledger/export",
+        "/api/v1/admin/treasury/overview",
+        "/api/v1/admin/treasury/revenue",
+        "/api/v1/admin/treasury/swf",
+        "/api/v1/admin/treasury/transactions"
+      ],
+      "exports": [
+        "AdminMintTopupDialog",
+        "AdminSalaryDisburseDialog",
+        "AdminTreasuryFundingCard",
+        "SwfControlPanel",
+        "TreasuryBudgetDialog",
+        "TreasuryBuybackDialog",
+        "TreasuryDisburseDialog",
+        "TreasuryForceRefreshButton",
+        "TreasuryOperationsDialog",
+        "TreasuryView",
+        "TreasuryWealthTaxDialog",
+        "dynamic",
+        "fetchCache",
+        "formatSwfQuantity",
+        "isTreasuryOutflow",
+        "metadata",
+        "parseSwfEvidence",
+        "revalidate",
+        "swfPortfolioTotals"
+      ],
+      "lexicalFormCount": 10,
+      "lexicalHandlerCount": 84,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/treasury/grants",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/treasury/grants/admin-grants-view.tsx",
+        "frontend/src/app/admin/treasury/grants/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/admin/treasury/grants",
+        "/api/admin/treasury/grants/clawback",
+        "/api/v1/admin/treasury/grants"
+      ],
+      "exports": [
+        "AdminGrantsView",
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 12,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/users",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/users/loading.tsx",
+        "frontend/src/app/admin/users/page.tsx",
+        "frontend/src/app/admin/users/user-directory-evidence.ts",
+        "frontend/src/app/admin/users/user-directory.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/users"
+      ],
+      "exports": [
+        "UserDirectory",
+        "dynamic",
+        "metadata",
+        "parseAdminUserSnapshot"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 7,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/users/[id]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/admin/users/[id]/member-detail-evidence.ts",
+        "frontend/src/app/admin/users/[id]/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/audit/events?member=${encodeURIComponent(userId)}&limit=50",
+        "/api/v1/admin/users",
+        "/api/v1/admin/users/${encodeURIComponent(userId)}/portfolio"
+      ],
+      "exports": [
+        "dynamic",
+        "metadata",
+        "resolveAdminMemberDetail"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/admin/work",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/admin/work/actions.ts",
+        "frontend/src/app/admin/work/admin-work-forms.tsx",
+        "frontend/src/app/admin/work/admin-work-stats.tsx",
+        "frontend/src/app/admin/work/loading.tsx",
+        "frontend/src/app/admin/work/page.tsx",
+        "frontend/src/app/admin/work/work-console-evidence.ts",
+        "frontend/src/app/admin/work/work-reauth-help.tsx",
+        "frontend/src/app/admin/work/work-stats-evidence.ts"
+      ],
+      "apiReferences": [
+        "/api/v1/admin/work",
+        "/api/v1/admin/work/auto-tune",
+        "/api/v1/admin/work/policy",
+        "/api/v1/admin/work/stats",
+        "/api/v1/admin/work/tasks/${encodeURIComponent(taskId)}"
+      ],
+      "exports": [
+        "WorkAutoTuneCard",
+        "WorkAutoTuneReauthHelp",
+        "WorkDailyCapGaugeCard",
+        "WorkPolicyTuningCard",
+        "WorkRankingChart",
+        "WorkStatsDashboard",
+        "WorkTaskTuningTable",
+        "WorkTrendMiniChart",
+        "autoTuneWorkPolicyAction",
+        "dynamic",
+        "metadata",
+        "parseAdminWorkConsole",
+        "parseAdminWorkStatsResponse",
+        "updateWorkRewardPolicy",
+        "updateWorkTask"
+      ],
+      "lexicalFormCount": 3,
+      "lexicalHandlerCount": 9,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/advisor",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/advisor/advisor-client.tsx",
+        "frontend/src/app/advisor/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/advisor/deoki/ask",
+        "/api/advisor/deoki/diagnose",
+        "/api/advisor/deoki/rebalance/execute"
+      ],
+      "exports": [
+        "AdvisorClient",
+        "generateMetadata"
+      ],
+      "lexicalFormCount": 1,
+      "lexicalHandlerCount": 6,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/announcements",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/announcements/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/announcements"
+      ],
+      "exports": [
+        "metadata",
+        "revalidate"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/announcements/[announcementId]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/announcements/[announcementId]/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/announcements"
+      ],
+      "exports": [
+        "generateMetadata",
+        "revalidate"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/arcade",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/arcade/actions.ts",
+        "frontend/src/app/arcade/casino-clock.tsx",
+        "frontend/src/app/arcade/casino-forms.tsx",
+        "frontend/src/app/arcade/casino-guest-view.tsx",
+        "frontend/src/app/arcade/casino-jackpot-ticker.tsx",
+        "frontend/src/app/arcade/casino-parts.tsx",
+        "frontend/src/app/arcade/casino-state.ts",
+        "frontend/src/app/arcade/casino-visual-hero.tsx",
+        "frontend/src/app/arcade/coin.ts",
+        "frontend/src/app/arcade/dice.ts",
+        "frontend/src/app/arcade/error.tsx",
+        "frontend/src/app/arcade/hilo-game.tsx",
+        "frontend/src/app/arcade/loading.tsx",
+        "frontend/src/app/arcade/mines-game.tsx",
+        "frontend/src/app/arcade/page.tsx",
+        "frontend/src/app/arcade/plinko-game.tsx",
+        "frontend/src/app/arcade/simulation-rules.ts",
+        "frontend/src/app/arcade/slots-game.tsx",
+        "frontend/src/app/arcade/theme-games.tsx",
+        "frontend/src/app/arcade/wheel-game.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/casino/clock",
+        "/api/v1/casino/coin/fairness",
+        "/api/v1/casino/coin/plays",
+        "/api/v1/casino/coin/terms",
+        "/api/v1/casino/dice/plays",
+        "/api/v1/casino/games/terms",
+        "/api/v1/casino/history",
+        "/api/v1/casino/self-limit",
+        "/api/v1/casino/theme/plays"
+      ],
+      "exports": [
+        "CASINO_IDLE",
+        "CASINO_TRANSACTION_TYPES",
+        "CLOSURE_COPY",
+        "CasinoClock",
+        "CasinoGuestView",
+        "CasinoJackpotTicker",
+        "CasinoVisualHero",
+        "ClosedNotice",
+        "CoinPlayForm",
+        "DIE_FACES",
+        "DiceNumberForm",
+        "DiceParityForm",
+        "GAME_ORDER",
+        "HiLoCardGame",
+        "LEGACY_RESULT_REELS",
+        "LOCK_CHOICES",
+        "LuckySlotsGame",
+        "MinesGame",
+        "PARITY_CHOICES",
+        "PlayOutcome",
+        "PlinkoGame",
+        "REEL_SYMBOLS",
+        "SelfLimitForm",
+        "ThemeGameCard",
+        "WheelGame",
+        "absAmount",
+        "closureOf",
+        "demoMinesMultiplier",
+        "dynamic",
+        "faceLabel",
+        "faceRolled",
+        "gameLabel",
+        "generateMetadata",
+        "isDieFace",
+        "isGameKey",
+        "isLockChoice",
+        "isParityChoice",
+        "ledgerLabel",
+        "lockUntilIso",
+        "multiplierFromPpm",
+        "parityLabel",
+        "parseDemoStake",
+        "percentFromPpm",
+        "playCoin",
+        "playDiceNumber",
+        "playDiceParity",
+        "playGem5",
+        "playHiLo20",
+        "playSlots",
+        "playThemeGame",
+        "playTreasure4",
+        "playWheel20",
+        "resultOf",
+        "selfLimitAmount",
+        "setSelfLimit",
+        "slotReelsForFace",
+        "themedOutcome",
+        "trimZeros"
+      ],
+      "lexicalFormCount": 8,
+      "lexicalHandlerCount": 63,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/bank",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/bank/actions.ts",
+        "frontend/src/app/bank/bank-forms.tsx",
+        "frontend/src/app/bank/bank-liquidity-card.tsx",
+        "frontend/src/app/bank/bank-privacy-notice.tsx",
+        "frontend/src/app/bank/bank-statement-link.tsx",
+        "frontend/src/app/bank/bank-statement.ts",
+        "frontend/src/app/bank/credit-score-card.tsx",
+        "frontend/src/app/bank/kinked-interest.ts",
+        "frontend/src/app/bank/member-bank-evidence.ts",
+        "frontend/src/app/bank/page.tsx",
+        "frontend/src/app/bank/repay-impact-preview.tsx",
+        "frontend/src/app/bank/saving-goal-certificate-dialog.tsx",
+        "frontend/src/app/bank/saving-pocket-customize-dialog.tsx",
+        "frontend/src/app/bank/saving-pockets-card.tsx",
+        "frontend/src/app/bank/savings-progress-ring.tsx",
+        "frontend/src/app/bank/toss-bank-hero-card.tsx",
+        "frontend/src/app/bank/types.ts",
+        "frontend/src/app/bank/virtual-bond-simulator-dialog.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/banking/bonds/${bondId}/redeem",
+        "/api/v1/banking/bonds/purchase",
+        "/api/v1/banking/borrow",
+        "/api/v1/banking/claim-interest",
+        "/api/v1/banking/credit-rating",
+        "/api/v1/banking/deposit",
+        "/api/v1/banking/pockets",
+        "/api/v1/banking/pockets/${pocketId}",
+        "/api/v1/banking/pockets/${pocketId}/archive",
+        "/api/v1/banking/pockets/${pocketId}/transfer",
+        "/api/v1/banking/repay",
+        "/api/v1/banking/repay-preview",
+        "/api/v1/banking/standing",
+        "/api/v1/banking/withdraw",
+        "/api/v1/wallet?recent=1"
+      ],
+      "exports": [
+        "BASE_BORROW_RATE_BPS",
+        "BankLiquidityCard",
+        "BankPrivacyNotice",
+        "BankStatementDownloadLink",
+        "CompoundInterestCard",
+        "CreditScoreCard",
+        "DepositWithdrawCard",
+        "OPTIMAL_UTILIZATION",
+        "RepayImpactPreview",
+        "SLOPE_1_BPS",
+        "SLOPE_2_BPS",
+        "STATUTORY_RESERVE_BPS",
+        "STATUTORY_RESERVE_RATIO",
+        "SavingGoalCertificateDialog",
+        "SavingPocketCustomizeDialog",
+        "SavingPocketsCard",
+        "SavingsGoalProgressRing",
+        "SmartLoanCard",
+        "TossBankHeroCard",
+        "VirtualBondSimulatorDialog",
+        "VirtualBondsCard",
+        "archivePocketAction",
+        "bankStatementCsv",
+        "borrowAction",
+        "calculateKinkedInterestRate",
+        "claimInterestAction",
+        "createPocketAction",
+        "customizePocketAction",
+        "depositAction",
+        "dynamic",
+        "memberBankEvidence",
+        "metadata",
+        "parseBankStandingSnapshot",
+        "previewRepayAction",
+        "purchaseBondAction",
+        "redeemBondAction",
+        "repayAction",
+        "transferPocketAction",
+        "withdrawAction"
+      ],
+      "lexicalFormCount": 15,
+      "lexicalHandlerCount": 53,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/bank/savings-pot",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/bank/savings-pot/layout.tsx",
+        "frontend/src/app/bank/savings-pot/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 2,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/blog",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/blog/blog-country-editorial.ts",
+        "frontend/src/app/blog/blog-data.ts",
+        "frontend/src/app/blog/blog-freshness.ts",
+        "frontend/src/app/blog/blog-hub-client.tsx",
+        "frontend/src/app/blog/blog-markdown.tsx",
+        "frontend/src/app/blog/blog-page-server.tsx",
+        "frontend/src/app/blog/blog-presentation-policy.ts",
+        "frontend/src/app/blog/blog-seo.ts",
+        "frontend/src/app/blog/blog-verified-client.ts",
+        "frontend/src/app/blog/blog.types.ts",
+        "frontend/src/app/blog/engineering-articles.ts",
+        "frontend/src/app/blog/macro-market-data.ts",
+        "frontend/src/app/blog/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/blog/verified"
+      ],
+      "exports": [
+        "BLOG_AUTHOR_DEOKI",
+        "BLOG_AUTHOR_ENGINEER",
+        "BLOG_CATEGORIES",
+        "BlogHubClient",
+        "COUNTRY_EDITION_TOPICS",
+        "DEFAULT_MACRO_SNAPSHOT",
+        "ENGINEERING_ARTICLES",
+        "addBlogPost",
+        "blogAlternateLanguages",
+        "blogHubUrl",
+        "blogUrl",
+        "canonicalBlogSlug",
+        "countryBlogPosts",
+        "createCountryBlogPost",
+        "deleteBlogPost",
+        "dynamic",
+        "generateDailyAiBlogPost",
+        "getAllBlogPosts",
+        "getAllBlogPostsForAdmin",
+        "getBlogCountryEdition",
+        "getBlogFreshnessNotice",
+        "getBlogPostBySlug",
+        "getLiveMacroMarketSnapshot",
+        "hasCountryEdition",
+        "isBlogDiscoverable",
+        "isCanonicalBlogSlug",
+        "metadata",
+        "metadataForArticle",
+        "metadataForHub",
+        "publishBlogPost",
+        "renderBlogArticle",
+        "renderBlogHub",
+        "renderBlogMarkdownBlocks",
+        "resolvePostHeroImage",
+        "shouldShowCompoundInlineCalculator",
+        "shouldShowFinancialPromotions",
+        "shouldShowReadership",
+        "summarizeBlogPost",
+        "verifiedArticleBySlug",
+        "verifiedArticlesForAdmin",
+        "verifiedPublicArticles"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 3,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/blog/[slug]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/blog/[slug]/blog-post-client.tsx",
+        "frontend/src/app/blog/[slug]/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "BlogPostClient",
+        "dynamic",
+        "generateMetadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 1,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/board",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/board/actions.ts",
+        "frontend/src/app/board/board-forms.tsx",
+        "frontend/src/app/board/board-participation.tsx",
+        "frontend/src/app/board/board-title-search.ts",
+        "frontend/src/app/board/loading.tsx",
+        "frontend/src/app/board/page.tsx",
+        "frontend/src/app/board/stock-actions.ts"
+      ],
+      "apiReferences": [
+        "/api/v1/auth/session",
+        "/api/v1/board/images/uploads",
+        "/api/v1/board/posts",
+        "/api/v1/board/posts/${encodeURIComponent(postId)}",
+        "/api/v1/board/posts/${encodeURIComponent(postId)}/comments",
+        "/api/v1/board/posts/${encodeURIComponent(postId)}/comments/${encodeURIComponent(commentId)}",
+        "/api/v1/board/public/stock-posts${suffix}",
+        "/api/v1/board/stock-posts"
+      ],
+      "exports": [
+        "BoardParticipation",
+        "NewPostForm",
+        "createComment",
+        "createPost",
+        "createStockAwarePost",
+        "deleteComment",
+        "deletePost",
+        "generateMetadata",
+        "parseBoardTitleQuery",
+        "revalidate",
+        "updatePost"
+      ],
+      "lexicalFormCount": 2,
+      "lexicalHandlerCount": 10,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/board/[postId]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/board/[postId]/page.tsx",
+        "frontend/src/app/board/[postId]/post-forms.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/board/posts/${encodedPostId}",
+        "/api/v1/board/posts/${encodedPostId}/comments",
+        "/api/v1/board/public/posts/${encodeURIComponent(postId)}",
+        "/api/v1/board/public/posts/${encodedPostId}",
+        "/api/v1/board/public/posts/${encodedPostId}/comments"
+      ],
+      "exports": [
+        "CommentForm",
+        "DeleteCommentButton",
+        "PostControls",
+        "dynamic",
+        "generateMetadata"
+      ],
+      "lexicalFormCount": 4,
+      "lexicalHandlerCount": 3,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/bonds",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/bonds/bonds-portal-client.tsx",
+        "frontend/src/app/bonds/market-integrity.ts",
+        "frontend/src/app/bonds/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/bonds/repo-loans/borrow",
+        "/api/bonds/repo-loans/repay",
+        "/api/bonds/rollover",
+        "/api/bonds/subscribe",
+        "/api/v1/bonds/markets",
+        "/api/v1/bonds/my-holdings",
+        "/api/v1/bonds/my-repo-loans"
+      ],
+      "exports": [
+        "BondsPortalClient",
+        "dynamic",
+        "metadata",
+        "verifyBondMarkets"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 8,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/businesses",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/businesses/actions.ts",
+        "frontend/src/app/businesses/business-forms.tsx",
+        "frontend/src/app/businesses/business-grant-banner.tsx",
+        "frontend/src/app/businesses/equity.ts",
+        "frontend/src/app/businesses/loading.tsx",
+        "frontend/src/app/businesses/page.tsx",
+        "frontend/src/app/businesses/supply-chain-widget.tsx"
+      ],
+      "apiReferences": [
+        "/api/treasury/apply-grant",
+        "/api/v1/business-equity",
+        "/api/v1/business-types",
+        "/api/v1/business-types/${encodeURIComponent(businessTypeId)}/purchases",
+        "/api/v1/businesses/${encodeURIComponent(ownershipId)}/boost",
+        "/api/v1/businesses/${encodeURIComponent(ownershipId)}/settle-v2",
+        "/api/v1/businesses/${encodeURIComponent(ownershipId)}/settlements",
+        "/api/v1/businesses/activate-license",
+        "/api/v1/businesses/my-v2",
+        "/api/v1/progression/early-game",
+        "/api/v1/shop/inventory"
+      ],
+      "exports": [
+        "ActivateLicenseButton",
+        "ApplyBoostModalButton",
+        "BusinessGrantBanner",
+        "PurchaseButton",
+        "SettleButton",
+        "SettleV2Button",
+        "SupplyChainWidget",
+        "activateLicenseAction",
+        "applyBoostAction",
+        "dynamic",
+        "equityGateNote",
+        "equityPercent",
+        "equitySummary",
+        "meetsEquityRequirement",
+        "metadata",
+        "purchaseBusiness",
+        "requiredEquity",
+        "settleBusiness",
+        "settleBusinessV2"
+      ],
+      "lexicalFormCount": 6,
+      "lexicalHandlerCount": 22,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/businesses/ventures",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/businesses/ventures/layout.tsx",
+        "frontend/src/app/businesses/ventures/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "metadata"
+      ],
+      "lexicalFormCount": 1,
+      "lexicalHandlerCount": 25,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/calculators",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/calculators/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/calendar",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/calendar/page.tsx",
+        "frontend/src/app/calendar/shop-deadlines.ts"
+      ],
+      "apiReferences": [
+        "/api/v1/early-game/today",
+        "/api/v1/engagement/early-game",
+        "/api/v1/seasons/events",
+        "/api/v1/shop/catalog"
+      ],
+      "exports": [
+        "dynamic",
+        "metadata",
+        "upcomingShopDeadlines"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/casino",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/casino/actions.ts",
+        "frontend/src/app/casino/casino-clock.tsx",
+        "frontend/src/app/casino/casino-forms.tsx",
+        "frontend/src/app/casino/casino-guest-view.tsx",
+        "frontend/src/app/casino/casino-jackpot-ticker.tsx",
+        "frontend/src/app/casino/casino-parts.tsx",
+        "frontend/src/app/casino/casino-state.ts",
+        "frontend/src/app/casino/casino-visual-hero.tsx",
+        "frontend/src/app/casino/coin.ts",
+        "frontend/src/app/casino/dice.ts",
+        "frontend/src/app/casino/error.tsx",
+        "frontend/src/app/casino/hilo-game.tsx",
+        "frontend/src/app/casino/loading.tsx",
+        "frontend/src/app/casino/page.tsx",
+        "frontend/src/app/casino/slots-game.tsx",
+        "frontend/src/app/casino/theme-games.tsx",
+        "frontend/src/app/casino/wheel-game.tsx"
+      ],
+      "apiReferences": [
+        "/api/discord/broadcast",
+        "/api/v1/casino/coin/plays",
+        "/api/v1/casino/dice/plays",
+        "/api/v1/casino/self-limit",
+        "/api/v1/casino/theme/plays"
+      ],
+      "exports": [
+        "CASINO_IDLE",
+        "CASINO_TRANSACTION_TYPES",
+        "CLOSURE_COPY",
+        "CasinoClock",
+        "CasinoGuestView",
+        "CasinoJackpotTicker",
+        "CasinoVisualHero",
+        "ClosedNotice",
+        "CoinPlayForm",
+        "DIE_FACES",
+        "DiceNumberForm",
+        "DiceParityForm",
+        "GAME_ORDER",
+        "HiLoCardGame",
+        "LEGACY_RESULT_REELS",
+        "LOCK_CHOICES",
+        "LuckySlotsGame",
+        "PARITY_CHOICES",
+        "PlayOutcome",
+        "REEL_SYMBOLS",
+        "SelfLimitForm",
+        "ThemeGameCard",
+        "WheelGame",
+        "absAmount",
+        "closureOf",
+        "faceLabel",
+        "faceRolled",
+        "gameLabel",
+        "isDieFace",
+        "isGameKey",
+        "isLockChoice",
+        "isParityChoice",
+        "ledgerLabel",
+        "lockUntilIso",
+        "multiplierFromPpm",
+        "parityLabel",
+        "percentFromPpm",
+        "playCoin",
+        "playDiceNumber",
+        "playDiceParity",
+        "playGem5",
+        "playHiLo20",
+        "playSlots",
+        "playThemeGame",
+        "playTreasure4",
+        "playWheel20",
+        "resultOf",
+        "selfLimitAmount",
+        "setSelfLimit",
+        "slotReelsForFace",
+        "themedOutcome",
+        "trimZeros"
+      ],
+      "lexicalFormCount": 8,
+      "lexicalHandlerCount": 46,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/central-bank",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/central-bank/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/central-bank/base-rate",
+        "/api/v1/central-bank/commercial-rates",
+        "/api/v1/central-bank/monetary-aggregates",
+        "/api/v1/central-bank/reserve-requirement"
+      ],
+      "exports": [
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/chat",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/chat/actions.ts",
+        "frontend/src/app/chat/chat-evidence.ts",
+        "frontend/src/app/chat/chat-room.tsx",
+        "frontend/src/app/chat/chat-sequence.ts",
+        "frontend/src/app/chat/chat-view.tsx",
+        "frontend/src/app/chat/compose-message-dialog.tsx",
+        "frontend/src/app/chat/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/chat/conversations",
+        "/api/v1/chat/conversations/${encodeURIComponent(activeConversation.conversation_id)}/messages?limit=50",
+        "/api/v1/chat/conversations/${encodeURIComponent(conversationId)}/archive",
+        "/api/v1/chat/conversations/${encodeURIComponent(conversationId)}/messages",
+        "/api/v1/chat/conversations/${encodeURIComponent(conversationId)}/mute",
+        "/api/v1/chat/conversations/${encodeURIComponent(conversationId)}/read",
+        "/api/v1/chat/conversations/${encodeURIComponent(conversationId)}/report",
+        "/api/v1/chat/users/${encodeURIComponent(targetUserId)}/block"
+      ],
+      "exports": [
+        "ChatRoom",
+        "ChatView",
+        "ComposeMessageDialog",
+        "archiveConversationAction",
+        "blockUserAction",
+        "chatSequence",
+        "dynamic",
+        "generateMetadata",
+        "isChatUuid",
+        "latestChatSequence",
+        "markAsReadAction",
+        "muteConversationAction",
+        "openConversationAction",
+        "reportConversationAction",
+        "sendMessageAction",
+        "unblockUserAction",
+        "verifyChatConversations",
+        "verifyChatMessages"
+      ],
+      "lexicalFormCount": 1,
+      "lexicalHandlerCount": 37,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/clubs",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/clubs/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/clubs${searchQuery ? "
+      ],
+      "exports": [
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 1,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/clubs/[clubId]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/clubs/[clubId]/clubhouse-canvas.tsx",
+        "frontend/src/app/clubs/[clubId]/clubhouse-view.tsx",
+        "frontend/src/app/clubs/[clubId]/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/clubs/${club.id}/feed",
+        "/api/v1/clubs/${club.id}/join",
+        "/api/v1/clubs/${club.id}/leave",
+        "/api/v1/clubs/${club.id}/projects/${selectedProject.id}/contributions",
+        "/api/v1/clubs/${clubId}/canvas",
+        "/api/v1/clubs/${encodeURIComponent(clubId)}",
+        "/api/v1/clubs/${encodeURIComponent(clubId)}/feed",
+        "/api/v1/clubs/${encodeURIComponent(clubId)}/projects"
+      ],
+      "exports": [
+        "ClubhouseCanvas",
+        "ClubhouseView",
+        "dynamic",
+        "generateMetadata"
+      ],
+      "lexicalFormCount": 2,
+      "lexicalHandlerCount": 20,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/clubs/[clubId]/members",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/clubs/[clubId]/members/members-view.tsx",
+        "frontend/src/app/clubs/[clubId]/members/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/clubs/${clubId}/members/${targetUserId}/role",
+        "/api/v1/clubs/${encodeURIComponent(clubId)}",
+        "/api/v1/clubs/${encodeURIComponent(clubId)}/members?limit=100"
+      ],
+      "exports": [
+        "MembersView",
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 1,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/clubs/new",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/clubs/new/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/clubs"
+      ],
+      "exports": [],
+      "lexicalFormCount": 1,
+      "lexicalHandlerCount": 6,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/clubs/warfare",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/clubs/warfare/layout.tsx",
+        "frontend/src/app/clubs/warfare/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/clubs?limit=50"
+      ],
+      "exports": [
+        "dynamic",
+        "metadata",
+        "revalidate"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/collections",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/collections/curation-retention-flow.tsx",
+        "frontend/src/app/collections/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/auth/me",
+        "/api/v1/collections"
+      ],
+      "exports": [
+        "CurationRetentionFlow",
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 1,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/dashboard",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/dashboard/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/stocks/alerts/events?limit=5",
+        "/api/v1/stocks/history",
+        "/api/v1/stocks/portfolio",
+        "/api/v1/stocks/watchlist",
+        "/api/v1/wallet?recent=6"
+      ],
+      "exports": [
+        "dynamic",
+        "metadata",
+        "revalidate"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/data-deletion",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/data-deletion/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/design-preview",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/design-preview/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/developer",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/developer/developer-portal-view.tsx",
+        "frontend/src/app/developer/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "DeveloperPortalView",
+        "ENDPOINTS_DATA",
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 5,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/enterprises",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/enterprises/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/enterprises/public"
+      ],
+      "exports": [
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/features",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/features/features-view.tsx",
+        "frontend/src/app/features/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "FeaturesView",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 4,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/forgot-password",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/forgot-password/actions.ts",
+        "frontend/src/app/forgot-password/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/auth/local/password-reset/request"
+      ],
+      "exports": [
+        "metadata",
+        "requestPasswordReset"
+      ],
+      "lexicalFormCount": 1,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/fx",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/fx/layout.tsx",
+        "frontend/src/app/fx/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/fx/forward/contract",
+        "/api/v1/fx/forward/my-contracts",
+        "/api/v1/fx/my-wallet",
+        "/api/v1/fx/portal",
+        "/api/v1/fx/swap/usd-to-wld",
+        "/api/v1/fx/swap/wld-to-usd"
+      ],
+      "exports": [
+        "metadata"
+      ],
+      "lexicalFormCount": 2,
+      "lexicalHandlerCount": 13,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/gallery",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/gallery/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/photos"
+      ],
+      "exports": [
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/gallery/[photoId]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/gallery/[photoId]/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/photos"
+      ],
+      "exports": [
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/gallery/submit",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/gallery/submit/actions.ts",
+        "frontend/src/app/gallery/submit/page.tsx",
+        "frontend/src/app/gallery/submit/submit-forms.tsx",
+        "frontend/src/app/gallery/submit/withdraw-photo-form.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/auth/session",
+        "/api/v1/photos",
+        "/api/v1/photos/mine",
+        "/api/v1/photos/uploads",
+        "/api/v1/photos/withdraw"
+      ],
+      "exports": [
+        "PhotoSubmissionForm",
+        "WithdrawPendingPhotoForm",
+        "dynamic",
+        "metadata",
+        "submitPhoto",
+        "withdrawPendingPhoto"
+      ],
+      "lexicalFormCount": 2,
+      "lexicalHandlerCount": 5,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/guide",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/guide/guide.ts",
+        "frontend/src/app/guide/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "BEGINNER_TIPS",
+        "CURRENT_IMPLEMENTED_FEATURES",
+        "ECONOMY_PILLARS",
+        "FIRST_DAY_ORDER",
+        "FIRST_DAY_ORDER_EN",
+        "GROWTH_STAGES",
+        "GUIDE_FAQS",
+        "GUIDE_STEPS",
+        "QUICK_START_STEPS",
+        "QUICK_START_STEPS_EN",
+        "guideDestinations",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/guide/career-mastery",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/guide/career-mastery/career-step-by-step-guide.tsx",
+        "frontend/src/app/guide/career-mastery/legacy-visitor-banner.tsx",
+        "frontend/src/app/guide/career-mastery/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "CAREER_GUIDE_JOBS",
+        "CareerStepByStepGuide",
+        "LegacyVisitorBanner",
+        "MASTERY_TIERS_GUIDE",
+        "generateMetadata",
+        "revalidate"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 12,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/guide/dopamine-system",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/guide/dopamine-system/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/guide/glossary",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/guide/glossary/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata",
+        "revalidate"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/guide/glossary/[term]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/guide/glossary/[term]/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata",
+        "generateStaticParams",
+        "revalidate"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/guide/stock-trading",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/guide/stock-trading/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata",
+        "revalidate"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/guide/virtual-banking",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/guide/virtual-banking/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata",
+        "revalidate"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/help",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/help/actions.ts",
+        "frontend/src/app/help/article-identity.ts",
+        "frontend/src/app/help/help-category-counts.tsx",
+        "frontend/src/app/help/help-publication-date.tsx",
+        "frontend/src/app/help/help-related.tsx",
+        "frontend/src/app/help/help-search.tsx",
+        "frontend/src/app/help/locale.ts",
+        "frontend/src/app/help/page.tsx",
+        "frontend/src/app/help/report-action.ts",
+        "frontend/src/app/help/report-form.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/auth/session",
+        "/api/v1/help/articles/${locale}/${slug}/report",
+        "/api/v1/help/categories?locale=${locale}",
+        "/api/v1/help/search"
+      ],
+      "exports": [
+        "HelpCategoryCounts",
+        "HelpPublicationDate",
+        "HelpReportForm",
+        "HelpSearch",
+        "RelatedHelp",
+        "dynamic",
+        "helpArticleHref",
+        "metadata",
+        "normalizeHelpLocale",
+        "reportVerifiedHelp",
+        "requireHelpPublicationIdentity",
+        "searchVerifiedHelp"
+      ],
+      "lexicalFormCount": 2,
+      "lexicalHandlerCount": 1,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/help/[slug]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/help/[slug]/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/help/articles/${locale}/${encodeURIComponent(slug)}"
+      ],
+      "exports": [
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/inventory",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/inventory/inventory-view.tsx",
+        "frontend/src/app/inventory/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/profile",
+        "/api/v1/shop/holdings",
+        "/api/v1/shop/holdings/${item.catalog_id}/equip"
+      ],
+      "exports": [
+        "InventoryView",
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 2,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/invite/[code]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/invite/[code]/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/kdic",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/kdic/kdic-portal-evidence.ts",
+        "frontend/src/app/kdic/layout.tsx",
+        "frontend/src/app/kdic/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/kdic/portal"
+      ],
+      "exports": [
+        "calculateKdicIllustration",
+        "metadata",
+        "parseKdicPortalResponse"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 6,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/lobby",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/lobby/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/login",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/login/actions.ts",
+        "frontend/src/app/login/consent-form.tsx",
+        "frontend/src/app/login/login-providers-view.tsx",
+        "frontend/src/app/login/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/auth/consent",
+        "/api/v1/auth/local/login",
+        "/api/v1/auth/policy",
+        "/api/v1/auth/prelogin-session",
+        "/api/v1/auth/providers",
+        "/api/v1/auth/session"
+      ],
+      "exports": [
+        "ConsentForm",
+        "LoginProvidersView",
+        "dynamic",
+        "metadata",
+        "submitConsent",
+        "submitLocalLogin"
+      ],
+      "lexicalFormCount": 2,
+      "lexicalHandlerCount": 3,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/login/providers",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/login/providers/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/marketplace",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/marketplace/appraisal-view.tsx",
+        "frontend/src/app/marketplace/auction-view.tsx",
+        "frontend/src/app/marketplace/crafting-actions.ts",
+        "frontend/src/app/marketplace/crafting-panel.tsx",
+        "frontend/src/app/marketplace/crafting-recipes.ts",
+        "frontend/src/app/marketplace/direct-trade-view.tsx",
+        "frontend/src/app/marketplace/market-listings-view.tsx",
+        "frontend/src/app/marketplace/market-tax.ts",
+        "frontend/src/app/marketplace/marketplace-evidence.ts",
+        "frontend/src/app/marketplace/marketplace-tabs.tsx",
+        "frontend/src/app/marketplace/marketplace.ts",
+        "frontend/src/app/marketplace/my-listings-view.tsx",
+        "frontend/src/app/marketplace/page.tsx",
+        "frontend/src/app/marketplace/price-discovery-chart.tsx",
+        "frontend/src/app/marketplace/sell-listing-modal.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/crafting/execute",
+        "/api/v1/marketplace/appraisals",
+        "/api/v1/marketplace/auctions",
+        "/api/v1/marketplace/auctions/${selectedAuction.id}/bid",
+        "/api/v1/marketplace/listings?limit=50",
+        "/api/v1/marketplace/trades",
+        "/api/v1/marketplace/trades/${trade.id}/accept",
+        "/api/v1/marketplace/trades/${trade.id}/confirm",
+        "/api/v1/marketplace/trades/${tradeId}/cancel"
+      ],
+      "exports": [
+        "AppraisalView",
+        "AuctionView",
+        "CraftingPanel",
+        "DirectTradeView",
+        "INITIAL_MARKET_LISTINGS",
+        "MARKET_TAX_RATE",
+        "MAX_MARKET_TAX_WLD",
+        "MarketListingsView",
+        "MarketplaceTabs",
+        "MyListingsView",
+        "P0_CRAFTING_RECIPES",
+        "PriceDiscoveryChart",
+        "SellListingModal",
+        "calculateListingFee",
+        "calculateMarketTax",
+        "calculateSaleFee",
+        "calculateSellerNet",
+        "dynamic",
+        "executeCraftingAction",
+        "filterMarketplaceHoldings",
+        "marketplaceQuery",
+        "metadata",
+        "parseVerifiedMarketplaceListings"
+      ],
+      "lexicalFormCount": 1,
+      "lexicalHandlerCount": 46,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/marketplace/auction",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/marketplace/auction/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 8,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/mint",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/mint/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/mint/audit-certificates",
+        "/api/v1/mint/seigniorage"
+      ],
+      "exports": [
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/newspaper",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/newspaper/newspaper-view.tsx",
+        "frontend/src/app/newspaper/page.tsx",
+        "frontend/src/app/newspaper/weekly-brief.test-fixture.ts",
+        "frontend/src/app/newspaper/weekly-world-brief.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/newspaper/weekly-brief",
+        "/api/v1/stocks",
+        "/api/v1/stocks/market-events"
+      ],
+      "exports": [
+        "NewspaperView",
+        "SYNTHETIC_TEST_BRIEF",
+        "WeeklyWorldBrief",
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 3,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/pension",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/pension/funded-treasury-pension-panel.tsx",
+        "frontend/src/app/pension/page.tsx",
+        "frontend/src/app/pension/pension-portal-client.tsx"
+      ],
+      "apiReferences": [
+        "/api/pension/contribute",
+        "/api/pension/funded/",
+        "/api/pension/funded/position",
+        "/api/pension/liquidate",
+        "/api/pension/toggle-retire",
+        "/api/v1/pension/my-account",
+        "/api/v1/pension/my-contributions",
+        "/api/v1/pension/my-payouts",
+        "/api/v1/pension/overview",
+        "/api/v1/wallet/summary"
+      ],
+      "exports": [
+        "FundedTreasuryPensionPanel",
+        "PENSION_LEDGER_SETTLEMENT_PAUSED",
+        "PensionPortalClient",
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 15,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/prediction",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/prediction/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 7,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/privacy",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/privacy/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/profile",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/profile/actions.ts",
+        "frontend/src/app/profile/loading.tsx",
+        "frontend/src/app/profile/page.tsx",
+        "frontend/src/app/profile/profile-avatar.tsx",
+        "frontend/src/app/profile/profile-forms.tsx",
+        "frontend/src/app/profile/profile-parts.tsx",
+        "frontend/src/app/profile/profile.ts"
+      ],
+      "apiReferences": [
+        "/api/v1/auth/session",
+        "/api/v1/profile",
+        "/api/v1/profile/:userId",
+        "/api/v1/profile/image",
+        "/api/v1/profile/settings",
+        "/api/v1/profile/titles"
+      ],
+      "exports": [
+        "DISPLAY_NAME_MAX",
+        "FIELD_CHOICES",
+        "IMAGE_URL_MAX",
+        "INHERIT",
+        "NO_TITLE",
+        "ProfileAvatar",
+        "ProfileCard",
+        "ProfileFigure",
+        "ProfileImageForm",
+        "ProfileSettingsForm",
+        "VISIBILITIES",
+        "VISIBILITY_CHOICES",
+        "VISIBILITY_FIELDS",
+        "characters",
+        "displayName",
+        "dynamic",
+        "fieldInputName",
+        "fieldVisibilityFrom",
+        "isImageAddress",
+        "isTitleCode",
+        "isUuid",
+        "isVisibility",
+        "jobLabel",
+        "metadata",
+        "nothingShown",
+        "removeProfileImage",
+        "saveProfile",
+        "savedSentence",
+        "titleChoices",
+        "titleLabel",
+        "uploadProfileImage",
+        "visibilityLabel"
+      ],
+      "lexicalFormCount": 4,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/profile/[userId]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/profile/[userId]/loading.tsx",
+        "frontend/src/app/profile/[userId]/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/profile/${encodeURIComponent(userId)}"
+      ],
+      "exports": [
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/profile/settings",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/profile/settings/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "dynamic"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/progression",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/progression/actions.ts",
+        "frontend/src/app/progression/credit.ts",
+        "frontend/src/app/progression/loading.tsx",
+        "frontend/src/app/progression/page.tsx",
+        "frontend/src/app/progression/progression-forms.tsx",
+        "frontend/src/app/progression/stages.ts",
+        "frontend/src/app/progression/unlock-parts.tsx",
+        "frontend/src/app/progression/unlocks.ts"
+      ],
+      "apiReferences": [
+        "/api/v1/bank/loans/${encodeURIComponent(loanId)}/repayments",
+        "/api/v1/progression",
+        "/api/v1/progression/credit",
+        "/api/v1/progression/early-game",
+        "/api/v1/progression/refreshes"
+      ],
+      "exports": [
+        "LOAN_STANDING_LABELS",
+        "LoanBoard",
+        "RefreshButton",
+        "STAGES",
+        "UNLOCK_STATE_LABELS",
+        "UnlockCard",
+        "UnlockLadder",
+        "businessGate",
+        "businessGateNote",
+        "dynamic",
+        "gradeLabel",
+        "hasOverdueLoan",
+        "isRepayable",
+        "lendsNothing",
+        "loanStanding",
+        "metadata",
+        "nextUnlock",
+        "ratePercent",
+        "refreshStage",
+        "repayLoan",
+        "requirementLines",
+        "rungConditions",
+        "stageIndex",
+        "stageLabel",
+        "unlockConditions",
+        "unlockState",
+        "unlockStateNote",
+        "urgentFirst"
+      ],
+      "lexicalFormCount": 3,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/progression/prestige",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/progression/prestige/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/quests",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/quests/actions.ts",
+        "frontend/src/app/quests/early-events-parts.tsx",
+        "frontend/src/app/quests/early-events.ts",
+        "frontend/src/app/quests/early-game-parts.tsx",
+        "frontend/src/app/quests/early-game.ts",
+        "frontend/src/app/quests/event-forms.tsx",
+        "frontend/src/app/quests/loading.tsx",
+        "frontend/src/app/quests/page.tsx",
+        "frontend/src/app/quests/quest-forms.tsx",
+        "frontend/src/app/quests/quest-parts.tsx",
+        "frontend/src/app/quests/quests.ts",
+        "frontend/src/app/quests/vip-chest-status.ts"
+      ],
+      "apiReferences": [
+        "/api/v1/early-game/claims",
+        "/api/v1/early-game/first-day",
+        "/api/v1/early-game/today",
+        "/api/v1/engagement",
+        "/api/v1/engagement/dopamine/vip-chest/status",
+        "/api/v1/engagement/early-game",
+        "/api/v1/engagement/npcs/${encodeURIComponent(code)}/orders",
+        "/api/v1/engagement/preferences"
+      ],
+      "exports": [
+        "ClaimEventButton",
+        "CollectionCard",
+        "FirstDayFlow",
+        "GoalCard",
+        "NPCS",
+        "NextUnlock",
+        "NotificationForm",
+        "NpcCard",
+        "NpcOrderButton",
+        "TodayEventCard",
+        "WeeklyGoalCard",
+        "affinityLabel",
+        "claimMessage",
+        "claimTodayEvent",
+        "collectionFigure",
+        "collectionPercent",
+        "collectionRewardNote",
+        "dynamic",
+        "eventBlockMessage",
+        "experienceNote",
+        "firstDaySummary",
+        "goalCaveat",
+        "goalFigure",
+        "goalPercent",
+        "goalTitle",
+        "goalWindowLabel",
+        "metadata",
+        "npcName",
+        "npcOrderMessage",
+        "orderFromNpc",
+        "parseVipChestStatus",
+        "pendingEffectNote",
+        "preferenceMessage",
+        "progressLabel",
+        "progressMessage",
+        "rewardLine",
+        "rewardParts",
+        "setNotifications",
+        "stageLabel",
+        "stepFigure",
+        "unlockLines"
+      ],
+      "lexicalFormCount": 4,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/register",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/register/actions.ts",
+        "frontend/src/app/register/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/auth/consent",
+        "/api/v1/auth/local/register",
+        "/api/v1/auth/policy",
+        "/api/v1/auth/prelogin-session"
+      ],
+      "exports": [
+        "dynamic",
+        "metadata",
+        "submitLocalRegister"
+      ],
+      "lexicalFormCount": 1,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/reset-password",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/reset-password/actions.ts",
+        "frontend/src/app/reset-password/page.tsx",
+        "frontend/src/app/reset-password/reset-receipt.ts"
+      ],
+      "apiReferences": [
+        "/api/v1/auth/local/password-reset/complete"
+      ],
+      "exports": [
+        "completePasswordReset",
+        "isPasswordResetReceipt",
+        "metadata"
+      ],
+      "lexicalFormCount": 1,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/roadmap",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/roadmap/page.tsx",
+        "frontend/src/app/roadmap/roadmap-evidence.ts",
+        "frontend/src/app/roadmap/roadmap-view.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/stocks"
+      ],
+      "exports": [
+        "RoadmapView",
+        "dynamic",
+        "metadata",
+        "parseRoadmapMarketEvidence",
+        "revalidate"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 12,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/safety",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/safety/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/safety/takedown",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/safety/takedown/actions.ts",
+        "frontend/src/app/safety/takedown/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/safety/takedown"
+      ],
+      "exports": [
+        "submitEmergencyTakedown"
+      ],
+      "lexicalFormCount": 1,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/search",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/search/page.tsx",
+        "frontend/src/app/search/search.ts"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "ROUTE_KEYWORDS",
+        "dynamic",
+        "filterSearchEntries",
+        "metadata",
+        "searchableEntries"
+      ],
+      "lexicalFormCount": 1,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/seasons",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/seasons/actions.ts",
+        "frontend/src/app/seasons/enter-button.tsx",
+        "frontend/src/app/seasons/hall-of-fame-ticker.tsx",
+        "frontend/src/app/seasons/loading.tsx",
+        "frontend/src/app/seasons/page.tsx",
+        "frontend/src/app/seasons/season-pass-track.tsx",
+        "frontend/src/app/seasons/season-reward-claim-banner.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/seasons/claim-rewards",
+        "/api/v1/seasons/current",
+        "/api/v1/seasons/events",
+        "/api/v1/seasons/events/${encodeURIComponent(eventId)}/consumptions",
+        "/api/v1/seasons/events/${selected.event_id}/leaderboard"
+      ],
+      "exports": [
+        "EnterButton",
+        "SEASON_1_MILESTONES",
+        "SeasonHallOfFameTicker",
+        "SeasonPassTrack",
+        "SeasonRewardClaimBanner",
+        "claimSeasonRewardAction",
+        "dynamic",
+        "enterEvent",
+        "metadata"
+      ],
+      "lexicalFormCount": 1,
+      "lexicalHandlerCount": 7,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/shop",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/shop/actions.ts",
+        "frontend/src/app/shop/my-receipts.tsx",
+        "frontend/src/app/shop/page.tsx",
+        "frontend/src/app/shop/purchase-control.tsx",
+        "frontend/src/app/shop/shop-compare-panel.tsx",
+        "frontend/src/app/shop/shop-constants.ts",
+        "frontend/src/app/shop/shop-membership-section.tsx",
+        "frontend/src/app/shop/shop-membership-status.ts",
+        "frontend/src/app/shop/shop-price-ceiling.ts",
+        "frontend/src/app/shop/shop-price-floor.ts",
+        "frontend/src/app/shop/shop-rarity.ts",
+        "frontend/src/app/shop/shop-stock.ts",
+        "frontend/src/app/shop/shop-store-view.tsx",
+        "frontend/src/app/shop/shop-upkeep-cap.ts",
+        "frontend/src/app/shop/wallet-balance.ts"
+      ],
+      "apiReferences": [
+        "/api/shop/purchases${params.size ? ",
+        "/api/shop/purchases/export${search.trim() ? ",
+        "/api/v1/profile",
+        "/api/v1/shop/catalog",
+        "/api/v1/shop/catalog${querySuffix}",
+        "/api/v1/shop/catalog/${encodeURIComponent(catalogId)}/purchases",
+        "/api/v1/shop/items/${encodeURIComponent(itemId)}/purchases",
+        "/api/v1/shop/public-catalog${querySuffix}",
+        "/api/v1/wallet"
+      ],
+      "exports": [
+        "MyReceipts",
+        "PurchaseControl",
+        "SHOP_RARITIES",
+        "ShopComparePanel",
+        "ShopMembershipSection",
+        "ShopStoreView",
+        "VIP_PASS_CATALOG_ID",
+        "buyCatalogItemDirect",
+        "cancelPlusMembership",
+        "cashBalanceFromWallet",
+        "dynamic",
+        "hasVerifiedVipPass",
+        "metadata",
+        "normalizeShopPriceCeiling",
+        "parseShopUpkeepCap",
+        "purchaseItem",
+        "shopCatalogQuery",
+        "shopCatalogueQuery",
+        "shopFilterQuery",
+        "shopMinimumPriceQuery",
+        "shopStockFilter",
+        "subscribePlusMembership",
+        "vipMembershipFromCatalog"
+      ],
+      "lexicalFormCount": 2,
+      "lexicalHandlerCount": 20,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/shop/catalog",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/shop/catalog/actions.ts",
+        "frontend/src/app/shop/catalog/catalog-forms.tsx",
+        "frontend/src/app/shop/catalog/catalog-parts.tsx",
+        "frontend/src/app/shop/catalog/catalog.ts",
+        "frontend/src/app/shop/catalog/holdings-filter.ts",
+        "frontend/src/app/shop/catalog/loading.tsx",
+        "frontend/src/app/shop/catalog/page.tsx",
+        "frontend/src/app/shop/catalog/shop-ownership.ts",
+        "frontend/src/app/shop/catalog/shop-price-order.ts"
+      ],
+      "apiReferences": [
+        "/api/v1/early-game/today",
+        "/api/v1/shop/catalog",
+        "/api/v1/shop/catalog/${encodeURIComponent(catalogId)}/purchases",
+        "/api/v1/shop/catalog?ownership=${ownership}",
+        "/api/v1/shop/catalog?sort=${sort}",
+        "/api/v1/shop/catalog?stock=available",
+        "/api/v1/shop/holdings/${encodeURIComponent(catalogId)}/consumptions",
+        "/api/v1/shop/holdings/${encodeURIComponent(catalogId)}/upkeep-settlements"
+      ],
+      "exports": [
+        "BuyForm",
+        "CatalogCard",
+        "HoldingCard",
+        "PURCHASE_CEILING",
+        "SettleUpkeepButton",
+        "UseItemButton",
+        "buyCatalogItem",
+        "categoryLabel",
+        "consumeHeldItem",
+        "countLabel",
+        "dynamic",
+        "effectLabel",
+        "filterCatalogByCategory",
+        "groupByCategory",
+        "hasUpkeep",
+        "holdingNote",
+        "holdingsFilterUrl",
+        "isConsumable",
+        "isHeldToTheLimit",
+        "isUsable",
+        "maxPurchasable",
+        "memberCatalogUrl",
+        "memberOwnershipCatalogUrl",
+        "metadata",
+        "normalizedShopOwnership",
+        "normalizedShopPriceOrder",
+        "owesUpkeep",
+        "purchaseLimitLabel",
+        "purchaseMessage",
+        "settleItemUpkeep",
+        "settlementMessage",
+        "stockCatalogApiPath",
+        "stockLabel",
+        "useMessage",
+        "weeksLabel"
+      ],
+      "lexicalFormCount": 5,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/spaces",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/spaces/city-projects-view.tsx",
+        "frontend/src/app/spaces/page.tsx",
+        "frontend/src/app/spaces/space-canvas-editor.tsx",
+        "frontend/src/app/spaces/spaces-view.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/spaces/${s.id}/tax/status",
+        "/api/v1/spaces/${space.id}/tax/pay",
+        "/api/v1/spaces/${spaceId}/layout",
+        "/api/v1/spaces/city/projects/${selectedCityProj.id}/contributions",
+        "/api/v1/spaces/purchase",
+        "/api/v1/spaces/tax/delinquencies"
+      ],
+      "exports": [
+        "CityProjectsView",
+        "DEFAULT_CITY_PROJECTS",
+        "PALETTE",
+        "SpaceCanvasEditor",
+        "SpacesView",
+        "calculateHonorScore",
+        "generateMetadata"
+      ],
+      "lexicalFormCount": 3,
+      "lexicalHandlerCount": 34,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/spaces/real-estate",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/spaces/real-estate/layout.tsx",
+        "frontend/src/app/spaces/real-estate/page.tsx",
+        "frontend/src/app/spaces/real-estate/real-estate-auction-client.tsx"
+      ],
+      "apiReferences": [
+        "/api/spaces/real-estate/auction",
+        "/api/spaces/real-estate/claim-rent"
+      ],
+      "exports": [
+        "RealEstateAuctionClient",
+        "generateMetadata",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 6,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/status",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/status/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/status"
+      ],
+      "exports": [
+        "metadata",
+        "revalidate"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/stocks",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/stocks/actions.ts",
+        "frontend/src/app/stocks/layout.tsx",
+        "frontend/src/app/stocks/live-candles.ts",
+        "frontend/src/app/stocks/live.tsx",
+        "frontend/src/app/stocks/loading.tsx",
+        "frontend/src/app/stocks/market-news.tsx",
+        "frontend/src/app/stocks/market-sentiment-gauge.tsx",
+        "frontend/src/app/stocks/page.tsx",
+        "frontend/src/app/stocks/stock-comparison-math.ts",
+        "frontend/src/app/stocks/stock-comparison.tsx",
+        "frontend/src/app/stocks/stock-detail-dialog.tsx",
+        "frontend/src/app/stocks/stock-hub.ts",
+        "frontend/src/app/stocks/stock-market-sort.ts",
+        "frontend/src/app/stocks/stock-search.ts",
+        "frontend/src/app/stocks/stocks-sub-nav.tsx",
+        "frontend/src/app/stocks/tick-size.ts",
+        "frontend/src/app/stocks/trade-dialog.tsx",
+        "frontend/src/app/stocks/trade-form.tsx",
+        "frontend/src/app/stocks/watchlist-toggle.tsx"
+      ],
+      "apiReferences": [
+        "/api/stocks/${stockId}/candles?interval=${interval}",
+        "/api/v1/stocks",
+        "/api/v1/stocks/${encodeURIComponent(stockId)}/orders",
+        "/api/v1/stocks/${encodeURIComponent(stockId)}/watchlist"
+      ],
+      "exports": [
+        "LiveBadge",
+        "LiveHoldingValue",
+        "LiveQuote",
+        "LiveSparkline",
+        "MarketNews",
+        "MarketSentimentGauge",
+        "StockComparison",
+        "StockDetailDialog",
+        "StocksSubNav",
+        "TradeDialog",
+        "TradeForm",
+        "WatchlistToggle",
+        "applyTick",
+        "bucketStart",
+        "comparisonSymbolsQuery",
+        "computeMarketSentiment",
+        "dynamic",
+        "eventScope",
+        "filterStocks",
+        "findHoldingForStock",
+        "findStockBySymbol",
+        "generateKrxLadder",
+        "generateMetadata",
+        "getKrxTickSize",
+        "initialComparisonIds",
+        "metadata",
+        "normalizeStockQuery",
+        "normalizeStockSort",
+        "normalizeStockSymbol",
+        "placeOrder",
+        "reconcile",
+        "rollOver",
+        "setWatchlist",
+        "signedDelta",
+        "signedPercentChange",
+        "snapToKrxTick",
+        "sortMarketStocks",
+        "stepKrxTick"
+      ],
+      "lexicalFormCount": 2,
+      "lexicalHandlerCount": 11,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/stocks/[symbol]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/stocks/[symbol]/page.tsx",
+        "frontend/src/app/stocks/[symbol]/stock-alert-delete-button.tsx",
+        "frontend/src/app/stocks/[symbol]/stock-chart-drawing-overlay.tsx",
+        "frontend/src/app/stocks/[symbol]/stock-chart-drawing-toolbar.tsx",
+        "frontend/src/app/stocks/[symbol]/stock-chart-drawing.types.ts",
+        "frontend/src/app/stocks/[symbol]/stock-conditional-orders.tsx",
+        "frontend/src/app/stocks/[symbol]/stock-depth-chart.tsx",
+        "frontend/src/app/stocks/[symbol]/stock-discussion-section.tsx",
+        "frontend/src/app/stocks/[symbol]/stock-halt-banner.tsx",
+        "frontend/src/app/stocks/[symbol]/stock-halt-receipt-dialog.tsx",
+        "frontend/src/app/stocks/[symbol]/stock-interactive-chart.tsx",
+        "frontend/src/app/stocks/[symbol]/stock-market-toast.tsx",
+        "frontend/src/app/stocks/[symbol]/stock-micro-portfolio.tsx",
+        "frontend/src/app/stocks/[symbol]/stock-order-panel.tsx",
+        "frontend/src/app/stocks/[symbol]/stock-orderbook.tsx",
+        "frontend/src/app/stocks/[symbol]/stock-quick-alert-dialog.tsx",
+        "frontend/src/app/stocks/[symbol]/stock-ticker-switcher.tsx",
+        "frontend/src/app/stocks/[symbol]/stock-trading-console.tsx"
+      ],
+      "apiReferences": [
+        "/api/stocks/${encodeURIComponent(stockId)}/candles?interval=${intervalSeconds}",
+        "/api/v1/board/public/stock-posts?stock=${encodedSymbol}",
+        "/api/v1/newspaper/pulse",
+        "/api/v1/stocks",
+        "/api/v1/stocks/alerts",
+        "/api/v1/stocks/halt-receipts",
+        "/api/v1/stocks/portfolio",
+        "/api/v1/stocks/watchlist"
+      ],
+      "exports": [
+        "FIBONACCI_LEVELS",
+        "StockAlertDeleteButton",
+        "StockChartDrawingOverlay",
+        "StockChartDrawingToolbar",
+        "StockConditionalOrders",
+        "StockDepthChart",
+        "StockDiscussionSection",
+        "StockHaltBanner",
+        "StockHaltReceiptDialog",
+        "StockInteractiveChart",
+        "StockMarketToast",
+        "StockMicroPortfolio",
+        "StockOrderPanel",
+        "StockOrderbook",
+        "StockQuickAlertDialog",
+        "StockTickerSwitcher",
+        "StockTradingConsole",
+        "computeOrderbook",
+        "dynamic",
+        "generateMetadata",
+        "getDrawingStorageKey"
+      ],
+      "lexicalFormCount": 5,
+      "lexicalHandlerCount": 72,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/stocks/alerts",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/stocks/alerts/actions.ts",
+        "frontend/src/app/stocks/alerts/alert-deeplink.ts",
+        "frontend/src/app/stocks/alerts/alert-manager.tsx",
+        "frontend/src/app/stocks/alerts/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/stocks",
+        "/api/v1/stocks/alerts",
+        "/api/v1/stocks/alerts/${encodeURIComponent(alertId)}",
+        "/api/v1/stocks/alerts/events?limit=30"
+      ],
+      "exports": [
+        "AlertManager",
+        "createStockAlert",
+        "deleteStockAlert",
+        "dynamic",
+        "metadata",
+        "resolveInitialAlertStockId",
+        "revalidate"
+      ],
+      "lexicalFormCount": 2,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/stocks/community",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/stocks/community/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/stocks/compare",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/stocks/compare/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/stocks"
+      ],
+      "exports": [
+        "dynamic",
+        "metadata",
+        "revalidate"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/stocks/derivatives",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/stocks/derivatives/layout.tsx",
+        "frontend/src/app/stocks/derivatives/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/stocks/derivatives/markets"
+      ],
+      "exports": [
+        "dynamic",
+        "metadata",
+        "revalidate"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/stocks/history",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/stocks/history/history-window.ts",
+        "frontend/src/app/stocks/history/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/stocks/history?limit=${window}${minGross ? "
+      ],
+      "exports": [
+        "isVerifiedStockHistoryGrossResponse",
+        "normalizeStockHistoryGrossFloor",
+        "normalizeStockHistoryWindow",
+        "stockHistoryApiPath"
+      ],
+      "lexicalFormCount": 1,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/stocks/league",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/stocks/league/page.tsx",
+        "frontend/src/app/stocks/league/stocks-league-client.tsx"
+      ],
+      "apiReferences": [
+        "/api/stocks/league",
+        "/api/stocks/league/copy-trade/cancel",
+        "/api/stocks/league/copy-trade/subscribe"
+      ],
+      "exports": [
+        "StocksLeagueClient",
+        "generateMetadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 7,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/stocks/portfolio",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/stocks/portfolio/analysis.ts",
+        "frontend/src/app/stocks/portfolio/page.tsx",
+        "frontend/src/app/stocks/portfolio/portfolio-donut-chart.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/stocks/halt-receipts",
+        "/api/v1/stocks/portfolio"
+      ],
+      "exports": [
+        "PortfolioDonutChart",
+        "analyzePortfolio",
+        "dynamic",
+        "metadata",
+        "revalidate"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/stocks/watchlist",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/stocks/watchlist/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/stocks/watchlist"
+      ],
+      "exports": [],
+      "lexicalFormCount": 1,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/support",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/support/actions.ts",
+        "frontend/src/app/support/member-support-forms.tsx",
+        "frontend/src/app/support/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/auth/session",
+        "/api/v1/support/threads",
+        "/api/v1/support/threads${filters.size ? ",
+        "/api/v1/support/threads/${encodeURIComponent(id)}/messages",
+        "/api/v1/support/threads/${encodeURIComponent(selected)}/messages",
+        "/api/v1/support/threads/${encodeURIComponent(threadId)}/messages",
+        "/api/v1/support/threads/summary"
+      ],
+      "exports": [
+        "NewSupportThreadForm",
+        "SupportReplyForm",
+        "createSupportThread",
+        "dynamic",
+        "metadata",
+        "replySupportThread"
+      ],
+      "lexicalFormCount": 3,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/terms",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/terms/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/tools/layout.tsx",
+        "frontend/src/app/tools/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/capital-gains-tax-calculator",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/tools/capital-gains-tax-calculator/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/capital-gains-tax-calculator/[preset]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/tools/capital-gains-tax-calculator/[preset]/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata",
+        "generateStaticParams"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/compound-calculator",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/tools/compound-calculator/layout.tsx",
+        "frontend/src/app/tools/compound-calculator/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 10,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/compound-calculator/[preset]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/tools/compound-calculator/[preset]/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata",
+        "generateStaticParams",
+        "revalidate"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/crypto-apy-calculator",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/tools/crypto-apy-calculator/layout.tsx",
+        "frontend/src/app/tools/crypto-apy-calculator/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 15,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/dividend-tax-calculator",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/tools/dividend-tax-calculator/dividend-calculator-client.tsx",
+        "frontend/src/app/tools/dividend-tax-calculator/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "DividendCalculatorClient",
+        "generateMetadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 5,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/dividend-tax-calculator/[ticker]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/tools/dividend-tax-calculator/[ticker]/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata",
+        "generateStaticParams"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/farming-calculator",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/tools/farming-calculator/layout.tsx",
+        "frontend/src/app/tools/farming-calculator/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 5,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/farming-calculator/[preset]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/tools/farming-calculator/[preset]/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata",
+        "generateStaticParams"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/fire-calculator",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/tools/fire-calculator/layout.tsx",
+        "frontend/src/app/tools/fire-calculator/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 10,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/gift-tax-calculator",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/tools/gift-tax-calculator/gift-tax-interactive-client.tsx",
+        "frontend/src/app/tools/gift-tax-calculator/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "GiftTaxInteractiveClient",
+        "generateMetadata",
+        "revalidate"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 3,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/gift-tax-calculator/[preset]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/tools/gift-tax-calculator/[preset]/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata",
+        "generateStaticParams",
+        "revalidate"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/goal-wealth-calculator",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/tools/goal-wealth-calculator/layout.tsx",
+        "frontend/src/app/tools/goal-wealth-calculator/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 8,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/isa-calculator",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/tools/isa-calculator/layout.tsx",
+        "frontend/src/app/tools/isa-calculator/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 4,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/isa-calculator/[slug]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/tools/isa-calculator/[slug]/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata",
+        "generateStaticParams"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/kimchi-premium-calculator",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/tools/kimchi-premium-calculator/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/kimchi-premium-calculator/[preset]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/tools/kimchi-premium-calculator/[preset]/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata",
+        "generateStaticParams"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/loan-interest-calculator",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/tools/loan-interest-calculator/loan-calculator-client.tsx",
+        "frontend/src/app/tools/loan-interest-calculator/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "LoanCalculatorClient",
+        "generateMetadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 8,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/loan-interest-calculator/[preset]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/tools/loan-interest-calculator/[preset]/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata",
+        "generateStaticParams"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/pension-tax-calculator",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/tools/pension-tax-calculator/layout.tsx",
+        "frontend/src/app/tools/pension-tax-calculator/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 5,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/pension-tax-calculator/[slug]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/tools/pension-tax-calculator/[slug]/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata",
+        "generateStaticParams"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/quant-studio",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/tools/quant-studio/layout.tsx",
+        "frontend/src/app/tools/quant-studio/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 7,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/real-estate-calculator",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/tools/real-estate-calculator/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/real-estate-calculator/[preset]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/tools/real-estate-calculator/[preset]/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata",
+        "generateStaticParams"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/retirement-calculator",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/tools/retirement-calculator/layout.tsx",
+        "frontend/src/app/tools/retirement-calculator/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 5,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/retirement-calculator/[slug]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/tools/retirement-calculator/[slug]/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata",
+        "generateStaticParams"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/salary-calculator",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/tools/salary-calculator/layout.tsx",
+        "frontend/src/app/tools/salary-calculator/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 3,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/salary-calculator/[preset]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/tools/salary-calculator/[preset]/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata",
+        "generateStaticParams",
+        "revalidate"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/stock-calculator",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/tools/stock-calculator/layout.tsx",
+        "frontend/src/app/tools/stock-calculator/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 9,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/stock-calculator/[preset]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/tools/stock-calculator/[preset]/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata",
+        "generateStaticParams",
+        "revalidate"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/tax-calculator",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/tools/tax-calculator/layout.tsx",
+        "frontend/src/app/tools/tax-calculator/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 11,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/youth-leap-calculator",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/tools/youth-leap-calculator/layout.tsx",
+        "frontend/src/app/tools/youth-leap-calculator/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 3,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/tools/youth-leap-calculator/[preset]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/tools/youth-leap-calculator/[preset]/page.tsx"
+      ],
+      "apiReferences": [],
+      "exports": [
+        "generateMetadata",
+        "generateStaticParams"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/treasury",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/treasury/page.tsx",
+        "frontend/src/app/treasury/treasury-dao-voting.tsx",
+        "frontend/src/app/treasury/treasury-portal-client.tsx",
+        "frontend/src/app/treasury/treasury-program-card.tsx",
+        "frontend/src/app/treasury/treasury-public-state.ts",
+        "frontend/src/app/treasury/treasury-reserve-gauge.tsx",
+        "frontend/src/app/treasury/treasury-verified-state.ts",
+        "frontend/src/app/treasury/treasury.types.ts"
+      ],
+      "apiReferences": [
+        "/api/treasury/apply-grant",
+        "/api/treasury/claim",
+        "/api/treasury/proposals",
+        "/api/v1/treasury/public-overview"
+      ],
+      "exports": [
+        "TREASURY_PROGRAMS",
+        "TreasuryDaoVoting",
+        "TreasuryPortalClient",
+        "TreasuryProgramCard",
+        "TreasuryReserveGauge",
+        "buildUnverifiedTreasuryState",
+        "dynamic",
+        "loadTreasuryPublicState",
+        "metadata"
+      ],
+      "lexicalFormCount": 2,
+      "lexicalHandlerCount": 25,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/verify-email",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/verify-email/actions.ts",
+        "frontend/src/app/verify-email/page.tsx",
+        "frontend/src/app/verify-email/verified-activation.ts"
+      ],
+      "apiReferences": [
+        "/api/v1/auth/local/verify-email"
+      ],
+      "exports": [
+        "completeEmailVerification",
+        "dynamic",
+        "hasVerifiedEmailActivationReceipt",
+        "metadata"
+      ],
+      "lexicalFormCount": 1,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/verify-email-change",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/verify-email-change/actions.ts",
+        "frontend/src/app/verify-email-change/email-change-receipt.ts",
+        "frontend/src/app/verify-email-change/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/auth/local/email-change/complete"
+      ],
+      "exports": [
+        "completeLoginEmailChange",
+        "isEmailChangeReceipt",
+        "metadata"
+      ],
+      "lexicalFormCount": 1,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/wallet",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/wallet/actions.ts",
+        "frontend/src/app/wallet/export-ledger-csv.tsx",
+        "frontend/src/app/wallet/loading.tsx",
+        "frontend/src/app/wallet/page.tsx",
+        "frontend/src/app/wallet/sides.ts",
+        "frontend/src/app/wallet/wallet-forms.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/bank/loans",
+        "/api/v1/bank/loans/${encodeURIComponent(loanId)}/repayments",
+        "/api/v1/bank/movements",
+        "/api/v1/rewards/availability",
+        "/api/v1/rewards/daily/claims",
+        "/api/v1/stocks/portfolio",
+        "/api/v1/wallet/transfers",
+        "/api/v1/wallet?recent=50"
+      ],
+      "exports": [
+        "BankPanel",
+        "ExportLedgerCsvButton",
+        "LoanList",
+        "MoneyverseId",
+        "RewardButtons",
+        "TransferForm",
+        "borrow",
+        "claimDaily",
+        "isCanonicalWld",
+        "ledgerCsvContent",
+        "metadata",
+        "moveBank",
+        "pocketBreakdown",
+        "postingAmount",
+        "repay",
+        "sides",
+        "transfer"
+      ],
+      "lexicalFormCount": 5,
+      "lexicalHandlerCount": 6,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/wallet/activity",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/wallet/activity/loading.tsx",
+        "frontend/src/app/wallet/activity/page.tsx",
+        "frontend/src/app/wallet/activity/period.ts",
+        "frontend/src/app/wallet/activity/types.ts"
+      ],
+      "apiReferences": [
+        "/api/v1/wallet/activity?period=${period}&direction=${direction}${range ? "
+      ],
+      "exports": [
+        "activityCalendarRange",
+        "activityCompletenessNotice",
+        "activityCursorUrl",
+        "activityDirection",
+        "activityPeriod",
+        "activityPeriodUrl",
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 1,
+      "lexicalHandlerCount": 0,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/wallet/activity/transactions/[transactionId]",
+      "requiresFixture": true,
+      "sourceFiles": [
+        "frontend/src/app/wallet/activity/transactions/[transactionId]/copy-transaction-id.tsx",
+        "frontend/src/app/wallet/activity/transactions/[transactionId]/loading.tsx",
+        "frontend/src/app/wallet/activity/transactions/[transactionId]/page.tsx"
+      ],
+      "apiReferences": [
+        "/api/v1/wallet/activity/transactions/${transactionId}"
+      ],
+      "exports": [
+        "CopyTransactionId",
+        "dynamic",
+        "metadata"
+      ],
+      "lexicalFormCount": 0,
+      "lexicalHandlerCount": 1,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    },
+    {
+      "route": "/work",
+      "requiresFixture": false,
+      "sourceFiles": [
+        "frontend/src/app/work/actions.ts",
+        "frontend/src/app/work/career-mastery-card.tsx",
+        "frontend/src/app/work/career-qualifications-card.tsx",
+        "frontend/src/app/work/career-tasks-board.tsx",
+        "frontend/src/app/work/loading.tsx",
+        "frontend/src/app/work/page.tsx",
+        "frontend/src/app/work/work-countdown.tsx",
+        "frontend/src/app/work/work-duration-filter.ts",
+        "frontend/src/app/work/work-forms.tsx",
+        "frontend/src/app/work/work-quota-card.tsx",
+        "frontend/src/app/work/work-quota.ts",
+        "frontend/src/app/work/work-receipt-filter.tsx",
+        "frontend/src/app/work/work-search.ts",
+        "frontend/src/app/work/work.ts"
+      ],
+      "apiReferences": [
+        "/api/v1/work",
+        "/api/v1/work/active-job",
+        "/api/v1/work/assignments",
+        "/api/v1/work/assignments/${encodeURIComponent(assignmentId)}/completions",
+        "/api/v1/work/assignments/${encodeURIComponent(assignmentId)}/verify",
+        "/api/v1/work/profile",
+        "/api/v1/work/qualifications",
+        "/api/v1/work/qualifications/certify",
+        "/api/v1/work/tasks",
+        "/api/v1/work/tasks?${query}"
+      ],
+      "exports": [
+        "CAREER_JOBS",
+        "CareerMasteryCard",
+        "CareerQualificationsCard",
+        "CareerTasksBoard",
+        "ClaimButton",
+        "JobSwitchButton",
+        "MASTERY_RANKS",
+        "SubmitTaskButton",
+        "TakeButton",
+        "TaskCompleteModalButton",
+        "WorkCountdown",
+        "WorkQuotaDashboard",
+        "WorkReceiptRewardFilter",
+        "boardOrder",
+        "certifyQualificationAction",
+        "claimReward",
+        "completeTaskV2Action",
+        "computeMasteryTier",
+        "dailyQuotaLabel",
+        "difficultyLabel",
+        "durationLabel",
+        "dynamic",
+        "filterRecommendedWorkTasks",
+        "filterWorkTasks",
+        "filterWorkTasksByMinReward",
+        "getMasteryRank",
+        "getRequiredXpForLevel",
+        "hasExpired",
+        "isOpen",
+        "isSpent",
+        "jobLabel",
+        "jobMeta",
+        "metadata",
+        "normalizedWorkAvailableOnly",
+        "normalizedWorkDuration",
+        "normalizedWorkRewardCeiling",
+        "progressPercent",
+        "quotaReached",
+        "remaining",
+        "rewardSentence",
+        "secondsUntilSubmittable",
+        "statusLabel",
+        "submitTask",
+        "switchJobAction",
+        "takeTask",
+        "workQuotaBlock",
+        "workTaskBlock",
+        "workTasksApiPath"
+      ],
+      "lexicalFormCount": 9,
+      "lexicalHandlerCount": 13,
+      "liveVerification": "NOT_RUN",
+      "actionAcceptance": "UNVERIFIED",
+      "referenceKind": "LEXICAL_NOT_EXECUTION"
+    }
+  ],
+  "nativeMappings": [
+    {
+      "route": "/",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeHomeController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/account-deletion",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/account-deletion.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/account-deletion/",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/account-deletion/index.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/adminpresentation/AdminUiController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/admin/web/AdminDashboardPage.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin-preview",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/admin/web/AdminDashboardPage.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin-preview.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/admin/web/AdminDashboardPage.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin-preview/",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/admin/web/AdminDashboardPage.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin-preview/index.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/admin/web/AdminDashboardPage.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/admin/web/AdminDashboardPage.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin/",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/adminpresentation/AdminUiController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin/",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/admin/web/AdminDashboardPage.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin/controls",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/adminpresentation/AdminReadPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin/controls",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/admin/web/LiveAdminOverviewPages.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin/economy",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/adminpresentation/AdminReadPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin/economy",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/admin/web/LiveAdminOverviewPages.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin/economy/scenario-lab",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/adminpresentation/AdminReadPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin/economy/scenario-lab",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/admin/web/LiveAdminOverviewPages.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin/enterprises",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/adminpresentation/AdminReadPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin/enterprises",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/admin/web/LiveAdminOverviewPages.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin/index.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/admin/web/AdminDashboardPage.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin/logs/delivery",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/adminpresentation/AdminDeliveryPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin/logs/system",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/adminpresentation/AdminUiController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin/market",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/adminpresentation/AdminReadPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin/market",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/admin/web/LiveAdminOverviewPages.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin/users",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/adminpresentation/AdminReadPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/admin/users",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/admin/web/LiveAdminUsersPage.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/board",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/presentation/NativePublicFeaturePageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/calculators",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/tools/SpringNativeToolHubController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/chat",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeMessagingPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/chat.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeMessagingPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/chat/",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeMessagingPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/chat/index.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeMessagingPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/forgot-password",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/forgot-password.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/forgot-password/",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/forgot-password/index.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/index.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeHomeController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/login",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/login.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/login/",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/login/index.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/login/providers",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/login/providers.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/login/providers/",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/login/providers/index.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/register",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/register.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/register/",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/register/index.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/reset-password",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/reset-password.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/reset-password/",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/reset-password/index.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/shop",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/presentation/NativePublicFeaturePageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/status",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/status/StatusSourceTruthController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/stocks",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/stock/web/PublicStocksReadOnlyPage.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/stocks",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/presentation/NativePublicFeaturePageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/support",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeMessagingPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/support.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeMessagingPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/support/",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeMessagingPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/support/index.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeMessagingPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/tools",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/tools/SpringNativeToolHubController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/tools/compound-calculator",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/tools/SpringNativeCalculatorsController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/tools/stock-calculator",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/tools/SpringNativeCalculatorsController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/verify-email",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/verify-email-change",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/verify-email-change.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/verify-email-change/",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/verify-email-change/index.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/verify-email.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/verify-email/",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/verify-email/index.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeAuthPageController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/wallet",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeWalletController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/wallet.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeWalletController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/wallet/",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeWalletController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    },
+    {
+      "route": "/wallet/index.html",
+      "sourceFile": "spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeWalletController.java",
+      "requiresFixture": false,
+      "productionAcceptance": "UNVERIFIED"
+    }
+  ]
+}

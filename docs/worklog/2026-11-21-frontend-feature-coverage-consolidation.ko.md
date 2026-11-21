@@ -15,3 +15,9 @@
 
 ## 종료 상태
 아직 착수/조사 단계이며 신규 코드·운영 전환·서비스 정리는 실행 전이다. 전체 기능 정상으로 판정하지 않는다. SQL/grant/원장/잔액/세션 보정·메시지 발송·전체 backend 승격은 이 frontend 단계에 포함하지 않는다.
+
+## 진행 체크포인트1
+- 미참조 DB-free old Test5개 중지·가능한 부팅 해제 완료. ports4780/4790/4806/4812/4816은 실제 nginx-T 참조 목록에 없고 각 unit의 mode·PID·listener·RequiredBy/TriggeredBy를 확인했다. 전체 include/bytes 및 공개/관리자/사용자/API guest HTTP14경로 전후 동일. release 파일은 삭제하지 않았다.
+- 최초 preflight는 IPv4-mapped IPv6 loopback 표기 때문에 변경 전 거부했다. 두 번째는 정상 Java SIGTERM143을 기존unit이 실패로 표시해 원상 복원했다. 정확한 종료143을 기록한 뒤 그 retire 대상만 실패 marker를 정리하여 최종5개 inactive/부팅 비활성으로 확인했다. 다른 failed unit은 reset하지 않았다.
+- MemAvailable385656→543888kB, SwapFree12896516→13897348kB. 별도 경제AI 프로세스 약2.3GB RSS도 관찰했지만 기능 소유자/worker이므로 frontend 정리 대상으로 중지하지 않았다. 로컬 대형 빌드는 자원 상태를 보며 제한하고 공식 CI를 필수로 유지한다.
+- 기능 원장 helper4개 RED→GREEN, 실제 소스 후보/lexical action/API 참조 원장을 생성했다. 코드 존재를 실행 성공으로 올려잡지 않는다. 운영 연결/나머지 기능 검증은 계속 진행 중이다.
