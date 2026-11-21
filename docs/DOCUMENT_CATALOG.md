@@ -1,5 +1,9 @@
 # 📚 Document Catalog
 
+## v2026.11.21.1803.1 — Instagram Java virtual-threads research intake (DRAFT / docs only)
+- [EN verified-metadata finding](findings/2026-11-21-instagram-java-virtual-threads-reference-v2026.11.21.1803.1.md) / [KO](findings/2026-11-21-instagram-java-virtual-threads-reference-v2026.11.21.1803.1.ko.md) · [Worklog](worklog/2026-11-21-instagram-virtual-threads-v2026.11.21.1803.1.md) · [GitHub update](updates/v2026.11.21.1803.1-github.md) · [Internal](updates/v2026.11.21.1803.1-internal.md). Java 21+ virtual threads referenced; current Spring Java 17 source only, Reel audiovisual unverified; not adopted into planning, no app/Test/Production change.
+
+
 ## v2026.11.13.2 — Spring migration detailed review and artifact policy (DRAFT)
 - [EN section-by-section review](planning/SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.md) / [KO](planning/SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.ko.md) · [EN artifact/Artifactory](planning/SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.md) / [KO](planning/SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.ko.md) · [Worklog](worklog/2026-11-13-spring-migration-detailed-review-v2026.11.13.2.md). Stacked PR #3144 on #3142, no live deployment; G0/G1 remain gated.
 
