@@ -39,22 +39,23 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
     }
 
     static boolean isMemberPrivatePath(String p) {
-        return p.startsWith("/api/support/") || p.startsWith("/api/v1/support/")
-                || p.startsWith("/api/chat/") || p.startsWith("/api/v1/chat/")
-                || p.startsWith("/api/account") || p.startsWith("/api/v1/account")
+        String normalized = p.startsWith("/app-api/") ? p.replaceFirst("^/app-api", "/api") : p;
+        return normalized.startsWith("/api/support/") || normalized.startsWith("/api/v1/support/")
+                || normalized.startsWith("/api/chat/") || normalized.startsWith("/api/v1/chat/")
+                || normalized.startsWith("/api/account") || normalized.startsWith("/api/v1/account")
                 // A legacy wallet root/overview/balance is always a private, session-owned read.
                 // Exclude /summary: guests receive signedIn=false/null, and server refuses identity headers.
-                || p.matches("^/api/(v1/)?wallet(/(overview|balance)/?)?$")
-                || p.startsWith("/api/banking/pockets") || p.startsWith("/api/v1/banking/pockets")
-                || (p.startsWith("/api/photos") && !p.contains("/uploads")) || (p.startsWith("/api/v1/photos") && !p.contains("/uploads"))
-                || p.startsWith("/api/wallet/transfer") || p.startsWith("/api/v1/wallet/transfer")
-                || p.equals("/api/bonds/my-holdings") || p.equals("/api/v1/bonds/my-holdings")
-                || p.equals("/api/bonds/my-repo-loans") || p.equals("/api/v1/bonds/my-repo-loans")
+                || normalized.matches("^/api/(v1/)?wallet(/(overview|balance)/?)?$")
+                || normalized.startsWith("/api/banking/pockets") || normalized.startsWith("/api/v1/banking/pockets")
+                || (normalized.startsWith("/api/photos") && !normalized.contains("/uploads")) || (normalized.startsWith("/api/v1/photos") && !normalized.contains("/uploads"))
+                || normalized.startsWith("/api/wallet/transfer") || normalized.startsWith("/api/v1/wallet/transfer")
+                || normalized.equals("/api/bonds/my-holdings") || normalized.equals("/api/v1/bonds/my-holdings")
+                || normalized.equals("/api/bonds/my-repo-loans") || normalized.equals("/api/v1/bonds/my-repo-loans")
                 // Owner-specific personal space, growth/credit and advisor projections.
-                || p.matches("^/api/(v1/)?(space|spaces)(/.*)?$")
-                   && !p.matches("^/api/(v1/)?(space|spaces)/real-estate/districts/?$")
-                || p.matches("^/api/(v1/)?progression(/.*)?$")
-                || p.matches("^/api/(v1/)?advisor(/.*)?$");
+                || normalized.matches("^/api/(v1/)?(space|spaces)(/.*)?$")
+                   && !normalized.matches("^/api/(v1/)?(space|spaces)/real-estate/districts/?$")
+                || normalized.matches("^/api/(v1/)?progression(/.*)?$")
+                || normalized.matches("^/api/(v1/)?advisor(/.*)?$");
     }
 
     static boolean isAdminDiagnosticsPath(String p) {
