@@ -145,3 +145,7 @@ Merged isolated operational branch592..a200 into parent without committing yet, 
 ## Finished — reviewed canary source integration milestone
 Scoped fix1 review marks I1/I2/I3 ADDRESSED,0newCritical/Important/Minor. Parent integrated operational files byte-identical to a200554628, verified45canary+7QA+4maintenance=56Python/0fail/0skip and552Node/0fail/0skip; security/control/compile and staged diff checks passed. Application tree is unchanged from b061's660-tested source. Append-only plan/log conflicts preserved both histories; one integration-only trailing blank line was corrected. No live stage/config/service/credential/DB change.
 Separate out-of-scope observation: backend file removal before failed daemon-reload is not retryable. Record it as a new bounded continuation, not a fourth finding in the closed fix round; resolve before installation. Entire operational/live acceptance remains OPEN.
+
+
+## Before work — backend inverse retry continuation
+New isolated source taska200 addresses the separate backend remove/reload retry observation with persisted ownership/phase and foreign-resource negatives. Only install.py/test_install.py plus paired logs; no actual credentials, root stage/service/Nginx/DB or deployment. Parent sourceheader/QA/currentmain work remains separate. Baseline, RED, minimal fix, covering Python/source scans and independent review precede integration.
