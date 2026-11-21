@@ -55,7 +55,16 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
                 || normalized.matches("^/api/(v1/)?(space|spaces)(/.*)?$")
                    && !normalized.matches("^/api/(v1/)?(space|spaces)/real-estate/districts/?$")
                 || normalized.matches("^/api/(v1/)?progression(/.*)?$")
-                || normalized.matches("^/api/(v1/)?advisor(/.*)?$");
+                || normalized.matches("^/api/(v1/)?advisor(/.*)?$")
+                // OWASP API1:2023 BOLA prevention for casino betting, inventory, work assignments and stock orders
+                || normalized.startsWith("/api/casino/play") || normalized.startsWith("/api/v1/casino/play")
+                || normalized.startsWith("/api/casino/dice") || normalized.startsWith("/api/v1/casino/dice")
+                || normalized.startsWith("/api/shop/purchase") || normalized.startsWith("/api/v1/shop/purchase")
+                || normalized.startsWith("/api/shop/inventory") || normalized.startsWith("/api/v1/shop/inventory")
+                || normalized.startsWith("/api/work/") || normalized.startsWith("/api/v1/work/")
+                || normalized.startsWith("/api/stocks/orders") || normalized.startsWith("/api/v1/stocks/orders")
+                || normalized.startsWith("/api/stocks/portfolio") || normalized.startsWith("/api/v1/stocks/portfolio")
+                || normalized.startsWith("/api/arena/battles") || normalized.startsWith("/api/v1/arena/battles");
     }
 
     static boolean isAdminDiagnosticsPath(String p) {

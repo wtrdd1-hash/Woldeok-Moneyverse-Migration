@@ -256,3 +256,47 @@ The owner-designated AgentMemory reel and upstream README are preserved in [EN](
 
 
 
+
+---
+
+## 15. 🧠 다중 AI 세션 연속성 및 공용 기억 저장소 불변 원칙 (agentmemory Architecture & Cross-Session Continuity)
+
+- **제정 일시**: 2026-11-21
+- **레퍼런스 출처**: MIRLABS (`@mirl.abs`), `rohitg00/agentmemory` (GitHub Star 30k+ 오픈소스 아키텍처)
+- **핵심 목표**: AI 코딩 에이전트가 세션이 바뀔 때마다 과거 결정을 잊어버려 매번 같은 설명을 반복하거나 아키텍처를 뒤흔드는 문제를 원천 차단하고, 프로젝트 진행 시 항상 준수해야 하는 공용 기억 저장소(Memory Layer) 표준 강제.
+
+```
+       [Session 1: 기능 개발 및 아키텍처 결정]
+                         │
+                         ▼ (Capture: 기록)
+    ┌──────────────────────────────────────────────┐
+    │     PROJECT_MEMORY.md (공용 기억 저장소)      │
+    │  - 아키텍처 결정 이유, 미들웨어 위치, 테스트 경로     │
+    │  - 시크릿 자동 마스킹 (Secret Redaction)       │
+    │  - 에빙하우스 가중치 관리 (Ebbinghaus Decay)   │
+    └──────────────────────────────────────────────┘
+                         │
+                         ▼ (Recall: 회상 및 검증)
+       [Session 2: 신규 작업 이어 하기 (Continue)]
+```
+
+### 1. 4단계 기억 라이프사이클 (4-Phase Lifecycle)
+1. **기록 (Capture)**:
+   - 세션 중 수행된 핵심 아키텍처 결정(라이브러리 선정 이유, 미들웨어/인터셉터 경로, DB 마이그레이션 번호, 보안 정책 변경 등)은 작업 종료 즉시 메모리 파일(`PROJECT_MEMORY.md` 및 `implementation_plan.md`)에 명확한 근거와 함께 기록한다.
+2. **찾기 (Recall)**:
+   - 새로운 세션이나 작업이 시작될 때, 에이전트는 추측으로 작업하지 않고 반드시 `PROJECT_MEMORY.md`와 최신 릴리스 히스토리를 먼저 읽어(BM25/키워드 수준 정밀 회상) 과거에 이미 확립된 원칙과 파일 위치를 떠올린다.
+3. **이어 하기 (Continue)**:
+   - 사용자에게 이전에 결정된 사항(예: 로그인 방식, 원장 락 순서, 포트 번호 등)을 다시 묻지 않고, 이전 세션의 컨텍스트를 그대로 승계하여 일관되게 코드를 구현한다.
+4. **확인·수정 (Inspect)**:
+   - 기억에 기록된 내용과 실제 코드베이스 간에 불일치가 발생하는지 수시로 검토하고, 변경 사항이 있을 경우 메모리를 즉각 동기화한다.
+
+### 2. 시크릿 자동 마스킹 원칙 (Secret Redaction by Design)
+- API Key, 세션 토큰, DB 비밀번호, 비공개 Webhook URL 등 민감한 자격증명(PII/Secrets)은 메모리 및 변경 로그에 절대로 평문으로 남기지 않는다.
+- 항상 환경변수 명칭(예: `${DATABASE_PASSWORD}`, `${DISCORD_BOT_TOKEN}`) 또는 마스킹된 포맷(`sk-ant-***`)으로만 기록한다.
+
+### 3. 에빙하우스 망각 곡선 (Ebbinghaus Decay) 가중치 관리
+- **영구 보존 기억 (Core Invariants)**: 금융 원장 락, 보안 바운더리 필터, Nginx 헤더 스트리핑, 단일 진실 공급원 등 핵심 시스템 규칙은 망각되지 않도록 메모리 상단에 영구 고정한다.
+- **감쇠 및 압축 (Decay & Summarization)**: 단기 디버깅 로그, 일회성 빌드 해시, 임시 파일 기록 등은 작업 완료 후 핵심 결론만 남기고 주기적으로 압축 요약하여 컨텍스트 윈도우와 메모리 토큰 낭비를 방지한다.
+
+### 4. 크로스 에이전트/도구 간 단일 기억 저장소 공유 (Cross-Agent Shared SSOT)
+- 메인 코딩 에이전트, 서브에이전트(browser, research 등), 그리고 추후 다른 AI 도구가 투입되더라도 모두 동일한 `PROJECT_MEMORY.md`를 유일한 단일 진실 공급원(Single Source of Truth)으로 참조하고 갱신하여 세션 간 지식 단절을 완전히 방지한다.

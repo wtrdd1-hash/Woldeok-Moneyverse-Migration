@@ -32,7 +32,8 @@ class SensitiveApiBoundaryFilterTest {
                 "/api/v1/support/threads", "/api/support/threads", "/api/v1/chat/conversations",
                 "/api/chat/conversations", "/api/wallet/overview", "/api/wallet/balance",
                 "/api/v1/wallet/overview", "/api/v1/wallet/balance", "/api/wallet", "/api/v1/wallet",
-                "/api/bonds/my-holdings", "/api/v1/seo/status/admin", "/seo/status", "/api/v1/audit/frontend-errors"}) {
+                "/api/bonds/my-holdings", "/api/v1/seo/status/admin", "/seo/status", "/api/v1/audit/frontend-errors",
+                "/api/v1/casino/play", "/api/casino/dice", "/api/v1/shop/purchase", "/api/v1/work/assignments", "/api/v1/stocks/orders"}) {
             var req = new MockHttpServletRequest("GET", path);
             req.addHeader("X-User-Id", UUID.randomUUID().toString());
             var res = new MockHttpServletResponse();
