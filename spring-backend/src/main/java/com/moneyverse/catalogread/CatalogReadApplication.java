@@ -4,6 +4,7 @@ import com.moneyverse.api.domain.admin.service.AdminAuthService;
 import com.moneyverse.api.domain.health.NativeBuildIdentity;
 import com.moneyverse.api.domain.shop.service.AdminShopService;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.boot.autoconfigure.sql.init.SqlInitializationAutoConfiguration;
@@ -15,7 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 /** A single canonical read authority reuses existing sessions without importing any issuer or worker. */
 @Configuration(proxyBeanMethods=false)
-@EnableAutoConfiguration(exclude={HibernateJpaAutoConfiguration.class,UserDetailsServiceAutoConfiguration.class,SqlInitializationAutoConfiguration.class})
+@EnableAutoConfiguration(exclude={HibernateJpaAutoConfiguration.class,JpaRepositoriesAutoConfiguration.class,UserDetailsServiceAutoConfiguration.class,SqlInitializationAutoConfiguration.class})
 @Import({AdminAuthService.class,AdminShopService.class,NativeBuildIdentity.class,CatalogReadController.class})
 public class CatalogReadApplication {
     @Bean SecurityFilterChain catalogReadSecurity(HttpSecurity http) throws Exception {
