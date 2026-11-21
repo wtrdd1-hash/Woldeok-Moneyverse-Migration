@@ -26,3 +26,11 @@ Remaining admin actions/exported pages, member wallet/market/shop/community/ques
 
 ## Builder check
 Independent read-only source review confirmed the six-route boundary and exact approver requirement. StaticHtmlAliasController only owns two redirects; SpaWebMvcConfig serves independent exported HTML, so global CSS replacement or inserting foreign DOM could break hydration and actions. This stage follows the approved common design without claiming whole-site completion.
+
+
+## Follow-up slice — delivery log (2026-11-21)
+The next existing read-only route is `/admin/logs/delivery`. Real signed-in API navigation returns30 actual events, while the current UI rejects them: the source uses `status`, the Next parser requires `delivery_status`. All30 observed status values were null; two timestamps were populated. Timestamp presence is not proof of delivered status. The replacement must show unknown explicitly, separate known delivered/active/terminal/unknown sample counts, and never fabricate a success rate or delivery acknowledgement.
+
+Reuse the exact Nov18 admin shell, favicon, five locales and read-table CSS. Preserve the existing refresh and log/Discord links; do not implement or send Discord messages. The data source remains the existing cookie-authorized GET `/api/v1/admin/discord-outbox-events`, at most30 unique bounded records. Required canonical `status` may be null (unknown) or one of pending/delivering/retry_pending/delivered/suppressed/dead_letter. If a compatibility alias exists it must agree; missing status is malformed. Validate IDs, event types, integral nonnegative attempts and consistent UTC timestamps. Known delivered requires a delivery timestamp; known non-delivered forbids one; legacy unknown may carry a timestamp without claiming successful delivery.
+
+Same authorization/fixed-origin/body bounds/private response rules apply. Source errors discard the entire result and return503; verified empty is200 with0sample rows. The native process remains database-free. Existing eight production routes remain on their accepted generation unless independently reaccepted. A separate exact-main Test and narrowly scoped delivery HTML/versioned assets promotion is required.

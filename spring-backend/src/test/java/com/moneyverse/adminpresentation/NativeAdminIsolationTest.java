@@ -362,4 +362,119 @@ class NativeAdminIsolationTest {
         }
     }
 
+
+    static String deliveryRow(int id,String state,String completed) {
+        return "{\"event_id\":\"00000000-0000-4000-8000-"+String.format("%012d",id)+"\","
+            +"\"event_type\":\"qa.delivery\",\"created_at\":\"2026-11-20T00:00:00Z\","
+            +"\"delivered_at\":"+(completed==null?"null":"\""+completed+"\"")+","
+            +"\"delivery_attempts\":2,\"status\":"+(state==null?"null":"\""+state+"\"")+"}";
+    }
+    static void deliveryReply(String body) {
+        overrides.put("/api/v1/admin/discord-outbox-events",new Reply(200,"application/json",body));
+    }
+    @Test void deliveryPageUsesCanonicalSourceAndKeepsUnknownSeparateFromDelivered() throws Exception {
+        deliveryReply("{\"events\":["+deliveryRow(1,null,"2026-11-20T00:01:00Z")+"]}");
+        var response=get("/admin/logs/delivery",ADMIN);
+        assertEquals(200,response.statusCode());
+        assertEquals(List.of("/api/v1/admin/me","/api/v1/admin/discord-outbox-events"),paths);
+        assertTrue(response.body().contains("data-delivery-metric=\"unknown\"><strong>1</strong>"));
+        assertTrue(response.body().contains("data-delivery-metric=\"delivered\"><strong>0</strong>"));
+        assertTrue(response.body().contains("data-i18n=\"adminDeliveryUnknown\""));
+        assertTrue(response.body().contains("2026-11-20T00:01:00Z"));
+        assertTrue(response.body().contains("class=\"admin-sidebar\""));
+        assertTrue(response.body().contains("/assets/mv39/favicon.ico?v="));
+        assertEquals(1,response.body().split("id=\"mv-support-launcher\"",-1).length-1);
+        assertEquals("private, no-store",response.headers().firstValue("Cache-Control").orElse(""));
+        assertTrue(response.headers().firstValue("X-Robots-Tag").orElse("").contains("noindex"));
+        assertTrue(response.headers().allValues("Set-Cookie").isEmpty());
+    }
+    @Test void deliveryPageSummariesOnlyCountValidatedRecentSampleOutcomes() throws Exception {
+        var rows=new ArrayList<String>();int id=1;
+        for(String state:List.of("pending","delivering","retry_pending","delivered","suppressed","dead_letter"))
+            rows.add(deliveryRow(id++,state,state.equals("delivered")?"2026-11-20T00:01:00Z":null));
+        rows.add(deliveryRow(id,null,null));deliveryReply("{\"events\":["+String.join(",",rows)+"]}");
+        var response=get("/admin/logs/delivery",ADMIN);assertEquals(200,response.statusCode());
+        for(var item:Map.of("recent",7,"delivered",1,"active",3,"terminal",2,"unknown",1,"retried",7).entrySet())
+            assertTrue(response.body().contains("data-delivery-metric=\""+item.getKey()+"\"><strong>"+item.getValue()+"</strong>"),item.getKey());
+        for(String key:List.of("Pending","Delivering","Retry","Delivered","Suppressed","Failed","Unknown"))
+            assertTrue(response.body().contains("data-i18n=\"adminDelivery"+key+"\""),key);
+    }
+    @Test void verifiedEmptyDeliverySourceIsSuccessfulButMissingEvidenceIsNot() throws Exception {
+        deliveryReply("{\"events\":[]}");var response=get("/admin/logs/delivery",ADMIN);
+        assertEquals(200,response.statusCode());assertTrue(response.body().contains("data-delivery-metric=\"recent\"><strong>0</strong>"));
+        assertTrue(response.body().contains("Nothing to display yet"));
+        for(String malformed:List.of("{}","{\"events\":null}","{\"events\":{}}","{\"events\":[null]}")){
+            deliveryReply(malformed);response=get("/admin/logs/delivery",ADMIN);assertEquals(503,response.statusCode());
+            assertTrue(response.body().contains("Unable to load data"));assertFalse(response.body().contains("data-delivery-metric="));
+        }
+    }
+    @Test void invalidDeliveryRowsNeverBecomePartialHealthyCounts() throws Exception {
+        String valid=deliveryRow(1,"pending",null);
+        var malformed=new ArrayList<String>(List.of(
+            valid.replace("\"status\":\"pending\"","\"status\":\"success\""),
+            valid.replace("\"status\":\"pending\"","\"delivery_status\":\"pending\""),
+            valid.replace("\"status\":\"pending\"","\"status\":\"pending\",\"delivery_status\":\"delivered\""),
+            valid.replace("\"delivery_attempts\":2","\"delivery_attempts\":-1"),
+            valid.replace("\"delivery_attempts\":2","\"delivery_attempts\":1.5"),
+            valid.replace("\"delivery_attempts\":2","\"delivery_attempts\":2147483648"),
+            valid.replace("qa.delivery","<script>unsafe()</script>"),
+            valid.replace("00000000-0000-4000-8000-000000000001","bad-id"),
+            valid.replace("2026-11-20T00:00:00Z","2099-11-20T00:00:00Z"),
+            valid.replace("2026-11-20T00:00:00Z","2026-02-30T00:00:00Z"),
+            deliveryRow(1,"delivered",null),deliveryRow(1,"pending","2026-11-20T00:01:00Z"),
+            deliveryRow(1,"delivered","2026-11-19T23:59:59Z")));
+        for(String row:malformed){
+            deliveryReply("{\"events\":["+row+"]}");var response=get("/admin/logs/delivery",ADMIN);
+            assertEquals(503,response.statusCode(),row);assertFalse(response.body().contains("data-delivery-metric="));
+        }
+        deliveryReply("{\"events\":["+valid+","+valid+"]}");assertEquals(503,get("/admin/logs/delivery",ADMIN).statusCode());
+        var many=new ArrayList<String>();for(int i=1;i<=31;i++)many.add(deliveryRow(i,"pending",null));
+        deliveryReply("{\"events\":["+String.join(",",many)+"]}");assertEquals(503,get("/admin/logs/delivery",ADMIN).statusCode());
+    }
+    @Test void deliveryRequiresVerifiedAdministratorBeforeReadingEventsAndRejectsMutations() throws Exception {
+        assertEquals(302,get("/admin/logs/delivery",null,"X-User-Id","forged").statusCode());assertTrue(paths.isEmpty());
+        overrides.put("/api/v1/admin/me",new Reply(200,"application/json","{\"roles\":[\"member\"]}"));
+        assertEquals(403,get("/admin/logs/delivery",ADMIN).statusCode());assertEquals(List.of("/api/v1/admin/me"),paths);
+        paths.clear();var req=HttpRequest.newBuilder(base.resolve("/admin/logs/delivery")).header("Cookie",ADMIN)
+            .POST(HttpRequest.BodyPublishers.ofString("{}")).build();
+        assertEquals(403,browser.send(req,HttpResponse.BodyHandlers.discarding()).statusCode());assertTrue(paths.isEmpty());
+    }
+    @Test void deliverySourceLossCannotRenderAnEmptySuccessOrLeakTheUpstreamBody() throws Exception {
+        for(int status:List.of(401,403,500)){
+            overrides.put("/api/v1/admin/discord-outbox-events",new Reply(status,"application/json","{\"private\":\"upstream-secret-fixture\"}"));
+            var response=get("/admin/logs/delivery",ADMIN);assertEquals(status==401?302:status==403?403:503,response.statusCode());
+            assertFalse(response.body().contains("upstream-secret-fixture"));assertFalse(response.body().contains("data-delivery-metric="));
+        }
+    }
+    @Test void deliverySameShellAndStatusesRenderInAllFiveLocales() throws Exception {
+        deliveryReply("{\"events\":["+deliveryRow(1,null,null)+"]}");
+        for(String lang:List.of("en","ko","ja","zh","vi")){
+            var response=get("/admin/logs/delivery",ADMIN+"; wdmv_locale="+lang);assertEquals(200,response.statusCode(),lang);
+            assertEquals(lang,response.headers().firstValue("Content-Language").orElse(""));
+            assertTrue(response.body().contains("data-i18n=\"adminTool_logs_delivery\""));
+            assertTrue(response.body().contains("data-i18n=\"adminDeliveryUnknown\""));
+            assertFalse(response.body().contains("null</"));assertTrue(response.body().contains("/admin/logs/system"));
+        }
+    }
+
+
+    @Test void deliveryRejectsMidnightNormalizationInBothSourceTimestamps() throws Exception {
+        String start=deliveryRow(1,null,null).replace("2026-11-20T00:00:00Z","2026-11-20T24:00:00Z");
+        String end=deliveryRow(1,"delivered","2026-11-20T24:00:00Z");
+        assertAll(java.util.stream.Stream.of(start,end).map(row->(org.junit.jupiter.api.function.Executable)()->{
+            deliveryReply("{\"events\":["+row+"]}");var response=get("/admin/logs/delivery",ADMIN);
+            assertEquals(503,response.statusCode());assertFalse(response.body().contains("data-delivery-metric="));
+        }));
+    }
+    @Test void deliveryAccessibleLabelsShareTheCurrentLanguageWithTheVisibleHeadings() throws Exception {
+        deliveryReply("{\"events\":[]}");
+        var response=get("/admin/logs/delivery",ADMIN+"; wdmv_locale=ko");
+        var copy=new com.fasterxml.jackson.databind.ObjectMapper().readTree(
+            NativeAdminIsolationTest.class.getResourceAsStream("/ui/mv43-copy.json"));
+        assertEquals(200,response.statusCode());
+        assertTrue(response.body().contains("aria-label=\""+copy.path("logs").get(1).asText()+"\""));
+        assertTrue(response.body().contains("data-i18n-aria=\"logs\""));
+        assertTrue(response.body().contains("data-i18n-aria=\"adminDeliveryRecords\""));
+    }
+
 }

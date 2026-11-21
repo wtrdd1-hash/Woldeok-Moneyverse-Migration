@@ -17,7 +17,7 @@ public final class AdminSourceClient {
     private static final int MAX_BODY=2*1024*1024;
     private static final Set<String> ROLES=Set.of("superadmin","admin","operator","approver","server_operator");
     private static final Set<String> PATHS=Set.of("/api/v1/admin/me","/api/v1/admin/users","/api/v1/admin/stocks",
-        "/api/v1/admin/controls","/api/v1/admin/logs/system",
+        "/api/v1/admin/controls","/api/v1/admin/logs/system","/api/v1/admin/discord-outbox-events",
         "/api/v1/business/catalog","/api/v1/admin/economy/reconciliations/latest");
     private final URI origin;
     private final ObjectMapper mapper;
