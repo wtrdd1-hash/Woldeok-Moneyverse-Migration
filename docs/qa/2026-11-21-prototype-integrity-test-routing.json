@@ -1,0 +1,180 @@
+{
+  "accepted": true,
+  "phase": "preview",
+  "source": "8ba9139b2fcd577253ee83a24040091be218d64b",
+  "release": "/var/lib/moneyverse-frontend-integrity-20261121/releases/frontend-prototype-integrity-8ba9139b2fcd",
+  "ci": {
+    "source": "8ba9139b2fcd577253ee83a24040091be218d64b",
+    "run": 44890241945,
+    "jobs": {
+      "classify": "success",
+      "policy": "success",
+      "spring-web-check": "success",
+      "runtime-check": "success"
+    }
+  },
+  "installed": {
+    "/etc/nginx/snippets/moneyverse-p0-admin-ui-frontend-v20261118.conf": "6a7a4e4b56e09863d23b5204ea9298f2a677ba1389ff7c7b9e2420c2c58fdbb0"
+  },
+  "before": {
+    "/": {
+      "status": 200,
+      "cache": "private, no-store",
+      "location": "",
+      "source": ""
+    },
+    "/admin": {
+      "status": 302,
+      "cache": "private, no-store",
+      "location": "https://easy-scraping.com/login?error=login_required",
+      "source": ""
+    },
+    "/admin/users": {
+      "status": 302,
+      "cache": "private, no-store",
+      "location": "https://easy-scraping.com/login?error=login_required",
+      "source": ""
+    },
+    "/wallet": {
+      "status": 302,
+      "cache": "private, no-store",
+      "location": "/login?next=%2Fwallet",
+      "source": ""
+    },
+    "/support": {
+      "status": 302,
+      "cache": "private, no-store",
+      "location": "/login?next=%2Fsupport",
+      "source": ""
+    },
+    "/chat": {
+      "status": 302,
+      "cache": "private, no-store",
+      "location": "/login?next=%2Fchat",
+      "source": ""
+    },
+    "/account": {
+      "status": 403,
+      "cache": "",
+      "location": "",
+      "source": ""
+    },
+    "/api/v1/auth/session": {
+      "status": 200,
+      "cache": "private, no-store",
+      "location": "",
+      "source": ""
+    },
+    "/api/v1/wallet/summary": {
+      "status": 200,
+      "cache": "no-cache, no-store, max-age=0, must-revalidate",
+      "location": "",
+      "source": ""
+    },
+    "/api/v1/admin/me": {
+      "status": 401,
+      "cache": "no-store",
+      "location": "",
+      "source": ""
+    },
+    "/.git/config": {
+      "status": 403,
+      "cache": "",
+      "location": "",
+      "source": ""
+    },
+    "/actuator/env": {
+      "status": 404,
+      "cache": "no-cache, no-store, max-age=0, must-revalidate",
+      "location": "",
+      "source": ""
+    },
+    "/frontend-version": {
+      "status": 204,
+      "cache": "private, no-store",
+      "location": "",
+      "source": ""
+    }
+  },
+  "after": {
+    "/": {
+      "status": 200,
+      "cache": "private, no-store",
+      "location": "",
+      "source": ""
+    },
+    "/admin": {
+      "status": 302,
+      "cache": "private, no-store",
+      "location": "https://easy-scraping.com/login?error=login_required",
+      "source": ""
+    },
+    "/admin/users": {
+      "status": 302,
+      "cache": "private, no-store",
+      "location": "https://easy-scraping.com/login?error=login_required",
+      "source": ""
+    },
+    "/wallet": {
+      "status": 302,
+      "cache": "private, no-store",
+      "location": "/login?next=%2Fwallet",
+      "source": ""
+    },
+    "/support": {
+      "status": 302,
+      "cache": "private, no-store",
+      "location": "/login?next=%2Fsupport",
+      "source": ""
+    },
+    "/chat": {
+      "status": 302,
+      "cache": "private, no-store",
+      "location": "/login?next=%2Fchat",
+      "source": ""
+    },
+    "/account": {
+      "status": 403,
+      "cache": "",
+      "location": "",
+      "source": ""
+    },
+    "/api/v1/auth/session": {
+      "status": 200,
+      "cache": "private, no-store",
+      "location": "",
+      "source": ""
+    },
+    "/api/v1/wallet/summary": {
+      "status": 200,
+      "cache": "no-cache, no-store, max-age=0, must-revalidate",
+      "location": "",
+      "source": ""
+    },
+    "/api/v1/admin/me": {
+      "status": 401,
+      "cache": "no-store",
+      "location": "",
+      "source": ""
+    },
+    "/.git/config": {
+      "status": 403,
+      "cache": "",
+      "location": "",
+      "source": ""
+    },
+    "/actuator/env": {
+      "status": 404,
+      "cache": "no-cache, no-store, max-age=0, must-revalidate",
+      "location": "",
+      "source": ""
+    },
+    "/frontend-version": {
+      "status": 204,
+      "cache": "private, no-store",
+      "location": "",
+      "source": ""
+    }
+  },
+  "scope": "five static presentation pages only; no economic or full-backend acceptance"
+}

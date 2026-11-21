@@ -1,0 +1,63 @@
+{
+  "accepted": true,
+  "source": "8ba9139b2fcd577253ee83a24040091be218d64b",
+  "publicEdge": [
+    {
+      "route": "/shop",
+      "http": 200,
+      "source": "8ba9139b2fcd577253ee83a24040091be218d64b",
+      "scope": "prototype-integrity",
+      "cache": "private, no-store",
+      "cfCache": "DYNAMIC",
+      "inlineStylesMatch": true,
+      "hydrationScriptMatches": true,
+      "fileSha256": "e803ea97d06675d49176076ec26250520dfeb0f6b628529ed35439c1910eb197"
+    },
+    {
+      "route": "/stocks",
+      "http": 200,
+      "source": "8ba9139b2fcd577253ee83a24040091be218d64b",
+      "scope": "prototype-integrity",
+      "cache": "private, no-store",
+      "cfCache": "DYNAMIC",
+      "inlineStylesMatch": true,
+      "hydrationScriptMatches": true,
+      "fileSha256": "289e5a8886cad725dd67c2fe449242b9291b6fc7b66edb0a594dbc8b0866f7ed"
+    },
+    {
+      "route": "/quests",
+      "http": 200,
+      "source": "8ba9139b2fcd577253ee83a24040091be218d64b",
+      "scope": "prototype-integrity",
+      "cache": "private, no-store",
+      "cfCache": "DYNAMIC",
+      "inlineStylesMatch": true,
+      "hydrationScriptMatches": true,
+      "fileSha256": "f11fcef4c092202ba1b77ffd63037d8c734b4dd2a0a89fad08dc2ba8797923b6"
+    },
+    {
+      "route": "/board",
+      "http": 200,
+      "source": "8ba9139b2fcd577253ee83a24040091be218d64b",
+      "scope": "prototype-integrity",
+      "cache": "private, no-store",
+      "cfCache": "DYNAMIC",
+      "inlineStylesMatch": true,
+      "hydrationScriptMatches": true,
+      "fileSha256": "ca90c9be13619c1e04561717e039107287799202c2c5a2b0350bee17cff7068d"
+    },
+    {
+      "route": "/status",
+      "http": 200,
+      "source": "8ba9139b2fcd577253ee83a24040091be218d64b",
+      "scope": "prototype-integrity",
+      "cache": "private, no-store",
+      "cfCache": "DYNAMIC",
+      "inlineStylesMatch": true,
+      "hydrationScriptMatches": true,
+      "fileSha256": "b7b2817b6d546cdf2d4620ab898629c5c763342980cc1708890dc585966cc083"
+    }
+  ],
+  "externalTestStatus": 403,
+  "noPrivateValuesRetained": true
+}
