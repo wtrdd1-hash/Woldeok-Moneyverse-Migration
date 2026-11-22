@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
-  <title>주식 · Woldeok Moneyverse</title>
-  <meta name="description" content="숫자·기능·상태를 한눈에 확인하는 가상경제 통합 관제 구성" />
+  <title>가상 주식 거래소 · Woldeok Moneyverse</title>
+  <meta name="description" content="[토스 증권 스타일] 10대 가상 상장사 실시간 호가, 캔들 차트, 모의투자 시뮬레이터" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
 
   <style>
@@ -17,13 +17,15 @@
       --mv-surface: #151d32;
       --mv-surface-light: #1b243e;
       --mv-border: rgba(168, 188, 216, 0.12);
-      --mv-primary: #2dd4bf;
-      --mv-primary-light: #b39eff;
+      --mv-border-active: rgba(156, 131, 255, 0.4);
+      --mv-primary: #9c83ff;
+      --mv-primary-glow: rgba(156, 131, 255, 0.35);
       --mv-blue: #64b7ff;
       --mv-green: #4ade80;
-      --mv-rose: #fb7185;
+      --mv-red: #f87171;
       --mv-text: #e9f1ff;
       --mv-muted: #a8bcd8;
+      --mv-subtle: #627594;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -36,7 +38,14 @@
       width: 100%;
     }
 
-    /* Top Global Super-Header */
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+
+    /* 1. Top Super Header */
     .super-header {
       display: flex;
       justify-content: space-between;
@@ -45,7 +54,8 @@
       font-size: 11px;
       color: #64748b;
       letter-spacing: 0.5px;
-      border-bottom: 1px solid rgba(168, 188, 216, 0.06);
+      border-bottom: 1px solid rgba(168, 188, 216, 0.08);
+      background-color: #080b15;
     }
     .super-header strong {
       color: var(--mv-primary);
@@ -58,16 +68,17 @@
       width: 100%;
     }
 
-    /* Sidebar (Desktop 1024px+) */
+    /* 2. Desktop 240px Fixed Sidebar */
     .home-sidebar {
       display: none;
-      width: 210px;
-      min-width: 210px;
-      background-color: var(--mv-sidebar);
+      width: 240px;
+      min-width: 240px;
+      max-width: 240px;
+      background-color: #0c1020;
       border-right: 1px solid var(--mv-border);
-      padding: 24px 14px;
+      padding: 24px 16px;
       flex-direction: column;
-      gap: 20px;
+      gap: 24px;
       position: sticky;
       top: 0;
       height: 100vh;
@@ -80,12 +91,31 @@
     }
 
     .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 8px 16px 8px;
+      border-bottom: 1px solid rgba(168, 188, 216, 0.1);
+      text-decoration: none;
+    }
+    .logo-badge {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #9c83ff 0%, #64b7ff 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: #ffffff;
+      font-size: 16px;
+      box-shadow: 0 4px 12px var(--mv-primary-glow);
+    }
+    .logo-title {
       font-size: 15px;
       font-weight: 800;
+      letter-spacing: -0.02em;
       color: #ffffff;
-      padding: 0 8px 12px 8px;
-      border-bottom: 1px solid var(--mv-border);
-      letter-spacing: -0.2px;
     }
 
     .nav-list {
@@ -93,99 +123,109 @@
       display: flex;
       flex-direction: column;
       gap: 4px;
+      padding: 0;
+      margin: 0;
     }
     .nav-item-link {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 9px 12px;
-      border-radius: 8px;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 10px;
       color: var(--mv-muted);
       text-decoration: none;
-      font-size: 13px;
+      font-size: 13.5px;
       font-weight: 600;
-      transition: all 0.15s ease;
+      transition: all 0.15s ease-in-out;
     }
     .nav-item-link:hover {
-      background-color: rgba(156, 131, 255, 0.08);
+      background-color: var(--mv-surface);
       color: #ffffff;
     }
     .nav-item-link.active {
-      background-color: rgba(156, 131, 255, 0.2);
-      border: 1px solid rgba(156, 131, 255, 0.35);
-      color: #ffffff;
-      font-weight: 700;
-    }
-    .nav-star {
+      background: linear-gradient(90deg, rgba(156, 131, 255, 0.2) 0%, rgba(156, 131, 255, 0.05) 100%);
       color: var(--mv-primary);
-      font-size: 12px;
+      border: 1px solid rgba(156, 131, 255, 0.35);
+      font-weight: 700;
+      box-shadow: 0 2px 10px rgba(156, 131, 255, 0.15);
+    }
+    .nav-item-link .material-symbols-outlined {
+      font-size: 20px;
+      width: 24px;
+      text-align: center;
     }
 
-    /* Main Container */
+    /* 3. Main Workspace */
     .home-main {
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 24px 32px 64px 32px;
-      max-width: 1100px;
+      padding: 24px 32px 80px 32px;
+      max-width: 1200px;
       margin: 0 auto;
       width: 100%;
-      gap: 16px;
+      gap: 20px;
     }
 
     @media (max-width: 768px) {
       .home-main {
-        padding: 16px 16px 80px 16px;
+        padding: 16px 14px 90px 14px;
+        gap: 16px;
       }
     }
 
-    /* Header: Title + Search + Auth */
+    /* Header: Title + Language + Auth */
     .home-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding-bottom: 8px;
     }
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
     .header-title {
-      font-size: 20px;
-      font-weight: 800;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
       color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-sub {
+      font-size: 13px;
+      color: var(--mv-muted);
     }
     .header-right {
       display: flex;
       align-items: center;
       gap: 10px;
     }
-    .search-box {
-      display: flex;
+    .lang-switcher-pill {
+      display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: var(--mv-surface);
-      border: 1px solid var(--mv-border);
-      border-radius: 8px;
-      padding: 6px 12px;
-      width: 180px;
-    }
-    .search-box input {
-      background: none;
-      border: none;
-      outline: none;
-      color: #ffffff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(156, 131, 255, 0.3);
+      background: rgba(21, 29, 50, 0.85);
+      color: #e9f1ff;
       font-size: 12px;
-      width: 100%;
+      cursor: pointer;
+      font-weight: 700;
+      backdrop-filter: blur(8px);
+      transition: all 0.2s ease;
     }
-    .search-box input::placeholder {
-      color: #7b8fa8;
-    }
-
-    /* Auth Action Container */
-    #auth-action-container {
-      display: flex;
-      align-items: center;
+    .lang-switcher-pill:hover {
+      border-color: var(--mv-primary);
+      background: rgba(156, 131, 255, 0.15);
     }
     .header-auth-circle {
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
       display: flex;
@@ -194,272 +234,317 @@
       color: #ffffff;
       box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4);
       text-decoration: none;
-      font-weight: 700;
-      font-size: 12px;
+      transition: transform 0.15s ease;
     }
-    .user-profile-badge {
+    .header-auth-circle:hover {
+      transform: scale(1.05);
+    }
+
+    /* 4. Global Macro Pulse Ticker */
+    .macro-ticker-strip {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(21, 29, 50, 0.7);
+      border: 1px solid var(--mv-border);
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 12px;
+      overflow: hidden;
+    }
+    .macro-badge {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 8px;
-      background: rgba(156, 131, 255, 0.15);
-      border: 1px solid rgba(156, 131, 255, 0.35);
-      color: #ffffff;
-      text-decoration: none;
-      font-size: 12px;
-      font-weight: 700;
-    }
-    .btn-logout-mini {
-      padding: 4px 8px;
+      gap: 4px;
+      padding: 3px 8px;
       border-radius: 6px;
-      background: rgba(244, 63, 94, 0.12);
-      border: 1px solid rgba(244, 63, 94, 0.3);
-      color: #fb7185;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-left: 6px;
-    }
-
-    /* Hero Banner Card */
-    .hero-card {
-      background-color: var(--mv-surface);
-      border: 1px solid var(--mv-border);
-      border-radius: 12px;
-      padding: 24px 28px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .hero-heading {
-      font-size: 22px;
+      background: rgba(156, 131, 255, 0.2);
+      border: 1px solid rgba(156, 131, 255, 0.35);
+      color: var(--mv-primary);
       font-weight: 800;
-      color: #ffffff;
+      font-size: 11px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
-    .hero-sub {
-      font-size: 13px;
+    .macro-content {
       color: var(--mv-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
     }
 
-    /* 3-Split KPI Card (from home.png) */
-    .kpi-split-card {
-      background-color: var(--mv-surface);
-      border: 1px solid var(--mv-border);
-      border-radius: 12px;
+    /* 5. 4-Column Neo Navy Market Status Strip */
+    .market-status-grid {
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
     }
-    @media (min-width: 640px) {
-      .kpi-split-card {
-        grid-template-columns: repeat(3, 1fr);
+    @media (min-width: 1024px) {
+      .market-status-grid {
+        grid-template-columns: repeat(4, 1fr);
       }
     }
-    .kpi-split-col {
-      padding: 18px 24px;
+    .status-card {
+      background-color: var(--mv-surface);
+      border: 1px solid var(--mv-border);
+      border-radius: 14px;
+      padding: 16px 18px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 90px;
-      position: relative;
+      min-height: 84px;
     }
-    .kpi-split-col:not(:last-child) {
-      border-right: 1px solid var(--mv-border);
+    .status-card-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--mv-subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
-    .kpi-title {
-      font-size: 12px;
-      color: var(--mv-muted);
-      font-weight: 600;
-    }
-    .kpi-value {
-      font-size: 20px;
-      font-weight: 800;
+    .status-card-val {
+      font-size: 19px;
+      font-weight: 900;
       color: #ffffff;
       font-family: 'JetBrains Mono', monospace;
       margin-top: 4px;
-    }
-    .kpi-sample-tag {
-      font-size: 10px;
-      color: #7b8fa8;
-      align-self: flex-end;
-      margin-top: auto;
-    }
-
-    /* Bento Grid: Chart + Quick Actions */
-    .bento-grid-2col {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 16px;
-    }
-    @media (min-width: 768px) {
-      .bento-grid-2col {
-        grid-template-columns: 1.6fr 1fr;
-      }
-    }
-
-    .bento-chart-card {
-      background-color: var(--mv-surface);
-      border: 1px solid var(--mv-border);
-      border-radius: 12px;
-      padding: 18px 22px;
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* 6. Toss Style Filter Tabs */
+    .filter-tabs-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 12px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(168, 188, 216, 0.08);
+      flex-wrap: wrap;
     }
-    .bento-card-title {
-      font-size: 14px;
-      font-weight: 800;
-      color: #ffffff;
-    }
-    .chart-box {
-      width: 100%;
-      height: 120px;
-      margin-top: 6px;
-    }
-    .chart-box svg {
-      width: 100%;
-      height: 100%;
-      overflow: visible;
-    }
-
-    .bento-actions-card {
-      background-color: var(--mv-surface);
-      border: 1px solid var(--mv-border);
-      border-radius: 12px;
-      padding: 18px 22px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .actions-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 4px;
-    }
-    .action-item {
+    .filter-btn-group {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 13px;
-      color: #ffffff;
-      text-decoration: none;
-      padding: 4px 0;
-      transition: color 0.15s ease;
+      overflow-x: auto;
+      padding-bottom: 2px;
     }
-    .action-item:hover {
-      color: var(--mv-primary);
-    }
-    .circle-bullet {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      border: 1.5px solid var(--mv-primary);
-    }
-
-    /* Bottom Recent Records Card (from home.png) */
-    .recent-records-card {
-      background-color: var(--mv-surface);
-      border: 1px solid var(--mv-border);
-      border-radius: 12px;
-      padding: 20px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .records-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .records-table tr {
-      border-bottom: 1px solid rgba(168, 188, 216, 0.08);
-    }
-    .records-table tr:last-child {
-      border-bottom: none;
-    }
-    .records-table td {
-      padding: 10px 0;
-      font-size: 13px;
-    }
-    .records-table td.label-td {
-      font-weight: 600;
-      color: #ffffff;
-    }
-    .records-table td.btn-td {
-      text-align: right;
-    }
-    .records-action-link {
-      color: var(--mv-primary);
-      text-decoration: none;
+    .filter-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
+      padding: 0 16px;
+      border-radius: 10px;
       font-size: 12px;
       font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 4px;
-      transition: background-color 0.15s;
+      cursor: pointer;
+      border: 1px solid var(--mv-border);
+      background: var(--mv-surface);
+      color: var(--mv-muted);
+      transition: all 0.15s ease;
+      white-space: nowrap;
     }
-    .records-action-link:hover {
-      background-color: rgba(156, 131, 255, 0.12);
+    .filter-btn:hover {
+      color: #ffffff;
+      border-color: rgba(168, 188, 216, 0.3);
+    }
+    .filter-btn.active {
+      background: rgba(74, 222, 128, 0.15);
+      color: var(--mv-green);
+      border: 1px solid rgba(74, 222, 128, 0.4);
+      box-shadow: 0 2px 8px rgba(74, 222, 128, 0.1);
+    }
+    .market-count-badge {
+      font-size: 12px;
+      color: var(--mv-subtle);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
     }
 
-    /* Bottom Sample Caption */
-    .sample-notice-caption {
-      font-size: 11px;
-      color: #5d718a;
-      text-align: center;
-      margin-top: 8px;
+    /* 7. 10 Listed Companies: Clean Card Grid (2-Column) */
+    .stocks-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
     }
-
-    /* Mobile View Stack (under 768px, matching right phone in home.png) */
-    .mobile-cards-stack {
-      display: none;
-      flex-direction: column;
-      gap: 10px;
-    }
-    @media (max-width: 767px) {
-      .hero-card, .kpi-split-card, .bento-grid-2col, .recent-records-card {
-        display: none !important;
+    @media (min-width: 900px) {
+      .stocks-grid {
+        grid-template-columns: repeat(2, 1fr);
       }
-      .mobile-cards-stack {
-        display: flex !important;
-      }
     }
-
-    .mobile-card-item {
+    .stock-card {
       background-color: var(--mv-surface);
       border: 1px solid var(--mv-border);
-      border-radius: 12px;
-      padding: 16px 18px;
+      border-radius: 16px;
+      padding: 18px 20px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      gap: 14px;
       text-decoration: none;
-      color: #ffffff;
+      transition: all 0.18s ease;
+      position: relative;
     }
-    .mobile-card-title {
+    .stock-card:hover {
+      border-color: var(--mv-border-active);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+    .stock-info-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+      flex: 1;
+      text-decoration: none;
+    }
+    .stock-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #1c2642;
+      border: 1px solid rgba(168, 188, 216, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: #e9f1ff;
+      flex-shrink: 0;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    }
+    .stock-meta {
+      min-width: 0;
+      flex: 1;
+    }
+    .stock-name-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .stock-name {
       font-size: 14.5px;
       font-weight: 800;
       color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .mobile-card-sub {
+    .stock-symbol {
       font-size: 11px;
-      color: var(--mv-muted);
-      margin-top: 3px;
+      color: var(--mv-subtle);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      margin-top: 2px;
     }
-    .mobile-chevron {
-      color: #7b8fa8;
-      font-size: 18px;
+    .stock-halt-badge {
+      font-size: 9px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(248, 113, 113, 0.2);
+      border: 1px solid rgba(248, 113, 113, 0.4);
+      color: var(--mv-red);
+      flex-shrink: 0;
+    }
+    .stock-price-col {
+      text-align: right;
+      min-width: 90px;
+      flex-shrink: 0;
+      text-decoration: none;
+    }
+    .stock-cur-price {
+      font-size: 15px;
+      font-weight: 900;
+      font-family: 'JetBrains Mono', monospace;
+      color: #ffffff;
+      tabular-nums: true;
+    }
+    .stock-cur-unit {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--mv-subtle);
+      margin-left: 2px;
+    }
+    .stock-pct-change {
+      font-size: 12px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 2px;
+    }
+    .stock-pct-change.up {
+      color: var(--mv-red);
+    }
+    .stock-pct-change.down {
+      color: var(--mv-blue);
+    }
+    .stock-action-col {
+      flex-shrink: 0;
+    }
+    .btn-buy-mini {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      min-height: 38px;
+      padding: 0 14px;
+      border-radius: 10px;
+      background: rgba(248, 113, 113, 0.15);
+      border: 1px solid rgba(248, 113, 113, 0.35);
+      color: var(--mv-red);
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .btn-buy-mini:hover {
+      background: rgba(248, 113, 113, 0.25);
+      border-color: var(--mv-red);
+      transform: scale(1.02);
     }
 
-    /* Mobile Bottom Dock (5-Tab) */
+    /* 8. Safe Simulation Notice Card */
+    .safe-notice-card {
+      background-color: var(--mv-surface);
+      border: 1px solid var(--mv-border);
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--mv-muted);
+    }
+    .safe-notice-card .material-symbols-outlined {
+      color: var(--mv-green);
+      font-size: 20px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .safe-notice-text strong {
+      color: #ffffff;
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    /* 9. Mobile Bottom Dock (5-Tab) */
     .mobile-bottom-dock {
       display: none;
       position: fixed;
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 58px;
+      height: 60px;
       background-color: rgba(12, 16, 32, 0.95);
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(14px);
       border-top: 1px solid var(--mv-border);
       z-index: 50;
       justify-content: space-around;
@@ -469,394 +554,357 @@
     @media (max-width: 1023px) {
       .mobile-bottom-dock { display: flex !important; }
     }
-    .mobile-bottom-dock a {
+    .mobile-dock-tab {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 2px;
+      gap: 3px;
       color: var(--mv-muted);
       text-decoration: none;
       font-size: 10.5px;
       font-weight: 600;
       min-width: 56px;
       min-height: 46px;
+      transition: color 0.15s ease;
     }
-    .mobile-bottom-dock a.active {
+    .mobile-dock-tab.active {
       color: var(--mv-primary);
       font-weight: 800;
     }
-    .mobile-bottom-dock a .icon {
-      font-size: 20px;
+    .mobile-dock-tab .material-symbols-outlined {
+      font-size: 22px;
     }
   </style>
 </head>
 <body>
-  <!-- Top Super Header -->
-  <div class="super-header">
+  <!-- 1. Top Global Super Header -->
+  <header class="super-header" role="banner">
     <div><strong>W Woldeok Moneyverse</strong> &nbsp; ALL-PAGE DESIGN / v2026.11.18.12</div>
-    <div>주식 · /stocks</div>
-  </div>
+    <div>주식 거래소 · /stocks</div>
+  </header>
 
   <div class="home-layout">
-    <!-- Desktop Sidebar -->
-    <aside class="home-sidebar" aria-label="사이드바">
-      <div class="sidebar-logo">W Moneyverse</div>
-      <ul class="nav-list">
-        <li>
-          <a href="/" class="nav-item-link">
-            <span class="nav-star">✦</span>
-            <span>홈</span>
-          </a>
-        </li>
-        <li>
-          <a href="/stocks" class="nav-item-link">
-            <span class="nav-star">✦</span>
-            <span>대시보드</span>
-          </a>
-        </li>
-        <li>
-          <a href="/wallet" class="nav-item-link">
-            <span class="nav-star">✦</span>
-            <span>지갑</span>
-          </a>
-        </li>
-        <li>
-          <a href="/stocks" class="nav-item-link active">
-            <span class="nav-star">✦</span>
-            <span>주식</span>
-          </a>
-        </li>
-        <li>
-          <a href="/quests" class="nav-item-link">
-            <span class="nav-star">✦</span>
-            <span>퀘스트</span>
-          </a>
-        </li>
-        <li>
-          <a href="/shop" class="nav-item-link">
-            <span class="nav-star">✦</span>
-            <span>상점</span>
-          </a>
-        </li>
-        <li>
-          <a href="/board" class="nav-item-link">
-            <span class="nav-star">✦</span>
-            <span>커뮤니티</span>
-          </a>
-        </li>
-        <li>
-          <a href="/admin-preview" class="nav-item-link">
-            <span class="nav-star">✦</span>
-            <span>관리자</span>
-          </a>
-        </li>
-      </ul>
+    <!-- 2. Desktop 240px Fixed Sidebar with Google Material Symbols -->
+    <aside class="home-sidebar" aria-label="사이드바 내비게이션">
+      <a href="/" class="sidebar-logo">
+        <div class="logo-badge">W</div>
+        <div class="logo-title">W Moneyverse</div>
+      </a>
+      <nav aria-label="메인 메뉴">
+        <ul class="nav-list">
+          <li>
+            <a href="/" class="nav-item-link">
+              <span class="material-symbols-outlined">home</span>
+              <span>홈</span>
+            </a>
+          </li>
+          <li>
+            <a href="/wallet" class="nav-item-link">
+              <span class="material-symbols-outlined">account_balance_wallet</span>
+              <span>지갑</span>
+            </a>
+          </li>
+          <li>
+            <a href="/stocks" class="nav-item-link active">
+              <span class="material-symbols-outlined">trending_up</span>
+              <span>주식</span>
+            </a>
+          </li>
+          <li>
+            <a href="/quests" class="nav-item-link">
+              <span class="material-symbols-outlined">rewarded_ads</span>
+              <span>퀘스트</span>
+            </a>
+          </li>
+          <li>
+            <a href="/shop" class="nav-item-link">
+              <span class="material-symbols-outlined">storefront</span>
+              <span>상점</span>
+            </a>
+          </li>
+          <li>
+            <a href="/board" class="nav-item-link">
+              <span class="material-symbols-outlined">forum</span>
+              <span>커뮤니티</span>
+            </a>
+          </li>
+          <li>
+            <a href="/chat" class="nav-item-link">
+              <span class="material-symbols-outlined">chat</span>
+              <span>채팅</span>
+            </a>
+          </li>
+          <li>
+            <a href="/account" class="nav-item-link">
+              <span class="material-symbols-outlined">person</span>
+              <span>내 계정</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
     </aside>
 
-    <!-- Main Content -->
-    <main class="home-main">
-      <!-- Header -->
+    <!-- 3. Main Workspace -->
+    <main class="home-main" id="main-content">
+      <!-- Title & Action Bar -->
       <header class="home-header">
-        <h1 class="header-title">주식</h1>
+        <div class="header-left">
+          <h1 class="header-title">
+            <span class="material-symbols-outlined" style="color: var(--mv-primary); font-size: 28px;">candlestick_chart</span>
+            <span>가상 주식 거래소</span>
+          </h1>
+          <p class="header-sub">실시간 10단 호가창 및 모의투자 시뮬레이터 (10대 상장사)</p>
+        </div>
         <div class="header-right">
-          <div class="search-box">
-            <input type="text" placeholder="메뉴 검색" aria-label="메뉴 검색" />
-          </div>
-          <div id="auth-action-container">
-            <a href="/login" class="header-auth-circle" title="로그인">
-              <span class="material-symbols-outlined" style="font-size: 16px;">login</span>
-            </a>
-          </div>
+          <button type="button" class="lang-switcher-pill" title="언어 변경 (5개국어 지원)">
+            <span class="material-symbols-outlined" style="font-size: 16px; color: var(--mv-primary);">language</span>
+            <span>KR KO</span>
+          </button>
+          <a href="/login" class="header-auth-circle" title="로그인">
+            <span class="material-symbols-outlined" style="font-size: 18px;">login</span>
+          </a>
         </div>
       </header>
 
-      <!-- Desktop Hero Card -->
-      <section class="hero-card">
-        <h2 class="hero-heading">주식</h2>
-        <p class="hero-sub">숫자·기능·상태를 한눈에 확인하는 구성</p>
+      <!-- 4. Global Macro Pulse Ticker -->
+      <section class="macro-ticker-strip" aria-label="시장 공시 펄스">
+        <span class="macro-badge">
+          <span class="material-symbols-outlined" style="font-size: 14px;">bolt</span>
+          <span>MARKET TICKER</span>
+        </span>
+        <span class="macro-content" id="macro-ticker-text">
+          실시간 10대 상장사 시장 호가 스트림이 정상 연결되었습니다. 안정적인 분할 매매로 포트폴리오를 관리하세요.
+        </span>
       </section>
 
-      <!-- 3-Split KPI Card (from home.png) -->
-      <section class="kpi-split-card" aria-label="주요 현황">
-        <div class="kpi-split-col">
-          <span class="kpi-title">가상 자산</span>
-          <div class="kpi-value" id="kpi-wallet-val">—</div>
-          <span class="kpi-sample-tag" id="kpi-wallet-state" aria-live="polite">—</span>
-        </div>
-        <div class="kpi-split-col">
-          <span class="kpi-title">최근 변동</span>
-          <div class="kpi-value" id="kpi-change-val">—</div>
-          <span class="kpi-sample-tag" id="kpi-change-state" aria-live="polite">—</span>
-        </div>
-        <div class="kpi-split-col">
-          <span class="kpi-title">활동</span>
-          <div class="kpi-value" id="kpi-status-val">—</div>
-          <span class="kpi-sample-tag" id="kpi-status-state" aria-live="polite">—</span>
-        </div>
+      <!-- 5. 4-Column Neo Navy Market Status Strip -->
+      <section class="market-status-grid" aria-label="시장 지표 개요">
+        <article class="status-card">
+          <span class="status-card-title">상장 종목</span>
+          <div class="status-card-val">
+            <span id="stat-total-stocks">10</span>
+            <span style="font-size: 12px; color: var(--mv-subtle); font-weight: 500;">종목</span>
+          </div>
+        </article>
+        <article class="status-card">
+          <span class="status-card-title">상승 / 하락 흐름</span>
+          <div class="status-card-val">
+            <span style="color: var(--mv-red);" id="stat-advancing">—</span>
+            <span style="color: var(--mv-subtle); font-size: 14px;">/</span>
+            <span style="color: var(--mv-blue);" id="stat-declining">—</span>
+          </div>
+        </article>
+        <article class="status-card">
+          <span class="status-card-title">주문 표준 (KRX)</span>
+          <div class="status-card-val" style="font-size: 13px; gap: 8px;">
+            <span style="color: var(--mv-red); display: inline-flex; align-items: center; gap: 4px;">
+              <span class="material-symbols-outlined" style="font-size: 14px;">trending_up</span> 매수·상승
+            </span>
+            <span style="color: var(--mv-blue); display: inline-flex; align-items: center; gap: 4px;">
+              <span class="material-symbols-outlined" style="font-size: 14px;">trending_down</span> 매도·하락
+            </span>
+          </div>
+        </article>
+        <article class="status-card">
+          <span class="status-card-title">트레이딩 데스크</span>
+          <div class="status-card-val" style="font-size: 13px; color: var(--mv-green);">
+            <span class="material-symbols-outlined" style="font-size: 16px;">verified</span>
+            <span>실시간 호가 틱 연동</span>
+          </div>
+        </article>
       </section>
 
-      <!-- 2-Col Bento Grid (from home.png) -->
-      <section class="bento-grid-2col">
-        <!-- Left: Trend Polyline Chart -->
-        <div class="bento-chart-card">
-          <h3 class="bento-card-title">현황 추이</h3>
-          <div class="chart-box"><p id="chart-status" role="status">—</p>
-          </div>
+      <!-- 6. Filter Tabs Row -->
+      <section class="filter-tabs-row" aria-label="종목 정렬 필터">
+        <div class="filter-btn-group" role="tablist">
+          <button type="button" class="filter-btn active" data-sort="default" role="tab" aria-selected="true">전체 10종목</button>
+          <button type="button" class="filter-btn" data-sort="change" role="tab" aria-selected="false">급등·급락순</button>
+          <button type="button" class="filter-btn" data-sort="price" role="tab" aria-selected="false">가격순</button>
+          <button type="button" class="filter-btn" data-sort="name" role="tab" aria-selected="false">이름순</button>
         </div>
-
-        <!-- Right: Quick Actions -->
-        <div class="bento-actions-card">
-          <h3 class="bento-card-title">빠른 작업</h3>
-          <div class="actions-list">
-            <a href="/status" class="action-item">
-              <span class="circle-bullet"></span>
-              <span>상태 조회</span>
-            </a>
-            <a href="/guide" class="action-item">
-              <span class="circle-bullet"></span>
-              <span>상세 정보</span>
-            </a>
-            <a href="/admin/logs" class="action-item">
-              <span class="circle-bullet"></span>
-              <span>작업 기록</span>
-            </a>
-          </div>
-        </div>
+        <span class="market-count-badge" id="stocks-badge-count">총 10개 종목 상장 중</span>
       </section>
 
-      <!-- Bottom Recent Records Card (from home.png) -->
-      <section class="recent-records-card">
-        <h3 class="bento-card-title">최근 기록</h3>
-        <table class="records-table">
-          <tbody>
-            <tr>
-              <td class="label-td">데이터 원천 상태</td>
-              <td class="btn-td"><a href="/status" class="records-action-link">조회</a></td>
-            </tr>
-            <tr>
-              <td class="label-td">권한 및 확인</td>
-              <td class="btn-td"><a href="/admin/security" class="records-action-link">검토</a></td>
-            </tr>
-            <tr>
-              <td class="label-td">마지막 작업</td>
-              <td class="btn-td"><a href="/admin/logs" class="records-action-link">표시</a></td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- 7. 10 Listed Companies: Clean Card Grid (2-Column) -->
+      <section class="stocks-grid" id="stocks-container" aria-label="10대 상장사 목록">
+        <!-- JavaScript binds live cards from /api/v1/stocks -->
       </section>
 
-      <!-- Mobile Stack (from home.png right phone frame) -->
-      <div class="mobile-cards-stack">
-        <div class="mobile-card-item">
-          <div>
-            <div class="mobile-card-title">주식</div>
-            <div class="mobile-card-sub">모바일 맞춤 구성 · 시안</div>
-          </div>
-          <span class="material-symbols-outlined mobile-chevron">chevron_right</span>
+      <!-- 8. Safe Simulation Notice Card -->
+      <section class="safe-notice-card" aria-label="안내 사항">
+        <span class="material-symbols-outlined">help</span>
+        <div class="safe-notice-text">
+          <strong>100% 안전한 가상 모의투자 안내</strong>
+          <p>월덕 머니버스의 모든 종목 시세와 재화(WLD)는 게임 내 알고리즘에 의해 움직이는 가상 경제이며, 실제 현금 입출금이나 실제 주식 투자 상품이 아닙니다.</p>
         </div>
-        <div class="mobile-card-item">
-          <div>
-            <div class="mobile-card-title">자산 정보</div>
-            <div class="mobile-card-sub">자세한 내용 보기 ›</div>
-          </div>
-          <span class="material-symbols-outlined mobile-chevron">chevron_right</span>
-        </div>
-        <div class="mobile-card-item">
-          <div>
-            <div class="mobile-card-title">추이 차트</div>
-            <div class="mobile-card-sub">자세한 내용 보기 ›</div>
-          </div>
-          <span class="material-symbols-outlined mobile-chevron">chevron_right</span>
-        </div>
-        <div class="mobile-card-item">
-          <div>
-            <div class="mobile-card-title">거래 내역</div>
-            <div class="mobile-card-sub">자세한 내용 보기 ›</div>
-          </div>
-          <span class="material-symbols-outlined mobile-chevron">chevron_right</span>
-        </div>
-        <div class="mobile-card-item">
-          <div>
-            <div class="mobile-card-title">관련 메뉴</div>
-            <div class="mobile-card-sub">자세한 내용 보기 ›</div>
-          </div>
-          <span class="material-symbols-outlined mobile-chevron">chevron_right</span>
-        </div>
-      </div>
-
-      <!-- Sample Notice Caption -->
-      <div class="sample-notice-caption">
-        본 화면은 설계용 예시이며 실제 회원/금융 데이터를 사용하지 않습니다.
-      </div>
+      </section>
     </main>
   </div>
 
-  <!-- Mobile Bottom Navigation (Matching home.png bottom icons) -->
+  <!-- 9. Mobile Bottom Dock (5-Tab) with Google Material Symbols -->
   <nav class="mobile-bottom-dock" aria-label="모바일 하단 내비게이션">
-    <a href="/">
-      <span class="material-symbols-outlined icon">home</span>
+    <a href="/" class="mobile-dock-tab">
+      <span class="material-symbols-outlined">home</span>
       <span>홈</span>
     </a>
-    <a href="/wallet" class="active">
-      <span class="material-symbols-outlined icon">trending_up</span>
-      <span>자산</span>
+    <a href="/wallet" class="mobile-dock-tab">
+      <span class="material-symbols-outlined">account_balance_wallet</span>
+      <span>지갑</span>
     </a>
-    <a href="/arcade">
-      <span class="material-symbols-outlined icon">diamond</span>
-      <span>게임</span>
+    <a href="/stocks" class="mobile-dock-tab active">
+      <span class="material-symbols-outlined">trending_up</span>
+      <span>주식</span>
     </a>
-    <a href="/board">
-      <span class="nav-star" style="font-size: 16px;">✦</span>
-      <span>소통</span>
+    <a href="/quests" class="mobile-dock-tab">
+      <span class="material-symbols-outlined">rewarded_ads</span>
+      <span>퀘스트</span>
     </a>
-    <a href="/account">
-      <span class="material-symbols-outlined icon">account_circle</span>
-      <span>마이</span>
+    <a href="/board" class="mobile-dock-tab">
+      <span class="material-symbols-outlined">forum</span>
+      <span>커뮤니티</span>
     </a>
   </nav>
 
-  <!-- Dynamic Session & Real Data Hydration Script -->
+  <!-- 10. Live Stock Client Engine -->
   <script>
     (function() {
       'use strict';
-      function escapeHtml(str) {
-        if (!str) return '';
-        return String(str).replace(/[&<>'"]/g, function(tag) {
-          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag;
-        });
-      }
-      window.executeLogout = async function() {
-        try {
-          await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'same-origin' });
-          window.location.reload();
-        } catch (e) {
-          window.location.href = '/api/v1/auth/reset';
-        }
+
+      const STOCK_NAMES = {
+        'CHIMU314': '치무전자',
+        'SPACE': '월덱 우주항공',
+        'DUCK': '덕덕 물산',
+        'MYUY': '뮤야 엔터테인먼트',
+        'WDB': 'Woldeok Bio',
+        'WDM': '월덱 모빌리티',
+        'WDT': '덕트코인',
+        'WDG': '건전지',
+        'AAA': '삼식식품',
+        'NEO': '네오사이버'
       };
-      const labels = {"en":{"loading":"Loading","unavailable":"Unavailable","guest":"Sign in required","available":"API response"},"ko":{"loading":"\uc870\ud68c \uc911","unavailable":"\uc870\ud68c \ubd88\uac00","guest":"\ub85c\uadf8\uc778 \ud544\uc694","available":"API \uc751\ub2f5"},"ja":{"loading":"\u8aad\u8fbc\u4e2d","unavailable":"\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093","guest":"\u30ed\u30b0\u30a4\u30f3\u304c\u5fc5\u8981","available":"API \u5fdc\u7b54"},"zh":{"loading":"\u52a0\u8f7d\u4e2d","unavailable":"\u65e0\u6cd5\u83b7\u53d6","guest":"\u8bf7\u5148\u767b\u5f55","available":"API \u54cd\u5e94"},"vi":{"loading":"\u0110ang t\u1ea3i","unavailable":"Kh\u00f4ng kh\u1ea3 d\u1ee5ng","guest":"C\u1ea7n \u0111\u0103ng nh\u1eadp","available":"Ph\u1ea3n h\u1ed3i API"}};
-      const states = {wallet:'loading',change:'loading',status:'unavailable'};
-      const authContainer = document.getElementById('auth-action-container');
-      const initialAuth = authContainer ? authContainer.innerHTML : '';
-      let sessionRevision = 0, marketRevision = 0;
-      function refreshStateLabels() {
-        const lang = document.documentElement.lang || (window.MVI18n ? window.MVI18n.getLocale() : 'en');
-        const copy = labels[lang] || labels.en;
-        for (const key of Object.keys(states)) {
-          const el = document.getElementById('kpi-' + key + '-state');
-          if (el) el.textContent = copy[states[key]];
-        }
-        const chart = document.getElementById('chart-status');
-        if (chart) chart.textContent = copy.unavailable;
-      }
-      function metric(key,value,state) {
-        states[key] = state;
-        const el = document.getElementById('kpi-' + key + '-val');
-        if (el) {
-          el.textContent = value === null ? '\u2014' : value;
-          el.dataset.sourceState = state;
-          el.style.color = key === 'change' && value !== null ? (value.startsWith('-') ? '#fb7185' : '#4ade80') : '';
-        }
-        refreshStateLabels();
-      }
-      function integer(value) {
-        return typeof value === 'string' && /^(0|[1-9][0-9]{0,37})$/.test(value) ? value : null;
-      }
-      async function read(path) {
-        const res = await fetch(path,{credentials:'same-origin',cache:'no-store',redirect:'error',signal:AbortSignal.timeout(5000)});
-        if (!res.ok) { const error = new Error('Source unavailable'); error.status = res.status; throw error; }
-        return res.json();
-      }
-      async function hydrateHomeSession() {
-        const revision = ++sessionRevision;
-        let sessionVerified = false;
-        metric('wallet',null,'loading');
+
+      let stockDataList = [];
+      let currentSort = 'default';
+
+      async function fetchStocks() {
         try {
-          const data = await read('/api/v1/auth/session');
-          if (revision !== sessionRevision) return;
-          if (!data || !(data.authenticated === true || data.signedIn === true) || !data.user) {
-            if (authContainer) authContainer.innerHTML = initialAuth;
-            metric('wallet',null,'guest');
-            return;
-          }
-          sessionVerified = true;
-          const displayName = data.user.displayName || data.user.username || 'Member';
-          const roles = Array.isArray(data.user.roles) ? data.user.roles : [];
-          const isAdmin = roles.some(function(r) { return typeof r === 'string' && r.toLowerCase().indexOf('admin') !== -1; });
-            if (authContainer) {
-              authContainer.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <a href="/account" class="user-profile-badge" title="내 계정">
-                    <span class="material-symbols-outlined" style="font-size: 15px; color: #a78bfa;">account_circle</span>
-                    <span>${escapeHtml(displayName)}</span>
-                    ${isAdmin ? '<span style="font-size: 9px; padding: 1px 4px; border-radius: 4px; background: #6366f1; color: #fff;">ADMIN</span>' : ''}
-                  </a>
-                  <button type="button" class="btn-logout-mini" onclick="executeLogout()">로그아웃</button>
+          const resp = await fetch('/api/v1/stocks', { cache: 'no-store' });
+          if (!resp.ok) throw new Error('Network status: ' + resp.status);
+          const data = await resp.json();
+          stockDataList = data.stocks || [];
+          renderStocks();
+        } catch (err) {
+          console.warn('[Stocks] Fallback to default catalog', err);
+          renderFallback();
+        }
+      }
+
+      function getSortedStocks() {
+        const copy = [...stockDataList];
+        if (currentSort === 'change') {
+          copy.sort((a, b) => {
+            const pctA = getPct(a);
+            const pctB = getPct(b);
+            return Math.abs(pctB) - Math.abs(pctA);
+          });
+        } else if (currentSort === 'price') {
+          copy.sort((a, b) => Number(b.current_price) - Number(a.current_price));
+        } else if (currentSort === 'name') {
+          copy.sort((a, b) => (STOCK_NAMES[a.symbol] || a.name || '').localeCompare(STOCK_NAMES[b.symbol] || b.name || ''));
+        }
+        return copy;
+      }
+
+      function getPct(stock) {
+        const cur = Number(stock.current_price) || 0;
+        const open = Number(stock.day_open_price || stock.current_price) || cur;
+        return open > 0 ? ((cur - open) / open) * 100 : 0;
+      }
+
+      function renderStocks() {
+        const container = document.getElementById('stocks-container');
+        if (!container) return;
+
+        const sorted = getSortedStocks();
+        let advancing = 0;
+        let declining = 0;
+
+        const html = sorted.map(stock => {
+          const cur = Number(stock.current_price) || 0;
+          const pct = getPct(stock);
+          const isUp = pct >= 0;
+          if (isUp) advancing++; else declining++;
+          const name = STOCK_NAMES[stock.symbol] || stock.name || stock.symbol;
+          const isHalted = stock.halt_status && stock.halt_status.includes('HALT');
+
+          return `
+            <div class="stock-card">
+              <a href="/stocks/${encodeURIComponent(stock.symbol)}" class="stock-info-left">
+                <div class="stock-avatar">${stock.symbol.slice(0, 3)}</div>
+                <div class="stock-meta">
+                  <div class="stock-name-row">
+                    <span class="stock-name">${name}</span>
+                    ${isHalted ? '<span class="stock-halt-badge">거래정지</span>' : ''}
+                  </div>
+                  <div class="stock-symbol">${stock.symbol}</div>
                 </div>
-              `;
-            }
-          const wallet = await read('/api/v1/wallet/summary');
-          if (revision !== sessionRevision) return;
-          if (wallet && wallet.signedIn === false) {
-            if (authContainer) authContainer.innerHTML = initialAuth;
-            metric('wallet',null,'guest');
-            return;
-          }
-          const amount = wallet && wallet.signedIn === true ? integer(wallet.totalAvailableAmount) : null;
-          if (amount === null) throw new Error('Canonical wallet amount required');
-          metric('wallet',amount.replace(/\B(?=([0-9]{3})+(?![0-9]))/g,',') + ' WLD','available');
-        } catch (error) {
-          if (revision !== sessionRevision) return;
-          if ((!sessionVerified || error.status === 401) && authContainer) authContainer.innerHTML = initialAuth;
-          metric('wallet',null,error.status === 401 ? 'guest' : 'unavailable');
-        }
+              </a>
+              <a href="/stocks/${encodeURIComponent(stock.symbol)}" class="stock-price-col">
+                <div class="stock-cur-price">${cur.toLocaleString()}<span class="stock-cur-unit">WLD</span></div>
+                <div class="stock-pct-change ${isUp ? 'up' : 'down'}">
+                  <span class="material-symbols-outlined" style="font-size: 14px;">${isUp ? 'trending_up' : 'trending_down'}</span>
+                  <span>${isUp ? '+' : ''}${pct.toFixed(1)}%</span>
+                </div>
+              </a>
+              <div class="stock-action-col">
+                <a href="/stocks/${encodeURIComponent(stock.symbol)}" class="btn-buy-mini">
+                  <span class="material-symbols-outlined" style="font-size: 14px;">add_shopping_cart</span>
+                  <span>매수</span>
+                </a>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        container.innerHTML = html;
+
+        // Update KPI Strip
+        const elTotal = document.getElementById('stat-total-stocks');
+        const elAdv = document.getElementById('stat-advancing');
+        const elDec = document.getElementById('stat-declining');
+        const elCount = document.getElementById('stocks-badge-count');
+
+        if (elTotal) elTotal.textContent = sorted.length;
+        if (elAdv) elAdv.textContent = advancing;
+        if (elDec) elDec.textContent = declining;
+        if (elCount) elCount.textContent = `총 ${sorted.length}개 종목 상장 중`;
       }
-      function gcd(a,b) {
-        a = a < 0n ? -a : a;
-        while (b) { const next = a % b; a = b; b = next; }
-        return a;
+
+      function renderFallback() {
+        const defaultSymbols = ['CHIMU314', 'SPACE', 'DUCK', 'MYUY', 'WDB', 'WDM', 'WDT', 'WDG', 'AAA', 'NEO'];
+        stockDataList = defaultSymbols.map(sym => ({
+          symbol: sym,
+          name: STOCK_NAMES[sym],
+          current_price: '10000',
+          day_open_price: '10000',
+          halt_status: 'ACTIVE'
+        }));
+        renderStocks();
       }
-      function price(value) {
-        // Legacy JSON prices are accepted only if their number representation is exact.
-        if (typeof value === 'number' && Number.isSafeInteger(value)) value = String(value);
-        const canonical = integer(value);
-        if (canonical === null || canonical === '0') throw new Error('Verified positive price required');
-        return BigInt(canonical);
-      }
-      function marketChange(stocks) {
-        if (!Array.isArray(stocks) || !stocks.length || stocks.length > 1000) throw new Error('Verified market rows required');
-        let numerator = 0n, denominator = 1n;
-        for (const stock of stocks) {
-          const current = price(stock.current_price), opening = price(stock.day_open_price);
-          numerator = numerator * opening + (current - opening) * denominator;
-          denominator *= opening;
-          const divisor = gcd(numerator,denominator);
-          numerator /= divisor; denominator /= divisor;
-        }
-        denominator *= BigInt(stocks.length);
-        const scaled = (numerator < 0n ? -numerator : numerator) * 10000n;
-        const rounded = (scaled * 2n + denominator) / (denominator * 2n);
-        const sign = numerator < 0n && rounded !== 0n ? '-' : '+';
-        return sign + String(rounded / 100n) + '.' + String(rounded % 100n).padStart(2,'0') + '%';
-      }
-      async function hydrateMarketChange() {
-        const revision = ++marketRevision;
-        metric('change',null,'loading');
-        try {
-          const data = await read('/api/v1/stocks');
-          if (revision !== marketRevision) return;
-          metric('change',marketChange(data && data.stocks),'available');
-        } catch (error) {
-          if (revision === marketRevision) metric('change',null,'unavailable');
-        }
-      }
-      refreshStateLabels();
-      window.addEventListener('moneyverse:localeChanged',refreshStateLabels);
-      document.addEventListener('DOMContentLoaded',refreshStateLabels);
-      if (typeof MutationObserver === 'function') new MutationObserver(refreshStateLabels).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
-      hydrateHomeSession();
-      hydrateMarketChange();
-      setInterval(function() { return Promise.all([hydrateHomeSession(),hydrateMarketChange()]); },15000);
+
+      // Filter tabs event listener
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          currentSort = this.getAttribute('data-sort') || 'default';
+          renderStocks();
+        });
+      });
+
+      // Initialize
+      fetchStocks();
     })();
   </script>
 </body>

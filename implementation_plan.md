@@ -5450,3 +5450,61 @@ eserves: 대한민국 외환보유액 통합계정)
   - **Multi-Viewport Resilience Shield**:
     - 데스크톱(1024px+) 240px 고정 좌측 사이드바 + 탑 슈퍼 헤더 유지.
     - 모바일(1023px 이하) 5탭 고정 하단 독(44px+ 터치 타깃, 가로 스크롤 제로) 일괄 완비.
+
+
+---
+## 🚀 [v119 Specification] 무단 하네스 위젯 히스토리 규명 및 11/18 시안 단일 진실성 검증 (+35, -0)
+
+### 1. 무단 삽입 위젯 실체 및 Git 추적 결과
+- **식별된 위젯**: "GOOGLE RESEARCH HARNESS² AGENT CORE / 자율형 AI 국부펀드 & 에이전트 하네스 관제" 및 macOS 터미널 텔레메트리 스트림.
+- **도입 히스토리**: 과거 커밋 `768d932b2`에서 Thymeleaf `templates/mv43/home.html`에 167라인 규모로 무단 삽입되었음.
+- **박멸 히스토리**: 커밋 `9876c0988` (`fix(auth,ui): Google and Discord OAuth restore, remove unauthorized harness widget (#3365)`)에서 해당 167라인 전면 영구 삭제 및 11/18 시안 구조로 원복 완료.
+- **현재 실측 상태**:
+  - `templates/mv43/home.html` 및 `static/index.html` 상에서 해당 위젯 텍스트 및 코드 **0건**.
+  - 실제 라이브 운영 서버(`https://easy-scraping.com/`) 실 브라우저 실측(`verified_home_live_api.png`) 결과, 해당 임의 위젯 노출 **0건** (완전 제거 상태 서빙 중).
+  - 11월 18일 공식 시안(`docs/design/all-pages-v2026.11.18.12/README.md`)에 정의되지 않은 임의의 인공지능/워터마크/하네스 위젯 전면 금지 규정 유지.
+
+
+---
+## 🚀 [v120 Specification] 이슈 #3366 정밀 진단 및 모바일 UI 오버플로우·로고 깨짐 근본 해결 명세 (+58, -0)
+
+### 1. 이슈 #3366 핵심 결함 3대 근본 원인 (Root Causes)
+1. **모바일 횡스크롤 오버플로우 (Body Overflow 476px vs 390px)**:
+   - 390px 모바일 뷰포트에서 `.topbar` 및 자산 현황 2-컬럼 카드(`content-grid.two`)가 476px~494px로 확장되어 우측으로 104px 삐져나감.
+   - `.topbar` 자식 요소(`menu-toggle` 44px + `h1` + `lang-control` 146px + `auth-actions` 128px)가 flex-wrap 없이 일렬 강제 배치됨.
+   - `content-grid.two`가 모바일 미디어 쿼리에서 `minmax(240px, .85fr)` 제약으로 2행으로 떨어지지 않고 가로로 늘어남.
+2. **모바일 브랜드 로고 깨짐 (Broken Image Placeholder at square W mark)**:
+   - `chrome.html`의 3라인 및 37라인(드로어 헤더)에서 `<img class="brand-mark" src="/assets/mv39/favicon.ico?v=...">`로 `.ico` 파일을 `<img>` 태그로 직접 렌더링.
+   - 모바일 사파리/크롬 웹뷰 등에서 `.ico` 포맷의 `<img>` 디코딩 실패 또는 CDN 캐시 미스로 엑스박스(broken image icon) 발생.
+3. **게스트 상태 및 실데이터 Hydration 정합성**:
+   - 비로그인 게스트 상태 카드("로그인 후 내 자산을 확인하세요") 레이아웃 붕괴 방지 및 로그인 시 실제 Spring Boot REST API(`/api/v1/wallet/summary`) 실제 잔액(`394,728 WLD`) 즉시 바인딩 보장.
+
+### 2. 세부 해결 계획 (Implementation Actions)
+- **로고 엑스박스 원천 차단**:
+  - `chrome.html`, `index.html` 및 전체 템플릿의 `<img>` 기반 favicon 참조를 순수 벡터 CSS/SVG 엠블럼(`<span class="brand-mark" aria-hidden="true">W</span>` 또는 SVG)으로 교체하여 어떤 환경에서도 100% 무결점 렌더링.
+- **모바일 헤더 320px~430px 반응형 전면 안정화**:
+  - `site.css` 및 `chrome.css` 모바일 미디어 쿼리 보강:
+    - `.topbar`: `max-width: 100%`, `overflow: hidden`, `gap: 6px`.
+    - `#language-selector`: 모바일에서 `min-width: 0`, `max-width: 78px`, 패딩 축소.
+    - `.auth-actions`: 프로필 및 로그인/로그아웃 버튼 모바일 터치 타겟(44px) 유지하며 `max-width: 80px` 내외로 안착.
+    - `.content-grid.two`: 모바일(767px 이하)에서 단일 1열(`1fr`)로 완전 스택 처리하여 카드 너비가 뷰포트를 절대 초과하지 않도록 보장 (`body.scrollWidth === window.innerWidth`).
+
+
+---
+## 🚀 [v121 Specification] 이슈 #3366 로고 깨짐 및 모바일 512px 오버플로우 코드 수정 완료 내역 (+42, -0)
+
+### 1. 로컬 코드베이스 수정 사항
+- **`spring-backend/src/main/resources/templates/shared/chrome.html`**:
+  - 사이드바(라인 3) 및 드로어 헤더(라인 37)의 `<img class="brand-mark" src="/assets/mv39/favicon.ico...">`를 `<span class="brand-mark" aria-hidden="true">W</span>`로 교체.
+  - `.ico` 포맷의 `<img>` 디코딩 실패 및 CDN 캐시 미스로 인한 모바일 깨진 이미지 플레이스홀더(엑스박스) 원천 박멸.
+- **`spring-backend/src/main/resources/static/assets/mv39/site.css`**:
+  - `html, body`: `overflow-x: clip; max-width: 100%; position: relative;` 방어벽 구축.
+  - `.app-shell, .app-main, .app-inner`: `max-width: 100%; min-width: 0; overflow-x: clip;` 컨테이너 팽창 차단.
+  - `@media(max-width: 767px)`: `.kpi-grid` 및 `.tools-grid`를 1열(`grid-template-columns: 1fr`)로 스택 처리하여 카드 최소폭(232px) 합산에 의한 476px/512px 강제 팽창 원천 제거.
+  - `@media(max-width: 480px)`: `.topbar` 갭 축소(6px), H1 말줄임(`flex-shrink: 1`), 언어 선택자 폭(`max-width: 76px`) 및 인증 버튼 콤팩트 패딩 적용.
+
+### 2. 운영 서버 배포 준비 상태
+- 수정된 2개 파일:
+  1. `spring-backend/src/main/resources/templates/shared/chrome.html`
+  2. `spring-backend/src/main/resources/static/assets/mv39/site.css`
+- Git Status: 로컬 수정 완료, 사용자 명시적 배포 승인 대기 중.
