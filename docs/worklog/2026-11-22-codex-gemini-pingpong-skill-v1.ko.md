@@ -22,3 +22,9 @@
 - PASS: 영문 정본/한국어 문서, 작업·업데이트·변경 이력, 통합 기획서·에이전트 지침 연결. 내부 업데이트는 기존 `.gitignore`대로 GitHub 업로드에서 제외해 미니PC 비공개 0700/0600 폴더에 보관.
 - 사이트·운영 금융·백엔드·DB·실 Test·운영 승격 및 타 AI 브랜치 수정 없음.
 - GitHub 새 브랜치와 검토 PR로 전달하며 최종 커밋/PR 주소는 GitHub 검토 기록에 남김.
+
+## GitHub 인계 — 2026-11-22
+
+- Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3363 (open, not merged).
+- Installation/documentation source commit: `2b3131c3160167d182d59a7dce1940c5f72cb28e`.
+- Live Codex/Gemini model exchange: **NOT VERIFIED**; Test/Production unchanged.

@@ -28,3 +28,9 @@
 - PASS: mirrored user skill installed; English canonical/Korean secondary guide, worklog, changelog, GitHub update, and root/plan/agent indexes aligned. Project documentation policy intentionally excludes private `*internal*.md` update files from Git; sanitized internal EN/KO notes stored under `/home/debian/.local/state/moneyverse-agent-pingpong/internal-updates/` with 0700/0600 permissions.
 - No application code, backend process, API, customer ledger, database, Test server or Production deployment was touched. No other agent branch/worktree was edited or merged.
 - GitHub branch and review PR are the delivery path; merging and actual multi-model authentication remain a separate review gate. Final commit/PR evidence will be noted in the GitHub review record.
+
+## GitHub handoff — 2026-11-22
+
+- Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3363 (open, not merged).
+- Installation/documentation source commit: `2b3131c3160167d182d59a7dce1940c5f72cb28e`.
+- Live Codex/Gemini model exchange: **NOT VERIFIED**; Test/Production unchanged.
