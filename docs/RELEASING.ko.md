@@ -176,3 +176,14 @@ GitOps/Kubernetes 기록은 provenance와 복구/목표 아키텍처로 유지�
 이번 적용은 DB·세션·금융 API·스케줄러·소켓·봇이 없는 화면 전용 실행 모드입니다. 홈, 도구 목록, 계산기 목록과 두 계산기만 전환하며 기존 로그인·API·회원·관리자 경로를 유지합니다. 정확한 main CI 산출물·JAR 해시·실행 프로세스·Test·브라우저 검증·무중단 전환·롤백 증거가 필요합니다.
 
 운영 소스 식별은 `/frontend-version?scope=public-presentation`을 사용합니다. 기존 Next 화면의 자동 새로고침 충돌을 막기 위해 일반 버전 응답을 유지하며, 변경된 공용 파일은 콘텐츠 버전별로 분리합니다. 별도 동시 보안 작업이 있으면 이를 유지한 역방향 롤백을 준비합니다. 전체 백엔드·금융·마이그레이션·로그인 회원 및 관리자 승격 게이트를 통과한 것으로 간주하지 않습니다. [실제 적용·검증·잔여 문제](releases/2026-11-20-native-presentation-production.ko.md).
+
+
+## Owner directive — mandatory Test before Production (2026-11-22)
+
+Every frontend and backend change must run as its exact source/artifact in the isolated Test environment before Production promotion. Verify the changed routes, real backend contracts, authorization failures, relevant database behavior, desktop/mobile layouts and required checks. Resolve observed failures before promotion; skipped or unreachable required checks are blockers, never passes. Promote the same tested artifact, preserve sessions and rollback, and record the Test and Production evidence in the task log.
+
+Keep the Test website reachable for its accepted public frontend routes. Public Test access does not authorize exposing administrator data, bypassing authentication, enabling Production financial writes, or replacing a Test backend with invented data. Unaccepted/private routes retain their explicit admission boundaries.
+
+
+## 사용자 고정 지시 — Test 검증 후 운영 승격
+프론트엔드와 백엔드는 항상 같은 후보 코드·산출물을 Test 서버에 먼저 연결하고 검증합니다. 접속 장애, 필요한 API/DB/권한 검사, PC·모바일 화면 검사에서 문제가 있으면 해결한 뒤 운영으로 승격합니다. 생략되거나 실행하지 못한 필수 검사는 통과로 기록하지 않습니다. 기존 세션과 롤백 산출물을 보존하고, Test·운영의 실제 버전과 결과를 작업 기록에 남깁니다.

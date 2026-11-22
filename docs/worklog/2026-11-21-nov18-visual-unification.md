@@ -234,3 +234,30 @@ After completed r5 inverse, the original renderer is healthy at exact old source
 ### 2026-11-22 private connection installation — finished scoped step
 Protected r6 installation exited0. Application f0336fded6068f884c87f88efedeb770fd3387d4/operations b2eb6c181bf90e865120ce4eb962135f015665e7 now run in the administrator-only preview. Exact process/JAR/source proof and original boundary checks were repeated successfully. Canonical DB-read health and presentation health/version200; public origin maintenance503 retained. See [measured connection receipt](../releases/2026-11-22-native-catalog-preview-connection.md).
 Whole rebuild remains in progress: browser use disabled; authenticated/visual/full-route acceptance and Production promotion OPEN. Current main was fetched again and remains f033. Operational CI44987327884 still running; no completed exact-head CI claim or main integration.
+
+
+## 2026-11-22 owner correction — connect the authored frontend to the real origin
+
+### Before work
+Owner explicitly corrected preview-only delivery and directed actual frontend connection. Continue the approved Nov18 Spring release plan without renewed approval. Current branch37667922cb, mainf033, root503 maintenance; canonical private preview is healthy but is not the deliverable.
+
+### Bounded first public connection
+Use the existing immutable mainf033 application artifact, dedicated database-free Test/Production presentation units on currently vacant4820/4822, and the established read gateway4821. Release the authored home/index/tools/calculators plus existing eight pure authentication screen families and exact packaged frontend version. No renderer source, backend, database, session issuance, financial write or worker ownership change. Other routes stay explicitly in maintenance until accepted; this follows the owner's earlier instruction to connect completed scopes progressively.
+
+Ruling: authenticated/browser control availability must not prevent testing anonymous authored pages with the project's isolated, fresh-profile automated browser harness. Do not inspect/reuse user browser profiles, cookies, active sessions or settings. Headless acceptance against actual isolated Test is real browser evidence for this public scope only; it does not certify member/admin functionality.
+
+Deployment plan: (1) freeze root-owned Test/Production generations from the exact CI artifact and existing config identities; (2) test a narrow host+URI maintenance exemption and current-asset hash map while preserving older versions/API/Test guards; (3) start isolated Test, exercise actual SSR/assets/five locales/eight widths/calculator controls with a fresh automated browser; (4) independent operational review and required exact-source checks; (5) start independent Production at the same artifact, check source/process/readiness, activate only accepted paths, prove actual host/public origin, preserve Test independence and a guarded inverse.
+
+
+### 2026-11-22 Test reachability correction — before work
+The owner explicitly requires a working Test URL and Test-first validation for both frontend and backend. The old Test host denied every external request by server-level Cloudflare-header guards and inherited network ACLs, so enabling its frontend process alone would still return403. Scope the exception to accepted public GET/HEAD documents, verified public assets and four cookie-only read paths. Preserve Test mutation refusal, unknown/private route admission and existing backend actor checks. No authentication/financial write is exposed through the new Test route gateway. Record the recurring release requirement in AGENTS and both release guides. This deployment changes presentation/routing only; the underlying backend application and database are unchanged.
+
+
+### 2026-11-22 Test-first connection — reviewed implementation checkpoint
+The private independent backend now passes17 real checks at sourcef033/JAR8a1c75: own synthetic DB55436,348 exact migration checksums, canonical10-stock/0-board results, explicit guest session, redacted public guest wallet summary, denied private wallets/admin/forged actor, Test-only CORS, observed Hikari read-only setting, disabled jobs/offline bot and sandbox. Its service and own DB container restart/boot policies are verified; no actual host reboot was performed.
+
+Public routing review identified and fixed: independent backend acceptance was missing; chained inverse lost predecessor inode authority; string Nginx map keys were case-insensitive; transformed Test proxy behavior needed actual upstream-capture tests. Regressions verified RED→GREEN. Production startup and route connection now require both backend and frontend Test evidence. Test gateway points at isolated55438, not Production. Full19 public operational tests pass, including actual transformed Nginx with CF/non-CF access, exact/mixed-case paths, original query, no forwarded bodies/forged identity headers, cookie policy, immutable favicon dependency and denied writes/private/unknown paths. Disposable fixture corrections mirror actual map scope/hash settings; production expectations were not weakened.
+
+Reviewer icon concern used an obsolete local page: all12 actual mainf033 presentations were checked and reference only the approved hashed /assets/mv39/favicon.ico, already included in real admission/byte tests. No unrelated legacy icon aliases were exposed. Backend reviewer4P1 fixes have their own12 helper tests and parent source review; real17-check evidence is separate from unit results.
+
+Source implementation/review step finished; actual public Test connection and240-case browser acceptance remain in progress. Main root still maintenance until same-artifact Test/backend/frontend acceptance succeeds. Root-approved source and operational revisions remain distinct.

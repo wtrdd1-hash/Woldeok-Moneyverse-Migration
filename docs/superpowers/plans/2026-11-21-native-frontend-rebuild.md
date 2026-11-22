@@ -114,3 +114,16 @@ After reviewed Nginx reload, wait at most5 seconds for a fresh anonymous catalog
 
 ## Task2 restored-process handoff
 After completed r5 inverse, the original renderer is healthy at exact old source but has a new verified MainPID. The immutable initial QA receipt must not be edited to relabel that restarted process. Add an explicit --prior-inverse preparation input. It must accept only a protected direct child of the task root whose complete inverse, verified-old phase/current PID, exact original source/JAR, current restored unit/include inode+hash and unchanged site are proved. Preserve the original receipt; carry separate restoration evidence snapshots into the new proposal and revalidate them before mutation. Foreign PID/inode, incomplete or altered evidence must refuse without stopping/adopting a process.
+
+
+## Progressive public connection continuation
+
+### Current authority
+Owner explicitly corrected preview-only delivery and directed actual frontend connection. Continue the approved Nov18 Spring release plan without renewed approval. Current branch37667922cb, mainf033, root503 maintenance; canonical private preview is healthy but is not the deliverable.
+
+### Bounded first public connection
+Use the existing immutable mainf033 application artifact, dedicated database-free Test/Production presentation units on currently vacant4820/4822, and the established read gateway4821. Release the authored home/index/tools/calculators plus existing eight pure authentication screen families and exact packaged frontend version. No renderer source, backend, database, session issuance, financial write or worker ownership change. Other routes stay explicitly in maintenance until accepted; this follows the owner's earlier instruction to connect completed scopes progressively.
+
+Ruling: authenticated/browser control availability must not prevent testing anonymous authored pages with the project's isolated, fresh-profile automated browser harness. Do not inspect/reuse user browser profiles, cookies, active sessions or settings. Headless acceptance against actual isolated Test is real browser evidence for this public scope only; it does not certify member/admin functionality.
+
+Deployment plan: (1) freeze root-owned Test/Production generations from the exact CI artifact and existing config identities; (2) test a narrow host+URI maintenance exemption and current-asset hash map while preserving older versions/API/Test guards; (3) start isolated Test, exercise actual SSR/assets/five locales/eight widths/calculator controls with a fresh automated browser; (4) independent operational review and required exact-source checks; (5) start independent Production at the same artifact, check source/process/readiness, activate only accepted paths, prove actual host/public origin, preserve Test independence and a guarded inverse.

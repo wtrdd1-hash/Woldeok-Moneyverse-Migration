@@ -213,3 +213,10 @@ This is eight read screens, not all-site or full-backend certification. Whole-si
 
 ### 2026-11-21 — delivery read-page follow-up
 The ninth shared-shell admin read route is `/admin/logs/delivery`, sourced from two exact cookie-authorized GETs on a separate loopback gateway. The prior eight routes keep their accepted generation. Bind release checks to the full active Nginx include inventory, stable MainPID/cwd/manifest/open-JAR/listener identity and packaged plus served asset hashes. Legacy null delivery outcomes remain Unknown; timestamps never become delivery acknowledgements. Retain source-bound protected Test and Test-stop Production independence. This is no financial, full-backend, all-admin-action or whole-site waiver. [Observed acceptance](releases/2026-11-21-nov18-admin-delivery-production.ko.md).
+
+
+## Owner directive — mandatory Test before Production (2026-11-22)
+
+Every frontend and backend change must run as its exact source/artifact in the isolated Test environment before Production promotion. Verify the changed routes, real backend contracts, authorization failures, relevant database behavior, desktop/mobile layouts and required checks. Resolve observed failures before promotion; skipped or unreachable required checks are blockers, never passes. Promote the same tested artifact, preserve sessions and rollback, and record the Test and Production evidence in the task log.
+
+Keep the Test website reachable for its accepted public frontend routes. Public Test access does not authorize exposing administrator data, bypassing authentication, enabling Production financial writes, or replacing a Test backend with invented data. Unaccepted/private routes retain their explicit admission boundaries.
