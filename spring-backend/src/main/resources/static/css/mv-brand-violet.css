@@ -1,0 +1,23 @@
+/* Nov18 interactive color contract for native Spring MVC + Thymeleaf pages.
+   Use alongside existing native styles; deliberately do not reset data/status. */
+:root {
+  --mv-brand-violet: #9C83FF;
+  --mv-brand-violet-hover: #B4A0FF;
+  --mv-brand-violet-subtle: rgba(156, 131, 255, .12);
+}
+
+:where(.app-shell, .admin-v40, .moneyverse-app-shell)
+:is(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--mv-brand-violet) !important;
+  outline-offset: 3px;
+}
+
+.admin-v40 :is(.admin-nav, .admin-bottom-tabs, #admin-drawer) a[aria-current="page"],
+.app-shell :is(.side-links, .mobile-tabs) a[aria-current="page"] {
+  color: var(--mv-brand-violet) !important;
+  border-color: rgba(156, 131, 255, .35);
+}
+
+:where(.app-shell, .admin-v40) :is(.brand, .admin-kicker) {
+  accent-color: var(--mv-brand-violet);
+}

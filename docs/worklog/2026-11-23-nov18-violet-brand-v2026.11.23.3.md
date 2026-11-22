@@ -10,10 +10,16 @@ Status: in progress | Owner: ChatGPT | Independent worktree: `fix/nov18-violet-b
 
 ## In progress
 - [x] Independent child worktree and conflict-free baseline
-- [ ] Failing regression test(s) for theme invariants
-- [ ] Scoped UI corrections with semantic-state exceptions
-- [ ] Source and Spring tests; compare production integration boundaries
-- [ ] Internal / GitHub updates, independent review, PR handoff
+- [x] Failing regression test(s) for theme invariants
+- [x] Scoped UI corrections with semantic-state exceptions
+- [x] Source and Spring tests; compare production integration boundaries
+- [x] Internal / GitHub updates, source self-review; PR handoff pending
+
+## Checkpoint: implementation and evidence
+- Nov18 bank branding and the primary legacy CTA contract updated without changing finance/status semantics. Separate native admin/member focus/active CSS uses a SHA-256 query version.
+- Browser found a missing legacy Next stylesheet and a remote-only Material font; added native bank 4/2/1-column layouts and the existing local icon font. Screenshots are offline and cannot prove authenticated API success.
+- RED prior to implementation: three brand tests, then one bank layout/font test; GREEN after fixes. Full H2 Spring JUnit669 PASS, zero failures/errors/skips, `bootJar` PASS. Additional real loopback Spring HTTP classpath-only 2/2 PASS; first attempted fixture lacked application class and was corrected. Chromium static preview 3 paths × 4 widths 12/12, no overflow.
+- Midpoint main re-fetched `9876c09888`, parent remained `0bf9fc8426`; other agents' worktrees untouched.
 
 ## Finished
-Pending; not released.
+Source and QA candidate complete; GitHub PR/review integration and official Test/Production release still pending. No real member/financial action or deployment. See [QA](../qa/2026-11-23-nov18-violet-brand-qa-v2026.11.23.3.md) and [screenshots](../design/nov18-violet-v2026.11.23.3/README.md).
