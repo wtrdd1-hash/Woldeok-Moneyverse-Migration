@@ -12,5 +12,10 @@
 - `mv-shell-nov18.css`에 모바일 하단 독 안전영역, 최소 44px 탭 영역, 본문/문의 버튼 여백을 일관 적용. JavaScript/API/DB/원장/권한 변경 없음.
 - Spring 오프라인 전체 JUnit **665개 성공, 실패0, 오류0, 건너뜀0**(XML 105개). 소스 검증이지 실제 계정 로그인·금융·화면 전체 통과는 아님.
 
+## 중간2 — 격리 H2 Test에서 실제 실행물 불일치 재현·원인 수정
+- 첫 격리 Test에서 `/api/version`이 후보 SHA 200을 표시했지만 실제 HTTP CSS는 후보 빌드가 아닌 `/srv/moneyverse-data/frontend-static/css/`의 구형 파일과 해시가 일치했다. 9개 HTML URL도 새 CSS 링크 미포함. **버전 정상=디자인 자산 배포 완료가 아니라는 사실을 재현**.
+- 원인은 `SpaWebMvcConfig.resourceLocations("")`가 가변 공용 호스트 정적 파일을 JAR 클래스패스보다 먼저 제공하는 구조. 기존 운영 안전성을 위해 기본 우선순위를 임의 변경하지 않았다.
+- 대신 명시적 격리 Test 옵션 `moneyverse.frontend.classpath-only=true` 추가. 설정 시 JAR 빌드 자산 외 파일을 제공하지 않으며 기존 불변 릴리스 디렉터리와 혼합 설정을 거부하고 누락 URL을 임의 index 200으로 치환하지 않는다. `NativeUiPreview` 자동 적용. 설정 단위검사 RED→GREEN, 정확 SHA HTTP 해시 재시험 예정.
+
 ## 종료 / 배포 경계
 9개 회원 화면의 공통 CSS 및 59개 공통 팔레트 **소스 수정** 완료. 다만 다른 구형 정적 화면31개에는 동일 사이드바/독 DOM이 없고 서버 템플릿22개는 별도 레이아웃을 가진다. 180경로 전면 통일이나 운영 수용으로 표현 금지. OAuth PR #3365와 Gemini/FE-C 미커밋 변경 비접촉. 정확 SHA Test·실제 로그인/재무·시각 비교·롤백·무중단 검증 후 운영 승격, 미검증 시 HOLD. 독립 Test 결과는 PR 작업 이력에 추가한다.
