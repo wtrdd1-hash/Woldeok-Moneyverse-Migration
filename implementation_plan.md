@@ -5373,3 +5373,49 @@ eserves: 대한민국 외환보유액 통합계정)
 - Gradle 컴파일 및 단위 테스트 (gradlew test)
 - Vitest 프론트엔드 테스트 (npx vitest run src/lib/app-gateway.test.ts)
 - 프론트엔드에서 백엔드 엔드포인트(/api/v1/status, /api/v1/shop/catalog, /api/v1/wallet/overview) 호출 및 응답 정합성 검증
+
+---
+## 🚀 [v113 Specification] 11월 18일 공식 마스터 디자인 전 사이트(일반 사용자 → 관리자) Spring Boot 네이티브 전면 통합 구축
+- **반영 일시**: 2026-11-22
+- **사용자 요청 사항**: "모든페이지 해여되 일반사용자 페이지부터 광리자페이지뷰커 알겠지?", "디자인통알시키고 스프링으로규축하고... 11월18일 디자인이라고 나는 명시했어... 그걸로 진행할것"
+- **핵심 목표 및 아키텍처 원칙**:
+  1. **Spring Boot 3.3.5 단일 런타임 (Single Spring Runtime)**:
+     - 외장 Node/Next.js를 완전히 배제하고, Java Spring Boot 3.3.5 단일 런타임(포트 4550)에서 100% 프론트엔드 정적 서빙(classpath:/static/) 및 Thymeleaf SSR을 통합 제공.
+  2. **11월 18일 Dark Navy & Violet 마스터 디자인 토큰 전수 적용**:
+     - --mv-bg: #0C1020 (심해 다크 네이비 베이스)
+     - --mv-surface: #151D32 (카드, 사이드바, 헤더 서피스)
+     - --mv-surface-hover: #1C2742 (호버 카드, 인풋 필드)
+     - --mv-border: #263554 (섬세한 그리드 보더)
+     - --mv-primary: #9C83FF (브랜드 시그니처 바이올렛, Glow: gba(156, 131, 255, 0.25))
+     - --mv-blue: #64B7FF (스카이블루 액센트)
+     - --mv-green: #10B981 (금융 상승, 원장 정상 배지)
+     - --mv-red: #F43F5E (금융 하락, 위험 액션)
+  3. **다중 뷰포트 무결점 레이아웃 (Multi-Viewport Resilience Shield)**:
+     - **데스크톱(1024px ~ 1440px+)**: 240px 좌측 고정 사이드바(8개 탭) + 벤토 그리드(Bento Grid 2.0) + 56px 플로팅 관제탑 챗 독(.global-support-dock).
+     - **모바일(390px ~ 430px)**: 상단 헤더(메뉴 토글 + 타이틀 + 언어 토글 + 프로필 캡슐) + 하단 5-탭 고정 독(.mobile-bottom-nav-dock, 56x46px 터치 타깃으로 WCAG 44px 준수).
+     - **극소 모바일(320px)**: 가로 스크롤 0건(overflow-x: hidden !important;), 테이블은 .table-scroll-wrapper로 안전 격리.
+  4. **실데이터 전수 바인딩 불변식 (No-Mock Invariant)**:
+     - 가짜 목업 완전 배제, /api/v1/auth/me 세션 하이드레이션, /api/v1/wallet/overview 실 복식부기 잔액, /api/v1/stocks 10초 무깜빡임 실시간 폴링.
+     - 금융 수치는 ont-mono tabular-nums tracking-tight 및 	oLocaleString('ko-KR') 적용.
+  5. **인스타그램 릴스 레퍼런스 접목 (Harness² AI 궤도 애니메이션 & 다크 로그 터미널)**:
+     - Google Research harness2의 중앙 AI 코어 + 궤도(Orbit) 애니메이션 컴포넌트 탑재.
+     - macOS 스타일 실시간 터미널 컴포넌트를 메인 대시보드에 배치하여 자산 리밸런싱 및 원장 동기화 로그 시각화.
+
+### 1. 단계별 실행 계획 (Staged Rollout Plan)
+- **Part 1: 일반 사용자 핵심 5대 페이지 (지갑, 주식, 상점, 퀘스트, 계산기) + 메인 홈 정비**
+  - wallet.html: 11월 18일 네이티브 셸, 잔액/송금/계좌 탭, 44px 퀵 금액 버튼, 모바일 바텀 독.
+  - stocks.html: 10대 상장사 실시간 호가/차트, 매수/매도 패널, 모노스페이스 수치.
+  - shop.html: 정본 아이템 카탈로그, 인벤토리 탭, 구매 모달.
+  - quests.html: 출석 체크, 일일 퀘스트, 보상 수령 인터랙션.
+  - 	ools.html: 12종 금융 계산기 인터랙티브 허브.
+  - index.html: Harness² AI 궤도 애니메이션 및 라이브 터미널 로그 통합.
+- **Part 2: 일반 사용자 부가 페이지 (소셜/커뮤니티, 가이드, 미니게임, 연금 등)**
+  - oard.html: 실제 주주 인증 마크 소셜 피드.
+  - guide.html, rcade.html, casino.html, pension.html, work.html 네이티브 통일.
+- **Part 3: 관리자 관제탑 및 전문 관리 뷰군 (Admin Control Tower)**
+  - dmin.html 및 	emplates/mv46/admin-*.html: 총괄 관제탑, 유저 관리, 킬스위치 제어, 감사 로그.
+
+### 2. 검증 계획 (Verification Plan)
+- ./gradlew compileJava 및 ./gradlew test (Spring Boot 빌드 및 테스트 무결성 확인)
+- 각 HTML 페이지별 뷰포트(1280px, 390px, 320px) 레이아웃 및 디자인 토큰 적용 확인
+- API 엔드포인트(/api/v1/auth/me, /api/v1/wallet/overview, /api/v1/stocks 등) 실데이터 바인딩 동작 확인

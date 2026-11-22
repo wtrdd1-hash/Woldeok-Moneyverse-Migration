@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
@@ -62,13 +62,14 @@
     /* Sidebar (Desktop 1024px+) */
     .home-sidebar {
       display: none;
-      width: 210px;
-      min-width: 210px;
-      background-color: var(--mv-sidebar);
+      width: 240px;
+      min-width: 240px;
+      max-width: 240px;
+      background-color: #0c1020;
       border-right: 1px solid var(--mv-border);
-      padding: 24px 14px;
+      padding: 24px 16px;
       flex-direction: column;
-      gap: 20px;
+      gap: 24px;
       position: sticky;
       top: 0;
       height: 100vh;
@@ -81,45 +82,69 @@
     }
 
     .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 8px 12px 8px;
+      border-bottom: 1px solid rgba(168, 188, 216, 0.1);
+    }
+
+    .logo-badge {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #9c83ff 0%, #64b7ff 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: #ffffff;
+      font-size: 16px;
+      box-shadow: 0 4px 12px var(--mv-primary-glow);
+    }
+
+    .logo-title {
       font-size: 15px;
       font-weight: 800;
+      letter-spacing: -0.02em;
       color: #ffffff;
-      padding: 0 8px 12px 8px;
-      border-bottom: 1px solid var(--mv-border);
-      letter-spacing: -0.2px;
     }
 
     .nav-list {
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
+      padding: 0;
+      margin: 0;
     }
     .nav-item-link {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 9px 12px;
-      border-radius: 8px;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 10px;
       color: var(--mv-muted);
       text-decoration: none;
-      font-size: 13px;
+      font-size: 13.5px;
       font-weight: 600;
-      transition: all 0.15s ease;
+      transition: all 0.15s ease-in-out;
     }
     .nav-item-link:hover {
-      background-color: rgba(156, 131, 255, 0.08);
+      background-color: var(--mv-surface);
       color: #ffffff;
     }
     .nav-item-link.active {
-      background-color: rgba(156, 131, 255, 0.2);
-      border: 1px solid rgba(156, 131, 255, 0.35);
-      color: #ffffff;
-      font-weight: 700;
-    }
-    .nav-star {
+      background: linear-gradient(90deg, rgba(156, 131, 255, 0.2) 0%, rgba(156, 131, 255, 0.05) 100%);
       color: var(--mv-primary);
-      font-size: 12px;
+      border: 1px solid rgba(156, 131, 255, 0.35);
+      font-weight: 700;
+      box-shadow: 0 2px 10px rgba(156, 131, 255, 0.15);
+    }
+    .nav-item-link .icon {
+      font-size: 18px;
+      width: 20px;
+      text-align: center;
     }
 
     /* Main Container */
@@ -512,54 +537,70 @@
 
   <div class="home-layout">
     <!-- Desktop Sidebar -->
-    <aside class="home-sidebar" aria-label="사이드바">
-      <div class="sidebar-logo">W Moneyverse</div>
+    <!-- Desktop Sidebar -->
+    <aside class="home-sidebar" aria-label="사이드바 내비게이션">
+      <div class="sidebar-logo">
+        <img src="/images/woldeok-symbol.png" alt="W" class="logo-badge" style="width: 32px; height: 32px; border-radius: 8px; object-fit: cover; display: inline-block;">
+        <div class="logo-title">W Moneyverse</div>
+      </div>
       <ul class="nav-list">
         <li>
           <a href="/" class="nav-item-link">
-            <span class="nav-star">✦</span>
+            <span class="material-symbols-outlined icon">home</span>
             <span>홈</span>
           </a>
         </li>
         <li>
-          <a href="/stocks" class="nav-item-link">
-            <span class="nav-star">✦</span>
+          <a href="/#overview" class="nav-item-link">
+            <span class="material-symbols-outlined icon">dashboard</span>
             <span>대시보드</span>
           </a>
         </li>
         <li>
           <a href="/wallet" class="nav-item-link">
-            <span class="nav-star">✦</span>
+            <span class="material-symbols-outlined icon">account_balance_wallet</span>
             <span>지갑</span>
           </a>
         </li>
         <li>
           <a href="/stocks" class="nav-item-link">
-            <span class="nav-star">✦</span>
+            <span class="material-symbols-outlined icon">trending_up</span>
             <span>주식</span>
           </a>
         </li>
         <li>
-          <a href="/quests" class="nav-item-link">
-            <span class="nav-star">✦</span>
-            <span>퀘스트</span>
-          </a>
-        </li>
-        <li>
           <a href="/shop" class="nav-item-link">
-            <span class="nav-star">✦</span>
+            <span class="material-symbols-outlined icon">storefront</span>
             <span>상점</span>
           </a>
         </li>
         <li>
+          <a href="/quests" class="nav-item-link">
+            <span class="material-symbols-outlined icon">rewarded_ads</span>
+            <span>퀘스트</span>
+          </a>
+        </li>
+        <li>
+          <a href="/tools/compound-calculator" class="nav-item-link">
+            <span class="material-symbols-outlined icon">calculate</span>
+            <span>계산기</span>
+          </a>
+        </li>
+        <li>
           <a href="/board" class="nav-item-link">
-            <span class="nav-star">✦</span>
+            <span class="material-symbols-outlined icon">forum</span>
             <span>커뮤니티</span>
           </a>
         </li>
         <li>
+          <a href="/guide/stock-trading" class="nav-item-link active">
+            <span class="material-symbols-outlined icon">menu_book</span>
+            <span>가이드</span>
+          </a>
+        </li>
+        <li>
           <a href="/admin-preview" class="nav-item-link">
-            <span class="nav-star">✦</span>
+            <span class="material-symbols-outlined icon">admin_panel_settings</span>
             <span>관리자</span>
           </a>
         </li>
@@ -719,26 +760,27 @@
   </div>
 
   <!-- Mobile Bottom Navigation (Matching home.png bottom icons) -->
+  <!-- Mobile Bottom Navigation Dock (5-Tab 44px+ Standard) -->
   <nav class="mobile-bottom-dock" aria-label="모바일 하단 내비게이션">
     <a href="/">
       <span class="material-symbols-outlined icon">home</span>
       <span>홈</span>
     </a>
-    <a href="/wallet">
+    <a href="/stocks">
       <span class="material-symbols-outlined icon">trending_up</span>
-      <span>자산</span>
+      <span>주식</span>
     </a>
-    <a href="/arcade">
-      <span class="material-symbols-outlined icon">diamond</span>
-      <span>게임</span>
+    <a href="/tools/compound-calculator">
+      <span class="material-symbols-outlined icon">calculate</span>
+      <span>계산기</span>
     </a>
-    <a href="/board">
-      <span class="nav-star" style="font-size: 16px;">✦</span>
-      <span>소통</span>
+    <a href="/guide/stock-trading" class="active">
+      <span class="material-symbols-outlined icon">menu_book</span>
+      <span>가이드</span>
     </a>
-    <a href="/account" class="active">
-      <span class="material-symbols-outlined icon">account_circle</span>
-      <span>마이</span>
+    <a href="/admin-preview">
+      <span class="material-symbols-outlined icon">admin_panel_settings</span>
+      <span>관리자</span>
     </a>
   </nav>
 
