@@ -320,50 +320,9 @@ public class OAuthController {
                     p, result.userId(), result.displayName(), result.isNew());
 
             if (!wantsJson) {
-                ResponseCookie sessionCookie = ResponseCookie
-                        .from("mv_session", result.token())
-                        .path("/")
-                        .maxAge(Duration.ofDays(30))
-                        .httpOnly(true)
-                        .secure(true)
-                        .sameSite("Lax")
+                return ResponseEntity.status(HttpStatus.FOUND)
+                        .location(URI.create("/"))
                         .build();
-
-                ResponseCookie hostSessionCookie = ResponseCookie
-                        .from("__Host-mv_session", result.token())
-                        .path("/")
-                        .maxAge(Duration.ofDays(30))
-                        .httpOnly(true)
-                        .secure(true)
-                        .sameSite("Lax")
-                        .build();
-
-                ResponseCookie csrfCookie = ResponseCookie
-                        .from("mv_csrf", result.csrfToken())
-                        .path("/")
-                        .maxAge(Duration.ofDays(30))
-                        .httpOnly(true)
-                        .secure(true)
-                        .sameSite("Lax")
-                        .build();
-
-                ResponseCookie hostCsrfCookie = ResponseCookie
-                        .from("__Host-mv_csrf", result.csrfToken())
-                        .path("/")
-                        .maxAge(Duration.ofDays(30))
-                        .httpOnly(true)
-                        .secure(true)
-                        .sameSite("Lax")
-                        .build();
-
-                HttpHeaders redirectHeaders = new HttpHeaders();
-                redirectHeaders.setLocation(URI.create("/"));
-                redirectHeaders.add(HttpHeaders.SET_COOKIE, sessionCookie.toString());
-                redirectHeaders.add(HttpHeaders.SET_COOKIE, hostSessionCookie.toString());
-                redirectHeaders.add(HttpHeaders.SET_COOKIE, csrfCookie.toString());
-                redirectHeaders.add(HttpHeaders.SET_COOKIE, hostCsrfCookie.toString());
-
-                return new ResponseEntity<>(redirectHeaders, HttpStatus.FOUND);
             }
 
             Map<String, Object> res = new LinkedHashMap<>();
