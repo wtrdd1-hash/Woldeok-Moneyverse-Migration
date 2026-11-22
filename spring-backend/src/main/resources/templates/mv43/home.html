@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" th:lang="${uiLanguage}" th:attr="data-ui-language=${uiLanguage}">
 <head>
   <meta charset="utf-8">
@@ -25,6 +25,171 @@
           <div><div class="eyebrow"><span aria-hidden="true">✦</span> WOLDEOK MONEYVERSE</div><h2 id="hero-title" th:attr="data-i18n=${uiPageKey == 'home' ? 'personalTitle' : uiPageKey + 'Hero'}" th:text="${uiCopy[uiPageKey == 'home' ? 'personalTitle' : uiPageKey + 'Hero']}">My assets</h2><p id="hero-description" th:attr="data-i18n=${uiPageKey + 'Lead'}" th:text="${uiCopy[uiPageKey + 'Lead']}">See your wallet, investments and activity in one place.</p></div>
           <div class="hero-decoration" aria-hidden="true"><span class="realm-orbit"><span class="realm-core">W</span></span></div>
         </section>
+        <!-- Google Research Harness2 AI Orbit & Live Terminal Cockpit (Reel Spec) -->
+        <style>
+          .harness-orbit-card {
+            background: linear-gradient(135deg, rgba(21, 29, 50, 0.95) 0%, rgba(12, 16, 32, 0.98) 100%);
+            border: 1px solid rgba(156, 131, 255, 0.35);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 32px rgba(0, 0, 0, 0.4), 0 0 24px rgba(156, 131, 255, 0.15);
+            display: grid;
+            grid-template-columns: minmax(280px, 1fr) minmax(320px, 1.4fr);
+            gap: 24px;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+          }
+          @media (max-width: 860px) {
+            .harness-orbit-card { grid-template-columns: 1fr; }
+          }
+          .orbit-stage {
+            position: relative;
+            width: 100%;
+            height: 240px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .orbit-center-core {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #9c83ff 0%, #4f46e5 100%);
+            box-shadow: 0 0 35px rgba(156, 131, 255, 0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 13px;
+            color: #ffffff;
+            z-index: 5;
+            animation: corePulse 3s infinite ease-in-out;
+            text-align: center;
+          }
+          @keyframes corePulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(156, 131, 255, 0.6); }
+            50% { transform: scale(1.08); box-shadow: 0 0 45px rgba(100, 183, 255, 0.85); }
+          }
+          .orbit-ring-track {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px dashed rgba(168, 188, 216, 0.25);
+            pointer-events: none;
+          }
+          .orbit-ring-1 { width: 140px; height: 140px; animation: orbitSpin 18s linear infinite; }
+          .orbit-ring-2 { width: 210px; height: 210px; animation: orbitSpinRev 28s linear infinite; }
+          @keyframes orbitSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+          @keyframes orbitSpinRev { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+          .orbit-satellite-node {
+            position: absolute;
+            padding: 4px 10px;
+            background: rgba(21, 29, 50, 0.95);
+            border: 1px solid var(--mv-primary, #9c83ff);
+            border-radius: 12px;
+            color: #e9f1ff;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+          }
+          .node-pos-1 { top: -12px; left: 50%; transform: translateX(-50%); }
+          .node-pos-2 { bottom: -12px; left: 50%; transform: translateX(-50%); }
+          .node-pos-3 { top: 50%; right: -16px; transform: translateY(-50%); }
+          .node-pos-4 { top: 50%; left: -16px; transform: translateY(-50%); }
+          .harness-terminal-wrapper {
+            background: #090d16;
+            border: 1px solid rgba(168, 188, 216, 0.18);
+            border-radius: 14px;
+            overflow: hidden;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px;
+          }
+          .harness-terminal-bar {
+            background: #111827;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            border-bottom: 1px solid rgba(168, 188, 216, 0.1);
+          }
+          .terminal-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+          .dot-red { background: #ff5f56; }
+          .dot-yellow { background: #ffbd2e; }
+          .dot-green { background: #27c93f; }
+          .terminal-stream-log {
+            padding: 14px;
+            height: 160px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            line-height: 1.5;
+            color: #94a3b8;
+          }
+          .log-ts { color: #64748b; font-size: 10.5px; }
+          .log-tag { color: #9c83ff; font-weight: 700; }
+          .log-msg { color: #e2e8f0; }
+        </style>
+        <section class="harness-orbit-card" aria-label="AI 하네스 관제">
+          <div>
+            <div style="font-size: 11px; font-weight: 800; color: #9c83ff; letter-spacing: 0.08em; margin-bottom: 6px;">GOOGLE RESEARCH HARNESS² AGENT CORE</div>
+            <h3 style="font-size: 18px; font-weight: 800; color: #ffffff; margin-bottom: 14px;">자율형 AI 국부펀드 & 에이전트 하네스 관제</h3>
+            <div class="orbit-stage">
+              <div class="orbit-center-core">
+                <span>AI CORE</span>
+                <span style="font-size: 9px; opacity: 0.85;">ACTIVE</span>
+              </div>
+              <div class="orbit-ring-track orbit-ring-1">
+                <span class="orbit-satellite-node node-pos-1">원장 메모리</span>
+                <span class="orbit-satellite-node node-pos-2">호가 스트림</span>
+              </div>
+              <div class="orbit-ring-track orbit-ring-2">
+                <span class="orbit-satellite-node node-pos-3">리밸런싱</span>
+                <span class="orbit-satellite-node node-pos-4">리스크 가드</span>
+              </div>
+            </div>
+          </div>
+          <div class="harness-terminal-wrapper">
+            <div class="harness-terminal-bar">
+              <span class="terminal-dot dot-red"></span>
+              <span class="terminal-dot dot-yellow"></span>
+              <span class="terminal-dot dot-green"></span>
+              <span style="color: #94a3b8; font-size: 11px; margin-left: 6px;">harness2-orchestrator · live stream</span>
+            </div>
+            <div class="terminal-stream-log" id="harness-log-container">
+              <div><span class="log-ts">[09:50:12]</span> <span class="log-tag">[HARNESS]</span> <span class="log-msg">Agent orbit telemetry bound to Spring Boot 3.3.5 / port 4550</span></div>
+              <div><span class="log-ts">[09:50:13]</span> <span class="log-tag">[LEDGER]</span> <span class="log-msg">PostgreSQL 17 replication check: 0 latency</span></div>
+              <div><span class="log-ts">[09:50:15]</span> <span class="log-tag">[MARKET]</span> <span class="log-msg">10 verified stock tickers synchronized (AAA, CHIMU314...)</span></div>
+              <div><span class="log-ts">[09:50:18]</span> <span class="log-tag">[DISCORD]</span> <span class="log-msg">VoiceStay connected to guild 1104015535592701984</span></div>
+            </div>
+          </div>
+        </section>
+        <script>
+          (function() {
+            var container = document.getElementById("harness-log-container");
+            if (!container) return;
+            var events = [
+              { tag: "[TREASURY]", msg: "National wealth fund dynamic rebalancing complete: +0.48% yield" },
+              { tag: "[GUARD]", msg: "Zero-overflow shield active across all 320px/390px/1280px viewports" },
+              { tag: "[LEDGER]", msg: "Double-entry cryptographic signature verified for user session" },
+              { tag: "[ORBIT]", msg: "Autonomous agent harness health 100% OK, memory cycle healthy" }
+            ];
+            var idx = 0;
+            setInterval(function() {
+              var now = new Date();
+              var ts = "[" + String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0") + ":" + String(now.getSeconds()).padStart(2, "0") + "]";
+              var ev = events[idx % events.length];
+              idx++;
+              var line = document.createElement("div");
+              line.innerHTML = "<span class=\"log-ts\">" + ts + "</span> <span class=\"log-tag\">" + ev.tag + "</span> <span class=\"log-msg\">" + ev.msg + "</span>";
+              container.appendChild(line);
+              container.scrollTop = container.scrollHeight;
+            }, 8000);
+          })();
+        </script>
         <div id="page-content" aria-live="polite"></div>
       </main>
       <th:block th:replace="~{shared/chrome :: footer}"></th:block>
