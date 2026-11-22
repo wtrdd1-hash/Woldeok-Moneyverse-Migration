@@ -831,6 +831,265 @@
       white-space: nowrap !important;
       word-break: keep-all !important;
     }
+
+    /* Harness² Autonomous AI Financial Orbit & Live Terminal */
+    .harness-ai-section {
+      width: 100%;
+    }
+    .harness-orbit-card {
+      background: var(--mv-surface);
+      border: 1px solid var(--mv-border);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+    .harness-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      border-bottom: 1px solid rgba(168, 188, 216, 0.08);
+      padding-bottom: 12px;
+    }
+    .harness-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .harness-badge-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .harness-content-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    @media (min-width: 1024px) {
+      .harness-content-grid {
+        grid-template-columns: 1.1fr 1fr;
+        gap: 20px;
+      }
+    }
+    .orbit-visual-container {
+      background: rgba(9, 13, 26, 0.7);
+      border: 1px solid rgba(156, 131, 255, 0.15);
+      border-radius: 12px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 280px;
+      position: relative;
+      overflow: hidden;
+    }
+    .orbit-stage {
+      position: relative;
+      width: 240px;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .orbit-center-core {
+      position: relative;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+      border: 2px solid var(--mv-primary);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      box-shadow: 0 0 20px rgba(156, 131, 255, 0.4);
+    }
+    .core-pulse-glow {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: rgba(156, 131, 255, 0.3);
+      animation: core-pulse 2.2s infinite ease-in-out;
+      z-index: -1;
+    }
+    @keyframes core-pulse {
+      0% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.35); opacity: 0.1; }
+      100% { transform: scale(1); opacity: 0.8; }
+    }
+    .core-icon {
+      font-size: 24px;
+      color: #ffffff;
+    }
+    .core-label {
+      font-size: 9px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+    }
+    .core-sub {
+      font-size: 8px;
+      color: var(--mv-primary-light);
+    }
+    .orbit-ring-track {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px dashed rgba(156, 131, 255, 0.2);
+    }
+    .ring-1 {
+      width: 140px;
+      height: 140px;
+      animation: orbit-rotate 24s linear infinite;
+    }
+    .ring-2 {
+      width: 210px;
+      height: 210px;
+      animation: orbit-rotate-reverse 36s linear infinite;
+    }
+    @keyframes orbit-rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes orbit-rotate-reverse {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+    .orbit-node {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(21, 29, 50, 0.95);
+      border: 1px solid var(--mv-border);
+      padding: 4px 8px;
+      border-radius: 20px;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: #ffffff;
+      white-space: nowrap;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    }
+    .orbit-node span.material-symbols-outlined {
+      font-size: 13px;
+      color: var(--mv-primary);
+    }
+    .node-1 { top: -10px; left: calc(50% - 35px); }
+    .node-2 { bottom: -10px; left: calc(50% - 35px); }
+    .node-3 { top: 10px; left: -15px; }
+    .node-4 { top: 10px; right: -15px; }
+    .node-5 { bottom: 0px; left: calc(50% - 35px); }
+    .orbit-metrics-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      width: 100%;
+      border-top: 1px solid rgba(168, 188, 216, 0.08);
+      padding-top: 12px;
+      margin-top: 10px;
+      gap: 8px;
+    }
+    .orbit-metric-mini {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    .metric-mini-label {
+      font-size: 10.5px;
+      color: var(--mv-muted);
+    }
+    .metric-mini-val {
+      font-size: 12.5px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+    .harness-terminal-wrapper {
+      background: #090d1a;
+      border: 1px solid rgba(168, 188, 216, 0.14);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 280px;
+    }
+    .terminal-titlebar {
+      background: #111728;
+      border-bottom: 1px solid rgba(168, 188, 216, 0.08);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .terminal-traffic-lights {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .traffic-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+    .terminal-title {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+      color: var(--mv-muted);
+    }
+    .terminal-screen {
+      padding: 12px 14px;
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11.5px;
+      line-height: 1.6;
+      color: #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+      max-height: 240px;
+    }
+    .terminal-line {
+      word-break: break-all;
+    }
+    .term-time {
+      color: #64748b;
+    }
+    .term-tag {
+      font-size: 10px;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-weight: 700;
+      margin: 0 4px;
+    }
+    .tag-info { background: rgba(100, 183, 255, 0.15); color: #64b7ff; }
+    .tag-success { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+    .tag-violet { background: rgba(156, 131, 255, 0.18); color: #a78bfa; }
+    .term-prompt {
+      color: var(--mv-primary);
+      font-weight: 700;
+    }
+    .term-cursor {
+      display: inline-block;
+      width: 6px;
+      height: 13px;
+      background: var(--mv-primary);
+      vertical-align: middle;
+      animation: term-blink 1s infinite;
+    }
+    @keyframes term-blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
 </style>
 <link rel="stylesheet" href="/css/mv-theme-nov18.css">
 </head>
@@ -973,6 +1232,98 @@
           <div class="metric-value text-blue">진행 중</div>
           <div class="metric-sub">
             <span>등록 12,840 명 · 실시간 활성 1,420 세션</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Harness² Inspired Autonomous AI Financial Orbit & Live Execution Log -->
+      <section class="harness-ai-section" aria-label="AI 자율 금융 관제 및 하네스 실행 궤도">
+        <div class="harness-orbit-card">
+          <div class="harness-header-row">
+            <div class="harness-title-wrap">
+              <span class="material-symbols-outlined" style="color: var(--mv-primary); font-size: 24px;">neurology</span>
+              <div>
+                <h3 style="margin: 0; font-size: 14.5px; font-weight: 800; color: #ffffff;">자율형 AI 국부펀드 & 에이전트 하네스 관제</h3>
+                <p style="margin: 2px 0 0; font-size: 11.5px; color: var(--mv-muted);">Google Research Harness² 아키텍처 기반 · 자산배분·원장동기화·리스크 실시간 궤도 제어</p>
+              </div>
+            </div>
+            <div class="harness-badge-group">
+              <span class="mv-badge mv-badge-violet">[v2.0 하네스 활성]</span>
+              <span class="mv-badge mv-badge-success">● 자율 리밸런싱 가동</span>
+            </div>
+          </div>
+
+          <div class="harness-content-grid">
+            <!-- Left: Orbit Animation Visual -->
+            <div class="orbit-visual-container">
+              <div class="orbit-stage">
+                <div class="orbit-center-core">
+                  <div class="core-pulse-glow"></div>
+                  <span class="material-symbols-outlined core-icon">psychology</span>
+                  <span class="core-label">AI CORE</span>
+                  <span class="core-sub">SWF Agent</span>
+                </div>
+                <div class="orbit-ring-track ring-1">
+                  <div class="orbit-node node-1" title="복식부기 원장 메모리 (PostgreSQL)">
+                    <span class="material-symbols-outlined">menu_book</span>
+                    <span class="node-text">원장 메모리</span>
+                  </div>
+                  <div class="orbit-node node-2" title="실시간 호가 스트림 (Netty 9092)">
+                    <span class="material-symbols-outlined">show_chart</span>
+                    <span class="node-text">호가 스트림</span>
+                  </div>
+                </div>
+                <div class="orbit-ring-track ring-2">
+                  <div class="orbit-node node-3" title="국부펀드 리밸런싱 (Hourly)">
+                    <span class="material-symbols-outlined">rebase_edit</span>
+                    <span class="node-text">리밸런싱</span>
+                  </div>
+                  <div class="orbit-node node-4" title="12종 금융 계산 엔진">
+                    <span class="material-symbols-outlined">calculate</span>
+                    <span class="node-text">계산 엔진</span>
+                  </div>
+                  <div class="orbit-node node-5" title="리스크 감지 가드 (Circuit Breaker)">
+                    <span class="material-symbols-outlined">security</span>
+                    <span class="node-text">리스크 가드</span>
+                  </div>
+                </div>
+              </div>
+              <div class="orbit-metrics-strip">
+                <div class="orbit-metric-mini">
+                  <span class="metric-mini-label">국부펀드 AUM</span>
+                  <span class="metric-mini-val font-mono" id="swf-aum-val">1,874,794,798 WLD</span>
+                </div>
+                <div class="orbit-metric-mini">
+                  <span class="metric-mini-label">하네스 튜닝 지수</span>
+                  <span class="metric-mini-val font-mono text-violet">+11.5 pt</span>
+                </div>
+                <div class="orbit-metric-mini">
+                  <span class="metric-mini-label">원장 동기화율</span>
+                  <span class="metric-mini-val font-mono text-green">100% 무결</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: macOS Minimal Dark Terminal Log -->
+            <div class="harness-terminal-wrapper">
+              <div class="terminal-titlebar">
+                <div class="terminal-traffic-lights">
+                  <span class="traffic-dot dot-red"></span>
+                  <span class="traffic-dot dot-yellow"></span>
+                  <span class="traffic-dot dot-green"></span>
+                </div>
+                <div class="terminal-title">terminal ~ woldeok-ai-daemon --live-stream</div>
+                <span class="material-symbols-outlined" style="font-size: 15px; color: var(--mv-muted);">terminal</span>
+              </div>
+              <div class="terminal-screen" id="harness-terminal-screen">
+                <div class="terminal-line"><span class="term-time">[02:00:00]</span> <span class="term-tag tag-info">INFO</span> [Autonomous SWF Scheduler] Hourly treasury automated investment triggered.</div>
+                <div class="terminal-line"><span class="term-time">[02:00:00]</span> <span class="term-tag tag-success">SUCCESS</span> [TreasuryService] SWF rebalancing completed: 국고 복리 성장 국부펀드(ASWF) 리밸런싱 완료 (AUM: 1,874,794,798 WLD, 재투자: 9,214,800 WLD)</div>
+                <div class="terminal-line"><span class="term-time">[02:15:22]</span> <span class="term-tag tag-info">INFO</span> [MarketEngine] 10대 상장사 호가 스트림 동기화 완료 (체결률: 99.8%)</div>
+                <div class="terminal-line"><span class="term-time">[02:30:45]</span> <span class="term-tag tag-success">SUCCESS</span> [LedgerGuard] 복식부기 원장 해시 무결성 검증 100% 통과 (대차대조 불일치 0건)</div>
+                <div class="terminal-line"><span class="term-time">[02:45:10]</span> <span class="term-tag tag-violet">ADAPT</span> [Harness²] 외장 부품 튜닝 사이클 정상 구동 (컨텍스트 윈도우 최적화 완료)</div>
+                <div class="terminal-line term-cursor-line"><span class="term-prompt">daemon@moneyverse:~$</span> <span class="term-cursor"></span></div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -1418,10 +1769,55 @@
         }
       }
 
+      // Live Harness Terminal Stream Simulation
+      function initHarnessTerminal() {
+        const screen = document.getElementById('harness-terminal-screen');
+        if (!screen) return;
+
+        const events = [
+          { tag: 'tag-info', tagText: 'INFO', msg: '[TreasuryService] 국부펀드(ASWF) 복리 자산 AUM 동기화 완료: 1,874,794,798 WLD' },
+          { tag: 'tag-success', tagText: 'SUCCESS', msg: '[MarketEngine] 10대 상장사 호가 스트림 100% 무결점 갱신 (지연: 1.2ms)' },
+          { tag: 'tag-violet', tagText: 'HARNESS', msg: '[AgentHarness] 모델 가중치 불변 보존 및 4대 외장 하네스 튜닝 사이클 정상 구동' },
+          { tag: 'tag-info', tagText: 'INFO', msg: '[LedgerGuard] 복식부기 원장 대차대조 무결성 감사 통과 (오차: 0 WLD)' },
+          { tag: 'tag-success', tagText: 'SUCCESS', msg: '[Autonomous SWF] 다음 주기 국고 배당 재투자 전략 자동 수립 완료' },
+          { tag: 'tag-violet', tagText: 'ORBIT', msg: '[AgentOrbit] 6개 하네스 노드 활성 상태 정상 (메모리·스트림·계산엔진 연동)' }
+        ];
+
+        let idx = 0;
+        setInterval(function() {
+          const now = new Date();
+          const timeStr = '[' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0') + ']';
+          const ev = events[idx % events.length];
+          idx++;
+
+          const line = document.createElement('div');
+          line.className = 'terminal-line';
+          line.innerHTML = '<span class="term-time">' + timeStr + '</span> <span class="term-tag ' + ev.tag + '">' + ev.tagText + '</span> ' + escapeHtml(ev.msg);
+
+          const cursorLine = screen.querySelector('.term-cursor-line');
+          if (cursorLine) {
+            screen.insertBefore(line, cursorLine);
+          } else {
+            screen.appendChild(line);
+          }
+
+          // keep last 12 lines
+          const allLines = screen.querySelectorAll('.terminal-line:not(.term-cursor-line)');
+          if (allLines.length > 12) {
+            allLines[0].remove();
+          }
+          screen.scrollTop = screen.scrollHeight;
+        }, 8000);
+      }
+
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', hydrateUserSession);
+        document.addEventListener('DOMContentLoaded', function() {
+          hydrateUserSession();
+          initHarnessTerminal();
+        });
       } else {
         hydrateUserSession();
+        initHarnessTerminal();
       }
     })();
   </script>

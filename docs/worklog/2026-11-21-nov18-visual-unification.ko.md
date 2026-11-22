@@ -315,3 +315,15 @@ Public routing review identified and fixed: independent backend acceptance was m
 Reviewer icon concern used an obsolete local page: all12 actual mainf033 presentations were checked and reference only the approved hashed /assets/mv39/favicon.ico, already included in real admission/byte tests. No unrelated legacy icon aliases were exposed. Backend reviewer4P1 fixes have their own12 helper tests and parent source review; real17-check evidence is separate from unit results.
 
 Source implementation/review step finished; actual public Test connection and240-case browser acceptance remain in progress. Main root still maintenance until same-artifact Test/backend/frontend acceptance succeeds. Root-approved source and operational revisions remain distinct.
+
+
+### Main advancement and active-home data-contract defect — before work
+Current main advanced concurrently fromf033 to768d932b202fbd506e5b0692bf4a38d1f5af1ef6 while immutable preparation was starting; the strict current-main gate correctly refused before any public stage or routing changes. Main includes PR3356's new active home block with hardcoded replication latency, yield, session signature and agent health claims plus inline simulation. These violate the approved no-invented-live-data contract and existing home CSP. Integrate current main, preserve unrelated contributions/history, remove only the unbacked active-home block, and add real rendered-template regressions. Historical captured static pages remain outside accepted presentation routes; no all-page acceptance is claimed.
+
+Merge conflict resolution: three current task plan/worklog files had our appended continuation versus an empty main side. Preserve all task continuation text; no distinct main text was discarded. Database/main Java sources are unchanged by the concurrent UI work. New source/artifact must still pass exact-main CI and independent Test backend/frontend acceptance; no stale-source bypass or manifest relabelling.
+
+
+### Current-main reconciliation — source validation finished
+The five-language real Thymeleaf home regression failed5/5 on invented telemetry, then passed after removing only the injected active-home block and BOM. The resulting active template is byte-identical to the previously approved real-backend-consumer template; other concurrent static files/history are preserved outside accepted routes. Full Spring667+bootJar passed with zero failures/errors/skips; separate24 PostgreSQL-tagged tests were excluded locally, not counted. Native UI/money Node351 passed. Independent focused source review found no P0/P1; it did not replace actual backend/browser acceptance.
+
+The strict source gate stopped the oldf033 public preparation before any stage or routing mutation. Source update requires a new exact-main CI artifact and backend/frontend Test runs; no source ID or protected manifest was relabelled. Existing isolatedf033 backend remains healthy after one nonreproducible4s read timeout during build load; followup APIreads were0.013–0.274s, noblockedDBlocks/no restarts. Record transient observation without declaring an unproven cause.
