@@ -300,3 +300,11 @@ The owner-designated AgentMemory reel and upstream README are preserved in [EN](
 
 ### 4. 크로스 에이전트/도구 간 단일 기억 저장소 공유 (Cross-Agent Shared SSOT)
 - 메인 코딩 에이전트, 서브에이전트(browser, research 등), 그리고 추후 다른 AI 도구가 투입되더라도 모두 동일한 `PROJECT_MEMORY.md`를 유일한 단일 진실 공급원(Single Source of Truth)으로 참조하고 갱신하여 세션 간 지식 단절을 완전히 방지한다.
+
+
+## Recurring owner-selected frontend references — 2026-11-22
+Always consult https://www.instagram.com/reel/DfZgpiWtX1z/ and https://www.instagram.com/reel/DewJPndCCng/ during frontend work. These references supplement the approved November18 navy/violet Spring design, current favicon logo, actual backend data, PC/mobile and administrator consistency. Neither reel has been independently inspected yet; do not invent their contents or equate the earlier user-pasted toolkit summary with verified video content. Preserve provenance and safe reduced-motion behavior.
+Owner directs progressive live adoption of individually completed and accepted frontend scopes while remaining features continue. Exact-source CI/artifact/isolated Test, real source-positive UI/session/rollback and financial/security gates still apply. Current task logs and source ledger distinguish deployed/implemented/unverified. No repeated authorization is required within this scope.
+
+
+2026-11-22 measured continuation: protected native administrator catalog preview connection installed successfully (application f0336fded6068f884c87f88efedeb770fd3387d4, operational b2eb6c181bf90e865120ce4eb962135f015665e7). DB-read health/source and presentation health/source200; anonymous401/unknown404/write405 and existingAPI/maintenance boundaries passed. Public frontend is still503 maintenance; do not claim Production cutover. Browser control is disabled; authenticated/visual acceptance remainsOPEN. Receipt: docs/releases/2026-11-22-native-catalog-preview-connection.md. Both recurring Instagram design references remain required but video contents unverified.

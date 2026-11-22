@@ -336,6 +336,70 @@ class InstallTests(unittest.TestCase):
         self.assertNotIn(('stop',self.m.API_UNIT),self.system.calls)
         self.assertFalse(self.m.ENVIRONMENT.exists())
 
+    def handoff_fixture(self):
+        import zipfile
+        with zipfile.ZipFile(self.oldjar,'w') as archive:
+            archive.writestr('META-INF/build-info.properties','build.sourceRevision='+self.manifest['oldSource']+'\n')
+        self.oldjar.chmod(0o444)
+        self.manifest['oldJarSha256']=self.m.digest(self.oldjar.read_bytes())
+        self.run_apply()
+        outcome=self.m.rollback(self.stage,self.manifest,self.system)
+        self.assertTrue(outcome['complete'])
+        self.m.save(self.stage/'manifest.json',self.manifest)
+        base={'applicationSource':self.manifest['oldSource'],'jar':str(self.oldjar),
+            'jarSha256':self.manifest['oldJarSha256'],
+            'files':{'qa.service':self.m.digest(b'old frontend unit'),
+                     'qa.conf':self.m.digest(b'old include'),
+                     'site.after':self.m.digest(b'unrelated site remains')}}
+        self.manifest['oldJarIdentity']=self.m.snapshot(self.oldjar)
+        self.m.save(self.stage/'manifest.json',self.manifest)
+        return base,{'mainPid':'101'}
+    def restored_receipt(self,base,receipt):
+        with patch.object(self.m,'protected_stage'),patch.object(self.m,'root_path'):
+            return self.m.restored_base_receipt(self.stage,base,receipt,self.system)
+    def test_completed_inverse_hands_off_exact_restored_process_without_rewriting_initial_receipt(self):
+        base,receipt=self.handoff_fixture()
+        calls=list(self.system.calls)
+        result=self.restored_receipt(base,receipt)
+        self.assertEqual(result['mainPid'],'404')
+        self.assertEqual(receipt,{'mainPid':'101'})
+        self.assertEqual(self.system.calls,calls)
+        self.assertEqual(set(result['restoration']['files']),{'manifest.json','journal.json','rollback-outcome.json'})
+    def test_incomplete_inverse_wrong_phase_and_wrong_source_never_adopt_restored_pid(self):
+        base,receipt=self.handoff_fixture()
+        cases=[('rollback-outcome.json',lambda q:q.update(complete=False)),
+               ('rollback-outcome.json',lambda q:q.update(errors=['synthetic'])),
+               ('journal.json',lambda q:q['frontendInverse'].update(phase='starting-old')),
+               ('journal.json',lambda q:q['inverse'].update(nginxReloaded=False)),
+               ('manifest.json',lambda q:q.update(oldSource='c'*40))]
+        for name,change in cases:
+            with self.subTest(file=name):
+                path=self.stage/name;original=path.read_bytes();value=json.loads(original);change(value);self.m.save(path,value)
+                try:
+                    with self.assertRaises(ValueError):self.restored_receipt(base,receipt)
+                finally:path.write_bytes(original)
+    def test_restoration_handoff_rejects_foreign_pid_or_same_bytes_new_inode(self):
+        base,receipt=self.handoff_fixture()
+        self.system.states[self.m.FRONT_UNIT]['MainPID']='909'
+        with self.assertRaises(ValueError):self.restored_receipt(base,receipt)
+        self.system.states[self.m.FRONT_UNIT]['MainPID']='404'
+        path=self.m.FRONT_FILE;retained=path.with_name('retained-owned');path.rename(retained);path.write_bytes(retained.read_bytes())
+        with self.assertRaises(ValueError):self.restored_receipt(base,receipt)
+        self.assertTrue(path.exists());self.assertEqual(path.read_bytes(),b'old frontend unit')
+    def test_forward_gate_revalidates_restoration_evidence_inode(self):
+        base,receipt=self.handoff_fixture()
+        self.manifest['priorRestoration']=self.restored_receipt(base,receipt)['restoration']
+        with patch.object(self.m,'protected_stage'),patch.object(self.m,'root_path'):
+            self.m.forward_gate(self.manifest)
+            path=self.stage/'journal.json';temp=self.stage/'foreign-journal'
+            temp.write_bytes(path.read_bytes());os.replace(temp,path)
+            with self.assertRaises(ValueError):self.m.forward_gate(self.manifest)
+
+    def test_restoration_handoff_rejects_stage_outside_task_root(self):
+        base,receipt=self.handoff_fixture()
+        self.m.ROOT=self.root/'other-root'
+        with self.assertRaises(ValueError):self.restored_receipt(base,receipt)
+
     def test_front_readiness_failure_restores_original_renderer_and_bytes(self):
         self.system.fail='front-readiness'
         with self.assertRaises(RuntimeError):self.run_apply()
@@ -815,5 +879,62 @@ class InstallTests(unittest.TestCase):
                        {'status':'in_progress'},{'conclusion':'failure'},
                        {'jobs':good['jobs'][:-1]},{'jobs':good['jobs']+[good['jobs'][0]]}]:
             with self.assertRaises(ValueError):self.m.validate_ci('b'*40,{**good,**change})
+
+
+class RouteAdoptionTests(unittest.TestCase):
+    def exercise(self, responses, action):
+        from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+        import threading
+        m=module();seen=[];pending=list(responses)
+        class Handler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                seen.append((self.command,self.path,self.headers.get('Host'),self.headers.get('Cookie')))
+                status,marker=pending.pop(0) if len(pending)>1 else pending[0]
+                self.send_response(status)
+                if marker:self.send_header('X-MV-Rebuild-QA',marker)
+                self.end_headers()
+            def log_message(self,*args):pass
+        server=ThreadingHTTPServer(('127.0.0.1',0),Handler)
+        thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
+        real=m.urllib.request.build_opener(m.urllib.request.ProxyHandler({}),m.NoRedirect())
+        class LocalTransport:
+            def open(self,request,timeout):
+                if request.full_url!='http://127.0.0.1'+m.canary.PREFIX+'catalog':
+                    raise AssertionError('Route readiness must probe only the fixed catalog')
+                forwarded=m.urllib.request.Request('http://127.0.0.1:'+str(server.server_port)+m.canary.PREFIX+'catalog',
+                    headers=dict(request.header_items()),method=request.get_method())
+                return real.open(forwarded,timeout=timeout)
+        try:
+            with patch.object(m.urllib.request,'build_opener',return_value=LocalTransport()):
+                action(m,seen)
+        finally:
+            server.shutdown();server.server_close();thread.join()
+        self.assertTrue(seen)
+        self.assertTrue(all(row==('GET',m.canary.PREFIX+'catalog','easy-scraping.com',None) for row in seen))
+        return seen
+    def test_reload_waits_for_new_private_route_after_old_worker_404(self):
+        seen=self.exercise([(404,None),(401,'nov18-real-read-20261122')],
+            lambda m,seen:m.wait_catalog_adoption(timeout=.5))
+        self.assertEqual(len(seen),2)
+    def test_real_boundaries_wait_for_route_adoption_before_other_probes(self):
+        from types import SimpleNamespace
+        def check(m,seen):
+            def probe(*args,**kwargs):
+                self.assertEqual(len(seen),2,'Admission checks must follow observed new-route readiness')
+                raise StopIteration('Boundary checks reached after readiness')
+            system=m.System.__new__(m.System)
+            system.helper=SimpleNamespace(probe=probe)
+            with self.assertRaises(StopIteration):system.boundaries({})
+        self.exercise([(404,None),(401,'nov18-real-read-20261122')],check)
+    def test_old_worker_404_exhaustion_is_bounded(self):
+        def check(m,seen):
+            with self.assertRaises(RuntimeError):m.wait_catalog_adoption(timeout=.08)
+        self.exercise([(404,None)],check)
+    def test_unsafe_or_unmarked_responses_never_earn_readiness(self):
+        for status,marker in [(200,'nov18-real-read-20261122'),(401,None),(302,None),(403,None),(503,None)]:
+            with self.subTest(status=status):
+                def check(m,seen):
+                    with self.assertRaises(ValueError):m.wait_catalog_adoption(timeout=.5)
+                self.assertEqual(len(self.exercise([(status,marker)],check)),1)
 
 if __name__=='__main__':unittest.main()

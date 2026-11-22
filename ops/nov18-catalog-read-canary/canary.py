@@ -8,6 +8,7 @@ PREFIX='/_mv/nov18-rebuild-qa/'
 FRONT_UNIT='moneyverse-nov18-rebuild-qa-v20261121.service'
 API_UNIT='moneyverse-nov18-catalog-read-qa-v20261122.service'
 ENVIRONMENT=Path('/etc/moneyverse/nov18-catalog-read-qa-v20261122.env')
+RELEASE_ROOT=Path('/srv/moneyverse-native-rebuild-releases')
 
 def database_environment(raw):
     try:
@@ -25,9 +26,9 @@ def database_environment(raw):
         url='jdbc:postgresql://'+u.hostname+':'+str(port)+u.path
         if query:url+='?sslmode='+query[0][1]
         values={'SPRING_DATASOURCE_URL':url,'SPRING_DATASOURCE_USERNAME':user,'SPRING_DATASOURCE_PASSWORD':password,
-            'SPRING_DATASOURCE_DRIVER_CLASS_NAME':'org.postgresql.Driver','SPRING_DATASOURCE_HIKARI_READ_ONLY':'true',
-            'SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE':'2','SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE':'0',
-            'SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT':'5000','SPRING_SQL_INIT_MODE':'never','SPRING_JPA_HIBERNATE_DDL_AUTO':'none'}
+            'SPRING_DATASOURCE_DRIVERCLASSNAME':'org.postgresql.Driver','SPRING_DATASOURCE_HIKARI_READONLY':'true',
+            'SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE':'2','SPRING_DATASOURCE_HIKARI_MINIMUMIDLE':'0',
+            'SPRING_DATASOURCE_HIKARI_CONNECTIONTIMEOUT':'5000','SPRING_SQL_INIT_MODE':'never','SPRING_JPA_HIBERNATE_DDLAUTO':'none'}
         def quote(value):return '"'+value.replace('\\','\\\\').replace('"','\\"')+'"'
         return ''.join(key+'='+quote(value)+'\n' for key,value in values.items())
     except Exception:
@@ -64,7 +65,7 @@ def render_config(front_port=4830,api_port=4832):
     return catalog+qa_module().render_config(front_port)
 
 def render_units(jar):
-    if not isinstance(jar,str) or not re.fullmatch(r'/srv/moneyverse-data/releases/test-nov18-catalog-read-canary-v2026\.11\.22\.1-[0-9a-f]{12}/moneyverse-spring-backend-0\.0\.1-SNAPSHOT\.jar',jar):
+    if not isinstance(jar,str) or not re.fullmatch(re.escape(str(RELEASE_ROOT))+r'/test-nov18-catalog-read-canary-v2026\.11\.22\.1-[0-9a-f]{12}/moneyverse-spring-backend-0\.0\.1-SNAPSHOT\.jar',jar):
         raise ValueError('Unapproved immutable canary generation')
     common='''Restart=on-failure
 RestartSec=3

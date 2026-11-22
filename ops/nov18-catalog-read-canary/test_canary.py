@@ -20,8 +20,11 @@ class CanaryTests(unittest.TestCase):
         self.assertEqual(values['SPRING_DATASOURCE_USERNAME'],'moneyverse_app')
         self.assertEqual(values['SPRING_DATASOURCE_PASSWORD'],password)
         self.assertEqual(values['SPRING_DATASOURCE_URL'],'jdbc:postgresql://127.0.0.1:5433/disposable_example?sslmode=disable')
-        self.assertEqual(values['SPRING_DATASOURCE_HIKARI_READ_ONLY'],'true')
-        self.assertEqual(values['SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE'],'2')
+        self.assertEqual(values['SPRING_DATASOURCE_HIKARI_READONLY'],'true')
+        self.assertEqual(values['SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE'],'2')
+        self.assertEqual(values['SPRING_DATASOURCE_DRIVERCLASSNAME'],'org.postgresql.Driver')
+        self.assertEqual(values['SPRING_JPA_HIBERNATE_DDLAUTO'],'none')
+        self.assertNotIn('SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT',values)
         for unsafe in [url.replace('moneyverse_app','postgres'),url.replace('127.0.0.1','example.com'),url+'#fragment',url+'&options=role%3Dpostgres',url+'&sslmode=require',url.replace('sslmode=disable','sslmode=invalid'),url.replace('disposable_example','../private'),url.replace(urllib.parse.quote(password,safe=''),'ci_example%0Ainjected'),url+'\n']:
             with self.assertRaises(ValueError) as raised:m.database_environment(unsafe)
             self.assertNotIn(password,str(raised.exception));self.assertNotIn(unsafe,str(raised.exception))
@@ -38,7 +41,7 @@ class CanaryTests(unittest.TestCase):
         self.assertEqual(values['SPRING_DATASOURCE_PASSWORD'],password)
 
     def test_generated_units_are_valid_systemd_and_reject_unowned_jar_paths(self):
-        m=module();jar='/srv/moneyverse-data/releases/test-nov18-catalog-read-canary-v2026.11.22.1-'+'a'*12+'/moneyverse-spring-backend-0.0.1-SNAPSHOT.jar'
+        m=module();jar='/srv/moneyverse-native-rebuild-releases/test-nov18-catalog-read-canary-v2026.11.22.1-'+'a'*12+'/moneyverse-spring-backend-0.0.1-SNAPSHOT.jar'
         units=m.render_units(jar)
         with tempfile.TemporaryDirectory(prefix='mv-canary-units-') as folder:
             files=[]
@@ -50,6 +53,16 @@ class CanaryTests(unittest.TestCase):
             self.assertEqual(result.returncode,0,result.stderr)
         for jar in ['/tmp/unowned.jar','/srv/moneyverse-data/releases/../private.jar','/srv/moneyverse-data/releases/anything.jar\nEnvironment=unsafe']:
             with self.assertRaises(ValueError):m.render_units(jar)
+
+    def test_executable_generations_use_a_dedicated_root_owned_tree(self):
+        m=module()
+        self.assertEqual(m.RELEASE_ROOT,Path('/srv/moneyverse-native-rebuild-releases'))
+        path=Path(__file__).with_name('install.py')
+        spec=importlib.util.spec_from_file_location('owned_root_installer',path)
+        installer=importlib.util.module_from_spec(spec);spec.loader.exec_module(installer)
+        self.assertEqual(installer.RELEASES,m.RELEASE_ROOT)
+        legacy='/srv/moneyverse-data/releases/test-nov18-catalog-read-canary-v2026.11.22.1-'+'a'*12+'/moneyverse-spring-backend-0.0.1-SNAPSHOT.jar'
+        with self.assertRaises(ValueError):m.render_units(legacy)
 
     def test_actual_nginx_protects_the_catalog_and_never_forwards_actor_transport_headers(self):
         m=module();seen=[]

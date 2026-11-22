@@ -231,3 +231,60 @@ installer 기준40통과. 실제 임시파일의 영속 재시도·외부자원 
 ## 완료 — 백엔드 복구 재시도 소스 통합
 독립 검토는2e420bba를 Critical0/Important0/Minor0으로 승인했습니다. 한영 로그 충돌은 모든 기준 이력을 순서대로 보존하고 자식 추가 기록 전체를 이어 해결했습니다. 설치기·테스트는 검토된 소스와 바이트가 같고 공유 guard는 그대로입니다. 부모 실행 Python67+7+4=78개 실패0/제외0, 컴파일·보안·제어문자·diff 검사를 통과했습니다. 애플리케이션은 b061의660개/JAR 검증 소스와 동일하고 JS/정책 소스도552개 성공 당시와 같습니다. Python만 바뀌어 무거운 애플리케이션 검사는 반복하지 않으며 최종 HEAD CI는 필수입니다.
 이 제한된 소스의 미해결 검토 결함은 없습니다. 실제 서비스·root준비·DB·세션·카탈로그·브라우저·정상 복구는 아직 미수행입니다. 헤더·운영 소스의 최종 CI를 진행하고 전체180경로 기능 수용은 OPEN으로 유지합니다.
+
+
+## 작업 전 — 관리자 문의 조회 소스
+부모가 PR3352·실제 카탈로그 수용을 담당하는 동안 독립 fd3 소스에서 관리자 문의 조회를 구현합니다.196의 DB 관리자 조회 함수에 Spring 관리자 API·네이티브 화면이 없어 실제 함수 기반 읽기 API와 사용자 전환 시 비우는11월18일 UI를 추가합니다. 마이그레이션·권한·저장·게이트웨이·운영 변경은 없고 답변·상태 변경 영수증·전체 이력 페이지 처리는 OPEN입니다. 공유 Gradle 잠금과 통합 전 독립 검토를 지킵니다.
+
+
+## 작업 전 — SSH 복구 및 완료 화면 순차 적용
+사용자는 SSH 계속 작업·릴스2개 상시 참고·실제 검증 완료 화면의 순차 운영 적용을 재승인했습니다. 기존 관리 호스트를 거쳐 원래 VM으로 SSH를 복구했고 데몬·방화벽·포트·자격·VM 재시작 변경은 없습니다. 기존2222는 미접속이며 저장소와 미완료 문의 소스를 보존했습니다. 접속 상세·자격은 기록하지 않습니다.
+이전 준비는 root가 Debian 소유 공유 Gradle 잠금 파일을 쓰기 열기하지 못해66으로 종료됐고 설치기·stage·apply는 실행되지 않았습니다. 같은 잠금을 읽기 전용 파일디스크립터로 열어 배타 flock을 유지하며 파일 권한 완화나 잠금 우회는 하지 않습니다. main은 PR3353의 f0336fded6로 진행됐고 CI44932169050/후보44932169037은 성공했습니다. 별도 변경인 Next 토큰 기본값·프록시·전체 앱 자격 CORS는 활성화하지 않고 전역 보안 검토 OPEN으로 둡니다. 한정 Spring 실행 모드는 이 구성을 포함하지 않으며 전체 서비스 보안 수용으로 과장하지 않습니다.
+체크: [x]기존SSH복구 [x]이전준비·소스확인 [ ]참고자료·메모리동기화 [ ]현재main산출물준비 [ ]실데이터·세션·브라우저 [ ]정상복구 [ ]수용범위만운영연결. 대체 화면 수용 전 점검을 유지합니다.
+
+
+## Before work - isolated root-owned executable generations
+Actual protected prepare refuses the legacy shared release root because it and its parent are deployment-account owned. Keep the shared deployment tree unchanged. Use a dedicated root-owned generation root directly under /srv, one shared constant for installer and unit-path validation, reject shared/outside paths, and verify RED/GREEN plus full operational tests. Retain old QA rollback artifact unchanged and hash/inode bound. No application/API/DB change or permission relaxation. Reviewed committed source precedes preparation/application.
+
+
+## In progress - dedicated root source verified
+Actual failure reproduced: shared releases parent is deployment-account owned; safe guard refuses before stage. New helper tests observed2RED (missing shared root constant and new-generation path rejection), then68canary+7QA+4maintenance=79PythonGREEN/0failure/0skip including real isolated Nginx and systemd validation. Dedicated /srv root constant drives both installer and exact generation/JAR path renderer; valid legacy path now explicitly refused. Shared directory/old rollback artifact untouched. Independent source spec+quality review approved0Critical/Important/Minor. Security/control/diff checks passed; no application/SQL runtime source changed.
+Current main f033/CI44932169050 remains explicit app artifact authority. New committed reviewed operational revision is separately identified; no older JAR is relabelled. The protected directory/prepare/apply, actual data-positive/session/browser and normal inverse remain OPEN. Both recurring owner reel URLs are now recorded on the MiniPC; content still unverified.
+
+
+## Before work - deployed read-only pool binding regression
+R4 preparation passed with actual directory0755/JAR0444/private env0600 and unprivileged readability checks. Actual backend then failed before accepting traffic: binding spring.datasource.hikari.read-only reports Hikari pool sealed. Automatic inverse completed with zero component errors and original QA PID/source preserved; public root remains503. Reproduce exact uppercase deployment environment and canonical property binding in genuine datasource composition tests before changing runtime code. No new grant/migration, production identity or fake startup success. Test excludes local PostgreSQL; current canonical transaction/actor/read-only checks stay intact.
+
+
+## In progress - genuine environment-name mapping reproduction
+The initial H2 composition matrix3passed and did NOT reproduce actual PostgreSQL-unit startup. Its custom-named SystemEnvironmentPropertySource did not model Boot's genuine systemEnvironment mapping. Correct the fixture to replace StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME before judging the deployed underscore-separated pool keys. Hypothesis: nested connection.timeout mapping can access the connection getter/start the pool before readOnly binding. Preserve all source checks; no runtime patch until reproduction.
+
+
+## 2026-11-22 — deployment pool environment binding correction
+
+- Before work: private read-canary r4 failed before frontend replacement. Its recorded inverse completed with no errors; public maintenance and previous frontend PID/source were retained. The actual error was Spring environment binding of Hikari read-only after the pool was sealed.
+- In progress: an initially custom-named property source did not reproduce the problem (3/3); that result was not accepted as RED. Replacing the actual systemEnvironment property source, and then consuming the real Python environment generator, reproduced the startup failure (3 tests, 1 failure). The Python canonical-key contract also failed against the old generator.
+- Correction: canonical Spring environment names remove property-name hyphens instead of replacing them with underscores. Changed only six deployment variable names. Read-only mode, pool limits, credential handling, application-role restriction, initialization exclusions, route scope and database grants are unchanged. See [Spring external configuration](https://docs.spring.io/spring-boot/reference/features/external-config.html).
+- Validation: unchanged generated-environment regression 3/3; complete Spring test and bootJar command exit0, XML662 tests/0 failures/0 errors/0 skipped. The separate24 PostgreSQL-tagged tests were excluded locally, not counted as passes. Canary68 + protectedQA7 + maintenance4 Python tests passed. Native UI/money351 Node tests passed. Repository security, control-byte scans and git diff --check passed. Existing unrelated test fixture warning/deprecation noise remains; these results do not establish real PostgreSQL or browser/cutover acceptance.
+- Review: fresh focused review of exact generator, parser assertions and Java subprocess/environment/context code found no actionable findings.
+- Finished scope: source correction and regression checks only. The deployment retry and browser acceptance remain in progress. Latest origin/main remains f0336fded6068f884c87f88efedeb770fd3387d4; no application artifact is relabelled. Direct host Nginx still returns503 for / and /status, protected old HTML401 and missing new catalog404. Public automated HTTPS probes currently return edge403; that is not a successful public application check.
+
+
+### Task2 route reload adoption continuation — before work
+The corrected r5 backend and new frontend reached exact-source readiness. After Nginx reload returned, the first catalog boundary request still hit an old worker and returned404 (host access log13:47:16: HTML401, JS401, catalog404). The new configuration had already been installed; nginx reload is asynchronous. The installer correctly refused acceptance and began inverse. Old frontend restart proof was initially too early; a second explicit persisted inverse completed with no errors, old source72714/health200 restored. Do not weaken the final401/unknown404/write405/API/maintenance/Test admission checks. Add bounded observed route-adoption readiness before the unchanged boundaries, with real HTTP fixture coverage for old404 -> exact new401/header, timeout and unsafe responses. Browser local use is disabled in Work settings; no authentication state was exported.
+
+
+### Task2 restored-process handoff — before work
+After completed r5 inverse, the original renderer is healthy at exact old source but has a new verified MainPID. The immutable initial QA receipt must not be edited to relabel that restarted process. Add an explicit --prior-inverse preparation input. It must accept only a protected direct child of the task root whose complete inverse, verified-old phase/current PID, exact original source/JAR, current restored unit/include inode+hash and unchanged site are proved. Preserve the original receipt; carry separate restoration evidence snapshots into the new proposal and revalidate them before mutation. Foreign PID/inode, incomplete or altered evidence must refuse without stopping/adopting a process.
+
+
+### Task2 route adoption and restored-process handoff — validation checkpoint
+- In progress: added bounded observed catalog-route adoption after asynchronous Nginx reload. Only an unmarked old-worker404 retries; exact marked401 is readiness. Unsafe200, unmarked401, redirects403/503 fail immediately. Final admission/API/maintenance/Test checks are unchanged. Real loopback HTTP tests include invocation ordering; removing the real boundaries readiness call caused a failing regression.
+- In progress: explicit preparation-only --prior-inverse validates completed inverse ancestry and the actual restored process without editing the original QA receipt. Separate evidence snapshots are rechecked by forward gates. Foreign PID/inode, incomplete phase/source and out-of-root evidence refuse. The accepted flag remains historical: both an accepted generation later rolled back and a failed attempt may have a valid complete inverse; neither bypasses the required current verified-old process proof.
+- Validation: canary77 + QA7 + maintenance4 Python tests passed; security/control-byte/diff checks passed. The handoff fixture initially lacked a real immutable source-bound JAR; fixed the disposable fixture, without relaxing production provenance. An actual read-only host check proved original72714 source/current restored PID191220 and all three restoration-evidence files. Fresh exact-diff review found no P0/P1 findings; reviewer did not claim independent live tests.
+- Finished scope: operational source and regression continuation. New canary retry remains pending; public maintenance is still in place. Browser use is disabled in Work settings, so positive authenticated browser acceptance is OPEN and no credential/session extraction workaround is used.
+
+
+### 2026-11-22 private connection installation — finished scoped step
+Protected r6 installation exited0. Application f0336fded6068f884c87f88efedeb770fd3387d4/operations b2eb6c181bf90e865120ce4eb962135f015665e7 now run in the administrator-only preview. Exact process/JAR/source proof and original boundary checks were repeated successfully. Canonical DB-read health and presentation health/version200; public origin maintenance503 retained. See [measured connection receipt](../releases/2026-11-22-native-catalog-preview-connection.md).
+Whole rebuild remains in progress: browser use disabled; authenticated/visual/full-route acceptance and Production promotion OPEN. Current main was fetched again and remains f033. Operational CI44987327884 still running; no completed exact-head CI claim or main integration.
