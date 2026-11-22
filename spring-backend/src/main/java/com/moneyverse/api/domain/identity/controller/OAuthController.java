@@ -12,7 +12,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,14 +37,23 @@ public class OAuthController {
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
 
-    @Value("${moneyverse.discord.client-id:887278005179785218}")
+    @Value("${moneyverse.discord.client-id:${DISCORD_CLIENT_ID:}}")
     private String discordClientId;
 
-    @Value("${moneyverse.discord.client-secret:vDEGshAzv9Rxh-ge9fCHZ82xTC9w-DzI}")
+    @Value("${moneyverse.discord.client-secret:${DISCORD_CLIENT_SECRET:}}")
     private String discordClientSecret;
 
-    @Value("${moneyverse.discord.redirect-uri:https://easy-scraping.com/auth/discord/callback}")
+    @Value("${moneyverse.discord.redirect-uri:${DISCORD_REDIRECT_URI:https://easy-scraping.com/auth/discord/callback}}")
     private String discordRedirectUri;
+
+    @Value("${moneyverse.google.client-id:${GOOGLE_CLIENT_ID:}}")
+    private String googleClientId;
+
+    @Value("${moneyverse.google.client-secret:${GOOGLE_CLIENT_SECRET:}}")
+    private String googleClientSecret;
+
+    @Value("${moneyverse.google.redirect-uri:${GOOGLE_REDIRECT_URI:https://easy-scraping.com/auth/google/callback}}")
+    private String googleRedirectUri;
 
     public OAuthController(UserAuthService authService, ObjectMapper objectMapper) {
         this.authService = authService;
@@ -88,7 +99,12 @@ public class OAuthController {
                     URLEncoder.encode(state, StandardCharsets.UTF_8)
             );
         } else {
-            authorizationUrl = "https://accounts.google.com/o/oauth2/v2/auth";
+            authorizationUrl = String.format(
+                    "https://accounts.google.com/o/oauth2/v2/auth?client_id=%s&response_type=code&redirect_uri=%s&scope=openid%%20email%%20profile&state=%s&access_type=online&prompt=select_account",
+                    URLEncoder.encode(googleClientId, StandardCharsets.UTF_8),
+                    URLEncoder.encode(googleRedirectUri, StandardCharsets.UTF_8),
+                    URLEncoder.encode(state, StandardCharsets.UTF_8)
+            );
         }
 
         // Browser OAuth start must always 302 redirect unless explicit format=json parameter is set
@@ -122,7 +138,7 @@ public class OAuthController {
         boolean wantsJson = "json".equalsIgnoreCase(request.getParameter("format"));
 
         if (error != null && !error.isBlank()) {
-            log.warn("[OAuth] Provider reported error: {}", error);
+            log.warn("[OAuth] Provider reported error: provider={}, error={}", p, error);
             if (!wantsJson) {
                 return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_cancelled")).build();
             }
@@ -130,14 +146,14 @@ public class OAuthController {
         }
 
         if (code == null || code.isBlank()) {
-            log.warn("[OAuth] No authorization code received");
+            log.warn("[OAuth] No authorization code received for provider={}", p);
             if (!wantsJson) {
                 return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_response")).build();
             }
             return ResponseEntity.badRequest().body(Map.of("outcome", "error", "error", "oauth_response"));
         }
 
-        if (!"discord".equals(p)) {
+        if (!"discord".equals(p) && !"google".equals(p)) {
             if (!wantsJson) {
                 return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=unsupported_provider")).build();
             }
@@ -145,68 +161,134 @@ public class OAuthController {
         }
 
         try {
-            // 1. Exchange authorization code for Discord access token
-            String tokenBody = String.format(
-                    "client_id=%s&client_secret=%s&grant_type=authorization_code&code=%s&redirect_uri=%s",
-                    URLEncoder.encode(discordClientId, StandardCharsets.UTF_8),
-                    URLEncoder.encode(discordClientSecret, StandardCharsets.UTF_8),
-                    URLEncoder.encode(code, StandardCharsets.UTF_8),
-                    URLEncoder.encode(discordRedirectUri, StandardCharsets.UTF_8)
-            );
+            String providerSubjectId;
+            String displayName;
 
-            HttpRequest tokenRequest = HttpRequest.newBuilder()
-                    .uri(URI.create("https://discord.com/api/v10/oauth2/token"))
-                    .timeout(Duration.ofSeconds(15))
-                    .header("Content-Type", "application/x-www-form-urlencoded")
-                    .header("Accept", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(tokenBody))
-                    .build();
+            if ("discord".equals(p)) {
+                // 1. Exchange authorization code for Discord access token
+                String tokenBody = String.format(
+                        "client_id=%s&client_secret=%s&grant_type=authorization_code&code=%s&redirect_uri=%s",
+                        URLEncoder.encode(discordClientId, StandardCharsets.UTF_8),
+                        URLEncoder.encode(discordClientSecret, StandardCharsets.UTF_8),
+                        URLEncoder.encode(code, StandardCharsets.UTF_8),
+                        URLEncoder.encode(discordRedirectUri, StandardCharsets.UTF_8)
+                );
 
-            HttpResponse<String> tokenResponse = httpClient.send(tokenRequest, HttpResponse.BodyHandlers.ofString());
-            if (tokenResponse.statusCode() < 200 || tokenResponse.statusCode() >= 300) {
-                log.error("[OAuth] Discord token exchange failed: status={}, body={}", tokenResponse.statusCode(), tokenResponse.body());
-                if (!wantsJson) {
-                    return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_verification")).build();
+                HttpRequest tokenRequest = HttpRequest.newBuilder()
+                        .uri(URI.create("https://discord.com/api/v10/oauth2/token"))
+                        .timeout(Duration.ofSeconds(15))
+                        .header("Content-Type", "application/x-www-form-urlencoded")
+                        .header("Accept", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(tokenBody))
+                        .build();
+
+                HttpResponse<String> tokenResponse = httpClient.send(tokenRequest, HttpResponse.BodyHandlers.ofString());
+                if (tokenResponse.statusCode() < 200 || tokenResponse.statusCode() >= 300) {
+                    log.error("[OAuth] Discord token exchange failed: status={}, body={}", tokenResponse.statusCode(), tokenResponse.body());
+                    if (!wantsJson) {
+                        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_verification")).build();
+                    }
+                    return ResponseEntity.badRequest().body(Map.of("outcome", "error", "error", "oauth_verification"));
                 }
-                return ResponseEntity.badRequest().body(Map.of("outcome", "error", "error", "oauth_verification"));
+
+                JsonNode tokenJson = objectMapper.readTree(tokenResponse.body());
+                String accessToken = tokenJson.path("access_token").asText(null);
+                if (accessToken == null || accessToken.isBlank()) {
+                    log.error("[OAuth] Invalid Discord access token in response: {}", tokenResponse.body());
+                    if (!wantsJson) {
+                        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_verification")).build();
+                    }
+                    return ResponseEntity.badRequest().body(Map.of("outcome", "error", "error", "oauth_verification"));
+                }
+
+                // 2. Fetch user profile from Discord @me endpoint
+                HttpRequest userRequest = HttpRequest.newBuilder()
+                        .uri(URI.create("https://discord.com/api/v10/users/@me"))
+                        .timeout(Duration.ofSeconds(10))
+                        .header("Authorization", "Bearer " + accessToken)
+                        .header("Accept", "application/json")
+                        .GET()
+                        .build();
+
+                HttpResponse<String> userResponse = httpClient.send(userRequest, HttpResponse.BodyHandlers.ofString());
+                if (userResponse.statusCode() < 200 || userResponse.statusCode() >= 300) {
+                    log.error("[OAuth] Discord user profile fetch failed: status={}, body={}", userResponse.statusCode(), userResponse.body());
+                    if (!wantsJson) {
+                        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_profile")).build();
+                    }
+                    return ResponseEntity.badRequest().body(Map.of("outcome", "error", "error", "oauth_verification"));
+                }
+
+                JsonNode userJson = objectMapper.readTree(userResponse.body());
+                providerSubjectId = userJson.path("id").asText(null);
+                String username = userJson.path("username").asText("사용자");
+                String globalName = userJson.path("global_name").asText(null);
+                displayName = (globalName != null && !globalName.isBlank()) ? globalName : username;
+
+            } else {
+                // 1. Exchange authorization code for Google access token
+                String tokenBody = String.format(
+                        "client_id=%s&client_secret=%s&grant_type=authorization_code&code=%s&redirect_uri=%s",
+                        URLEncoder.encode(googleClientId, StandardCharsets.UTF_8),
+                        URLEncoder.encode(googleClientSecret, StandardCharsets.UTF_8),
+                        URLEncoder.encode(code, StandardCharsets.UTF_8),
+                        URLEncoder.encode(googleRedirectUri, StandardCharsets.UTF_8)
+                );
+
+                HttpRequest tokenRequest = HttpRequest.newBuilder()
+                        .uri(URI.create("https://oauth2.googleapis.com/token"))
+                        .timeout(Duration.ofSeconds(15))
+                        .header("Content-Type", "application/x-www-form-urlencoded")
+                        .header("Accept", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(tokenBody))
+                        .build();
+
+                HttpResponse<String> tokenResponse = httpClient.send(tokenRequest, HttpResponse.BodyHandlers.ofString());
+                if (tokenResponse.statusCode() < 200 || tokenResponse.statusCode() >= 300) {
+                    log.error("[OAuth] Google token exchange failed: status={}, body={}", tokenResponse.statusCode(), tokenResponse.body());
+                    if (!wantsJson) {
+                        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_verification")).build();
+                    }
+                    return ResponseEntity.badRequest().body(Map.of("outcome", "error", "error", "oauth_verification"));
+                }
+
+                JsonNode tokenJson = objectMapper.readTree(tokenResponse.body());
+                String accessToken = tokenJson.path("access_token").asText(null);
+                if (accessToken == null || accessToken.isBlank()) {
+                    log.error("[OAuth] Invalid Google access token in response: {}", tokenResponse.body());
+                    if (!wantsJson) {
+                        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_verification")).build();
+                    }
+                    return ResponseEntity.badRequest().body(Map.of("outcome", "error", "error", "oauth_verification"));
+                }
+
+                // 2. Fetch user profile from Google userinfo endpoint
+                HttpRequest userRequest = HttpRequest.newBuilder()
+                        .uri(URI.create("https://www.googleapis.com/oauth2/v3/userinfo"))
+                        .timeout(Duration.ofSeconds(10))
+                        .header("Authorization", "Bearer " + accessToken)
+                        .header("Accept", "application/json")
+                        .GET()
+                        .build();
+
+                HttpResponse<String> userResponse = httpClient.send(userRequest, HttpResponse.BodyHandlers.ofString());
+                if (userResponse.statusCode() < 200 || userResponse.statusCode() >= 300) {
+                    log.error("[OAuth] Google user profile fetch failed: status={}, body={}", userResponse.statusCode(), userResponse.body());
+                    if (!wantsJson) {
+                        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_profile")).build();
+                    }
+                    return ResponseEntity.badRequest().body(Map.of("outcome", "error", "error", "oauth_verification"));
+                }
+
+                JsonNode userJson = objectMapper.readTree(userResponse.body());
+                providerSubjectId = userJson.path("sub").asText(null);
+                String name = userJson.path("name").asText(null);
+                String email = userJson.path("email").asText("사용자");
+                displayName = (name != null && !name.isBlank()) ? name : email;
             }
 
-            JsonNode tokenJson = objectMapper.readTree(tokenResponse.body());
-            String accessToken = tokenJson.path("access_token").asText(null);
-            if (accessToken == null || accessToken.isBlank()) {
-                log.error("[OAuth] Invalid Discord access token in response: {}", tokenResponse.body());
-                if (!wantsJson) {
-                    return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_verification")).build();
-                }
-                return ResponseEntity.badRequest().body(Map.of("outcome", "error", "error", "oauth_verification"));
-            }
-
-            // 2. Fetch user profile from Discord @me endpoint
-            HttpRequest userRequest = HttpRequest.newBuilder()
-                    .uri(URI.create("https://discord.com/api/v10/users/@me"))
-                    .timeout(Duration.ofSeconds(10))
-                    .header("Authorization", "Bearer " + accessToken)
-                    .header("Accept", "application/json")
-                    .GET()
-                    .build();
-
-            HttpResponse<String> userResponse = httpClient.send(userRequest, HttpResponse.BodyHandlers.ofString());
-            if (userResponse.statusCode() < 200 || userResponse.statusCode() >= 300) {
-                log.error("[OAuth] Discord user profile fetch failed: status={}, body={}", userResponse.statusCode(), userResponse.body());
-                if (!wantsJson) {
-                    return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_profile")).build();
-                }
-                return ResponseEntity.badRequest().body(Map.of("outcome", "error", "error", "oauth_verification"));
-            }
-
-            JsonNode userJson = objectMapper.readTree(userResponse.body());
-            String discordId = userJson.path("id").asText(null);
-            String username = userJson.path("username").asText("사용자");
-            String globalName = userJson.path("global_name").asText(null);
-            String displayName = (globalName != null && !globalName.isBlank()) ? globalName : username;
-
-            if (discordId == null || discordId.isBlank()) {
-                log.error("[OAuth] No discord user id in @me response: {}", userResponse.body());
+            if (providerSubjectId == null || providerSubjectId.isBlank()) {
+                log.error("[OAuth] No user identifier in {} response", p);
                 if (!wantsJson) {
                     return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_profile")).build();
                 }
@@ -228,50 +310,29 @@ public class OAuthController {
             // 4. Complete OAuth Login in Database (auth_complete_oauth_login) and issue cookies
             OAuthLoginResult result = authService.completeOAuthLogin(
                     preAuthSessionId,
-                    "discord",
-                    discordId,
+                    p,
+                    providerSubjectId,
                     displayName,
                     response
             );
 
-            log.info("[OAuth] Successfully logged in user via Discord: userId={}, displayName={}, isNew={}",
-                    result.userId(), result.displayName(), result.isNew());
+            log.info("[OAuth] Successfully logged in user via {}: userId={}, displayName={}, isNew={}",
+                    p, result.userId(), result.displayName(), result.isNew());
 
             if (!wantsJson) {
-                org.springframework.http.ResponseCookie sessionCookie = org.springframework.http.ResponseCookie
-                        .from("mv_session", result.token())
-                        .path("/")
-                        .maxAge(Duration.ofDays(30))
-                        .httpOnly(true)
-                        .secure(true)
-                        .sameSite("Lax")
+                return ResponseEntity.status(HttpStatus.FOUND)
+                        .location(URI.create("/"))
                         .build();
-
-                org.springframework.http.ResponseCookie hostCookie = org.springframework.http.ResponseCookie
-                        .from("__Host-mv_session", result.token())
-                        .path("/")
-                        .maxAge(Duration.ofDays(30))
-                        .httpOnly(true)
-                        .secure(true)
-                        .sameSite("Lax")
-                        .build();
-
-                org.springframework.http.HttpHeaders redirectHeaders = new org.springframework.http.HttpHeaders();
-                redirectHeaders.setLocation(URI.create("/"));
-                redirectHeaders.add(org.springframework.http.HttpHeaders.SET_COOKIE, sessionCookie.toString());
-                redirectHeaders.add(org.springframework.http.HttpHeaders.SET_COOKIE, hostCookie.toString());
-
-                return new ResponseEntity<>(redirectHeaders, HttpStatus.FOUND);
             }
 
             Map<String, Object> res = new LinkedHashMap<>();
             res.put("outcome", "signed-in");
-            res.put("provider", "discord");
+            res.put("provider", p);
             res.put("consentCurrent", true);
             return ResponseEntity.ok(res);
 
         } catch (Exception e) {
-            log.error("[OAuth] Unexpected callback error", e);
+            log.error("[OAuth] Unexpected callback error for provider=" + p, e);
             if (!wantsJson) {
                 return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=server_error")).build();
             }

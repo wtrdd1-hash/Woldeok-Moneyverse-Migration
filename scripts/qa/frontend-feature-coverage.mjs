@@ -12,7 +12,7 @@ function references(text){
 /** Static references identify review work; they never prove a browser action or a live endpoint. */
 export function buildFrontendCoverage(inputRoot){
   const root=resolve(inputRoot),app=join(root,'frontend/src/app');
-  const pages=files(app).filter(path=>/\/page\.(?:tsx|ts|jsx|js)$/.test(path)).map(page=>{
+  const pages=files(app).filter(path=>/[\\/]page\.(?:tsx|ts|jsx|js)$/.test(path)).map(page=>{
     const directory=dirname(page),segments=relative(app,directory).split(/[\\/]/).filter(Boolean);
     const route='/'+segments.filter(part=>!/^\(.*\)$/.test(part)&&!part.startsWith('@')).join('/');
     const sources=readdirSync(directory,{withFileTypes:true}).filter(entry=>entry.isFile()&&/\.(?:tsx?|jsx?)$/.test(entry.name)&&!/(?:\.test\.|\.spec\.)/.test(entry.name)).map(entry=>join(directory,entry.name)).sort();

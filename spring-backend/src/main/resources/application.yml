@@ -45,11 +45,18 @@ moneyverse:
     ping-timeout: 60000
     max-frame-payload-length: 1048576
   discord:
+    client-id: ${DISCORD_CLIENT_ID:}
+    client-secret: ${DISCORD_CLIENT_SECRET:}
+    redirect-uri: ${DISCORD_REDIRECT_URI:https://easy-scraping.com/auth/discord/callback}
     bot-token: ${DISCORD_BOT_TOKEN:}
     log-channel-id: ${DISCORD_LOG_CHANNEL_ID:1542465347364589609}
     admin-user-id: ${DISCORD_ADMIN_ALERT_USER_ID:889085646768078850}
     voice-guild-id: ${DISCORD_VOICE_GUILD_ID:1104015535592701984}
     voice-channel-id: ${DISCORD_VOICE_CHANNEL_ID:1536572442422550538}
+  google:
+    client-id: ${GOOGLE_CLIENT_ID:}
+    client-secret: ${GOOGLE_CLIENT_SECRET:}
+    redirect-uri: ${GOOGLE_REDIRECT_URI:https://easy-scraping.com/auth/google/callback}
 
 management:
   endpoints:

@@ -471,6 +471,7 @@
     authUnavailable:["This action is currently unavailable. No change has been made and no email delivery has been confirmed.","현재 이 기능을 이용할 수 없습니다. 변경된 내용이 없으며 이메일 발송도 확인되지 않았습니다.","現在この操作は利用できません。変更は行われず、メール送信も確認されていません。","此操作暂不可用。未进行任何更改，也未确认邮件已发送。","Thao tác này hiện chưa khả dụng. Chưa có thay đổi và chưa xác nhận email được gửi."],
     authJavascript:["JavaScript is required for verified form submission.","확인된 양식 제출을 위해 JavaScript가 필요합니다.","確認付きのフォーム送信にはJavaScriptが必要です。","经验证的表单提交需要 JavaScript。","Cần JavaScript để gửi biểu mẫu có xác nhận."],
     authDiscord:["Continue with Discord","Discord로 계속하기","Discordで続行","使用 Discord 继续","Tiếp tục với Discord"],
+    authGoogle:["Continue with Google","Google로 계속하기","Googleで続行","使用 Google 继续","Tiếp tục với Google"],
     authGoogleUnavailable:["Google sign-in is currently unavailable.","현재 Google 로그인을 이용할 수 없습니다.","現在Googleログインは利用できません。","Google 登录暂不可用。","Đăng nhập Google hiện chưa khả dụng."],
     authBackLogin:["Back to login","로그인으로 돌아가기","ログインに戻る","返回登录","Quay lại đăng nhập"],
     authReady:["Enter your credentials and check the acknowledgements to continue.","이메일과 비밀번호를 입력하고 동의 사항을 확인해 주세요.","認証情報を入力し、確認事項を選択してください。","请输入登录信息并确认各项声明。","Nhập thông tin đăng nhập và đánh dấu các xác nhận."],
