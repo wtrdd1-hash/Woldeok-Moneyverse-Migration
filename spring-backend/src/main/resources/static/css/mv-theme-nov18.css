@@ -627,3 +627,17 @@ html, body {
 #mv-floating-chat-modal h2{font-size:1rem;margin:0}
 #mv-floating-chat-modal .mv-chat-body a{min-height:44px;display:flex;align-items:center;justify-content:center}
 @media(max-width:480px){#mv-floating-chat-modal{left:12px;right:12px;width:auto}}
+
+/* Nov18 legacy Next body contract: one approved background for all 59 static pages.
+   Scope this to old pre-rendered Tailwind body classes; do not override protected
+   page data, local form styles, or authenticated application interactions. */
+html body[class*="bg-[#"] {
+  background-color: var(--mv-bg-base) !important;
+  color: var(--mv-text-primary) !important;
+}
+
+/* Keyboard access and legibility stay consistent across the two shell generations. */
+:where(.home-layout, .mv-page, .mv-card) :where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--mv-brand-violet);
+  outline-offset: 3px;
+}
