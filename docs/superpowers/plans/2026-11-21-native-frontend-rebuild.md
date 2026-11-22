@@ -103,3 +103,7 @@ Independent source-only slice: existing196 scoped administrator support function
 
 ## Operational root ownership correction
 Use /srv/moneyverse-native-rebuild-releases (root-owned0755) for new canary executable generations; leave existing shared directories and rollback generation untouched. One canary.py root constant drives install.py and rendered-unit validation. Actual systemd verification, legacy-path rejection and full operations tests required. Private credentials remain external. Committed reviewed ops revision and explicit current-main application artifact remain separate.
+
+
+## Task2 deployment environment regression continuation
+Use actual canary.py environment generation in CatalogReadCompositionTest, injected as the real systemEnvironment property source. Reproduce sealed-pool binding failure before implementation, correct only canonical Spring environment keys (hyphens removed), then assert effective read-only/max2/min0/timeout5000 on a real Hikari datasource. Keep default and canonical-CLI controls plus existing no-JPA/no-initializer/source-health isolation. Full Spring/JAR, operations and native checks plus fresh focused review precede any private QA retry. Do not weaken readonly or source/artifact/inverse gates.

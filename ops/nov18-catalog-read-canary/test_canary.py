@@ -20,8 +20,11 @@ class CanaryTests(unittest.TestCase):
         self.assertEqual(values['SPRING_DATASOURCE_USERNAME'],'moneyverse_app')
         self.assertEqual(values['SPRING_DATASOURCE_PASSWORD'],password)
         self.assertEqual(values['SPRING_DATASOURCE_URL'],'jdbc:postgresql://127.0.0.1:5433/disposable_example?sslmode=disable')
-        self.assertEqual(values['SPRING_DATASOURCE_HIKARI_READ_ONLY'],'true')
-        self.assertEqual(values['SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE'],'2')
+        self.assertEqual(values['SPRING_DATASOURCE_HIKARI_READONLY'],'true')
+        self.assertEqual(values['SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE'],'2')
+        self.assertEqual(values['SPRING_DATASOURCE_DRIVERCLASSNAME'],'org.postgresql.Driver')
+        self.assertEqual(values['SPRING_JPA_HIBERNATE_DDLAUTO'],'none')
+        self.assertNotIn('SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT',values)
         for unsafe in [url.replace('moneyverse_app','postgres'),url.replace('127.0.0.1','example.com'),url+'#fragment',url+'&options=role%3Dpostgres',url+'&sslmode=require',url.replace('sslmode=disable','sslmode=invalid'),url.replace('disposable_example','../private'),url.replace(urllib.parse.quote(password,safe=''),'ci_example%0Ainjected'),url+'\n']:
             with self.assertRaises(ValueError) as raised:m.database_environment(unsafe)
             self.assertNotIn(password,str(raised.exception));self.assertNotIn(unsafe,str(raised.exception))

@@ -26,9 +26,9 @@ def database_environment(raw):
         url='jdbc:postgresql://'+u.hostname+':'+str(port)+u.path
         if query:url+='?sslmode='+query[0][1]
         values={'SPRING_DATASOURCE_URL':url,'SPRING_DATASOURCE_USERNAME':user,'SPRING_DATASOURCE_PASSWORD':password,
-            'SPRING_DATASOURCE_DRIVER_CLASS_NAME':'org.postgresql.Driver','SPRING_DATASOURCE_HIKARI_READ_ONLY':'true',
-            'SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE':'2','SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE':'0',
-            'SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT':'5000','SPRING_SQL_INIT_MODE':'never','SPRING_JPA_HIBERNATE_DDL_AUTO':'none'}
+            'SPRING_DATASOURCE_DRIVERCLASSNAME':'org.postgresql.Driver','SPRING_DATASOURCE_HIKARI_READONLY':'true',
+            'SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE':'2','SPRING_DATASOURCE_HIKARI_MINIMUMIDLE':'0',
+            'SPRING_DATASOURCE_HIKARI_CONNECTIONTIMEOUT':'5000','SPRING_SQL_INIT_MODE':'never','SPRING_JPA_HIBERNATE_DDLAUTO':'none'}
         def quote(value):return '"'+value.replace('\\','\\\\').replace('"','\\"')+'"'
         return ''.join(key+'='+quote(value)+'\n' for key,value in values.items())
     except Exception:
