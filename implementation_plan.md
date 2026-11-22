@@ -5427,3 +5427,26 @@ eserves: 대한민국 외환보유액 통합계정)
   - rcade.html, casino.html, pension.html, work.html, onds.html, usinesses.html: 240px 표준 home-sidebar 및 5-Tab mobile-bottom-dock 래퍼 주입 완료.
   - Next.js SSR 하이드레이션 및 React 번들과 충돌 없는 독립 레이아웃 셸 구조 확립.
   - 모든 사용자 서브페이지에서 데스크톱(1024px+) 240px 고정 사이드바, 모바일(1023px 이하) 5탭 고정 하단 독 완벽 동작 보장.
+---
+## 🚀 [v115 Specification] Part 3 전수 서브페이지(중앙은행·국고·조폐국·프로필·계정·인벤토리·외환·마켓플레이스·공기업·공지사항·채팅·고객지원) 240px 표준 사이드바 & 5-Tab 모바일 독 일괄 통합
+- **v115 Changelog**:
+  - **전수 서브페이지 통합 완료**:
+    - central-bank.html: 한국은행 통화정책 공시 페이지 240px 표준 사이드바(주식 탭 활성화) 및 5탭 모바일 독 적용.
+    - 	reasury.html: 대한민국 국고 및 국부펀드 페이지 240px 표준 사이드바(지갑 탭 활성화) 및 5탭 모바일 독 적용.
+    - mint.html: 한국조폐공사 본원통화 주조 공시 페이지 240px 표준 사이드바(지갑 탭 활성화) 및 5탭 모바일 독 적용.
+    - kdic.html: 예금보험공사 보호기금 페이지 240px 표준 사이드바(지갑 탭 활성화) 및 5탭 모바일 독 적용.
+    - profile.html: 시민 프로필 페이지 240px 표준 사이드바(지갑 탭 활성화) 및 5탭 모바일 독 적용.
+    - ccount.html: 계정 및 보안 설정 페이지 240px 표준 사이드바(지갑 탭 활성화) 및 5탭 모바일 독 적용.
+    - inventory.html: 보유 아이템 인벤토리 페이지 240px 표준 사이드바(지갑 탭 활성화) 및 5탭 모바일 독 적용.
+    - x.html: 서울외환시장 실시간 환전 페이지 240px 표준 사이드바(상점 탭 활성화) 및 5탭 모바일 독 적용.
+    - marketplace.html: P2P 거래소 및 경매장 페이지 240px 표준 사이드바(상점 탭 활성화) 및 5탭 모바일 독 적용.
+    - enterprises.html: 국가 공기업 알리오 공시 페이지 240px 표준 사이드바(주식 탭 활성화) 및 5탭 모바일 독 적용.
+    - nnouncements.html: 공식 운영 공지사항 페이지 240px 표준 사이드바(커뮤니티 탭 활성화) 및 5탭 모바일 독 적용.
+    - chat.html: 실시간 커뮤니티 채팅 페이지 240px 표준 사이드바(커뮤니티 탭 활성화) 및 5탭 모바일 독 적용.
+    - support.html: 고객센터 및 1:1 문의 페이지 240px 표준 사이드바(커뮤니티 탭 활성화) 및 5탭 모바일 독 적용.
+  - **Zero Direct DB Access & 100% Server-Side Transactional Invariant**:
+    - 프론트엔드 JavaScript 내 직접 DB 연결/쿼리 0건 보장.
+    - 모든 데이터 변동은 Spring Boot 3.3.5 REST API(/api/v1/*)를 통해 PostgreSQL 17 @Transactional 서비스 계층에서만 승인 및 기록.
+  - **Multi-Viewport Resilience Shield**:
+    - 데스크톱(1024px+) 240px 고정 좌측 사이드바 + 탑 슈퍼 헤더 유지.
+    - 모바일(1023px 이하) 5탭 고정 하단 독(44px+ 터치 타깃, 가로 스크롤 제로) 일괄 완비.
