@@ -216,6 +216,15 @@ def forward_gate(manifest):
     approved_ci(manifest['applicationSource'],manifest['run'])
     artifact_still_approved(manifest['applicationSource'],manifest['run'],manifest['artifactProof'])
     check_snapshot(SOURCE_ENV,manifest['sourceEnv'])
+    proof=manifest.get('priorRestoration')
+    if proof is not None:
+        stage=Path(proof['stage'])
+        if stage.parent!=ROOT or '..' in stage.parts or set(proof['files'])!={'manifest.json','journal.json','rollback-outcome.json'}:
+            raise ValueError('Restoration proof scope changed')
+        protected_stage(stage)
+        for name,identity in proof['files'].items():
+            root_path(stage/name,True)
+            check_snapshot(stage/name,identity)
 
 
 def operational_files():
@@ -295,6 +304,29 @@ def edge_status(path,method='GET'):
     with response:return response.status
 
 
+
+def wait_catalog_adoption(timeout=5):
+    # Reload acknowledges the signal before old workers stop accepting requests.
+    # Only their known absent catalog route is retryable; unsafe admission fails.
+    deadline=time.monotonic()+timeout
+    opener=urllib.request.build_opener(urllib.request.ProxyHandler({}),NoRedirect())
+    while True:
+        request=urllib.request.Request('http://127.0.0.1'+canary.PREFIX+'catalog',
+            headers={'Host':'easy-scraping.com','Accept':'application/json'})
+        remaining=deadline-time.monotonic()
+        if remaining<=0:raise RuntimeError('Catalog route adoption timed out')
+        try:response=opener.open(request,timeout=min(remaining,1))
+        except urllib.error.HTTPError as failure:response=failure
+        with response:
+            status=response.status
+            marker=response.headers.get('X-MV-Rebuild-QA')
+        if status==401 and marker=='nov18-real-read-20261122':return
+        if status!=404 or marker is not None:
+            raise ValueError('Catalog route admission is not the approved private generation')
+        if time.monotonic()>=deadline:raise RuntimeError('Catalog route adoption timed out')
+        time.sleep(min(.05,max(0,deadline-time.monotonic())))
+
+
 def maintenance():
     root_path(MAINTENANCE,True)
     if digest(MAINTENANCE.read_bytes())!='7dbab08f6b977bbfdbafcc18f282351dd63fa930ce8e9577a407d9958321e4c6':
@@ -369,6 +401,7 @@ class System:
             time.sleep(.2)
     def nginx(self,action):self.helper.nginx(action)
     def boundaries(self,before):
+        wait_catalog_adoption()
         probe=self.helper.probe
         for path in [canary.PREFIX+'admin-shop',canary.PREFIX+'assets/mv46/admin-shop.js',canary.PREFIX+'catalog']:
             if probe(path)['status']!=401:raise ValueError('Anonymous private admission changed')
@@ -406,7 +439,48 @@ def loaded_inactive(system,unit,path):
     if system.state(unit)!=expected:raise ValueError('Loaded unit identity changed before start')
 
 
-def prior_base(system):
+def restored_base_receipt(stage,base,receipt,system):
+    stage=Path(stage)
+    if not stage.is_absolute() or stage.parent!=ROOT or stage==BASE or '..' in stage.parts:
+        raise ValueError('Explicit owned inverse stage required')
+    protected_stage(stage)
+    names={'manifest.json','journal.json','rollback-outcome.json'}
+    for name in names:root_path(stage/name,True)
+    evidence={name:snapshot(stage/name) for name in names}
+    previous=json.loads((stage/'manifest.json').read_text())
+    journal=json.loads((stage/'journal.json').read_text())
+    outcome=json.loads((stage/'rollback-outcome.json').read_text())
+    components={'frontendRestored','includeRestored','nginxReloaded','backendRemoved','environmentRemoved'}
+    if (outcome.get('complete') is not True or outcome.get('errors')!=[]
+        or any(outcome.get(key) is not True or journal.get('inverse',{}).get(key) is not True for key in components)
+        or type(journal.get('accepted')) is not bool or journal.get('frontStopped') is not True):
+        raise ValueError('Completed inverse evidence required')
+    phase=journal.get('frontendInverse',{})
+    pid=phase.get('pid')
+    if phase.get('phase')!='verified-old' or not isinstance(pid,str) or not re.fullmatch('[1-9][0-9]*',pid):
+        raise ValueError('Verified restored frontend process required')
+    if (previous.get('oldSource')!=base['applicationSource'] or previous.get('oldJar')!=base['jar']
+        or previous.get('oldJarSha256')!=base['jarSha256']
+        or previous.get('files',{}).get('front.before')!=base['files']['qa.service']
+        or previous.get('files',{}).get('include.before')!=base['files']['qa.conf']
+        or previous.get('targets',{}).get(str(SITE),{}).get('sha256')!=base['files']['site.after']):
+        raise ValueError('Restoration does not descend from the initial QA receipt')
+    jar=Path(base['jar'])
+    jar_proof(jar,base['jarSha256'],base['applicationSource'])
+    check_snapshot(jar,previous['oldJarIdentity'])
+    check_snapshot(SITE,previous['targets'][str(SITE)])
+    for path,key in [(FRONT_FILE,'qa.service'),(INCLUDE,'qa.conf')]:
+        root_path(path)
+        actual=snapshot(path)
+        identity=journal.get('owned',{}).get(str(path))
+        if ([actual['dev'],actual['ino'],actual['sha256']]!=identity or actual['sha256']!=base['files'][key]):
+            raise ValueError('Restored target inode or bytes changed')
+    system.prove(FRONT_UNIT,jar,base['applicationSource'],pid)
+    for name,identity in evidence.items():check_snapshot(stage/name,identity)
+    return {**receipt,'mainPid':pid,'restoration':{'stage':str(stage),'files':evidence}}
+
+
+def prior_base(system,prior_inverse=None):
     protected_stage(BASE)
     root_path(BASE/'manifest.json')
     root_path(BASE/'apply-receipt.json')
@@ -426,19 +500,20 @@ def prior_base(system):
         if digest(path.read_bytes())!=manifest['files'][name]:raise ValueError('Current QA no longer matches its receipt')
     jar=Path(manifest['jar'])
     jar_proof(jar,manifest['jarSha256'],manifest['applicationSource'])
+    if prior_inverse is not None:receipt=restored_base_receipt(prior_inverse,manifest,receipt,system)
     system.prove(FRONT_UNIT,jar,manifest['applicationSource'],receipt['mainPid'])
     system.ready(FRONT_UNIT,manifest['applicationSource'])
     return manifest,receipt
 
 
-def prepare(source,run,stage):
+def prepare(source,run,stage,prior_inverse=None):
     if not isinstance(source,str) or not re.fullmatch('[0-9a-f]{40}',source) or not isinstance(run,str) or not run.isdigit():
         raise ValueError('Explicit full source and CI run required')
     protected_stage(stage,False)
     operational_source,scripts=operational_files()
     approved_ci(source,run)
     system=System(stage)
-    previous,receipt=prior_base(system)
+    previous,receipt=prior_base(system,prior_inverse)
     baseline_targets={str(p):snapshot(p) for p in [FRONT_FILE,INCLUDE,SITE]}
     require_vacant(system)
     for path in [ENVIRONMENT.parent,API_FILE.parent,INCLUDE.parent,RELEASES]:root_path(path)
@@ -467,6 +542,7 @@ def prepare(source,run,stage):
               'jarIdentity':jar_proof(jar,artifact['sha256'],source),
               'oldJar':str(oldjar),'oldJarSha256':previous['jarSha256'],
               'oldJarIdentity':snapshot(oldjar),'oldSource':previous['applicationSource'],'oldPid':receipt['mainPid'],
+              'priorRestoration':receipt.get('restoration'),
               'sourceEnv':env_identity,'files':{name:digest(value) for name,value in files.items()},
               'targets':baseline_targets,
               'apiBefore':{p:system.helper.probe(p) for p in system.helper.API_PROBES}}
@@ -769,11 +845,13 @@ def main():
     parser.add_argument('action',choices=['prepare','apply','rollback'])
     parser.add_argument('--stage',required=True)
     parser.add_argument('--source');parser.add_argument('--run')
+    parser.add_argument('--prior-inverse')
     args=parser.parse_args()
     # Do not resolve away a caller-provided symlink.
     stage=Path(args.stage)
     if not stage.is_absolute() or '..' in stage.parts:raise ValueError('Explicit absolute stage required')
     protected_stage(stage,args.action!='prepare')
+    if args.prior_inverse and args.action!='prepare':raise ValueError('Prior inverse is preparation-only')
     lock_path=ROOT/'maintenance.lock'
     with private_umask():
         fd=os.open(lock_path,os.O_RDWR|os.O_CREAT|os.O_NOFOLLOW,0o600)
@@ -783,7 +861,7 @@ def main():
         fcntl.flock(lock,fcntl.LOCK_EX)
         try:
             if args.action=='prepare':
-                prepare(args.source,args.run,stage)
+                prepare(args.source,args.run,stage,args.prior_inverse)
             else:
                 manifest=validate_stage(stage,args.action=='apply')
                 system=System(stage)

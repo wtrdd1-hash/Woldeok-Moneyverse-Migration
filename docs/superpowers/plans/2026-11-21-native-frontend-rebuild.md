@@ -107,3 +107,10 @@ Use /srv/moneyverse-native-rebuild-releases (root-owned0755) for new canary exec
 
 ## Task2 deployment environment regression continuation
 Use actual canary.py environment generation in CatalogReadCompositionTest, injected as the real systemEnvironment property source. Reproduce sealed-pool binding failure before implementation, correct only canonical Spring environment keys (hyphens removed), then assert effective read-only/max2/min0/timeout5000 on a real Hikari datasource. Keep default and canonical-CLI controls plus existing no-JPA/no-initializer/source-health isolation. Full Spring/JAR, operations and native checks plus fresh focused review precede any private QA retry. Do not weaken readonly or source/artifact/inverse gates.
+
+## Task2 route-adoption continuation
+After reviewed Nginx reload, wait at most5 seconds for a fresh anonymous catalog GET to return401 with the exact native QA marker before final unchanged boundary checks. Only the observed old-worker404 may retry; any other status/missing marker fails immediately. Real local HTTP fixture exercises404->401, unsafe200, missing marker and bounded old404 exhaustion. Preserve all auth, artifacts, ownership/inverse and production maintenance rules.
+
+
+## Task2 restored-process handoff
+After completed r5 inverse, the original renderer is healthy at exact old source but has a new verified MainPID. The immutable initial QA receipt must not be edited to relabel that restarted process. Add an explicit --prior-inverse preparation input. It must accept only a protected direct child of the task root whose complete inverse, verified-old phase/current PID, exact original source/JAR, current restored unit/include inode+hash and unchanged site are proved. Preserve the original receipt; carry separate restoration evidence snapshots into the new proposal and revalidate them before mutation. Foreign PID/inode, incomplete or altered evidence must refuse without stopping/adopting a process.
