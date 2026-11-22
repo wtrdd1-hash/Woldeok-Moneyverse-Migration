@@ -1,3 +1,6 @@
+## v2026.11.22.2041.1 — 인스타그램 UI 100개 용어 참고 영상 기록 (문서 전용)
+- 공식 게시물 메타데이터와 22초 본편 확인, 원본 주소·게시자·영상에서 읽힌 UI 용어·미확인 범위·11월 18일 Spring UI 적용 지침 기록. [한글](research/2026-11-22-instagram-uxwoodytips-ui-100-v2041.ko.md) / [영문](research/2026-11-22-instagram-uxwoodytips-ui-100-v2041.md); [작업기록](worklog/2026-11-22-instagram-ui-glossary-v2041.ko.md). 전체 사전 100개 미확인; 앱/Test/운영 변경 없음.
+
 ## v2026.11.10.1948 — 조폐국 UI/정책 제한형 DB 함수 v1947 실제 운영 승격
 
 ## v2026.11.21.2234 — AgentMemory 영상·원본 링크 저장 및 AI 공동 작업기억 규칙 (문서만)

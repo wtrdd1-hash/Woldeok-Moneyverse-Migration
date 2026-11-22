@@ -1,5 +1,10 @@
 # 📚 Document Catalog
 
+## v2026.11.22.2041.1 — AI UI terminology / video source archived (PLANNING)
+
+- [English source and Moneyverse mapping](research/2026-11-22-instagram-uxwoodytips-ui-100-v2041.md) / [한국어](research/2026-11-22-instagram-uxwoodytips-ui-100-v2041.ko.md) — 2026-11-21 @uxwoodytips reel, 22-second video checked, visible pattern names captured; 100-term full dictionary **not** verified. Documentation only; owner-approved UI and Production controls unchanged.
+- [Worklog EN](worklog/2026-11-22-instagram-ui-glossary-v2041.md) / [KO](worklog/2026-11-22-instagram-ui-glossary-v2041.ko.md); [GitHub update](updates/v2026.11.22.2041.1-instagram-ui-100-github.md); Internal record kept locally on the mini-PC (`.gitignore` excludes it).
+
 ## v2026.11.21.2234 — AgentMemory saved reference and multi-agent memory handoff (PLANNING)
 - [English canonical protocol](development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md) / [한국어](development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md) · [Worklog](worklog/2026-11-21-agentmemory-shared-agent-protocol-v2234.md) · [GitHub](updates/v2026.11.21.2234-agentmemory-reference-github.md). Third-party installation NOT VERIFIED, no runtime deployment.
 

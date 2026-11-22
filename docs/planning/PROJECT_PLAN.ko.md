@@ -2,6 +2,10 @@
 
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 
+## v2026.11.22.2041.1 — 인스타그램 UI 명칭 100개 참고자료 영구 기록 (PLANNING / 문서만)
+
+사용자 제공 [인스타그램 릴스](https://www.instagram.com/reel/DgB83_Fh4NP/)는 @uxwoodytips의 2026-11-21 게시물로 AI에 정확한 UI 용어를 지정하는 방법을 설명한다. 공개 메타데이터와 22초 영상의 화면을 실제 확인하여 토글/체크박스/라디오, 벤토·카드 그리드, 모달·바텀시트·드로어, 기간 선택, 페이지네이션, 플로팅·하단 고정 등을 기록했다. **전체 100개 사전은 확보하지 못했으며 전수 검증으로 표시하지 않는다.** [한국어 상세 참고](../research/2026-11-22-instagram-uxwoodytips-ui-100-v2041.ko.md) / [영문 정본](../research/2026-11-22-instagram-uxwoodytips-ui-100-v2041.md)에 출처 및 머니버스 적용 기준을 보존한다. 11월 18일 Spring 웹 디자인·5개 언어·전역 채팅/문의·구글/디스코드 로그인·실제 금융 근거는 변경하지 않는다. 코드·Test·운영·DB·인증 수정 없음.
+
 ## v2026.11.21.2234 — AgentMemory 영상 영구 참고 및 작업 이어받기 규칙 (PLANNING / 미설치)
 
 사용자 지정 [Instagram 원본](https://www.instagram.com/reel/DfZgpiWtX1z/)과 [공식 저장소](https://github.com/rohitg00/agentmemory)를 [한국어 규칙](../development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md) / [영문 정본](../development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md)에 보관한다. 릴스 설명/메타데이터는 확인했으나 영상 본편 재생은 미확인. 개발 작업마다 최신 기획서 재조회, 비밀값 제거한 시작·중간·종료 기록, 다른 작업자의 브랜치 충돌 회피를 의무화한다. 외부 자동 기억 서버 설치 및 두 AI 도구 간 공유 테스트는 아직 미실시이며 보안검토 전 활성화 금지. **문서 전용, Test/운영 변경 없음.**
