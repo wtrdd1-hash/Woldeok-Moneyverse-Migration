@@ -45,7 +45,7 @@
 <noscript><p  data-i18n="authJavascript" th:text="${uiCopy['authJavascript']}">JavaScript is required for verified form submission.</p></noscript>
 <div th:if="${authPage == 'login'}" class="auth-providers">
 <a class="auth-provider" href="/auth/discord/authorize"><span  data-i18n="authDiscord" th:text="${uiCopy['authDiscord']}">Continue with Discord</span></a>
-<p class="auth-note" data-i18n="authGoogleUnavailable" th:text="${uiCopy['authGoogleUnavailable']}">Google sign-in is currently unavailable.</p>
+<a class="auth-provider" href="/auth/google/authorize"><span data-i18n="authGoogle" th:text="${uiCopy['authGoogle']}">Continue with Google</span></a>
 </div>
 <nav id="auth-help-navigation" class="auth-links" aria-label="Account help" th:attr="aria-label=${uiCopy['authHelp']}"><a href="/login"><span  data-i18n="login" th:text="${uiCopy['login']}">Log in</span></a><a href="/register"><span  data-i18n="authRegister" th:text="${uiCopy['authRegister']}">Create account</span></a><a href="/forgot-password"><span  data-i18n="authForgot" th:text="${uiCopy['authForgot']}">Forgot password</span></a></nav>
 </th:block>
