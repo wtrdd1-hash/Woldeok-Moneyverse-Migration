@@ -36,6 +36,16 @@ class Nov18VioletSpringHttpIntegrationTest {
     }
 
     @Test
+    void legacyNextVioletAdapterAndStoredTailwindBaseHaveExactClasspathBytes() throws Exception {
+        for (String path : new String[]{"css/mv-legacy-violet.css", "_next/static/css/5f13fc286907515d.css"}) {
+            var response = get("/" + path);
+            assertEquals(200, response.statusCode(), "Spring must serve " + path);
+            byte[] expected = new ClassPathResource("static/" + path).getContentAsByteArray();
+            assertArrayEquals(expected, response.body(), "Must never serve an unreviewed mutable CSS overlay: " + path);
+        }
+    }
+
+    @Test
     void bankPageDoesNotFallBackToMissingNextCssOrOldCyanBrand() throws Exception {
         var response = get("/bank.html");
         assertEquals(200, response.statusCode());

@@ -1,0 +1,131 @@
+/* Woldeok Moneyverse — Nov18 violet legacy snapshot adapter (v2026.11.23.4).
+ * For captured static Next HTML only; NOT for native Thymeleaf or live ledger data.
+ * This file intentionally does not reset body, cards, charts, positive/negative amounts,
+ * success/error statuses, input values, or the archived 180 concept PNGs. */
+:root {
+  --mv-brand-violet: #9C83FF;
+  --mv-brand-violet-hover: #B4A0FF;
+  --mv-brand-violet-tint: rgba(156, 131, 255, .14);
+  --mv-brand-violet-outline: rgba(156, 131, 255, .42);
+  --mv-brand-navy: #0C1020;
+  --mv-brand-card: #151D32;
+  /* The stored Tailwind base is shared by many old snapshots. Override its
+   * former emerald brand tokens without altering semantic utility classes. */
+  --primary: #9C83FF !important;
+  --ring: #9C83FF !important;
+  --background: #0C1020 !important;
+  --foreground: #E9F1FF !important;
+  --card: #151D32 !important;
+  --card-foreground: #E9F1FF !important;
+  --popover: #151D32 !important;
+  --popover-foreground: #E9F1FF !important;
+  --accent: rgba(156, 131, 255, .16) !important;
+  --accent-foreground: #E9F1FF !important;
+  --muted-foreground: #A8BCD8 !important;
+  --border: rgba(156, 131, 255, .20) !important;
+}
+
+/* Missing captured Tailwind base bundles otherwise leave the browser's 8px
+ * default margin on many mobile routes. Restoring the standard zero margin is
+ * a layout repair, not a horizontal-scroll masking trick. */
+html, body {
+  margin: 0;
+  min-width: 0;
+  background-color: var(--mv-brand-navy);
+}
+.moneyverse-app-shell { background-color: var(--mv-brand-navy) !important; }
+
+/* Unify the actual shared header and mobile dock, even if legacy hydration
+ * still selects a stored light-theme class. Do not modify forms or balances. */
+.moneyverse-site-header,
+nav[aria-label="Mobile Navigation"] {
+  background-color: rgba(12, 16, 32, .97) !important;
+  border-color: rgba(156, 131, 255, .24) !important;
+  color: #E9F1FF !important;
+}
+
+/* The captured Next shell previously used an emerald logo and brand text.
+ * Leave metric/ledger green classes alone; only site navigation chrome changes. */
+.moneyverse-site-header :is(a, button, span)[class*="text-emerald"],
+.moneyverse-site-header :is(a, button, span)[class*="text-teal"],
+.moneyverse-site-header :is(a, button, span)[class*="text-cyan"] {
+  color: var(--mv-brand-violet) !important;
+}
+
+/* Focus is an interaction state, never green/blue by route family. */
+:where(a, button, input, select, textarea, [role="tab"], [role="button"]):focus-visible {
+  outline: 2px solid var(--mv-brand-violet) !important;
+  outline-offset: 3px;
+}
+:where(input, select, textarea, button[type="submit"]) { accent-color: var(--mv-brand-violet); }
+
+/* Navigation is branding; do not recolor gain/loss values or status chips. */
+:is(nav, aside) a[aria-current="page"],
+:is(nav, aside) a[data-active="true"],
+[role="tab"][aria-selected="true"] {
+  color: var(--mv-brand-violet) !important;
+  border-color: var(--mv-brand-violet-outline) !important;
+}
+:is(nav, aside) a[aria-current="page"][class*="bg-emerald"],
+:is(nav, aside) a[aria-current="page"][class*="bg-cyan"],
+:is(nav, aside) a[aria-current="page"][class*="bg-blue"],
+:is(nav, aside) a[aria-current="page"][class*="bg-teal"] {
+  background-color: var(--mv-brand-violet-tint) !important;
+}
+
+/* Explicit old primary-action utility tokens. No generic .text-emerald rule:
+ * financial profit, accurate success and risk information must keep semantic hues. */
+:is(a, button, [role="button"])[class~="bg-emerald-500"],
+:is(a, button, [role="button"])[class~="bg-emerald-600"],
+:is(a, button, [role="button"])[class~="bg-emerald-600/90"],
+:is(a, button, [role="button"])[class~="bg-green-600"],
+:is(a, button, [role="button"])[class~="bg-cyan-600"],
+:is(a, button, [role="button"])[class~="bg-cyan-500"],
+:is(a, button, [role="button"])[class~="bg-teal-500"],
+:is(a, button, [role="button"])[class~="bg-teal-600"],
+:is(a, button, [role="button"])[class~="bg-blue-600"] {
+  background-color: var(--mv-brand-violet) !important;
+  background-image: none !important;
+  border-color: var(--mv-brand-violet-outline) !important;
+  color: var(--mv-brand-navy) !important;
+}
+
+/* Soft navigation/preset actions that previously looked like a second green brand. */
+:is(a, button, [role="button"])[class~="bg-emerald-500/10"],
+:is(a, button, [role="button"])[class~="bg-emerald-500/15"],
+:is(a, button, [role="button"])[class~="bg-emerald-500/20"],
+:is(a, button, [role="button"])[class~="bg-emerald-600/30"],
+:is(a, button, [role="button"])[class~="bg-green-500/10"],
+:is(a, button, [role="button"])[class~="bg-cyan-500/10"],
+:is(a, button, [role="button"])[class~="bg-cyan-500/15"],
+:is(a, button, [role="button"])[class~="bg-teal-500/10"],
+:is(a, button, [role="button"])[class~="bg-blue-500/15"],
+:is(a, button, [role="button"])[class~="bg-blue-600/10"] {
+  background-color: var(--mv-brand-violet-tint) !important;
+  border-color: var(--mv-brand-violet-outline) !important;
+  color: var(--mv-brand-violet) !important;
+}
+
+:is(nav, aside) a[class~="text-emerald-400"],
+:is(nav, aside) a[class~="text-cyan-400"],
+:is(nav, aside) a[class~="text-teal-400"],
+:is(nav, aside) a[class~="text-blue-400"],
+:is(a, button)[class*="hover:text-emerald"]:hover,
+:is(a, button)[class*="hover:text-cyan"]:hover,
+:is(a, button)[class*="hover:text-teal"]:hover {
+  color: var(--mv-brand-violet) !important;
+}
+
+/* The button hover remains visibly interactive on every route and locale. */
+:is(a, button, [role="button"])[class~="bg-emerald-500"]:hover,
+:is(a, button, [role="button"])[class~="bg-emerald-600"]:hover,
+:is(a, button, [role="button"])[class~="bg-cyan-600"]:hover,
+:is(a, button, [role="button"])[class~="bg-teal-600"]:hover {
+  background-color: var(--mv-brand-violet-hover) !important;
+}
+
+@media (forced-colors: active) {
+  :where(a, button, input, select, textarea, [role="tab"]):focus-visible {
+    outline: 2px solid Highlight !important;
+  }
+}
