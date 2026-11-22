@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.11.22.1 — Optional AI peer-review tooling (PROCESS ONLY / NOT A PRODUCT REQUIREMENT)
+
+Owner requested a Codex↔Gemini development-review ping-pong skill on mini-PC. The [versioned EN guide](../development/CODEX_GEMINI_PINGPONG_SKILL_v2026.11.22.1.md) / [KO guide](../development/CODEX_GEMINI_PINGPONG_SKILL_v2026.11.22.1.ko.md) describe a local, 1–3-round, read-only advisory workflow and agent handoff, strictly subordinate to this plan, signed-off specifications, ownership locks, real Test QA and promotion gates. Official Gemini CLI 0.70.0 was installed in a user-only directory and mock tests passed 6/6; real two-model authentication/communication is not verified. **No application architecture, feature, member data, Test service or Production release changed.**
+
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 
 ## v2026.11.21.2234 — Saved AgentMemory development reference and task-handoff protocol (PLANNING; not installed)

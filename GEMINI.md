@@ -1,5 +1,9 @@
 # 코딩 에이전트 규칙 및 설정 가이드라인 (GEMINI.md)
 
+## Optional Codex ↔ Gemini review handoff (v2026.11.22.1)
+
+For explicit two-agent review tasks, read [.agents/skills/codex-gemini-pingpong/SKILL.md](.agents/skills/codex-gemini-pingpong/SKILL.md) and [the versioned instructions](docs/development/CODEX_GEMINI_PINGPONG_SKILL_v2026.11.22.1.md). Work in your own branch/worktree; no shared-file edits, PR auto-merges, finance records or Production changes. Local CLI installation is not proof of a real two-model run.
+
 ## Permanent project task-memory handoff (v2026.11.21.2234)
 
 Before every task, consult the current project plan, integrated master, and versioned GitHub worklog. Record a sanitized start/mid/finish handoff in the task's branch. Shared external AgentMemory is **not installed or approved for automatic capture**; until its isolated security gates pass, the repository documentation remains the real persistence mechanism. See [EN](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md) / [KO](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md). Do not capture secrets, personal records or live ledgers.
