@@ -16,6 +16,11 @@
 - Live mini-PC shows Nginx/Java 4550/4632/4646, former managed service units inactive, 4550 started 20:32; `/api/version` local edge returned 503. Anonymous route checks and source/JAR/HTTP fingerprint comparisons recorded in findings.
 - FE-A, FE-B, FE-C, QA-1, QA-2 latest task records inspected; exact-SHA/auth/finance/visual gates remain unresolved. FE-C documents uncommitted worktree paths: **do not overwrite**.
 
+## MID addendum — indexed work history
+
+- Scanned all currently named FE-A/B/C and QA-1/QA-2 task folders on the mini-PC: 218, including 217 readable audit files. `hold` occurred in 216; `blocked` in 213 (text occurrences only). Git Nov 18–22 history has 293 commits, 153 titles matching frontend/UI/design patterns. No claim that each audit file was independently reviewed line-by-line.
+- Rechecked GitHub `main` unchanged `86393ad8bc...` after updating this isolated documentation branch.
+
 ## END — audit-only delivery
 - Findings recorded in EN/KO and separate internal/GitHub update entries. No code/data/service/edge config, restart, feature flag, auth state or Production deployment modified.
 - Verification is limited to repository reads, GitHub API metadata, Nginx/Java state, SHA256 fingerprint reads, and anonymous local HTTP. No 180-image live visual matrix or authenticated finance QA claimed.
