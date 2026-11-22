@@ -95,3 +95,11 @@ Resolve the prior catalog-read source review's deferred private-JSON noindex fin
 
 ## Task2 operational backend inverse continuation
 Separate from the closed I1/I2/I3 round, make persisted backend removal/reload retryable. Files install.py/test_install.py only plus paired logs. RED: backend stops/removes, daemon reload fails once, second explicit inverse loads persisted journal and completes. Foreign recreated file/PID/drop-in remains untouched and incomplete. Persisted phase plus controlled removed-generation proof is required; absence alone never authorizes removal/adoption. Keep all current source/artifact/private recovery boundaries. Parent-reviewed brief in ignored workspace defines fixtures/gates; no actual installation occurs in child.
+
+
+## Task3 source continuation — administrator support reads
+Independent source-only slice: existing196 scoped administrator support functions, narrow current-session/role read APIs, native shared-shell empty SSR and owner-bound browser list/filter/search/detail/refresh. Honest100-thread/500-message windows; verify detail against250-thread review window, no fake unknown empty success. Existing read-only actors/tables/security retained; replies/status/audit/idempotency/pagination and actual routing remain OPEN. Exact implementation/fixtures/paths in ignored task-admin-support-read brief. New isolated childfd3 while parent alone accepts/deploys current catalog canary; shared locale/digest edits merge later, never mutate current source/artifact.
+
+
+## Operational root ownership correction
+Use /srv/moneyverse-native-rebuild-releases (root-owned0755) for new canary executable generations; leave existing shared directories and rollback generation untouched. One canary.py root constant drives install.py and rendered-unit validation. Actual systemd verification, legacy-path rejection and full operations tests required. Private credentials remain external. Committed reviewed ops revision and explicit current-main application artifact remain separate.

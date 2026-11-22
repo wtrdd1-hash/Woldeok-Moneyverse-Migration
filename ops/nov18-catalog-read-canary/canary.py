@@ -8,6 +8,7 @@ PREFIX='/_mv/nov18-rebuild-qa/'
 FRONT_UNIT='moneyverse-nov18-rebuild-qa-v20261121.service'
 API_UNIT='moneyverse-nov18-catalog-read-qa-v20261122.service'
 ENVIRONMENT=Path('/etc/moneyverse/nov18-catalog-read-qa-v20261122.env')
+RELEASE_ROOT=Path('/srv/moneyverse-native-rebuild-releases')
 
 def database_environment(raw):
     try:
@@ -64,7 +65,7 @@ def render_config(front_port=4830,api_port=4832):
     return catalog+qa_module().render_config(front_port)
 
 def render_units(jar):
-    if not isinstance(jar,str) or not re.fullmatch(r'/srv/moneyverse-data/releases/test-nov18-catalog-read-canary-v2026\.11\.22\.1-[0-9a-f]{12}/moneyverse-spring-backend-0\.0\.1-SNAPSHOT\.jar',jar):
+    if not isinstance(jar,str) or not re.fullmatch(re.escape(str(RELEASE_ROOT))+r'/test-nov18-catalog-read-canary-v2026\.11\.22\.1-[0-9a-f]{12}/moneyverse-spring-backend-0\.0\.1-SNAPSHOT\.jar',jar):
         raise ValueError('Unapproved immutable canary generation')
     common='''Restart=on-failure
 RestartSec=3
