@@ -5419,3 +5419,11 @@ eserves: 대한민국 외환보유액 통합계정)
 - ./gradlew compileJava 및 ./gradlew test (Spring Boot 빌드 및 테스트 무결성 확인)
 - 각 HTML 페이지별 뷰포트(1280px, 390px, 320px) 레이아웃 및 디자인 토큰 적용 확인
 - API 엔드포인트(/api/v1/auth/me, /api/v1/wallet/overview, /api/v1/stocks 등) 실데이터 바인딩 동작 확인
+---
+## 🚀 [v114 Specification] Part 2B 잔여 서브페이지 240px 표준 사이드바 & 5-Tab 모바일 독 일체화 및 전역 스타일시트 배포
+- **v114 Changelog**:
+  - mv-shell-nov18.css 전역 스타일시트 신설: 11월 18일 Dark Navy (#0C1020), Brand Violet (#9C83FF), 240px 표준 사이드바 및 5-Tab 모바일 독 규격을 단일 CSS 클래스 세트로 캡슐화.
+  - ank.html: 기존 독자 네비게이션 헤더를 걷어내고 240px 표준 home-sidebar (은행 탭 활성화) 및 44px+ 터치 타깃 mobile-bottom-dock (5-Tab) 전면 교체. KDIC 예금자보호, 복리 예금 벤토 카드, 금리 표 보존.
+  - rcade.html, casino.html, pension.html, work.html, onds.html, usinesses.html: 240px 표준 home-sidebar 및 5-Tab mobile-bottom-dock 래퍼 주입 완료.
+  - Next.js SSR 하이드레이션 및 React 번들과 충돌 없는 독립 레이아웃 셸 구조 확립.
+  - 모든 사용자 서브페이지에서 데스크톱(1024px+) 240px 고정 사이드바, 모바일(1023px 이하) 5탭 고정 하단 독 완벽 동작 보장.
