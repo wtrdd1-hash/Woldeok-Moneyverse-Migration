@@ -1,0 +1,20 @@
+/* Bank design refinement — v2026.11.23.2. Presentation only; no financial logic. */
+:root { --bank-violet: #9c83ff; --bank-navy: #0c1020; --bank-surface: #151d32; }
+.bank-card { min-width:0; background:linear-gradient(155deg,#1b243d 0%,#151d32 100%); border:1px solid rgba(156,131,255,.2); border-radius:24px; padding:clamp(18px,2vw,28px); box-shadow:0 12px 30px rgba(0,0,0,.14); transition:border-color .18s ease, box-shadow .18s ease; }
+.bank-card:hover { transform:none; border-color:rgba(156,131,255,.48); box-shadow:0 16px 36px rgba(0,0,0,.2); }
+.bank-card h3 { line-height:1.35; letter-spacing:-.02em; overflow-wrap:anywhere; }
+.bank-card p { line-height:1.65; }
+.bank-rate-panel { background:linear-gradient(115deg,rgba(156,131,255,.14),rgba(100,183,255,.06)); border:1px solid rgba(156,131,255,.26); border-radius:24px; margin:0 0 32px; padding:clamp(20px,3vw,30px); color:#e9f1ff; }
+.bank-rate-panel__eyebrow { display:flex; align-items:center; gap:8px; font-size:12px; font-weight:700; color:#baaaff; letter-spacing:.02em; }
+.bank-rate-panel h2 { font-size:clamp(19px,2.2vw,26px); line-height:1.4; font-weight:800; letter-spacing:-.025em; margin:10px 0 8px; }
+.bank-rate-panel p { color:#a8bcd8; font-size:14px; line-height:1.7; max-width:74ch; }
+.bank-rate-cards { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:18px 0 12px; }
+.bank-rate-item { min-width:0; background:rgba(12,16,32,.65); border:1px solid rgba(168,188,216,.14); border-radius:16px; padding:16px; }
+.bank-rate-item strong { display:block; color:#f4f0ff; font-size:16px; font-weight:800; margin-bottom:5px; }
+.bank-rate-item span { display:block; font-size:13px; color:#a8bcd8; line-height:1.6; }
+.bank-rate-panel details { margin-top:12px; border-top:1px solid rgba(168,188,216,.17); padding-top:14px; }
+.bank-rate-panel summary { cursor:pointer; font-size:14px; font-weight:700; color:#d8cbff; min-height:44px; display:flex; align-items:center; }
+.bank-rate-panel summary:focus-visible, .bank-card a:focus-visible { outline:3px solid #9c83ff; outline-offset:3px; }
+.bank-rate-panel details p { margin:0 0 6px; }
+@media(max-width:600px) { .bank-rate-cards { grid-template-columns:minmax(0,1fr); } .bank-card { border-radius:20px; } .bank-rate-panel { border-radius:20px; } }
+@media(prefers-reduced-motion:reduce) { .bank-card { transition:none; } }
