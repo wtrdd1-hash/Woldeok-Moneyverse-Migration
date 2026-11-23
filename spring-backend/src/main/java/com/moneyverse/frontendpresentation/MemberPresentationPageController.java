@@ -30,7 +30,10 @@ public final class MemberPresentationPageController {
         String family=match instanceof String route?ROUTES.get(route):null;
         HttpHeaders headers=headers();headers.set("Content-Language",pages.language(request));if(family==null)return new ResponseEntity<>("",headers,HttpStatus.FORBIDDEN);
         String canonical="/"+family,cookie=source.sessionCookie(request);
-        Map<String,Object> model=Map.of("uiPageKey",family.equals("support")?"msgSupport":family.equals("chat")?"msgChat":family.equals("bank")?"bank":family.equals("stocks")?"stocks":"wallet","memberRefresh",canonical);
+        Map<String,Object> model=new HashMap<>();
+        model.put("uiPageKey",family.equals("support")?"msgSupport":family.equals("chat")?"msgChat":family.equals("bank")?"bank":family.equals("stocks")?"stocks":"wallet");
+        model.put("memberRefresh",canonical);
+        model.put("isAdmin",source.checkAdmin(cookie));
         if(cookie==null)return login(headers,canonical);
         try{verify(source.read("/api/v1/auth/me",cookie));}
         catch(AdminSourceClient.SourceFailure failure){

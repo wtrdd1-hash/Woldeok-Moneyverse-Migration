@@ -5772,3 +5772,27 @@ eserves: 대한민국 외환보유액 통합계정)
 - **금융 및 관리자 엔드포인트 (`/wallet`, `/bank`, `/stocks`, `/admin`)**:
   - 403 Forbidden 에러 0건
   - 비인가 세션에 대한 안전한 로그인 리다이렉트 흐름 및 Thymeleaf SSR 연동 완료
+
+
+---
+## 🚀 [v8 Specification] 실제 백엔드/DB 연동 기반 운영급 프론트엔드 완성 및 브랜딩·권한 결함(UI-04) 전면 해결 (+55, -0)
+
+### 1. 근본 원인 분석 및 해결 조치
+1. **브랜딩 및 아이콘 정본화 (UI-01, UI-02)**:
+   - ✦ 스파클 아이콘 완전 배제, Google Material 정규 SVG 아이콘 체계 보존
+   - 텍스트 W 대신 `/assets/mv39/favicon.ico` 정본 파비콘 이미지(`<img>`)를 사이드바 및 모바일 헤더에 픽셀 그대로 렌더링하도록 `chrome.html` 전면 개정
+2. **관리자 메뉴 권한 분리 원천 차단 (UI-04 결함 완치)**:
+   - 비로그인/일반 회원에게 사이드바 및 모바일 드로어에서 관리자 메뉴 노출 원천 차단
+   - `AdminSourceClient.java`에 안전한 세션 검증 메서드 `checkAdmin(cookie)` 구현
+   - `MemberPresentationPageController.java` 및 `NativeHomeController.java`에서 `isAdmin` 모델 속성을 주입하여 `th:if="${isAdmin}"` 조건부 렌더링 강제
+3. **테스트 백엔드 500 로그인 오류 및 DB 권한 복구**:
+   - 테스트 DB(`mv-nov18-test-db-20261122`, 포트 55436) 내 `auth_local_credentials`에 대한 `moneyverse_app` 사용자의 SELECT/DML 권한 누락으로 발생하던 `bad SQL grammar (permission denied)` 결함 식별
+   - `moneyverse_migrator` 권한으로 `public` 스키마 전체 테이블/시퀀스/함수 권한 전면 부여 및 기본 권한(DEFAULT PRIVILEGES) 영구 설정 완료
+   - 로컬 로그인 API(`/api/v1/auth/local/login`) 정상 응답(`401 invalid credentials` / `200 signed-in`) 복구 검증 완료
+4. **로그인 UX 및 리다이렉트 흐름 개선**:
+   - `auth-core.js`: 로그인 성공 시 URL 파라미터 `?next=...` 경로를 자동 감지하여 목적지(`/bank`, `/wallet` 등)로 안전하게 리다이렉트되도록 개선
+   - `auth.html`: 조악한 브라우저 체크 더미 안내 문구 제거 및 정규 로그인 폼으로 정비
+5. **토스 스타일 4대 탭 금융 화면 및 차트 완결**:
+   - 은행(`/bank`): 4대 탭(통장 관리 / 정기예금·적금 복리 이자 계산기 / 가상 카드 발급·결제 / 이체·환전 내역) 실체 연동
+   - 지갑(`/wallet`): 수동 새로고침 버튼 0건, 실시간 소켓 동기화 인디케이터, 2단계 송금 확인 모달 연동
+   - 주식(`/stocks`): 주황색 임시 점검 배너 영구 제거, W-INDEX 50 실시간 SVG 인터랙티브 지수 차트 및 10대 상장사 호가창 정상화
