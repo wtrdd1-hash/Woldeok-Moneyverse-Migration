@@ -30,10 +30,15 @@
 <section class="wallet-metrics" aria-label="Verified wallet balances">
 <article class="card"><h3  data-i18n="walletTotal" th:text="${uiCopy['walletTotal']}">Total balance</h3><strong id="kpi-total-val" class="wallet-value">—</strong></article>
 <article class="card"><h3  data-i18n="walletCash" th:text="${uiCopy['walletCash']}">Cash wallet</h3><strong id="kpi-cash-val" class="wallet-value">—</strong></article>
-<article class="card"><h3  data-i18n="walletBank" th:text="${uiCopy['walletBank']}">Bank deposits</h3><strong id="kpi-bank-val" class="wallet-value">—</strong></article>
+<article class="card"><div style="display:flex;justify-content:space-between;align-items:center;"><h3  data-i18n="walletBank" th:text="${uiCopy['walletBank']}">Bank deposits</h3><a href="/bank" style="font-size:0.75rem;color:#818cf8;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:4px;">은행 허브 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M5 13h11.86l-5.43 5.43 1.42 1.42L21.14 12l-8.29-8.29-1.42 1.42L16.86 11H5z"/></svg></a></div><strong id="kpi-bank-val" class="wallet-value">—</strong>
+<div class="wallet-bank-actions" style="margin-top:12px;display:flex;gap:8px;">
+  <button type="button" id="wallet-bank-deposit-btn" class="wallet-button" style="flex:1;padding:8px 12px;font-size:0.8125rem;font-weight:600;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;border:none;border-radius:8px;cursor:pointer;">입금하기</button>
+  <button type="button" id="wallet-bank-withdraw-btn" class="wallet-button" style="flex:1;padding:8px 12px;font-size:0.8125rem;font-weight:600;background:#1e293b;color:#cbd5e1;border:1px solid #334155;border-radius:8px;cursor:pointer;">출금하기</button>
+</div>
+</article>
 </section>
 <div class="wallet-workspace">
-<section class="card" aria-labelledby="wallet-history-title"><div class="card-heading"><h3 id="wallet-history-title" data-i18n="transactions" th:text="${uiCopy['transactions']}">Recent transactions</h3><button type="button" id="wallet-refresh" class="wallet-button" data-i18n="refresh" th:text="${uiCopy['refresh']}">Refresh</button></div>
+<section class="card" aria-labelledby="wallet-history-title"><div class="card-heading"><h3 id="wallet-history-title" data-i18n="transactions" th:text="${uiCopy['transactions']}">Recent transactions</h3><div style="display:inline-flex;align-items:center;gap:6px;font-size:0.75rem;color:#10b981;font-weight:500;"><span style="width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;display:inline-block;"></span>실시간 자동 연동</div></div>
 <div class="table-scroll" tabindex="0" role="region" aria-labelledby="wallet-history-title"><table class="wallet-table"><thead><tr>
 <th  data-i18n="walletWhen" th:text="${uiCopy['walletWhen']}">Date</th><th  data-i18n="walletType" th:text="${uiCopy['walletType']}">Type</th><th  data-i18n="walletAmount" th:text="${uiCopy['walletAmount']}">Amount (WLD)</th><th  data-i18n="walletDirection" th:text="${uiCopy['walletDirection']}">Direction</th><th  data-i18n="walletReceipt" th:text="${uiCopy['walletReceipt']}">Receipt ID</th>
 </tr></thead><tbody id="wallet-transactions"></tbody></table></div>
@@ -48,7 +53,33 @@
 <button type="submit" id="wallet-submit" class="wallet-submit" disabled data-i18n="walletSubmit" th:text="${uiCopy['walletSubmit']}">Send transfer</button>
 <p id="wallet-proof-notice" class="wallet-note" data-i18n="walletProofNotice" th:text="${uiCopy['walletProofNotice']}">Sending requires verified account, balance and security proof.</p>
 <p id="wallet-transfer-result" role="status" aria-live="polite"></p>
-</form></section></div></div>
+</form></section></div>
+<dialog id="wallet-bank-modal" style="padding:0;border:none;border-radius:16px;background:#0d111e;border:1px solid rgba(255,255,255,0.12);box-shadow:0 25px 50px -12px rgba(0,0,0,0.7);color:#f1f5f9;max-width:440px;width:90%;">
+  <div style="padding:20px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;align-items:center;">
+    <h3 id="wallet-bank-modal-title" style="margin:0;font-size:1.125rem;font-weight:700;">은행 예치금 관리</h3>
+    <button type="button" id="wallet-bank-modal-close" style="background:none;border:none;color:#94a3b8;font-size:1.5rem;cursor:pointer;line-height:1;">&times;</button>
+  </div>
+  <form id="wallet-bank-quick-form" style="padding:20px;display:flex;flex-direction:column;gap:16px;">
+    <input type="hidden" id="wallet-bank-action-type" value="deposit">
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:0.875rem;color:#94a3b8;">
+        <span id="wallet-bank-source-label">현금 잔액</span>
+        <strong id="wallet-bank-available-val" style="color:#f8fafc;">0 WLD</strong>
+      </div>
+      <label for="wallet-bank-amount" style="font-size:0.875rem;font-weight:600;display:block;margin-bottom:6px;">이체 금액 (WLD)</label>
+      <input id="wallet-bank-amount" type="text" inputmode="numeric" placeholder="금액 입력" required style="width:100%;box-sizing:border-box;padding:12px;background:#151b2e;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:1.125rem;font-family:var(--font-mono,monospace);">
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button type="button" class="wbank-quick-val" data-val="5000" style="flex:1;padding:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:#cbd5e1;cursor:pointer;font-size:0.8125rem;">+5천</button>
+      <button type="button" class="wbank-quick-val" data-val="10000" style="flex:1;padding:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:#cbd5e1;cursor:pointer;font-size:0.8125rem;">+1만</button>
+      <button type="button" class="wbank-quick-val" data-val="50000" style="flex:1;padding:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:#cbd5e1;cursor:pointer;font-size:0.8125rem;">+5만</button>
+      <button type="button" id="wbank-max-btn" style="flex:1;padding:6px;background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);border-radius:6px;color:#a5b4fc;cursor:pointer;font-size:0.8125rem;font-weight:600;">전액</button>
+    </div>
+    <p id="wallet-bank-msg" style="margin:0;font-size:0.875rem;min-height:20px;"></p>
+    <button type="submit" id="wallet-bank-submit" style="padding:12px;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;">실행하기</button>
+  </form>
+</dialog>
+</div>
       </main>
       <th:block th:replace="~{shared/chrome :: footer}"></th:block>
     </div>

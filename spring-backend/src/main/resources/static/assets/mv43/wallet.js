@@ -143,7 +143,114 @@
   });
   document.querySelectorAll('[data-amount]').forEach(button=>button.addEventListener('click',()=>{amount.value=button.dataset.amount;}));
   byId('wallet-all').addEventListener('click',()=>{if(snapshot&&!client.hasPending())amount.value=snapshot.cash;});
-  byId('wallet-refresh').addEventListener('click',()=>{if(!client.isBusy())load();});
+  const refreshBtn=byId('wallet-refresh');
+  if(refreshBtn){refreshBtn.addEventListener('click',()=>{if(!client.isBusy())load();});}
+
+  // --- Real-time Auto Sync (No manual refresh needed) ---
+  setInterval(()=>{if(!document.hidden&&!client.isBusy()&&owner())load();},5000);
+  window.addEventListener('message',e=>{if(e.data==='wallet:sync'||e.data==='banking:sync'){if(!client.isBusy())load();}});
+  if(window.socket){
+    window.socket.on('balance:change',()=>{if(!client.isBusy())load();});
+    window.socket.on('ledger:update',()=>{if(!client.isBusy())load();});
+  }
+
+  // --- Quick Bank Deposit / Withdraw Modal ---
+  const bankModal=byId('wallet-bank-modal');
+  const depositBtn=byId('wallet-bank-deposit-btn');
+  const withdrawBtn=byId('wallet-bank-withdraw-btn');
+  const modalClose=byId('wallet-bank-modal-close');
+  const modalTitle=byId('wallet-bank-modal-title');
+  const actionTypeInput=byId('wallet-bank-action-type');
+  const sourceLabel=byId('wallet-bank-source-label');
+  const availableVal=byId('wallet-bank-available-val');
+  const quickAmount=byId('wallet-bank-amount');
+  const bankMsg=byId('wallet-bank-msg');
+  const quickForm=byId('wallet-bank-quick-form');
+  const bankSubmit=byId('wallet-bank-submit');
+
+  function openBankModal(type) {
+    if(!bankModal)return;
+    actionTypeInput.value=type;
+    quickAmount.value='';
+    bankMsg.textContent='';
+    bankMsg.style.color='#f1f5f9';
+    if(type==='deposit'){
+      modalTitle.textContent='은행에 입금하기';
+      sourceLabel.textContent='보유 현금 지갑';
+      availableVal.textContent=core.formatMoney(snapshot?snapshot.cash:0,locale.current())+' WLD';
+      bankSubmit.textContent='은행으로 즉시 입금';
+    } else {
+      modalTitle.textContent='은행에서 출금하기';
+      sourceLabel.textContent='보유 은행 예치금';
+      availableVal.textContent=core.formatMoney(snapshot?snapshot.bank:0,locale.current())+' WLD';
+      bankSubmit.textContent='현금 지갑으로 출금';
+    }
+    if(typeof bankModal.showModal==='function') bankModal.showModal();
+    else bankModal.style.display='block';
+  }
+
+  if(depositBtn)depositBtn.addEventListener('click',()=>openBankModal('deposit'));
+  if(withdrawBtn)withdrawBtn.addEventListener('click',()=>openBankModal('withdraw'));
+  if(modalClose)modalClose.addEventListener('click',()=>{
+    if(typeof bankModal.close==='function') bankModal.close();
+    else bankModal.style.display='none';
+  });
+
+  document.querySelectorAll('.wbank-quick-val').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const cur=parseInt(quickAmount.value.replace(/[^0-9]/g,'')||'0',10);
+      quickAmount.value=cur+parseInt(btn.dataset.val,10);
+    });
+  });
+
+  const maxBtn=byId('wbank-max-btn');
+  if(maxBtn){
+    maxBtn.addEventListener('click',()=>{
+      if(!snapshot)return;
+      quickAmount.value=actionTypeInput.value==='deposit'?snapshot.cash:snapshot.bank;
+    });
+  }
+
+  if(quickForm){
+    quickForm.addEventListener('submit',async e=>{
+      e.preventDefault();
+      const type=actionTypeInput.value;
+      const amt=quickAmount.value.trim().replace(/[^0-9]/g,'');
+      if(!amt||amt==='0'){
+        bankMsg.textContent='올바른 금액을 입력하세요.';
+        bankMsg.style.color='#ef4444';
+        return;
+      }
+      bankSubmit.disabled=true;
+      bankMsg.textContent='처리 중...';
+      bankMsg.style.color='#a5b4fc';
+      try{
+        const url=type==='deposit'?'/api/v1/banking/deposit':'/api/v1/banking/withdraw';
+        const res=await fetch(url,{
+          method:'POST',
+          credentials:'same-origin',
+          headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-Token':session?session.csrfToken:''},
+          body:JSON.stringify({amount:amt})
+        });
+        const d=await res.json();
+        if(!res.ok||d.success===false){
+          throw new Error(d.message||d.error||'처리에 실패했습니다.');
+        }
+        bankMsg.textContent='성공적으로 처리되었습니다!';
+        bankMsg.style.color='#10b981';
+        setTimeout(()=>{
+          if(typeof bankModal.close==='function') bankModal.close();
+          else bankModal.style.display='none';
+          load();
+        },600);
+      }catch(err){
+        bankMsg.textContent=err.message;
+        bankMsg.style.color='#ef4444';
+      }finally{
+        bankSubmit.disabled=false;
+      }
+    });
+  }
   byId('wallet-export').addEventListener('click',()=>{
     if(!snapshot)return;
     // CSV cells stay text so spreadsheet import cannot round money or execute formulas.

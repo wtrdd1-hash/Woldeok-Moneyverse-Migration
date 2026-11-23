@@ -5564,3 +5564,42 @@ eserves: 대한민국 외환보유액 통합계정)
   - 주식 시세 틱 수신 시 실시간 DOM 바인딩 및 세션/지갑 실시간 동기화 파이프라인 연결.
 - **운영 서버 동기화 및 실 브라우저 검증**:
   - `/srv/moneyverse-data/...` 자산 파일 및 백엔드 JAR 반영 후 소켓 연결 수립(`online`, `market:ticks`) 및 새로고침 버튼 부재 실측.
+
+---
+## 🏛️ [v119 Specification] 토스뱅크 스타일 가상 상업은행(/bank) 및 지갑 예치금 원터치 입출금·복리이자·신용대출·저금통 통합 구현
+### 1. 요구사항 및 문제 정의
+- **현상**:
+  1. 사이드바 및 모바일 네비게이션에 '은행' 메뉴가 누락되어 진입 불가.
+  2. 지갑(\/wallet\) 페이지에 '은행 예치금' 지표는 있으나, 실제 현금과 은행 간 예금(입금) 및 인출(출금) 기능이 누락되어 송금만 가능했던 문제.
+  3. 기획서 상의 복리이자 수령, 비상금 저금통(Savings Pockets), 가상 신용 대출(Smart Loans), 가상 국공채 시뮬레이터 미탑재.
+- **해결 방안 (토스뱅크 스타일 풀스택 구현)**:
+  1. **네비게이션**: 사이드바 및 모바일 하단바, 햄버거 드로어에 Google Material SVG \landmark\(은행) 아이콘 메뉴 신설 (\/bank\).
+  2. **지갑 연동 퀵 모달**: \/wallet\ 상단 은행 예치금 카드에 [입금하기] / [출금하기] 버튼 및 1초 퀵 이체 모달 탑재 (5천/1만/5만/전액 퀵버튼).
+  3. **독립 은행 허브 (\/bank\) 신설**:
+     - 토스뱅크 스타일 히어로 카드 (순금융자산, 현금 지갑, 은행 예치금).
+     - [매일 이자 받기]: 연 4.50% 기준 실시간 누적 복리이자 카운팅 및 [지금 이자 받기] 원클릭 즉시 수령.
+     - [비상금 저금통/적금 팟]: 목표 금액 설정, 달성률 프로그레스 링, 보관금 이동.
+     - [가상 신용 대출 (Smart Loans)]: 1~10등급 신용평가, 소득/직업 기반 한도 조회, 대출 실행 및 원리금 상환.
+     - [가상 국채/채권]: 7일/30일 단기 채권 매수 및 만기 확정 수익 상환.
+  4. **백엔드 트랜잭션 무결성**:
+     - \BankService\: \deposit\ 시 \wallets\ 차감 & \ank_accounts\ 증액, \withdraw\ 시 \ank_accounts\ 차감 & \wallets\ 증액의 원자적(Atomic) 트랜잭션 보장.
+     - \claim-interest\: 누적 이자 정산 및 예치금 지급 엔드포인트 구현.
+
+### 2. 변경 대상 파일 목록
+- **백엔드 Java**:
+  - \spring-backend/src/main/java/com/moneyverse/api/domain/bank/service/BankService.java\
+  - \spring-backend/src/main/java/com/moneyverse/api/domain/bank/controller/BankController.java\
+  - \spring-backend/src/main/java/com/moneyverse/api/domain/web/NativeBankController.java\ (신규 컨트롤러)
+- **프론트엔드 템플릿 & 정적 자산**:
+  - \spring-backend/src/main/resources/templates/shared/chrome.html\ (사이드바/모바일 은행 링크 추가)
+  - \spring-backend/src/main/resources/templates/mv43/wallet.html\ (입출금 퀵 버튼 및 모달 추가)
+  - \spring-backend/src/main/resources/templates/mv43/bank.html\ (신규 은행 허브 템플릿)
+  - \spring-backend/src/main/resources/static/assets/mv43/bank.js\ 및 \ank.css\
+  - \spring-backend/src/main/resources/static/assets/mv43/wallet.js\
+- **인프라 & Nginx**:
+  - \/etc/nginx/sites-enabled/moneyverse.conf\ 및 라우트 허용 검증
+
+### 3. 검증 계획 (Verification Plan)
+- **백엔드 컴파일 & 빌드 검증**: \mvn test\ / 빌드 이상 무 확인
+- **API 동작 검증**: \curl\을 통한 \/api/v1/banking/standing\, \/deposit\, \/withdraw\, \/claim-interest\ 응답 및 DB 잔액 무결성 확인
+- **브라우저 E2E 검증**: 브라우저 서브에이전트를 통해 \/bank\ 및 \/wallet\ 접속, 입출금 및 이자 받기 동작 확인, 스크린샷 캡처

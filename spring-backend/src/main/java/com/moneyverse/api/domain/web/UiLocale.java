@@ -63,7 +63,7 @@ public class UiLocale implements LocaleResolver {
     @Override
     public Locale resolveLocale(HttpServletRequest request) {
         String path = request.getRequestURI();
-        if (List.of("/", "/index.html", "/wallet", "/wallet/", "/wallet.html", "/wallet/index.html").contains(path) || path.matches("^/(login|register|forgot-password|reset-password|verify-email|verify-email-change|account-deletion)(/|\\.html|/index\\.html)?$") || path.matches("^/login/providers(/|\\.html|/index\\.html)?$")) return Locale.forLanguageTag(resolve(request));
+        if (List.of("/", "/index.html", "/wallet", "/wallet/", "/wallet.html", "/wallet/index.html", "/bank", "/bank/", "/bank.html", "/bank/index.html").contains(path) || path.matches("^/(login|register|forgot-password|reset-password|verify-email|verify-email-change|account-deletion)(/|\\.html|/index\\.html)?$") || path.matches("^/login/providers(/|\\.html|/index\\.html)?$")) return Locale.forLanguageTag(resolve(request));
         if (List.of("/tools","/calculators","/tools/compound-calculator","/tools/stock-calculator","/status").contains(path))
             return Locale.forLanguageTag(resolvePublic(request));
         if(path.matches("^/(support|chat)(/|\\.html|/index\\.html)?$")) return Locale.forLanguageTag(resolve(request));

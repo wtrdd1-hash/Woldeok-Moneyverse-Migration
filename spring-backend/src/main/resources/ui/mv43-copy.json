@@ -1,5 +1,5 @@
-{
-  "publicationAnnouncements": [
+﻿{
+  "navBank": ["Bank", "은행", "銀行", "银行", "Ngân hàng"],`r`n  "bankHero": ["Virtual Banking", "가상 은행 & 복리 예금", "仮想銀行", "虚拟银行", "Ngân hàng ảo"],`r`n  "bankLead": ["Compound deposit interest, savings pockets and smart loans", "매일 실시간 복리 이자가 붙는 월덕뱅크. 예적금, 저축 팟, 가상 신용 대출", "複利預金とスマートローン", "复利存款与智能贷款", "Lãi suất tiền gửi và khoản vay"],`r`n  "bankDeposit": ["Deposit", "예금 입금", "預金", "存款", "Gửi tiền"],`r`n  "bankWithdraw": ["Withdraw", "예금 출금", "出金", "取款", "Rút tiền"],`r`n  "bankInterestClaim": ["Claim interest now", "지금 이자 받기", "今すぐ利息を受け取る", "立即领取利息", "Nhận lãi ngay"],`r`n  "publicationAnnouncements": [
     "Announcements",
     "운영 소식",
     "お知らせ",
@@ -4067,3 +4067,4 @@
     "Thứ tự"
   ]
 }
+
