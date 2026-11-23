@@ -11,6 +11,8 @@ All values are synthetic; images are planning mockups, NOT screenshots or functi
 
 > **Game-world implementation handoff — v2026.11.23.6 (review candidate):** [180-route English matrix](../GAME_UI_180_PAGE_IMPLEMENTATION_MATRIX_v2026.11.23.6.md) / [한국어](../GAME_UI_180_PAGE_IMPLEMENTATION_MATRIX_v2026.11.23.6.ko.md). All 180 existing PNGs remain the original approved Nov18 concept assets; this candidate does NOT re-render or replace them. The existing **favicon.ico is the official logo**, and admin menus must remain admin-only.
 
+> **Owner's additional requirement — 2026-11-23 v2026.11.23.7:** All 180 example visuals must be individually **redesigned and replaced with approved game-world images** in a separate versioned PNG directory. Preserve this original gallery for before/after comparison. Do not claim replacement from links or common CSS alone. Use unchanged current site `favicon.ico` pixels, admin-only menus, correct game-clock scope, and no fabricated operational figures. [EN replacement and QA matrix](../GAME_UI_180_PAGE_IMPLEMENTATION_MATRIX_v2026.11.23.6.md) / [한국어](../GAME_UI_180_PAGE_IMPLEMENTATION_MATRIX_v2026.11.23.6.ko.md). **Replacement delivery: NOT STARTED (0/180 verified).**
+
 ## Counts / 개수
 
 - admin: 40
