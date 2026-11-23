@@ -1,0 +1,6019 @@
+{
+  "source": "7b676e602bc984ab74572d4081655fdb297d176a",
+  "origin": "http://test.easy-scraping.com",
+  "freshProfile": true,
+  "cases": 240,
+  "failed": 0,
+  "interactionsPassed": true,
+  "results": [
+    {
+      "path": "/",
+      "width": 320,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "My assets dashboard",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 320,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "내 자산 대시보드",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 320,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "マイ資産ダッシュボード",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 320,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "我的资产概览",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 320,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "Tổng quan tài sản",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 360,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "My assets dashboard",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 360,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "내 자산 대시보드",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 360,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "マイ資産ダッシュボード",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 360,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "我的资产概览",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 360,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "Tổng quan tài sản",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 390,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "My assets dashboard",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 390,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "내 자산 대시보드",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 390,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "マイ資産ダッシュボード",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 390,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "我的资产概览",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 390,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "Tổng quan tài sản",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 430,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "My assets dashboard",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 430,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "내 자산 대시보드",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 430,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "マイ資産ダッシュボード",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 430,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "我的资产概览",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 430,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "Tổng quan tài sản",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 768,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 19,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "My assets dashboard",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 768,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 19,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "내 자산 대시보드",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 768,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 19,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "マイ資産ダッシュボード",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 768,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 19,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "我的资产概览",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 768,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 19,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "Tổng quan tài sản",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1024,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "My assets dashboard",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1024,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "내 자산 대시보드",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1024,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "マイ資産ダッシュボード",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1024,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "我的资产概览",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1024,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "Tổng quan tài sản",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1440,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "My assets dashboard",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1440,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "내 자산 대시보드",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1440,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "マイ資産ダッシュボード",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1440,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "我的资产概览",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1440,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "Tổng quan tài sản",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1920,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "My assets dashboard",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1920,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "내 자산 대시보드",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1920,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "マイ資産ダッシュボード",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1920,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "我的资产概览",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1920,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "Tổng quan tài sản",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 320,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 101,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "Financial tools, all in one place",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 320,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 101,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "하나의 공간, 금융 도구 탐색",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 320,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 101,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "金融ツールを一か所で",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 320,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 101,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "一站式探索金融工具",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 320,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 101,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "Khám phá công cụ tài chính tại một nơi",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 360,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 101,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "Financial tools, all in one place",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 360,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 101,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "하나의 공간, 금융 도구 탐색",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 360,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 101,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "金融ツールを一か所で",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 360,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 101,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "一站式探索金融工具",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 360,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 101,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "Khám phá công cụ tài chính tại một nơi",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 390,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 101,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "Financial tools, all in one place",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 390,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 101,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "하나의 공간, 금융 도구 탐색",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 390,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 101,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "金融ツールを一か所で",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 390,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 101,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "一站式探索金融工具",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 390,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 101,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "Khám phá công cụ tài chính tại một nơi",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 430,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 101,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "Financial tools, all in one place",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 430,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 101,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "하나의 공간, 금융 도구 탐색",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 430,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 101,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "金融ツールを一か所で",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 430,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 101,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "一站式探索金融工具",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 430,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 101,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "Khám phá công cụ tài chính tại một nơi",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 768,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 102,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "Financial tools, all in one place",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 768,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 102,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "하나의 공간, 금융 도구 탐색",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 768,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 102,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "金融ツールを一か所で",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 768,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 102,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "一站式探索金融工具",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 768,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 102,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "Khám phá công cụ tài chính tại một nơi",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 1024,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 106,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "Financial tools, all in one place",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 1024,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 106,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "하나의 공간, 금융 도구 탐색",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 1024,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 106,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "金融ツールを一か所で",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 1024,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 106,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "一站式探索金融工具",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 1024,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 106,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "Khám phá công cụ tài chính tại một nơi",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 1440,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 106,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "Financial tools, all in one place",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 1440,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 106,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "하나의 공간, 금융 도구 탐색",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 1440,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 106,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "金融ツールを一か所で",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 1440,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 106,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "一站式探索金融工具",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 1440,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 106,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "Khám phá công cụ tài chính tại một nơi",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 1920,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 106,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "Financial tools, all in one place",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 1920,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 106,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "하나의 공간, 금융 도구 탐색",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 1920,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 106,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "金融ツールを一か所で",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 1920,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 106,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "一站式探索金融工具",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 1920,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 106,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "tools-hub",
+        "heading": "Khám phá công cụ tài chính tại một nơi",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 320,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 46,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "Compound interest calculator",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 320,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 46,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "복리 계산기",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 320,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 46,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "複利計算機",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 320,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 46,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "复利计算器",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 320,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 46,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "Máy tính lãi kép",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 360,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 46,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "Compound interest calculator",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 360,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 46,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "복리 계산기",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 360,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 46,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "複利計算機",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 360,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 46,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "复利计算器",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 360,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 46,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "Máy tính lãi kép",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 390,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 46,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "Compound interest calculator",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 390,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 46,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "복리 계산기",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 390,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 46,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "複利計算機",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 390,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 46,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "复利计算器",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 390,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 46,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "Máy tính lãi kép",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 430,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 46,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "Compound interest calculator",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 430,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 46,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "복리 계산기",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 430,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 46,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "複利計算機",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 430,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 46,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "复利计算器",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 430,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 46,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "Máy tính lãi kép",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 768,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 47,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "Compound interest calculator",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 768,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 47,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "복리 계산기",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 768,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 47,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "複利計算機",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 768,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 47,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "复利计算器",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 768,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 47,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "Máy tính lãi kép",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 1024,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 51,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "Compound interest calculator",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 1024,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 51,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "복리 계산기",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 1024,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 51,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "複利計算機",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 1024,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 51,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "复利计算器",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 1024,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 51,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "Máy tính lãi kép",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 1440,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 51,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "Compound interest calculator",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 1440,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 51,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "복리 계산기",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 1440,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 51,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "複利計算機",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 1440,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 51,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "复利计算器",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 1440,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 51,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "Máy tính lãi kép",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 1920,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 51,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "Compound interest calculator",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 1920,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 51,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "복리 계산기",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 1920,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 51,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "複利計算機",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 1920,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 51,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "复利计算器",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/compound-calculator",
+      "width": 1920,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 51,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "compound",
+        "heading": "Máy tính lãi kép",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 320,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 43,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "Stock average price calculator",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 320,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 43,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "주식 평균단가 계산기",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 320,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 43,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "株式平均取得単価計算機",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 320,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 43,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "股票平均成本计算器",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 320,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 43,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "Máy tính giá vốn cổ phiếu",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 360,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 43,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "Stock average price calculator",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 360,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 43,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "주식 평균단가 계산기",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 360,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 43,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "株式平均取得単価計算機",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 360,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 43,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "股票平均成本计算器",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 360,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 43,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "Máy tính giá vốn cổ phiếu",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 390,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 43,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "Stock average price calculator",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 390,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 43,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "주식 평균단가 계산기",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 390,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 43,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "株式平均取得単価計算機",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 390,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 43,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "股票平均成本计算器",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 390,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 43,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "Máy tính giá vốn cổ phiếu",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 430,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 43,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "Stock average price calculator",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 430,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 43,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "주식 평균단가 계산기",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 430,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 43,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "株式平均取得単価計算機",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 430,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 43,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "股票平均成本计算器",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 430,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 43,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "Máy tính giá vốn cổ phiếu",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 768,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 44,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "Stock average price calculator",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 768,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 44,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "주식 평균단가 계산기",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 768,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 44,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "株式平均取得単価計算機",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 768,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 44,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "股票平均成本计算器",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 768,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 44,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "Máy tính giá vốn cổ phiếu",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 1024,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 48,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "Stock average price calculator",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 1024,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 48,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "주식 평균단가 계산기",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 1024,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 48,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "株式平均取得単価計算機",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 1024,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 48,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "股票平均成本计算器",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 1024,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 48,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "Máy tính giá vốn cổ phiếu",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 1440,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 48,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "Stock average price calculator",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 1440,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 48,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "주식 평균단가 계산기",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 1440,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 48,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "株式平均取得単価計算機",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 1440,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 48,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "股票平均成本计算器",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 1440,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 48,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "Máy tính giá vốn cổ phiếu",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 1920,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 48,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "Stock average price calculator",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 1920,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 48,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "주식 평균단가 계산기",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 1920,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 48,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "株式平均取得単価計算機",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 1920,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 48,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "股票平均成本计算器",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools/stock-calculator",
+      "width": 1920,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 48,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "stock-calculator",
+        "heading": "Máy tính giá vốn cổ phiếu",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/login",
+      "width": 390,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 29,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "login",
+        "heading": "Welcome Back!",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/login",
+      "width": 390,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 29,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "login",
+        "heading": "반가워요!",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/login",
+      "width": 390,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 29,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "login",
+        "heading": "おかえりなさい！",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/login",
+      "width": 390,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 29,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "login",
+        "heading": "欢迎回来！",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/login",
+      "width": 390,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 29,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "login",
+        "heading": "Chào mừng bạn!",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/login",
+      "width": 1440,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 34,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "login",
+        "heading": "Welcome Back!",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/login",
+      "width": 1440,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 34,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "login",
+        "heading": "반가워요!",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/login",
+      "width": 1440,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 34,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "login",
+        "heading": "おかえりなさい！",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/login",
+      "width": 1440,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 34,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "login",
+        "heading": "欢迎回来！",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/login",
+      "width": 1440,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 34,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "login",
+        "heading": "Chào mừng bạn!",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/login/providers",
+      "width": 390,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 29,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "login",
+        "heading": "Welcome Back!",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/login/providers",
+      "width": 390,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 29,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "login",
+        "heading": "반가워요!",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/login/providers",
+      "width": 390,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 29,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "login",
+        "heading": "おかえりなさい！",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/login/providers",
+      "width": 390,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 29,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "login",
+        "heading": "欢迎回来！",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/login/providers",
+      "width": 390,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 29,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "login",
+        "heading": "Chào mừng bạn!",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/login/providers",
+      "width": 1440,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 34,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "login",
+        "heading": "Welcome Back!",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/login/providers",
+      "width": 1440,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 34,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "login",
+        "heading": "반가워요!",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/login/providers",
+      "width": 1440,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 34,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "login",
+        "heading": "おかえりなさい！",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/login/providers",
+      "width": 1440,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 34,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "login",
+        "heading": "欢迎回来！",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/login/providers",
+      "width": 1440,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 34,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "login",
+        "heading": "Chào mừng bạn!",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/register",
+      "width": 390,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 29,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "register",
+        "heading": "Create a new account",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/register",
+      "width": 390,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 29,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "register",
+        "heading": "새 계정 만들기",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/register",
+      "width": 390,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 29,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "register",
+        "heading": "新しいアカウントを作成",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/register",
+      "width": 390,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 29,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "register",
+        "heading": "创建新账户",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/register",
+      "width": 390,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 29,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "register",
+        "heading": "Tạo tài khoản mới",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/register",
+      "width": 1440,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 34,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "register",
+        "heading": "Create a new account",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/register",
+      "width": 1440,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 34,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "register",
+        "heading": "새 계정 만들기",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/register",
+      "width": 1440,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 34,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "register",
+        "heading": "新しいアカウントを作成",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/register",
+      "width": 1440,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 34,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "register",
+        "heading": "创建新账户",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/register",
+      "width": 1440,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 34,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "register",
+        "heading": "Tạo tài khoản mới",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/forgot-password",
+      "width": 390,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 15,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "forgot-password",
+        "heading": "Forgot password",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/forgot-password",
+      "width": 390,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 15,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "forgot-password",
+        "heading": "비밀번호 찾기",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/forgot-password",
+      "width": 390,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 15,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "forgot-password",
+        "heading": "パスワードを忘れた場合",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/forgot-password",
+      "width": 390,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 15,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "forgot-password",
+        "heading": "忘记密码",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/forgot-password",
+      "width": 390,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 15,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "forgot-password",
+        "heading": "Quên mật khẩu",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/forgot-password",
+      "width": 1440,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 20,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "forgot-password",
+        "heading": "Forgot password",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/forgot-password",
+      "width": 1440,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 20,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "forgot-password",
+        "heading": "비밀번호 찾기",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/forgot-password",
+      "width": 1440,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 20,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "forgot-password",
+        "heading": "パスワードを忘れた場合",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/forgot-password",
+      "width": 1440,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 20,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "forgot-password",
+        "heading": "忘记密码",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/forgot-password",
+      "width": 1440,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 20,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "forgot-password",
+        "heading": "Quên mật khẩu",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/reset-password",
+      "width": 390,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 16,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "reset-password",
+        "heading": "Reset password",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/reset-password",
+      "width": 390,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 16,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "reset-password",
+        "heading": "비밀번호 재설정",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/reset-password",
+      "width": 390,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 16,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "reset-password",
+        "heading": "パスワード再設定",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/reset-password",
+      "width": 390,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 16,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "reset-password",
+        "heading": "重置密码",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/reset-password",
+      "width": 390,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 16,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "reset-password",
+        "heading": "Đặt lại mật khẩu",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/reset-password",
+      "width": 1440,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 21,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "reset-password",
+        "heading": "Reset password",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/reset-password",
+      "width": 1440,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 21,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "reset-password",
+        "heading": "비밀번호 재설정",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/reset-password",
+      "width": 1440,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 21,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "reset-password",
+        "heading": "パスワード再設定",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/reset-password",
+      "width": 1440,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 21,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "reset-password",
+        "heading": "重置密码",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/reset-password",
+      "width": 1440,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 21,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "reset-password",
+        "heading": "Đặt lại mật khẩu",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/verify-email",
+      "width": 390,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 15,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "verify-email",
+        "heading": "Verify email",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/verify-email",
+      "width": 390,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 15,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "verify-email",
+        "heading": "이메일 확인",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/verify-email",
+      "width": 390,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 15,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "verify-email",
+        "heading": "メール確認",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/verify-email",
+      "width": 390,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 15,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "verify-email",
+        "heading": "验证邮箱",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/verify-email",
+      "width": 390,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 15,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "verify-email",
+        "heading": "Xác minh email",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/verify-email",
+      "width": 1440,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 20,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "verify-email",
+        "heading": "Verify email",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/verify-email",
+      "width": 1440,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 20,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "verify-email",
+        "heading": "이메일 확인",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/verify-email",
+      "width": 1440,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 20,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "verify-email",
+        "heading": "メール確認",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/verify-email",
+      "width": 1440,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 20,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "verify-email",
+        "heading": "验证邮箱",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/verify-email",
+      "width": 1440,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 20,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "verify-email",
+        "heading": "Xác minh email",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/verify-email-change",
+      "width": 390,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 15,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "verify-email-change",
+        "heading": "Confirm email change",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/verify-email-change",
+      "width": 390,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 15,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "verify-email-change",
+        "heading": "이메일 변경 확인",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/verify-email-change",
+      "width": 390,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 15,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "verify-email-change",
+        "heading": "メール変更の確認",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/verify-email-change",
+      "width": 390,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 15,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "verify-email-change",
+        "heading": "确认邮箱变更",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/verify-email-change",
+      "width": 390,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 15,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "verify-email-change",
+        "heading": "Xác nhận đổi email",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/verify-email-change",
+      "width": 1440,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 20,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "verify-email-change",
+        "heading": "Confirm email change",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/verify-email-change",
+      "width": 1440,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 20,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "verify-email-change",
+        "heading": "이메일 변경 확인",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/verify-email-change",
+      "width": 1440,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 20,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "verify-email-change",
+        "heading": "メール変更の確認",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/verify-email-change",
+      "width": 1440,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 20,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "verify-email-change",
+        "heading": "确认邮箱变更",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/verify-email-change",
+      "width": 1440,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 20,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "verify-email-change",
+        "heading": "Xác nhận đổi email",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/account-deletion",
+      "width": 390,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 15,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "account-deletion",
+        "heading": "Account deletion",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/account-deletion",
+      "width": 390,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 15,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "account-deletion",
+        "heading": "계정 삭제",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/account-deletion",
+      "width": 390,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 15,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "account-deletion",
+        "heading": "アカウント削除",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/account-deletion",
+      "width": 390,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 15,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "account-deletion",
+        "heading": "删除账户",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/account-deletion",
+      "width": 390,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 15,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "account-deletion",
+        "heading": "Xóa tài khoản",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/account-deletion",
+      "width": 1440,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 20,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "account-deletion",
+        "heading": "Account deletion",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/account-deletion",
+      "width": 1440,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 20,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "account-deletion",
+        "heading": "계정 삭제",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/account-deletion",
+      "width": 1440,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 20,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "account-deletion",
+        "heading": "アカウント削除",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/account-deletion",
+      "width": 1440,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 20,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "account-deletion",
+        "heading": "删除账户",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/account-deletion",
+      "width": 1440,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 20,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "account-deletion",
+        "heading": "Xóa tài khoản",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    }
+  ],
+  "screenshots": [
+    "2026-11-23-test-frontend-screenshots/home-390.png",
+    "2026-11-23-test-frontend-screenshots/home-1440.png",
+    "2026-11-23-test-frontend-screenshots/compound-desktop.png",
+    "2026-11-23-test-frontend-screenshots/login-mobile.png",
+    "2026-11-23-test-frontend-screenshots/compound-mobile-known-result.png"
+  ],
+  "overlapGuardSelfTestPassed": true,
+  "transport": "Test hostname resolved to the Test host loopback through real Test Nginx HTTP; external HTTPS identity checked separately"
+}

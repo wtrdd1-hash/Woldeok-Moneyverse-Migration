@@ -1,4 +1,13 @@
 # Test frontend with real backend — 2026-11-23
+
+## Current checkpoint — accepted Test connection slice
+
+Finished: independent Test frontend connection, exact CI artifact, shared locale/favicon/support corrections, and the listed240-case common-screen browser matrix. Whole180-route implementation and authenticated/admin/financial acceptance remain OPEN. No Production promotion.
+
+Running application7b676e602bc984ab74572d4081655fdb297d176a is distinct from backendf0336fded6068f884c87f88efedeb770fd3387d4 and the later consolidated GitHub tip. The actual backend process targets the isolated Test PostgreSQL. No claim is made about unobserved process flags or unchanged backend PID across concurrent work.
+
+[Current detailed QA and limitations](../qa/2026-11-23-test-frontend-real-backend.md).
+
 ## Before work
 Owner narrowed the task to Test only. Production promotion is not authorized for this continuation.
 Use UI_UX_SINGLE_REFERENCE.ko.md at design revision39888c7d26 and retain exact favicon bytes. Current origin/main9876c09888 is an ancestor of the design candidate.
@@ -9,16 +18,16 @@ The prior frontend rebuilding plan remains the approved implementation scope. Th
 ## In progress
 - [x] Re-read project instructions, release/infrastructure authority and supplied single reference.
 - [x] Isolate work on MiniPC; preserve previous dirty worktrees and concurrent changes.
-- [ ] Establish baseline native tests.
-- [ ] Verify game-world shared styling, actual favicon and no invented runtime values by real rendering.
-- [ ] Bind independent frontend to real Test backend; no Production fallback.
-- [ ] Candidate CI and exact source identity.
-- [ ] Test-only Nginx routing with backup, compare-and-swap, inverse and Production byte preservation.
-- [ ] Browser PC/mobile/five-language and real API evidence.
-- [ ] Publish results and remaining defects.
+- [x] Establish baseline native tests.
+- [x] Verify game-world shared styling, actual favicon and no invented runtime values by real rendering.
+- [x] Bind independent frontend to real Test backend; no Production fallback.
+- [x] Candidate CI and exact source identity.
+- [x] Test-only routing ownership/recovery checks and Production byte preservation; final7b actual rollback not exercised.
+- [x] Listed common-screen PC/mobile/five-language and real read-API evidence; full functional acceptance OPEN.
+- [x] Publish results and remaining defects in versioned QA evidence.
 
 ## Finished
-Not finished. No runtime change or Production promotion has occurred.
+The connection/common-screen milestone is finished as scoped above. Whole-site implementation remains unfinished. Production promotion has not occurred.
 
 ### Checkpoint — baseline / first regression
 Native baseline662tests, zero failures/errors/skips. PostgreSQL-tagged tests excluded by project default are not counted as passes. Six Test routing isolation tests RED (missing module) then GREEN. Real-render branding regression5/5 fails on the existing administrator letter emblem before correction. Replaced only that pseudo-element with the byte-identical current favicon and updated resource content hashes.
@@ -59,3 +68,19 @@ Five real-render regressions observedRED before moving the56px launcher into the
 A private loopback development build of exact source7b676e602bc984ab74572d4081655fdb297d176a, using real isolated Test API55438 through a dedicated temporary proxy, passed240/240 and calculator/search/menu/modal interactions. This local-JAR result is not public Test/CI-artifact acceptance. Temporary developer units were ownership-verified and both stopped; no Production/runtime proxy change.
 The first new-toolbar probe incorrectly classified its own ancestor header as overlap. Corrected only ancestor containment, retaining header-peer/main-control checks; forced a real control collision and verified the guard rejects it. This guard self-test passes.
 Public upgrade of the attested7b candidate stopped before any transition because parallel Test-only API/OAuth/socket routes had been added. The old Test renderer stayed healthy. Added an exact reviewed compatibility tail, all upstreams55438/55440, while retaining the entire canonical page/asset/read prefix and refusing Production upstreams or modified guards. No Nginx write is performed by this upgrade. The actual complete site snapshot must still stay unchanged. One new boundary test RED->GREEN; full23Python tests pass. The parallel routes themselves are not claimed as business-operation acceptance.
+
+### Finished milestone — exact Test artifact and recorded gaps
+Actual source7b676e602bc984ab74572d4081655fdb297d176a was installed from successful candidate CI45139863605 with JAR SHA256a751dc6b8760967c7e3e8bcb7ca0c30fd1a73e9ad7df09548de66fe3a6893706. The Test-only unit upgrade and QA preserved the full existing Nginx snapshot; earlier owned development units were verified stopped.
+The240-case fresh-browser matrix and interactions passed with zero failures; a forced control-overlap self-test also passed. Transport was actual Test Nginx HTTP through Test-hostname loopback resolution, with separate external HTTPS200/exact-source verification. It is not240external TLS tests. The original favicon matches at all measured locations.
+Latest anonymous180GET inventory:15HTML,14auth-required,33fixture-required,117HTTP403,1HTTP503. The117403s are not implemented pages. /status remains a real backend read-boundary defect; member/admin positives, OAuth and financial writes remain unaccepted.
+Application validation recorded Java674, Node354 and operations23 with zero failures; locally excluded PostgreSQL-tagged tests are not counted passing. The exact CI required jobs succeeded. Final7b actual rollback/host reboot was not exercised.
+During final GitHub reconciliation, PR3402 was found closed unmerged and the shared remote task branch had advanced fromc437ccab6a to1ecf461fc8 through parallel consolidation into PR3407. Preserve it. Documentation evidence moved to docs/test-frontend-acceptance-evidence-20261123 based on that tip; no additional application changes were deployed or accepted. origin/main was fetched again and remained9876c09888ec84034eec183cf1309c85df3d7447.
+Production was not promoted. The recurring Test-before-Production rule is recorded on the task branch, not claimed merged to main. Complete functionality remains OPEN as listed in QA.
+
+### Before work — 2026-11-24 expanded diagnosis
+Owner requests comparison of all MiniPC/GitHub work, why the UI differs from the approved design, and why some pages are blocked. Continue read-only runtime/source/ingress/security comparison. Do not infer that earlier240-case evidence accepts another application SHA or every route.
+- [ ] Inventory active public Test/Production identities, presentation/API boundaries and worktrees.
+- [ ] Compare GitHub integration/PR/source and design authority.
+- [ ] Reproduce representative missing, denied, login-required and source-failed routes at each boundary.
+- [ ] Inspect actual desktop/mobile page styling and classify visual defects.
+- [ ] Publish evidence-linked causes and remaining actions without Production promotion.

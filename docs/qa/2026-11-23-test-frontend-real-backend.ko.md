@@ -1,35 +1,69 @@
 # 실제 Test 프론트엔드·백엔드 점검 — 2026-11-23
-현재 작업은 Test 전용이다. 운영 승격하지 않는다. [실제 Test](https://test.easy-scraping.com/) · [배포본 식별](https://test.easy-scraping.com/frontend-ui-version).
-기준: UI_UX_SINGLE_REFERENCE.ko.md 및 원본 파비콘. 신규180개 PNG는 생성된 디자인 자료이며 실제180개 기능 정상 증거가 아니다.
 
-## 현재 연결
-독립 Spring MVC/Thymeleaf frontend-presentation 서비스가 실제 Test API와 별도 합성 PostgreSQL에 연결된다. 운영4550으로의 fallback은 제거했다. 운영 설정은 Test 블록 바깥의 바이트 동일성을 확인했다.
-초기 연결 applicationSource5e0ede9ff8bddd187e8f14ac1ee89270f659acd0; 실제 backendSourcef0336fded6068f884c87f88efedeb770fd3387d4. 두 소스를 같은 배포본이라고 표시하지 않는다. 소스 DB 트리는 동일하지만 신규 백엔드를 운영 배포한 것은 아니다.
+## 현재 검증된 범위
 
-## 실제180경로 대조 — 익명 GET만
-| 결과 | 개수 | 의미 |
-|---|---:|---|
-| HTML 응답 |15| 게스트 화면 존재; 모든 기능 정상 증거 아님 |
-| 로그인 필요 |14| 보호된 native 관리자/회원 경로; 실제 로그인 후 기능은 미검증 |
-| 동적 fixture 필요 |33| 임의 계정/게시글 ID를 만들지 않았음 |
-| 미구현 또는 미연결404 |117| 실제 신규 프론트엔드 누락. 홈으로 우회해 정상으로 세지 않음 |
-| 실제 source unavailable503 |1| /status; 정상 상태를 합성하지 않음 |
+최신 사용자 지시는 **테스트 서버에서만 구현**이다. [테스트 화면](https://test.easy-scraping.com/) · [배포본 식별](https://test.easy-scraping.com/frontend-ui-version). 이 작업으로 운영 승격하지 않았다.
 
-원시 결과: [180행 기록](2026-11-23-test-frontend-route-180-initial.json).
-이 점검은 모든 관리자·회원·금융 기능 PASS가 아니다. 현재 브라우저의 운영 로그인 세션을 Test에 복사하지 않았다.
+독립 Spring MVC/Thymeleaf 프론트엔드를 실제 Spring API와 별도 합성 Test PostgreSQL에 연결했다. API 응답을 모킹하거나 잔액을 고정값으로 만들어 통과시키지 않았다. 현재 백엔드 프로세스의 DB 대상도 별도 Test DB임을 확인했다. 모든 업무 계약의 정상 작동을 뜻하지는 않는다.
 
-## 발견·수정 현황
-- F01 Test가 운영과 같은 renderer를 프록시하고 버전 조회가503/홈HTML을 반환: 독립 서비스와 정확한 JSON/SHA 응답으로 연결 확인.
-- F02 관리자 장식의 문자W: 현재 파비콘 바이너리로 교체;5언어 real-render 회귀 RED→GREEN.
-- F03 실제 브라우저 /?lang=ko가 영어로 유지: 최초 matrix의 두 번째 조건에서 실패. 서버/클라이언트 query 우선순위 및 URL 동기화, 게임시간 안내의 번역 누락을 수정 중. 새 배포본 실제 브라우저 재검증 전까지 OPEN.
-- F04117개 route 미연결: OPEN. 금융·게임·계정·정책·관리자 기능을 개별 실제 계약과 연결해야 한다.
-- F05 /status 실제 데이터 unavailable: OPEN. 정상 온라인 상태/시각을 만들어 표시하지 않음.
-- F06 Test 인증·OAuth·실제 회원/관리자 양성·쓰기 기능: OPEN. 현재 read-only Test 계약/게스트 UI 점검으로 통과 처리하지 않음.
+| 항목 | 확인값 |
+| --- | --- |
+| 실제 프론트엔드 소스 | `7b676e602bc984ab74572d4081655fdb297d176a` |
+| 실제 백엔드 소스 | `f0336fded6068f884c87f88efedeb770fd3387d4` |
+| 프론트엔드 JAR SHA256 | `a751dc6b8760967c7e3e8bcb7ca0c30fd1a73e9ad7df09548de66fe3a6893706` |
+| 동일 소스 후보 CI | [45139863605](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/actions/runs/45139863605), 성공 |
+| 전체 사이트 완료 판정 | **미완료 OPEN** |
 
-## 검증 구분
-초기 소스 Java667/Node351/Python16 통과; 최초 실제 UI matrix는1조건 통과 후 한국어 조건 실패로 중단했다.240개 통과가 아니다.
-언어 수정 후보는 Java673/Node353/Python19 통과를 확인했으며 신규 exact CI/artifact와 실제 browser acceptance를 기다린다. 로컬 Gradle에서 제외되는 PostgreSQL 태그는 통과로 세지 않았다.
+분류·정책·런타임·Spring 웹 필수 작업이 해당 소스에서 성공했다. 적용 대상이 아니어서 건너뛴 작업은 통과로 세지 않는다. 후속 문서·운영 도구 커밋을 실행 중인 애플리케이션 SHA로 바꿔 표시하지 않는다.
 
-## 후속 실제 브라우저 결과
-번역 수정 dbac 배포본은 홈40개 조건을 통과했다. 이후 /tools320px에서 문의 버튼이 검색칸과5.25px 겹쳐 전체 실행이 중단됨: [실측 JSON](2026-11-23-test-frontend-browser-overlap.json). 문의 버튼을 공통 헤더 공간에 배치하는 수정은 Java674/Node354 통과했으나 신규 실제 브라우저 재검증 전까지 미완료다.
-상태503은 [실제 앱 역할의 읽기 경계 결함](../findings/2026-11-23-test-status-read-boundary.ko.md)으로 확인됐으며 raw table GRANT 우회는 하지 않았다.
+## 실제 브라우저 검사
+
+**240개 조건, 실패0**, 계산·검색·메뉴·문의창 상호작용 및 겹침 검사의 음성 자체시험 통과. 새 브라우저 컨텍스트에서 Test 도메인을 해당 호스트의 루프백으로 연결해 실제 Test Nginx HTTP를 사용했다. 외부 HTTPS에서는 별도로200과 정확한 소스를 확인했다.240개 전체가 외부 네트워크·TLS 검사였다는 뜻은 아니다.
+
+- 홈·도구·계산기2종 × 너비8종320–1920px ×5언어:160조건.
+- 인증 화면8종 ×390/1440px ×5언어:80조건.
+- 서버 렌더링 언어·번역, 네이비·보라 공통 UI, 실제 파비콘, 가로 넘침·입력칸/버튼 겹침, 자산·JS 오류, 실제 조회 API4종 응답 구조 확인.
+- 복리1000·10%·2년→1210. 주식100×10+200×10→평균150·수량20·총액3000·목표165·손익300.
+- 도구 검색·필터·빈 결과, 모바일 메뉴, Escape/포커스, 문의창 열기·닫기 확인.
+- 인증 입력 중 언어를 바꿔도 입력·체크 상태 유지. 로그인 POST를 보내거나 비밀번호를 기록하지 않았다.
+
+증거: [240조건](2026-11-23-test-frontend-browser-accepted.json), [상호작용](2026-11-23-test-frontend-interactions-accepted.json), [연결 영수증](2026-11-23-test-frontend-connection-accepted.json), [PC 화면](2026-11-23-test-frontend-screenshots/actual-home-1440.png), [모바일 화면](2026-11-23-test-frontend-screenshots/actual-home-390.png).
+
+이 결과는 위 공통·공개·인증 렌더링 범위의 검증이다. 실제 OAuth·회원/관리자 로그인 후 기능·금융 쓰기·180경로 전체 통과가 아니다.
+
+## 발견 사항과 수정 결과
+
+| ID | 상태 | 내용 |
+| --- | --- | --- |
+| F01 | 해당 범위 수정 | Test가 운영 renderer를 공유하고 버전 JSON이 없던 문제를 독립 불변 배포본과 명시적 Test 백엔드 연결로 해결했다. |
+| F02 | 수정 | 관리자 장식의 문자 로고를 현재 파비콘으로 교체했다. 저장소·운영 favicon·Test favicon·브랜드 자산의 바이트가 같다. [해시 증거](2026-11-23-test-frontend-favicon-accepted.json). |
+| F03 | 수정 | 한국어 URL이 영어로 유지되던 문제를 서버/클라이언트 언어 우선순위와 URL 동기화로 해결했다.5언어 실제 matrix 통과. |
+| F04 | OPEN |117 native 경로가 누락·거부·미연결 상태다.403을 구현 성공으로 세지 않는다. |
+| F05 | OPEN |/status503. 백엔드가 권한이 회수된 원본 테이블을 직접 조회한다. [실제 앱 역할 결함 기록](../findings/2026-11-23-test-status-read-boundary.ko.md). 테이블 GRANT나 가짜 정상 상태로 우회하지 않았다. |
+| F06 | OPEN |회원·관리자 양성 시나리오, OAuth/CSRF, 실제 금융 쓰기는 역할·fixture별 검증이 필요하다. |
+| F07 | 수정 |320px 도구 화면에서56px 문의 버튼이 검색칸과5.25px 겹쳤다. 회원·관리자 공통 툴바에 공간을 확보했고 전체 matrix와 강제 겹침 음성시험이 통과했다. |
+
+결정1: 지원하는 단일 URL 언어를 저장된 이전 언어보다 우선한다. 직접 언어 링크를 열면 이전 선택이 변경된다. 쿠키·브라우저 fallback과 중복 query 일관성을 유지한다.
+결정2: 동일한56px 문의 버튼을 우하단 고정 overlay에서 공통 툴바로 이동했다. 위치가 달라지지만 모달·포커스 동작을 유지하고 입력칸을 가리는 원인을 제거한다.
+
+과거 실패도 보존한다: [최초 번역 실패](2026-11-23-test-frontend-browser-initial-failure.json), [검색칸 겹침](2026-11-23-test-frontend-browser-overlap.json), [초기180경로](2026-11-23-test-frontend-route-180-initial.json). 과거 실패를 현재 통과로 바꿔 쓰지 않았다.
+
+## 전체180경로 — 익명 GET 목록 검사
+
+| 최신 결과 | 개수 | 의미 |
+| --- | ---: | --- |
+| 게스트 HTML 존재 |15| 화면 존재; 전체 기능 통과 아님 |
+| 로그인 필요 |14| 보호된 화면; 로그인 후 기능 미검증 |
+| 동적 fixture 필요 |33| 임의 회원·게시글 ID를 만들지 않음 |
+| HTTP403 |117| native UI 누락·거부·미연결; 구현 통과 아님 |
+| HTTP503 |1| 실제 상태 백엔드 오류 |
+
+[180행 원시 기록](2026-11-23-test-frontend-route-180-latest.json). 병행 작업의 Test 경로 추가로 최초117개404가 native 보안403으로 달라졌다.117개 기능이 구현된 것이 아니다. 추가된 API/OAuth/socket 경로는 보존했으며 업무 기능 통과로 인정하지 않았다.
+
+## 검증·배포 한계
+
+애플리케이션7b 기준 Java674·Node354 기본 시험 실패/오류/건너뜀0, 운영 도구 회귀23개 통과. 로컬 기본 실행에서 제외되는 PostgreSQL 태그 시험은 통과로 세지 않는다. 후보 CI 성공이 실제 상태 오류나 미검증 업무 기능을 해소하지는 않는다.
+
+해당 프론트엔드만 Test에서 교체했다. 이 교체와 QA 동안 전체 Nginx 설정 스냅샷이 유지됐다. 임시 개발 서비스는 소유권 확인 후 종료했다. 실제 호스트 재부팅이나 최종7b의 실제 롤백 훈련을 했다는 뜻은 아니다.
+
+GitHub에서는 병행 작업이 기존 PR3402를 미병합 종료하고 같은 원격 브랜치를1ecf461fc8로 확장해 통합 PR3407을 열었다. **추가 코드는 이 증거로 배포·승인하지 않았다.** 다른 작업을 덮어쓰지 않도록 해당 원격 tip 기반 문서 전용 증거 브랜치에 결과를 보존한다. 최신 fetch 시 main은9876c09888이었다. main 병합 및 운영 승격은 하지 않았다.

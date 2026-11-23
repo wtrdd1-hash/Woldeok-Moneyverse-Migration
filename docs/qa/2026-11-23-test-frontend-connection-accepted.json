@@ -1,0 +1,21 @@
+{
+  "applicationSource": "7b676e602bc984ab74572d4081655fdb297d176a",
+  "backendSource": "f0336fded6068f884c87f88efedeb770fd3387d4",
+  "ciRun": 45139863605,
+  "testOnly": true,
+  "browserCases": 240,
+  "browserFailures": 0,
+  "interactionsPassed": true,
+  "overlapGuardSelfTestPassed": true,
+  "nginxUnchangedDuringUpgradeAndQA": true,
+  "productionPromoted": false,
+  "wholeSiteAccepted": false,
+  "routeCounts": {
+    "GUEST_HTML_AVAILABLE": 15,
+    "FIXTURE_REQUIRED": 33,
+    "HTTP_403": 117,
+    "AUTH_REQUIRED": 14,
+    "HTTP_503": 1
+  },
+  "frontendPid": 1937353
+}
