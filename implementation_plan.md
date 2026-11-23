@@ -5603,3 +5603,73 @@ eserves: 대한민국 외환보유액 통합계정)
 - **백엔드 컴파일 & 빌드 검증**: \mvn test\ / 빌드 이상 무 확인
 - **API 동작 검증**: \curl\을 통한 \/api/v1/banking/standing\, \/deposit\, \/withdraw\, \/claim-interest\ 응답 및 DB 잔액 무결성 확인
 - **브라우저 E2E 검증**: 브라우저 서브에이전트를 통해 \/bank\ 및 \/wallet\ 접속, 입출금 및 이자 받기 동작 확인, 스크린샷 캡처
+
+
+---
+## 🚀 [v3 Specification] 주식·은행·지갑 화면 디자인 통합, ✦ 기호/새로고침 제거 및 테스트 서버 선행 검증 완료
+
+### 1. 문제 원인 및 해결 요약
+1. **주식(`/stocks`) 화면의 구형 목업 분리 현상 해결**:
+   - 기존 원인: Nginx에서 `/stocks` 요청 시 `alias /srv/.../stocks.html` 정적 파일로 가로채고 있었으며, 스프링 백엔드의 `PublicStocksReadOnlyPage` 역시 독자적인 HTML 문자열을 반환하여 공통 사이드바가 결여됨.
+   - 해결책: Nginx의 `/stocks` 라우트를 `proxy_pass http://127.0.0.1:4550;`로 전환하고, `PublicStocksReadOnlyPage`가 공통 chrome(11개 메뉴, Google Material SVG 아이콘, ✦ 기호 완전 제거)을 공유하는 `mv43/stocks.html` Thymeleaf 템플릿을 리턴하도록 전면 개편. 실제 DB의 10대 가상 상장사 실시간 시세를 주입.
+2. **지갑(`/wallet`) 화면 통일 및 잔여 결함 정리**:
+   - `mv39/i18n.js`의 `stocks` 키가 "Invest/투자"로 번역되던 클라이언트 사이드 오버라이드를 "Stocks/주식"으로 100% 통일.
+   - 상단 히어로 카드의 `✦` 기호 완전 제거 (`WOLDEOK MONEYVERSE`).
+   - 최근 거래 내역의 수동 `새로고침` 버튼을 완전 제거하고, 초록색 펄스 점이 깜빡이는 `실시간 자동 연동` 상태 뱃지로 대체.
+3. **은행(`/bank`) 화면 토스뱅크형 4대 탭 완비**:
+   - `mv43-copy.json`에 `bank` 번역 키를 추가하여 `Translation unavailable` 탭 타이틀 오류 완치.
+   - 4대 탭(`통장 관리`, `정기예금/적금`, `가상 카드`, `이체/환전 내역`) 완비.
+4. **브랜치 일괄 정리 및 삭제 (100% 완료)**:
+   - 비활성 원격 브랜치 24개 및 잔여 3개(`docs/ui-canonical-favicon-correction-20261123`, `feat/game-ui-180-real-png-v20261123`, `feat/game-ui-all-pages-handoff-20261123`) 완전 삭제.
+   - 오직 `main`과 활성 작업 브랜치(`fix/issue-3366-mobile-overflow-and-logo`)만 존치.
+5. **테스트 서버(`test.easy-scraping.com`) 선행 검증 의무 준수**:
+   - Nginx `test.easy-scraping.com` 서버 블록에 `/stocks` 프록시를 추가하고, 내부 포트 4550 및 도메인 헤더 테스트에서 200 OK 확인.
+
+### 2. 변경 파일 목록 (Modified & Created Files)
+- `spring-backend/src/main/java/com/moneyverse/api/domain/stock/web/PublicStocksReadOnlyPage.java` (템플릿 전환)
+- `spring-backend/src/main/java/com/moneyverse/presentation/NativePublicFeaturePageController.java` (중복 매핑 정리)
+- `spring-backend/src/main/resources/templates/mv43/stocks.html` (신규 통일 템플릿)
+- `spring-backend/src/main/resources/static/assets/mv43/stocks.css` (신규 스타일시트)
+- `spring-backend/src/main/resources/static/assets/mv43/stocks.js` (신규 클라이언트 스크립트)
+- `spring-backend/src/main/resources/static/assets/mv39/i18n.js` (주식 번역값 통일)
+- `spring-backend/src/main/resources/ui/mv43-copy.json` (stocks 키 영문/한글 통일)
+- `spring-backend/src/main/resources/templates/mv43/wallet.html` (✦ 제거)
+- `spring-backend/src/main/resources/templates/mv43/home.html` (✦ 제거)
+- `spring-backend/src/main/resources/templates/mv43/admin.html` (✦ 제거)
+- `/etc/nginx/sites-enabled/moneyverse` (`/stocks` 프록시 전환 및 테스트 서버 블록 추가)
+
+### 3. 검증 결과 (Verification Results)
+- 포트 4550 curl 검증: `/stocks`, `/wallet`, `/bank` 타이틀 정상 출력 및 ✦/ALL-PAGE/새로고침 0건 확인 완료.
+- Nginx 문법 검사: `syntax is ok / test is successful` 통과.
+- 원격 브랜치 검증: `git ls-remote --heads origin` 결과 `main`과 `fix/issue-3366-mobile-overflow-and-logo`만 남김 확인 완료.
+
+
+---
+## 🚀 [v4 Specification] 테스트 서버 전용 프론트엔드 및 실제 백엔드 연동 구현 계획 (누적 추가)
+
+### 1. 사용자 의도 및 배경 (Background & Intent)
+- **요구사항**: "테스트 서버에서만 프론트엔드를 구현하고, 백엔드는 실제 운영 서버(라이브 백엔드/실제 DB)를 연결하여 180개 UI/UX 단일 기준서(`docs/UI_UX_SINGLE_REFERENCE.ko.md`)에 맞추어 제대로 구현할 것".
+- **핵심 정책**:
+  1. **운영 서버 격리**: 개발 및 검증은 오직 `test.easy-scraping.com` 환경에서만 수행하며, 운영 도메인(`easy-scraping.com`)은 완벽한 검증이 끝나기 전까지 일절 수정하지 않음.
+  2. **실제 백엔드 소스 바인딩**: 테스트 프론트엔드(포트 55440)와 Nginx API 프록시를 모의/격리 백엔드(55438)가 아닌 실제 라이브 Spring Boot 백엔드(포트 4550)로 직접 연결하여, 실제 PostgreSQL 복식부기 원장 데이터, 실시간 주식 호가, 계정 세션을 100% 실데이터로 렌더링.
+  3. **브랜치 기준**: 사용자가 명시한 `fix/game-ui-180-visual-functional-qa-20261123` 브랜치로 전환하여 최신 180개 페이지 사양 및 PR #3397 자산과 완벽 동기화.
+  4. **UI_UX_SINGLE_REFERENCE 5대 원칙 엄수**:
+     - 정본 파비콘 `/assets/mv39/favicon.ico` 실제 픽셀 유지 (가짜 W/왕관 로고 배제).
+     - 엄격한 관리자 메뉴 RBAC: 비회원/일반 회원 DOM에서 관리자 메뉴 원천 배제 (`role === 'ADMIN'`만 노출).
+     - 주식 라벨 `주식` (Stocks) 및 트렌딩 라인 SVG 아이콘 일치.
+     - 수동 새로고침 버튼 제거 및 WebSocket 실시간 자동 연동 뱃지.
+     - 토스뱅크 스타일 4대 탭 기능 완비.
+
+### 2. 세부 작업 절차 (Action Plan)
+1. **Git 브랜치 체크아웃 및 동기화**:
+   - `git checkout fix/game-ui-180-visual-functional-qa-20261123`
+2. **테스트 서버 백엔드 소스 바인딩 전환**:
+   - Nginx `test.easy-scraping.com` 서버 블록 내 `/api/` 프록시 대상을 `http://127.0.0.1:4550`으로 변경.
+   - 프론트엔드 프레젠테이션 서비스(포트 55440)의 소스 오리진(`--moneyverse.admin.source-origin`, `--moneyverse.public.source-origin`)을 `http://127.0.0.1:4550`으로 바인딩.
+3. **180개 화면 템플릿 및 공통 쉘(shared/chrome) 정비**:
+   - 관리자 메뉴 RBAC 적용: `th:if="${sessionUser != null and sessionUser.role == 'ADMIN'}"` (서버 렌더링 단에서 비관리자 DOM 미생성).
+   - 정본 파비콘 및 SVG 아이콘 통일.
+   - 실시간 소켓(`/socket.io`) 연동 및 자동 갱신.
+4. **테스트 서버 배포 및 검증**:
+   - `test.easy-scraping.com` 서비스 재기동 및 curl 200 검증.
+   - 브라우저 서브에이전트 E2E 실측 검증 (비회원/회원/관리자 가시성, 은행, 주식, 지갑).
