@@ -1,5 +1,7 @@
 # 🎨 Woldeok Moneyverse 2026 Next-Gen FinTech Design System Guidelines
 
+> **2026-11-23 design consolidation:** Keep this document only as a supporting technical standard (accuracy, accessibility, responsive layouts). The **sole current visual/style authority is the [official design hub](design/README.md) and [selected design](design/OWNER_SELECTED_UNIFIED_DESIGN_v2026.11.23.3.md)**. Conflicting older theme/palette instructions are SUPERSEDED; file retained for historical links.
+
 > **Document Version**: `v2026.09.27.472`  
 > **Benchmark Baseline**: 200,000+ Global Top-Tier Products (Linear, Stripe, Apple HIG, Vercel Geist, Toss Simplicity, Robinhood)  
 > **Status**: Official Design System Baseline
