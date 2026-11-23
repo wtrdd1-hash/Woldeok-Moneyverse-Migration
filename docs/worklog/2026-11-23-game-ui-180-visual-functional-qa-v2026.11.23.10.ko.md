@@ -26,3 +26,5 @@ Test Spring localhost:55438의 health UP, 게임시계 정책 600초/서버일, 
 
 ### 중간 추가: 독립 Test 180경로 GET
 Test backend localhost:55438에 인증 없는 GET 180건 순차 실행. 200=132/302=42/401=3/405=1/503=2. 홈 대시보드 title 잘못 폴백 33개; /status, /stocks/derivatives 503. 동적 URL은 샘플 가상값이므로 성공/오류 판정은 계약과 대조해야 함. 데이터변경·인증/금융 E2E 없음.
+
+추가 P1: 현재 favicon.ico 파일 본문 JPEG/JFIF와 Test 응답 MIME image/x-icon 불일치 확인; 원본 픽셀 사용 유지, 브라우저 호환성은 별도 검증 필요.

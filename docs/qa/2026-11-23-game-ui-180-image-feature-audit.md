@@ -392,3 +392,7 @@
 | /wallet/activity | 200 | 내 지갑 기록 · 월덕 머니버스 | NO_END_TO_END_PROOF |
 | /wallet/activity/transactions/[transactionId] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
 | /work | 200 | 직업 및 업무 — 전문 직업 2.0 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+
+## Additional brand asset issue: filename/MIME do not match bytes (P1)
+- The exact owner-designated existing favicon at spring-backend/src/main/resources/static/assets/mv39/favicon.ico contains JPEG/JFIF 1024x1024 bytes even though named .ico; independent Test serves it as Content-Type: image/x-icon (200, 355640 bytes).
+- The v10 design PNGs include the unchanged source favicon **pixel content**, avoiding any invented logo. Browser favicon/manifest handling may still be incompatible; requires native ICO/PNG conversion preserving appearance plus exact Test browser/head/asset regression before any operational change. The original file was not modified in this visual QA branch.

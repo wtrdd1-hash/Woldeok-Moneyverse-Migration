@@ -407,3 +407,8 @@
 | /wallet/activity | 200 | 내 지갑 기록 · 월덕 머니버스 | NO_END_TO_END_PROOF |
 | /wallet/activity/transactions/[transactionId] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
 | /work | 200 | 직업 및 업무 — 전문 직업 2.0 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+
+## 추가 발견: 공식 로고 자산의 파일 형식 불일치 (P1)
+- 사용자가 지정한 실제 로고 경로 spring-backend/src/main/resources/static/assets/mv39/favicon.ico 의 콘텐츠는 JPEG/JFIF 1024x1024인데 확장자는 .ico 이며 독립 Test 서버에서 Content-Type: image/x-icon 으로 응답한다. HEAD 200, 길이 355640.
+- 새 시안은 사용자가 지시한 **현재 원본 파비콘의 픽셀을 정확히 사용**했으므로 임의 로고를 만들지 않았다. 그러나 브라우저 파비콘/캐싱·MIME 호환성 실기기 검사는 필요하다. 원본 바이너리는 이번 회차에서 임의 교체하지 않는다.
+- 후속 개선 시 같은 로고 이미지를 진짜 ICO/PNG 포맷으로 내보내고 브라우저 헤더/manifest/PC·모바일 파비콘 회귀검증 후 적용할 것. 이는 디자인 PNG 자체 무결성과 별개의 문제다.

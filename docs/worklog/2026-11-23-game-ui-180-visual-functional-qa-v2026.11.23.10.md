@@ -17,3 +17,5 @@ Independent Test backend localhost:55438 reported health UP and clock policy 600
 
 ### Additional Test full-route anonymous GET
 Sequential read-only Test backend probes across 180 candidate paths: HTTP 200=132, 302=42, 401=3, 405=1, 503=2; 33 non-home routes had home dashboard title; /status and /stocks/derivatives returned 503. Dynamic params were synthetic, so method/auth/unknown-record behavior cannot be judged without contracts. No mutations or authenticated E2E.
+
+Additional P1: current favicon.ico contains JPEG/JFIF bytes while Test serves image/x-icon. Original source pixels preserved; browser icon compatibility requires separate correction/test.
