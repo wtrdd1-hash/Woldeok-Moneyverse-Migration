@@ -141,7 +141,7 @@
 - 다른 기여자의 `feat/game-ui-180-single-master-20261123`, `fix/public-ads-clear-disclosure-20261123`, `fix/game-ui-180-visual-functional-qa-20261123` 작업 파일을 건드리지 않는다.
 - 현재 `main`과 미병합 디자인 후보를 명시적으로 구분한다. `main`이 변하면 단계 중간과 합치기 직전에 새 SHA 및 기획 충돌/미병합 시안 상태를 재확인한다.
 - 외부 URL은 **디자인 참고 원천**으로 보존하며 리소스 이미지·영상·폰트·타사 코드 자체는 미승인 상태로 GitHub에 가져오지 않는다.
-- [작업 기록](../worklog/2026-11-23-reel-27-design-resources-v12.ko.md) · [GitHub용 변경 기록](../updates/v2026.11.23.12-reel-27-resources-github.ko.md) · [내부 변경 기록](../updates/v2026.11.23.12-reel-27-resources-internal.ko.md) · [카탈로그](../design/asset-resources-v2026.11.23.12/source-catalog.json).
+- [작업 기록](../worklog/2026-11-23-reel-27-design-resources-v12.ko.md) · [GitHub용 변경 기록](../updates/v2026.11.23.12-reel-27-resources-github.ko.md) · 내부 변경 기록: 로컬 전용 `docs/updates/v2026.11.23.12-reel-27-resources-internal.ko.md` (저장소 정책상 Git 제외) · [카탈로그](../design/asset-resources-v2026.11.23.12/source-catalog.json).
 
 ## 10. 소스 확인 내역
 

@@ -1,3 +1,6 @@
+## v2026.11.23.12 — Reel 27-site design source integration (PLANNING ONLY)
+Instagram oEmbed caption verified nine categories/27 names. EN/KO Spring-native design/resource/license/QA spec and discovery JSON added, project plan and master linked. 11/18 visual baseline, five locales, real API/ledger and ad disclosure preserved; no assets imported or code, DB, Test/Production changes. [Plan](planning/REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.md) / [KO](planning/REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.ko.md).
+
 ## v2026.11.10.1948 — National Mint UI/monetary policy verified in real Production v1947
 
 ## v2026.11.21.2234 — Permanent AgentMemory coding-reference preservation and safe task memory (DOCUMENTATION ONLY)

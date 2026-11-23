@@ -2,6 +2,10 @@
 
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 
+## v2026.11.23.12 — 릴스 디자인 리소스 27곳의 기획/적용 통합 원칙 (PLANNING / 문서만)
+
+사용자 [27곳 릴스](https://www.instagram.com/reel/DgB15siSolR/)를 **디자인 참고자료**로 통합함. 공식 oEmbed 게시글 설명에 9분야·27곳 확인, 영상 본편 재생은 미검증. [한국어 상세](REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.ko.md) / [English](REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.md): 11/18 승인 보라/네이비·파비콘, 단일 Spring MVC/Thymeleaf, 실제 DB/API, EN→KO→JA→ZH→VI, 광고표기, 개별 이용허락 검토, G0-G6 브라우저/실기능/독립 Test/복원 검증 필수. 별도 게임 UI 브랜치 180 새 PNG는 아직 미승인 시안이므로 실제 웹 완료로 간주하지 않음. [발견용 카탈로그](../design/asset-resources-v2026.11.23.12/source-catalog.json) / [작업기록](../worklog/2026-11-23-reel-27-design-resources-v12.ko.md). **코드/실제 에셋/DB/Test/운영 변경 없음**. 착수/중간 main SHA `9876c09888ec84034eec183cf1309c85df3d7447`.
+
 ## v2026.11.21.2234 — AgentMemory 영상/도구 영구 참고 및 기록 공유 (PLANNING / 문서만)
 
 [지정 릴스](https://www.instagram.com/reel/DfZgpiWtX1z/)와 [공식 코드](https://github.com/rohitg00/agentmemory)를 [국문 기준](../development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md) / [영문 정본](../development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md)에 저장한다. 매 작업 전 최신 통합기획/메인 SHA 재조회, 비밀값 없는 시작·중간·종료 이력 공유, 다음 작업자 이어받기를 필수로 한다. 자동 기억 수집은 격리 보안·공동도구 호환·보존/복원 검증 전 비활성이고 외부 도구 **미설치** 상태다. 코드·DB·Test/운영 변경 없음. 최초 main `a341ee3784bf611801efbcdef68e60ae38246dec`; 최종 통합 직전 재검증.

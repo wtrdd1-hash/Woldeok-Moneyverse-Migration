@@ -142,7 +142,7 @@ These are **future acceptance criteria, not measured successes**:
 
 Do not edit other contributors' current `feat/game-ui-180-single-master-20261123`, `fix/public-ads-clear-disclosure-20261123` or `fix/game-ui-180-visual-functional-qa-20261123` worktrees/branches. Re-fetch main mid-task and before integration; reconcile conflicting design authority without overwriting merged or unmerged work. Store public references, **not unlicensed third-party files**.
 
-[Task log](../worklog/2026-11-23-reel-27-design-resources-v12.md) · [GitHub update](../updates/v2026.11.23.12-reel-27-resources-github.md) · [Internal update](../updates/v2026.11.23.12-reel-27-resources-internal.md) · [Discovery catalog](../design/asset-resources-v2026.11.23.12/source-catalog.json).
+[Task log](../worklog/2026-11-23-reel-27-design-resources-v12.md) · [GitHub update](../updates/v2026.11.23.12-reel-27-resources-github.md) · Internal update: local-only `docs/updates/v2026.11.23.12-reel-27-resources-internal.md` (excluded by repository policy) · [Discovery catalog](../design/asset-resources-v2026.11.23.12/source-catalog.json).
 
 ## 10. Source verification record
 

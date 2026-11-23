@@ -1,3 +1,6 @@
+## v2026.11.23.12 — 27 design resources source catalog and native Spring rollout plan (DOCS ONLY)
+- Nine source categories and 27 listed sites confirmed through official reel caption metadata (video frames not viewed). New paired detailed spec, licensing/asset gates, G0-G6 frontend/Test/rollback steps and discovery JSON; updated planning authority/index, versioned updates and worklog. No application, third-party download, database, Test or Production changes. [Details](2026-11-23-design-resources-v12.md).
+
 ## v2026.11.18.20 — Spring and frontend Test-only reliability repair (RELEASE HOLD)
 - Pension GET no-create and authenticated owner read, unverified finance mutation fails closed, Android 200 HTML fallback removed, truthful shop outage UI. Integrated committed API-v4 and frontend v17 source candidate. Spring 174/174 PASS; Next build PASS, 121 focused frontend PASS, **full frontend suite timed out with observed failures**. Internally restricted official Test Nginx 20 GET no 502, old Spring static UI remains. No Production deployment or DB mutation. [QA](../qa/2026-11-18-spring-frontend-test-recovery-v2026.11.18.20.md).
 

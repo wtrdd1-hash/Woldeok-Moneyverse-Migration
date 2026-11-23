@@ -2,6 +2,10 @@
 
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 
+## v2026.11.23.12 — 릴스 웹디자인 리소스 27곳의 Spring 웹 적용 상세 기획 통합 (PLANNING / 문서만)
+
+사용자 [원본 릴스](https://www.instagram.com/reel/DgB15siSolR/) 게시글 설명에서 9분야·27곳 출처 확인. [한국어 상세 구축기획](REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.ko.md) / [영문 정본](REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.md)에 **참고·후보·보류**로 도입하며 전체 설치는 금지. 11월 18일 네이비/보라 승인 디자인·현재 파비콘·Spring MVC/Thymeleaf 단일 웹·5개 언어·실제 백엔드/원장·광고 식별을 보존한다. 개별 에셋 사용권·이미지/코드 실제 수용·실계정 Test·복원·운영무중단 검증은 후속 G0-G6 단계. [27곳 발견 카탈로그](../design/asset-resources-v2026.11.23.12/source-catalog.json) / [작업기록](../worklog/2026-11-23-reel-27-design-resources-v12.ko.md). 공식 oEmbed 원문 설명 확인, 영상 프레임·음성은 미검증. **파일 설치/실제 코드·Test·운영 변경 없음.** 착수/중간 main: `9876c09888ec84034eec183cf1309c85df3d7447`.
+
 ## v2026.11.21.2234 — AgentMemory 영상 영구 참고 및 작업 이어받기 규칙 (PLANNING / 미설치)
 
 사용자 지정 [Instagram 원본](https://www.instagram.com/reel/DfZgpiWtX1z/)과 [공식 저장소](https://github.com/rohitg00/agentmemory)를 [한국어 규칙](../development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md) / [영문 정본](../development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md)에 보관한다. 릴스 설명/메타데이터는 확인했으나 영상 본편 재생은 미확인. 개발 작업마다 최신 기획서 재조회, 비밀값 제거한 시작·중간·종료 기록, 다른 작업자의 브랜치 충돌 회피를 의무화한다. 외부 자동 기억 서버 설치 및 두 AI 도구 간 공유 테스트는 아직 미실시이며 보안검토 전 활성화 금지. **문서 전용, Test/운영 변경 없음.**

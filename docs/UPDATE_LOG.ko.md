@@ -1,3 +1,6 @@
+## v2026.11.23.12 — 릴스 27개 웹디자인 사이트 통합 기획 (PLANNING / 문서만)
+Instagram 공식 oEmbed 게시글 설명으로 9분야·27개 확인. 영/한 Spring 기반 리소스·사용권·성능·UI/실기능 QA 기획 및 JSON 목록을 추가하고 프로젝트 기획·통합 마스터에 반영. 기존 11/18 보라 테마/5언어/실제 원장/광고식별 보존. 자산 다운로드·코드·DB·Test·운영 변경 없음. [한국어 기획](planning/REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.ko.md) / [EN](planning/REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.md).
+
 ## v2026.11.10.1948 — 조폐국 UI/정책 제한형 DB 함수 v1947 실제 운영 승격
 
 ## v2026.11.21.2234 — AgentMemory 영상·원본 링크 저장 및 AI 공동 작업기억 규칙 (문서만)

@@ -1,5 +1,9 @@
 # 📚 Document Catalog
 
+## v2026.11.23.12 — Owner reel: 27 website design resource review (PLANNING / DOCS ONLY)
+- [EN canonical specification](planning/REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.md) / [KO maintained spec](planning/REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.ko.md) · [27-item discovery JSON](design/asset-resources-v2026.11.23.12/source-catalog.json) · [worklog](worklog/2026-11-23-reel-27-design-resources-v12.md) · [GitHub](updates/v2026.11.23.12-reel-27-resources-github.md). Existing Nov18 design authority and native Spring remain; none of the items or licenses is approved for automatic import.
+
+
 ## v2026.11.21.2234 — AgentMemory saved reference and multi-agent memory handoff (PLANNING)
 - [English canonical protocol](development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md) / [한국어](development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md) · [Worklog](worklog/2026-11-21-agentmemory-shared-agent-protocol-v2234.md) · [GitHub](updates/v2026.11.21.2234-agentmemory-reference-github.md). Third-party installation NOT VERIFIED, no runtime deployment.
 
