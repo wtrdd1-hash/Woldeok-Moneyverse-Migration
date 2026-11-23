@@ -101,3 +101,16 @@
 .menu-toggle svg, .drawer-close svg { display:block; margin:auto; }
 .lang-control .lang-icon { color:var(--accent); vertical-align:middle; flex-shrink:0; }
 .support-fab svg { display:block; margin:auto; }
+
+/* Force disable any legacy trouble banners and mock titlebars */
+#mv-troubleshooting-banner, .mv-troubleshooting-banner, .super-header, .top-mock-bar, [data-mock] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}

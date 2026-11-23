@@ -24,7 +24,7 @@
       <main id="main-content" tabindex="-1">
         <section class="hero" aria-labelledby="hero-title">
           <div>
-            <div class="eyebrow"><span aria-hidden="true">✦</span> WOLDEOK BANKING</div>
+            <div class="eyebrow"><svg style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;" viewBox="0 0 24 24" fill="currentColor"><path d="M4 10v7h3v-7H4zm6 0v7h3v-7h-3zM2 22h19v-3H2v3zm14-12v7h3v-7h-3zm-4.5-9L2 6v2h19V6l-9.5-5z"/></svg> WOLDEOK BANKING</div>
             <h2 id="hero-title">가상 은행 & 복리 예금</h2>
             <p id="hero-description">매일 실시간 복리 이자가 붙는 월덕뱅크. 예적금, 저축 팟, 가상 신용 대출을 한곳에서 안전하게 이용하세요.</p>
           </div>
@@ -73,10 +73,10 @@
 
           <!-- Banking Function Navigation Tabs -->
           <nav class="bank-tabs-nav" aria-label="은행 기능 선택">
-            <button type="button" class="bank-tab-btn active" data-tab="deposit-withdraw">입금 & 출금</button>
-            <button type="button" class="bank-tab-btn" data-tab="savings-pockets">비상금 저금통 팟</button>
-            <button type="button" class="bank-tab-btn" data-tab="smart-loans">가상 신용 대출</button>
-            <button type="button" class="bank-tab-btn" data-tab="virtual-bonds">가상 국공채</button>
+            <button type="button" class="bank-tab-btn active" data-tab="deposit-withdraw">통장 관리</button>
+            <button type="button" class="bank-tab-btn" data-tab="savings-pockets">정기예금/적금</button>
+            <button type="button" class="bank-tab-btn" data-tab="virtual-cards">가상 카드</button>
+            <button type="button" class="bank-tab-btn" data-tab="transfers-history">이체/환전 내역</button>
           </nav>
 
           <!-- Tab 1: Deposit & Withdraw -->
@@ -141,85 +141,96 @@
             </div>
           </section>
 
-          <!-- Tab 3: Smart Loans -->
-          <section id="tab-pane-smart-loans" class="bank-tab-pane">
+          <!-- Tab 3: Virtual Cards (가상 카드 관리) -->
+          <section id="tab-pane-virtual-cards" class="bank-tab-pane">
             <div class="bank-dual-grid">
-              <!-- Loan Borrow Card -->
-              <article class="card bank-form-card">
-                <div class="card-heading">
-                  <h3>가상 신용 대출 신청</h3>
-                  <span class="tag-pill highlight">무담보 즉시 승인</span>
+              <!-- Virtual Card Preview -->
+              <article class="card bank-form-card" style="background:linear-gradient(145deg,#1e1b4b,#0f172a);border:1px solid #4338ca;padding:24px;border-radius:16px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                  <span style="font-size:0.875rem;font-weight:700;color:#c7d2fe;letter-spacing:0.1em;">WOLDEOK BLACK CARD</span>
+                  <svg style="width:32px;height:24px;color:#818cf8;" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
                 </div>
-                <div class="loan-facts-box">
-                  <div class="loan-fact-row">
-                    <span>나의 신용 등급</span>
-                    <strong id="loan-grade-val">A1 (우수)</strong>
-                  </div>
-                  <div class="loan-fact-row">
-                    <span>최대 대출 가능 한도</span>
-                    <strong id="loan-limit-val">5,000,000 WLD</strong>
-                  </div>
-                  <div class="loan-fact-row">
-                    <span>적용 이자율</span>
-                    <strong id="loan-rate-val">연 3.20%</strong>
-                  </div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:1.25rem;letter-spacing:0.18em;color:#fff;margin:28px 0 16px;">
+                  5421 •••• •••• 8892
                 </div>
-                <form id="form-bank-borrow">
-                  <label for="borrow-amount-input">신청 대출 금액 (WLD)</label>
-                  <input type="number" id="borrow-amount-input" min="1000" step="1000" required placeholder="대출 신청액 입력">
-                  <button type="submit" id="btn-submit-borrow" class="wallet-submit">대출 즉시 실행</button>
-                  <p id="msg-borrow-result" class="bank-inline-msg" role="status"></p>
-                </form>
+                <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+                  <div>
+                    <div style="font-size:0.6875rem;color:#94a3b8;text-transform:uppercase;">Card Holder</div>
+                    <div id="card-holder-name" style="font-size:0.875rem;font-weight:600;color:#f8fafc;">VERIFIED MEMBER</div>
+                  </div>
+                  <div>
+                    <div style="font-size:0.6875rem;color:#94a3b8;text-transform:uppercase;">Valid Thru</div>
+                    <div style="font-size:0.875rem;font-weight:600;color:#f8fafc;">11/30</div>
+                  </div>
+                  <span style="padding:4px 8px;border-radius:6px;background:#10b981;color:#fff;font-size:0.6875rem;font-weight:700;">ACTIVE</span>
+                </div>
               </article>
 
-              <!-- Active Loan & Repayment Card -->
+              <!-- Card Settings & Limits -->
               <article class="card bank-form-card">
                 <div class="card-heading">
-                  <h3>대출 원리금 상환</h3>
-                  <span id="loan-status-tag" class="tag-pill">이용 중인 대출 없음</span>
+                  <h3>가상 결제 한도 및 카드 설정</h3>
+                  <span class="tag-pill positive">원클릭 잠금 지원</span>
                 </div>
-                <div id="active-loan-info" class="loan-active-info-box">
-                  <p class="empty-loan-text">현재 이용 중인 대출이 없습니다. 필요 시 신용 한도 내에서 언제든 즉시 실행할 수 있습니다.</p>
+                <p class="form-desc">상점 및 서비스 내 결제 시 보통예금 잔액에서 실시간 승인되는 안전 가상 카드입니다.</p>
+                <div style="display:flex;flex-direction:column;gap:14px;margin-top:16px;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(255,255,255,0.04);border-radius:8px;">
+                    <div>
+                      <div style="font-weight:600;font-size:0.875rem;">1회 결제 한도</div>
+                      <div style="font-size:0.75rem;color:#94a3b8;">부정 결제 방지용 최대 승인 한도</div>
+                    </div>
+                    <strong style="color:#a5b4fc;">100,000 WLD</strong>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(255,255,255,0.04);border-radius:8px;">
+                    <div>
+                      <div style="font-weight:600;font-size:0.875rem;">카드 결제 상태</div>
+                      <div style="font-size:0.75rem;color:#94a3b8;">분실 또는 미사용 시 즉시 일시정지</div>
+                    </div>
+                    <span id="card-status-label" style="color:#10b981;font-weight:600;font-size:0.875rem;">정상 이용 중</span>
+                  </div>
+                  <button type="button" id="btn-toggle-card-lock" class="wallet-submit btn-secondary" style="margin-top:8px;">카드 일시 잠금 / 해제</button>
                 </div>
-                <form id="form-bank-repay" style="display:none;">
-                  <label for="repay-amount-input">상환 금액 (WLD)</label>
-                  <input type="number" id="repay-amount-input" min="1" step="1" required placeholder="상환할 금액">
-                  <button type="submit" id="btn-submit-repay" class="wallet-submit btn-secondary">원리금 상환하기</button>
-                  <p id="msg-repay-result" class="bank-inline-msg" role="status"></p>
-                </form>
               </article>
             </div>
           </section>
 
-          <!-- Tab 4: Virtual Bonds -->
-          <section id="tab-pane-virtual-bonds" class="bank-tab-pane">
+          <!-- Tab 4: Transfers & FX History (이체/환전 내역) -->
+          <section id="tab-pane-transfers-history" class="bank-tab-pane">
             <article class="card">
               <div class="card-heading">
-                <h3>월덕 가상 국공채 투자</h3>
-                <span class="tag-pill positive">원금 + 확정 이자 보장</span>
+                <h3>은행 예금 거래 및 이체 내역</h3>
+                <span class="tag-pill">실시간 자동 동기화</span>
               </div>
-              <p class="form-desc">만기까지 보유 시 중앙은행이 원금과 확정 고수익 이자를 지급하는 안전 자산입니다.</p>
+              <p class="form-desc">월덕 은행 통장에서 발생한 예금, 인출, 복리이자 정산, 이체 기록입니다.</p>
               
-              <div class="bonds-products-grid">
-                <div class="bond-product-card">
-                  <div class="bond-term">7일 만기 단기 국채</div>
-                  <div class="bond-rate">연 5.20% 확정 수익</div>
-                  <div class="bond-min">최소 10,000 WLD 부터</div>
-                  <p class="bond-sub">단기 여유 자금을 빠르게 굴릴 수 있는 초단기 고수익 국공채 상품입니다.</p>
-                </div>
-                <div class="bond-product-card">
-                  <div class="bond-term">30일 만기 정기 국채</div>
-                  <div class="bond-rate">연 6.80% 최고 우대 금리</div>
-                  <div class="bond-min">최소 50,000 WLD 부터</div>
-                  <p class="bond-sub">안정적인 고수익 복리 투자를 원하는 시민을 위한 최고 금리 국채입니다.</p>
-                </div>
-              </div>
-
-              <div class="bonds-holdings-section">
-                <h4 style="margin: 1.5rem 0 0.75rem; font-size: 1rem; font-weight: 600;">보유 중인 가상 채권</h4>
-                <div id="bonds-holdings-container">
-                  <p class="empty-loan-text">현재 보유 중인 채권이 없습니다.</p>
-                </div>
+              <div class="table-scroll" tabindex="0" role="region" aria-label="은행 거래 내역">
+                <table class="wallet-table">
+                  <thead>
+                    <tr>
+                      <th>일시</th>
+                      <th>거래 구분</th>
+                      <th>금액 (WLD)</th>
+                      <th>상태</th>
+                      <th>원장 영수증 ID</th>
+                    </tr>
+                  </thead>
+                  <tbody id="bank-transfers-history-body">
+                    <tr>
+                      <td>2026. 11. 23. 오전</td>
+                      <td>복리이자 자동 지급</td>
+                      <td style="color:#10b981;font-weight:600;">+1,480 WLD</td>
+                      <td><span style="color:#10b981;">정상 완료</span></td>
+                      <td style="font-family:monospace;font-size:0.75rem;color:#94a3b8;">int-rec-92a10bf8</td>
+                    </tr>
+                    <tr>
+                      <td>2026. 11. 22. 오후</td>
+                      <td>보통예금 자율 입금</td>
+                      <td style="color:#818cf8;font-weight:600;">+50,000 WLD</td>
+                      <td><span style="color:#10b981;">정상 완료</span></td>
+                      <td style="font-family:monospace;font-size:0.75rem;color:#94a3b8;">dep-rec-41c88d01</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </article>
           </section>

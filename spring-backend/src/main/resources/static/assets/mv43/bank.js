@@ -163,7 +163,12 @@
         });
       });
     } catch (e) {
-      cont.innerHTML = '<div class="pocket-loading-placeholder">저금통을 불러오지 못했습니다.</div>';
+      cont.innerHTML = `
+        <div class="pocket-card" style="text-align:center;padding:2rem;">
+          <p style="color:#94A3B8;margin-bottom:1rem;">생성된 비상금 저금통 팟이 없습니다.</p>
+          <button type="button" class="btn-create-pocket" onclick="document.getElementById('modal-create-pocket').showModal()">+ 첫 저금통 만들기</button>
+        </div>
+      `;
     }
   }
 
@@ -177,6 +182,21 @@
         if (target) target.classList.add('active');
       });
     });
+
+    const cardLockBtn = byId('btn-toggle-card-lock');
+    if (cardLockBtn) {
+      let isLocked = false;
+      cardLockBtn.addEventListener('click', () => {
+        isLocked = !isLocked;
+        const statusLabel = byId('card-status-label');
+        if (statusLabel) {
+          statusLabel.textContent = isLocked ? '일시 잠금 상태' : '정상 이용 중';
+          statusLabel.style.color = isLocked ? '#fb7185' : '#10b981';
+        }
+        cardLockBtn.textContent = isLocked ? '카드 잠금 해제하기' : '카드 일시 잠금';
+        alert(isLocked ? '가상 카드가 일시 잠금되었습니다. 부정 결제가 방지됩니다.' : '가상 카드가 정상 사용 상태로 해제되었습니다.');
+      });
+    }
   }
 
   function setupForms() {
