@@ -109,9 +109,9 @@ def upgrade(archive,source,ci_run,previous):
     require_process(pid,old_jar)
     if deploy.identity(deploy.routing.PORT).get("id")!=previous:raise ValueError("Previous source changed")
     unit=retarget(original,previous,source)
-    site=deploy.SITE.resolve(strict=True);site_proof=deploy.snapshot(site)
-    text=site.read_text();a,b=deploy.routing.span(text)
-    if text[a:b]!=deploy.routing.server():raise ValueError("Test routing no longer matches the verified lane")
+    site=deploy.SITE.resolve(strict=True);site_bytes,site_proof=deploy.capture(site)
+    text=site_bytes.decode();a,b=deploy.routing.span(text)
+    lane=deploy.routing.validate_existing_lane(text[a:b])
     deploy.root_dir(deploy.ROOT,0o700)
     stage=deploy.ROOT/source
     if stage.exists():raise ValueError("Immutable upgrade stage already exists")
@@ -123,6 +123,7 @@ def upgrade(archive,source,ci_run,previous):
     deploy.private(stage/"unit.before",original)
     deploy.record(stage,"unit-before.json",before)
     deploy.record(stage,"nginx-unchanged.json",site_proof)
+    deploy.record(stage,"nginx-lane.json",{"lane":lane,"testBlockSha256":deploy.sha(text[a:b].encode()),"modifiedByThisUpgrade":False})
     generation=pathlib.Path(jar_path(source)).parent
     deploy.root_dir(generation.parent,0o755)
     if generation.exists():raise ValueError("Immutable upgrade generation already exists")

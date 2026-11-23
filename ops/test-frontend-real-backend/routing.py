@@ -1,5 +1,6 @@
 """Test-only presentation wiring; never proxy a fallback to Production."""
 import re
+from pathlib import Path
 
 PORT=55440
 UNIT="moneyverse-test-frontend-real-backend-v20261123.service"
@@ -111,3 +112,11 @@ MemoryMax=384M
 [Install]
 WantedBy=multi-user.target
 """
+
+def validate_existing_lane(block):
+    canonical=server()
+    if block==canonical:return "canonical-read-lane"
+    prefix=canonical.removesuffix("location / { return 404; }\n}")
+    tail=Path(__file__).with_name("parallel-test-tail.conf").read_text()
+    if block==prefix+tail:return "parallel-test-backend-lane"
+    raise ValueError("Test routing differs from both explicitly reviewed Test-only lanes")
