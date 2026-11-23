@@ -1,0 +1,10 @@
+# Test-only native frontend
+This continuation deploys no Production component. The owner explicitly requested frontend implementation on Test using a real backend.
+The completed native presentation slice runs in one database-free Spring MVC/Thymeleaf process on a dedicated loopback port. Both server-side clients are explicitly pinned to the existing real isolated Spring Test API and synthetic PostgreSQL. Browser reads use the Test origin and four fixed API paths; there is no Production fallback, actor-header forwarding, credential export, or mock server.
+Unknown routes return404; unaccepted mutations return405. Authentication-screen rendering does not certify sign-in, OAuth, account writes or financial mutations. Administrator/member positive sessions remain OPEN until owned Test fixtures and real backend flows are accepted. This is not180-page completion.
+
+## Candidate gate and apply
+Run Python unit tests and native project tests first. Candidate source must be pushed to the dedicated task branch; use its exact successful Build Test Candidate run. Required classify/policy/runtime/native checks and GitHub archive digest are enforced by deploy.py. A locally rebuilt or relabeled JAR is refused.
+Download the unique spring-native-candidate artifact archive into a root-private evidence directory. Execute deploy.py install with --archive, --source and --ci-run. The helper checks packaged source and checksum, refuses an existing unit/port/generation, installs an immutable Test JAR, validates its running source, changes only the Test server block with a guarded file replacement, checks Nginx syntax, reloads and probes actual Test source/read APIs. It records backup and ownership receipts. Syntax/probe failure restores only the owned change.
+The inverse action restores Test routing only when the full site file still has the identity installed by this operation; foreign replacements are refused. Artifacts/units/evidence remain for diagnosis. No Production deploy action exists.
+Service restart/enable policy is configured; this is not proof of a host reboot.

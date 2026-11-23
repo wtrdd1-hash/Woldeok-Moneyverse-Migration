@@ -551,3 +551,6 @@ reason and the test fails without one.
 - Inspect rendered UI before claiming completion.
 - Run only the design skills relevant to the task.
 - Do not generate multiple design alternatives unless requested.
+
+## Owner Test-first directive — 2026-11-23
+Always implement and verify frontend/backend candidates on an independently identified Test runtime with a real backend before any Production promotion. A Test hostname proxying the Production frontend is not independent acceptance. Bind evidence to exact source/artifact, actual API/DB, role/locale/viewport checks and inverse receipts. Failed/unreachable Test blocks promotion. Latest task scope is Test-only: do not promote this candidate to Production without a later owner instruction.

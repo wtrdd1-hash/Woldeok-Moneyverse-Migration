@@ -21,3 +21,6 @@ The prior frontend rebuilding plan remains the approved implementation scope. Th
 Not finished. No runtime change or Production promotion has occurred.
 
 최신 사용자 지시: 테스트 서버에서만 구현. 실제 Test API/DB 사용, 운영 승격 금지. 전체180화면 완료로 보고하지 않음.
+
+### In-progress validation checkpoint
+Real-render branding5RED->GREEN; complete native Java667/667, node351/351, zero failures/errors/skips. Nine routing/provenance/CAS tests pass. Required PostgreSQL-tagged tests are excluded locally, not claimed passing. Existing real Test API session/stocks/board/wallet summary each returned200 with expected object fields. No runtime change yet. Fresh review and exact candidate CI precede Test-only activation.

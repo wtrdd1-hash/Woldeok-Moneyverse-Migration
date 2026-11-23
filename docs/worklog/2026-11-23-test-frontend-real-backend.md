@@ -19,3 +19,9 @@ The prior frontend rebuilding plan remains the approved implementation scope. Th
 
 ## Finished
 Not finished. No runtime change or Production promotion has occurred.
+
+### Checkpoint — baseline / first regression
+Native baseline662tests, zero failures/errors/skips. PostgreSQL-tagged tests excluded by project default are not counted as passes. Six Test routing isolation tests RED (missing module) then GREEN. Real-render branding regression5/5 fails on the existing administrator letter emblem before correction. Replaced only that pseudo-element with the byte-identical current favicon and updated resource content hashes.
+
+### In-progress validation checkpoint
+Real-render branding5RED->GREEN; complete native Java667/667, node351/351, zero failures/errors/skips. Nine routing/provenance/CAS tests pass. Required PostgreSQL-tagged tests are excluded locally, not claimed passing. Existing real Test API session/stocks/board/wallet summary each returned200 with expected object fields. No runtime change yet. Fresh review and exact candidate CI precede Test-only activation.
