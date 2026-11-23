@@ -1,6 +1,10 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
-## v2026.11.20.1 — 18 November UI baseline + five-language/global support authority (docs only)
+## v2026.11.23.5 — 공식 디자인 단일화 (OWNER SELECTED / 최우선 현행)
+
+**현재 유일한 전체 웹 시각 디자인:** [공식 디자인 허브](design/README.ko.md) / [English](design/README.md) → [선택된 디자인 v2026.11.23.3 (KO)](design/OWNER_SELECTED_UNIFIED_DESIGN_v2026.11.23.3.ko.md) / [EN](design/OWNER_SELECTED_UNIFIED_DESIGN_v2026.11.23.3.md) → [180개 경로 원장](design/ALL_180_UNIFIED_UI_REGISTER_v2026.11.23.3.ko.md). 과거 11월18일/19일/20일 디자인 이미지는 **SUPERSEDED/HISTORICAL**로 공식 현행 디자인 목록에서 제외한다. 원본 링크는 감사/계보용으로만 유지하고 현재 선택한 신디자인 PNG라 오인하지 않는다. 신버전 이미지 ZIP은 대화 전달만 되었으며 GitHub PNG 180개 업로드는 OPEN. 기획 문서만 변경; Spring/Test/운영 미변경.
+
+## HISTORICAL / PARTIALLY SUPERSEDED — v2026.11.20.1 former UI baseline
 [Official EN plan](planning/NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.md) / [한국어](planning/NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.ko.md): 18 Nov PC/mobile navy-violet design binding for all eventual Spring MVC+Thymeleaf website screens, manual+auto EN/KO/JA/ZH/VI and one safe admin support/member chat launcher everywhere. Old mockup-only scope and Next runtime plans do not override latest owner directive. Current runtime and Production **not** certified by this documentation-only update.
 
 
@@ -8,7 +12,7 @@
 
 \`/\`에서 실제 ‘신규 사용자 유입을 위한 홈 화면 3안’이 출력됨을 공개 HTTP·미니PC 정적 HTML로 확인. [한국어 상세 보고서+실제 GitHub 홈/관리자 이미지](findings/LIVE_HOME_APPROVED_UI_GAP_v2026.11.19.32.1.ko.md) / [EN](findings/LIVE_HOME_APPROVED_UI_GAP_v2026.11.19.32.1.md) · [Spring 구현 기준](planning/SPRING_HOME_VISUAL_IMPLEMENTATION_GATES_v2026.11.19.32.1.ko.md) · [QA](qa/2026-11-19-home-ui-design-gap-v32.ko.md). UI·API·DB·운영 미변경.
 
-## v2026.11.19.31 — Restored Design Image Handoff (DOCS ONLY / Spring UI IMPLEMENTATION PENDING)
+## HISTORICAL — v2026.11.19.31 old image recovery (not selected current design)
 
 - [180 PC+mobile route PNG designs](design/all-pages-v2026.11.18.12/README.md) · [Administrator desktop/mobile PNG](design/admin-chat-v2026.11.18.13/README.md) · [EN handoff](design/UI_IMAGE_IMPLEMENTATION_HANDOFF_v2026.11.19.31.md) / [한국어](design/UI_IMAGE_IMPLEMENTATION_HANDOFF_v2026.11.19.31.ko.md). Source SVGs were recovered from closed unmerged PR #3268/#3270 and rasterized to pass fail-closed documentation CI. Spring UI implementation and Production deployment are not part of this documentation-only change.
 
