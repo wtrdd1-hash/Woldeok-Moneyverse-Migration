@@ -14,3 +14,6 @@ The image-files issue is corrected at first-pass concept level; comprehensive fu
 
 ### Additional Test read-only receipts
 Independent Test backend localhost:55438 reported health UP and clock policy 600 seconds/day, root/bank HTML 200, unauthenticated admin 302; blog sample slug HTML 200 carried home dashboard title. No authenticated or financial/admin mutation acceptance.
+
+### Additional Test full-route anonymous GET
+Sequential read-only Test backend probes across 180 candidate paths: HTTP 200=132, 302=42, 401=3, 405=1, 503=2; 33 non-home routes had home dashboard title; /status and /stocks/derivatives returned 503. Dynamic params were synthetic, so method/auth/unknown-record behavior cannot be judged without contracts. No mutations or authenticated E2E.

@@ -201,3 +201,194 @@
 - Unauthenticated GET /admin: HTTP 302 login redirect. Admin-role RBAC test remains open.
 - Important finding: GET /blog/test-article: HTML 200 but home dashboard title. Blog slug, correct content, 404 and routing/SEO remain suspect and unverified.
 - Full 180 route authenticated functional, financial settlement, admin mutation, mobile/locale, and Production verification not performed.
+
+## Isolated Test backend: all 180 routes anonymous GET inventory (2026-11-23 KST)
+- Test scope localhost:55438 only; no credential/session, read-only GET, dynamic parameters substituted with qa-no-such-* placeholders, not real records. Responses are NOT end-to-end feature acceptance.
+- 180/180 probes returned: **200=132, 302=42, 401=3, 405=1, 503=2**.
+- **33 non-home routes served HTTP200 with a HOME dashboard title**, indicating suspicious generic routing/fallback rather than verified route-specific content. Blog article routes are among them.
+- Two **HTTP503** Test routes: /status and /stocks/derivatives. Need fix/maintenance reconciliation.
+- HTTP302 admin responses can be correct authentication redirects, HTTP401 can be expected authorization; /safety/takedown HTTP405 may be intentional POST-only method. Do not call those failures without endpoint contracts.
+- This checks only read-only anonymous responses. It does not prove authenticated UX, finance ledger writes, game rewards, admin mutations, 5-locale/device or Production flows.
+
+| Route | Test anonymous GET | HTML title (abridged) | Classification |
+| --- | --- | --- | --- |
+| / | 200 | My assets dashboard · W Moneyverse | NO_END_TO_END_PROOF |
+| /[locale]/blog | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /[locale]/blog/[slug] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /[locale]/guide/glossary | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /[locale]/guide/glossary/[term] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /[locale]/tools/compound-interest-calculator | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /[locale]/tools/compound-interest-calculator/[preset] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /account | 200 | 내 계정 센터 - 월덕 머니버스 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /account-deletion | 200 | Account deletion · W Moneyverse | NO_END_TO_END_PROOF |
+| /account/notifications | 200 | 알림 설정 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /account/privacy | 200 | 개인정보 센터 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /account/security | 200 | 로그인 기기 및 보안 관리 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /admin | 302 |  | NO_END_TO_END_PROOF |
+| /admin/analytics | 302 |  | NO_END_TO_END_PROOF |
+| /admin/api-health | 302 |  | NO_END_TO_END_PROOF |
+| /admin/bank | 302 |  | NO_END_TO_END_PROOF |
+| /admin/blog | 302 |  | NO_END_TO_END_PROOF |
+| /admin/bonds | 302 |  | NO_END_TO_END_PROOF |
+| /admin/catalog | 302 |  | NO_END_TO_END_PROOF |
+| /admin/central-bank | 302 |  | NO_END_TO_END_PROOF |
+| /admin/content | 302 |  | NO_END_TO_END_PROOF |
+| /admin/controls | 302 |  | NO_END_TO_END_PROOF |
+| /admin/discord | 302 |  | NO_END_TO_END_PROOF |
+| /admin/economy | 302 |  | NO_END_TO_END_PROOF |
+| /admin/economy/scenario-lab | 302 |  | NO_END_TO_END_PROOF |
+| /admin/enterprises | 302 |  | NO_END_TO_END_PROOF |
+| /admin/fx | 302 |  | NO_END_TO_END_PROOF |
+| /admin/help | 302 |  | NO_END_TO_END_PROOF |
+| /admin/kdic | 302 |  | NO_END_TO_END_PROOF |
+| /admin/logs | 302 |  | NO_END_TO_END_PROOF |
+| /admin/logs/activity | 302 |  | NO_END_TO_END_PROOF |
+| /admin/logs/delivery | 302 |  | NO_END_TO_END_PROOF |
+| /admin/logs/errors | 302 |  | NO_END_TO_END_PROOF |
+| /admin/logs/integrity | 302 |  | NO_END_TO_END_PROOF |
+| /admin/logs/system | 302 |  | NO_END_TO_END_PROOF |
+| /admin/market | 302 |  | NO_END_TO_END_PROOF |
+| /admin/market/ai-news | 302 |  | NO_END_TO_END_PROOF |
+| /admin/mint | 302 |  | NO_END_TO_END_PROOF |
+| /admin/money-flow | 302 |  | NO_END_TO_END_PROOF |
+| /admin/operations/storage | 302 |  | NO_END_TO_END_PROOF |
+| /admin/pension | 302 |  | NO_END_TO_END_PROOF |
+| /admin/safety | 302 |  | NO_END_TO_END_PROOF |
+| /admin/security | 302 |  | NO_END_TO_END_PROOF |
+| /admin/seo | 302 |  | NO_END_TO_END_PROOF |
+| /admin/seo-audit | 302 |  | NO_END_TO_END_PROOF |
+| /admin/shop | 302 |  | NO_END_TO_END_PROOF |
+| /admin/support | 302 |  | NO_END_TO_END_PROOF |
+| /admin/treasury | 302 |  | NO_END_TO_END_PROOF |
+| /admin/treasury/grants | 302 |  | NO_END_TO_END_PROOF |
+| /admin/users | 302 |  | NO_END_TO_END_PROOF |
+| /admin/users/[id] | 401 |  | NO_END_TO_END_PROOF |
+| /admin/work | 302 |  | NO_END_TO_END_PROOF |
+| /advisor | 200 | AI 금융 어드바이저 덕이 — 포트폴리오 진단 &amp; 리밸런싱 / Woldeok Moneyverse ·  | NO_END_TO_END_PROOF |
+| /announcements | 200 |  | NO_END_TO_END_PROOF |
+| /announcements/[announcementId] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /arcade | 200 | 아케이드 · 월덕 머니버스 (Woldeok Moneyverse) | NO_END_TO_END_PROOF |
+| /bank | 200 | 가상 은행 & 복리 예금 · Woldeok Moneyverse | NO_END_TO_END_PROOF |
+| /bank/savings-pot | 200 | 4인 공동 저축 챌린지 팟 / 월덕 가상금융 소셜 세이빙 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /blog | 200 | 월덕 블로그 / 경제 · 코딩 · 컴퓨터 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /blog/[slug] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /board | 200 | 커뮤니티 · Woldeok Moneyverse | NO_END_TO_END_PROOF |
+| /board/[postId] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /bonds | 200 | 게임 내 가상 WLD 채권 거래소 / 머니버스 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /businesses | 200 | 가상 사업체 — 게임 내 비즈니스 운영 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /businesses/ventures | 200 | 가상 스타트업 VC 엔젤투자 &amp; 지분 펀딩 — 6대 유망 벤처 투자 &amp; 배당 수익 · 월덕 머 | NO_END_TO_END_PROOF |
+| /calculators | 200 | Calculator center / Woldeok Moneyverse | NO_END_TO_END_PROOF |
+| /calendar | 200 | 이벤트 캘린더 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /casino | 200 | 카지노 · 월덕 머니버스 (Woldeok Moneyverse) | NO_END_TO_END_PROOF |
+| /central-bank | 200 | 한국은행 (Bank of Korea) 통화정책 공시 포털 / 머니버스 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /chat | 302 |  | NO_END_TO_END_PROOF |
+| /clubs | 200 | 클럽·협동조합 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /clubs/[clubId] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /clubs/[clubId]/members | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /clubs/new | 200 | 월덕 머니버스 — 가상경제·모의 주식·금융 계산기 | NO_END_TO_END_PROOF |
+| /clubs/warfare | 200 | 클럽 공성전 운영 상태 / 월덕 머니버스 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /collections | 401 |  | NO_END_TO_END_PROOF |
+| /dashboard | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | NO_END_TO_END_PROOF |
+| /data-deletion | 200 | 개인정보 삭제 요청 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /design-preview | 200 | 신규 사용자 UX 시안 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /developer | 200 | 개발자 포털 &amp; API 센터 (관리자 전용) / Woldeok Moneyverse · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /enterprises | 200 | 국가 공기업 경영정보 공개 (ALIO) / 머니버스 공공 거버넌스 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /features | 200 | 핵심 기능 &amp; 사용법 가이드 / 실제 화면으로 보는 6대 핀테크 가상 경제 조작법 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /forgot-password | 200 | Forgot password · W Moneyverse | NO_END_TO_END_PROOF |
+| /fx | 200 | 서울외환시장 (FX) 실시간 환전 &amp; 외환보유액 포털 / 월덕 통화안전망 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /gallery | 200 | 사진 / Gallery · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /gallery/[photoId] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /gallery/submit | 200 | 사진 보내기 / Submit Photo · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /guide | 200 | 가이드 · Woldeok Moneyverse | NO_END_TO_END_PROOF |
+| /guide/career-mastery | 200 | 8대 전문 직업 2.0 &amp; 일일 WLD 급여 파밍 완벽 가이드 — 월덕 머니버스 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /guide/dopamine-system | 200 | 도파민 보상 루프 &amp; 지속 가능한 수익화 시스템 가이드 — 월덕 머니버스 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /guide/glossary | 200 | 50대 핵심 투자 &amp; 금융 용어사전 — 월덕 머니버스 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /guide/glossary/[term] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /guide/stock-trading | 200 | 가상 주식 실전 매매 &amp; 호가창 분석 가이드 — 월덕 머니버스 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /guide/virtual-banking | 200 | 가상 금융 &amp; 복리 예금·국채 전략 가이드 — 월덕 머니버스 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /help | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /help/[slug] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /inventory | 200 | 내 보관함 · 인벤토리 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /invite/[code] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /kdic | 200 | 예금보험공사(KDIC) 5천만원 예금자보호 포털 / 월덕 금융안전망 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /lobby | 200 | 커뮤니티 로비 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /login | 200 | Log in · W Moneyverse | NO_END_TO_END_PROOF |
+| /login/providers | 200 | Log in · W Moneyverse | NO_END_TO_END_PROOF |
+| /marketplace | 200 | 플레이어 마켓 — 거래 근거 확인 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /marketplace/auction | 200 | 월덕 머니버스 — 가상경제·모의 주식·금융 계산기 | NO_END_TO_END_PROOF |
+| /mint | 200 | 한국조폐공사 (KOMSCO) 화폐 공시 포털 / 머니버스 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /newspaper | 200 | 주간 경제 브리프 &amp; 실시간 월드 펄스 — 월덕 머니버스 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /pension | 200 | 국가 국민연금공단 (NPS) / 신규 정식 원장 적립·환급 및 과거 내역 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /prediction | 200 | 월덕 머니버스 — 가상경제·모의 주식·금융 계산기 | NO_END_TO_END_PROOF |
+| /privacy | 200 | 개인정보처리방침 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /profile | 200 | 내 프로필 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /profile/[userId] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /profile/settings | 200 | 월덕 머니버스 — 가상경제·모의 주식·금융 계산기 | NO_END_TO_END_PROOF |
+| /progression | 200 | 성장 단계 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /progression/prestige | 200 | 프레스티지 환생 — 거래 준비 중 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /quests | 200 | 퀘스트 · Woldeok Moneyverse | NO_END_TO_END_PROOF |
+| /register | 200 | Create account · W Moneyverse | NO_END_TO_END_PROOF |
+| /reset-password | 200 | Reset password · W Moneyverse | NO_END_TO_END_PROOF |
+| /roadmap | 200 | 머니버스 시작 가이드 / 가입·직업·가상 주식 탐색 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /safety | 200 | 머니버스 안전 센터 (Safety Center) · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /safety/takedown | 405 |  | NO_END_TO_END_PROOF |
+| /search | 200 | 통합 검색 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /seasons | 200 | 시즌 이벤트 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /shop | 200 | 상점 · Woldeok Moneyverse | NO_END_TO_END_PROOF |
+| /shop/catalog | 200 | 아이템 상점 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /spaces | 200 | 가상 부동산 &amp; 개인 공간 (Personal Spaces) / Woldeok Moneyverse ·  | NO_END_TO_END_PROOF |
+| /spaces/real-estate | 200 | 가상 부동산 메가시티 랜드마크 경매 &amp; 월세 배당 거래소 / Woldeok Moneyverse · 월 | NO_END_TO_END_PROOF |
+| /status | 503 | null / Woldeok Moneyverse | HTTP_503 |
+| /stocks | 200 | Virtual stock exchange / Woldeok Moneyverse | NO_END_TO_END_PROOF |
+| /stocks/[symbol] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /stocks/alerts | 401 |  | NO_END_TO_END_PROOF |
+| /stocks/community | 200 | 토스형 주주 라운지 &amp; 모의투자 소셜 피드 / 월덕 머니버스 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /stocks/compare | 200 | 가상 주식 종목 비교 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /stocks/derivatives | 503 |  | HTTP_503 |
+| /stocks/history | 200 | 월덕 머니버스 — 가상경제·모의 주식·금융 계산기 | NO_END_TO_END_PROOF |
+| /stocks/league | 200 | 가상 주식 실시간 카피 트레이딩 리그 &amp; 고래 리더보드 / Woldeok Moneyverse · 월덕 | NO_END_TO_END_PROOF |
+| /stocks/portfolio | 200 | 가상 주식 포트폴리오 분석 — 자산 비중 및 실시간 손익 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /stocks/watchlist | 200 | 월덕 머니버스 — 가상경제·모의 주식·금융 계산기 | NO_END_TO_END_PROOF |
+| /support | 302 |  | NO_END_TO_END_PROOF |
+| /terms | 200 | 이용약관 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /tools | 200 | Financial tools / Woldeok Moneyverse | NO_END_TO_END_PROOF |
+| /tools/capital-gains-tax-calculator | 200 | [2026 최신] 해외주식 양도소득세 계산기 — [무료/1초] 미국주식 250만원 비과세 &amp; 손익상계 | NO_END_TO_END_PROOF |
+| /tools/capital-gains-tax-calculator/[preset] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /tools/compound-calculator | 200 | Compound interest calculator / Woldeok Moneyverse | NO_END_TO_END_PROOF |
+| /tools/compound-calculator/[preset] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /tools/crypto-apy-calculator | 200 | 코인 스테이킹 APY 복리 계산기 — [무료] DeFi APR ↔ APY 변환 &amp; 일/월 복리 이자  | NO_END_TO_END_PROOF |
+| /tools/dividend-tax-calculator | 200 | [무료/무로그인] 배당소득세 계산기 — 1초 만에 국내·미국 배당주 15.4% 세후 실수령액 &amp; 20 | NO_END_TO_END_PROOF |
+| /tools/dividend-tax-calculator/[ticker] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /tools/farming-calculator | 200 | 직업별 일일 파밍 수익 시뮬레이터 — 5대 전문직 숙련도 &amp; 복리 예금 최적화 / 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /tools/farming-calculator/[preset] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /tools/fire-calculator | 200 | FIRE족 조기은퇴 4% 룰 계산기 — [무료] 목표 은퇴자산 &amp; 안전 인출률 30년 시뮬레이션 /  | NO_END_TO_END_PROOF |
+| /tools/gift-tax-calculator | 200 | [2026 최신] 증여세 계산기 — [무료/1초] 배우자 6억·자녀 5천만·혼인 1.5억 비과세 한도 &am | NO_END_TO_END_PROOF |
+| /tools/gift-tax-calculator/[preset] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /tools/goal-wealth-calculator | 200 | 목표 자산·은퇴·FIRE 달성 계산기 — 4% 룰 및 자금 고갈 시뮬레이터 / 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /tools/isa-calculator | 200 | [2026 최신] ISA 계좌 절세 계산기 — [무료/1초] 일반형·서민형 비과세 한도 &amp; 9.9%  | NO_END_TO_END_PROOF |
+| /tools/isa-calculator/[slug] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /tools/kimchi-premium-calculator | 200 | [실시간 무료] 코인 김치프리미엄 계산기 — 1초 만에 업비트·바이낸스 김프/역프 &amp; 차익거래 순수익 | NO_END_TO_END_PROOF |
+| /tools/kimchi-premium-calculator/[preset] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /tools/loan-interest-calculator | 200 | [무료/무로그인] 대출이자 계산기 — 1초 만에 2억·3억 대출 원리금균등 월 납입금 &amp; 총이자 즉시 | NO_END_TO_END_PROOF |
+| /tools/loan-interest-calculator/[preset] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /tools/pension-tax-calculator | 200 | [2026 최신] 연금소득세 &amp; 퇴직소득세 계산기 — [무료/1초] IRP·연금저축 수령액 &amp; | NO_END_TO_END_PROOF |
+| /tools/pension-tax-calculator/[slug] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /tools/quant-studio | 200 | 노코드 퀀트 전략 연습 — DCA·그리드·RSI 예시 시뮬레이션 / 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /tools/real-estate-calculator | 200 | [무료/무로그인] 부동산 임대수익률 계산기 — 1초 만에 오피스텔·상가 Cap Rate &amp; 레버리지  | NO_END_TO_END_PROOF |
+| /tools/real-estate-calculator/[preset] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /tools/retirement-calculator | 200 | 퇴직금·퇴직소득세 예상 계산기 — 근속기간·급여·IRP 참고 / 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /tools/retirement-calculator/[slug] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /tools/salary-calculator | 200 | [2026 최신] 연봉 실수령액 계산기 — [무료/1초] 4대보험·소득세 공제 후 세후 월급 즉시 확인 /  | NO_END_TO_END_PROOF |
+| /tools/salary-calculator/[preset] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /tools/stock-calculator | 200 | Stock average price calculator / Woldeok Moneyverse | NO_END_TO_END_PROOF |
+| /tools/stock-calculator/[preset] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /tools/tax-calculator | 200 | 가상자산·금융투자 세금 계산기 — 2026/2027 양도소득세 &amp; 배당소득세 / 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /tools/youth-leap-calculator | 200 | [2026 최신] 청년도약계좌 만기 수령액 계산기 — [무료/1초] 5,000만원 정부기여금 &amp; 비과 | NO_END_TO_END_PROOF |
+| /tools/youth-leap-calculator/[preset] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /treasury | 200 | [2026] 대국민 국고(Treasury) 포털 — 현재 회계기와 재정 대사 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /verify-email | 200 | Verify email · W Moneyverse | NO_END_TO_END_PROOF |
+| /verify-email-change | 200 | Confirm email change · W Moneyverse | NO_END_TO_END_PROOF |
+| /wallet | 302 |  | NO_END_TO_END_PROOF |
+| /wallet/activity | 200 | 내 지갑 기록 · 월덕 머니버스 | NO_END_TO_END_PROOF |
+| /wallet/activity/transactions/[transactionId] | 200 | 홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse) | HOME_TITLE_FALLBACK |
+| /work | 200 | 직업 및 업무 — 전문 직업 2.0 · 월덕 머니버스 | NO_END_TO_END_PROOF |

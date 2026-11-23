@@ -253,3 +253,5 @@
 | /wallet/activity | 지갑 · 활동 | finance | [NEW PNG](design/game-ui-v2026.11.23.10/previews/wallet-activity.png) | [Original](design/all-pages-v2026.11.18.12/previews/wallet-activity.png) | GENERATED_NOT_APPROVED |
 | /wallet/activity/transactions/[transactionId] | 지갑 · 활동 · 거래 상세 · 거래 상세 | finance | [NEW PNG](design/game-ui-v2026.11.23.10/previews/wallet-activity-transactions--transactionId-.png) | [Original](design/all-pages-v2026.11.18.12/previews/wallet-activity-transactions--transactionId-.png) | GENERATED_NOT_APPROVED |
 | /work | 직업 | game | [NEW PNG](design/game-ui-v2026.11.23.10/previews/work.png) | [Original](design/all-pages-v2026.11.18.12/previews/work.png) | GENERATED_NOT_APPROVED |
+
+> **추가 180경로 Test 결과 v2026.11.23.10:** 익명 GET200=132 / 302=42 / 401=3 / 405=1 / 503=2, 홈 title 잘못 반환 33건. /status 및 /stocks/derivatives Test503. 정확한 경로별 표는 [180경로 QA 보고서](qa/2026-11-23-game-ui-180-image-feature-audit.ko.md). 실제 기능 전체 정상 판정 금지.

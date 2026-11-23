@@ -23,3 +23,6 @@
 
 ### 추가 독립 Test 검증 기록
 Test Spring localhost:55438의 health UP, 게임시계 정책 600초/서버일, 홈/은행 HTML GET200, 비로그인 관리자 302 확인. 블로그 상세 샘플 GET200 제목이 홈으로 잘못 출력되는 P1 후보 기록. 계정/원장/관리자 쓰기 E2E 미실시.
+
+### 중간 추가: 독립 Test 180경로 GET
+Test backend localhost:55438에 인증 없는 GET 180건 순차 실행. 200=132/302=42/401=3/405=1/503=2. 홈 대시보드 title 잘못 폴백 33개; /status, /stocks/derivatives 503. 동적 URL은 샘플 가상값이므로 성공/오류 판정은 계약과 대조해야 함. 데이터변경·인증/금융 E2E 없음.

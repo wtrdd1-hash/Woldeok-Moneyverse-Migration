@@ -245,3 +245,5 @@ Record `route / original_png / proposed_png / brand_check / game_clock_check / r
 | /wallet/activity | 지갑 · 활동 | finance | [NEW PNG](design/game-ui-v2026.11.23.10/previews/wallet-activity.png) | [Original](design/all-pages-v2026.11.18.12/previews/wallet-activity.png) | GENERATED_NOT_APPROVED |
 | /wallet/activity/transactions/[transactionId] | 지갑 · 활동 · 거래 상세 · 거래 상세 | finance | [NEW PNG](design/game-ui-v2026.11.23.10/previews/wallet-activity-transactions--transactionId-.png) | [Original](design/all-pages-v2026.11.18.12/previews/wallet-activity-transactions--transactionId-.png) | GENERATED_NOT_APPROVED |
 | /work | 직업 | game | [NEW PNG](design/game-ui-v2026.11.23.10/previews/work.png) | [Original](design/all-pages-v2026.11.18.12/previews/work.png) | GENERATED_NOT_APPROVED |
+
+> **Additional 180-route isolated Test GET probe v2026.11.23.10:** 200=132 / 302=42 / 401=3 / 405=1 / 503=2; 33 non-home routes returned home dashboard title. Test 503 on /status and /stocks/derivatives. [Full 180-route QA](qa/2026-11-23-game-ui-180-image-feature-audit.md). Not end-to-end functional acceptance.
