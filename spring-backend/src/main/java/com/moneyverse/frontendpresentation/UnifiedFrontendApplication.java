@@ -23,7 +23,7 @@ import org.springframework.web.servlet.config.annotation.*;
 @Configuration(proxyBeanMethods=false)
 @EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class,JdbcTemplateAutoConfiguration.class,
     HibernateJpaAutoConfiguration.class,UserDetailsServiceAutoConfiguration.class})
-@Import({NativeHomeController.class,SpringNativeToolHubController.class,SpringNativeCalculatorsController.class,
+@Import({NativeHomeController.class,NativeBankController.class,com.moneyverse.api.domain.stock.web.PublicStocksReadOnlyPage.class,SpringNativeToolHubController.class,SpringNativeCalculatorsController.class,
     UiLocale.class,UiPageRenderer.class,AdminNavigation.class,NativeBuildIdentity.class,NativePresentationIdentityController.class,
     AdminSourceClient.class,AdminShopPageController.class,AdminUiController.class,AdminReadPageController.class,AdminDeliveryPageController.class,
     PublicSourceClient.class,PublicPublicationPageController.class,StatusPresentationPageController.class,FrontendIdentityController.class,MemberPresentationPageController.class,AdminProbePageController.class,NativeAuthPageController.class})
@@ -31,7 +31,11 @@ public class UnifiedFrontendApplication implements WebMvcConfigurer {
     private static final String[] READS={"/","/index.html","/tools","/calculators","/tools/compound-calculator","/tools/stock-calculator",
         "/admin","/admin/","/admin/shop","/admin/shop/","/admin/shop.html","/admin/shop/index.html","/admin/users","/admin/market","/admin/controls","/admin/enterprises","/admin/economy",
         "/admin/economy/scenario-lab","/admin/logs/system","/admin/logs/delivery","/admin/api-health",
-        "/wallet","/wallet/","/wallet.html","/wallet/index.html","/support","/support/","/support.html","/support/index.html",
+        "/wallet","/wallet/","/wallet.html","/wallet/index.html","/bank","/bank/","/bank.html","/bank/index.html",
+        "/stocks","/stocks/","/stocks.html","/stocks/index.html","/dashboard","/dashboard/","/dashboard.html","/dashboard/index.html",
+        "/board","/board/","/board.html","/board/index.html","/quests","/quests/","/quests.html","/quests/index.html",
+        "/shop","/shop/","/shop.html","/shop/index.html","/account","/account/","/account.html","/account/index.html",
+        "/support","/support/","/support.html","/support/index.html",
         "/chat","/chat/","/chat.html","/chat/index.html",
         "/announcements","/announcements/","/announcements.html","/announcements/index.html","/gallery","/gallery/","/gallery.html","/gallery/index.html",
         "/status","/status/","/status.html","/status/index.html","/frontend-version","/presentation-health","/admin-ui-health","/admin-ui-version","/frontend-ui-health","/frontend-ui-version",
