@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+> **2026-11-23 integrated design authority update / OWNER SELECTED / v2026.11.23.3.** The unified navy/violet full-site PC+mobile design is the selected future visual direction for all Nov18 180 routes. Include Jobs entry, distinct functional banking/wallet/career/quest/shop/admin flows and consistent global navigation. Original Nov18 PNGs remain historical reference, **not** updated images. New generated PNG package is conversation-only and has not been uploaded to GitHub. [EN selected-design spec](../design/OWNER_SELECTED_UNIFIED_DESIGN_v2026.11.23.3.md) · [route register](../design/ALL_180_UNIFIED_UI_REGISTER_v2026.11.23.3.md). Document/design-only; no source/runtime/Test/production change.
+
+
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 
 ## v2026.11.21.2234 — AgentMemory link retained for all future work handoffs (PLANNING; DOCS ONLY)
