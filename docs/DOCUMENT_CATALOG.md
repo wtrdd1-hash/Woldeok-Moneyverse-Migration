@@ -1,5 +1,7 @@
 # 📚 Document Catalog
 
+> v2026.11.23.8 신규 이미지: [180 new example images](design/game-ui-v2026.11.23.8/README.md) — 생성 완료/시안 검수 필요, 실제 서비스 적용 아님.
+
 **Current UI master (v2026.11.23.5):** [UI/UX Single Reference](UI_UX_SINGLE_REFERENCE.md) — exact current favicon is logo, admin nav for authorized admins only; design, defects, QA. Docs-only review pending.
 
 ## v2026.11.21.2234 — AgentMemory saved reference and multi-agent memory handoff (PLANNING)

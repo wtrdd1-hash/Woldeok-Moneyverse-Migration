@@ -46,3 +46,7 @@ Mandatory gates:
 Record `route / original_png / proposed_png / brand_check / game_clock_check / role_visibility_check / visual_diff / status / reviewer / approved_sha`, following `PLANNED → GENERATED → REVIEWED → APPROVED → IMPLEMENTED → TEST_VERIFIED`. Approved images and live implementation are separate acceptance milestones.
 
 [All 180 originals](design/all-pages-v2026.11.18.12/README.md) · [route matrix PR #3397](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3397).
+
+## v2026.11.23.8 actual visual image files
+
+[New gallery of 180 game-style PNGs](design/game-ui-v2026.11.23.8/README.md) contains actual new PC/mobile route images with original favicon pixels and admin-role menu distinction. GENERATED_NOT_APPROVED: individual visual review and live implementation QA remain open.

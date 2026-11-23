@@ -53,3 +53,7 @@
 각 시안 인벤토리에 `route / original_png / proposed_png / brand_check / game_clock_check / role_visibility_check / visual_diff / status / reviewer / approved_sha`를 기록하고 `PLANNED → GENERATED → REVIEWED → APPROVED → IMPLEMENTED → TEST_VERIFIED` 순으로 진척을 관리한다. **승인된 예시 이미지를 실제 프론트엔드로 구현하는 것은 별도 작업**이다.
 
 [180개 원본 전체 목록](design/all-pages-v2026.11.18.12/README.md) · [180개 수정·검증 매트릭스 PR #3397](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3397) · [통합 문서 PR #3396](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3396).
+
+## v2026.11.23.8 실제 예시 이미지 생성
+
+[신규 180개 게임형 PNG 갤러리](design/game-ui-v2026.11.23.8/README.ko.md)에 실제 PC/모바일 이미지 180개가 포함됨. 현재 favicon 원본 픽셀 삽입, 관리자 전용 메뉴 구분. 180개 이미지가 실제로 생성되었지만 상태는 GENERATED_NOT_APPROVED이며 개별 디자인 검토/실서비스 기능 QA 미완료.
