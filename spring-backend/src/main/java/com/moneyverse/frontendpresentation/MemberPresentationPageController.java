@@ -19,18 +19,18 @@ public final class MemberPresentationPageController {
     private final AdminSourceClient source;private final UiPageRenderer pages;
     public MemberPresentationPageController(AdminSourceClient source,UiPageRenderer pages){this.source=source;this.pages=pages;}
     private static Map<String,String> routes(){
-        var result=new HashMap<String,String>();for(String family:List.of("wallet","support","chat"))
+        var result=new HashMap<String,String>();for(String family:List.of("wallet","bank","stocks","support","chat"))
             for(String suffix:List.of("","/",".html","/index.html"))result.put("/"+family+suffix,family);
         return Map.copyOf(result);
     }
-    @GetMapping(value={"/wallet","/wallet/","/wallet.html","/wallet/index.html","/support","/support/","/support.html","/support/index.html",
+    @GetMapping(value={"/wallet","/wallet/","/wallet.html","/wallet/index.html","/bank","/bank/","/bank.html","/bank/index.html","/stocks","/stocks/","/stocks.html","/stocks/index.html","/support","/support/","/support.html","/support/index.html",
         "/chat","/chat/","/chat.html","/chat/index.html"},produces=MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<String> show(HttpServletRequest request){
         Object match=request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
         String family=match instanceof String route?ROUTES.get(route):null;
         HttpHeaders headers=headers();headers.set("Content-Language",pages.language(request));if(family==null)return new ResponseEntity<>("",headers,HttpStatus.FORBIDDEN);
         String canonical="/"+family,cookie=source.sessionCookie(request);
-        Map<String,Object> model=Map.of("uiPageKey",family.equals("support")?"msgSupport":family.equals("chat")?"msgChat":"wallet","memberRefresh",canonical);
+        Map<String,Object> model=Map.of("uiPageKey",family.equals("support")?"msgSupport":family.equals("chat")?"msgChat":family.equals("bank")?"bank":family.equals("stocks")?"stocks":"wallet","memberRefresh",canonical);
         if(cookie==null)return login(headers,canonical);
         try{verify(source.read("/api/v1/auth/me",cookie));}
         catch(AdminSourceClient.SourceFailure failure){

@@ -23,7 +23,7 @@ import org.springframework.web.servlet.config.annotation.*;
 @Configuration(proxyBeanMethods=false)
 @EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class,JdbcTemplateAutoConfiguration.class,
     HibernateJpaAutoConfiguration.class,UserDetailsServiceAutoConfiguration.class})
-@Import({NativeHomeController.class,NativeBankController.class,com.moneyverse.api.domain.stock.web.PublicStocksReadOnlyPage.class,SpringNativeToolHubController.class,SpringNativeCalculatorsController.class,
+@Import({NativeHomeController.class,SpringNativeToolHubController.class,SpringNativeCalculatorsController.class,
     UiLocale.class,UiPageRenderer.class,AdminNavigation.class,NativeBuildIdentity.class,NativePresentationIdentityController.class,
     AdminSourceClient.class,AdminShopPageController.class,AdminUiController.class,AdminReadPageController.class,AdminDeliveryPageController.class,
     PublicSourceClient.class,PublicPublicationPageController.class,StatusPresentationPageController.class,FrontendIdentityController.class,MemberPresentationPageController.class,AdminProbePageController.class,NativeAuthPageController.class})
