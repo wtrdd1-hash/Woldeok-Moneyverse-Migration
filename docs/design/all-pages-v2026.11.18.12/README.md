@@ -9,6 +9,8 @@ All values are synthetic; images are planning mockups, NOT screenshots or functi
 
 > **Recovered implementation handoff (v2026.11.19.31):** [English](../UI_IMAGE_IMPLEMENTATION_HANDOFF_v2026.11.19.31.md) · [한국어](../UI_IMAGE_IMPLEMENTATION_HANDOFF_v2026.11.19.31.ko.md). These images were originally in closed, unmerged PR #3268; they are conceptual wireframes, not Spring pages.
 
+> **Game-world implementation handoff — v2026.11.23.6 (review candidate):** [180-route English matrix](../GAME_UI_180_PAGE_IMPLEMENTATION_MATRIX_v2026.11.23.6.md) / [한국어](../GAME_UI_180_PAGE_IMPLEMENTATION_MATRIX_v2026.11.23.6.ko.md). All 180 existing PNGs remain the original approved Nov18 concept assets; this candidate does NOT re-render or replace them. The existing **favicon.ico is the official logo**, and admin menus must remain admin-only.
+
 ## Counts / 개수
 
 - admin: 40
