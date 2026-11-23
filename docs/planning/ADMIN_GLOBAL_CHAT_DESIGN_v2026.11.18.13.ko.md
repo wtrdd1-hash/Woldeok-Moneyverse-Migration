@@ -1,5 +1,7 @@
 # 관리자 페이지 리디자인·전 페이지 둥근 채팅 문의 — v2026.11.18.13
 
+> **2026-11-23 최신 디자인 정리: SUPERSEDED FOR VISUAL STYLE; SECURITY/RBAC REQUIREMENTS RETAINED.** 이 문서는 역사/보안 근거로 보존한다. **현행 전체 UI 시각 기준은 [사용자가 선택한 디자인](../design/OWNER_SELECTED_UNIFIED_DESIGN_v2026.11.23.3.ko.md)**이며, 이 문서의 이전 이미지는 새 공식 이미지가 아니다. 보안·권한·다국어 요구는 계속 유지하고 새 PNG의 GitHub 업로드 및 실제 코드·운영 구현은 미완료다.
+
 상태: 독립 미리보기 개발 / 운영 API 연결 보안 게이트 미통과
 상위 기획: [180개 화면 PC·모바일 리디자인](ALL_PAGES_RESPONSIVE_REDESIGN_v2026.11.18.12.ko.md).
 영문 정본: [English](ADMIN_GLOBAL_CHAT_DESIGN_v2026.11.18.13.md).
