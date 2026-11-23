@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:lang="${uiLanguage}" th:attr="data-ui-language=${uiLanguage}">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark"><meta name="theme-color" content="#0C1020">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title th:text="${legalTitle + ' | Woldeok Moneyverse'}">Woldeok Moneyverse legal policy</title>
+<link rel="stylesheet" href="/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31">
+<link rel="stylesheet" href="/assets/mv43/chrome.css?v=813d59e41d5282c3b390ff55f64bba377a21284d608346d205c269c1015c8e8c">
+<link rel="stylesheet" href="/assets/mv43/legal.css?v=b20081aa5bce7472e4197b6fffb260c321c816106c4f4b40b84ea880c52191dd">
+<script defer src="/assets/mv39/i18n.js?v=8c7cf8e55c170e6b527f93eaf8ce5a4b6e6e16034e35566fd9e1092a710d4fec"></script>
+<th:block th:replace="~{shared/chrome :: commonHead}"></th:block>
+</head>
+<body data-spring-page="legal">
+<a class="skip-link" href="#main-content" th:text="${uiCopy['publicSkip']}">Skip to main content</a>
+<div class="app-shell"><th:block th:replace="~{shared/chrome :: sidebar}"></th:block>
+<div class="app-main"><div class="app-inner">
+<th:block th:replace="~{shared/chrome :: pageHeader}"></th:block>
+<main id="main-content" class="legal-main" tabindex="-1">
+<section class="hero"><div class="hero-text"><div class="eyebrow">WOLDEOK MONEYVERSE</div>
+<h1 th:text="${legalTitle}">Legal policy</h1>
+<p th:if="${policyFallback}" class="legal-fallback" lang="en">The full policy text is available in English for this language. The original Korean version is also available.</p>
+</div></section>
+<!-- Policy text below is exported verbatim from the existing authored React policy document; no legal text is invented. -->
+<article lang="en" data-policy-language="en" class="policy-document grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6 [overflow-wrap:anywhere]">
+        <p class="section-label">WOLDEOK MONEYVERSE · TERMS OF SERVICE</p>
+        <p class="max-w-prose text-sm text-muted-foreground">
+          Woldeok Moneyverse is a community-driven virtual economy simulation service accessible across the Web and Discord.
+          This agreement sets forth the binding terms and standards governing your use of the platform.
+        </p>
+        <dl class="grid gap-2 rounded-lg border bg-card p-4 text-sm sm:grid-cols-3" aria-label="Document Information">
+          <div><dt>Document Version</dt><dd>2026-09-02</dd></div>
+          <div><dt>Effective Date</dt><dd>September 2, 2026</dd></div>
+          <div><dt>Status</dt><dd>Production Release</dd></div>
+        </dl>
+        <aside class="rounded-lg border-l-4 border-l-primary bg-card p-4" aria-label="Crucial Notice">
+          <strong>Virtual Economy Notice</strong>
+          <p>
+            All virtual currencies (WLD), balances, items, assets, and rewards in this service are purely simulated game data.
+            They cannot be redeemed, exchanged, or withdrawn for real cash, securities, or external tangible assets.
+          </p>
+        </aside>
+        <section class="grid gap-2" aria-labelledby="terms-summary-title">
+          <p class="section-label">Key Principles</p>
+          <h2 id="terms-summary-title">Three Core Tenets of Platform Access</h2>
+          <ul>
+            <li>You must be at least 14 years old to access the service. Access by minors under 14 is strictly restricted.</li>
+            <li>All asset changes are immutably ledgered. Discrepancies, system bugs, or fraudulent activities are audited and corrected based on ledger trails.</li>
+            <li>Account sharing, real-money trading (RMT), bot exploits, and actions disruptive to fair play are strictly prohibited.</li>
+          </ul>
+        </section>
+        <nav class="rounded-lg border bg-card p-4 text-sm" aria-label="Table of Contents">
+          <p class="font-semibold mb-2">Table of Contents</p>
+          <ol class="list-decimal pl-4 space-y-1">
+            <li><a href="#terms-purpose" class="hover:underline">Article 1: Purpose & Scope</a></li>
+            <li><a href="#terms-eligibility" class="hover:underline">Article 2: Eligibility & Accounts</a></li>
+            <li><a href="#terms-economy" class="hover:underline">Article 3: Virtual Economy & Transactions</a></li>
+            <li><a href="#terms-conduct" class="hover:underline">Article 4: User Conduct & Prohibited Acts</a></li>
+            <li><a href="#terms-operation" class="hover:underline">Article 5: Administration & Access Restrictions</a></li>
+            <li><a href="#terms-withdrawal" class="hover:underline">Article 6: Termination, Liability & Inquiries</a></li>
+          </ol>
+        </nav>
+        <section id="terms-purpose">
+          <h2>Article 1 (Purpose & Scope)</h2>
+          <p>
+            These Terms of Service govern the rights, duties, responsibilities, and dispute resolution standards between Woldeok Moneyverse
+            (&quot;Service&quot;) and its registered users across web applications and Discord environments.
+          </p>
+          <p>
+            These terms apply to the homepage, virtual wallets, transaction ledgers, mini-games, tools, and bots.
+            Matters concerning personal data are governed by our <a href="/privacy" class="text-primary hover:underline">Privacy Policy</a>.
+          </p>
+        </section>
+        <section id="terms-eligibility">
+          <h2>Article 2 (Eligibility & Accounts)</h2>
+          <ol class="list-decimal pl-4 space-y-1">
+            <li>Users may access services via verified third-party OAuth (Discord or Google) upon agreeing to these Terms.</li>
+            <li>Users under the age of 14 are strictly prohibited from creating accounts.</li>
+            <li>Users must maintain accurate account credentials. Providing fraudulent age info or selling accounts may result in immediate suspension.</li>
+            <li>Each external OAuth credential is tied to exactly one internal member identifier.</li>
+          </ol>
+        </section>
+        <section id="terms-economy">
+          <h2>Article 3 (Virtual Economy & Transactions)</h2>
+          <ol class="list-decimal pl-4 space-y-1">
+            <li>All tokens and items are strictly game objects with zero cash value.</li>
+            <li>All transactions require atomic verification by the backend central ledger.</li>
+            <li>Cash settlement, RMT, and gray-market transfers outside the app are grounds for permanent account deletion.</li>
+          </ol>
+        </section>
+        <section id="terms-conduct">
+          <h2>Article 4 (User Conduct & Prohibited Acts)</h2>
+          <p>Users shall refrain from the following prohibited activities:</p>
+          <ul class="list-disc pl-4 space-y-1">
+            <li>Unauthorized use, theft, or distribution of third-party account credentials.</li>
+            <li>Deploying automated botting scripts, macro exploitation, or distributed denial of service.</li>
+            <li>Harassment, offensive hate speech, distribution of malicious payloads or phishing links.</li>
+          </ul>
+        </section>
+        <section id="terms-operation">
+          <h2>Article 5 (Administration & Access Restrictions)</h2>
+          <p>
+            Administrators adhere to the principle of least privilege. In cases of malicious activity, the operator reserves the right
+            to place escrow holds, rollback transactions, or terminate accounts with audit logging.
+          </p>
+        </section>
+        <section id="terms-withdrawal">
+          <h2>Article 6 (Termination, Liability & Inquiries)</h2>
+          <ol class="list-decimal pl-4 space-y-1">
+            <li>Users may request account deletion at any time via self-service account management menus.</li>
+            <li>To the maximum extent permitted by applicable law, the Service shall not be liable for indirect, punitive, or consequential damages arising from the use of this free platform.</li>
+          </ol>
+        </section>
+        <aside class="rounded-lg border border-dashed p-4 text-sm text-muted-foreground" aria-label="Contact Information">
+          <strong>Operator Contact</strong>
+          <p>
+            Service Operator: Hong Jong-hwan. For inquiries regarding compliance or account restrictions, contact <a href="mailto:jungchwimisaenghwal63@gmail.com" class="text-primary hover:underline">jungchwimisaenghwal63@gmail.com</a>.
+          </p>
+        </aside>
+      </article>
+</main>
+<th:block th:replace="~{shared/chrome :: footer}"></th:block>
+</div></div></div>
+<th:block th:replace="~{shared/chrome :: mobileNavigation}"></th:block>
+<th:block th:replace="~{shared/chrome :: support}"></th:block>
+</body></html>
