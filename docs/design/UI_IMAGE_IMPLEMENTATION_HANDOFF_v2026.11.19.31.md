@@ -1,5 +1,7 @@
 # UI Image Implementation Handoff — v2026.11.19.31
 
+> **2026-11-23 supersession notice: HISTORICAL.** Preserved for historical provenance and security requirements. The [owner-selected current visual design](OWNER_SELECTED_UNIFIED_DESIGN_v2026.11.23.3.md) controls all new screens. Older images here are not new selected images; security/RBAC/localization obligations remain. New PNG binaries and Spring website deployment are not complete.
+
 **Status:** RECOVERED DESIGN ASSETS / IMPLEMENTATION NOT CERTIFIED. **Canonical language:** English; Korean companion: [한국어](UI_IMAGE_IMPLEMENTATION_HANDOFF_v2026.11.19.31.ko.md). **Scope:** repository documentation only; no Spring frontend, legacy frontend, DB, Test, or Production changes.
 
 ## Root cause and provenance
