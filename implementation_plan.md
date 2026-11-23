@@ -5542,3 +5542,25 @@ eserves: 대한민국 외환보유액 통합계정)
   - `.material-symbols-outlined` 클래스 스타일 정밀 정의 (폰트 사이즈 20px, baseline 중앙 정렬, flex-shrink 0).
   - `.nav-icon`에서 `font-family: Arial, sans-serif` 제거 및 머티리얼 심볼 최적화.
 - 운영 서버(`/srv/moneyverse-data/...`) 실시간 동기화 및 실 브라우저 렌더링 검증.
+
+---
+## 🚀 [v123 Specification] 수동 새로고침 버튼 제거 및 실시간 Netty-SocketIO 상시 자동 동기화(+56, -0)
+
+### 1. 요구사항 및 배경
+- **수동 새로고침 버튼 영구 제거**:
+  - 홈 화면의 `dashboard-section-header`에 배치되어 있던 `.refresh-button`("새로고침")을 완전 제거.
+  - 사용자가 수동으로 버튼을 눌러야만 잔액이나 시세가 갱신되던 레거시 방식을 탈피.
+- **실시간 Netty-SocketIO 상시 소통 아키텍처 구축**:
+  - 백엔드 Spring Boot 3.3.5 내장 Netty-SocketIO(포트 9092, Nginx `/socket.io/` 리버스 프록시)와 프론트엔드(`/socket.io.min.js`) 간 상시 양방향 실시간 웹소켓 통신 확립.
+  - `market:subscribe` 방 자동 조인 및 `market:ticks`(2초 주기 실시간 시세 브로드캐스트) 수신 시 주식 테이블 즉각 반응형 자동 리렌더링.
+  - 세션 및 지갑 잔액(`readSession()`)의 소켓 연결 즉시 동기화, 주기적 자동 헬스체크(10초 주기 백그라운드 폴링 보조), 브라우저 포커스/탭 전환(`visibilitychange`) 시 자동 최신화 체계 완비.
+
+### 2. 세부 변경 계획
+- **`spring-backend/src/main/resources/templates/shared/chrome.html`**:
+  - `<head>`의 `commonHead` 프래그먼트에 `<script src="/socket.io.min.js" defer></script>` 추가하여 전역 Socket.IO v4.7.5 클라이언트 상시 가용성 확보.
+- **`spring-backend/src/main/resources/static/assets/mv39/app.js`**:
+  - `renderHome()` 내 `refresh` 버튼 엘리먼트 생성 및 `head.appendChild(refresh)` 제거.
+  - `initSocketClient()` 및 실시간 소켓 이벤트 리스너(`connect`, `market:ticks`, `online`) 등록.
+  - 주식 시세 틱 수신 시 실시간 DOM 바인딩 및 세션/지갑 실시간 동기화 파이프라인 연결.
+- **운영 서버 동기화 및 실 브라우저 검증**:
+  - `/srv/moneyverse-data/...` 자산 파일 및 백엔드 JAR 반영 후 소켓 연결 수립(`online`, `market:ticks`) 및 새로고침 버튼 부재 실측.
