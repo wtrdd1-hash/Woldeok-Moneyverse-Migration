@@ -199,3 +199,12 @@
 | `/wallet/activity` | [Original PNG](all-pages-v2026.11.18.12/previews/wallet-activity.png) | DESIGN_REVIEW_OPEN |
 | `/wallet/activity/transactions/[transactionId]` | [Original PNG](all-pages-v2026.11.18.12/previews/wallet-activity-transactions--transactionId-.png) | DESIGN_REVIEW_OPEN |
 | `/work` | [Original PNG](all-pages-v2026.11.18.12/previews/work.png) | DESIGN_REVIEW_OPEN |
+
+
+## 신규 이미지 교체 필수 지시 — v2026.11.23.7
+
+**위 표의 180개 DESIGN_REVIEW_OPEN은 이제 모두 `REPLACEMENT_IMAGE_REQUIRED` 요구사항도 갖는다.** 11월18일 원본 PNG 보존 + 게임형 시안 신규 PNG 제작 + 역할별(게스트/회원/관리자) 이미지 분리 + 현재 파비콘 원본 픽셀 사용 + 화면별 PC/mobile 판독성 + 승인/전후 비교가 완료돼야 이미지 교체 완료로 인정한다. 이 표는 원본 목록이지 신규 PNG 결과물이 아니다.
+
+신규 시안 보관 위치 예시: `docs/design/game-ui-v2026.11.23.7/previews/<route-key>.png`. 새 이미지의 링크는 실제 파일 저장과 검증 후에만 추가한다. **현재는 0/180개 교체 확인 상태**이며, 검증되지 않은 새 로고 또는 가짜 날짜·금리·계정 데이터를 이미지에 쓰지 않는다. 승인된 새 이미지와 실제 Spring 프론트엔드 구현은 서로 다른 완료 조건이다.
+
+[단일 UI 통합 기준/지시 PR #3396](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3396).
