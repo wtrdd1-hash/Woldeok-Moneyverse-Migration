@@ -1,5 +1,7 @@
 # Woldeok Moneyverse — Living Project Plan
 
+> **UI/UX canonical entrypoint (v2026.11.23.5, docs-only):** [Single UI/UX design, issues and implementation rules](../UI_UX_SINGLE_REFERENCE.md). Binding owner correction: the **existing site favicon** is the one and only logo (not a generated W or crown emblem); admin navigation must be rendered **only** for authorized administrators. This is documentation scope, not a released UI or QA acceptance.
+
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 
 ## v2026.11.21.2234 — Saved AgentMemory development reference and task-handoff protocol (PLANNING; not installed)
