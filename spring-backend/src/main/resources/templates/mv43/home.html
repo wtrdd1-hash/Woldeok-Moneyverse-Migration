@@ -23,7 +23,21 @@
       <main id="main-content" tabindex="-1">
         <section class="hero" aria-labelledby="hero-title">
           <div><div class="eyebrow"><span aria-hidden="true">✦</span> WOLDEOK MONEYVERSE</div><h2 id="hero-title" th:attr="data-i18n=${uiPageKey == 'home' ? 'personalTitle' : uiPageKey + 'Hero'}" th:text="${uiCopy[uiPageKey == 'home' ? 'personalTitle' : uiPageKey + 'Hero']}">My assets</h2><p id="hero-description" th:attr="data-i18n=${uiPageKey + 'Lead'}" th:text="${uiCopy[uiPageKey + 'Lead']}">See your wallet, investments and activity in one place.</p></div>
-          <div class="hero-decoration" aria-hidden="true"><span class="realm-orbit"><span class="realm-core">W</span></span></div>
+          <div class="hero-decoration" aria-hidden="true"><span class="realm-orbit"><span class="realm-core"><img src="/assets/mv39/favicon.ico" width="120" height="120" alt=""></span></span></div>
+        </section>
+        <!-- Static policy summary only: never substitute this for a verified current game clock response. -->
+        <section class="game-clock-guide" aria-labelledby="game-clock-rule-title">
+          <div>
+            <h3 id="game-clock-rule-title" class="game-clock-guide__title"
+              th:text="${uiLanguage == 'ko' ? '서버 게임 시간 안내' : (uiLanguage == 'ja' ? 'ゲームサーバー時間の案内' : (uiLanguage == 'zh' ? '游戏服务器时间说明' : (uiLanguage == 'vi' ? 'Quy tắc thời gian máy chủ' : 'Server game time rules')))}">Server game time rules</h3>
+            <p class="game-clock-guide__note"
+              th:text="${uiLanguage == 'ko' ? '기획 기준 · 서버의 현재 날짜와 실제 적용 정책은 별도 검증 필요 · 금융 이자/보안 제한과 혼동 금지' : (uiLanguage == 'ja' ? '計画基準・現在の時刻は未検証・金融/安全の期間とは別' : (uiLanguage == 'zh' ? '规划规则·当前服务器时间尚未验证·不等同于金融或安全时限' : (uiLanguage == 'vi' ? 'Theo kế hoạch · Chưa xác minh giờ máy chủ · Không áp dụng cho mọi giới hạn' : 'Planned rule; live calendar unverified. Not a finance or safety timer.')))}">Planned rule; live calendar unverified.</p>
+          </div>
+          <div class="game-clock-guide__ratios" aria-label="Game time conversion rule">
+            <span th:text="${uiLanguage == 'ko' ? '현실 10분' : (uiLanguage == 'ja' ? '現実10分' : (uiLanguage == 'zh' ? '现实10分钟' : (uiLanguage == 'vi' ? '10 phút thực' : '10 real min')))}">10 real min</span><b>=</b>
+            <span th:text="${uiLanguage == 'ko' ? '서버 1일' : (uiLanguage == 'ja' ? 'ゲーム1日' : (uiLanguage == 'zh' ? '服务器1天' : (uiLanguage == 'vi' ? '1 ngày máy chủ' : '1 server day')))}">1 server day</span>
+            <span th:text="${uiLanguage == 'ko' ? '서버 7일 = 1주' : (uiLanguage == 'ja' ? 'ゲーム7日 = 1週' : (uiLanguage == 'zh' ? '服务器7天 = 1周' : (uiLanguage == 'vi' ? '7 ngày = 1 tuần' : '7 server days = 1 week')))}">7 server days = 1 week</span>
+          </div>
         </section>
         <div id="page-content" aria-live="polite"></div>
       </main>
