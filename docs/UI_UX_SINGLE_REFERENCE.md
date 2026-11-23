@@ -30,3 +30,19 @@ Earlier generated concepts **failed brand fidelity** because the original favico
 
 ## Controls and records
 Original plans, historic worklogs, QA and releases remain unchanged. Review main SHA, approved Nov 18 references and actual favicon before future edits. Use independent branch, exact-SHA tests, role×locale×viewport QA, Test and controlled zero-downtime Production with rollback. This document is not proof of a deployment.
+
+
+## 11. Owner directive — replace all 180 example design images (v2026.11.23.7)
+
+**Status: IMPLEMENTATION_REQUIRED / NOT_STARTED.** Do not treat a gallery index as delivery. Generate, review and version **new game-economy visual example images for all 180 desktop/mobile route concepts** across home, admin, finance, game, auth, member, social, tools and legal. Preserve original Nov 18 PNGs untouched under `docs/design/all-pages-v2026.11.18.12/previews/`; put approved replacements in a new versioned design directory (e.g. `docs/design/game-ui-v2026.11.23.7/previews/`). The consolidated index must prefer approved replacement images but link back to originals for comparison. This change **does not generate or replace any PNGs**.
+
+Mandatory gates:
+1. Embed the **unchanged pixels of the current existing favicon** `/assets/mv39/favicon.ico`, not a generated lookalike W/crown logo.
+2. Game progress, rewards, balances, trading quotes, interest, profiles and game dates must be grounded in supported features, otherwise explicitly marked synthetic proposal-only data.
+3. **Only administrator-role concept screens may show admin navigation.** Guest/member desktop and mobile screenshots must omit it entirely. Real runtime must separately enforce server authorization.
+4. Show the planned clock mapping `10 real min = 1 server day`, `7 server days = 1 server week` where applicable; do not fabricate current game date/status or confuse it with finance/security clocks.
+5. Produce legible desktop and mobile images, check responsive structure/5 locales/accessibility and page-specific visual/functional fidelity. Palette-only recoloring or 180 duplicate generic cards is not acceptable.
+
+Record `route / original_png / proposed_png / brand_check / game_clock_check / role_visibility_check / visual_diff / status / reviewer / approved_sha`, following `PLANNED → GENERATED → REVIEWED → APPROVED → IMPLEMENTED → TEST_VERIFIED`. Approved images and live implementation are separate acceptance milestones.
+
+[All 180 originals](design/all-pages-v2026.11.18.12/README.md) · [route matrix PR #3397](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3397).
