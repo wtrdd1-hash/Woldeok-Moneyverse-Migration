@@ -1,3 +1,6 @@
+## v2026.11.24.0818 — Stitch Skills 로컬 적용 시험
+소스 전용 디자인 추출 스킬과 11월 18일 승인 디자인 규격·정적 검사를 추가. Stitch 클라우드 디자인은 별도 MCP 연결·승인 필요; Test/운영 무변경. [상세](../development/GOOGLE_STITCH_SKILLS_PILOT_v2026.11.24.0818.ko.md).
+
 # 월덕 머니버스 — Living Project Plan
 
 > **v2026.11.23.10 UI visual/feature audit** [180 revised PNGs](../design/game-ui-v2026.11.23.10/README.ko.md) · [audit](../qa/2026-11-23-game-ui-180-image-feature-audit.ko.md). Image file QA only; full runtime acceptance unverified.

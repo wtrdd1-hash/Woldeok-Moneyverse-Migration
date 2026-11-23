@@ -1,3 +1,6 @@
+## v2026.11.24.0818 — local Stitch Skills pilot
+Source-only design system extraction is locally available; approved Nov 18 DESIGN.md and test script added. Actual Stitch cloud design requires separate MCP setup/authorization; no Test/Production action. [Details](../development/GOOGLE_STITCH_SKILLS_PILOT_v2026.11.24.0818.md).
+
 # Woldeok Moneyverse — Living Project Plan
 
 > **v2026.11.23.10 UI visual/feature audit** [180 revised PNGs](../design/game-ui-v2026.11.23.10/README.md) · [audit](../qa/2026-11-23-game-ui-180-image-feature-audit.md). Image file QA only; full runtime acceptance unverified.

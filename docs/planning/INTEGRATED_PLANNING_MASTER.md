@@ -1,3 +1,6 @@
+## v2026.11.24.0818 — Stitch Skills design-contract pilot (not deployed)
+Google's source-only extraction skill is available project-locally and the November 18 approved web design has an EN/KO machine-readable `.stitch/DESIGN.md`; 11 CSS token checks PASS. Preserve Spring/Thymeleaf, real API data and independent Test requirements. No Stitch MCP, cloud screens or deployments. [Details](../development/GOOGLE_STITCH_SKILLS_PILOT_v2026.11.24.0818.md).
+
 # Woldeok Moneyverse — Integrated Planning Master
 
 > **v2026.11.24.1 UI VISUAL AUTHORITY (current):** Nov23 **v10 only** is the single active reference for all 180 routes: [authority](../design/CURRENT_UI_DESIGN.md), [manifest](../design/CURRENT_UI_DESIGN_MANIFEST.json), [active gallery](../design/game-ui-v2026.11.23.10/README.md). v8/Nov18 PNGs are archived and NOT implementation inputs. Image approval and Test/E2E remain open.

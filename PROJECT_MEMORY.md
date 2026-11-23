@@ -310,3 +310,7 @@ Owner directs progressive live adoption of individually completed and accepted f
 
 
 2026-11-22 measured continuation: protected native administrator catalog preview connection installed successfully (application f0336fded6068f884c87f88efedeb770fd3387d4, operational b2eb6c181bf90e865120ce4eb962135f015665e7). DB-read health/source and presentation health/source200; anonymous401/unknown404/write405 and existingAPI/maintenance boundaries passed. Public frontend is still503 maintenance; do not claim Production cutover. Browser control is disabled; authenticated/visual acceptance remainsOPEN. Receipt: docs/releases/2026-11-22-native-catalog-preview-connection.md. Both recurring Instagram design references remain required but video contents unverified.
+
+
+## v2026.11.24.0818 — Google Stitch Skills local design extraction handoff
+Owner supplied YouTube Shorts T5qdrYS7znc; verified upstream `google-labs-code/stitch-skills`. In isolated worktree, installed source-only extractor as `.agents/skills/stitch-extract-design-md` and authored `.stitch/DESIGN.md` plus Korean companion from approved November 18 Spring CSS. The local static checker confirms 11 official tokens; no Stitch MCP credential or cloud project, no source/data upload, no Test/Production deployment. When resuming, re-read integrated master and `docs/development/GOOGLE_STITCH_SKILLS_PILOT_v2026.11.24.0818.ko.md`; never infer 180-screen implementation from this design contract.

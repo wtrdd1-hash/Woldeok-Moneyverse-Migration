@@ -1,3 +1,6 @@
+## v2026.11.24.0818 — Stitch Skills 공식 디자인 계약 시범 (배포 없음)
+Google의 소스 전용 추출 스킬을 프로젝트 내부에 설치하고 11월 18일 승인 디자인을 한영 `.stitch/DESIGN.md` 규격으로 작성. CSS 11개 토큰 정적 검사 PASS. Spring/Thymeleaf·실데이터·독립 Test 원칙 불변; Stitch MCP·클라우드 화면 생성·운영 배포 없음. [상세](../development/GOOGLE_STITCH_SKILLS_PILOT_v2026.11.24.0818.ko.md).
+
 # 월덕 머니버스 — 통합 기획 마스터
 
 > **v2026.11.24.1 현행 UI 이미지 최상위 기준:** 11월23일 **v10만** 180개 경로 구현의 시각 자료: [단일 기준](../design/CURRENT_UI_DESIGN.ko.md), [매니페스트](../design/CURRENT_UI_DESIGN_MANIFEST.json), [최신 갤러리](../design/game-ui-v2026.11.23.10/README.ko.md). v8·11월18일 이미지는 보관본이며 새 구현 참조 금지. 시각 승인·Test/E2E는 미완료.
