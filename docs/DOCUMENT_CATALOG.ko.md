@@ -1,5 +1,7 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
+**현재 UI 통합 기준 (v2026.11.23.5):** [UI/UX 통합 문서](UI_UX_SINGLE_REFERENCE.ko.md) — 현재 파비콘이 로고, 관리자 메뉴 관리자 전용; 화면·문제·QA 원장. 문서 검토 중.
+
 **DOC-2026.11.11.1500 — [최신 문서·권위·검증 현황](CURRENT_DOCUMENTATION_STATUS.ko.md) / [English](CURRENT_DOCUMENTATION_STATUS.md).** 아래 과거 기록은 현재 운영 기능 인증이 아님. 통합기획서와 실측 영수증을 우선하며, 기록 시점 테스트 버전 API는 HTTP 502였음. 문서만 변경.
 
 
