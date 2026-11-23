@@ -17,8 +17,12 @@ public class NativePublicFeaturePageController {
 
     @GetMapping(value={"/stocks","/shop","/board"},produces=MediaType.TEXT_HTML_VALUE)
     public String show(HttpServletRequest request,HttpServletResponse response,Model model) {
-        String template=home.home(request,response,model);
-        model.addAttribute("uiPageKey",Map.of("/stocks","stocks","/shop","shop","/board","board").get(request.getRequestURI()));
+        String uri = request.getRequestURI();
+        String template = home.home(request, response, model);
+        if ("/stocks".equals(uri)) {
+            template = "mv43/stocks";
+        }
+        model.addAttribute("uiPageKey", Map.of("/stocks", "stocks", "/shop", "shop", "/board", "board").getOrDefault(uri, "stocks"));
         return template;
     }
 }

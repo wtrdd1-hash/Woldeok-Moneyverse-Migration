@@ -270,8 +270,10 @@
     "adminLogsSource_FRONTEND_ERRORS":["Frontend errors", "프론트엔드 오류", "フロントエンドエラー", "前端错误", "Lỗi frontend"],
 
     home:['Home','홈','ホーム','首页','Trang chủ'],
+    dashboard:['Dashboard','대시보드','ダッシュボード','仪表盘','Bảng điều khiển'],
     wallet:['Wallet','지갑','ウォレット','钱包','Ví'],
-    stocks:['Invest','투자','投資','投资','Đầu tư'],
+    bank:['Bank','은행','銀行','银行','Ngân hàng'],
+    stocks:['Stocks','주식','株式','股票','Cổ phiếu'],
     quests:['Quests','퀘스트','クエスト','任务','Nhiệm vụ'],
     shop:['Shop','상점','ショップ','商店','Cửa hàng'],
     board:['Community','커뮤니티','コミュニティ','社区','Cộng đồng'],

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:lang="${uiLanguage}" th:attr="data-ui-language=${uiLanguage}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0C1020">
+  <meta name="description" content="W Moneyverse Virtual Stock Exchange — Real-time Quotes, Chart & Simulated Investment">
+  <title>가상 주식 거래소 · W Moneyverse</title>
+  <link rel="stylesheet" href="/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31">
+  <link rel="stylesheet" href="/assets/mv43/stocks.css">
+  <script src="/assets/mv39/i18n.js?v=ee47eefcc4e63a309d88f841372a79121535f1e1100532b388a8842910501022" defer></script>
+  <script src="/assets/mv39/money.js?v=9e95a9188599bc8d14d9743b3506f68af9fd17a63c6dd7db471e0d077d9283d5" defer></script>
+  <script src="/assets/mv43/stocks.js" defer></script>
+  <th:block th:replace="~{shared/chrome :: commonHead}"></th:block>
+</head>
+<body data-page="stocks">
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="app-shell">
+  <th:block th:replace="~{shared/chrome :: sidebar}"></th:block>
+  <div class="app-main">
+    <div class="app-inner">
+      <th:block th:replace="~{shared/chrome :: pageHeader}"></th:block>
+      <main id="main-content" tabindex="-1">
+        <section class="hero" aria-labelledby="hero-title">
+          <div>
+            <div class="eyebrow"><svg style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;" viewBox="0 0 24 24" fill="currentColor"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg> WOLDEOK SECURITIES</div>
+            <h2 id="hero-title">가상 주식 거래소</h2>
+            <p id="hero-description">머니버스 10대 가상 상장사 실시간 호가 및 모의투자 시뮬레이션 시스템입니다.</p>
+          </div>
+          <div class="hero-decoration" aria-hidden="true"><span class="realm-orbit"><span class="realm-core">S</span></span></div>
+        </section>
+
+        <div id="page-content" class="stocks-page-content">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:rgba(21,29,50,0.6);border:1px solid rgba(168,188,216,0.1);border-radius:12px;">
+            <div style="display:inline-flex;align-items:center;gap:8px;font-size:0.8125rem;color:#10b981;font-weight:600;">
+              <span style="width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 10px #10b981;display:inline-block;"></span>
+              실시간 시세 자동 동기화 중 (소켓 연동)
+            </div>
+            <span style="font-size:0.75rem;color:#64748b;font-family:var(--font-mono,monospace);">KRX-SIMULATED · DELAY 0ms</span>
+          </div>
+
+          <!-- Hero Portfolio Card -->
+          <section class="stocks-hero-card" aria-label="투자 자산 요약">
+            <div class="stocks-hero-header">
+              <div class="stocks-hero-sub">내 투자 평가 총액</div>
+              <div class="stocks-hero-main-row">
+                <strong id="kpi-invest-total" class="stocks-hero-amount">394,728 WLD</strong>
+                <span class="stocks-profit-badge plus">+1.42% 당일 수익</span>
+              </div>
+            </div>
+
+            <div class="stocks-metrics-grid">
+              <div class="stocks-metric-item">
+                <span class="stocks-metric-label">주문 가능 현금</span>
+                <strong id="kpi-invest-cash" class="stocks-metric-val">394,728 WLD</strong>
+              </div>
+              <div class="stocks-metric-item">
+                <span class="stocks-metric-label">보유 종목 수</span>
+                <strong class="stocks-metric-val">3 종목</strong>
+              </div>
+              <div class="stocks-metric-item">
+                <span class="stocks-metric-label">총 평가 손익</span>
+                <strong class="stocks-metric-val" style="color:#f87171;">+5,600 WLD</strong>
+              </div>
+              <div class="stocks-metric-item">
+                <span class="stocks-metric-label">가상 시장 거래대금</span>
+                <strong class="stocks-metric-val">1.42조 WLD</strong>
+              </div>
+            </div>
+          </section>
+
+          <!-- Toss-style 3-Tabs Navigation -->
+          <nav class="stocks-tabs-nav" aria-label="주식 탭">
+            <button type="button" class="stocks-tab-btn active" data-tab="market">전체 종목 시세</button>
+            <button type="button" class="stocks-tab-btn" data-tab="holdings">내 보유 주식</button>
+            <button type="button" class="stocks-tab-btn" data-tab="orders">체결 / 주문 내역</button>
+          </nav>
+
+          <!-- Tab 1: 전체 종목 시세 -->
+          <div id="panel-market" class="stocks-tab-panel active">
+            <section class="stocks-table-card">
+              <div class="stocks-table-head">
+                <h3 class="stocks-table-title">가상 상장사 실시간 시세</h3>
+                <span style="font-size:0.75rem;color:#94a3b8;">10개사 상장 거래 중</span>
+              </div>
+              <div style="overflow-x:auto;">
+                <table class="stocks-table">
+                  <thead>
+                    <tr>
+                      <th>종목명 / 코드</th>
+                      <th>현재가 (WLD)</th>
+                      <th>전일대비</th>
+                      <th>거래량</th>
+                      <th>주문</th>
+                    </tr>
+                  </thead>
+                  <tbody id="stocks-list-tbody">
+                    <!-- Dynamic rendering by stocks.js -->
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+
+          <!-- Tab 2: 내 보유 주식 -->
+          <div id="panel-holdings" class="stocks-tab-panel">
+            <section class="stocks-table-card">
+              <div class="stocks-table-head">
+                <h3 class="stocks-table-title">보유 잔고 및 수익률</h3>
+              </div>
+              <div style="overflow-x:auto;">
+                <table class="stocks-table">
+                  <thead>
+                    <tr>
+                      <th>종목명</th>
+                      <th>보유수량</th>
+                      <th>평균매수가</th>
+                      <th>평가손익</th>
+                      <th>수익률</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>월덕전자</strong></td>
+                      <td>10 주</td>
+                      <td>72,000 WLD</td>
+                      <td style="color:#f87171;">+25,000 WLD</td>
+                      <td style="color:#f87171;font-weight:700;">+3.47%</td>
+                    </tr>
+                    <tr>
+                      <td><strong>덕산하이닉스</strong></td>
+                      <td>5 주</td>
+                      <td>175,000 WLD</td>
+                      <td style="color:#f87171;">+16,000 WLD</td>
+                      <td style="color:#f87171;font-weight:700;">+1.83%</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+
+          <!-- Tab 3: 체결 / 주문 내역 -->
+          <div id="panel-orders" class="stocks-tab-panel">
+            <section class="stocks-table-card">
+              <div class="stocks-table-head">
+                <h3 class="stocks-table-title">최근 체결 기록</h3>
+              </div>
+              <div style="overflow-x:auto;">
+                <table class="stocks-table">
+                  <thead>
+                    <tr>
+                      <th>체결일시</th>
+                      <th>종목</th>
+                      <th>구분</th>
+                      <th>체결단가</th>
+                      <th>수량</th>
+                      <th>상태</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style="font-size:0.75rem;color:#94a3b8;">2026. 11. 23. 14:20</td>
+                      <td>월덕전자</td>
+                      <td><span style="color:#f87171;font-weight:700;">매수</span></td>
+                      <td>74,500 WLD</td>
+                      <td>5 주</td>
+                      <td><span style="color:#10b981;font-weight:600;">체결 완료</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+
+          <!-- Trade Order Modal Dialog -->
+          <dialog id="stock-trade-modal" style="padding:0;border:none;border-radius:16px;background:#0d111e;border:1px solid rgba(255,255,255,0.12);box-shadow:0 25px 50px -12px rgba(0,0,0,0.7);color:#f1f5f9;max-width:440px;width:90%;">
+            <div style="padding:20px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;align-items:center;">
+              <h3 id="modal-stock-name" style="margin:0;font-size:1.125rem;font-weight:700;">종목 주문</h3>
+              <button type="button" id="modal-trade-close" style="background:none;border:none;color:#94a3b8;font-size:1.5rem;cursor:pointer;line-height:1;">&times;</button>
+            </div>
+            <form onsubmit="event.preventDefault(); alert('모의투자 주문이 접수되었습니다.'); document.getElementById('stock-trade-modal').close();" style="padding:20px;display:flex;flex-direction:column;gap:16px;">
+              <input type="hidden" id="trade-stock-code">
+              <input type="hidden" id="trade-stock-price">
+              <div>
+                <span style="font-size:0.8125rem;color:#94a3b8;">현재가</span>
+                <div id="modal-stock-price" style="font-size:1.5rem;font-weight:800;color:#f8fafc;font-family:var(--font-mono,monospace);margin-top:4px;">0 WLD</div>
+              </div>
+              <div>
+                <label for="trade-quantity" style="font-size:0.875rem;font-weight:600;display:block;margin-bottom:6px;">주문 수량 (주)</label>
+                <input id="trade-quantity" type="number" min="1" value="1" required style="width:100%;box-sizing:border-box;padding:12px;background:#151b2e;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:1.125rem;font-family:var(--font-mono,monospace);">
+              </div>
+              <div style="display:flex;gap:10px;margin-top:10px;">
+                <button type="submit" style="flex:1;padding:14px;background:#ef4444;color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">매수하기</button>
+                <button type="button" onclick="alert('모의투자 매도 주문이 접수되었습니다.'); document.getElementById('stock-trade-modal').close();" style="flex:1;padding:14px;background:#3b82f6;color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">매도하기</button>
+              </div>
+            </form>
+          </dialog>
+        </div>
+      </main>
+      <th:block th:replace="~{shared/chrome :: footer}"></th:block>
+    </div>
+  </div>
+</div>
+<th:block th:replace="~{shared/chrome :: mobileNavigation}"></th:block>
+<th:block th:replace="~{shared/chrome :: support}"></th:block>
+</body>
+</html>
