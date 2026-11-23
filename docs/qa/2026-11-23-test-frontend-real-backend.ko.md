@@ -15,7 +15,7 @@
 | 미구현 또는 미연결404 |117| 실제 신규 프론트엔드 누락. 홈으로 우회해 정상으로 세지 않음 |
 | 실제 source unavailable503 |1| /status; 정상 상태를 합성하지 않음 |
 
-원시 결과: [180행 기록](2026-11-23-test-frontend-real-backend/route-180-guest-audit-initial.json).
+원시 결과: [180행 기록](2026-11-23-test-frontend-route-180-initial.json).
 이 점검은 모든 관리자·회원·금융 기능 PASS가 아니다. 현재 브라우저의 운영 로그인 세션을 Test에 복사하지 않았다.
 
 ## 발견·수정 현황

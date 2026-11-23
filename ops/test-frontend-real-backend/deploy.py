@@ -35,7 +35,14 @@ def root_dir(path,mode):
         raise ValueError("Owned protected directory required")
 def atomic(path,data,expected,mode,stage,name):
     same(path,expected)
-    writer=owned.OwnedFiles()
+    class IntentOwnedFiles(owned.OwnedFiles):
+        def _displace(self,target,slot,prior,entry):
+            item=entry["candidate"]
+            planned={"device":item[0],"inode":item[1],"sha256":item[2],"mode":mode,"uid":os.geteuid()}
+            record(stage,name+".intent.json",{"path":str(target),"candidate":planned,
+                "predecessor":expected,"recoveryDirectory":str(slot.parent)})
+            return super()._displace(target,slot,prior,entry)
+    writer=IntentOwnedFiles()
     try:
         same(path,expected)
         writer.write(path,data,mode=mode,replace=True,expected=expected["sha256"],

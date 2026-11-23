@@ -1,5 +1,5 @@
 """Replace only the previously verified own Test frontend unit, retaining an inverse."""
-import argparse,fcntl,importlib.util,json,os,pathlib,re
+import argparse,fcntl,importlib.util,json,os,pathlib,re,time
 HERE=pathlib.Path(__file__).resolve().parent
 spec=importlib.util.spec_from_file_location("native_test_deploy",HERE/"deploy.py")
 deploy=importlib.util.module_from_spec(spec);spec.loader.exec_module(deploy)
@@ -33,22 +33,64 @@ def manager():
         raise ValueError("Foreign systemd authority")
     return int(state["MainPID"])
 
-def restore(stage,context,acquired):
-    deploy.same(UNIT,acquired)
-    old=pathlib.Path(jar_path(context["previous"]))
-    new=pathlib.Path(jar_path(context["source"]))
-    if deploy.sha(old.read_bytes())!=context["previousJarSha256"]:raise ValueError("Inverse artifact changed")
-    pid=manager()
-    if pid:require_process(pid,new)
-    deploy.run("systemctl","stop",deploy.routing.UNIT)
-    if manager()!=0:raise ValueError("Candidate did not stop")
-    restored=deploy.atomic(UNIT,(stage/"unit.before").read_bytes(),acquired,0o644,stage,"unit-restored")
-    deploy.run("systemctl","daemon-reload");deploy.run("systemctl","start",deploy.routing.UNIT)
+
+def recovery_state(stage,unit):
+    before=json.loads((stage/"unit-before.json").read_text())
+    intent_path=stage/"unit-owned.intent.json"
+    intent=json.loads(intent_path.read_text()) if intent_path.exists() else None
+    if unit.exists() or unit.is_symlink():
+        now=deploy.snapshot(unit)
+        if now==before:return "previous",now,None
+        if intent and intent.get("path")==str(unit) and now==intent.get("candidate"):
+            return "candidate",now,None
+        raise ValueError("Recovery refuses a foreign unit occupant")
+    if not intent or intent.get("path")!=str(unit):raise ValueError("Missing ownership intent")
+    directory=pathlib.Path(intent["recoveryDirectory"])
+    if directory.parent!=unit.parent or not directory.name.startswith("."+unit.name+".nov18-qa-"):
+        raise ValueError("Unapproved recovery directory")
+    slot=directory/"displaced";deploy.same(slot,before)
+    return "displaced",before,slot
+
+def wait_process(jar,verify,timeout=5):
+    deadline=time.monotonic()+timeout
+    while time.monotonic()<deadline:
+        verify()
+        try:
+            pid=manager()
+            if pid==0:return 0
+            require_process(pid,jar);return pid
+        except (OSError,ValueError):pass
+        time.sleep(.1)
+    raise ValueError("Test process ownership did not become provable")
+
+def recover(stage,context):
+    old=pathlib.Path(jar_path(context["previous"]));new=pathlib.Path(jar_path(context["source"]))
+    original=(stage/"unit.before").read_bytes()
+    retarget(original,context["previous"],context["source"])
+    if deploy.sha(old.read_bytes())!=context["previousJarSha256"]:
+        raise ValueError("Inverse artifact changed")
+    kind,proof,slot=recovery_state(stage,UNIT)
+    if kind=="candidate":
+        if proof["sha256"]!=deploy.sha(deploy.routing.unit(str(new)).encode()):
+            raise ValueError("Planned unit bytes are not the candidate")
+        wait_process(new,lambda:deploy.same(UNIT,proof))
+        deploy.run("systemctl","stop",deploy.routing.UNIT)
+        if manager()!=0:raise ValueError("Owned candidate did not stop")
+        proof=deploy.atomic(UNIT,original,proof,0o644,stage,"unit-restored")
+    elif kind=="displaced":
+        # A hard link cannot replace a foreign occupant arriving after the check.
+        os.link(slot,UNIT);deploy.same(UNIT,proof)
+    deploy.same(UNIT,proof)
+    deploy.run("systemctl","daemon-reload")
+    running=wait_process(old,lambda:deploy.same(UNIT,proof))
+    if running==0:deploy.run("systemctl","start",deploy.routing.UNIT)
     def verify():
-        deploy.same(UNIT,restored);require_process(manager(),old)
+        deploy.same(UNIT,proof);manager()
     deploy.wait_identity(deploy.routing.PORT,context["previous"],verify,timeout=30)
+    pid=wait_process(old,verify)
+    if not pid:raise ValueError("Restored source has no owned process")
     deploy.wait_identity(80,context["previous"],verify)
-    deploy.record(stage,"rollback.json",{"source":context["previous"],"pid":manager(),"unit":restored,"testOnly":True})
+    deploy.record(stage,"rollback.json",{"source":context["previous"],"pid":pid,"unit":proof,"testOnly":True})
 
 def upgrade(archive,source,ci_run,previous):
     data,expected,attestation=deploy.candidate(archive,source,ci_run)
@@ -86,21 +128,21 @@ def upgrade(archive,source,ci_run,previous):
     if generation.exists():raise ValueError("Immutable upgrade generation already exists")
     generation.mkdir(mode=0o755)
     jar=generation/"app.jar";deploy.private(jar,data);os.chmod(jar,0o444)
-    # Nginx and the real API/DB stay running; only this proven Test renderer is stopped.
-    deploy.same(UNIT,before)
-    if manager()!=pid:raise ValueError("Previous manager process changed")
-    require_process(pid,old_jar)
-    deploy.run("systemctl","stop",deploy.routing.UNIT)
-    if manager()!=0:raise ValueError("Previous renderer did not stop")
-    acquired=deploy.atomic(UNIT,unit,before,0o644,stage,"unit-owned")
-    deploy.record(stage,"unit.json",acquired)
-    deploy.record(stage,"start-intent.json",{"source":source,"previous":previous})
+    # Recovery intent exists before any service transition, including a process crash.
+    deploy.record(stage,"transition-intent.json",{"source":source,"previous":previous,"previousPid":pid})
     try:
+        deploy.same(UNIT,before)
+        if manager()!=pid:raise ValueError("Previous manager process changed")
+        require_process(pid,old_jar)
+        deploy.run("systemctl","stop",deploy.routing.UNIT)
+        if manager()!=0:raise ValueError("Previous renderer did not stop")
+        acquired=deploy.atomic(UNIT,unit,before,0o644,stage,"unit-owned")
+        deploy.record(stage,"unit.json",acquired)
+        deploy.record(stage,"start-intent.json",{"source":source,"previous":previous})
         deploy.run("systemctl","daemon-reload");deploy.run("systemctl","start",deploy.routing.UNIT)
         def verify():
             deploy.same(UNIT,acquired)
-            running=manager()
-            if running:require_process(running,jar)
+            manager()
         deploy.wait_identity(deploy.routing.PORT,source,verify,timeout=30)
         verify();new_pid=manager();require_process(new_pid,jar)
         deploy.record(stage,"runtime.json",{"source":source,"pid":new_pid,"jarSha256":expected,"unit":deploy.routing.UNIT})
@@ -112,7 +154,7 @@ def upgrade(archive,source,ci_run,previous):
             "operationalSource":attestation["operationalSource"],"jarSha256":expected,"pid":new_pid,
             "testOnly":True,"wholeSiteAccepted":False,"nginxConfigurationUnchanged":True})
     except Exception:
-        restore(stage,context,acquired);raise
+        recover(stage,context);raise
     print(json.dumps({"source":source,"previousSource":previous,"pid":new_pid,"testOnly":True,"nginxConfigurationUnchanged":True}))
 
 def main():
@@ -127,7 +169,7 @@ def main():
             stage=deploy.ROOT/a.source;deploy.root_dir(stage,0o700)
             context=json.loads((stage/"upgrade-context.json").read_text())
             if context.get("source")!=a.source or context.get("kind")!="test-frontend-upgrade":raise ValueError("Wrong upgrade receipt")
-            restore(stage,context,json.loads((stage/"unit.json").read_text()))
+            recover(stage,context)
         else:
             if not a.previous or a.archive is None or not a.ci_run:raise ValueError("Explicit accepted predecessor and attested candidate required")
             jar_path(a.previous);upgrade(a.archive,a.source,a.ci_run,a.previous)

@@ -121,3 +121,9 @@ test('manual language changes synchronize URL without a page reload or losing ot
  window.MV39Locale.setPreference('auto');
  assert.equal(changed.searchParams.has('lang'),false);
 });
+
+test('repeated URL language values use the same canonical cookie fallback as SSR',()=>{
+ const window=localeWindow('wdmv_locale=vi','en','vi');window.location={search:'?lang=ko&lang=ko'};
+ runInNewContext(source('static/assets/mv39/i18n.js'),{window,Event,console,URLSearchParams,URL});
+ assert.equal(window.MV39Locale.current(),'vi');
+});

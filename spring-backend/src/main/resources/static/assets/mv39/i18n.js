@@ -781,7 +781,8 @@
       return supports(code) ? code : null;
     } catch { return null; }
   }
-  let preference = explicitPreference() || storage.read() || readCookie() || 'auto';
+  const cookiePreference=readCookie();
+  let preference = explicitPreference() || (supports(cookiePreference)||cookiePreference==='auto'?cookiePreference:null) || storage.read() || 'auto';
   if (preference !== 'auto' && !supports(preference)) preference='auto';
   let current = preference === 'auto' ? detectBrowser() : preference;
   const missingKeys = new Set();

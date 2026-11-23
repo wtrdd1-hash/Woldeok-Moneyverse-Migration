@@ -23,4 +23,10 @@ class NativeExplicitLocaleTest {
   r.setParameter("lang","unsupported");r.setCookies(new Cookie("wdmv_locale","ja"));
   assertEquals("ja",locale.resolve(r));assertEquals("ja",locale.resolvePublic(r));
  }
+
+ @org.junit.jupiter.api.Test void duplicateSelectionsAreIgnoredConsistentlyWithTheClient() {
+  var locale=new UiLocale(new ObjectMapper());var r=new MockHttpServletRequest();
+  r.addParameter("lang","ko","ko");r.setCookies(new Cookie("wdmv_locale","en"));
+  assertEquals("en",locale.resolve(r));assertEquals("en",locale.resolvePublic(r));
+ }
 }
