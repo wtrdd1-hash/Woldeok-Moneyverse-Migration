@@ -1,3 +1,6 @@
+## v2026.11.24.0818 — Stitch Skills 로컬 적용 시험
+소스 전용 디자인 추출 스킬과 11월 18일 승인 디자인 규격·정적 검사를 추가. Stitch 클라우드 디자인은 별도 MCP 연결·승인 필요; Test/운영 무변경. [상세](../development/GOOGLE_STITCH_SKILLS_PILOT_v2026.11.24.0818.ko.md).
+
 # 월덕 머니버스 — Living Project Plan
 
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).

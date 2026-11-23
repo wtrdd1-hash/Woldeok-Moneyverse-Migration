@@ -1,3 +1,6 @@
+## v2026.11.24.0818 — Stitch Skills design-contract pilot (not deployed)
+Google's source-only extraction skill is available project-locally and the November 18 approved web design has an EN/KO machine-readable `.stitch/DESIGN.md`; 11 CSS token checks PASS. Preserve Spring/Thymeleaf, real API data and independent Test requirements. No Stitch MCP, cloud screens or deployments. [Details](../development/GOOGLE_STITCH_SKILLS_PILOT_v2026.11.24.0818.md).
+
 # Woldeok Moneyverse — Integrated Planning Master
 
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).

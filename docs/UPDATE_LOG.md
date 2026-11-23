@@ -1,3 +1,6 @@
+## v2026.11.24.0818 — Google Stitch Skills source-only pilot (branch only)
+Local design extraction skill, EN/KO approved Nov-18 DESIGN.md, and 11-token CSS contract PASS. Stitch MCP, UI generation, Test and Production remain unperformed. [Details](development/GOOGLE_STITCH_SKILLS_PILOT_v2026.11.24.0818.md).
+
 ## v2026.11.10.1948 — National Mint UI/monetary policy verified in real Production v1947
 
 ## v2026.11.21.2234 — Permanent AgentMemory coding-reference preservation and safe task memory (DOCUMENTATION ONLY)

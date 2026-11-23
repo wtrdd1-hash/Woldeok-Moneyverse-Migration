@@ -5450,3 +5450,10 @@ eserves: 대한민국 외환보유액 통합계정)
   - **Multi-Viewport Resilience Shield**:
     - 데스크톱(1024px+) 240px 고정 좌측 사이드바 + 탑 슈퍼 헤더 유지.
     - 모바일(1023px 이하) 5탭 고정 하단 독(44px+ 터치 타깃, 가로 스크롤 제로) 일괄 완비.
+
+## v2026.11.24.0818 — Google Stitch Skills source-only design-contract pilot (append-only)
+- Source: Google Labs Code stitch-skills pinned SHA `9f4e828e77634e230978be45fec5501554dbe4b2`; video T5qdrYS7znc.
+- Isolated branch only; installed `stitch-extract-design-md`, added `.stitch/DESIGN.md` EN/KO and reproducible Spring CSS contract checker (11 tokens PASS).
+- Maintain approved November 18 navy/violet, English/Korean plus JA/ZH/VI, actual API/DB, RBAC and Spring MVC + Thymeleaf runtime.
+- Required future gates: provision Stitch MCP with authorized credential, approve sanitized assets before upload, create design proposals, actual visual comparison and independent Test before production. No remote generation or deployment in this version.
+- Details: docs/development/GOOGLE_STITCH_SKILLS_PILOT_v2026.11.24.0818.md / .ko.md.

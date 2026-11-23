@@ -1,3 +1,6 @@
+## v2026.11.24.0818 — Stitch Skills 공식 디자인 계약 시범 (배포 없음)
+Google의 소스 전용 추출 스킬을 프로젝트 내부에 설치하고 11월 18일 승인 디자인을 한영 `.stitch/DESIGN.md` 규격으로 작성. CSS 11개 토큰 정적 검사 PASS. Spring/Thymeleaf·실데이터·독립 Test 원칙 불변; Stitch MCP·클라우드 화면 생성·운영 배포 없음. [상세](../development/GOOGLE_STITCH_SKILLS_PILOT_v2026.11.24.0818.ko.md).
+
 # 월덕 머니버스 — 통합 기획 마스터
 
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).

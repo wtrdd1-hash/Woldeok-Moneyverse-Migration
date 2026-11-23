@@ -1,3 +1,6 @@
+## v2026.11.24.0818 — Google Stitch Skills 소스 전용 적용 시험 (브랜치만)
+11월 18일 공식 디자인의 한영 DESIGN.md·로컬 추출 스킬·CSS 11개 토큰 계약 검증 PASS. Stitch MCP 연결·화면 생성·Test/운영 배포는 하지 않음. [상세](development/GOOGLE_STITCH_SKILLS_PILOT_v2026.11.24.0818.ko.md).
+
 ## v2026.11.10.1948 — 조폐국 UI/정책 제한형 DB 함수 v1947 실제 운영 승격
 
 ## v2026.11.21.2234 — AgentMemory 영상·원본 링크 저장 및 AI 공동 작업기억 규칙 (문서만)
