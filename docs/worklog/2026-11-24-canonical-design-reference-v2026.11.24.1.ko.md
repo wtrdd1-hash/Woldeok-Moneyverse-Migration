@@ -28,3 +28,9 @@
 - 2026-11-24 중간 재확인: origin/main SHA 9876c09888ec84034eec183cf1309c85df3d7447, 기존 v10 후보 브랜치 SHA a61f6d8b9df05bb9f3daee9f8acff067b15abb21; 충돌할 새 커밋 없음.
 - 문서·정적 검증 완료. **운영·Test 서버 변경 없음.** 이번 브랜치의 독립 PR 검토 후 상위 v10 후보 통합이 우선이다.
 - 후속 보류: GitHub CI/리뷰, v10 후보 main 통합, 이미지 화면별 시각 승인, 실제 서버 기능 E2E 및 별도 운영 승격 게이트.
+
+## GitHub 인계 — 2026-11-24 KST
+- 1차 커밋: 1c4e0ea11c6ee10b1592cc24a495b1d0538f431b (문서/JSON/정적 검사만 33파일).
+- PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3417
+- 기준: fix/test-frontend-real-backend-20261123. GitHub 변경 비교상 ahead 1 / behind 0 / 병합 가능. **현재 PR은 열려 있고 아직 미병합**, 독립 리뷰 필요.
+- 상위 v10 후보도 main 미반영 상태. 문서 기준 정리와 실제 운영 반영은 구분하며 테스트/운영 게이트를 건너뛰지 않는다.
