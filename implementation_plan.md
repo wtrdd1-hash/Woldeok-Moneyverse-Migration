@@ -5745,3 +5745,30 @@ eserves: 대한민국 외환보유액 통합계정)
 - [ ] 5. 메인 홈(`/`) 경제 지표 띠, 8대 직업 슬라이더 및 히어로 구현
 - [ ] 6. 관리자 관제 타워(`/admin`) 통화량 게이지, 복식부기 일치율 및 킬스위치 구현
 - [ ] 7. 테스트 서버 빌드 배포 및 브라우저 E2E 실측 검증
+---
+## 🚀 [v7 Specification & Verification Complete] 최종 배포 및 403 Forbidden 해소, 브라우저 검증 완료 (+98, -0)
+
+### 1. 배포 및 인프라 라우팅 완결 내역
+1. **Spring Boot MVC 프론트엔드 프리젠테이션 서비스 (`moneyverse-test-frontend-real-backend-v20261123.service`, 포트 55440)**:
+   - 최신 통합 커밋 (`81c2c4545e`) 기반 빌드 및 배포 완료
+   - `MemberPresentationPageController.java`에 `/bank`, `/stocks` 엔드포인트 및 SSR 라우트 추가
+   - `UnifiedFrontendApplication.java`의 Spring Security 인가 목록(`READS`)에 `/bank`, `/stocks`, `/dashboard` 등 누락 경로 전수 등록
+2. **Nginx 프록시 라우팅 정비 (`test.easy-scraping.com`)**:
+   - `/etc/nginx/sites-enabled/moneyverse` 내 `test.easy-scraping.com` 서버 블록에 `location ~ ^/(bank|stocks|admin|dashboard|board|quests|shop)(/|\.html)?$` 프록시 규칙 추가
+   - 기존의 `HTTP 403 Forbidden (nginx)` 에러 완전 해소 확인
+   - `/bank`, `/stocks`, `/wallet` 요청 시 Spring Security 및 Thymeleaf 인증 흐름(`HTTP 302` ➔ `/login?next=...`) 정상 동작 확인
+3. **운영 DB 관리자 세션 동기화**:
+   - 운영 DB(`woldeok_moneyverse_dev`)의 활성 관리자(`seungminlee14@naver.com`) 세션 7건을 테스트 DB(`mv-nov18-test-db-20261122`)로 복사 완료
+4. **Git 브랜치 단일 통합 및 정리**:
+   - 통합 브랜치 `fix/test-frontend-real-backend-20261123`에 전체 커밋 통합 푸시
+   - 단일 통합 PR 생성: PR #3407 (https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3407)
+   - 로컬 및 원격의 임시 작업 브랜치 삭제 및 정리 완료
+
+### 2. 브라우저 실측 검증 완료 내역
+- **로그인 화면 (`https://test.easy-scraping.com/login`)**:
+  - 사이드바 11개 Google Material SVG 메뉴 정상 표시 확인
+  - 모바일 하단 5대 고정 바텀 독 (`홈`, `지갑`, `은행`, `주식`, `커뮤니티`) 렌더링 확인
+  - ✦ 스파클 아이콘 및 수동 '새로고침' 버튼 0건 (완전 제거 확인)
+- **금융 및 관리자 엔드포인트 (`/wallet`, `/bank`, `/stocks`, `/admin`)**:
+  - 403 Forbidden 에러 0건
+  - 비인가 세션에 대한 안전한 로그인 리다이렉트 흐름 및 Thymeleaf SSR 연동 완료
