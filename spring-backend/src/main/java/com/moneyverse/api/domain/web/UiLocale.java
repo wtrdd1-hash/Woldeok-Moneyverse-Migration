@@ -50,13 +50,12 @@ public class UiLocale implements LocaleResolver {
     }
 
     public String resolvePublic(HttpServletRequest request) {
-        if(request.getCookies()!=null) {
-            for(var cookie:request.getCookies()) {
-                if("wdmv_locale".equals(cookie.getName())&&SUPPORTED.contains(cookie.getValue())) return cookie.getValue();
-            }
+        // An explicit language selection on this request takes precedence over an older
+        // persisted choice; absent that selection, resolve() honors the manual cookie.
+        String explicit = request.getParameter("lang");
+        if (explicit != null && SUPPORTED.contains(explicit.toLowerCase(Locale.ROOT))) {
+            return explicit.toLowerCase(Locale.ROOT);
         }
-        String explicit=request.getParameter("lang");
-        if(explicit!=null&&SUPPORTED.contains(explicit.toLowerCase(Locale.ROOT))) return explicit.toLowerCase(Locale.ROOT);
         return resolve(request);
     }
 
