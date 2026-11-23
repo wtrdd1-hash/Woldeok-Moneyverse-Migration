@@ -5,7 +5,7 @@
 <meta name="color-scheme" content="dark"><meta name="theme-color" content="#0C1020"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="referrer" content="no-referrer">
 <title th:text="${uiCopy.get(#vars.uiPageKey)} + ' · W Moneyverse'">로그인 · W Moneyverse</title>
 <link rel="stylesheet" href="/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31">
-<link rel="stylesheet" href="/assets/mv43/auth.css">
+<link rel="stylesheet" href="/assets/mv43/auth.css?v=2026112310">
 <script src="/assets/mv39/i18n.js?v=8c7cf8e55c170e6b527f93eaf8ce5a4b6e6e16034e35566fd9e1092a710d4fec" defer></script>
 <script src="/assets/mv43/auth-core.js?v=f2531bd940e0d3ba591a4e4ede875ea66b3b03365a6ac73684e0bdaeb3fd617e" defer></script>
 <script src="/assets/mv43/auth.js?v=11fdfba8d53004315a1ab140deb95a5040847a0bb50add727a53785f4928cd03" defer></script>
@@ -17,85 +17,120 @@
 <div class="app-main"><div class="app-inner"><th:block th:replace="~{shared/chrome :: pageHeader}"></th:block>
 <main id="main-content" tabindex="-1" class="auth-main">
 
-<!-- Game-Economy Hero Banner (Matching docs/design/game-ui-v2026.11.23.10/previews/login.png) -->
-<section class="hero" aria-labelledby="auth-heading">
-  <div>
-    <div class="eyebrow">WOLDEOK MONEYVERSE • AUTH</div>
-    <h2 id="auth-heading">로그인</h2>
-    <p>게임형 금융 · 가상경제 서비스<br><span style="color:#94a3b8;font-size:0.875rem;">실제 서비스 기능 및 권한에 따라 표시</span></p>
-    <div style="margin-top:16px;padding:10px 16px;background:rgba(15,21,42,0.6);border:1px solid rgba(156,131,255,0.3);border-radius:12px;display:inline-flex;align-items:center;gap:12px;font-size:0.8125rem;">
-      <span style="color:#cbb9ff;font-weight:700;">서버 게임 시간 기준</span>
-      <span style="color:#e2e8f0;font-family:var(--font-mono,monospace);">현실 10분 = 서버 1일 · 서버 7일 = 서버 1주</span>
+<div class="auth-main-wrap">
+
+  <!-- 1. Game-Economy Hero Banner with Neon City Skyline & W Emblem -->
+  <section class="auth-hero-banner" aria-labelledby="auth-heading">
+    <div class="auth-hero-content">
+      <div class="auth-hero-eyebrow">
+        <span>✦</span>
+        <span>WOLDEOK MONEYVERSE • AUTH</span>
+      </div>
+      <h2 id="auth-heading" class="auth-hero-title">로그인</h2>
+      <p class="auth-hero-desc">
+        게임형 금융 · 가상경제 서비스<br>
+        <span class="auth-hero-subdesc">실제 서비스 기능 및 권한에 따라 표시</span>
+      </p>
+      <a href="/bank" class="auth-hero-btn">
+        <span>페이지 기능 확인</span>
+        <span>&rarr;</span>
+      </a>
     </div>
-  </div>
-  <div class="hero-decoration" aria-hidden="true">
-    <span class="realm-orbit">
-      <span class="realm-core">
-        <img src="/assets/mv39/favicon.ico" alt="" width="56" height="56" style="border-radius:12px;">
-      </span>
-    </span>
-  </div>
-</section>
 
-<!-- Dual-Card 2-Column Grid Layout (Matching v2026.11.23.10 design) -->
-<div class="auth-grid-layout">
-  <!-- Left Card: Input Credentials -->
-  <article class="card" style="padding:28px;">
-    <h3 style="font-size:1.125rem;font-weight:700;color:#f8fafc;margin:0 0 20px;">로그인 · 계정/정보 입력</h3>
-    <form id="native-auth-form" action="/login" method="post" style="display:flex;flex-direction:column;gap:16px;">
-      <div>
-        <label for="auth-email" style="display:block;font-size:0.875rem;font-weight:600;color:#cbd5e1;margin-bottom:6px;">계정 또는 이메일</label>
-        <input id="auth-email" name="email" type="email" autocomplete="email" placeholder="검증된 이메일 계정 입력" required style="width:100%;box-sizing:border-box;padding:12px 14px;background:#0f152a;border:1px solid rgba(156,131,255,0.3);border-radius:10px;color:#fff;font-size:0.9375rem;">
+    <div class="auth-hero-visual" aria-hidden="true">
+      <!-- Neon Skyline Silhouette SVG -->
+      <svg class="auth-skyline-svg" viewBox="0 0 400 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M40 220V120H70V80H90V220H130V60H160V100H180V220H220V90H240V40H260V220H300V110H330V70H350V220H400V220H0V220H40Z" fill="url(#neon-skyline-grad)" opacity="0.4"/>
+        <path d="M120 220V110H140V70H170V220H210V50H230V20H250V220H280V130H310V90H340V220Z" fill="url(#neon-buildings-grad)" opacity="0.6"/>
+        <defs>
+          <linearGradient id="neon-skyline-grad" x1="200" y1="40" x2="200" y2="220" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#8b5cf6" stop-opacity="0.6"/>
+            <stop offset="1" stop-color="#1e1b4b" stop-opacity="0"/>
+          </linearGradient>
+          <linearGradient id="neon-buildings-grad" x1="230" y1="20" x2="230" y2="220" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#c084fc" stop-opacity="0.8"/>
+            <stop offset="1" stop-color="#312e81" stop-opacity="0.1"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="auth-moon-glow"></div>
+      <div class="auth-emblem-badge">
+        <img src="/assets/mv39/favicon.ico" alt="W Emblem" class="auth-emblem-img">
       </div>
-      <div>
-        <label for="auth-password" style="display:block;font-size:0.875rem;font-weight:600;color:#cbd5e1;margin-bottom:6px;">비밀번호</label>
-        <input id="auth-password" name="password" type="password" autocomplete="current-password" placeholder="비밀번호 입력" required style="width:100%;box-sizing:border-box;padding:12px 14px;background:#0f152a;border:1px solid rgba(156,131,255,0.3);border-radius:10px;color:#fff;font-size:0.9375rem;">
-      </div>
-      <p id="auth-status" role="status" aria-live="polite" style="margin:0;font-size:0.875rem;min-height:20px;"></p>
-      <button id="auth-submit" type="submit" style="padding:14px;background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;display:inline-flex;justify-content:center;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(124,58,237,0.4);transition:all 0.2s;">
-        <span>확인 및 계속하기</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M5 13h11.86l-5.43 5.43 1.42 1.42L21.14 12l-8.29-8.29-1.42 1.42L16.86 11H5z"/></svg>
-      </button>
-    </form>
-  </article>
+    </div>
+  </section>
 
-  <!-- Right Card: Safe Usage & Social Authentication -->
-  <article class="card" style="padding:28px;">
-    <h3 style="font-size:1.125rem;font-weight:700;color:#f8fafc;margin:0 0 20px;">안전한 이용</h3>
-    <div style="display:flex;flex-direction:column;gap:18px;">
-      <div style="display:flex;gap:12px;align-items:flex-start;">
-        <span style="color:#9c83ff;font-size:1.25rem;line-height:1;">&bull;</span>
-        <div style="flex:1;">
-          <strong style="color:#f1f5f9;font-size:0.9375rem;">간편 소셜 로그인</strong>
-          <p style="margin:4px 0 12px;font-size:0.8125rem;color:#94a3b8;line-height:1.5;">Discord 및 Google 계정으로 안전하고 빠르게 시작하세요.</p>
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <a href="/auth/discord/authorize" style="display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 16px;background:#5865F2;color:#fff;border-radius:10px;text-decoration:none;font-weight:600;font-size:0.875rem;box-shadow:0 4px 12px rgba(88,101,242,0.3);">
+  <!-- 2. Dual-Card 2-Column Exact Grid Layout (Matching v2026.11.23.10 preview) -->
+  <div class="auth-grid-cards">
+
+    <!-- Left Card: Input Credentials -->
+    <article class="auth-card">
+      <div class="auth-card-header">
+        <h3 class="auth-card-heading">로그인 · 계정/정보 입력</h3>
+      </div>
+      <form id="native-auth-form" action="/login" method="post" class="auth-form">
+        <div class="auth-field">
+          <label for="auth-email" class="auth-label">계정 또는 이메일</label>
+          <input id="auth-email" name="email" type="email" autocomplete="email" placeholder="검증된 입력만 제출" required class="auth-input">
+        </div>
+        <div class="auth-field">
+          <label for="auth-password" class="auth-label">비밀번호</label>
+          <input id="auth-password" name="password" type="password" autocomplete="current-password" placeholder="검증된 입력만 제출" required class="auth-input">
+        </div>
+        <p id="auth-status" role="status" aria-live="polite" class="auth-status-msg"></p>
+        <button id="auth-submit" type="submit" class="auth-btn-primary">
+          <span>확인 및 계속하기</span>
+          <span>&rarr;</span>
+        </button>
+      </form>
+    </article>
+
+    <!-- Right Card: Safe Usage & Verified Auth Pipeline -->
+    <article class="auth-card">
+      <div class="auth-card-header">
+        <h3 class="auth-card-heading">안전한 이용</h3>
+      </div>
+      <div class="auth-info-list">
+        
+        <!-- Item 1: Social Login -->
+        <div class="auth-info-item">
+          <div class="auth-info-title">Google · Discord · 자체 로그인</div>
+          <p class="auth-info-text">연동된 소셜 계정으로 신속하고 안전하게 세션을 연결합니다.</p>
+          <div class="auth-social-group">
+            <a href="/auth/discord/authorize" class="auth-btn-discord">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
               <span>Discord 계정으로 계속하기</span>
             </a>
-            <a href="/auth/google/authorize" style="display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 16px;background:#1e293b;border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:10px;text-decoration:none;font-weight:600;font-size:0.875rem;">
+            <a href="/auth/google/authorize" class="auth-btn-google">
               <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12.3 0 15.2s.7 5.5 1.9 7.9l3.7-2.9c-.1-.7-.2-1.4-.2-2.1z"/><path fill="#34A853" d="M12 23.5c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.4-6.4-5.2L1.9 16.5C3.7 20.2 7.5 23.5 12 23.5z"/></svg>
               <span>Google 계정으로 계속하기</span>
             </a>
           </div>
         </div>
-      </div>
-      <div style="display:flex;gap:12px;align-items:flex-start;">
-        <span style="color:#9c83ff;font-size:1.25rem;line-height:1;">&bull;</span>
-        <div>
-          <strong style="color:#f1f5f9;font-size:0.9375rem;">약관 및 개인정보보호</strong>
-          <p style="margin:4px 0 0;font-size:0.8125rem;color:#94a3b8;line-height:1.5;">계정 진입 시 <a href="/terms" target="_blank" style="color:#a78bfa;text-decoration:underline;">이용약관</a> 및 <a href="/privacy" target="_blank" style="color:#a78bfa;text-decoration:underline;">개인정보처리방침</a>에 동의한 것으로 처리됩니다.</p>
+
+        <!-- Item 2: Terms & Privacy -->
+        <div class="auth-info-item">
+          <div class="auth-info-title">약관 · 개인정보처리방침</div>
+          <p class="auth-info-text">계정 진입 시 <a href="/terms" target="_blank" class="auth-link">이용약관</a> 및 <a href="/privacy" target="_blank" class="auth-link">개인정보처리방침</a>에 동의한 것으로 처리됩니다.</p>
         </div>
-      </div>
-      <div style="display:flex;gap:12px;align-items:flex-start;">
-        <span style="color:#9c83ff;font-size:1.25rem;line-height:1;">&bull;</span>
-        <div>
-          <strong style="color:#f1f5f9;font-size:0.9375rem;">실시간 인라인 보안 검증</strong>
-          <p style="margin:4px 0 0;font-size:0.8125rem;color:#94a3b8;line-height:1.5;">실제 백엔드 PBKDF2 암호화 검증 및 안전한 세션 쿠키가 발급됩니다.</p>
+
+        <!-- Item 3: Inline Validation -->
+        <div class="auth-info-item">
+          <div class="auth-info-title">인라인 유효성 검사</div>
+          <p class="auth-info-text">실시간 입력 형식 검증 및 위변조 방지 CSRF 토큰이 안전하게 적용됩니다.</p>
         </div>
+
+        <!-- Item 4: Real Server Response -->
+        <div class="auth-info-item">
+          <div class="auth-info-title">실제 서버 응답으로만 완료 표시</div>
+          <p class="auth-info-text">실제 백엔드 PBKDF2/Argon2id 검증 및 원장 데이터 세션이 발급됩니다.</p>
+        </div>
+
       </div>
-    </div>
-  </article>
+    </article>
+
+  </div>
+
 </div>
 
 </main>
