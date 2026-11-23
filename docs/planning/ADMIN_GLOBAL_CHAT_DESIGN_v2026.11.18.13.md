@@ -1,5 +1,7 @@
 # Admin Console Redesign & Everywhere Floating Chat — v2026.11.18.13
 
+> **2026-11-23 supersession notice: SUPERSEDED FOR VISUAL STYLE; SECURITY/RBAC REQUIREMENTS RETAINED.** Preserved for historical provenance and security requirements. The [owner-selected current visual design](../design/OWNER_SELECTED_UNIFIED_DESIGN_v2026.11.23.3.md) controls all new screens. Older images here are not new selected images; security/RBAC/localization obligations remain. New PNG binaries and Spring website deployment are not complete.
+
 Status: ISOLATED IMPLEMENTATION PREVIEW; PRODUCTION INTEGRATION BLOCKED
 Parent: [180-page responsive redesign v2026.11.18.12](ALL_PAGES_RESPONSIVE_REDESIGN_v2026.11.18.12.md).
 Korean: [companion](ADMIN_GLOBAL_CHAT_DESIGN_v2026.11.18.13.ko.md).
