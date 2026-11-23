@@ -70,3 +70,24 @@ Start: main `9876c09888ec84034eec183cf1309c85df3d7447`; remote mini-PC devices s
 - **Rate/time semantics:** Existing client contract exposes separate `daily_interest_rate_pct` and `annual_yield_pct`. Do **not** infer that multiplying one by 365 gives the other, nor assume a game day/year equals a real-world day/year. Explain accrual, compounding, settlement and display periods separately and bind verified authenticated API values. When runtime rules cannot be verified, show that the basis is pending verification rather than inventing rates or time mapping.
 - **Source-risk finding:** `frontend/src/app/bank/types.ts` and `frontend/src/app/bank/page.tsx` describe the separate daily/annual fields, while Spring `BankService.java` has static fallback defaults. This is not proof that either accurately represents the currently deployed settlement contract.
 - **Implementation scope:** [Spring bank presentation refinement candidate](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/tree/fix/bank-ui-rate-basis-20261123) adds the period explanation and card styling; runtime mapping of the screenshot form is still unverified, and this does **not** certify form fixes, transactions, or real interest settlement. No financial write logic changes.
+
+
+## 8. Home screenshot: game identity, official logo, time semantics and assistant correction — v2026.11.23.3
+
+**Evidence:** User-provided Nov 23 screenshots (home and deposit/withdraw), approved Nov 18 concept/reference, and repository main source. Screenshot observations are not a verified exact live deployment SHA.
+
+| ID | Priority | Observed discrepancy | Acceptance |
+| --- | --- | --- | --- |
+| UI-12 | P1 | Home is a generic flat purple admin-like dashboard, with insufficient game-world visual hierarchy/progression cues | Compare all Nov 18 approved PC/mobile compositions, real gameplay capabilities and actual data; do not fabricate levels/rewards |
+| UI-13 | P1 | Simple letter-W sidebar and hero marks rather than official crown/laurel/metallic W emblem | Reuse `spring-backend/src/main/resources/static/assets/mv39/woldeok-official-icon.png` throughout shared chrome, mobile and home; check favicon and sizing |
+| UI-14 | P1 | Literal `Translation unavailable` appears in Korean nav | Five-language key coverage and correct localized fallback/empty/error UI |
+| UI-15 | P1 | Native gray menu search, duplicated admin-like navigation and repetitive empty cards | Functional search, deduplicated navigation, real action preservation and responsive UI |
+| UI-16 | P0/P1 | Game clock absent. [Server game clock spec](../planning/SERVER_GAME_CLOCK_SPEC.md) states **10 real minutes = 1 server day; 7 server days = 1 server week**, used for game work/shop limits but *not* automatically finance, security, session and casino safety limits | Verify live DB policy, game clock API and policy version before asserting current server day/week. Explain application scope and reality/game distinction |
+| UI-17 | P0 | Spring `GameClockService.current()` returns `success=true` and invented day/week/policy values including `real_seconds_per_day=14400` after DB query failures, risking false current time | Separate backend fail-closed fix with database/source/negative-path QA. Never blindly bind unverified fallback to UI |
+| UI-18 | P1 | Real wallet metric shown while user-specific investment/quest game data and UX states remain partial/unverified | Per-user authorized server data and functional game-state workflows with safe failures |
+
+### Assistant execution-error record and safeguards
+- Earlier PR [#3394](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3394) edited static `bank.html` CSS/description, **not** the screenshot's confirmed live transaction form. The scope was communicated too broadly initially; it is a draft and proves no transaction/UI or interest settlement completion.
+- Initial UI-document PR [#3393](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3393) did not sufficiently cover game visual identity, source-specific official icon, broken translation and the explicit accelerated game calendar/false-success fallback. This section corrects the documentation gap without changing historical records.
+- Verification order: current plan → Nov 18 image → exact renderer/source → official asset → actual API/clock policy → exact-SHA Test/Production receipt. No “full UI complete” without scope-specific proof.
+- Separate [home presentation candidate branch](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/tree/fix/nov18-game-ui-clock-logo-20261123) changes only `mv43/home.html`, `shared/chrome.html`, and new `assets/mv39/game-home.css`; it shows the **planned 10-minute-to-server-day ratio**, not a fabricated live current calendar. No gameplay/financial business logic or backend clock fix is claimed.
