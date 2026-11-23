@@ -1,5 +1,7 @@
 # November 18 Design Baseline — Global Language and Support/Chat Implementation Authority
 
+**VISUAL HISTORY / NOT CURRENT IMAGE AUTHORITY (v2026.11.24.1):** Nov18 images are archived. Use [Nov23 v10 only](../design/CURRENT_UI_DESIGN.md) for screen visuals; retain functional, localization and chat requirements below unless superseded.
+
 > **2026-11-21 13:22 KST current, scoped:** The delivery log now uses main7d58568e3041 and the Nov18 shared shell. Nine observed administrator read routes are unified; the prior eight remain e2fb and public5remain93a3. Delivery Test40cases/Production15cases, prior8before-and-after16layouts each and Test-stop independence passed. The other27administrator routes, whole site and mutations remain OPEN, including misleading API-health metrics and account/support/chat403. [Delivery acceptance](../releases/2026-11-21-nov18-admin-delivery-production.ko.md). Earlier eight-route records below are historical acceptance snapshots.
 
 

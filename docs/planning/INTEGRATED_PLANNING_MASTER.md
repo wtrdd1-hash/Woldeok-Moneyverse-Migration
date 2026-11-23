@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+> **v2026.11.24.1 UI VISUAL AUTHORITY (current):** Nov23 **v10 only** is the single active reference for all 180 routes: [authority](../design/CURRENT_UI_DESIGN.md), [manifest](../design/CURRENT_UI_DESIGN_MANIFEST.json), [active gallery](../design/game-ui-v2026.11.23.10/README.md). v8/Nov18 PNGs are archived and NOT implementation inputs. Image approval and Test/E2E remain open.
+
+
 > **v2026.11.23.10 UI visual/feature audit** [180 revised PNGs](../design/game-ui-v2026.11.23.10/README.md) · [audit](../qa/2026-11-23-game-ui-180-image-feature-audit.md). Image file QA only; full runtime acceptance unverified.
 
 > v2026.11.23.8 신규 이미지: [180 new images](../design/game-ui-v2026.11.23.8/README.md) — 생성 완료/시안 검수 필요, 실제 서비스 적용 아님.

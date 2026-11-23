@@ -1,3 +1,5 @@
+> **ARCHIVED / SUPERSEDED — NOT AN IMPLEMENTATION SOURCE.** Use only [active v10 design authority](../CURRENT_UI_DESIGN.md) and [active v10 gallery](../game-ui-v2026.11.23.10/README.md) for new UI work. Historical comparison only.
+
 # 180 new game-economy UI design example PNGs (desktop + mobile)
 
 > v2026.11.23.8 · **GENERATED_NOT_APPROVED / all 180 actual PNG files generated** · [한국어](README.ko.md)

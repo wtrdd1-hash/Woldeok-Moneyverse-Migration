@@ -1,5 +1,7 @@
 # 프론트엔드 및 UI 공식 통합 마스터 지침서 (v2026.11.19 기준)
 
+**Visual authority override v2026.11.24.1:** For every implementation, use the [Nov23 v10-only gallery](design/game-ui-v2026.11.23.10/README.md) via [single active policy](design/CURRENT_UI_DESIGN.md). All older PNG references below are historical, NOT valid visual implementation inputs. Preserve underlying functional/security rules.
+
 > **기준일자:** 2026-11-18 ~ 2026-11-19 KST  
 > **적용범위:** Moneyverse 단일 런타임 전 웹 페이지 (`index.html`, `/stocks`, `/admin-preview`, `/wallet`, `/board` 등)  
 > **상태:** 공식 승인 및 운영 환경(`https://easy-scraping.com`) 100% 라이브 적용 완료

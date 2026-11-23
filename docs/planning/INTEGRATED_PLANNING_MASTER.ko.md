@@ -1,5 +1,8 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+> **v2026.11.24.1 현행 UI 이미지 최상위 기준:** 11월23일 **v10만** 180개 경로 구현의 시각 자료: [단일 기준](../design/CURRENT_UI_DESIGN.ko.md), [매니페스트](../design/CURRENT_UI_DESIGN_MANIFEST.json), [최신 갤러리](../design/game-ui-v2026.11.23.10/README.ko.md). v8·11월18일 이미지는 보관본이며 새 구현 참조 금지. 시각 승인·Test/E2E는 미완료.
+
+
 > **v2026.11.23.10 UI visual/feature audit** [180 revised PNGs](../design/game-ui-v2026.11.23.10/README.ko.md) · [audit](../qa/2026-11-23-game-ui-180-image-feature-audit.ko.md). Image file QA only; full runtime acceptance unverified.
 
 > v2026.11.23.8 신규 이미지: [새 이미지 180개](../design/game-ui-v2026.11.23.8/README.ko.md) — 생성 완료/시안 검수 필요, 실제 서비스 적용 아님.

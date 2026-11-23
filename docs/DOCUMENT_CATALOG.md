@@ -1,5 +1,7 @@
 # 📚 Document Catalog
 
+**Current visuals v2026.11.24.1:** [Nov23 v10 only](design/CURRENT_UI_DESIGN.md) · [180 route manifest](design/CURRENT_UI_DESIGN_MANIFEST.json). All earlier visual PNG sets are archived; this does not certify full implementation or Test.
+
 > **v2026.11.23.10 UI visual/feature audit** [180 revised PNGs](design/game-ui-v2026.11.23.10/README.md) · [audit](qa/2026-11-23-game-ui-180-image-feature-audit.md). Image file QA only; full runtime acceptance unverified.
 
 > v2026.11.23.8 신규 이미지: [180 new example images](design/game-ui-v2026.11.23.8/README.md) — 생성 완료/시안 검수 필요, 실제 서비스 적용 아님.

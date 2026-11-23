@@ -1,5 +1,7 @@
 # 코딩 에이전트 규칙 및 설정 가이드라인 (GEMINI.md)
 
+**현행 디자인 단일 기준 (v2026.11.24.1):** UI 작업 전 [현행 이미지 기준](docs/design/CURRENT_UI_DESIGN.ko.md), [180경로 매니페스트](docs/design/CURRENT_UI_DESIGN_MANIFEST.json), [11월23일 v10 갤러리](docs/design/game-ui-v2026.11.23.10/README.ko.md) 확인. **v8·11월18일 보관 이미지 사용 및 임의 대체 금지.** 실제 기능·API·승인·승격은 별도 검증한다.
+
 ## Permanent project task-memory handoff (v2026.11.21.2234)
 
 Before every task, consult the current project plan, integrated master, and versioned GitHub worklog. Record a sanitized start/mid/finish handoff in the task's branch. Shared external AgentMemory is **not installed or approved for automatic capture**; until its isolated security gates pass, the repository documentation remains the real persistence mechanism. See [EN](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md) / [KO](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md). Do not capture secrets, personal records or live ledgers.

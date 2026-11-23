@@ -1,5 +1,7 @@
 # AGENTS.md
 
+**Current UI image authority (v2026.11.24.1):** Before UI/frontend work, read [single active design policy](docs/design/CURRENT_UI_DESIGN.md), [strict 180-route manifest](docs/design/CURRENT_UI_DESIGN_MANIFEST.json) and [Nov23 v10-only gallery](docs/design/game-ui-v2026.11.23.10/README.md). **NEVER** use archived Nov23 v8/Nov18 images as visual implementation inputs or fallbacks. Respect latest owner instruction, integrated planning, verified APIs and separate release gates; v10 images are not proof of live functionality.
+
 ## Persistent agent task handoff (v2026.11.21.2234)
 
 On every task, **recall the latest approved plan and relevant versioned worklogs before making changes**, then record sanitized start/checkpoint/finish decisions for the next contributor. Use the established GitHub worklog fallback now; do **not** assume the external AgentMemory service is installed. No credentials or member/financial records may enter agent memory. Read [shared memory protocol](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md) and its [Korean counterpart](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md). Worktree ownership, current main and CI always outrank recalled history.

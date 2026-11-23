@@ -1,5 +1,7 @@
 # Woldeok Moneyverse 프로젝트 메모리 (PROJECT_MEMORY.md)
 
+**Current visual source v2026.11.24.1:** Use [Nov23 v10-only UI image authority](docs/design/CURRENT_UI_DESIGN.md) and its 180-route manifest for all new designs. v8 and Nov18 images are historical only; Test/Production and final visual acceptance remain unverified.
+
 ## 2026-11-21 shared agent-memory reference (PLANNING / no installed service)
 
 The owner-designated AgentMemory reel and upstream README are preserved in [EN](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md) / [KO](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md). Every task must recall latest plans/worklogs and record sanitized start/mid/finish decisions; this is GitHub-document based until an isolated, reviewed external memory service has been actually installed and verified. No runtime or production change was made under v2026.11.21.2234.

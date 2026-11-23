@@ -1,3 +1,5 @@
+> **보관본 / 구버전 — 구현 기준 사용 금지.** 새 UI 구현은 [현행 v10 기준](../CURRENT_UI_DESIGN.ko.md) 및 [현행 v10 갤러리](../game-ui-v2026.11.23.10/README.ko.md)만 참조. 이력 비교 전용.
+
 # 게임형 UI 신규 예시 이미지 180개 (PC + 모바일)
 
 > v2026.11.23.8 · **GENERATED_NOT_APPROVED / 180개 PNG 실제 생성** · [English](README.md)

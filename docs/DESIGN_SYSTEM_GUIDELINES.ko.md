@@ -1,5 +1,7 @@
 # 🎨 월덕 머니버스(Woldeok Moneyverse) 2026 차세대 핀테크 디자인 시스템 공식 지침서
 
+**현행 이미지 기준 v2026.11.24.1:** [11월23일 v10 갤러리](design/game-ui-v2026.11.23.10/README.ko.md)만 시각 구현 참고. [단일 기준](design/CURRENT_UI_DESIGN.ko.md)에 따라 이전 시안은 이력 보관 전용이며 기능·접근성 규칙은 유지.
+
 > **문서 버전**: `v2026.09.27.472`  
 > **설계 기준**: 200,000+ 글로벌 탑티어 프로덕트(Linear, Stripe, Apple HIG, Vercel Geist, Toss Simplicity, Robinhood) 분석 기반 2026 Next-Gen FinTech Design Language  
 > **상태**: 공식 적용 (Official Design System Baseline)

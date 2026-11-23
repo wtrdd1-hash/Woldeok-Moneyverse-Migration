@@ -1,5 +1,9 @@
 # [Moneyverse] 다국어·연구자료 기반 AI 블로그 엔진 및 관리자 제어 통합 구현 계획서 (v1)
 
+## Current UI image precedence — v2026.11.24.1
+**All new PC/mobile web screen visuals must follow Nov23 v10 only:** [authority](docs/design/CURRENT_UI_DESIGN.md) / [한국어](docs/design/CURRENT_UI_DESIGN.ko.md) · [180-route manifest](docs/design/CURRENT_UI_DESIGN_MANIFEST.json). Earlier v8/Nov18 PNGs are preserved as historical references and must not be used to implement or patch UI; functional planning is still governed by the integrated master. This change does not imply full E2E acceptance or Production promotion.
+
+
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
 - **v9**: [조폐국 화폐발행 국고 충전, 관리자 임금 지급, SWF 및 8대 보류 기능 전면 실가동 해제, NestJS 컨트롤러 다중 바인딩 및 Next.js 클라이언트 인라인 번들링 최적화] (+85, -0)
 - **v296**: [국고 시민 신청 BFF CSRF 방어 연동, 14일 의무 창업 환수 스케줄러 SQL 문법 정상화 및 혜택 수령 라우트 정규화] (+58, -0)

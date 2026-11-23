@@ -1,3 +1,5 @@
+> **ARCHIVED / SUPERSEDED — NOT AN IMPLEMENTATION SOURCE.** Historical Nov18 concepts only. Sole route-by-route implementation reference is [Nov23 v10](../game-ui-v2026.11.23.10/README.md); see [authority](../CURRENT_UI_DESIGN.md).
+
 # All-Page PC + Mobile Visual Concepts / 전체 페이지 시안
 
 Version: v2026.11.18.12 | Status: PLANNING ONLY | Source: frontend/src/app/**/page.tsx
