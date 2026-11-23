@@ -38,7 +38,20 @@
 </article>
 </section>
 <div class="wallet-workspace">
-<section class="card" aria-labelledby="wallet-history-title"><div class="card-heading"><h3 id="wallet-history-title" data-i18n="transactions" th:text="${uiCopy['transactions']}">Recent transactions</h3><div style="display:inline-flex;align-items:center;gap:6px;font-size:0.75rem;color:#10b981;font-weight:500;"><span style="width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;display:inline-block;"></span>실시간 자동 연동</div></div>
+<section class="card" aria-labelledby="wallet-history-title">
+  <div class="card-heading" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+    <h3 id="wallet-history-title" data-i18n="transactions" th:text="${uiCopy['transactions']}">Recent transactions</h3>
+    <div style="display:inline-flex;align-items:center;gap:6px;font-size:0.75rem;color:#10b981;font-weight:500;">
+      <span style="width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;display:inline-block;"></span>실시간 자동 연동
+    </div>
+  </div>
+  <div class="wallet-tx-filters" style="display:flex;gap:6px;margin:12px 0;flex-wrap:wrap;" role="tablist" aria-label="Transaction filters">
+    <button type="button" class="tx-filter-btn active" data-filter="all" style="padding:6px 12px;background:#4f46e5;color:#fff;border:none;border-radius:6px;font-size:0.75rem;font-weight:600;cursor:pointer;">전체</button>
+    <button type="button" class="tx-filter-btn" data-filter="DEPOSIT" style="padding:6px 12px;background:rgba(255,255,255,0.06);color:#94a3b8;border:1px solid rgba(255,255,255,0.1);border-radius:6px;font-size:0.75rem;font-weight:600;cursor:pointer;">입금</button>
+    <button type="button" class="tx-filter-btn" data-filter="WITHDRAWAL" style="padding:6px 12px;background:rgba(255,255,255,0.06);color:#94a3b8;border:1px solid rgba(255,255,255,0.1);border-radius:6px;font-size:0.75rem;font-weight:600;cursor:pointer;">출금/송금</button>
+    <button type="button" class="tx-filter-btn" data-filter="REWARD" style="padding:6px 12px;background:rgba(255,255,255,0.06);color:#94a3b8;border:1px solid rgba(255,255,255,0.1);border-radius:6px;font-size:0.75rem;font-weight:600;cursor:pointer;">보상</button>
+    <button type="button" class="tx-filter-btn" data-filter="INTEREST" style="padding:6px 12px;background:rgba(255,255,255,0.06);color:#94a3b8;border:1px solid rgba(255,255,255,0.1);border-radius:6px;font-size:0.75rem;font-weight:600;cursor:pointer;">이자</button>
+  </div>
 <div class="table-scroll" tabindex="0" role="region" aria-labelledby="wallet-history-title"><table class="wallet-table"><thead><tr>
 <th  data-i18n="walletWhen" th:text="${uiCopy['walletWhen']}">Date</th><th  data-i18n="walletType" th:text="${uiCopy['walletType']}">Type</th><th  data-i18n="walletAmount" th:text="${uiCopy['walletAmount']}">Amount (WLD)</th><th  data-i18n="walletDirection" th:text="${uiCopy['walletDirection']}">Direction</th><th  data-i18n="walletReceipt" th:text="${uiCopy['walletReceipt']}">Receipt ID</th>
 </tr></thead><tbody id="wallet-transactions"></tbody></table></div>
@@ -78,6 +91,65 @@
     <p id="wallet-bank-msg" style="margin:0;font-size:0.875rem;min-height:20px;"></p>
     <button type="submit" id="wallet-bank-submit" style="padding:12px;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;">실행하기</button>
   </form>
+</dialog>
+
+<!-- 2단계 송금 확인 모달 -->
+<dialog id="wallet-transfer-confirm-modal" style="padding:0;border:none;border-radius:16px;background:#0d111e;border:1px solid rgba(255,255,255,0.12);box-shadow:0 25px 50px -12px rgba(0,0,0,0.7);color:#f1f5f9;max-width:420px;width:90%;">
+  <div style="padding:20px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;align-items:center;">
+    <h3 style="margin:0;font-size:1.125rem;font-weight:700;">송금 정보 확인</h3>
+    <button type="button" id="wallet-transfer-confirm-close" style="background:none;border:none;color:#94a3b8;font-size:1.5rem;cursor:pointer;line-height:1;">&times;</button>
+  </div>
+  <div style="padding:20px;display:flex;flex-direction:column;gap:16px;">
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px;">
+      <div style="font-size:0.75rem;color:#94a3b8;margin-bottom:4px;">받는 분 ID</div>
+      <div id="confirm-recipient-id" style="font-size:0.9375rem;font-weight:700;color:#f8fafc;word-break:break-all;font-family:var(--font-mono,monospace);">—</div>
+    </div>
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px;">
+      <div style="font-size:0.75rem;color:#94a3b8;margin-bottom:4px;">송금 금액</div>
+      <div style="display:flex;align-items:baseline;gap:6px;">
+        <span id="confirm-transfer-amount" style="font-size:1.5rem;font-weight:800;color:#818cf8;font-family:var(--font-mono,monospace);">0</span>
+        <span style="font-size:0.875rem;font-weight:700;color:#94a3b8;">WLD</span>
+      </div>
+    </div>
+    <p style="margin:0;font-size:0.75rem;color:#f59e0b;line-height:1.4;">⚠️ 가상 회계 원장에 즉시 기록되며 송금 후 취소할 수 없습니다. 받는 분 정보를 다시 한 번 확인해 주세요.</p>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button type="button" id="wallet-transfer-cancel-btn" style="flex:1;padding:12px;background:#1e293b;border:1px solid #334155;border-radius:8px;color:#cbd5e1;font-weight:600;cursor:pointer;">취소</button>
+      <button type="button" id="wallet-transfer-execute-btn" style="flex:1;padding:12px;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;">최종 송금</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- 영수증 상세 팝업 모달 -->
+<dialog id="wallet-receipt-modal" style="padding:0;border:none;border-radius:16px;background:#0d111e;border:1px solid rgba(255,255,255,0.12);box-shadow:0 25px 50px -12px rgba(0,0,0,0.7);color:#f1f5f9;max-width:440px;width:90%;">
+  <div style="padding:20px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;align-items:center;">
+    <h3 style="margin:0;font-size:1.125rem;font-weight:700;">거래 영수증 상세</h3>
+    <button type="button" id="wallet-receipt-close" style="background:none;border:none;color:#94a3b8;font-size:1.5rem;cursor:pointer;line-height:1;">&times;</button>
+  </div>
+  <div style="padding:20px;display:flex;flex-direction:column;gap:12px;font-size:0.875rem;">
+    <div style="display:flex;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.06);">
+      <span style="color:#94a3b8;">영수증 번호</span>
+      <span id="receipt-modal-id" style="font-family:var(--font-mono,monospace);font-weight:600;color:#818cf8;">—</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.06);">
+      <span style="color:#94a3b8;">거래 일시</span>
+      <span id="receipt-modal-date" style="font-family:var(--font-mono,monospace);">—</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.06);">
+      <span style="color:#94a3b8;">거래 유형</span>
+      <span id="receipt-modal-type" style="font-weight:600;">—</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.06);">
+      <span style="color:#94a3b8;">거래 금액</span>
+      <strong id="receipt-modal-amount" style="font-family:var(--font-mono,monospace);font-size:1.125rem;color:#10b981;">—</strong>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.06);">
+      <span style="color:#94a3b8;">원장 무결성 상태</span>
+      <span style="color:#10b981;display:inline-flex;align-items:center;gap:4px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> 복식부기 검증됨
+      </span>
+    </div>
+    <button type="button" id="receipt-modal-ok" style="margin-top:12px;padding:10px;background:#1e293b;border:1px solid #334155;border-radius:8px;color:#cbd5e1;font-weight:600;cursor:pointer;">닫기</button>
+  </div>
 </dialog>
 </div>
       </main>

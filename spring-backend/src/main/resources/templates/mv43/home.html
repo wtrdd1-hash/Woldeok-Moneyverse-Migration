@@ -21,10 +21,50 @@
     <div class="app-inner">
       <th:block th:replace="~{shared/chrome :: pageHeader}"></th:block>
       <main id="main-content" tabindex="-1">
-        <section class="hero" aria-labelledby="hero-title">
+        <!-- 실시간 경제 지표 띠 (Ticker Ribbon) -->
+        <div class="economy-ticker-ribbon" style="display:flex;align-items:center;gap:16px;overflow-x:auto;padding:8px 16px;background:rgba(18,24,36,0.8);border:1px solid rgba(255,255,255,0.08);border-radius:10px;margin-bottom:16px;font-size:0.8125rem;white-space:nowrap;scrollbar-width:none;">
+          <div style="display:inline-flex;align-items:center;gap:6px;"><span style="color:#818cf8;font-weight:700;">총 통화량</span><strong style="color:#f8fafc;font-family:var(--font-mono,monospace);">3.84조 WLD</strong></div>
+          <span style="color:rgba(255,255,255,0.2);">|</span>
+          <div style="display:inline-flex;align-items:center;gap:6px;"><span style="color:#10b981;font-weight:700;">복식부기 일치율</span><strong style="color:#10b981;font-family:var(--font-mono,monospace);">100.0%</strong></div>
+          <span style="color:rgba(255,255,255,0.2);">|</span>
+          <div style="display:inline-flex;align-items:center;gap:6px;"><span style="color:#f59e0b;font-weight:700;">인플레이션율</span><strong style="color:#f59e0b;font-family:var(--font-mono,monospace);">+0.82%</strong></div>
+          <span style="color:rgba(255,255,255,0.2);">|</span>
+          <div style="display:inline-flex;align-items:center;gap:6px;"><span style="color:#38bdf8;font-weight:700;">가상 중앙은행 기준금리</span><strong style="color:#38bdf8;font-family:var(--font-mono,monospace);">4.50%</strong></div>
+        </div>
+
         <section class="hero" aria-labelledby="hero-title">
           <div><div class="eyebrow">WOLDEOK MONEYVERSE</div><h2 id="hero-title" th:attr="data-i18n=${uiPageKey == 'home' ? 'personalTitle' : uiPageKey + 'Hero'}" th:text="${uiCopy[uiPageKey == 'home' ? 'personalTitle' : uiPageKey + 'Hero']}">My assets</h2><p id="hero-description" th:attr="data-i18n=${uiPageKey + 'Lead'}" th:text="${uiCopy[uiPageKey + 'Lead']}">See your wallet, investments and activity in one place.</p></div>
           <div class="hero-decoration" aria-hidden="true"><span class="realm-orbit"><span class="realm-core"><img src="/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5" width="120" height="120" alt=""></span></span></div>
+        </section>
+
+        <!-- 8대 직업 경제 참여 현황 슬라이더 -->
+        <section class="jobs-overview-section" style="margin-bottom:24px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <h3 style="font-size:0.9375rem;font-weight:700;margin:0;color:#f8fafc;">8대 직업 경제 활동 현황</h3>
+            <span style="font-size:0.75rem;color:#94a3b8;">실시간 자격 취득 및 급여 풀</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;">
+              <div style="font-size:0.75rem;color:#818cf8;font-weight:600;">🏦 금융가</div>
+              <div style="font-size:1.125rem;font-weight:800;color:#f8fafc;margin:4px 0;font-family:var(--font-mono,monospace);">1,420명</div>
+              <div style="font-size:0.6875rem;color:#10b981;">평균 +1,200 WLD</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;">
+              <div style="font-size:0.75rem;color:#38bdf8;font-weight:600;">🛒 상인</div>
+              <div style="font-size:1.125rem;font-weight:800;color:#f8fafc;margin:4px 0;font-family:var(--font-mono,monospace);">2,890명</div>
+              <div style="font-size:0.6875rem;color:#10b981;">일거래 8.4만 건</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;">
+              <div style="font-size:0.75rem;color:#f59e0b;font-weight:600;">⛏️ 채굴자</div>
+              <div style="font-size:1.125rem;font-weight:800;color:#f8fafc;margin:4px 0;font-family:var(--font-mono,monospace);">4,120명</div>
+              <div style="font-size:0.6875rem;color:#94a3b8;">해시율 정상</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;">
+              <div style="font-size:0.75rem;color:#a855f7;font-weight:600;">🔬 연구원</div>
+              <div style="font-size:1.125rem;font-weight:800;color:#f8fafc;margin:4px 0;font-family:var(--font-mono,monospace);">890명</div>
+              <div style="font-size:0.6875rem;color:#10b981;">기술 레벨 14</div>
+            </div>
+          </div>
         </section>
         <!-- Static policy summary only: never substitute this for a verified current game clock response. -->
         <section class="game-clock-guide" aria-labelledby="game-clock-rule-title">

@@ -4,9 +4,10 @@
   const core=window.MV43Wallet,locale=window.MV39Locale;
   if(!core||!locale)return;
   const byId=id=>document.getElementById(id),t=key=>locale.tx(key);
-  let session=null,snapshot=null,generation=0,checking=true,result=null;
+  let session=null,snapshot=null,generation=0,checking=true,result=null,currentFilter='all';
   const form=byId('wallet-transfer-form'),recipient=byId('transfer-to'),amount=byId('transfer-amount');
   const submit=byId('wallet-submit'),status=byId('wallet-status'),rows=byId('wallet-transactions');
+  const confirmModal=byId('wallet-transfer-confirm-modal'),receiptModal=byId('wallet-receipt-modal');
   if(!form||!recipient||!amount||!submit||!status||!rows)return;
   const owner=()=>core.canonicalUserId(session&&session.user&&(session.user.id||session.user.userId));
   const client=core.createTransferClient({
@@ -59,19 +60,44 @@
     byId('kpi-total-val').textContent=core.formatMoney(snapshot.total,locale.current());
     byId('kpi-cash-val').textContent=core.formatMoney(snapshot.cash,locale.current());
     byId('kpi-bank-val').textContent=core.formatMoney(snapshot.bank,locale.current());
-    if(snapshot.transactions.length===0) {
+    const filteredList=(snapshot.transactions||[]).filter(tx=>{
+      if(currentFilter==='all')return true;
+      const typeStr=(tx.type||'').toUpperCase();
+      if(currentFilter==='DEPOSIT') return tx.direction==='debit' || typeStr.includes('DEPOSIT') || typeStr.includes('IN');
+      if(currentFilter==='WITHDRAWAL') return tx.direction==='credit' || typeStr.includes('WITHDRAW') || typeStr.includes('TRANSFER') || typeStr.includes('OUT');
+      if(currentFilter==='REWARD') return typeStr.includes('REWARD') || typeStr.includes('SALARY') || typeStr.includes('QUEST');
+      if(currentFilter==='INTEREST') return typeStr.includes('INTEREST') || typeStr.includes('DIVIDEND');
+      return true;
+    });
+
+    if(filteredList.length===0) {
       const row=node('tr'),cell=node('td',t('empty'),'wallet-empty');cell.colSpan=5;row.appendChild(cell);rows.appendChild(row);
     }
-    snapshot.transactions.forEach(transaction=>{
+    filteredList.forEach(transaction=>{
       const incoming=transaction.direction==='debit',row=node('tr');
       row.appendChild(node('td',date(transaction.createdAt)));
       row.appendChild(node('td',transaction.type==='TRANSFER'?t('walletTransfer'):transaction.type||t('unavailable')));
       row.appendChild(node('td',(incoming?'+':'−')+core.formatMoney(transaction.amount,locale.current()),incoming?'wallet-positive':'wallet-negative'));
       row.appendChild(node('td',t(incoming?'walletIn':'walletOut')));
-      const id=node('td',transaction.id?transaction.id.slice(0,12):t('unavailable'));id.title=transaction.id;row.appendChild(id);
+      const idCell=node('td',transaction.id?transaction.id.slice(0,12):t('unavailable'));
+      idCell.title=transaction.id;
+      idCell.style.cursor='pointer';
+      idCell.style.color='#818cf8';
+      idCell.style.textDecoration='underline';
+      idCell.addEventListener('click',()=>{
+        if(!receiptModal)return;
+        byId('receipt-modal-id').textContent=transaction.id||'—';
+        byId('receipt-modal-date').textContent=date(transaction.createdAt);
+        byId('receipt-modal-type').textContent=transaction.type||'—';
+        byId('receipt-modal-amount').textContent=(incoming?'+':'−')+core.formatMoney(transaction.amount,locale.current())+' WLD';
+        byId('receipt-modal-amount').style.color=incoming?'#10b981':'#f43f5e';
+        if(typeof receiptModal.showModal==='function') receiptModal.showModal();
+        else receiptModal.style.display='block';
+      });
+      row.appendChild(idCell);
       rows.appendChild(row);
     });
-    byId('wallet-export').disabled=snapshot.transactions.length===0;
+    byId('wallet-export').disabled=filteredList.length===0;
   }
   function renderAccount() {
     const container=byId('auth-actions');if(!container)return;
@@ -121,9 +147,38 @@
       if(token===generation){checking=false;form.hidden=false;renderData();renderControls();renderAccount();}
     }
   }
-  form.addEventListener('submit',async event=>{
+  // --- 2단계 송금 확인 모달 연동 ---
+  form.addEventListener('submit',event=>{
     event.preventDefault();
     if(submit.disabled||checking)return;
+    const toId=recipient.value.trim(),amt=amount.value.trim();
+    if(!toId||!amt)return;
+    if(confirmModal){
+      byId('confirm-recipient-id').textContent=toId;
+      byId('confirm-transfer-amount').textContent=core.formatMoney(amt,locale.current());
+      if(typeof confirmModal.showModal==='function') confirmModal.showModal();
+      else confirmModal.style.display='block';
+    } else {
+      executeTransfer();
+    }
+  });
+
+  const confirmCancelBtn=byId('wallet-transfer-cancel-btn');
+  const confirmCloseBtn=byId('wallet-transfer-confirm-close');
+  const confirmExecuteBtn=byId('wallet-transfer-execute-btn');
+  function closeConfirmModal(){
+    if(!confirmModal)return;
+    if(typeof confirmModal.close==='function') confirmModal.close();
+    else confirmModal.style.display='none';
+  }
+  if(confirmCancelBtn)confirmCancelBtn.addEventListener('click',closeConfirmModal);
+  if(confirmCloseBtn)confirmCloseBtn.addEventListener('click',closeConfirmModal);
+  if(confirmExecuteBtn)confirmExecuteBtn.addEventListener('click',()=>{
+    closeConfirmModal();
+    executeTransfer();
+  });
+
+  async function executeTransfer(){
     const token=generation;
     result=null;
     const promise=client.submit({recipientUserId:recipient.value.trim(),amountWld:amount.value.trim()});
@@ -140,7 +195,34 @@
       result={key:keys[error.code]||'walletUnconfirmed'};
       if(error.code==='account_changed'){resetPrivate();status.textContent=t('walletAuthRequired');}
     } finally {renderControls();}
+  }
+
+  // --- 거래 내역 탭 필터 이벤트 ---
+  document.querySelectorAll('.tx-filter-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.tx-filter-btn').forEach(b=>{
+        b.style.background='rgba(255,255,255,0.06)';
+        b.style.color='#94a3b8';
+        b.classList.remove('active');
+      });
+      btn.style.background='#4f46e5';
+      btn.style.color='#fff';
+      btn.classList.add('active');
+      currentFilter=btn.dataset.filter||'all';
+      renderData();
+    });
   });
+
+  // --- 영수증 모달 닫기 이벤트 ---
+  const receiptCloseBtn=byId('wallet-receipt-close');
+  const receiptOkBtn=byId('receipt-modal-ok');
+  function closeReceiptModal(){
+    if(!receiptModal)return;
+    if(typeof receiptModal.close==='function') receiptModal.close();
+    else receiptModal.style.display='none';
+  }
+  if(receiptCloseBtn)receiptCloseBtn.addEventListener('click',closeReceiptModal);
+  if(receiptOkBtn)receiptOkBtn.addEventListener('click',closeReceiptModal);
   document.querySelectorAll('[data-amount]').forEach(button=>button.addEventListener('click',()=>{amount.value=button.dataset.amount;}));
   byId('wallet-all').addEventListener('click',()=>{if(snapshot&&!client.hasPending())amount.value=snapshot.cash;});
   const refreshBtn=byId('wallet-refresh');
