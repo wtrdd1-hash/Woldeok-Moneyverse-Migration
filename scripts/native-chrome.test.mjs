@@ -103,3 +103,27 @@ test('shared aria labels follow locale changes while an expanded menu retains it
   assert.equal(ids['mobile-menu-toggle'].attributes['aria-label'],'ja:close');
   assert.equal(ids['mobile-menu-close'].attributes['aria-label'],'ja:close');
 });
+
+test('explicit URL language wins over stale storage and cookie',()=>{
+ const window=localeWindow('wdmv_locale=en','en','ko');window.location={search:'?lang=KO'};
+ runInNewContext(source('static/assets/mv39/i18n.js'),{window,Event,console,URLSearchParams,URL});
+ assert.equal(window.MV39Locale.current(),'ko');
+ assert.equal(window.MV39Locale.preference(),'ko');
+});
+test('manual language changes synchronize URL without a page reload or losing other parameters',()=>{
+ const window=localeWindow('',null,'en');window.location={href:'https://test.easy-scraping.com/login?lang=en&next=%2Fwallet#form',search:'?lang=en&next=%2Fwallet'};
+ let changed;
+ window.history={state:null,replaceState:(_state,_title,url)=>{changed=new URL(url);}};
+ runInNewContext(source('static/assets/mv39/i18n.js'),{window,Event,console,URLSearchParams,URL});
+ window.MV39Locale.setPreference('ja');
+ assert.equal(changed.searchParams.get('lang'),'ja');assert.equal(changed.searchParams.get('next'),'/wallet');assert.equal(changed.hash,'#form');
+ assert.equal(window.document.documentElement.dataset.uiLanguage,'ja');
+ window.MV39Locale.setPreference('auto');
+ assert.equal(changed.searchParams.has('lang'),false);
+});
+
+test('repeated URL language values use the same canonical cookie fallback as SSR',()=>{
+ const window=localeWindow('wdmv_locale=vi','en','vi');window.location={search:'?lang=ko&lang=ko'};
+ runInNewContext(source('static/assets/mv39/i18n.js'),{window,Event,console,URLSearchParams,URL});
+ assert.equal(window.MV39Locale.current(),'vi');
+});

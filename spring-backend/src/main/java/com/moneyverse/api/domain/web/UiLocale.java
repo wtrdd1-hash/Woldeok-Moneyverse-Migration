@@ -30,6 +30,11 @@ public class UiLocale implements LocaleResolver {
     }
 
     public String resolve(HttpServletRequest request) {
+        // A direct language choice belongs to this request, ahead of an older saved preference.
+        String[] selections=request.getParameterValues("lang");
+        String explicit=selections!=null&&selections.length==1?selections[0]:null;
+        if(explicit!=null&&SUPPORTED.contains(explicit.toLowerCase(Locale.ROOT)))
+            return explicit.toLowerCase(Locale.ROOT);
         if (request.getCookies() != null) {
             for (var cookie : request.getCookies()) {
                 if ("wdmv_locale".equals(cookie.getName()) && SUPPORTED.contains(cookie.getValue())) return cookie.getValue();
@@ -50,13 +55,6 @@ public class UiLocale implements LocaleResolver {
     }
 
     public String resolvePublic(HttpServletRequest request) {
-        if(request.getCookies()!=null) {
-            for(var cookie:request.getCookies()) {
-                if("wdmv_locale".equals(cookie.getName())&&SUPPORTED.contains(cookie.getValue())) return cookie.getValue();
-            }
-        }
-        String explicit=request.getParameter("lang");
-        if(explicit!=null&&SUPPORTED.contains(explicit.toLowerCase(Locale.ROOT))) return explicit.toLowerCase(Locale.ROOT);
         return resolve(request);
     }
 

@@ -81,13 +81,15 @@ class NativeStatusIsolationTest {
             assertThrows(IllegalArgumentException.class,()->fixed.read(path));
         assertTrue(headers.isEmpty());
     }
-    @Test void explicitPublicLocaleRetainsCookieQueryHeaderPrecedenceAcrossAliases() throws Exception {
+    @Test void explicitPublicLocaleUsesQueryCookieHeaderPrecedenceAcrossAliases() throws Exception {
         for(String path:List.of("/status","/status/","/status.html","/status/index.html")) {
             var query=get(path+"?lang=ja","en");assertEquals(200,query.statusCode());
             assertEquals("ja",query.headers().firstValue("Content-Language").orElse(""));
             assertTrue(query.body().contains("lang=ja"));assertTrue(query.body().contains("lang=\"ja\""));
             var cookie=get(path+"?lang=ja","en","Cookie","wdmv_locale=vi");
-            assertEquals("vi",cookie.headers().firstValue("Content-Language").orElse(""));
+            assertEquals("ja",cookie.headers().firstValue("Content-Language").orElse(""));
+            var saved=get(path,"en","Cookie","wdmv_locale=vi");
+            assertEquals("vi",saved.headers().firstValue("Content-Language").orElse(""));
             var fallback=get(path+"?lang=unsupported","ko");
             assertEquals("ko",fallback.headers().firstValue("Content-Language").orElse(""));
         }

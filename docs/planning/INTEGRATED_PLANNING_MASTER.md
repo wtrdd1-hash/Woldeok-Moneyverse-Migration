@@ -1,5 +1,11 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+> **v2026.11.23.10 UI visual/feature audit** [180 revised PNGs](../design/game-ui-v2026.11.23.10/README.md) · [audit](../qa/2026-11-23-game-ui-180-image-feature-audit.md). Image file QA only; full runtime acceptance unverified.
+
+> v2026.11.23.8 신규 이미지: [180 new images](../design/game-ui-v2026.11.23.8/README.md) — 생성 완료/시안 검수 필요, 실제 서비스 적용 아님.
+
+> **UI consolidation reference (v2026.11.23.5, docs-only):** [UI/UX single source and QA issues](../UI_UX_SINGLE_REFERENCE.md). The *current favicon itself* is the brand logo; admin nav only for authorized administrators, never guests/non-admins. Previous generated emblem mockups are not approved brand references. Exact-runtime QA remains OPEN.
+
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 
 ## v2026.11.21.2234 — AgentMemory link retained for all future work handoffs (PLANNING; DOCS ONLY)

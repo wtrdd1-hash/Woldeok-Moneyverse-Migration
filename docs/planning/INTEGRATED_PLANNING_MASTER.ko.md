@@ -1,5 +1,11 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+> **v2026.11.23.10 UI visual/feature audit** [180 revised PNGs](../design/game-ui-v2026.11.23.10/README.ko.md) · [audit](../qa/2026-11-23-game-ui-180-image-feature-audit.ko.md). Image file QA only; full runtime acceptance unverified.
+
+> v2026.11.23.8 신규 이미지: [새 이미지 180개](../design/game-ui-v2026.11.23.8/README.ko.md) — 생성 완료/시안 검수 필요, 실제 서비스 적용 아님.
+
+> **UI 통합 문서 (v2026.11.23.5, 문서 전용):** [UI/UX 통합 문제·디자인·수용 조건](../UI_UX_SINGLE_REFERENCE.ko.md). **현재 파비콘이 로고**이며 생성형 W/왕관 이미지는 대체 불가. 관리자 메뉴는 로그인한 **인가된 관리자만 표시**, 일반 회원·비회원 화면·검색에는 숨김. Test/운영 검증 미실시.
+
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 
 ## v2026.11.21.2234 — AgentMemory 영상/도구 영구 참고 및 기록 공유 (PLANNING / 문서만)
