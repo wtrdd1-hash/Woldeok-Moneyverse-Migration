@@ -14,13 +14,19 @@
 - Current Test frontend version is `7b676e602bc984ab74572d4081655fdb297d176a`, and a separate 55443 scoped legal UI is active. Production remains unchanged.
 
 ## In progress
-- [ ] Add disallow-all, noindex Test-only robots and non-advertising empty sitemap (read-only GET/HEAD; other methods 405).
-- [ ] Add reviewed, hash-guarded install/rollback process confined to Test vhost, with original bytes retained and byte comparison of Production Nginx sections.
-- [ ] Validate before/after semantics, authorization behavior and exact original test frontend version; run Nginx syntax test and semantic QA.
-- [ ] Fresh `origin/main` verification and publish evidence.
+- [x] Add disallow-all, noindex Test-only robots and non-advertising empty sitemap (read-only GET/HEAD; other methods 405).
+- [x] Add reviewed, hash-guarded install/rollback process confined to Test vhost, with original bytes retained and byte comparison of Production Nginx sections.
+- [x] Validate before/after semantics, authorization behavior and exact original test frontend version; run Nginx syntax test and semantic QA.
+- [x] Fresh `origin/main` verification and publish evidence.
 
-## Finished
-Pending independent runtime checks. No Production promotion authorized.
+## Finished — verified Test-only deployment (partial overall QA)
+- **Deployed** v2026.11.24.3 add-on through graceful Nginx reload, no Java restart, DB, auth change or Production cutover. Nginx syntax check PASS, audit backup under `/var/backups/moneyverse-test-ingress-v20261124-3/`.
+- Before/after: Test `/robots.txt` **403 -> 200**, `/sitemap.xml` **403 -> 200**. GET/HEAD 200, POST 405, explicit `Disallow: /`, noindex/no-store and empty XML. Public HTTPS confirmed both 200.
+- Nginx Production server config suffix is **byte-identical** before/after. Test `/`, `/login`, `/terms`, `/privacy`, `/api/v1/stocks` remain 200; unauthenticated `/admin` remains 302; source version remains `7b676e602bc984ab74572d4081655fdb297d176a`.
+- Installer unit tests **5/5 PASS** and standalone real HTTP smoke **13/13 PASS**. Semantic QA moved **4/7 -> 6/7**, **overall still FAIL**, with only missing-path `403 != 404` unresolved. This remaining failure is NOT bypassed; release certification remains BLOCKED.
+- Known blockers not repaired in this scope: arbitrary unknown page fallback/403, 180-page browser+real-data coverage, finance/authenticated E2E; Production hourly QA bank/wallet 302 expectations require separate security-preserving review.
+- Rollback: `sudo python3 scripts/ops/test_ingress_semantic_v20261124.py rollback --snippet ops/nginx/test-public-crawl-block-v2026.11.24.3.conf` from this worktree; only owned Test include removed, snapshot retained.
+- No Production promotion and no change to Production virtual-host bytes. Exact main re-checked before completion.
 
 ### Intermediate checkpoint — predeployment
 - Added a Test-only include with disallow-all /robots.txt and empty /sitemap.xml, both 200 for GET/HEAD and 405 otherwise; X-Robots-Tag noindex and no-store.
