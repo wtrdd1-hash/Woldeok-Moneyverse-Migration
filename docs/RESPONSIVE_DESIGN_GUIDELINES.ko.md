@@ -1,5 +1,7 @@
 # 📱 월덕 머니버스(Woldeok Moneyverse) 2026 반응형 디자인 기준 공식 지침서
 
+> **2026-11-23 문서 정리:** 이 문서는 보조 기술 기준(가독성/접근성/반응형/정확성)으로만 유지한다. **시각 스타일·브랜드 색상·공통 구성의 유일한 최신 권위는 [공식 디자인 허브](design/README.ko.md)와 [선택 디자인](design/OWNER_SELECTED_UNIFIED_DESIGN_v2026.11.23.3.ko.md)**이다. 충돌하는 구버전 외관/컬러 제안은 SUPERSEDED. 과거 문서 경로는 링크 보존을 위해 유지한다.
+
 > **문서 버전**: `v2026.09.27.473`  
 > **분석 기준**: 200,000+ 글로벌 모바일 & 웹 핀테크/SaaS 래퍼런스(Apple HIG, Toss Simplicity, Robinhood Crypto, Stripe Billing, Linear Mobile, Vercel Geist, GitHub Mobile, Supabase Studio)  
 > **상태**: 공식 적용 (Official Responsive Design Baseline)
