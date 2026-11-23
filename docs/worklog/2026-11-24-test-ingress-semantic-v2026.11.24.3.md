@@ -21,3 +21,9 @@
 
 ## Finished
 Pending independent runtime checks. No Production promotion authorized.
+
+### Intermediate checkpoint — predeployment
+- Added a Test-only include with disallow-all /robots.txt and empty /sitemap.xml, both 200 for GET/HEAD and 405 otherwise; X-Robots-Tag noindex and no-store.
+- Added hash-guarded, reverse-only Test section installer; Production Nginx suffix is an explicit byte-preservation invariant.
+- Local Python isolated tests: **5/5 PASS**; live configuration dry run: **PREFLIGHT_OK**. Not yet installed.
+- Existing unknown 403/expected 404 is intentionally UNRESOLVED; no weakened security and no QA-specific 404 spoof.
