@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Living Project Plan
 
+> **2026-11-23 OWNER-SELECTED VISUAL DESIGN — v2026.11.23.3 / PLANNING ONLY.** The owner selected the unified navy/violet desktop+mobile design for all 180 Nov18 routes, explicitly including visible Jobs/Career access and domain-specific banking, wallet, quest, shop and administration UI. This choice governs future visual work, not 180 completed functional screens, new PNG publication, or a website deployment. [Selected visual authority](../design/OWNER_SELECTED_UNIFIED_DESIGN_v2026.11.23.3.md) · [180-route register](../design/ALL_180_UNIFIED_UI_REGISTER_v2026.11.23.3.md). The new 180 image ZIP exists only in the conversation; GitHub PNG uploads, detailed acceptance, Spring Test and Production remain OPEN.
+
+
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 
 ## v2026.11.21.2234 — Saved AgentMemory development reference and task-handoff protocol (PLANNING; not installed)
