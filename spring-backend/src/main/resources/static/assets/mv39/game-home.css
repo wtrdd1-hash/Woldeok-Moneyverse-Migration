@@ -1,0 +1,29 @@
+/* v2026.11.23.3 — Nov18 game-finance identity; scoped to home; server/data unchanged. */
+body[data-page="home"]{background:radial-gradient(ellipse at 80% 0,rgba(110,74,201,.12),transparent 42%),#0c1020}
+body[data-page="home"] .hero{position:relative;isolation:isolate;overflow:hidden;min-height:260px;padding:clamp(24px,4vw,48px);border-radius:26px;border:1px solid rgba(174,146,255,.42);background:radial-gradient(circle at 84% 20%,rgba(163,118,255,.23),transparent 31%),linear-gradient(115deg,#222847,#151d32 64%,#171b35);box-shadow:0 18px 55px rgba(0,0,0,.22)}
+body[data-page="home"] .hero:before{content:"";position:absolute;inset:auto -10% -110px 35%;height:220px;background:radial-gradient(ellipse,rgba(156,131,255,.16),transparent 68%);pointer-events:none}
+body[data-page="home"] .hero h2{font-size:clamp(28px,3.4vw,48px);letter-spacing:-.045em;line-height:1.18;margin:12px 0}
+body[data-page="home"] .hero p{font-size:clamp(13px,1.2vw,16px);line-height:1.65}
+body[data-page="home"] .hero-decoration{width:clamp(100px,13vw,172px);height:clamp(100px,13vw,172px);flex:0 0 auto;border-radius:50%;border:1px solid rgba(189,163,255,.55);box-shadow:0 0 0 18px rgba(156,131,255,.06),0 0 0 38px rgba(156,131,255,.035);background:radial-gradient(circle,rgba(148,119,255,.26),transparent 72%);overflow:hidden}
+body[data-page="home"] .realm-orbit{display:grid;place-items:center;width:100%;height:100%}
+body[data-page="home"] .realm-core{display:grid;place-items:center;width:78%;height:78%;border-radius:50%;background:rgba(12,16,32,.45);box-shadow:inset 0 0 20px rgba(156,131,255,.16)}
+body[data-page="home"] .realm-core img{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 10px 16px rgba(0,0,0,.28))}
+body[data-page="home"] .game-clock-guide{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px;margin:0 0 26px;padding:18px 22px;background:linear-gradient(110deg,#1e2644,#161c32);border:1px solid rgba(156,131,255,.34);border-radius:18px}
+body[data-page="home"] .game-clock-guide__left{display:flex;align-items:center;gap:14px;min-width:0}
+body[data-page="home"] .game-clock-guide__icon{width:46px;height:46px;flex:none;display:grid;place-items:center;border-radius:15px;border:1px solid rgba(156,131,255,.37);background:rgba(156,131,255,.13);color:#c5b1ff;font-size:22px}
+body[data-page="home"] .game-clock-guide h3{margin:0 0 3px;font-weight:850;font-size:15px}
+body[data-page="home"] .game-clock-guide p{margin:0;color:#a8bcd8;font-size:12px;line-height:1.65}
+body[data-page="home"] .game-clock-guide__ratio{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+body[data-page="home"] .game-clock-guide__ratio span{background:#10172c;border:1px solid #414269;color:#dbcfff;border-radius:10px;padding:10px 13px;font-size:13px;font-weight:800}
+body[data-page="home"] .game-clock-guide__ratio strong{color:#bc9fff}
+body[data-page="home"] .kpi-grid .card{min-height:183px;border-radius:21px;background:linear-gradient(145deg,#1e2540,#161d33);border-color:#424362;box-shadow:inset 0 1px rgba(255,255,255,.035),0 14px 30px rgba(0,0,0,.12)}
+body[data-page="home"] .kpi-grid .card:first-child{border-color:rgba(156,131,255,.43);background:linear-gradient(145deg,#27274c,#171e37)}
+body[data-page="home"] .kpi-grid .metric-value{color:#f3edff;font-size:clamp(24px,2.7vw,36px)}
+body[data-page="home"] .action-card{min-height:62px;padding:16px 19px;border:1px solid #444467;border-radius:15px;background:linear-gradient(115deg,#252c4c,#202640);transition:border-color .17s,background .17s}
+body[data-page="home"] .action-card:hover{border-color:#9c83ff;background:#30325a}
+body[data-page="home"] .section-heading{display:flex;align-items:center;gap:9px;font-size:19px}
+body[data-page="home"] .section-heading:before{content:"";width:4px;height:21px;border-radius:8px;background:#9c83ff}
+body[data-page="home"] .nav-link[aria-current="page"]{border-color:#9c83ff;background:linear-gradient(90deg,rgba(156,131,255,.2),rgba(156,131,255,.05))}
+body[data-page="home"] .brand-mark{object-fit:cover;background:transparent}
+@media(max-width:640px){body[data-page="home"] .hero{padding:24px 18px;min-height:220px;gap:8px}body[data-page="home"] .hero-decoration{width:77px;height:77px}body[data-page="home"] .game-clock-guide{padding:15px;gap:12px}body[data-page="home"] .game-clock-guide__ratio{width:100%}body[data-page="home"] .game-clock-guide__ratio span{flex:1;text-align:center;min-width:0;font-size:12px}body[data-page="home"] .kpi-grid .card{min-height:150px}}
+@media(prefers-reduced-motion:reduce){body[data-page="home"] .action-card{transition:none}}
