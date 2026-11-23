@@ -1,5 +1,8 @@
 # 월덕 머니버스 — Living Project Plan
 
+> **2026-11-23 사용자 선택 UI 기준 — v2026.11.23.3 / 기획 전용.** 사용자 지시로 11월18일 전체 180개 경로의 **네이비·보라색 통일 PC·모바일 디자인**을 후속 디자인 기준으로 선택한다. 직업 바로가기, 상세 업무, 은행·지갑·퀘스트·상점·관리자 업무별 UI를 포함한다. 시각 기준 선택은 180개 기능별 디자인 검수, 새 PNG의 GitHub 업로드, Spring 웹 구현/운영 배포 완료를 뜻하지 않는다. [선택 디자인 공식 문서](../design/OWNER_SELECTED_UNIFIED_DESIGN_v2026.11.23.3.ko.md) · [180개 경로 원장](../design/ALL_180_UNIFIED_UI_REGISTER_v2026.11.23.3.ko.md). 새 ZIP은 대화에만 존재하며 GitHub 바이너리 업로드·세부 검수·Test·운영은 OPEN이다.
+
+
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 
 ## v2026.11.21.2234 — AgentMemory 영상 영구 참고 및 작업 이어받기 규칙 (PLANNING / 미설치)
