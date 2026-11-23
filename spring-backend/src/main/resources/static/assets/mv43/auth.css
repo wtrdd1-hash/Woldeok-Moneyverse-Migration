@@ -1,0 +1,153 @@
+/* Auth Page Styles - 2-Column Game-UI Layout (docs/design/game-ui-v2026.11.23.10) */
+.auth-grid-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: start;
+  margin-top: 24px;
+}
+
+@media (min-width: 860px) {
+  .auth-grid-layout {
+    grid-template-columns: 1.15fr 0.85fr;
+  }
+}
+
+.auth-hero-box {
+  margin-top: 16px;
+  padding: 10px 16px;
+  background: rgba(15, 21, 42, 0.6);
+  border: 1px solid rgba(156, 131, 255, 0.3);
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.8125rem;
+}
+
+.auth-hero-dot {
+  width: 8px;
+  height: 8px;
+  background: #34d399;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
+}
+
+.auth-hero-subtext {
+  color: #94a3b8;
+  font-size: 0.875rem;
+}
+
+.auth-emblem-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(30, 41, 59, 0.8));
+  border: 1px solid rgba(156, 131, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-emblem-text {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #c084fc;
+  text-shadow: 0 0 12px rgba(192, 132, 252, 0.5);
+}
+
+.auth-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.auth-badge-input {
+  background: rgba(124, 58, 237, 0.15);
+  color: #c084fc;
+  border: 1px solid rgba(156, 131, 255, 0.3);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.auth-badge-secure {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.auth-card-desc {
+  color: #94a3b8;
+  font-size: 0.875rem;
+  margin-top: 4px;
+}
+
+.auth-submit-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #7c3aed, #6366f1);
+  color: #ffffff;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+.auth-submit-btn:hover {
+  background: linear-gradient(135deg, #6d28d9, #4f46e5);
+  transform: translateY(-1px);
+}
+
+.auth-social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.auth-social-discord {
+  background: #5865F2;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(88, 101, 242, 0.3);
+}
+
+.auth-social-discord:hover {
+  background: #4752C4;
+  color: #ffffff;
+}
+
+.auth-social-google {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: #f1f5f9;
+}
+
+.auth-social-google:hover {
+  background: rgba(51, 65, 85, 0.9);
+  color: #f1f5f9;
+}
+
+.auth-info-box {
+  padding: 12px 16px;
+  background: rgba(15, 21, 42, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 10px;
+}
