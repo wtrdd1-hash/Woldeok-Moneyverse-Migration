@@ -1,5 +1,7 @@
 # 월덕 머니버스 — Living Project Plan
 
+> **v2026.11.23.10 UI visual/feature audit** [180 revised PNGs](../design/game-ui-v2026.11.23.10/README.ko.md) · [audit](../qa/2026-11-23-game-ui-180-image-feature-audit.ko.md). Image file QA only; full runtime acceptance unverified.
+
 > v2026.11.23.8 신규 이미지: [실제 신규 180개 시안](../design/game-ui-v2026.11.23.8/README.ko.md) — 생성 완료/시안 검수 필요, 실제 서비스 적용 아님.
 
 > **UI/UX 단일 통합 기준 (v2026.11.23.5, 문서 전용):** [UI 디자인·문제·지침 통합 원장](../UI_UX_SINGLE_REFERENCE.ko.md). 사용자 정정: **현재 사이트 파비콘 자체가 공식 로고**이며 생성 W/왕관 로고로 대체 금지. 관리자 메뉴는 **권한 있는 관리자에게만** 표시. 본 문서 추가는 UI 구현/운영승격 증거가 아니다.
