@@ -193,3 +193,11 @@
 | /wallet/activity | [PNG](../design/game-ui-v2026.11.23.10/previews/wallet-activity.png) | NOT_IN_STATIC_SCAN | IMAGE_FILE_QA_PASS / LIVE_NOT_VERIFIED |
 | /wallet/activity/transactions/[transactionId] | [PNG](../design/game-ui-v2026.11.23.10/previews/wallet-activity-transactions--transactionId-.png) | NOT_IN_STATIC_SCAN | IMAGE_FILE_QA_PASS / LIVE_NOT_VERIFIED |
 | /work | [PNG](../design/game-ui-v2026.11.23.10/previews/work.png) | NOT_IN_STATIC_SCAN | IMAGE_FILE_QA_PASS / LIVE_NOT_VERIFIED |
+
+## Isolated Test backend read-only probes (2026-11-23 KST)
+- Independent moneyverse-nov18-test-backend-v20261122.service active at localhost:55438.
+- GET /actuator/health: HTTP 200 status UP. GET /api/v1/game-clock: 200 with policy v2026.09.15.114, 600 real seconds/server day and 7 server days/week.
+- GET / and /bank: HTML 200. This proves only public HTML responses, not banking transactions.
+- Unauthenticated GET /admin: HTTP 302 login redirect. Admin-role RBAC test remains open.
+- Important finding: GET /blog/test-article: HTML 200 but home dashboard title. Blog slug, correct content, 404 and routing/SEO remain suspect and unverified.
+- Full 180 route authenticated functional, financial settlement, admin mutation, mobile/locale, and Production verification not performed.

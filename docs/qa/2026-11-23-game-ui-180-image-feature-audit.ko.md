@@ -207,3 +207,12 @@
 | /wallet/activity | [PNG](../design/game-ui-v2026.11.23.10/previews/wallet-activity.png) | NOT_IN_STATIC_SCAN | IMAGE_FILE_QA_PASS / LIVE_NOT_VERIFIED |
 | /wallet/activity/transactions/[transactionId] | [PNG](../design/game-ui-v2026.11.23.10/previews/wallet-activity-transactions--transactionId-.png) | NOT_IN_STATIC_SCAN | IMAGE_FILE_QA_PASS / LIVE_NOT_VERIFIED |
 | /work | [PNG](../design/game-ui-v2026.11.23.10/previews/work.png) | NOT_IN_STATIC_SCAN | IMAGE_FILE_QA_PASS / LIVE_NOT_VERIFIED |
+
+## 독립 Test 백엔드 읽기 전용 실측 (2026-11-23 KST)
+- moneyverse-nov18-test-backend-v20261122.service 가 실행 중이며 localhost:55438 바인딩 확인.
+- GET /actuator/health: HTTP 200 JSON status=UP.
+- GET /api/v1/game-clock: HTTP 200, policyVersion=v2026.09.15.114, realSecondsPerDay=600, gameDaysPerWeek=7.
+- GET / 및 /bank: 각각 HTML 200, 페이지 읽기 성공만 확인. 금융 거래 성공 증거 아님.
+- GET /admin: 비로그인 302 로그인 경로로 리다이렉트, 실제 관리자 로그인/RBAC E2E 검증은 별도 필요.
+- 중요 발견: GET /blog/test-article: HTTP 200인데 HTML title은 홈 대시보드. 등록되지 않은 slug/라우팅/SEO/404 경로 오류 가능성. 실제 게시글 상세 API 검증 전 정상 판정 금지.
+- 전체 사용자 인증, 거래·정산 쓰기, 관리자 변경, 180개 페이지 E2E·운영 QA는 해당 읽기 전용 검사에 포함되지 않음.
