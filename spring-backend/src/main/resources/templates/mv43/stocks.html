@@ -96,7 +96,22 @@
                     </tr>
                   </thead>
                   <tbody id="stocks-list-tbody">
-                    <!-- Dynamic rendering by stocks.js -->
+                    <tr th:each="stock : ${stocks}">
+                      <td>
+                        <div class="stock-name-cell">
+                          <span class="stock-name-title" th:text="${stock.name}">종목명</span>
+                          <span class="stock-code-sub" th:text="${stock.symbol}">CODE</span>
+                        </div>
+                      </td>
+                      <td><strong class="stock-price" th:text="${stock.currentPrice} + ' WLD'">0 WLD</strong></td>
+                      <td>
+                        <span class="stock-change" th:text="${stock.dayOpenPrice != null ? stock.dayOpenPrice : '0.00%'}">0.00%</span>
+                      </td>
+                      <td th:text="${stock.marketCap != null ? stock.marketCap : '1,500,000'}">1,500,000</td>
+                      <td>
+                        <button type="button" class="btn-stock-trade" th:attr="onclick='window.openTradeModal(\'' + ${stock.symbol} + '\', \'' + ${stock.name} + '\', ' + ${stock.currentPrice} + ')'">모의주문</button>
+                      </td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
