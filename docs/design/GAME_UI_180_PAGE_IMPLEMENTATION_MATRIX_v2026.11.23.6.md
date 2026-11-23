@@ -199,3 +199,12 @@ Each route: desktop 1440px, mobile 390px and narrow 320px, keyboard/200% zoom, E
 | `/wallet/activity` | [Original PNG](all-pages-v2026.11.18.12/previews/wallet-activity.png) | DESIGN_REVIEW_OPEN |
 | `/wallet/activity/transactions/[transactionId]` | [Original PNG](all-pages-v2026.11.18.12/previews/wallet-activity-transactions--transactionId-.png) | DESIGN_REVIEW_OPEN |
 | `/work` | [Original PNG](all-pages-v2026.11.18.12/previews/work.png) | DESIGN_REVIEW_OPEN |
+
+
+## Mandatory replacement of all example images — v2026.11.23.7
+
+**Each of the 180 DESIGN_REVIEW_OPEN rows additionally requires `REPLACEMENT_IMAGE_REQUIRED`.** Preserve immutable Nov 18 PNG originals; produce separate versioned game-economy concept PNGs, including legible desktop/mobile, guest/member/admin visibility variants, exact pixel-preserved current favicon, verified gameplay/world semantics and a visual comparison/approval record. The table is a source inventory, not a new-artifact deliverable.
+
+Place accepted replacements at e.g. `docs/design/game-ui-v2026.11.23.7/previews/<route-key>.png`; link only confirmed existing files. **0/180 replacements currently verified**. Never fabricate actual balances, game dates, interest or admin visibility. Image approval and Spring implementation are separately gated milestones.
+
+[Single UI requirement authority PR #3396](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3396).
