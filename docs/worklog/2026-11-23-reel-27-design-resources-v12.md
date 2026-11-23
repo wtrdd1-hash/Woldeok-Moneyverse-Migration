@@ -11,7 +11,7 @@ Scope: detailed EN/KO plan, machine-readable *discovery-only* catalog, catalog/i
 Risks: license/attribution, 3D performance, React dependencies incompatible with Spring-only runtime, existing unmerged design branches, other contributor collisions.
 
 ## Mid-work checkpoint
-PENDING.
+2026-11-23 KST: `origin/main` remote rechecked: `9876c09888ec84034eec183cf1309c85df3d7447` (unchanged). Official oEmbed confirms 27 names and order. EN/KO long-form plan and 27-entry machine-readable discovery catalog authored. Source-specific official terms checked: Storyset attribution, Iconify per icon-set license, 21st.dev per-component rights, React Bits MIT+Commons Clause, Lummi/Unsplash/Pexels content licensing, Spline/GetLayers/GSAP restrictions. Source video frames remain unverified. No downloaded files or runtime dependencies. Parallel feature/design branches remain untouched.
 
 ## Finish and handoff
 PENDING.

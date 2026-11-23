@@ -11,7 +11,7 @@
 주요 위험: 상업 이용권·출처표기, 3D 성능, React 의존성과 Spring 단일 런타임 충돌, 미병합 디자인 브랜치, 동시 작업자 충돌.
 
 ## 중간 점검
-PENDING.
+2026-11-23 KST: 원격 `origin/main` 재조회 SHA `9876c09888ec84034eec183cf1309c85df3d7447`로 착수 시점과 동일. 공식 oEmbed에서 27개 원문 명칭/순서 확인. 영문/한국어 상세계획과 27개 기계판독 카탈로그 작성. Storyset 출처표시, Iconify 세트별 라이선스, 21st.dev 개별 컴포넌트 이용권, React Bits MIT+Commons Clause, Lummi/Unsplash/Pexels 라이선스, Spline/GetLayers/GSAP 조건 검토. 영상 프레임은 미검증. 실제 에셋 다운로드/의존성 설치 없음. 동시 디자인/기능 브랜치 변경 없음.
 
 ## 종료·다음 작업자 인계
 PENDING.
