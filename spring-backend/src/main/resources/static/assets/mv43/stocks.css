@@ -225,3 +225,124 @@
   opacity: 0.9;
   transform: translateY(-1px);
 }
+
+
+/* Realtime Socket Sync Bar & SVG Interactive Chart Styles (CSP Compliant) */
+.stocks-sync-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: rgba(21, 29, 50, 0.6);
+  border: 1px solid rgba(168, 188, 216, 0.1);
+  border-radius: 12px;
+}
+
+.stocks-sync-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: #10b981;
+  font-weight: 600;
+}
+
+.stocks-sync-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 10px #10b981;
+  display: inline-block;
+}
+
+.stocks-sync-tag {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-family: var(--font-mono, monospace);
+  font-variant-numeric: tabular-nums;
+}
+
+.stocks-chart-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.stocks-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.stocks-chart-title-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stocks-chart-title {
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: #f8fafc;
+}
+
+.stocks-chart-badge {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  font-weight: 700;
+  font-family: var(--font-mono, monospace);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.stocks-chart-btn-group {
+  display: flex;
+  gap: 4px;
+}
+
+.stocks-chart-time-btn {
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #94a3b8;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.stocks-chart-time-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+.stocks-chart-time-btn.active {
+  background: #4f46e5;
+  color: #ffffff;
+}
+
+.stocks-chart-canvas-wrap {
+  position: relative;
+  width: 100%;
+  height: 140px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.stocks-chart-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.eyebrow-icon {
+  width: 14px;
+  height: 14px;
+  vertical-align: -2px;
+  margin-right: 4px;
+}

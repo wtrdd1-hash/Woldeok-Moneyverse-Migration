@@ -5764,3 +5764,21 @@ eserves: ??쒕?援??명솚蹂댁쑀???듯빀怨꾩젙)
 - Required future gates: provision Stitch MCP with authorized credential, approve sanitized assets before upload, create design proposals, actual visual comparison and independent Test before production. No remote generation or deployment in this version.
 - Details: docs/development/GOOGLE_STITCH_SKILLS_PILOT_v2026.11.24.0818.md / .ko.md.
 
+
+
+---
+## 🚀 [v12 Specification] 어제 디자인 기준 프론트엔드 전 페이지 정밀 점검 및 크래프트맨십 고도화 (CSP 인라인 스타일 박멸, 모노스페이스 수치 렌더링, 320px 모바일 방어)
+- **작업 일시**: 2026-11-24 08:50 KST
+- **작업자**: **Gemini / GPT** (Antigravity Agent & Upstream Planner)
+- **작업 번호 (Task ID)**: `TASK-20261124-03`
+- **참조 스킬**: `anti-ai-frontend-craftsmanship`, `cross-surface-visual-hierarchy-architect`, `fintech-responsive-layout-engine`, `gpt-taste`
+- **반영 범위**:
+  1. **CSP 인라인 스타일 전면 외주화 (`stocks.html`, `wallet.html`, `bank.html`)**:
+     - 브라우저 CSP(`style-src 'self'`) 환경에서 차단될 수 있는 HTML 인라인 `style="..."` 속성을 `stocks.css`, `wallet.css`, `bank.css`의 전용 CSS 클래스로 100% 분리.
+     - 은행 예치금 모달(`wallet-bank-modal`), 2단계 송금 확인 모달(`wallet-transfer-confirm-modal`), W-INDEX 50 실시간 SVG 차트 헤더/컨트롤 스타일 외주화.
+  2. **금융 수치 타이포그래피 크래프트맨십 (Tabular Numbers & Monospace)**:
+     - 지갑 잔액(`kpi-total-val`, `kpi-cash-val`, `kpi-bank-val`), 은행 순자산(`kpi-net-worth`), 주가 및 변동률에 `font-variant-numeric: tabular-nums` 및 `font-mono`를 엄격 적용하여 실시간 데이터 갱신 시 글리프 자릿수 흔들림(Jittering) 원천 방지.
+     - 상승/수익(`text-emerald-400`), 하락/손실(`text-rose-400`) 고대비 색상 토큰 체계화.
+  3. **320px 모바일 ~ 1440px 데스크톱 반응형 방어 아키텍처**:
+     - 헤더/모달 내 상태 뱃지(`credit-grade-badge`, `tag-pill`, `stocks-profit-badge`)에 `flex-shrink: 0`을 부여하여 모바일 화면에서 찌그러짐 및 텍스트 클리핑 원천 차단.
+     - 최소 44px 이상의 터치 타깃 확보 및 모바일 가로 스크롤 제로(Body Overflow Zero) 보장.
