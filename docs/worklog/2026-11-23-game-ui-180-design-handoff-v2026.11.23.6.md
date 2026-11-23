@@ -13,3 +13,6 @@ Owner requests game-world visual refinement for the full site, the **exact exist
 
 ## End boundary
 The shared shell edit does NOT replace/redraw 180 PNGs or migrate separate legacy static/Next HTML. No exact Test/Production deployment, screenshot diff, admin-role browser exercise, financial transaction/clock fail-close change, or full feature QA was performed. The protected main branch requires independent review and passing checks; this PR is not a runtime receipt.
+
+## v2026.11.23.7 owner follow-up
+Owner expressly requires actual **replacement example PNGs for all 180 routes**, not merely an indexed gallery. Added versioned imagery production/approval rules to both route matrices and original source gallery, and to the bilingual UI master PR. Use exact site favicon pixels, admin-only menu on admin-role images, and no fabricated server clock/finance numbers. **No new PNGs generated or uploaded; 0/180 replacements verified.** Existing original images and historical records preserved.
