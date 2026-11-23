@@ -138,4 +138,15 @@ class RoutingTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             deploy.wait_identity(80,"new",Mock(side_effect=ValueError("foreign config")),timeout=1)
 
+
+    def test_preserved_parallel_test_only_routes_are_explicit_and_bounded(self):
+        canonical=routing.server()
+        self.assertEqual("canonical-read-lane",routing.validate_existing_lane(canonical))
+        prefix=canonical.removesuffix("location / { return 404; }\n}")
+        tail=(pathlib.Path(__file__).with_name("parallel-test-tail.conf")).read_text()
+        self.assertEqual("parallel-test-backend-lane",routing.validate_existing_lane(prefix+tail))
+        with self.assertRaises(ValueError):routing.validate_existing_lane(prefix+tail.replace("55438","4550"))
+        with self.assertRaises(ValueError):routing.validate_existing_lane((prefix+tail).replace("proxy_pass_request_headers off;","",1))
+        with self.assertRaises(ValueError):routing.validate_existing_lane(prefix+tail+"\nserver { }")
+
 if __name__=='__main__':unittest.main()
