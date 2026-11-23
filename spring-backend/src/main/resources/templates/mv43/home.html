@@ -8,6 +8,7 @@
   <meta name="description" content="W Moneyverse — personal finance, investing, quests and community">
   <title th:text="${uiCopy[uiPageKey == 'home' ? 'personalTitle' : uiPageKey]} + ' · W Moneyverse'">My assets · W Moneyverse</title>
   <link rel="stylesheet" href="/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31">
+  <link rel="stylesheet" href="/assets/mv39/game-home.css">
   <script src="/assets/mv39/i18n.js?v=ee47eefcc4e63a309d88f841372a79121535f1e1100532b388a8842910501022" defer></script>
   <script src="/assets/mv39/money.js?v=9e95a9188599bc8d14d9743b3506f68af9fd17a63c6dd7db471e0d077d9283d5" defer></script>
   <script src="/assets/mv39/app.js?v=dd1448ca8e6f4b4cb585e0a1ee199a523b3b503f3df2b8be562058bbe897a9d4" defer></script>
@@ -23,7 +24,23 @@
       <main id="main-content" tabindex="-1">
         <section class="hero" aria-labelledby="hero-title">
           <div><div class="eyebrow"><span aria-hidden="true">✦</span> WOLDEOK MONEYVERSE</div><h2 id="hero-title" th:attr="data-i18n=${uiPageKey == 'home' ? 'personalTitle' : uiPageKey + 'Hero'}" th:text="${uiCopy[uiPageKey == 'home' ? 'personalTitle' : uiPageKey + 'Hero']}">My assets</h2><p id="hero-description" th:attr="data-i18n=${uiPageKey + 'Lead'}" th:text="${uiCopy[uiPageKey + 'Lead']}">See your wallet, investments and activity in one place.</p></div>
-          <div class="hero-decoration" aria-hidden="true"><span class="realm-orbit"><span class="realm-core">W</span></span></div>
+          <div class="hero-decoration" aria-hidden="true"><span class="realm-orbit"><span class="realm-core"><img src="/assets/mv39/woldeok-official-icon.png" width="126" height="126" alt=""></span></span></div>
+        </section>
+        <!-- Policy-only clock guide; never emulate current server date/time or financial settlement. -->
+        <section class="game-clock-guide" aria-labelledby="game-clock-guide-heading">
+          <div class="game-clock-guide__left">
+            <span class="game-clock-guide__icon" aria-hidden="true">◷</span>
+            <div>
+              <h3 id="game-clock-guide-heading"
+                  th:text="${uiLanguage == 'ko' ? '서버 게임 시간 기준' : (uiLanguage == 'ja' ? 'サーバーゲーム時間の基準' : (uiLanguage == 'zh' ? '服务器游戏时间规则' : (uiLanguage == 'vi' ? 'Quy tắc thời gian trò chơi' : 'Server game time rules')))}">Server game time rules</h3>
+              <p th:text="${uiLanguage == 'ko' ? '기획 기준 · 실제 적용 상태는 서버 정책 검증 필요 · 금융 이자 및 보안 시간과 별개' : (uiLanguage == 'ja' ? '計画上の基準 · 実際の稼働状態は未確認 · 金融・安全の期間とは別' : (uiLanguage == 'zh' ? '规划规则 · 实际服务器状态待核实 · 与金融和安全时间区分' : (uiLanguage == 'vi' ? 'Quy tắc trong kế hoạch · Chưa xác minh trạng thái máy chủ · Không áp dụng cho mọi dịch vụ' : 'Planning rule · Live server state unverified · Not a finance or safety timer')))}">Planning rule · Live server state unverified</p>
+            </div>
+          </div>
+          <div class="game-clock-guide__ratio">
+            <span th:text="${uiLanguage == 'ko' ? '현실 10분' : (uiLanguage == 'ja' ? '現実10分' : (uiLanguage == 'zh' ? '现实10分钟' : (uiLanguage == 'vi' ? '10 phút thực' : '10 real minutes')))}">10 real minutes</span>
+            <strong aria-hidden="true">=</strong>
+            <span th:text="${uiLanguage == 'ko' ? '서버 1일' : (uiLanguage == 'ja' ? 'ゲーム1日' : (uiLanguage == 'zh' ? '游戏1天' : (uiLanguage == 'vi' ? '1 ngày trò chơi' : '1 server day')))}">1 server day</span>
+          </div>
         </section>
         <div id="page-content" aria-live="polite"></div>
       </main>
