@@ -1,6 +1,6 @@
 # All-Page PC + Mobile Visual Concepts / 전체 페이지 시안
 
-> **2026-11-23 documentation consolidation status: SUPERSEDED / HISTORICAL.** Retained as historical design/provenance evidence. **Current selected visual direction is [Unified Navy/Violet UI v2026.11.23.3](OWNER_SELECTED_UNIFIED_DESIGN_v2026.11.23.3.md)**. This file and its historical images are not deleted to preserve inbound links; retained security/accessibility/five-language requirements remain governed by current project planning. New selected PNG assets and website implementation have NOT been uploaded/deployed.
+> **2026-11-23 documentation consolidation status: SUPERSEDED / HISTORICAL.** Retained as historical design/provenance evidence. **Current selected visual direction is [Unified Navy/Violet UI v2026.11.23.3](../OWNER_SELECTED_UNIFIED_DESIGN_v2026.11.23.3.md)**. This file and its historical images are not deleted to preserve inbound links; retained security/accessibility/five-language requirements remain governed by current project planning. New selected PNG assets and website implementation have NOT been uploaded/deployed.
 
 Version: v2026.11.18.12 | Status: PLANNING ONLY | Source: frontend/src/app/**/page.tsx
 
