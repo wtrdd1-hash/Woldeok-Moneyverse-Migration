@@ -1,5 +1,7 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+> v2026.11.23.11 public advertisement disclosure / 공개 광고 표시: [Ad display and policy QA](../qa/2026-11-23-public-ad-display-audit-v2026.11.23.11.ko.md) — source change candidate only, native Spring Test and Production not verified. Protected routes remain ad-free.
+
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 
 ## v2026.11.21.2234 — AgentMemory 영상/도구 영구 참고 및 기록 공유 (PLANNING / 문서만)

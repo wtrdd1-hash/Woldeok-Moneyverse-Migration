@@ -1,5 +1,7 @@
 # 📚 Document Catalog
 
+> v2026.11.23.11 public advertisement disclosure / 공개 광고 표시: [Ad display and policy QA](qa/2026-11-23-public-ad-display-audit-v2026.11.23.11.md) — source change candidate only, native Spring Test and Production not verified. Protected routes remain ad-free.
+
 ## v2026.11.21.2234 — AgentMemory saved reference and multi-agent memory handoff (PLANNING)
 - [English canonical protocol](development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md) / [한국어](development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md) · [Worklog](worklog/2026-11-21-agentmemory-shared-agent-protocol-v2234.md) · [GitHub](updates/v2026.11.21.2234-agentmemory-reference-github.md). Third-party installation NOT VERIFIED, no runtime deployment.
 
