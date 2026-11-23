@@ -69,7 +69,7 @@ class NativePublicChromeTest {
         mvc.perform(get(path).param("lang",lang).header("Accept-Language","en"))
                 .andExpect(status().isOk()).andExpect(header().string("Content-Language",lang));
         mvc.perform(get(path).cookie(new Cookie("wdmv_locale",lang)).param("lang","en").header("Accept-Language","ko"))
-                .andExpect(status().isOk()).andExpect(header().string("Content-Language",lang));
+                .andExpect(status().isOk()).andExpect(header().string("Content-Language","en"));
         if(path.equals("/tools/compound-calculator")) {
             String label=switch(lang){case "ko" -> "초기 투자 금액"; case "ja" -> "初期投資額";
                 case "zh" -> "初始本金"; case "vi" -> "Vốn ban đầu"; default -> "Initial principal";};
@@ -86,8 +86,10 @@ class NativePublicChromeTest {
     }
 
     @ParameterizedTest @MethodSource("nativeRoutes")
-    void savedManualPreferenceWinsOverQueryAndBrowser(String path) throws Exception {
+    void explicitSelectionWinsOverSavedPreferenceAndBrowser(String path) throws Exception {
         mvc.perform(get(path).cookie(new Cookie("wdmv_locale","vi")).param("lang","ko").header("Accept-Language","ja"))
+                .andExpect(status().isOk()).andExpect(header().string("Content-Language","ko"));
+        mvc.perform(get(path).cookie(new Cookie("wdmv_locale","vi")).header("Accept-Language","ja"))
                 .andExpect(status().isOk()).andExpect(header().string("Content-Language","vi"));
     }
     static Stream<String> nativeRoutes() {return Stream.of("/tools","/calculators","/tools/compound-calculator","/tools/stock-calculator","/status");}

@@ -82,7 +82,7 @@ def operation_revision(source,remote_head):
     if head!=remote_head:raise ValueError("Operational checkpoint is not the pushed branch HEAD")
     run("git","-C",str(repo),"merge-base","--is-ancestor",source,head)
     require_control_only(run("git","-C",str(repo),"diff","--name-only",source,head).splitlines())
-    for name in ("deploy.py","routing.py","owned_files.py"):
+    for name in ("deploy.py","routing.py","owned_files.py","upgrade.py"):
         expected=subprocess.check_output(["git","-C",str(repo),"show",head+":ops/test-frontend-real-backend/"+name])
         if (HERE/name).read_bytes()!=expected:raise ValueError("Operational code differs from reviewed commit")
     return head

@@ -744,6 +744,13 @@
     msgReceipt:["Receipt ID", "전송 확인 번호", "送信確認番号", "发送凭证编号", "Mã xác nhận gửi"],
     msgSequence:["Sequence", "순서", "順序", "序号", "Thứ tự"]
   };
+  // The policy guide shares the same live language changes as navigation.
+  dictionary.gameClockTitle=["Server game time rules", "서버 게임 시간 안내", "ゲームサーバー時間の案内", "游戏服务器时间说明", "Quy tắc thời gian máy chủ"];
+  dictionary.gameClockNote=["Planned rule; live calendar unverified. Not a finance or safety timer.", "기획 기준 · 서버의 현재 날짜와 실제 적용 정책은 별도 검증 필요 · 금융 이자/보안 제한과 혼동 금지", "計画基準・現在の時刻は未検証・金融/安全の期間とは別", "规划规则·当前服务器时间尚未验证·不等同于金融或安全时限", "Theo kế hoạch · Chưa xác minh giờ máy chủ · Không áp dụng cho mọi giới hạn"];
+  dictionary.gameClockRealMinutes=["10 real min", "현실 10분", "現実10分", "现实10分钟", "10 phút thực"];
+  dictionary.gameClockServerDay=["1 server day", "서버 1일", "ゲーム1日", "服务器1天", "1 ngày máy chủ"];
+  dictionary.gameClockServerWeek=["7 server days = 1 week", "서버 7일 = 1주", "ゲーム7日 = 1週", "服务器7天 = 1周", "7 ngày = 1 tuần"];
+  dictionary.gameClockConversion=["Game time conversion rule", "게임 시간 환산 기준", "ゲーム時間の換算基準", "游戏时间换算规则", "Quy tắc quy đổi thời gian"];
   const supports = code => SUPPORTED.includes(code);
   const storage = {
     read() { try { return root.localStorage.getItem(STORE_KEY); } catch { return null; } },
@@ -767,7 +774,14 @@
     }
     return 'en';
   }
-  let preference = storage.read() || readCookie() || 'auto';
+  function explicitPreference() {
+    try {
+      const values = new URLSearchParams(root.location && root.location.search || '').getAll('lang');
+      const code = values.length === 1 ? values[0].toLowerCase() : '';
+      return supports(code) ? code : null;
+    } catch { return null; }
+  }
+  let preference = explicitPreference() || storage.read() || readCookie() || 'auto';
   if (preference !== 'auto' && !supports(preference)) preference='auto';
   let current = preference === 'auto' ? detectBrowser() : preference;
   const missingKeys = new Set();
@@ -789,6 +803,15 @@
       // The legacy app and Spring frontend share a compatible manual preference cookie.
       root.document.cookie = COOKIE_KEY + '=' + (next === 'auto' ? '' : encodeURIComponent(next)) + '; Path=/; Max-Age=' + (next === 'auto' ? '0' : '31536000') + '; SameSite=Lax';
       root.document.documentElement.lang=current;
+      if(root.document.documentElement.dataset)root.document.documentElement.dataset.uiLanguage=current;
+      // Keep a direct language link consistent with the newest in-place manual choice.
+      if(root.location && root.history && root.history.replaceState) {
+        try {
+          const url=new URL(root.location.href);
+          if(next==='auto')url.searchParams.delete('lang');else url.searchParams.set('lang',next);
+          root.history.replaceState(root.history.state,'',url.href);
+        } catch { /* Restricted history must not erase drafts or block local translation. */ }
+      }
       root.dispatchEvent(new Event('mv39-language-change'));
     }
     return current;

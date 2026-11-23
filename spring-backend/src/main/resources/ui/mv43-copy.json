@@ -4065,5 +4065,47 @@
     "順序",
     "序号",
     "Thứ tự"
+  ],
+  "gameClockTitle": [
+    "Server game time rules",
+    "서버 게임 시간 안내",
+    "ゲームサーバー時間の案内",
+    "游戏服务器时间说明",
+    "Quy tắc thời gian máy chủ"
+  ],
+  "gameClockNote": [
+    "Planned rule; live calendar unverified. Not a finance or safety timer.",
+    "기획 기준 · 서버의 현재 날짜와 실제 적용 정책은 별도 검증 필요 · 금융 이자/보안 제한과 혼동 금지",
+    "計画基準・現在の時刻は未検証・金融/安全の期間とは別",
+    "规划规则·当前服务器时间尚未验证·不等同于金融或安全时限",
+    "Theo kế hoạch · Chưa xác minh giờ máy chủ · Không áp dụng cho mọi giới hạn"
+  ],
+  "gameClockRealMinutes": [
+    "10 real min",
+    "현실 10분",
+    "現実10分",
+    "现实10分钟",
+    "10 phút thực"
+  ],
+  "gameClockServerDay": [
+    "1 server day",
+    "서버 1일",
+    "ゲーム1日",
+    "服务器1天",
+    "1 ngày máy chủ"
+  ],
+  "gameClockServerWeek": [
+    "7 server days = 1 week",
+    "서버 7일 = 1주",
+    "ゲーム7日 = 1週",
+    "服务器7天 = 1周",
+    "7 ngày = 1 tuần"
+  ],
+  "gameClockConversion": [
+    "Game time conversion rule",
+    "게임 시간 환산 기준",
+    "ゲーム時間の換算基準",
+    "游戏时间换算规则",
+    "Quy tắc quy đổi thời gian"
   ]
 }

@@ -8,7 +8,7 @@
   <meta name="description" content="W Moneyverse — personal finance, investing, quests and community">
   <title th:text="${uiCopy[uiPageKey == 'home' ? 'personalTitle' : uiPageKey]} + ' · W Moneyverse'">My assets · W Moneyverse</title>
   <link rel="stylesheet" href="/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31">
-  <script src="/assets/mv39/i18n.js?v=ee47eefcc4e63a309d88f841372a79121535f1e1100532b388a8842910501022" defer></script>
+  <script src="/assets/mv39/i18n.js?v=dc686c97448c5ef20c90290b4286e6919a03a1d83a8629bc60e3710dd8568a0a" defer></script>
   <script src="/assets/mv39/money.js?v=9e95a9188599bc8d14d9743b3506f68af9fd17a63c6dd7db471e0d077d9283d5" defer></script>
   <script src="/assets/mv39/app.js?v=dd1448ca8e6f4b4cb585e0a1ee199a523b3b503f3df2b8be562058bbe897a9d4" defer></script>
   <th:block th:replace="~{shared/chrome :: commonHead}"></th:block>
@@ -28,15 +28,13 @@
         <!-- Static policy summary only: never substitute this for a verified current game clock response. -->
         <section class="game-clock-guide" aria-labelledby="game-clock-rule-title">
           <div>
-            <h3 id="game-clock-rule-title" class="game-clock-guide__title"
-              th:text="${uiLanguage == 'ko' ? '서버 게임 시간 안내' : (uiLanguage == 'ja' ? 'ゲームサーバー時間の案内' : (uiLanguage == 'zh' ? '游戏服务器时间说明' : (uiLanguage == 'vi' ? 'Quy tắc thời gian máy chủ' : 'Server game time rules')))}">Server game time rules</h3>
-            <p class="game-clock-guide__note"
-              th:text="${uiLanguage == 'ko' ? '기획 기준 · 서버의 현재 날짜와 실제 적용 정책은 별도 검증 필요 · 금융 이자/보안 제한과 혼동 금지' : (uiLanguage == 'ja' ? '計画基準・現在の時刻は未検証・金融/安全の期間とは別' : (uiLanguage == 'zh' ? '规划规则·当前服务器时间尚未验证·不等同于金融或安全时限' : (uiLanguage == 'vi' ? 'Theo kế hoạch · Chưa xác minh giờ máy chủ · Không áp dụng cho mọi giới hạn' : 'Planned rule; live calendar unverified. Not a finance or safety timer.')))}">Planned rule; live calendar unverified.</p>
+            <h3 id="game-clock-rule-title" class="game-clock-guide__title" data-i18n="gameClockTitle" th:text="${uiCopy['gameClockTitle']}">Server game time rules</h3>
+            <p class="game-clock-guide__note" data-i18n="gameClockNote" th:text="${uiCopy['gameClockNote']}">Planned rule; live calendar unverified.</p>
           </div>
-          <div class="game-clock-guide__ratios" aria-label="Game time conversion rule">
-            <span th:text="${uiLanguage == 'ko' ? '현실 10분' : (uiLanguage == 'ja' ? '現実10分' : (uiLanguage == 'zh' ? '现实10分钟' : (uiLanguage == 'vi' ? '10 phút thực' : '10 real min')))}">10 real min</span><b>=</b>
-            <span th:text="${uiLanguage == 'ko' ? '서버 1일' : (uiLanguage == 'ja' ? 'ゲーム1日' : (uiLanguage == 'zh' ? '服务器1天' : (uiLanguage == 'vi' ? '1 ngày máy chủ' : '1 server day')))}">1 server day</span>
-            <span th:text="${uiLanguage == 'ko' ? '서버 7일 = 1주' : (uiLanguage == 'ja' ? 'ゲーム7日 = 1週' : (uiLanguage == 'zh' ? '服务器7天 = 1周' : (uiLanguage == 'vi' ? '7 ngày = 1 tuần' : '7 server days = 1 week')))}">7 server days = 1 week</span>
+          <div class="game-clock-guide__ratios" aria-label="Game time conversion rule" data-i18n-aria="gameClockConversion" th:attr="aria-label=${uiCopy['gameClockConversion']}">
+            <span data-i18n="gameClockRealMinutes" th:text="${uiCopy['gameClockRealMinutes']}">10 real min</span><b>=</b>
+            <span data-i18n="gameClockServerDay" th:text="${uiCopy['gameClockServerDay']}">1 server day</span>
+            <span data-i18n="gameClockServerWeek" th:text="${uiCopy['gameClockServerWeek']}">7 server days = 1 week</span>
           </div>
         </section>
         <div id="page-content" aria-live="polite"></div>
