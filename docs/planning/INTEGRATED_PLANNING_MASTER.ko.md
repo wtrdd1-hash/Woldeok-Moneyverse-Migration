@@ -1,5 +1,8 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+> **2026-11-23 통합 디자인 권위 변경 / 사용자 선택 / v2026.11.23.3.** 사용자 지시에 따라 **네이비·보라색 전체 웹 PC·모바일 통일 디자인**을 11월18일 180개 경로의 최신 선택 시각 기준으로 지정한다. 직업 메뉴·실제 업무 흐름·은행/지갑/퀘스트/상점/관리자 기능별 화면 구성을 필수로 한다. 기존 11월18일 GitHub PNG는 역사적 원본으로 보존하고 새 디자인 PNG가 올라갔다고 오인하지 않는다. 신규 180개 이미지 ZIP은 대화에만 전달했고 GitHub 바이너리 미업로드다. [선택 기준 국문](../design/OWNER_SELECTED_UNIFIED_DESIGN_v2026.11.23.3.ko.md) · [180개 경로](../design/ALL_180_UNIFIED_UI_REGISTER_v2026.11.23.3.ko.md). 문서/시안 선택만 완료, 코드/Test/운영 변경 없음.
+
+
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 
 ## v2026.11.21.2234 — AgentMemory 영상/도구 영구 참고 및 기록 공유 (PLANNING / 문서만)
