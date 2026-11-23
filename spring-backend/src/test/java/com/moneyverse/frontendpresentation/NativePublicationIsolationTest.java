@@ -28,6 +28,15 @@ class NativePublicationIsolationTest {
   for(String family:List.of("announcements","gallery"))for(String suffix:List.of("","/",".html","/index.html"))for(String lang:List.of("en","ko","ja","zh","vi")){var r=get("/"+family+suffix,lang);assertEquals(200,r.statusCode(),family+suffix+lang);assertEquals(lang,r.headers().firstValue("Content-Language").orElse(""));assertTrue(r.body().contains("class=\"topbar\""));assertTrue(r.body().contains("id=\"mv-support-launcher\""));assertTrue(r.body().contains("data-publication-id=\""+ID+"\""));assertFalse(r.body().contains("<script>title</script>"));assertFalse(r.headers().firstValue("X-Robots-Tag").orElse("").contains("noindex"));}
   for(String bean:List.of("dataSource","jdbcTemplate","userAuthService","adminAuthService","socketIOServer","marketTickerService"))assertFalse(app.containsBean(bean),bean);
  }
+ @Test void titlesUseLocalizedTextWithoutNullTemplateSegments()throws Exception{
+  var titles=Map.of("en","Announcements","ko","운영 소식","ja","お知らせ","zh","公告","vi","Thông báo");
+  for(var entry:titles.entrySet()){
+   var a=get("/announcements",entry.getKey());assertEquals(200,a.statusCode());
+   assertTrue(a.body().contains("<title data-public-title=\"publicationAnnouncements\">"+entry.getValue()+" | Woldeok Moneyverse</title>"),entry.getKey()+" got="+a.body().substring(a.body().indexOf("<title"),a.body().indexOf("</title>")+8));
+   assertFalse(a.body().contains("null | Woldeok Moneyverse"),entry.getKey());
+   var g=get("/gallery",entry.getKey());assertEquals(200,g.statusCode());assertFalse(g.body().contains("null | Woldeok Moneyverse"));
+  }
+ }
  @Test void actualBodyAndApprovedImageAreEscapedAndCspIsRestricted()throws Exception{
   var a=get("/announcements","en");assertTrue(a.body().contains("Full verified body &lt;img"));assertTrue(a.body().contains("<details"));
   var p=get("/gallery","en");assertTrue(p.body().contains("src=\"https://approved.example/qa.jpg\""));assertTrue(p.body().contains("Actual &lt;script&gt;alt&lt;/script&gt;"));assertTrue(p.headers().firstValue("Content-Security-Policy").orElse("").contains("img-src 'self' https://approved.example"));assertFalse(p.headers().firstValue("Content-Security-Policy").orElse("").contains("https:"+";"));

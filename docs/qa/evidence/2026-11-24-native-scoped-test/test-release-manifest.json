@@ -1,0 +1,28 @@
+{
+  "at": "2026-11-24T00:44:39.706406+09:00",
+  "source_jar_sha": "fbc2bd0367d6a9739a6ed61232b228177786040b7b62fbae0969622d54a96c87",
+  "source_git_sha": "6eee110a03932764b01e15bc93faf829282bfa1a",
+  "old_nginx_sha": "b7d40d78382065579f0491f5f41f69b5994ca344a3ec47780d9f629979d1eb3d",
+  "new_nginx_sha": "fb95b7f6ba7afd8baa9a2f5f327db970db1d8b1ac0c29a591179e9ad3aecfe67",
+  "non_test_sha": "2aded4226c64107dd7e42e95c6f0a5f95ef643c2d01636de37b4bab8241cc7be",
+  "routes_modified": [
+    "/announcements",
+    "/announcements/",
+    "/announcements.html",
+    "/announcements/index.html",
+    "/gallery",
+    "/gallery/",
+    "/gallery.html",
+    "/gallery/index.html"
+  ],
+  "routes_added": [
+    "/terms",
+    "/terms/",
+    "/privacy",
+    "/privacy/",
+    "/socket.io.min.js",
+    "/assets/mv43/legal.css"
+  ],
+  "old_test_upstream": "http://127.0.0.1:55440",
+  "scoped_upstream": "http://127.0.0.1:55443"
+}

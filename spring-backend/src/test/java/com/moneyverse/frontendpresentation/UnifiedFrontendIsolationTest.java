@@ -77,6 +77,35 @@ class UnifiedFrontendIsolationTest {
         var request=HttpRequest.newBuilder(base.resolve("/admin/users")).header("Cookie",COOKIE).POST(HttpRequest.BodyPublishers.ofString("{}")).build();
         assertEquals(403,browser.send(request,HttpResponse.BodyHandlers.discarding()).statusCode());assertTrue(sourcePaths.isEmpty());
     }
+    @Test void legalPoliciesAndScriptArePublicButOtherRoutesStayClosed() throws Exception {
+        for (String path : List.of("/terms", "/privacy")) {
+            var result=get(path + "?lang=ko",null);
+            assertEquals(200,result.statusCode(),path);
+            assertTrue(result.body().contains("2026-09-02"),path);
+            assertTrue(result.body().contains("#0C1020"),path);
+            assertFalse(result.body().contains("<script>alert"),path);
+            assertTrue(result.headers().firstValue("Cache-Control").orElse("").contains("no-store"),path);
+            for(String requested : List.of("en","ko","ja","zh","vi")){
+                var page=get(path+"?lang="+requested,null);
+                assertEquals(200,page.statusCode(),path+"/"+requested);
+                assertTrue(page.body().contains("data-ui-language=\""+requested+"\""),path+"/"+requested);
+                assertTrue(page.body().contains("2026-09-02"),path+"/"+requested);
+                String bodyLanguage=requested.equals("ko")?"ko":"en";
+                assertTrue(page.body().contains("data-policy-language=\""+bodyLanguage+"\""),path+"/"+requested);
+                assertFalse(page.body().contains("null | Woldeok Moneyverse"),path+"/"+requested);
+            }
+        }
+        var script=get("/socket.io.min.js",null);
+        assertEquals(200,script.statusCode());
+        assertTrue(script.headers().firstValue("Content-Type").orElse("").contains("javascript"));
+        assertEquals(403,get("/terms/admin",null).statusCode());
+        assertEquals(403,get("/privacy/secret",null).statusCode());
+        assertEquals(403,get("/socket.io/unknown",null).statusCode());
+        var denied=HttpRequest.newBuilder(base.resolve("/terms")).POST(HttpRequest.BodyPublishers.ofString("x")).build();
+        assertEquals(403,browser.send(denied,HttpResponse.BodyHandlers.discarding()).statusCode());
+        assertEquals(403,get("/terms/secret",null).statusCode());
+        assertTrue(sourcePaths.isEmpty(),"Legal policies may not read private upstream data");
+    }
     @Test void isolatedFrontendHealthCannotClaimDatabaseOrWholeSiteAcceptance() throws Exception {
         var response=get("/frontend-ui-health",null);assertEquals(200,response.statusCode());
         assertTrue(response.body().contains("\"databaseRequired\":false"));assertTrue(response.body().contains("\"wholeSiteAccepted\":false"));
