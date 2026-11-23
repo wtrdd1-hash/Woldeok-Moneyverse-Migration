@@ -29,3 +29,7 @@
 ## 검증 구분
 초기 소스 Java667/Node351/Python16 통과; 최초 실제 UI matrix는1조건 통과 후 한국어 조건 실패로 중단했다.240개 통과가 아니다.
 언어 수정 후보는 Java673/Node353/Python19 통과를 확인했으며 신규 exact CI/artifact와 실제 browser acceptance를 기다린다. 로컬 Gradle에서 제외되는 PostgreSQL 태그는 통과로 세지 않았다.
+
+## 후속 실제 브라우저 결과
+번역 수정 dbac 배포본은 홈40개 조건을 통과했다. 이후 /tools320px에서 문의 버튼이 검색칸과5.25px 겹쳐 전체 실행이 중단됨: [실측 JSON](2026-11-23-test-frontend-browser-overlap.json). 문의 버튼을 공통 헤더 공간에 배치하는 수정은 Java674/Node354 통과했으나 신규 실제 브라우저 재검증 전까지 미완료다.
+상태503은 [실제 앱 역할의 읽기 경계 결함](../findings/2026-11-23-test-status-read-boundary.ko.md)으로 확인됐으며 raw table GRANT 우회는 하지 않았다.
