@@ -76,3 +76,14 @@
   .admin-mobile-brand{display:flex;flex:0 0 44px;min-width:44px;min-height:44px;align-items:center;justify-content:center;border-radius:11px}
   .admin-mobile-brand img{display:block;width:32px;height:32px;object-fit:contain}
 }
+
+/* A toolbar slot keeps support reachable without covering forms or navigation. */
+.topbar .support-fab,.admin-topbar .support-fab{position:static;inset:auto;z-index:auto;flex:0 0 56px;width:56px;height:56px;min-width:56px;min-height:56px;margin-inline-start:8px}
+@media(max-width:1023px){
+  .topbar,.admin-topbar{flex-wrap:wrap}
+  .topbar .top-spacer{display:none}
+  .topbar h1{flex:1 1 calc(100% - 64px);max-width:none;white-space:normal;overflow-wrap:anywhere}
+  .topbar .lang-control,.admin-locale-label{margin-inline-start:auto}
+  .admin-heading{flex:1 1 calc(100% - 128px)}
+  .admin-account{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+}

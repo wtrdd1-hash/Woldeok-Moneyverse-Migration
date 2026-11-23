@@ -1,4 +1,4 @@
-<!doctype html><html xmlns:th="http://www.thymeleaf.org"><head><th:block th:fragment="commonHead"><link rel="icon" type="image/x-icon" href="/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5"><link rel="stylesheet" href="/assets/mv43/chrome.css?v=d8525be5fcded40f8c4039b426ebc1835cbf6ee01196ec70023d920189643837"><link rel="stylesheet" href="/assets/mv43/game-world.css?v=7126a07f2dccc9c42177f659d6d26d11d0f204684c39ede9b9a5ca09724e6bed"><script src="/assets/mv43/chrome.js?v=d9f8a8987e748f00460eebfd7cab3ed5e07ddd75090569f9dcde64f0bb857a55" defer></script></th:block></head><body>
+<!doctype html><html xmlns:th="http://www.thymeleaf.org"><head><th:block th:fragment="commonHead"><link rel="icon" type="image/x-icon" href="/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5"><link rel="stylesheet" href="/assets/mv43/chrome.css?v=813d59e41d5282c3b390ff55f64bba377a21284d608346d205c269c1015c8e8c"><link rel="stylesheet" href="/assets/mv43/game-world.css?v=7126a07f2dccc9c42177f659d6d26d11d0f204684c39ede9b9a5ca09724e6bed"><script src="/assets/mv43/chrome.js?v=d9f8a8987e748f00460eebfd7cab3ed5e07ddd75090569f9dcde64f0bb857a55" defer></script></th:block></head><body>
   <aside th:fragment="sidebar" class="sidebar" aria-label="Main navigation" data-i18n-aria="navigationMain" th:attr="aria-label=${uiCopy['navigationMain']}">
     <a href="/" class="brand"><img class="brand-mark" src="/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5" alt="" width="32" height="32"><span>W Moneyverse</span></a>
     <nav class="side-links" aria-label="Primary navigation" data-i18n-aria="navigationMain" th:attr="aria-label=${uiCopy['navigationMain']}">
@@ -28,6 +28,7 @@
           </select>
         </label>
         <div class="auth-actions" id="auth-actions"><a href="/login" class="auth-link" data-i18n="login" th:text="${uiCopy['login']}">Log in</a></div>
+        <th:block th:replace="~{shared/chrome :: supportLauncher}"></th:block>
       </header>
       <footer th:fragment="footer" class="footer"><span data-i18n="allRights" th:text="${uiCopy['allRights']}">Virtual WLD is not legal tender.</span>
         <span class="foot-links"><a href="/terms" data-i18n="authTermsLink" th:text="${uiCopy['authTermsLink']}">Terms</a><a href="/privacy" data-i18n="authPrivacyLink" th:text="${uiCopy['authPrivacyLink']}">Privacy</a><a href="/support" data-i18n="support" th:text="${uiCopy['support']}">Support</a></span></footer>
@@ -47,8 +48,9 @@
 </aside>
 <nav class="bottom-tabs" id="mobile-tabs" aria-label="Mobile bottom navigation" data-i18n-aria="navigationMobile" th:attr="aria-label=${uiCopy['navigationMobile']}"><a class="bottom-tab" href="/" th:attr="aria-current=${uiPageKey == 'home' ? 'page' : null}"><span aria-hidden="true">⌂</span><span data-i18n="home" th:text="${uiCopy['home']}">My assets</span></a><a class="bottom-tab" href="/wallet" th:attr="aria-current=${uiPageKey == 'wallet' ? 'page' : null}"><span aria-hidden="true">▣</span><span data-i18n="wallet" th:text="${uiCopy['wallet']}">Wallet</span></a><a class="bottom-tab" href="/stocks" th:attr="aria-current=${uiPageKey == 'stocks' ? 'page' : null}"><span aria-hidden="true">↗</span><span data-i18n="stocks" th:text="${uiCopy['stocks']}">Invest</span></a><a class="bottom-tab" href="/quests" th:attr="aria-current=${uiPageKey == 'quests' ? 'page' : null}"><span aria-hidden="true">✧</span><span data-i18n="quests" th:text="${uiCopy['quests']}">Quests</span></a><a class="bottom-tab" href="/board" th:attr="aria-current=${uiPageKey == 'board' ? 'page' : null}"><span aria-hidden="true">☷</span><span data-i18n="board" th:text="${uiCopy['board']}">Community</span></a></nav>
 </th:block>
+<th:block th:fragment="supportLauncher"><button type="button" id="mv-support-launcher" class="support-fab" aria-haspopup="dialog" aria-controls="mv-support-panel" aria-label="Help & chat" th:attr="aria-label=${uiCopy['support']}"><span aria-hidden="true">☏</span></button></th:block>
 <th:block th:fragment="support">
-<button type="button" id="mv-support-launcher" class="support-fab" aria-haspopup="dialog" aria-controls="mv-support-panel" aria-label="Help & chat" th:attr="aria-label=${uiCopy['support']}"><span aria-hidden="true">☏</span></button>
+
 <dialog id="mv-support-panel" class="mv-support-panel" aria-labelledby="mv-support-heading">
   <header class="mv-support-heading"><h2 id="mv-support-heading" data-i18n="supportHero" th:text="${uiCopy['supportHero']}">Contact support</h2>
     <button type="button" id="mv-support-close" class="mv-support-close" aria-label="Close" th:attr="aria-label=${uiCopy['close']}">×</button></header>

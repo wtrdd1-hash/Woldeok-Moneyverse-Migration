@@ -33,6 +33,10 @@ class GameWorldBrandContractTest {
             var html=pages.render(template,request,Map.of("uiPageKey","home","denied",true,"adminPageKey","dashboard"));
             assertTrue(html.contains("/assets/mv43/game-world.css?v="+hash),template);
             assertTrue(html.contains("/assets/mv39/favicon.ico?v="),template);
+            var header=java.util.regex.Pattern.compile("<header[^>]*>[\\s\\S]*?</header>").matcher(html);
+            assertTrue(header.find(),template);
+            assertTrue(header.group().contains("id=\"mv-support-launcher\""),"Support must own a toolbar slot rather than cover form controls");
+            assertEquals(1,java.util.regex.Pattern.compile("id=\"mv-support-launcher\"").matcher(html).results().count());
             assertFalse(html.contains("AI CORE ACTIVE"),template);
             assertFalse(html.contains("0.48%"),template);
         }
