@@ -91,3 +91,18 @@ Start: main `9876c09888ec84034eec183cf1309c85df3d7447`; remote mini-PC devices s
 - Initial UI-document PR [#3393](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3393) did not sufficiently cover game visual identity, source-specific official icon, broken translation and the explicit accelerated game calendar/false-success fallback. This section corrects the documentation gap without changing historical records.
 - Verification order: current plan → Nov 18 image → exact renderer/source → official asset → actual API/clock policy → exact-SHA Test/Production receipt. No “full UI complete” without scope-specific proof.
 - Separate [home presentation candidate branch](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/tree/fix/nov18-game-ui-clock-logo-20261123) changes only `mv43/home.html`, `shared/chrome.html`, and new `assets/mv39/game-home.css`; it shows the **planned 10-minute-to-server-day ratio**, not a fabricated live current calendar. No gameplay/financial business logic or backend clock fix is claimed.
+
+
+## 9. Screenshot and revised visual concept integration — v2026.11.23.4
+
+The companion conversation attachment `moneyverse-ui-visual-v2026.11.23.4.zip` contains a standalone `index.html` comparison, `README.ko.md`, and three images. **These binary PNGs are delivered with the conversation, not uploaded to GitHub** through the current text-only file writing connector. This GitHub document records their identities and design/QA mapping without claiming that the runtime or original Nov 18 previews have been altered.
+
+| Image | Package filename | Status and limitations |
+| --- | --- | --- |
+| IMG-01 | `01-current-home-user-screenshot.png` | Original owner-supplied screenshot: generic W logo, flat cards, untranslated `Translation unavailable`, no game-clock information. SHA256 `76b0aef93aaa69c52d785e6f2d96564587aebddff22758e01d02903cc4406d9f` |
+| IMG-02 | `02-home-concept-game-ui.png` | Newly generated game-style home **concept**, not a pixel-accurate Nov 18 implementation. All illustrated balances, avatar, level, quests, current game day/time are synthesized demo details, not server data. SHA256 `311f5b51fa83007e80477d3710e4053cb6bec8daf646e33b66882dbe6ff3f59a` |
+| IMG-03 | `03-ui-integrated-visual-overview.png` | Generated visual issue/solution overview including banking. Any **server year = 365 days** equation, interest rates, milestones, completion badges, and finance/game values depicted here are *unverified visual-generation errors* and MUST NOT be used as implementation requirements. SHA256 `f9579114ab288f7b27b2cab1a32daa448138cc1027d49a170fba78dced9e328f` |
+
+**Implementation mapping:** official repository brand asset replaces the simple W; Nov 18 PC/mobile source previews govern layout/function fidelity rather than the generated concept; game clock display must distinguish *planned* 10 real minutes/server day and 7 server days/week from verified current DB policy and from finance/security time; 5-locale missing translation and bank form errors remain separate QA issues. Source [server clock spec](../planning/SERVER_GAME_CLOCK_SPEC.md).
+
+**Evidence boundary:** image generation did not edit the original Nov 18 approved source PNG files, modify game/finance backend logic, prove current server time, or deploy UI. [Candidate home PR #3395](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3395) is separate and partial. Existing worklogs and historical assets remain intact.
