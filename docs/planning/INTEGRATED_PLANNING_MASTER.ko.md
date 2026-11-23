@@ -1,5 +1,8 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+> **v2026.11.23.1 테스트 서버 강화 규정 (검토 제안 / 문서 전용):** [초엄격 테스트 서버 운영 규정](../operations/STRICT_TEST_SERVER_GOVERNANCE_v2026.11.23.1.ko.md). 4550은 과거 Spring API 포트이며 테스트 전용으로 확인되지 않음. 실제 미니PC 오프라인으로 활성 포트/방화벽 실측 미완료. 분리·권한·QA·정확한 SHA·무중단 승격 게이트 미통과 시 운영 승격 차단.
+
+
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 
 ## v2026.11.21.2234 — AgentMemory 영상/도구 영구 참고 및 기록 공유 (PLANNING / 문서만)
