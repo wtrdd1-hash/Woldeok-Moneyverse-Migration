@@ -18,7 +18,7 @@
 <p th:if="${authLeadKey != null}" th:attr="data-i18n=${authLeadKey}" th:text="${uiCopy.get(#vars.authLeadKey)}">Access your Moneyverse account.</p></div></section>
 <section class="card auth-card" aria-labelledby="auth-heading">
 <th:block th:if="${authFields}">
-<p class="auth-note" data-i18n="authConsentNotice">머니버스 계정으로 안전하게 로그인하세요. 디스코드 및 이메일 계정을 지원합니다.</p>
+<p class="auth-note">머니버스 계정으로 안전하게 로그인하세요. 디스코드 및 이메일 계정을 지원합니다.</p>
 <form id="native-auth-form" action="/login" method="post" th:attr="data-auth-mode=${authPage},action=${authPage == 'login' ? '/login' : '/register'}">
 <fieldset class="auth-fields" th:disabled="${authPage == 'register'}">
 <label for="auth-email" data-i18n="authEmail" th:text="${uiCopy['authEmail']}">Email</label>
