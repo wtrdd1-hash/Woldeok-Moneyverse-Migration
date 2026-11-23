@@ -155,17 +155,69 @@ def install(archive,source,ci_run):
     owned=atomic(target,proposed,before,mode,stage,"site-owned")
     try:
         run("nginx","-t");run("systemctl","reload","nginx")
-        if identity(80).get("id")!=source:raise ValueError("Actual Test origin source mismatch")
+        wait_identity(80,source,lambda:same(target,owned))
         for path in routing.READS:
             req=urllib.request.Request("http://127.0.0.1"+path,headers={"Host":"test.easy-scraping.com","Accept":"application/json"})
             with urllib.request.urlopen(req,timeout=10) as r:
                 if r.status!=200:raise ValueError("Real Test backend failed")
         run("systemctl","enable",routing.UNIT)
-        record(stage,"accepted.json",{"source":source,"jarSha256":expected,"pid":pid,"testOnly":True,"wholeSiteAccepted":False,"productionConfigurationUnchanged":True})
+        record(stage,"accepted.json",{"source":source,"jarSha256":expected,"pid":pid,"testOnly":True,"wholeSiteAccepted":False,"productionConfigurationUnchanged":True,"siteReceipt":"site-owned.json"})
     except Exception:
         atomic(target,original,owned,mode,stage,"site-restored")
         run("nginx","-t");run("systemctl","reload","nginx")
         raise
+    print(json.dumps({"source":source,"testOnly":True,"stage":str(stage),"frontendPort":routing.PORT,"realBackendPort":55438}))
+
+
+def wait_identity(port,source,verify,timeout=8):
+    deadline=time.monotonic()+timeout
+    while time.monotonic()<deadline:
+        verify()
+        try:ready=identity(port).get("id")==source
+        except Exception:ready=False
+        if ready:
+            verify();return
+        time.sleep(.1)
+    raise ValueError("New-source readiness did not converge; old HTML is never acceptance")
+
+def connect_prepared(archive,source,ci_run):
+    data,expected,attestation=candidate(archive,source,ci_run)
+    stage=ROOT/source;root_dir(stage,0o700)
+    if (stage/"accepted.json").exists():raise ValueError("Candidate already accepted")
+    before=json.loads((stage/"before.json").read_text())
+    target=SITE.resolve(strict=True)
+    if str(target)!=before["target"]:raise ValueError("Site authority changed")
+    original=(stage/"site.before").read_bytes()
+    proposed=(stage/"site.after").read_bytes()
+    if routing.site(original.decode()).encode()!=proposed:raise ValueError("Prepared Test transformation changed")
+    restored=json.loads((stage/"site-restored.json").read_text())
+    same(target,restored)
+    if original!=target.read_bytes():raise ValueError("Only a verified own inverse may resume")
+    unit_proof=json.loads((stage/"unit.json").read_text())
+    runtime=json.loads((stage/"runtime.json").read_text())
+    app=pathlib.Path(routing.BASE)/source/"app.jar"
+    if runtime["source"]!=source or sha(app.read_bytes())!=expected or runtime["jarSha256"]!=expected:
+        raise ValueError("Prepared runtime artifact changed")
+    def process():
+        same(UNIT,unit_proof)
+        pid=int(run("systemctl","show",routing.UNIT,"-p","MainPID","--value").strip())
+        if pid!=runtime["pid"] or str(app).encode() not in (pathlib.Path("/proc")/str(pid)/"cmdline").read_bytes().split(b"\0"):
+            raise ValueError("Prepared unit process changed")
+    wait_identity(routing.PORT,source,process)
+    record(stage,"retry-attestation.json",attestation)
+    acquired=atomic(target,proposed,restored,before["mode"],stage,"site-retry-owned")
+    try:
+        run("nginx","-t");run("systemctl","reload","nginx")
+        wait_identity(80,source,lambda:same(target,acquired))
+        for path in routing.READS:
+            req=urllib.request.Request("http://127.0.0.1"+path,headers={"Host":"test.easy-scraping.com","Accept":"application/json"})
+            with urllib.request.urlopen(req,timeout=10)as r:
+                if r.status!=200 or not isinstance(json.load(r),dict):raise ValueError("Real Test backend response invalid")
+        process();run("systemctl","enable",routing.UNIT)
+        record(stage,"accepted.json",{"source":source,"operationalSource":attestation["operationalSource"],"jarSha256":expected,"pid":runtime["pid"],"testOnly":True,"wholeSiteAccepted":False,"productionConfigurationUnchanged":True,"siteReceipt":"site-retry-owned.json"})
+    except Exception:
+        atomic(target,original,acquired,before["mode"],stage,"site-retry-restored")
+        run("nginx","-t");run("systemctl","reload","nginx");raise
     print(json.dumps({"source":source,"testOnly":True,"stage":str(stage),"frontendPort":routing.PORT,"realBackendPort":55438}))
 
 def inverse(source):
@@ -173,14 +225,17 @@ def inverse(source):
     stage=ROOT/source
     before=json.loads((stage/"before.json").read_text())
     target=pathlib.Path(before["target"])
-    owned=json.loads((stage/"site-owned.json").read_text())
+    accepted=json.loads((stage/"accepted.json").read_text())
+    receipt=accepted["siteReceipt"]
+    if receipt not in ("site-owned.json","site-retry-owned.json"):raise ValueError("Unknown ownership receipt")
+    owned=json.loads((stage/receipt).read_text())
     atomic(target,(stage/"site.before").read_bytes(),owned,before["mode"],stage,"manual-restored")
     run("nginx","-t");run("systemctl","reload","nginx")
     # Preserve the candidate and receipt for diagnosis; no unrelated service is stopped.
     record(stage,"inverse.json",{"source":source,"routingRestored":True})
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument("action",choices=("install","inverse"))
+    p=argparse.ArgumentParser();p.add_argument("action",choices=("install","connect","inverse"))
     p.add_argument("--source",required=True);p.add_argument("--archive",type=pathlib.Path);p.add_argument("--ci-run")
     a=p.parse_args()
     if os.geteuid()!=0:raise ValueError("Root-owned deployment required")
@@ -190,5 +245,5 @@ def main():
         if a.action=="inverse":inverse(a.source)
         else:
             if a.archive is None or not a.ci_run:raise ValueError("Attested CI candidate archive required")
-            install(a.archive,a.source,a.ci_run)
+            (connect_prepared if a.action=="connect" else install)(a.archive,a.source,a.ci_run)
 if __name__=="__main__":main()

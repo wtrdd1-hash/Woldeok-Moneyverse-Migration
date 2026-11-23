@@ -126,4 +126,16 @@ class RoutingTest(unittest.TestCase):
             deploy.atomic(p,b"before",acquired,0o600,root,"inverse")
             self.assertEqual("before",p.read_text())
 
+
+    def test_reload_readiness_never_accepts_old_html_or_wrong_source(self):
+        from unittest.mock import patch,Mock
+        verify=Mock()
+        with patch.object(deploy,"identity",side_effect=[ValueError("old HTML"),{"id":"old"},{"id":"new"}]):
+            deploy.wait_identity(80,"new",verify,timeout=1)
+        self.assertGreaterEqual(verify.call_count,3)
+    def test_reload_readiness_refuses_changed_configuration(self):
+        from unittest.mock import Mock
+        with self.assertRaises(ValueError):
+            deploy.wait_identity(80,"new",Mock(side_effect=ValueError("foreign config")),timeout=1)
+
 if __name__=='__main__':unittest.main()
