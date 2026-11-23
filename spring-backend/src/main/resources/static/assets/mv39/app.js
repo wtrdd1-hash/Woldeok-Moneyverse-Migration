@@ -277,11 +277,14 @@
     });
     document.title=t(page)+' · W Moneyverse';
     const select=document.getElementById('language-selector');
-    select.value=locale.preference();
-    select.setAttribute('aria-label',t('selectLanguage'));
-    const auto=select.querySelector('option[value="auto"]');
-    auto.textContent=t('auto');
-    document.querySelector('.support-fab').setAttribute('aria-label',t('support'));
+    if (select) {
+      select.value=locale.preference();
+      select.setAttribute('aria-label',t('selectLanguage'));
+      const auto=select.querySelector('option[value="auto"]');
+      if (auto) auto.textContent=t('auto');
+    }
+    const fab=document.querySelector('.support-fab');
+    if (fab) fab.setAttribute('aria-label',t('support'));
   }
   function renderAuthControls() {
     const container=document.getElementById('auth-actions');container.replaceChildren();
