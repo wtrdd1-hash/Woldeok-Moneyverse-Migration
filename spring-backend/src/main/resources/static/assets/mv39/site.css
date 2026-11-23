@@ -82,3 +82,22 @@
   .support-fab{display:flex;width:56px;height:56px;right:16px;bottom:calc(80px + env(safe-area-inset-bottom,0px));}
   .app-inner{padding-bottom:calc(160px + env(safe-area-inset-bottom,0px));}
 }
+
+/* Google Material Symbols Navigation and UI Enhancements */
+.material-symbols-outlined{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;font-size:20px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;-webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased;vertical-align:middle;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 20}
+.nav-icon.material-symbols-outlined{font-family:'Material Symbols Outlined'!important;font-size:20px;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;color:var(--accent);flex:0 0 22px}
+.nav-link[aria-current=page] .nav-icon.material-symbols-outlined{font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 20;color:#c6b7ff}
+.bottom-tab .material-symbols-outlined{font-size:22px;display:block;margin:0 auto 2px;line-height:1}
+.bottom-tab[aria-current=page] .material-symbols-outlined{font-variation-settings:'FILL' 1,'wght' 600}
+.menu-toggle .material-symbols-outlined{font-size:24px}
+.support-fab .material-symbols-outlined{font-size:28px}
+.lang-control .material-symbols-outlined{font-size:20px;color:var(--accent)}
+
+/* SVG Navigation Icon Enhancements */
+.nav-icon { width:20px; height:20px; flex:0 0 20px; display:inline-flex; align-items:center; justify-content:center; color:var(--accent); vertical-align:middle; }
+.nav-link[aria-current=page] .nav-icon { color:#fff; }
+.tab-icon { width:22px; height:22px; margin:0 auto 3px; display:block; color:#a8b4d2; }
+.bottom-tab[aria-current=page] .tab-icon { color:#c4afff; }
+.menu-toggle svg, .drawer-close svg { display:block; margin:auto; }
+.lang-control .lang-icon { color:var(--accent); vertical-align:middle; flex-shrink:0; }
+.support-fab svg { display:block; margin:auto; }

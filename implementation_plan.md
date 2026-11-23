@@ -5508,3 +5508,37 @@ eserves: 대한민국 외환보유액 통합계정)
   1. `spring-backend/src/main/resources/templates/shared/chrome.html`
   2. `spring-backend/src/main/resources/static/assets/mv39/site.css`
 - Git Status: 로컬 수정 완료, 사용자 명시적 배포 승인 대기 중.
+
+---
+## 🚀 [v122 Specification] 구글 머티리얼 심볼(Google Material Symbols) 아이콘 전면 교체 및 UI 통일성 확보 (+64, -0)
+
+### 1. 현상 파악 및 문제점 (Current Flaws)
+- **조잡한 유니코드 특수문자 글리프 의존**:
+  - 사이드바 내비게이션, 모바일 드로어, 하단 바텀 탭, 햄버거 메뉴, 언어 선택기 등에서 유니코드 특수문자(`⌂`, `▣`, `↗`, `✧`, `◈`, `☷`, `◉`, `♙`, `⚙`, `☏`, `◎`, `☰`, `×`)가 텍스트 글리프로 삽입되어 있음.
+  - OS 및 브라우저 기본 글꼴(Apple SD Gothic Neo, Malgun Gothic 등)에 따라 아이콘의 두께, 선 굵기, 정렬 및 여백이 뒤죽박죽으로 렌더링되며, 고대비 다크 테마 금융 대시보드로서의 시각적 완성도와 통일성을 저해함.
+
+### 2. 구글 머티리얼 심볼(Google Material Symbols Outlined) 규격 정의
+- **글꼴 로드**: `https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200`
+- **아이콘 매핑 표준 (Navigation & Chrome)**:
+  1. **홈 (home)**: `home`
+  2. **지갑 (wallet)**: `account_balance_wallet`
+  3. **투자 (stocks)**: `trending_up`
+  4. **퀘스트 (quests)**: `military_tech`
+  5. **상점 (shop)**: `shopping_bag`
+  6. **커뮤니티 (board)**: `forum`
+  7. **문의·채팅 (support)**: `support_agent`
+  8. **내 계정 (account)**: `account_circle`
+  9. **관리자 (admin)**: `settings`
+  10. **언어 선택기**: `translate`
+  11. **모바일 햄버거 메뉴 토글**: `menu`
+  12. **모바일 드로어 닫기 버튼**: `close`
+  13. **고객지원 FAB 플로팅 버튼**: `support_agent`
+
+### 3. 변경 대상 파일 및 작업 범위
+- `spring-backend/src/main/resources/templates/shared/chrome.html`:
+  - `commonHead` 프래그먼트에 Google Material Symbols 폰트 스타일시트 링크 추가.
+  - 사이드바, 모바일 드로어, 바텀 탭, 탑바, 지원 패널 내비게이션 아이콘을 `<span class="material-symbols-outlined nav-icon" aria-hidden="true">...</span>` 구조로 전면 교체.
+- `spring-backend/src/main/resources/static/assets/mv39/site.css`:
+  - `.material-symbols-outlined` 클래스 스타일 정밀 정의 (폰트 사이즈 20px, baseline 중앙 정렬, flex-shrink 0).
+  - `.nav-icon`에서 `font-family: Arial, sans-serif` 제거 및 머티리얼 심볼 최적화.
+- 운영 서버(`/srv/moneyverse-data/...`) 실시간 동기화 및 실 브라우저 렌더링 검증.
