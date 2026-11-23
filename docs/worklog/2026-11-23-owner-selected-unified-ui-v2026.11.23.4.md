@@ -1,0 +1,7 @@
+# Selected unified design designation v2026.11.23.4 — Worklog
+- 2026-11-23 owner explicitly chose v2026.11.23.3 navy/violet all-page design as the reference and requested GitHub official notation and image/document links.
+- Read current English canonical PROJECT_PLAN, INTEGRATED_PLANNING_MASTER and documentation policy; verified main SHA `9876c09888ec84034eec183cf1309c85df3d7447` at start and mid task.
+- Created bilingual `docs/design/OWNER_SELECTED_UNIFIED_DESIGN_v2026.11.23.3(.ko).md` and incorporated owner selection into BOTH English/Korean authoritative `PROJECT_PLAN` and `INTEGRATED_PLANNING_MASTER` on isolated design branch.
+- Linked the existing original GitHub PNGs and original 180-item gallery explicitly as HISTORICAL, not falsely as newly uploaded selected PNGs. New image ZIP supplied through the conversation `moneyverse-unified-ui-v2026.11.23.3.zip`, with eight priority images extracted and verified for direct conversation links.
+- GitHub PNG upload remains pending: MiniPC offline and current connector only writes UTF-8 text. Existing Nov18 source PNG unchanged; PR #3376 stays DRAFT. No code, auth, runtime, Test, production or DB changes.
+- Gemini conflict avoidance: dedicated existing branch `design/nov18-unified-all-180-20261123`, no main merge. Next step requires binary image upload, exact file link validation, per-control design QA, then Spring implementation/Test gates.
