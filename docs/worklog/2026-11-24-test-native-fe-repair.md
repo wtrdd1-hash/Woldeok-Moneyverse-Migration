@@ -1,0 +1,14 @@
+# Test-native frontend repair worklog — v2026.11.24.1
+## Start (2026-11-24 KST)
+Owner approved immediate repairs in the miniPC Test environment, independent of ongoing hourly tasks. Checked integrated planning master first, Nov18 authority, Nov23 v10 UI single master/design 180 PNG source, latest main, concurrent PRs, live Test routing, and authorized source boundaries. Operational main SHA: 9876c09888ec84034eec183cf1309c85df3d7447. Verified Test presentation application source 7b676e602bc984ab74572d4081655fdb297d176a and backend f0336fded6068f884c87f88efedeb770fd3387d4. New isolated worktree created from exact running Test presentation candidate rather than touching shared root or protected main; will propose as stacked branch for review. Scope: legal URL, safe script delivery, announcement/gallery title bug. No Production or financial data writes.
+## Baseline failure
+Observed /terms, /privacy, /socket.io.min.js HTTP403 from both native port55440 and Test Nginx; Test backend55438 has existing legal documents/static socket script, proving the restriction is native frontend allowlist/resource handler + absent native legal mapping. /announcements and /gallery 200 but title literal 'null | Woldeok Moneyverse', despite localized <h1>, due to invalid Thymeleaf title concatenation. No browser automated screenshot available in earlier QA. Tests must be RED before code.
+## Middle
+Pending.
+## Finish
+Pending.
+## Middle — code and TDD evidence
+- Created JUnit RED: 28 targeted tests, 2 failed as expected (/terms HTTP403; gallery/announcement null title). After source repair targeted 28/28 GREEN. Extended to all 5 locales, forbidden sibling paths, POST denial, no source fetch. Legal policy HTML exported exactly from existing EN/KO React JSX article content (2026-09-02), without inventing clauses or mixing private API responses; JA/ZH/VI chrome uses language preference with EN body fallback marked in HTML. Actual source policy version remains unchanged.
+- Changes: narrow Spring GET/HEAD allowlist for /terms,/privacy and /socket.io.min.js, native Thymeleaf page serving authored policy texts with Nov23 navy/violet shell and favicon, static JS resource handler; publication controller computes localized title string and templates render it instead of Thymeleaf null; no admin/finance authorization changes.
+- Full Java `./gradlew clean test bootJar --offline`: 676 tests, 0 failures/errors/skips (PostgreSQL-tagged project cases excluded per existing Gradle task filter, not counted). Node `node --test scripts/native-*.test.mjs`: 350/350 PASS after asset content-hash references corrected. Git diff check clean.
+- Next: exact SHA build, localhost browser preview with an installed Chromium binary, Test-only Nginx cutover only if safe and reversible. QA2 still owns Test auto-promotion; manual hotfix coordination and lock required. Production unchanged.
