@@ -24,3 +24,7 @@ Not finished. No runtime change or Production promotion has occurred.
 
 ### In-progress validation checkpoint
 Real-render branding5RED->GREEN; complete native Java667/667, node351/351, zero failures/errors/skips. Nine routing/provenance/CAS tests pass. Required PostgreSQL-tagged tests are excluded locally, not claimed passing. Existing real Test API session/stocks/board/wallet summary each returned200 with expected object fields. No runtime change yet. Fresh review and exact candidate CI precede Test-only activation.
+
+### Fresh review / one fix pass
+Reviewer found two P1 shared-file concurrency hazards before activation: separately captured bytes/identity and adopting a post-replacement foreign occupant. Three regressions observed RED; fixed by consistent fd capture and the previously reviewed NOREPLACE displacement/acquisition writer. It preserves displaced inodes in private recovery directories, verifies the actual displaced occupant, never replaces a foreign occupied path, and records only the acquired candidate identity. Full14Python tests GREEN, including post-comparison race, post-acquisition foreign write and successful inverse. No further review loop; covering tests answer the findings.
+Application source and operational source are distinct: an attested candidate may remain in use across a pushed operations/docs-only checkpoint only when Git ancestry and exact changed-path allowlist prove application bytes unchanged. A new application change always requires its own candidate. Production promotion remains forbidden.

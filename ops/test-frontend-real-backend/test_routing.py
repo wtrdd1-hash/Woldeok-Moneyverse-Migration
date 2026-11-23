@@ -72,4 +72,58 @@ class RoutingTest(unittest.TestCase):
             with self.assertRaises(ValueError):deploy.atomic(p,b"candidate",proof,0o600,pathlib.Path(d),"owned")
             self.assertEqual("foreign",p.read_text())
 
+
+    def test_original_capture_binds_bytes_and_identity(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            p=pathlib.Path(d)/"site";p.write_bytes(b"original")
+            data,proof=deploy.capture(p)
+            self.assertEqual(b"original",data)
+            self.assertEqual(deploy.sha(data),proof["sha256"])
+            self.assertEqual(proof,deploy.snapshot(p))
+    def test_immediately_replaced_foreign_bytes_cannot_be_adopted(self):
+        import tempfile
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as d:
+            root=pathlib.Path(d);p=root/"site";p.write_text("before");proof=deploy.snapshot(p)
+            real_replace,real_link=deploy.os.replace,deploy.os.link
+            def replace(a,b):
+                result=real_replace(a,b)
+                if pathlib.Path(b)==p:p.write_text("foreign")
+                return result
+            def link(a,b):
+                result=real_link(a,b)
+                if pathlib.Path(b)==p:p.write_text("foreign")
+                return result
+            with patch.object(deploy.os,"replace",replace),patch.object(deploy.os,"link",link):
+                with self.assertRaises(ValueError):deploy.atomic(p,b"candidate",proof,0o600,root,"owned")
+            self.assertEqual("foreign",p.read_text())
+            self.assertFalse((root/"owned.json").exists())
+    def test_race_after_final_comparison_restores_displaced_foreign_file(self):
+        import tempfile
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as d:
+            root=pathlib.Path(d);p=root/"site";p.write_text("before");proof=deploy.snapshot(p)
+            real_same=deploy.same;calls=[]
+            def compare(path,expected):
+                real_same(path,expected);calls.append(1)
+                if len(calls)==2:p.write_text("foreign")
+            with patch.object(deploy,"same",compare):
+                with self.assertRaises(ValueError):deploy.atomic(p,b"candidate",proof,0o600,root,"owned")
+            self.assertEqual("foreign",p.read_text())
+
+
+    def test_operational_checkpoint_cannot_hide_application_changes(self):
+        deploy.require_control_only(["ops/test-frontend-real-backend/deploy.py","docs/worklog/state.md"])
+        with self.assertRaises(ValueError):deploy.require_control_only(["spring-backend/src/main/resources/templates/mv43/home.html"])
+        with self.assertRaises(ValueError):deploy.require_control_only([".github/workflows/ci.yml"])
+    def test_owned_replacement_and_inverse_restore_original_bytes(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            root=pathlib.Path(d);p=root/"site";p.write_text("before");before=deploy.snapshot(p)
+            acquired=deploy.atomic(p,b"candidate",before,0o600,root,"forward")
+            self.assertEqual("candidate",p.read_text())
+            deploy.atomic(p,b"before",acquired,0o600,root,"inverse")
+            self.assertEqual("before",p.read_text())
+
 if __name__=='__main__':unittest.main()

@@ -4,15 +4,25 @@ import argparse, fcntl, hashlib, importlib.util, json, os, pathlib, re, socket, 
 HERE=pathlib.Path(__file__).resolve().parent
 spec=importlib.util.spec_from_file_location("test_routing",HERE/"routing.py")
 routing=importlib.util.module_from_spec(spec);spec.loader.exec_module(routing)
+_spec=importlib.util.spec_from_file_location("test_owned_files",HERE/"owned_files.py")
+owned=importlib.util.module_from_spec(_spec);_spec.loader.exec_module(owned)
 ROOT=pathlib.Path("/var/lib/moneyverse-test-frontend-20261123")
 SITE=pathlib.Path("/etc/nginx/sites-enabled/moneyverse")
 UNIT=pathlib.Path("/etc/systemd/system")/routing.UNIT
 
 def sha(data):return hashlib.sha256(data).hexdigest()
 def run(*args):return subprocess.check_output(args,text=True,stderr=subprocess.STDOUT)
-def snapshot(path):
-    st=path.stat()
-    return {"device":st.st_dev,"inode":st.st_ino,"sha256":sha(path.read_bytes())}
+def capture(path):
+    if path.is_symlink():raise ValueError("Ordinary configuration file required")
+    fd=os.open(path,os.O_RDONLY|os.O_NOFOLLOW)
+    with os.fdopen(fd,"rb") as f:
+        before=os.fstat(f.fileno());data=f.read();after=os.fstat(f.fileno())
+    current=path.lstat()
+    fields=lambda st:(st.st_dev,st.st_ino,st.st_size,st.st_mtime_ns,st.st_ctime_ns,st.st_mode,st.st_uid)
+    if fields(before)!=fields(after) or fields(after)!=fields(current):
+        raise ValueError("File changed during consistent capture")
+    return data,{"device":before.st_dev,"inode":before.st_ino,"sha256":sha(data),"mode":before.st_mode&0o777,"uid":before.st_uid}
+def snapshot(path):return capture(path)[1]
 def same(path,expected):
     if snapshot(path)!=expected:raise ValueError("Concurrent file replacement; refusing to overwrite")
 def private(path,data):
@@ -25,13 +35,20 @@ def root_dir(path,mode):
         raise ValueError("Owned protected directory required")
 def atomic(path,data,expected,mode,stage,name):
     same(path,expected)
-    tmp=path.parent/("."+path.name+".nov18-test-"+name)
-    private(tmp,data);os.chmod(tmp,mode)
+    writer=owned.OwnedFiles()
     try:
-        same(path,expected);os.replace(tmp,path)
+        same(path,expected)
+        writer.write(path,data,mode=mode,replace=True,expected=expected["sha256"],
+            expected_identity=(expected["device"],expected["inode"]))
+        acquired=writer.created.get(str(path))
+        if acquired is None:raise ValueError("Installed identity was not acquired")
+        proof={"device":acquired[0],"inode":acquired[1],"sha256":acquired[2],"mode":mode,"uid":os.geteuid()}
+        same(path,proof)
+        record(stage,name+".json",proof)
+        return proof
     finally:
-        if tmp.exists():tmp.unlink()
-    proof=snapshot(path);record(stage,name+".json",proof);return proof
+        # Keep displaced files in root-private NOREPLACE recovery directories.
+        record(stage,name+".recovery.json",writer.recoveries)
 def identity(port):
     req=urllib.request.Request("http://127.0.0.1:"+str(port)+"/frontend-ui-version",headers={"Host":"test.easy-scraping.com"})
     with urllib.request.urlopen(req,timeout=8) as r:return json.load(r)
@@ -56,6 +73,20 @@ def validate_attestation(source,metadata,jobs,artifacts,archive):
         raise ValueError("Attested CI archive digest mismatch")
     return selected[0]
 
+def require_control_only(paths):
+    if any(not (p=="AGENTS.md" or p.startswith("docs/") or p.startswith("ops/test-frontend-real-backend/")) for p in paths):
+        raise ValueError("Application source changed after the attested candidate")
+def operation_revision(source,remote_head):
+    repo=HERE.parent.parent
+    head=run("git","-C",str(repo),"rev-parse","HEAD").strip()
+    if head!=remote_head:raise ValueError("Operational checkpoint is not the pushed branch HEAD")
+    run("git","-C",str(repo),"merge-base","--is-ancestor",source,head)
+    require_control_only(run("git","-C",str(repo),"diff","--name-only",source,head).splitlines())
+    for name in ("deploy.py","routing.py","owned_files.py"):
+        expected=subprocess.check_output(["git","-C",str(repo),"show",head+":ops/test-frontend-real-backend/"+name])
+        if (HERE/name).read_bytes()!=expected:raise ValueError("Operational code differs from reviewed commit")
+    return head
+
 def candidate(archive,source,ci_run):
     if not re.fullmatch("[0-9]+",ci_run):raise ValueError("CI run id required")
     prefix="repos/wtrdd1-hash/Woldeok-Moneyverse-Migration/"
@@ -64,7 +95,7 @@ def candidate(archive,source,ci_run):
     jobs=gh("actions/runs/"+ci_run+"/jobs?per_page=100")["jobs"]
     artifacts=gh("actions/runs/"+ci_run+"/artifacts?per_page=100")["artifacts"]
     head=gh("git/ref/heads/fix/test-frontend-real-backend-20261123")["object"]["sha"]
-    if head!=source:raise ValueError("Candidate branch advanced; revalidate exact source")
+    ops_source=operation_revision(source,head)
     data=archive.read_bytes()
     proof=validate_attestation(source,metadata,jobs,artifacts,data)
     with zipfile.ZipFile(io.BytesIO(data)) as z:
@@ -75,7 +106,7 @@ def candidate(archive,source,ci_run):
         if manifest.get("sourceSha")!=source or len(names)!=1:raise ValueError("Source manifest mismatch")
         jar=z.read(names[0]);expected=manifest.get("sha256")
         check_packaged(jar,source,expected)
-    return jar,expected,{"ciRun":ci_run,"artifactId":proof["id"],"archiveSha256":sha(data),"source":source,"jarSha256":expected}
+    return jar,expected,{"ciRun":ci_run,"artifactId":proof["id"],"archiveSha256":sha(data),"source":source,"jarSha256":expected,"operationalSource":ops_source}
 
 def validate_unit_vacant():
     if UNIT.exists() or UNIT.is_symlink():raise ValueError("Refusing existing unit")
@@ -95,7 +126,7 @@ def install(archive,source,ci_run):
     record(stage,"attestation.json",attestation)
     target=SITE.resolve(strict=True)
     if not str(target).startswith("/etc/nginx/"):raise ValueError("Unexpected site authority")
-    original=target.read_bytes();before=snapshot(target);mode=target.stat().st_mode&0o777
+    original,before=capture(target);mode=before["mode"]
     proposed=routing.site(original.decode()).encode()
     a,b=routing.span(original.decode());c,d=routing.span(proposed.decode())
     if original.decode()[:a]!=proposed.decode()[:c] or original.decode()[b:]!=proposed.decode()[d:]:
