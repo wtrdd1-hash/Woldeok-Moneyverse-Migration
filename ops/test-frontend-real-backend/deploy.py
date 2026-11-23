@@ -55,7 +55,7 @@ def identity(port):
 def check_packaged(data,source,expected):
     if not re.fullmatch("[a-f0-9]{40}",source) or sha(data)!=expected:raise ValueError("Exact candidate digest required")
     with zipfile.ZipFile(io.BytesIO(data)) as z:
-        props=z.read("BOOT-INF/classes/META-INF/build-info.properties").decode()
+        props=z.read("META-INF/build-info.properties").decode()
         if "build.sourceRevision="+source not in props or "build.runtimeKind=spring-native" not in props:
             raise ValueError("Packaged source identity mismatch")
 

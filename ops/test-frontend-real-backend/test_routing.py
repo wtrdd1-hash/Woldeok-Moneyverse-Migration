@@ -60,7 +60,7 @@ class RoutingTest(unittest.TestCase):
     def test_packaged_identity_cannot_be_relabeled(self):
         import io,zipfile
         b=io.BytesIO()
-        with zipfile.ZipFile(b,"w") as z:z.writestr("BOOT-INF/classes/META-INF/build-info.properties","build.sourceRevision="+"a"*40+"\nbuild.runtimeKind=spring-native\n")
+        with zipfile.ZipFile(b,"w") as z:z.writestr("META-INF/build-info.properties","build.sourceRevision="+"a"*40+"\nbuild.runtimeKind=spring-native\n")
         data=b.getvalue()
         deploy.check_packaged(data,"a"*40,deploy.sha(data))
         with self.assertRaises(ValueError):deploy.check_packaged(data,"b"*40,deploy.sha(data))
