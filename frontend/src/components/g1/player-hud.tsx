@@ -49,7 +49,7 @@ export function PlayerHud({ compact = false }: { readonly compact?: boolean }) {
         className="flex min-h-11 items-center gap-2 rounded-full border border-[var(--g1-gold-deep)] bg-[var(--g1-plum)] py-1 pl-1 pr-4 text-sm font-semibold text-[var(--g1-ink)] transition-transform duration-150 active:scale-[0.97]"
       >
         {medal}
-        <span>로그인하고 모험 시작</span>
+        <span className="whitespace-nowrap">{compact ? '로그인' : '로그인하고 모험 시작'}</span>
       </Link>
     );
   }
