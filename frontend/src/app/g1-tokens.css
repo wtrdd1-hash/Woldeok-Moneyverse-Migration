@@ -188,3 +188,33 @@ html:root body { overflow-x: clip; }
 }
 
 .mv-shell main h2 { font-weight: 700; letter-spacing: -0.01em; }
+
+/*
+ * Precision pass (owner review 2026-11-24). One type scale and one action
+ * colour across all 180 routes, without editing each page:
+ * - Page titles ranged from text-2xl to text-5xl page to page; every h1 in
+ *   the shell now uses the same fluid size and leading.
+ * - Oversized section heads (text-2xl+) step to one h2 size.
+ * - Solid off-palette action fills on buttons and button-links (blue, indigo,
+ *   emerald, cyan, sky, teal) become the G1 violet action; translucent tints
+ *   (e.g. bg-emerald-500/10) are status colour and stay untouched because
+ *   they are different class tokens.
+ */
+.mv-shell main h1 {
+  font-size: clamp(1.5rem, 1.05rem + 1.2vw, 2.125rem);
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+.mv-shell main h2:is(.text-2xl, .text-3xl, .text-4xl) {
+  font-size: 1.375rem;
+  line-height: 1.35;
+}
+.mv-shell main :is(button, a):is(.bg-blue-500, .bg-blue-600, .bg-blue-700, .bg-indigo-500, .bg-indigo-600, .bg-indigo-700, .bg-emerald-500, .bg-emerald-600, .bg-emerald-700, .bg-cyan-500, .bg-cyan-600, .bg-sky-500, .bg-sky-600, .bg-teal-500, .bg-teal-600) {
+  background-color: var(--g1-violet-ink);
+  color: var(--g1-ink);
+}
+.mv-shell main :is(button, a):is(.bg-blue-500, .bg-blue-600, .bg-indigo-600, .bg-emerald-500, .bg-emerald-600, .bg-cyan-500, .bg-sky-500, .bg-teal-500):hover {
+  background-color: var(--g1-violet);
+  color: var(--g1-night);
+}
+.mv-shell main :is(input, select, textarea).rounded-full { border-radius: 6px; }
