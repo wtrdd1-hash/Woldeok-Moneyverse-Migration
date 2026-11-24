@@ -1,6 +1,6 @@
-# G2 "Guild Ledger Terminal" refined design — direction proposal (awaiting approval)
+# G2 "Guild Ledger Terminal" refined design — active design authority (owner-approved 2026-11-24)
 
-**Status: 13 direction screens. G1 remains the active authority.** On approval G2 extends to all 180 routes and is implemented. No Production change.
+**Status: owner-approved 2026-11-24, the active visual authority.** Implemented on Test. No Production change.
 
 Refines G1 after owner feedback and guild-home QA v2026.11.24.1646: a ledger status strip on every page as the single signature; hairline 6px panels without chamfers; one violet action colour, gold only on the player's own balance, Korean market rise red / fall blue; tabular body figures in tables (Orbitron only for the main balance); 12-column grid, 44px table rows; grouped navigation with GM console for administrators only. Hallmark sloplint: 13/13 clean. Figures are illustrative and stamped. External models (Codex usage limit, Gemini invalid key) returned no response, so none is claimed. [한국어](README.ko.md)
 

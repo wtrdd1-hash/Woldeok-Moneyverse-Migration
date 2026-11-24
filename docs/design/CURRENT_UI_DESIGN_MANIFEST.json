@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "authority_version": "v2026.11.24.G1",
+  "authority_version": "v2026.11.24.G2",
   "design_version": "v2026.11.24.G1",
-  "selection": "Owner approved G1 \"Guild Ledger\" on 2026-11-24; v2026.11.23.10 archived.",
+  "selection": "Owner approved G2 \"Guild Ledger Terminal\" on 2026-11-24 as the visual system, refining G1; G1 per-route previews remain the layout reference. v2026.11.23.10 archived.",
   "design_review": "VISUAL_REVIEW_OPEN",
   "runtime_e2e": "NOT_VERIFIED",
   "total_routes": 180,
@@ -917,5 +917,11 @@
       "file": "docs/design/game-ui-v2026.11.24.G1/previews/work.png",
       "sha256": "320a66d36a132a78f62d967482b27d5f1b29c362e2060913e6b3498a3fc82efc"
     }
-  ]
+  ],
+  "style_authority": {
+    "version": "v2026.11.24.G2",
+    "reference": "docs/design/game-ui-v2026.11.24.G2/README.md",
+    "approved": "2026-11-24 by owner",
+    "scope": "Visual system for every route (shell, ledger strip, panels, type, colour). The 13 G2 previews are the visual reference; the per-route G1 previews below still define each page's content and order until G2 per-route previews exist."
+  }
 }
