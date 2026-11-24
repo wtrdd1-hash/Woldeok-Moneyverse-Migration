@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.24.1319 — Claudex Loop development skill installation (no deployment)
+- [English](development/CLAUDEX_LOOP_INSTALL_v2026.11.24.1319.md) / [한국어](development/CLAUDEX_LOOP_INSTALL_v2026.11.24.1319.ko.md) · [GitHub update](updates/v2026.11.24.1319-claudex-loop-github.md). Offline tests 37/37; live cross-provider loop not executed.
+
 ## v2026.11.20.1 — 18 November UI baseline + five-language/global support authority (docs only)
 [Official EN plan](planning/NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.md) / [한국어](planning/NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.ko.md): 18 Nov PC/mobile navy-violet design binding for all eventual Spring MVC+Thymeleaf website screens, manual+auto EN/KO/JA/ZH/VI and one safe admin support/member chat launcher everywhere. Old mockup-only scope and Next runtime plans do not override latest owner directive. Current runtime and Production **not** certified by this documentation-only update.
 

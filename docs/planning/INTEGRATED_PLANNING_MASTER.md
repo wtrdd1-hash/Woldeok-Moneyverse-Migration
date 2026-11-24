@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.11.24.1319 — Claudex Loop skill installation (development only)
+[Installation and verification](../development/CLAUDEX_LOOP_INSTALL_v2026.11.24.1319.md). Existing Gemini collaboration and release gates remain unchanged; live cross-model loop not executed.
+
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 
 ## v2026.11.21.2234 — AgentMemory link retained for all future work handoffs (PLANNING; DOCS ONLY)
