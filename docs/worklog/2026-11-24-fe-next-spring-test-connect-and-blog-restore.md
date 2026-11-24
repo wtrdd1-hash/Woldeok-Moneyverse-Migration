@@ -230,3 +230,11 @@ nginx: 운영 블로그 경로(`/blog`, `/{en,ja,zh,ko}/blog[/*]`)와 `@mv_blog_
 - 운영 실검사(https://easy-scraping.com): 180 경로 정상 166 / 건너뜀 14, JS 오류 0, 가로 넘침 0. 외환·예금보험·연금 503 은 전환 전과 동일(백엔드 기능 꺼짐). 기존에 깨져 있던 `/api/v1/blog/verified`(400)를 읽기 전용 블로그 API 로 바로잡음(200).
 - 미배포: 이 브랜치의 Spring 변경(로그인 CSRF state 검증 등)은 운영 Spring 에 아직 없음 — 백엔드 배포는 별도 결정 필요.
 - PR #3442 검토: "v2026.11.24.11 180장 시안"이 보관된 v2026.11.23.10 이미지와 180장 모두 동일(바이트 일치) — 소유자에게 보고.
+
+### 12단계 — 전체 분석·백엔드 점검·회귀 수정·DESIGN180 명세 (작업자: Claude Code / Claude Opus 5.5)
+- 소유자 지시: 중단 후 전체 분석, 이어서 "해결진행 및 백엔드 기능 다 점검, 스킬 제대로 많이". 사용 스킬: 저장소 Superpowers(using-superpowers, brainstorming, writing-plans, test-driven-development, systematic-debugging, verification-before-completion, subagent-driven-development 읽음), .agents spring-* 8종 점검표, hallmark, ui-ux-pro-max/frontend-design(토큰 검토).
+- 백엔드 점검: BFF 106 경로 Test·운영 대조(대부분 일치, 405=POST 전용), 운영 쿠키·CORS·CSRF·actuator·문서 노출 점검(외부 출처 쓰기 401/403, CORS 허용 없음, actuator 403, swagger 404). Spring 테스트 710/713(기존 Thymeleaf 3건).
+- 근본 원인 수정(TDD): next.config rewrites 가 동적 BFF 6개를 가리던 문제 → fallback 으로 이동(c855cfc7a6). Test 배포·검증(종목 기호 캔들 200).
+- 운영 nginx 회귀 2건 수정: /health·/health/spring·/api/v1/spring 누락 → 복구(200). 기존 운영의 읽기 전용 쓰기 차단(문의·채팅·프로필·알림·일자리·관리자 경제/주식/회원)이 새 블록에 빠져 있던 것 → 복구(쓰기 403, 읽기 정상). 첫 시도에서 nginx -t 실패(서버 레벨 if 안 add_header) — reload 는 실행되지 않아 운영 영향 없음, 즉시 수정.
+- 공유 .git 의 root 소유 파일 1,475개(20:50 경 root git 실행 흔적) → debian 소유로 복구(모든 작업자 커밋 차단 해소).
+- PR #3443(DESIGN180) 검토 후 구현 명세 초안: docs/superpowers/specs/2026-11-24-design180-next-implementation.md — 소유자 승인 대기(brainstorming 관문).
