@@ -41,6 +41,8 @@ public final class MemberPresentationPageController {
             return new ResponseEntity<>(pages.render("mv43/member-unavailable",request,model),headers,
                 failure.status()==403?HttpStatus.FORBIDDEN:HttpStatus.SERVICE_UNAVAILABLE);
         }
+        if(family.equals("bank")||family.equals("stocks"))
+            return new ResponseEntity<>(pages.render("mv43/member-unavailable",request,model),headers,HttpStatus.SERVICE_UNAVAILABLE);
         if("1".equals(request.getHeader("RSC"))||request.getParameter("_rsc")!=null)
             return new ResponseEntity<>("",headers,HttpStatus.NOT_ACCEPTABLE);
         model.put("isAdmin",source.checkAdmin(cookie));
