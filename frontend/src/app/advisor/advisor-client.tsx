@@ -34,6 +34,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { useMountedViewer } from '@/components/use-mounted-viewer';
 
 interface RebalanceTradeItem {
   readonly asset: string;
@@ -162,9 +163,19 @@ export function AdvisorClient() {
     }
   };
 
+  // The diagnosis reads the member's own portfolio; a visitor would only get
+  // a 401, so wait for a signed-in viewer before asking.
+  const viewer = useMountedViewer();
   useEffect(() => {
-    fetchDiagnosis();
-  }, []);
+    if (viewer === null) return;
+    if (!viewer.signedIn) {
+      setLoading(false);
+      return;
+    }
+    void fetchDiagnosis();
+    // fetchDiagnosis only reads state setters; re-run when sign-in changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewer?.signedIn, viewer === null]);
 
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });

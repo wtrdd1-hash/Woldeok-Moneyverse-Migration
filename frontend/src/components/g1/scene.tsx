@@ -40,9 +40,9 @@ function Body({ kind, h }: { readonly kind: G1SceneKind; readonly h: number }) {
             [390, 80, 70],
           ].map(([x, bw, bh]) => (
             <g key={x}>
-              <rect x={x} y={h - bh!} width={Math.round(bw! * 0.7)} height={bh} style={{ ...fill('--g1-plum-3'), stroke: 'var(--g1-violet)', strokeOpacity: 0.35 }} />
+              <rect x={x} y={h - bh!} width={Math.round(bw! * 0.7)} height={bh} style={{ ...fill('--g1-plum-2'), stroke: 'var(--g1-line)' }} />
               {[0, 1, 2].map((k) => (
-                <rect key={k} x={x! + 8 + k * 14} y={h - bh! + 14} width={6} height={9} style={fill('--g1-gold', 0.75)} />
+                <rect key={k} x={x! + 8 + k * 14} y={h - bh! + 14} width={4} height={7} style={fill('--g1-gold', k === 1 ? 0.55 : 0.25)} />
               ))}
             </g>
           ))}
@@ -149,8 +149,9 @@ export function G1Scene({ kind, className }: { readonly kind: G1SceneKind; reado
   return (
     <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMaxYMax slice" aria-hidden="true" focusable="false" className={className}>
       <Stars w={w} h={h} />
-      <circle cx={w - 90} cy={58} r={38} style={fill('--g1-moon', 0.85)} />
-      <circle cx={w - 90} cy={58} r={52} style={stroke('--g1-gold', 1, 0.25)} />
+      {/* A crescent reads as night without a flat disc dominating the banner. */}
+      <circle cx={w - 90} cy={52} r={26} style={fill('--g1-gold', 0.9)} />
+      <circle cx={w - 80} cy={46} r={24} style={fill('--g1-plum')} />
       <Body kind={kind} h={h} />
     </svg>
   );

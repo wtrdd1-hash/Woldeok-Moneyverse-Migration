@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useMountedViewer } from '@/components/use-mounted-viewer';
 import {
   TrendingUp,
   TrendingDown,
@@ -125,8 +126,12 @@ export function TossStyleSocialFeed() {
   const [newStance, setNewStance] = useState<'bullish' | 'bearish' | 'neutral'>('bullish');
   const [newCategory, setNewCategory] = useState<'전략' | '일지' | '질문' | '잡담'>('전략');
 
-  // 포트폴리오 DB 실시간 자동 조회
+  // 포트폴리오 DB 실시간 자동 조회 — members only: a visitor has no portfolio,
+  // and asking anyway produced a 401 on every public visit.
+  const viewer = useMountedViewer();
+  const signedIn = viewer?.signedIn === true;
   React.useEffect(() => {
+    if (!signedIn) return;
     let mounted = true;
     async function loadPortfolio() {
       setIsLoadingPortfolio(true);
@@ -165,7 +170,7 @@ export function TossStyleSocialFeed() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [signedIn]);
 
   const symbols = ['ALL', 'CHIPS', 'WDG', 'SPACE', 'WFIN', 'MYUY', 'DUCK'];
 
