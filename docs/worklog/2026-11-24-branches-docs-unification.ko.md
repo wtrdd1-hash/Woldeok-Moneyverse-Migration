@@ -54,3 +54,6 @@ Integrated exact10f66b61bf source. The runner remains explicit-request-only advi
 
 ### Prior Test operations branch retained
 Integrated committed79b3077373 only; foreign dirty worktree remains untouched. Preserved Nov23 candidate home design and added the existing real-data page-content consumer anchor. Did not reintroduce the old simulated treasury/market/ledger terminal. Incoming real-data-contract assertions retained. Offline gateway19/19 and isolated-backend12/12 pass; no install, routing, service switch or financial write executed. Test-first directives agree with current authority and remain mandatory.
+
+### OAuth historical tip comparison
+Integrated exactdad1a3c664 by content reconciliation. Its only remaining OAuth delta duplicated cookies already written by UserAuthService.loginWithOAuth; kept the current single cookie-writing path and callback response. Kept full matching server/client dictionaries, current design and asset hashes instead of older hash-only edits. Earlier removal of the fabricated harness remains intact. No auth/CSRF checks weakened.
