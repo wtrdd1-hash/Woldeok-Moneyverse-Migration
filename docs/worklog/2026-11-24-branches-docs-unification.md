@@ -40,3 +40,13 @@ Document authority and32primary entry points were normalized to confirmed owner 
 ### Closed release-path registration
 The existing aggregate failed classification on six known inputs: two Stitch Markdown notes, the upstream plain-text license, the current design JSON manifest and two scoped QA report JSONs. Reviewed the JSON shapes for sensitive-key candidates; none found. Added only five exact non-runtime record paths as documentation and the exact design manifest as control-plane input. Neighboring JSON/scripts remainUNKNOWN; non-100644 manifest modes remain refused. Three added regressions observedRED; classifier27/27GREEN. This fixes missing path taxonomy without bypassing unknown-path, executable/symlink or runtime-input checks.
 The corrupted mixed rootimplementation_plan history was replaced by a current authority entry point; its exact earlier bytes remain linked at immutablebc0ad807... and in Git history.
+
+### Branch reconciliation checkpoint
+All captured documentation-only maximal heads are now ancestors of the isolated candidate. Dated index/ledger insertions retained both records; owner-approved architecture status wins over the original proposal-only wording. No unresolved business instruction was silently selected.
+PR3362's exact original head is already verified merged into main by squash86393ad8bc. Recorded a history-only parent with identical candidate tree so later ancestry cleanup can prove containment without replaying old UI. No such assumption is made for closed/unmerged PRs.
+Finance PR3421 now contained; targeted Java finance/identity tests pass. Retained strict owner validation before optional administrator navigation proof and the unavailable-finance negative. Old locale audit/regression branches retained; current duplicate-query protection wins over the older single-parameter shortcut.
+Local full lint initially inspected Gradle-generated copies of already-excluded browser exports:8651errors, all under spring-backend/build. Added only that build-output ignore. Original frontend/backend sources and error severities stay checked; revalidation writes its exact exit receipt. No lint-rule weakening.
+
+### Legacy color branch and local lint
+Retained legacy violet styling branch98c1bbff88. In the shared native head preserve the already-verified component theme/game-world/v10 resources instead of adding an older overlapping global stylesheet; the older CSS asset and its legacy-page links remain preserved. Native Node354/354pass after asset rehash.
+Actual pnpm lint exit0 is recorded, with1085warnings/0errors; only Gradle-generated copies were newly excluded. No application source rule or severity was suppressed. Source-backed feature/API/role checks and full exact CI remain required beforemain.

@@ -40,3 +40,7 @@ Document authority and32primary entry points were normalized to confirmed owner 
 ### Closed release-path registration
 The existing aggregate failed classification on six known inputs: two Stitch Markdown notes, the upstream plain-text license, the current design JSON manifest and two scoped QA report JSONs. Reviewed the JSON shapes for sensitive-key candidates; none found. Added only five exact non-runtime record paths as documentation and the exact design manifest as control-plane input. Neighboring JSON/scripts remainUNKNOWN; non-100644 manifest modes remain refused. Three added regressions observedRED; classifier27/27GREEN. This fixes missing path taxonomy without bypassing unknown-path, executable/symlink or runtime-input checks.
 The corrupted mixed rootimplementation_plan history was replaced by a current authority entry point; its exact earlier bytes remain linked at immutablebc0ad807... and in Git history.
+
+### Legacy color branch and local lint
+Retained legacy violet styling branch98c1bbff88. In the shared native head preserve the already-verified component theme/game-world/v10 resources instead of adding an older overlapping global stylesheet; the older CSS asset and its legacy-page links remain preserved. Native Node354/354pass after asset rehash.
+Actual pnpm lint exit0 is recorded, with1085warnings/0errors; only Gradle-generated copies were newly excluded. No application source rule or severity was suppressed. Source-backed feature/API/role checks and full exact CI remain required beforemain.

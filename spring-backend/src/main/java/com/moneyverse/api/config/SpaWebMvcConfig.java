@@ -31,6 +31,20 @@ public class SpaWebMvcConfig implements WebMvcConfigurer {
     @Value("${moneyverse.frontend.release-dir:}")
     private String immutableFrontendReleaseDir = "";
 
+    /** Fail-closed, explicit opt-in for exact-source isolated previews; default Production is unchanged. */
+    @Value("${moneyverse.frontend.classpath-only:false}")
+    private boolean classpathOnly = false;
+
+    static String[] resourceLocations(String configuredReleaseDir, boolean classpathOnly) {
+        if (classpathOnly) {
+            if (configuredReleaseDir != null && !configuredReleaseDir.isBlank()) {
+                throw new IllegalArgumentException("Classpath-only mode cannot mix an immutable release and stale external assets");
+            }
+            return new String[]{"classpath:/static/"};
+        }
+        return resourceLocations(configuredReleaseDir);
+    }
+
     static String[] resourceLocations(String configuredReleaseDir) {
         String[] legacyLocations={"file:/srv/moneyverse-data/frontend-static/", "classpath:/static/"};
         if (configuredReleaseDir == null || configuredReleaseDir.isBlank()) return legacyLocations;
@@ -82,7 +96,7 @@ public class SpaWebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/**")
-                .addResourceLocations(resourceLocations(immutableFrontendReleaseDir))
+                .addResourceLocations(resourceLocations(immutableFrontendReleaseDir, classpathOnly))
                 .resourceChain(true)
                 .addResolver(new PathResourceResolver() {
                     @Override
@@ -135,6 +149,9 @@ public class SpaWebMvcConfig implements WebMvcConfigurer {
 
                         // Missing files, JS bundles and fonts MUST return 404, never SPA HTML200.
                         if (isStaticFile(cleanPath)) return null;
+
+                        // Isolated Test must not turn an unknown route into a stale or synthetic success.
+                        if (classpathOnly) return null;
 
                         // A versioned release may only provide exact routes, never hijack legacy pages.
                         if (!allowSpaFallback(location.getURI().toString(), immutableFrontendReleaseDir)) return null;
