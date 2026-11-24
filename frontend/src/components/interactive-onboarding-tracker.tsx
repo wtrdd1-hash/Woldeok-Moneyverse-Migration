@@ -131,7 +131,7 @@ export function InteractiveOnboardingTracker() {
   };
 
   return (
-    <div className="fixed bottom-20 left-3.5 z-40 lg:bottom-6 lg:left-[264px] select-none max-w-[calc(100vw-1.5rem)] overflow-hidden">
+    <div className="fixed bottom-20 left-3.5 z-40 lg:bottom-[76px] lg:left-4 select-none max-w-[calc(100vw-1.5rem)] overflow-hidden">
       {/* 플로팅 축하 알림 배너 */}
       {justClaimedReward && (
         <div className="mb-2 p-3 bg-[var(--g1-plum-2)] text-[var(--g1-ink)] rounded-md border border-[var(--g1-gold)] font-bold text-xs flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300">

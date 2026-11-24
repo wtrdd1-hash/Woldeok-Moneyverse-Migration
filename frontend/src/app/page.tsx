@@ -200,7 +200,7 @@ export default async function HomePage() {
         <section aria-labelledby="home-market-heading" className="g1-panel">
           <div className="mb-2 flex items-baseline justify-between gap-3">
             <h2 id="home-market-heading" className="text-lg text-[var(--g1-ink)]">오늘 크게 움직인 종목</h2>
-            <Link href="/stocks" prefetch={false} className="text-sm text-[var(--g1-violet)] hover:underline">거래소</Link>
+            <Link href="/stocks" prefetch={false} className="inline-flex min-h-11 items-center px-1 text-sm text-[var(--g1-violet)] hover:underline">거래소</Link>
           </div>
           {movers.length === 0 ? (
             <p className="py-6 text-sm text-[var(--g1-muted)]">시세 자료를 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.</p>
@@ -244,7 +244,7 @@ export default async function HomePage() {
               <Megaphone className="size-4 text-[var(--g1-muted)]" aria-hidden />
               길드 공지
             </h2>
-            <Link href="/announcements" prefetch={false} className="text-sm text-[var(--g1-violet)] hover:underline">전체 보기</Link>
+            <Link href="/announcements" prefetch={false} className="inline-flex min-h-11 items-center px-1 text-sm text-[var(--g1-violet)] hover:underline">전체 보기</Link>
           </div>
           {announcements.length === 0 ? (
             <p className="py-3 text-sm text-[var(--g1-muted)]">지금 게시된 공지가 없습니다.</p>

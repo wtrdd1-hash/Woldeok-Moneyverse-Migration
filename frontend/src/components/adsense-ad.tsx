@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useViewer } from '@/lib/use-viewer';
 import { usePathname } from 'next/navigation';
+import { useLocale } from '@/components/locale-provider';
 import { isEligiblePublicAdPath, publicAdDisclosure } from '@/lib/ad-placement-policy';
 import { isAdministrator } from '@/lib/viewer-state';
 
@@ -32,6 +33,7 @@ export function AdSenseAd({
 }) {
   const viewer = useViewer();
   const pathname = usePathname();
+  const { locale: selectedLocale } = useLocale();
   const canDisplay = Boolean(viewer && !isAdministrator(viewer) && isEligiblePublicAdPath(pathname));
   const requested = useRef(false);
   const adRef = useRef<HTMLModElement | null>(null);
@@ -110,7 +112,7 @@ export function AdSenseAd({
   // Do not render ads before the viewer is known, on private/transaction pages, or on an empty slot.
   if (!canDisplay || (status === 'unfilled' || status === 'optimized')) return null;
 
-  const disclosure = publicAdDisclosure(pathname);
+  const disclosure = publicAdDisclosure(pathname, selectedLocale);
   return (
     <section
       aria-label={disclosure + ' / Sponsored advertisement'}

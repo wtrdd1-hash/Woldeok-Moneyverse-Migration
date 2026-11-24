@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { useLocale } from '@/components/locale-provider';
 import { isEligiblePublicAdPath, publicAdDisclosure } from '@/lib/ad-placement-policy';
 
 /**
@@ -13,8 +14,9 @@ import { isEligiblePublicAdPath, publicAdDisclosure } from '@/lib/ad-placement-p
  */
 export function AdPreviewSlot({ variant, className }: { readonly variant: 'display' | 'in-article' | 'multiplex'; readonly className?: string | undefined }) {
   const pathname = usePathname();
+  const { locale: selectedLocale } = useLocale();
   if (!isEligiblePublicAdPath(pathname)) return null;
-  const label = publicAdDisclosure(pathname);
+  const label = publicAdDisclosure(pathname, selectedLocale);
   const height = variant === 'multiplex' ? 'min-h-[250px]' : variant === 'in-article' ? 'min-h-[120px]' : 'min-h-[100px]';
   return (
     <aside
