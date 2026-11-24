@@ -5892,3 +5892,29 @@ eserves: ??쒕?援??명솚蹂댁쑀???듯빀怨꾩젙)
   - `spring-backend/src/main/resources/static/assets/mv43/home.css` (벤토 그리드 반응형 스타일 반영)
 - **검증 결과**:
   - `npm run typecheck` (`tsc --noEmit`): **0 errors 통과**
+
+---
+## 🚀 [v17 Specification] 180개 전 페이지 게임 UI(Gaming Neo-Fintech) 전면 쇄신, 게스트 완전 개방 모드, Playwright 180종 고해상도 렌더링 및 메인 통합 PR
+- **작업 일시**: 2026-11-24 19:46 KST
+- **작업 번호 (Task ID)**: TASK-20261124-TOTAL-GAME-REVAMP-180
+- **사용자 핵심 지시**: "너무 별로야 너가 게임처럼 ui 180페이지정도 디자인 다이미지로 만들어줘 그리고 pr 로 메인통합하고 링크까지줘 기획보면서 제대로 모든기능이 페이지 잘되게 보이게 디자인해줘 그리고 모든파일분석하고 디자인 관련지침분서하고 너가 만든디자인빼고 다 정리하고 너걸로프론트엔드 지정할것"
+- **조율 확정 사항 (Interactive Alignment Q&A)**:
+  1. **디자인 테마**: Stake/Roobet/Linear 급 다크 게이밍 & 네오 핀테크 테마 (흑연/딥 네이비 #0d1117/#161b22, 웜 골드 #f59e0b, 에메랄드 #10b981, 100% Lucide SVG 벡터 아이콘, 보라색 그라데이션 탈피).
+  2. **게스트/접근성 정책**: 완전 개방 게스트 모드 (비로그인 상태에서도 180개 전 페이지의 게임/퀘스트/상점/거래소 UI가 100% 렌더링되고, 실제 액션 시에만 로그인 모달이 뜨도록 예외 튕김 원천 제거).
+  3. **디자인 이미지 파이프라인**: Playwright 풀 렌더링 파이프라인을 구축하여 180개 라우트를 1660x990 고해상도로 일괄 캡처하고 docs/design/ 및 매니페스트에 신규 v11로 정식 통합.
+  4. **레거시 정리**: 원격 서버의 미사용 셸(mv-fe-v10, mv-fe-v12, 11/21~11/23 임시본 등 약 8GB) 및 이전 v8/v10 등 충돌하는 구형 디자인 아티팩트 전수 정리.
+  5. **혁신 기능 4종**:
+     - 실시간 게임 HUD 상단바 (WLD 잔고 카운트업, 티커 마퀴 배너)
+     - 퀘스트/보상 수령 축하 Canvas 골드 폭죽 파티클
+     - Web Audio SFX 엔진 (버튼 클릭, 베팅 완료 효과음)
+     - 반응형 게임 퀵독(Quick Dock) 모바일 320px~데스크톱 최적화
+- **적용 스킬 (Design Skills Applied)**:
+  - nti-ai-frontend-craftsmanship (AI Slop 5대 패턴 배제, 비대칭 벤토 그리드, 고대비 모노스페이스)
+  - interactive-minigame-web-engine (Stake/Roobet 수준 인터랙티브 인터페이스, 100% SVG 벡터)
+  - design-system (토큰 아키텍처, FOUT 방지, 크롬 안정성, 모션 타이밍)
+- **주요 실행 단계 (Action Plan)**:
+  1. debian13 서버 내 완료된 임시 셸 디렉토리 7종 일괄 정리 (약 8GB 디스크 여유 공간 회수)
+  2. quests/page.tsx 등 서버 컴포넌트의 비로그인 강제 에러/리다이렉트 예외 차단 및 안전 게스트 폴백 적용, Mojibake 텍스트 복구
+  3. 전역 게임형 HUD 및 퀵독 내비게이션, 사운드/파티클 시스템 도입
+  4. 180개 라우트 대상 Playwright 스크린샷 일괄 캡처 및 CURRENT_UI_DESIGN_MANIFEST.json v2026.11.24.11 생성
+  5. Git 브랜치 생성, 커밋, 원격 푸시, GitHub PR 생성 및 사용자 링크 전달
