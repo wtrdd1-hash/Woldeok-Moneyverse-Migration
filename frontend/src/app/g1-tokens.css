@@ -162,3 +162,12 @@ html:root body { overflow-x: clip; }
  */
 .mv-shell main .rounded-2xl, .mv-shell main .rounded-3xl, .mv-shell main .rounded-xl { border-radius: 8px; }
 .mv-shell main .shadow-md, .mv-shell main .shadow-lg, .mv-shell main .shadow-xl, .mv-shell main .shadow-2xl { box-shadow: none; }
+
+/*
+ * Labels are sentence case in the body face (no tracked capitals). Pages that
+ * hand-roll an `.eyebrow` or `uppercase tracking-*` label read as quiet muted
+ * text instead of a shouting tag. Scoped to <main>; the shell sets its own.
+ */
+.mv-shell main .uppercase { text-transform: none; }
+.mv-shell main .tracking-wider, .mv-shell main .tracking-widest, .mv-shell main [class*="tracking-[0.1"], .mv-shell main [class*="tracking-[0.2"] { letter-spacing: normal; }
+.mv-shell main .eyebrow { text-transform: none; letter-spacing: normal; font-family: inherit; font-size: 13px; color: var(--g1-muted); }

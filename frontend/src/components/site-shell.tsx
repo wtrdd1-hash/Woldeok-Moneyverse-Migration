@@ -29,8 +29,7 @@ export function SiteShell({ children }: { readonly children: React.ReactNode }) 
         <main id="main" className="moneyverse-main mx-auto w-full max-w-[1440px] flex-1 px-4 pb-[calc(env(safe-area-inset-bottom)+5rem)] pt-5 sm:px-6 lg:px-8 lg:pb-10 lg:pt-6">
           {children}
         </main>
-        <footer className="hidden items-center justify-between gap-4 px-8 pb-6 text-xs text-[var(--g1-faint)] lg:flex">
-          <span>월덕 머니버스, 게임 세계의 금융과 경험</span>
+        <footer className="hidden items-center justify-end gap-4 px-8 pb-6 text-xs text-[var(--g1-faint)] lg:flex">
           <nav aria-label="정책" className="flex gap-4">
             <Link href="/terms" prefetch={false} className="hover:text-white">이용약관</Link>
             <Link href="/privacy" prefetch={false} className="hover:text-white">개인정보처리방침</Link>
