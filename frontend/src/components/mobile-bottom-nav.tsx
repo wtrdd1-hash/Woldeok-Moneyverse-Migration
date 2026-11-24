@@ -2,13 +2,36 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, TrendingUp, Wallet, Briefcase, ShieldAlert } from 'lucide-react';
+import { Home, TrendingUp, Wallet, Briefcase, ShieldCheck, UserRound, LogIn, type LucideIcon } from 'lucide-react';
 import { TranslatedText as T } from '@/components/translated-text';
+import { useViewer } from '@/lib/use-viewer';
+import { isAdministrator } from '@/lib/viewer-state';
+
+interface DockItem {
+  readonly href: string;
+  readonly korean: string;
+  readonly english: string;
+  readonly japanese: string;
+  readonly chinese: string;
+  readonly icon: LucideIcon;
+  readonly isActive: boolean;
+}
 
 export function MobileBottomNav() {
   const pathname = usePathname();
+  const viewer = useViewer();
 
-  const navItems = [
+  // The fifth slot depends on who is reading. The console link renders only
+  // for a server-authorized administrator; a member gets their account and a
+  // signed-out reader gets sign-in, so the slot is never a dead end.
+  const fifth: DockItem =
+    viewer && isAdministrator(viewer)
+      ? { href: '/admin', korean: '관리', english: 'Admin', japanese: '管理', chinese: '管理', icon: ShieldCheck, isActive: pathname.startsWith('/admin') }
+      : viewer?.signedIn
+        ? { href: '/account', korean: '내 계정', english: 'Account', japanese: 'アカウント', chinese: '账户', icon: UserRound, isActive: pathname.startsWith('/account') }
+        : { href: '/login', korean: '로그인', english: 'Sign in', japanese: 'ログイン', chinese: '登录', icon: LogIn, isActive: pathname.startsWith('/login') };
+
+  const navItems: readonly DockItem[] = [
     {
       href: '/',
       korean: '홈',
@@ -45,21 +68,13 @@ export function MobileBottomNav() {
       icon: Briefcase,
       isActive: pathname.startsWith('/work'),
     },
-    {
-      href: '/admin',
-      korean: '관제/전체',
-      english: 'Admin',
-      japanese: '管理',
-      chinese: '管理',
-      icon: ShieldAlert,
-      isActive: pathname.startsWith('/admin'),
-    },
+    fifth,
   ];
 
   return (
     <nav
       aria-label="Mobile Navigation"
-      className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-background/90 dark:bg-[#090d14]/95 backdrop-blur-2xl border-t border-border/70 dark:border-slate-800/80 shadow-2xl px-2 pb-[env(safe-area-inset-bottom)] zero-overflow-shield"
+      className="mv-dock md:hidden fixed bottom-0 inset-x-0 z-50 bg-background/90 backdrop-blur-2xl border-t border-border shadow-2xl px-2 pb-[env(safe-area-inset-bottom)] zero-overflow-shield"
     >
       <div className="grid grid-cols-5 items-center min-h-[58px] max-w-lg mx-auto min-w-0">
         {navItems.map((item) => {
@@ -68,14 +83,15 @@ export function MobileBottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center justify-center w-full h-full min-h-[44px] py-1 text-center transition-all duration-150 active:scale-[0.98] min-w-0 ${
+              aria-current={item.isActive ? 'page' : undefined}
+              className={`flex flex-col items-center justify-center w-full h-full min-h-[44px] py-1 text-center transition-colors duration-150 motion-safe:active:scale-[0.98] min-w-0 ${
                 item.isActive ? 'text-primary font-bold' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               <div className="relative shrink-0">
-                <Icon className={`size-5 transition-transform ${item.isActive ? 'stroke-[2.5px] scale-110' : 'stroke-[1.75px]'}`} />
+                <Icon aria-hidden className={`size-5 ${item.isActive ? 'stroke-[2.5px]' : 'stroke-[1.75px]'}`} />
                 {item.isActive && (
-                  <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(16,185,129,0.85)]" />
+                  <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary" />
                 )}
               </div>
               <span className="text-[10px] mt-0.5 tracking-tight truncate max-w-[64px] font-sans">

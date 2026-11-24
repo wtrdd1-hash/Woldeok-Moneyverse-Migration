@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Bell, ChevronDown, Globe2, LogIn, LogOut, Menu, MessageSquare, ShieldCheck, Sliders, User, Wallet, Sparkles, ChevronRight } from 'lucide-react';
+import { Bell, ChevronDown, Globe2, LogIn, LogOut, Menu, MessageSquare, ShieldCheck, Sliders, User, Wallet, Sparkles, ChevronRight, Map as MapIcon, LayoutGrid, Target } from 'lucide-react';
 import { logout } from '@/app/actions';
 import { Brand } from '@/components/brand';
 import { ThemeMenu, ThemePanel } from '@/components/theme-controls';
@@ -87,7 +87,7 @@ export function SiteHeader() {
   const mobileAdmin = mobileAdminEntries(viewer);
 
   return (
-    <header className="moneyverse-site-header sticky top-0 z-30 border-b border-border/70 dark:border-slate-800/80 bg-background/80 dark:bg-[#090d14]/85 backdrop-blur-2xl w-full max-w-full overflow-hidden transition-all shadow-[0_4px_20px_rgba(0,0,0,0.25)]">
+    <header className="moneyverse-site-header sticky top-0 z-30 border-b border-border/70 bg-background/85 backdrop-blur-2xl w-full max-w-full overflow-hidden transition-all shadow-sm">
       <div className="mx-auto flex h-14 sm:h-16 w-full max-w-[1440px] items-center justify-between gap-1.5 px-2 min-[400px]:gap-2 min-[400px]:px-3 min-[480px]:gap-3 min-[480px]:px-4 sm:px-6 lg:gap-2 xl:gap-3 2xl:gap-4 lg:px-4 xl:px-6 2xl:px-8">
         <Brand />
 
@@ -104,11 +104,11 @@ export function SiteHeader() {
         <div className={cn('flex items-center gap-1 min-[400px]:gap-1.5 sm:gap-2 lg:gap-1.5 xl:gap-2 2xl:gap-3 shrink-0', 'ml-auto lg:ml-0')}>
           <Link
             href="/roadmap"
-            className="hidden 2xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-xs font-bold transition-all shadow-xs shrink-0"
+            className="hidden 2xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 text-xs font-bold transition-all shadow-xs shrink-0"
           >
             <Sparkles className="size-3.5" />
             <span>{localeLabel(locale, '실전 가이드', 'Quick Guide', '実践ガイド', '快速指南')}</span>
-            <Badge className="bg-emerald-500 text-black text-[9px] px-1 py-0 h-4 font-black">HOT</Badge>
+            <Badge className="bg-primary text-primary-foreground text-[9px] px-1 py-0 h-4 font-black">HOT</Badge>
           </Link>
           <ServerClockPill className="hidden md:inline-flex lg:hidden 2xl:inline-flex" />
           <LanguageSwitcher compact className="flex shrink-0" />
@@ -139,24 +139,24 @@ export function SiteHeader() {
                 {/* 1. 모바일 사이드 메뉴 최상단 4개 국어 원터치 세그먼트 탭 */}
                 <MobileLanguageSegment />
 
-                {/* 🌟 초보자 필수 가이드 & 튜토리얼 퀵 허브 */}
-                <div className="my-2 rounded-xl border border-emerald-500/30 bg-gradient-to-b from-emerald-950/40 via-card to-card p-3 shadow-sm space-y-2">
+                {/* Beginner guide quick hub */}
+                <div className="my-2 rounded-xl border border-primary/30 bg-gradient-to-b from-accent via-card to-card p-3 shadow-sm space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 text-xs font-extrabold text-emerald-400">
+                    <span className="flex items-center gap-1.5 text-xs font-extrabold text-primary">
                       <Sparkles className="size-3.5" />
                       {localeLabel(locale, '처음 시작하시나요?', 'New to Moneyverse?', '初めての方へ', '新手指南')}
                     </span>
-                    <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-[9px] px-1.5 py-0 font-bold">
+                    <Badge className="bg-primary/15 text-primary border-primary/40 text-[9px] px-1.5 py-0 font-bold">
                       +170,000 WLD
                     </Badge>
                   </div>
                   <div className="grid grid-cols-2 gap-1.5 pt-0.5">
                     <Link
                       href="/roadmap"
-                      className="flex flex-col rounded-lg border border-border/70 bg-muted/40 p-2 text-left hover:border-emerald-500/50 hover:bg-muted transition-colors"
+                      className="flex flex-col rounded-lg border border-border/70 bg-muted/40 p-2 text-left hover:border-primary/50 hover:bg-muted transition-colors"
                     >
                       <span className="text-[11px] font-bold text-foreground flex items-center gap-1">
-                        🎬 {localeLabel(locale, '실전 로드맵', 'Roadmap', 'ロードマップ', '成长路线')}
+                        <MapIcon aria-hidden className="size-3" /> {localeLabel(locale, '실전 로드맵', 'Roadmap', 'ロードマップ', '成长路线')}
                       </span>
                       <span className="text-[9px] text-muted-foreground truncate">
                         {localeLabel(locale, '초·중·후반 3단계', '3-Stage Guide', '3段階ガイド', '3阶段指南')}
@@ -164,10 +164,10 @@ export function SiteHeader() {
                     </Link>
                     <Link
                       href="/features"
-                      className="flex flex-col rounded-lg border border-border/70 bg-muted/40 p-2 text-left hover:border-emerald-500/50 hover:bg-muted transition-colors"
+                      className="flex flex-col rounded-lg border border-border/70 bg-muted/40 p-2 text-left hover:border-primary/50 hover:bg-muted transition-colors"
                     >
                       <span className="text-[11px] font-bold text-foreground flex items-center gap-1">
-                        🖼️ {localeLabel(locale, '기능 사용법', 'Features', '機能操作', '功能指南')}
+                        <LayoutGrid aria-hidden className="size-3" /> {localeLabel(locale, '기능 사용법', 'Features', '機能操作', '功能指南')}
                       </span>
                       <span className="text-[9px] text-muted-foreground truncate">
                         {localeLabel(locale, '실제 화면 조작법', 'Live UI Guide', '画面操作法', '实际操作法')}
@@ -178,7 +178,7 @@ export function SiteHeader() {
                     href="/roadmap#quiz"
                     className="flex items-center justify-between rounded-lg border border-primary/30 bg-primary/10 px-2.5 py-1.5 text-[10px] font-bold text-primary hover:bg-primary/20 transition-colors"
                   >
-                    <span>🎯 {localeLabel(locale, '30초 내 투자 성향 진단받기', '30s Investor Profile Quiz', '30秒投資傾向診断', '30秒投资偏好诊断')}</span>
+                    <span className="flex items-center gap-1"><Target aria-hidden className="size-3" /> {localeLabel(locale, '30초 내 투자 성향 진단받기', '30s Investor Profile Quiz', '30秒投資傾向診断', '30秒投资偏好诊断')}</span>
                     <ChevronRight className="size-3" />
                   </Link>
                 </div>
@@ -412,7 +412,7 @@ function HeaderGroup({
                       className={cn(
                         'shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-extrabold tracking-tight',
                         catEntry.badge === 'HOT' && 'bg-rose-500/15 text-rose-500 dark:text-rose-400',
-                        catEntry.badge === 'NEW' && 'bg-emerald-500/15 text-emerald-500 dark:text-emerald-400',
+                        catEntry.badge === 'NEW' && 'bg-primary/15 text-primary',
                         catEntry.badge === '인기' && 'bg-amber-500/15 text-amber-500 dark:text-amber-400',
                         catEntry.badge === '필수' && 'bg-blue-500/15 text-blue-500 dark:text-blue-400',
                         catEntry.badge === '금융' && 'bg-purple-500/15 text-purple-500 dark:text-purple-400',
@@ -527,7 +527,7 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
               <p className="text-[11px] font-bold text-muted-foreground">{localeLabel(locale, '인증 상태', 'Session', 'セッション状態', '认证状态')}</p>
               <span className={cn(
                 'rounded-md px-1.5 py-0.5 text-[10px] font-extrabold tracking-tight',
-                isAdmin ? 'bg-primary/20 text-primary' : 'bg-emerald-500/15 text-emerald-500 dark:text-emerald-400'
+                isAdmin ? 'bg-primary/20 text-primary' : 'bg-primary/15 text-primary'
               )}>
                 {isAdmin ? 'ADMIN' : 'VERIFIED'}
               </span>

@@ -5,7 +5,7 @@ import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 
 export function SiteShell({ children }: { readonly children: React.ReactNode }) {
   return (
-    <div className="moneyverse-app-shell flex min-h-dvh flex-col w-full max-w-full overflow-x-hidden bg-[#090A0F]">
+    <div className="moneyverse-app-shell flex min-h-dvh flex-col w-full max-w-full overflow-x-hidden bg-background">
       {/* 2026 Toss-style Clean Single Header */}
       <ClientErrorReporter />
       <SiteHeader />
