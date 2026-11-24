@@ -1,5 +1,8 @@
 # Frontend inconsistency and denied-route diagnosis — 2026-11-24
 
+> **Final recheck:** while writing this report, the Test JAR path changed again from e821295b… to 2c127776f33fa04a4cd35db747f2fc05201eb9494ed1de6aff7894e36aef6f11 while the public version still claims7b. The final path differs from the original CI artifact in 42 entries. The34-entry comparison and route/browser counts below are the first observation snapshot, not acceptance of this later file. [Final capture](2026-11-24-frontend-diagnosis-artifact-drift-final.json). Acceptance remains HOLD.
+
+
 **Decision: HOLD whole-site acceptance.** The causes are mismatched runtime artifacts, incomplete presentation routes, broken asset routing and multiple visual implementations. This investigation did not deploy Production, stop services or change database privileges.
 
 ## Scope and evidence limits
