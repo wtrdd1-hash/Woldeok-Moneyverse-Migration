@@ -1,0 +1,1040 @@
+{
+  "at": "2026-11-23T23:04:53.400950+09:00",
+  "origin": "local Nginx Host:test.easy-scraping.com read-only GET",
+  "totals": {
+    "200": 17,
+    "403": 114,
+    "302": 16
+  },
+  "routes": [
+    {
+      "route": "/",
+      "status": 200,
+      "location": "",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": "내 자산 대시보드 · W Moneyverse"
+    },
+    {
+      "route": "/account",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/account-deletion",
+      "status": 200,
+      "location": "",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": "Account deletion · W Moneyverse"
+    },
+    {
+      "route": "/account/notifications",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/account/privacy",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/account/security",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin",
+      "status": 302,
+      "location": "/login?next=%2Fadmin",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": ""
+    },
+    {
+      "route": "/admin/analytics",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/api-health",
+      "status": 302,
+      "location": "/login?next=%2Fadmin%2Fapi-health",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": ""
+    },
+    {
+      "route": "/admin/bank",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/blog",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/bonds",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/catalog",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/central-bank",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/content",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/controls",
+      "status": 302,
+      "location": "/login?next=%2Fadmin%2Fcontrols",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": ""
+    },
+    {
+      "route": "/admin/discord",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/economy",
+      "status": 302,
+      "location": "/login?next=%2Fadmin%2Feconomy",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": ""
+    },
+    {
+      "route": "/admin/economy/scenario-lab",
+      "status": 302,
+      "location": "/login?next=%2Fadmin%2Feconomy%2Fscenario-lab",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": ""
+    },
+    {
+      "route": "/admin/enterprises",
+      "status": 302,
+      "location": "/login?next=%2Fadmin%2Fenterprises",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": ""
+    },
+    {
+      "route": "/admin/fx",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/help",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/kdic",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/logs",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/logs/activity",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/logs/delivery",
+      "status": 302,
+      "location": "/login?next=%2Fadmin%2Flogs%2Fdelivery",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": ""
+    },
+    {
+      "route": "/admin/logs/errors",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/logs/integrity",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/logs/system",
+      "status": 302,
+      "location": "/login?next=%2Fadmin%2Flogs%2Fsystem",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": ""
+    },
+    {
+      "route": "/admin/market",
+      "status": 302,
+      "location": "/login?next=%2Fadmin%2Fmarket",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": ""
+    },
+    {
+      "route": "/admin/market/ai-news",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/mint",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/money-flow",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/operations/storage",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/pension",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/safety",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/security",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/seo",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/seo-audit",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/shop",
+      "status": 302,
+      "location": "/login?next=%2Fadmin%2Fshop",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": ""
+    },
+    {
+      "route": "/admin/support",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/treasury",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/treasury/grants",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/admin/users",
+      "status": 302,
+      "location": "/login?next=%2Fadmin%2Fusers",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": ""
+    },
+    {
+      "route": "/admin/work",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/advisor",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/announcements",
+      "status": 200,
+      "location": "",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": "null | Woldeok Moneyverse"
+    },
+    {
+      "route": "/arcade",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/bank",
+      "status": 302,
+      "location": "/login?next=%2Fbank",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": ""
+    },
+    {
+      "route": "/bank/savings-pot",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/blog",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/board",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/bonds",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/businesses",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/businesses/ventures",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/calculators",
+      "status": 200,
+      "location": "",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": ""
+    },
+    {
+      "route": "/calendar",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/casino",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/central-bank",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/chat",
+      "status": 302,
+      "location": "/login?next=%2Fchat",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": ""
+    },
+    {
+      "route": "/clubs",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/clubs/new",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/clubs/warfare",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/collections",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/dashboard",
+      "status": 200,
+      "location": "",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": "내 자산 대시보드 · W Moneyverse"
+    },
+    {
+      "route": "/data-deletion",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/design-preview",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/developer",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/enterprises",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/features",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/forgot-password",
+      "status": 200,
+      "location": "",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": "Forgot password · W Moneyverse"
+    },
+    {
+      "route": "/fx",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/gallery",
+      "status": 200,
+      "location": "",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": "null | Woldeok Moneyverse"
+    },
+    {
+      "route": "/gallery/submit",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/guide",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/guide/career-mastery",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/guide/dopamine-system",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/guide/glossary",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/guide/stock-trading",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/guide/virtual-banking",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/help",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/inventory",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/kdic",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/lobby",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/login",
+      "status": 200,
+      "location": "",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": "Log in · W Moneyverse"
+    },
+    {
+      "route": "/login/providers",
+      "status": 200,
+      "location": "",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": "Log in · W Moneyverse"
+    },
+    {
+      "route": "/marketplace",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/marketplace/auction",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/mint",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/newspaper",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/pension",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/prediction",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/privacy",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/profile",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/profile/settings",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/progression",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/progression/prestige",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/quests",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/register",
+      "status": 200,
+      "location": "",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": "Create account · W Moneyverse"
+    },
+    {
+      "route": "/reset-password",
+      "status": 200,
+      "location": "",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": "Reset password · W Moneyverse"
+    },
+    {
+      "route": "/roadmap",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/safety",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/safety/takedown",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/search",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/seasons",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/shop",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/shop/catalog",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/spaces",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/spaces/real-estate",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/status",
+      "status": 200,
+      "location": "",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": "null | Woldeok Moneyverse"
+    },
+    {
+      "route": "/stocks",
+      "status": 302,
+      "location": "/login?next=%2Fstocks",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": ""
+    },
+    {
+      "route": "/stocks/alerts",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/stocks/community",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/stocks/compare",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/stocks/derivatives",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/stocks/history",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/stocks/league",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/stocks/portfolio",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/stocks/watchlist",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/support",
+      "status": 302,
+      "location": "/login?next=%2Fsupport",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": ""
+    },
+    {
+      "route": "/terms",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/tools",
+      "status": 200,
+      "location": "",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": ""
+    },
+    {
+      "route": "/tools/capital-gains-tax-calculator",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/tools/compound-calculator",
+      "status": 200,
+      "location": "",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": "Compound interest calculator | Woldeok Moneyverse"
+    },
+    {
+      "route": "/tools/crypto-apy-calculator",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/tools/dividend-tax-calculator",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/tools/farming-calculator",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/tools/fire-calculator",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/tools/gift-tax-calculator",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/tools/goal-wealth-calculator",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/tools/isa-calculator",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/tools/kimchi-premium-calculator",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/tools/loan-interest-calculator",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/tools/pension-tax-calculator",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/tools/quant-studio",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/tools/real-estate-calculator",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/tools/retirement-calculator",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/tools/salary-calculator",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/tools/stock-calculator",
+      "status": 200,
+      "location": "",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": "Stock average price calculator | Woldeok Moneyverse"
+    },
+    {
+      "route": "/tools/tax-calculator",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/tools/youth-leap-calculator",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/treasury",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/verify-email",
+      "status": 200,
+      "location": "",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": "Verify email · W Moneyverse"
+    },
+    {
+      "route": "/verify-email-change",
+      "status": 200,
+      "location": "",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": "Confirm email change · W Moneyverse"
+    },
+    {
+      "route": "/wallet",
+      "status": 302,
+      "location": "/login?next=%2Fwallet",
+      "renderer": "Spring-MVC-Thymeleaf",
+      "title": ""
+    },
+    {
+      "route": "/wallet/activity",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    },
+    {
+      "route": "/work",
+      "status": 403,
+      "location": "",
+      "renderer": "",
+      "title": ""
+    }
+  ]
+}
