@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Briefcase, Calculator, Landmark, Megaphone, ScrollText, ShoppingBag, TrendingUp } from 'lucide-react';
 import { GuestQuickstart } from '@/components/guest-quickstart';
+import { PageHeader } from '@/components/page-header';
+import { StatRow } from '@/components/d180/primitives';
 import { WalletGlance } from '@/components/wallet-glance';
 import { P2PTransferModal } from '@/components/p2p-transfer-modal';
 import { PublicAdvertisement } from '@/components/public-advertisement';
@@ -119,9 +121,10 @@ function noticeDate(value: string | null | undefined): string | null {
 
 export default async function HomePage() {
   const locale = await getServerLocale();
-  const [marketData, notices] = await Promise.all([
+  const [marketData, notices, macro] = await Promise.all([
     apiOrNull<{ stocks: StockItem[] }>('/api/v1/stocks'),
     apiOrNull<{ announcements: Announcement[] }>('/api/v1/announcements'),
+    apiOrNull<{ baseInterestRatePct?: unknown }>('/api/v1/economy/macro-pulse'),
   ]);
 
   const priced = (marketData?.stocks ?? [])
@@ -134,68 +137,94 @@ export default async function HomePage() {
       return left === right ? 0 : left > right ? -1 : 1;
     })
     .slice(0, 5);
+  const rising = priced.filter((row) => row.bp > 0n).length;
+  const falling = priced.filter((row) => row.bp < 0n).length;
+  const baseRate =
+    typeof macro?.baseInterestRatePct === 'number' && Number.isFinite(macro.baseInterestRatePct)
+      ? `${macro.baseInterestRatePct.toFixed(2)}%`
+      : null;
 
   const announcements = (notices?.announcements ?? []).slice(0, 4);
+  const panel = 'min-w-0 rounded-lg border border-[var(--g1-line)] bg-[var(--g1-plum)]';
+  const panelHead = 'flex min-h-11 items-center justify-between gap-3';
+  const link = 'inline-flex min-h-11 items-center text-xs text-[var(--g1-violet)] hover:underline';
 
   return (
-    <div data-page="home" className="flex flex-col gap-4">
+    <div data-page="home" className="flex flex-col gap-5">
       <h1 className="sr-only">
         {HOME_H1_BY_LOCALE[locale] ?? HOME_H1_BY_LOCALE.en}
       </h1>
 
-      {/* G2: the global ledger strip above carries server time, market breadth,
-          base rate and balance (QA GH-01/GH-08), so the home head is just its
-          name and one line of context. */}
-      <header className="flex flex-col gap-1">
-        <h2 id="home-status-heading" className="g1-display text-[28px] leading-tight text-[var(--g1-ink)]">길드 홀</h2>
-        <p className="text-sm text-[var(--g1-muted)]">오늘의 월덕 시장과 길드 소식입니다.</p>
-      </header>
+      {/* DESIGN180 page head (no hero banner: guild-home QA GH-01). The SEO h1
+          above stays; this visible title is the page name. */}
+      <PageHeader
+        title="길드 홀"
+        titleAs="h2"
+        action={
+          <>
+            <Link href="/quests" prefetch={false} className="inline-flex min-h-11 items-center rounded-md border border-[var(--g1-line)] px-4 text-sm font-semibold text-[var(--g1-ink)] hover:border-[var(--g1-violet)]">퀘스트 보기</Link>
+            <MemberOnly fallback={<Link href="/login" prefetch={false} className="g1-cta">로그인</Link>}>
+              <Link href="/wallet" prefetch={false} className="g1-cta">지갑 열기</Link>
+            </MemberOnly>
+          </>
+        }
+      >
+        오늘의 월덕 시장과 길드 소식입니다.
+      </PageHeader>
 
       {/* QA GH-03: guests keep the no-signup entry; members never see it. */}
       <GuestOnly>
         <GuestQuickstart locale={locale} />
       </GuestOnly>
 
-      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
-        <section aria-labelledby="hero-balance-heading" className="g1-panel flex flex-col gap-3">
-          <h2 id="hero-balance-heading" className="text-lg text-[var(--g1-ink)]">내 자산</h2>
-          {/* QA GH-04: no decorative coin; WalletGlance keeps its distinct
-              unknown / signed-out / unreadable / balance states. */}
-          <MemberOnly fallback={<p className="text-sm text-[var(--g1-muted)]">로그인하면 원장에 기록된 잔액이 표시됩니다.</p>}>
-            {/* G2: Orbitron and gold only on the member's own balance. */}
-            <p className="g2-balance text-3xl text-[var(--g1-gold)]">
-              <WalletGlance />
-            </p>
-            <p className="text-sm text-[var(--g1-muted)]">원장에 기록된 사용 가능 잔액입니다.</p>
-          </MemberOnly>
-          <MemberOnly
-            fallback={
-              <Link href="/login" prefetch={false} className="g1-cta w-fit">로그인하고 지갑 보기</Link>
-            }
-          >
-            <div className="flex flex-wrap gap-2">
-              <Link href="/wallet" prefetch={false} className="g1-cta">지갑 열기</Link>
-              <div className="min-w-[10rem] flex-1">
-                <P2PTransferModal triggerText="WLD 보내기" />
-              </div>
-            </div>
-          </MemberOnly>
-        </section>
+      <section aria-labelledby="hero-balance-heading">
+        <h2 id="hero-balance-heading" className="sr-only">오늘의 요약</h2>
+        <StatRow
+          label="오늘의 요약"
+          items={[
+            {
+              label: '사용 가능 잔액',
+              // QA GH-04: WalletGlance keeps its signed-out / unreadable / balance states.
+              value: <MemberOnly fallback={<Link href="/login" prefetch={false} className="text-base font-medium text-[var(--g1-violet)] hover:underline">로그인 후 표시</Link>}><WalletGlance /></MemberOnly>,
+              note: '원장 기준',
+            },
+            {
+              label: '오늘 시장',
+              value: priced.length === 0 ? null : (
+                <span>
+                  <span className="text-[var(--g1-ember)]">상승 {rising}</span>
+                  <span className="text-[var(--g1-faint)]"> / </span>
+                  <span className="text-[var(--g1-rare-rare)]">하락 {falling}</span>
+                </span>
+              ),
+              note: '개장가 대비 종목 수',
+            },
+            { label: '기준금리', value: baseRate, note: '중앙은행 발표' },
+          ]}
+        />
+      </section>
 
-        <section aria-labelledby="home-market-heading" className="g1-panel">
-          <div className="mb-2 flex items-baseline justify-between gap-3">
-            <h2 id="home-market-heading" className="text-lg text-[var(--g1-ink)]">오늘 크게 움직인 종목</h2>
-            <Link href="/stocks" prefetch={false} className="inline-flex min-h-11 items-center px-1 text-sm text-[var(--g1-violet)] hover:underline">거래소</Link>
+      <MemberOnly>
+        <div className="max-w-xs">
+          <P2PTransferModal triggerText="WLD 보내기" />
+        </div>
+      </MemberOnly>
+
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1.8fr)_minmax(270px,1fr)]">
+        <section aria-labelledby="home-market-heading" className={`${panel} overflow-hidden`}>
+          <div className={`${panelHead} px-[22px] pt-5`}>
+            <h2 id="home-market-heading" className="text-lg font-bold text-[var(--g1-ink)]">오늘 크게 움직인 종목</h2>
+            <Link href="/stocks" prefetch={false} className={link}>거래소</Link>
           </div>
           {movers.length === 0 ? (
-            <p className="py-6 text-sm text-[var(--g1-muted)]">시세 자료를 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.</p>
+            <p className="px-[22px] py-6 text-sm text-[var(--g1-muted)]">시세 자료를 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.</p>
           ) : (
-            <table className="w-full text-sm">
+            <table className="mt-3 w-full text-[13px]">
               <thead>
-                <tr className="border-b border-[var(--g1-line)] text-left text-xs text-[var(--g1-muted)]">
-                  <th className="py-2 font-medium">종목</th>
-                  <th className="py-2 text-right font-medium">현재가</th>
-                  <th className="py-2 text-right font-medium">오늘 등락</th>
+                <tr className="bg-[var(--g1-night-2)] text-left text-xs text-[var(--g1-muted)]">
+                  <th className="px-[22px] py-3 font-medium">종목</th>
+                  <th className="px-4 py-3 text-right font-medium">현재가</th>
+                  <th className="px-[22px] py-3 text-right font-medium">오늘 등락</th>
                 </tr>
               </thead>
               <tbody>
@@ -203,15 +232,15 @@ export default async function HomePage() {
                   const pct = changePercent(stock.current_price, stock.day_open_price);
                   const tone = bp > 0n ? 'text-[var(--g1-ember)]' : bp < 0n ? 'text-[var(--g1-rare-rare)]' : 'text-[var(--g1-muted)]';
                   return (
-                    <tr key={stock.symbol} className="border-b border-[var(--g1-line)] last:border-0">
-                      <td className="py-2">
+                    <tr key={stock.symbol} className="border-t border-[var(--g1-line)]">
+                      <td className="px-[22px] py-2">
                         <Link href={`/stocks/${encodeURIComponent(stock.symbol)}`} prefetch={false} className="block min-h-11 py-1 hover:text-[var(--g1-violet)]">
-                          <span className="font-semibold text-[var(--g1-ink)]">{getStockName(stock.symbol, locale, stock.name)}</span>
-                          <span className="block text-xs text-[var(--g1-muted)]">{stock.symbol}</span>
+                          <span className="block font-semibold text-[var(--g1-ink)]">{getStockName(stock.symbol, locale, stock.name)}</span>
+                          <span className="block text-[11px] text-[var(--g1-muted)]">{stock.symbol}</span>
                         </Link>
                       </td>
-                      <td className="g1-num py-2 text-right">{groupDigits(stock.current_price)}</td>
-                      <td className={`g1-num py-2 text-right ${tone}`}>{pct === null ? '—' : `${pct}%`}</td>
+                      <td className="px-4 py-2 text-right font-semibold tabular-nums">{groupDigits(stock.current_price)}</td>
+                      <td className={`px-[22px] py-2 text-right font-semibold tabular-nums ${tone}`}>{pct === null ? '확인 불가' : `${pct}%`}</td>
                     </tr>
                   );
                 })}
@@ -219,56 +248,58 @@ export default async function HomePage() {
             </table>
           )}
         </section>
-      </div>
 
-      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        {/* QA GH-05: real titles with dates, height follows the list. */}
-        <section aria-labelledby="home-notices-heading" className="g1-panel">
-          <div className="mb-1 flex items-baseline justify-between gap-3">
-            <h2 id="home-notices-heading" className="flex items-center gap-2 text-lg text-[var(--g1-ink)]">
-              <Megaphone className="size-4 text-[var(--g1-muted)]" aria-hidden />
-              길드 공지
-            </h2>
-            <Link href="/announcements" prefetch={false} className="inline-flex min-h-11 items-center px-1 text-sm text-[var(--g1-violet)] hover:underline">전체 보기</Link>
-          </div>
-          {announcements.length === 0 ? (
-            <p className="py-3 text-sm text-[var(--g1-muted)]">지금 게시된 공지가 없습니다.</p>
-          ) : (
+        <div className="grid min-w-0 gap-5">
+          {/* QA GH-05: real titles with dates, height follows the list. */}
+          <section aria-labelledby="home-notices-heading" className={`${panel} px-[22px] py-5`}>
+            <div className={panelHead}>
+              <h2 id="home-notices-heading" className="flex items-center gap-2 text-lg font-bold text-[var(--g1-ink)]">
+                <Megaphone className="size-4 text-[var(--g1-muted)]" aria-hidden />
+                길드 공지
+              </h2>
+              <Link href="/announcements" prefetch={false} className={link}>전체 보기</Link>
+            </div>
+            {announcements.length === 0 ? (
+              <p className="py-3 text-sm text-[var(--g1-muted)]">지금 게시된 공지가 없습니다.</p>
+            ) : (
+              <ul className="divide-y divide-[var(--g1-line)]">
+                {announcements.map((notice) => (
+                  <li key={notice.announcementId}>
+                    <Link
+                      href={`/announcements/${encodeURIComponent(notice.announcementId)}`}
+                      prefetch={false}
+                      className="flex min-h-11 items-center justify-between gap-3 py-2 text-[13px] text-[var(--g1-body)] hover:text-[var(--g1-ink)]"
+                    >
+                      <span className="line-clamp-1">{notice.isPinned ? '[고정] ' : ''}{notice.title}</span>
+                      {noticeDate(notice.publishedAt) && (
+                        <span className="shrink-0 text-[11px] tabular-nums text-[var(--g1-muted)]">{noticeDate(notice.publishedAt)}</span>
+                      )}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section aria-labelledby="home-routes-heading" className={`${panel} px-[22px] py-5`}>
+            <h2 id="home-routes-heading" className="mb-1 text-lg font-bold text-[var(--g1-ink)]">다음 할 일</h2>
             <ul className="divide-y divide-[var(--g1-line)]">
-              {announcements.map((notice) => (
-                <li key={notice.announcementId}>
-                  <Link
-                    href={`/announcements/${encodeURIComponent(notice.announcementId)}`}
-                    prefetch={false}
-                    className="flex min-h-11 items-center justify-between gap-3 py-2 text-sm text-[var(--g1-body)] hover:text-[var(--g1-ink)]"
-                  >
-                    <span className="line-clamp-1">{notice.isPinned ? '[고정] ' : ''}{notice.title}</span>
-                    {noticeDate(notice.publishedAt) && (
-                      <span className="g1-num shrink-0 text-xs text-[var(--g1-muted)]">{noticeDate(notice.publishedAt)}</span>
-                    )}
+              {QUICK_LINKS.map(({ href, label, note, icon: Icon }) => (
+                <li key={href}>
+                  <Link href={href} prefetch={false} className="group flex min-h-11 items-center gap-3 py-3">
+                    <span className="grid size-[38px] shrink-0 place-items-center rounded-lg bg-[var(--g1-plum-2)] text-[var(--g1-violet)]">
+                      <Icon className="size-[18px]" aria-hidden />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold text-[var(--g1-ink)] group-hover:text-[var(--g1-violet)]">{label}</span>
+                      <span className="block text-xs text-[var(--g1-muted)]">{note}</span>
+                    </span>
                   </Link>
                 </li>
               ))}
             </ul>
-          )}
-        </section>
-
-        <section aria-labelledby="home-routes-heading" className="g1-panel">
-          <h2 id="home-routes-heading" className="mb-1 text-lg text-[var(--g1-ink)]">어디로 갈까요</h2>
-          <ul className="divide-y divide-[var(--g1-line)]">
-            {QUICK_LINKS.map(({ href, label, note, icon: Icon }) => (
-              <li key={href}>
-                <Link href={href} prefetch={false} className="group flex min-h-11 items-center gap-3 py-2">
-                  <Icon className="size-4 shrink-0 text-[var(--g1-muted)] group-hover:text-[var(--g1-violet)]" aria-hidden />
-                  <span className="min-w-0">
-                    <span className="block text-sm font-semibold text-[var(--g1-ink)] group-hover:text-[var(--g1-violet)]">{label}</span>
-                    <span className="block text-xs text-[var(--g1-muted)]">{note}</span>
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
+          </section>
+        </div>
       </div>
 
       {/* Policy: ads only after the page's primary content on public routes. */}

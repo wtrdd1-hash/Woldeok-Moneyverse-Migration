@@ -32,4 +32,10 @@ describe('PageHeader (DESIGN180)', () => {
     const { container } = render(<PageHeader title="은행" />);
     expect(container.querySelector('header')!.className).toContain('mb-6');
   });
+
+  it('can render its title as h2 when the page already owns an SEO h1', () => {
+    render(<PageHeader title="길드 홀" titleAs="h2" />);
+    expect(screen.queryByRole('heading', { level: 1 })).toBeNull();
+    expect(screen.getByRole('heading', { level: 2, name: '길드 홀' })).toBeDefined();
+  });
 });

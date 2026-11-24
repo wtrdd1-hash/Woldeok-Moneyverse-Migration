@@ -1,11 +1,14 @@
 export function PageHeader({
   eyebrow: _eyebrow,
   title,
+  titleAs: Title = 'h1',
   action,
   children,
 }: {
   readonly eyebrow?: string;
   readonly title: React.ReactNode;
+  /** h2 when the page already renders its own (e.g. SEO) h1. */
+  readonly titleAs?: 'h1' | 'h2';
   readonly action?: React.ReactNode;
   readonly children?: React.ReactNode;
 }) {
@@ -15,7 +18,7 @@ export function PageHeader({
           page actions on the right. `eyebrow` stays in the API (91 callers)
           but is never drawn (owner direction: no eyebrow labels). */}
       <div className="min-w-0">
-        <h1 className="max-w-full min-w-0 break-words text-[var(--g1-ink)]">{title}</h1>
+        <Title className="max-w-full min-w-0 break-words text-[clamp(1.625rem,1.3rem+0.8vw,2rem)] font-bold leading-tight tracking-[-0.035em] text-[var(--g1-ink)]">{title}</Title>
         {children && (
           <div className="mt-2 min-w-0 max-w-[640px] text-sm leading-relaxed text-[var(--g1-muted)] [overflow-wrap:anywhere] [word-break:keep-all]">
             {children}

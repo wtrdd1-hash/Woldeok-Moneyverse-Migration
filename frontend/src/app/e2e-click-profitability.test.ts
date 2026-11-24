@@ -12,8 +12,8 @@ const linksTo = (path: string) => new RegExp(`href(="|: ')${path.replace(/[/]/g,
 
 describe('E2E Real-Click Profitability and Full-Stack Flow QA', () => {
   it('verifies the 2026 accessible fintech card and authenticated wallet glance', () => {
-    // G1 (approved 2026-11-24) replaced the slate card; the balance panel is a G1 item frame.
-    expect(homeSource).toContain('className="g1-panel');
+    // DESIGN180 (approved 2026-11-24): the balance is the first StatRow cell.
+    expect(homeSource).toContain('<StatRow');
     expect(homeSource).toContain('WalletGlance');
     expect(homeSource).toMatch(linksTo('/tools/compound-calculator'));
     expect(homeSource).toMatch(linksTo('/tools/stock-calculator'));
