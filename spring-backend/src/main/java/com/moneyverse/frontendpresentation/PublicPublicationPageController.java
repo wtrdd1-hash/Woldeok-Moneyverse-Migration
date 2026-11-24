@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 public final class PublicPublicationPageController {
     private final PublicSourceClient source;
     private final UiPageRenderer pages;
-    public PublicPublicationPageController(PublicSourceClient source,UiPageRenderer pages){this.source=source;this.pages=pages;}
+    private final com.moneyverse.api.domain.web.UiLocale locale;
+    public PublicPublicationPageController(PublicSourceClient source,UiPageRenderer pages,com.moneyverse.api.domain.web.UiLocale locale){this.source=source;this.pages=pages;this.locale=locale;}
     @GetMapping(value={"/announcements","/announcements/","/announcements.html","/announcements/index.html"},produces=MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<String> announcements(HttpServletRequest request){return show(request,false);}
     @GetMapping(value={"/gallery","/gallery/","/gallery.html","/gallery/index.html"},produces=MediaType.TEXT_HTML_VALUE)
@@ -33,7 +34,7 @@ public final class PublicPublicationPageController {
         String query=q.toLowerCase(Locale.ROOT);int window=rows.size();
         var filtered=rows.stream().filter(row->String.valueOf(gallery?row.get("altText"):row.get("title")+" "+row.get("body")).toLowerCase(Locale.ROOT).contains(query)).toList();
         var model=new HashMap<String,Object>();model.put("uiPageKey",gallery?"publicationGallery":"publicationAnnouncements");
-        model.put("publicTitleKey",model.get("uiPageKey"));model.put("language",pages.publicLanguage(request));model.put("sourceUnavailable",unavailable);
+        model.put("publicTitleKey",model.get("uiPageKey"));model.put("fullPageTitle",java.util.Objects.requireNonNull(locale.labels(pages.publicLanguage(request)).get(String.valueOf(model.get("uiPageKey"))))+" | Woldeok Moneyverse");model.put("language",pages.publicLanguage(request));model.put("sourceUnavailable",unavailable);
         model.put("rows",filtered);model.put("query",q);model.put("window",window);model.put("limit",limit);model.put("family",family);
         headers.set("Content-Security-Policy",csp(hosts));if(unavailable)headers.set("X-Robots-Tag","noindex, nofollow, noarchive");
         return new ResponseEntity<>(pages.renderPublic("mv46/"+family,request,model),headers,unavailable?HttpStatus.SERVICE_UNAVAILABLE:HttpStatus.OK);

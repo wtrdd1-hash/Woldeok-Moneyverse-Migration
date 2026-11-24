@@ -3,7 +3,7 @@
 ## 📌 기본 정보
 - **문서 식별자**: `DOC-SPEC-BRAND-ICON-001`
 - **적용 대상**: Woldeok Moneyverse 웹 포털, 모바일 PWA, 관리자 콘솔, 공식 문서
-- **마스터 파일 위치**: [woldeok-official-icon.png](file:///c:/Users/sds/Desktop/tset/Woldeok-Moneyverse-Migration/frontend/public/images/woldeok-official-icon.png)
+- **마스터 파일 위치**: [woldeok-official-icon.png](../frontend/public/images/woldeok-official-icon.png)
 
 ---
 
@@ -28,4 +28,4 @@ frontend/public/
     └── woldeok-official-icon.png       # 1024x1024 마스터 원본 공식 아이콘
 ```
 
-상세 디자인 토큰 및 컴포넌트 구현 가이드는 [OFFICIAL_BRAND_ICON_GUIDELINES.ko.md](file:///c:/Users/sds/Desktop/tset/Woldeok-Moneyverse-Migration/docs/design/OFFICIAL_BRAND_ICON_GUIDELINES.ko.md)를 참조하십시오.
+상세 디자인 토큰 및 컴포넌트 구현 가이드는 [OFFICIAL_BRAND_ICON_GUIDELINES.ko.md](design/OFFICIAL_BRAND_ICON_GUIDELINES.ko.md)를 참조하십시오.

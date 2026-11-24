@@ -17,3 +17,26 @@ Start main9876c09888ec84034eec183cf1309c85df3d7447. Isolated linked worktree reu
 ## Finished
 In progress. No main mutation, branch deletion or runtime/DB action yet.
 Open owner decisions: automatic production-image preparation versus fully manual preparation; factual tool/work provenance versus blanket generated-tool-name ban. These choices remain pending and are not inferred from elapsed time.
+
+### Owner decisions confirmed
+Automatic image preparation is allowed; actual Production cutover requires separate approval. UI/commit generated-source attribution is forbidden; factual technical references and work provenance are allowed. New UI target Next/BFF + Spring was already approved. Do not alter runtime from this documentation reconciliation.
+
+### Inventory checkpoint
+Read5631unique documentation blobs (about64.9MB) across49tip trees:5542unique Markdown/text paths. Automated instruction/link candidates require semantic triage;1563per-revision potential-link records are not confirmed broken links. Captured39local branches and22actual remote feature heads plusmain; symbolic remoteHEAD is excluded. Deleted one unchecked-out local branch already ancestor-confirmed inmain; all other unintegrated heads retained.
+Existing100-commit aggregate merged into the isolated candidate without conflicts, notmain. Node/Java baseline checks recorded before further reconciliation.
+
+### Integration RED and corrective ruling
+Existing aggregate: Node354tests,302pass/52fail; Java test compilation fails on changed PublicStocksReadOnlyPage constructor. Roots include BOM JSON, divergent catalogs, stale asset hashes and a replacement stock prototype inventing ten10000WLD prices on source failure, using Number for prices and unescaped name interpolation. Restore the existing guarded legacy public market/static reads frommain while retaining the new authenticated template and all history. Target stays Next/BFF; the synthetic fallback is not accepted. No financial/security assertions removed. Synchronize the full five-language catalog and content-bound asset hashes.
+
+### Corrective validation checkpoint
+Node354/354pass after restoring the protected legacy stock read surfaces, removing catalog BOM, matching server/client dictionaries and hashing served native assets. Java improved from compile failure to684tests/113failures, then684tests/8failures after fixing duplicate fragments, missing supportLauncher, canonical accessible logos and restoring the real page-specific auth form contract (the replacement posted every flow tologin).
+Added an exact role-proof ordering assertion and observed1testRED: admin probe preceded validated member identity. Move the optional navigation-role read after valid identity/Flight refusal. Preserve all identity/amount/CSRF assertions. A five-language heading check now accepts CSS classes while retaining exact heading key and text. Existing native public stocks mapping restored; bank/stocks guest-only regression from PR3421 imported. Full suite is running again.
+Shared remote integration ref advanced before the prepared merge; actual MERGE_HEAD is pinnedbc0ad8078540d9f5e70991d8e85c277a8e037323, which includes the earlier6e79 snapshot plus two later commits. Do not infer the older ref was the tested tree.
+
+### First aggregate corrected GREEN
+Actual prepared aggregate plus corrective changes: Java685tests/0failures/0errors/0skips, Node354/354pass. PostgreSQL-tagged tests excluded by the local default are not counted passing. The identity-before-admin-read regression observedRED then passed in the full suite. Removed duplicated shared fragments; restored one reserved support launcher, accessible canonical logos and legacy page-specific authentication behavior. This is candidate verification only; remaining branch reconciliation and full runtime CI still pending.
+Document authority and32primary entry points were normalized to confirmed owner decisions.45unambiguous links repaired;4missing historical sources explicitly annotated without fabricating reports. All historical source paths/evidence retained in the audit.
+
+### Closed release-path registration
+The existing aggregate failed classification on six known inputs: two Stitch Markdown notes, the upstream plain-text license, the current design JSON manifest and two scoped QA report JSONs. Reviewed the JSON shapes for sensitive-key candidates; none found. Added only five exact non-runtime record paths as documentation and the exact design manifest as control-plane input. Neighboring JSON/scripts remainUNKNOWN; non-100644 manifest modes remain refused. Three added regressions observedRED; classifier27/27GREEN. This fixes missing path taxonomy without bypassing unknown-path, executable/symlink or runtime-input checks.
+The corrupted mixed rootimplementation_plan history was replaced by a current authority entry point; its exact earlier bytes remain linked at immutablebc0ad807... and in Git history.

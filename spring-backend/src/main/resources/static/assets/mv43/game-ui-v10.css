@@ -1,0 +1,543 @@
+/* ==========================================================================
+   WOLDEOK MONEYVERSE — GAME UI v2026.11.23.10 CANONICAL SPECIFICATION CSS
+   Cyber-Midnight Navy (#0C0C16) & Radiant Neon Violet (#7C3AED / #6D44BA)
+   ========================================================================== */
+
+:root {
+  --game-bg: #0c0c16;
+  --game-sidebar-bg: #0e0e1c;
+  --game-card-bg: #141427;
+  --game-card-inner-bg: #1a1a33;
+  --game-border: rgba(139, 92, 246, 0.25);
+  --game-border-bright: rgba(139, 92, 246, 0.5);
+  --game-accent-purple: #6d44ba;
+  --game-accent-hover: #7c3aed;
+  --game-accent-glow: rgba(124, 58, 237, 0.4);
+  --game-input-bg: #181830;
+  --game-text-primary: #ffffff;
+  --game-text-secondary: #a78bfa;
+  --game-text-muted: #8b8ba7;
+  --game-active-menu-bg: #2b1f4c;
+  --game-active-menu-border: #7c3aed;
+}
+
+body {
+  background-color: var(--game-bg) !important;
+  color: var(--game-text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* App Shell */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--game-bg);
+}
+
+/* 1. Left Sidebar (Matching v10 Exactly) */
+.sidebar {
+  width: 240px;
+  min-width: 240px;
+  background-color: var(--game-sidebar-bg) !important;
+  border-right: 1px solid var(--game-border) !important;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  box-sizing: border-box;
+}
+
+.sidebar .brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: #ffffff;
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-bottom: 32px;
+  padding-left: 8px;
+}
+
+.sidebar .brand-emblem {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 15px var(--game-accent-glow);
+}
+
+.sidebar .side-links {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.sidebar .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  color: var(--game-text-muted);
+  text-decoration: none;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.sidebar .nav-link:hover {
+  color: #ffffff;
+  background-color: rgba(139, 92, 246, 0.1);
+}
+
+.sidebar .nav-link.active,
+.sidebar .nav-link[aria-current="page"] {
+  background-color: var(--game-active-menu-bg) !important;
+  border: 1px solid var(--game-active-menu-border) !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  box-shadow: 0 0 15px rgba(124, 58, 237, 0.2);
+}
+
+.sidebar .nav-icon {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.75;
+  color: currentColor;
+  flex-shrink: 0;
+}
+
+.sidebar-bottom-caption {
+  font-size: 0.75rem;
+  color: #6b6b80;
+  padding: 16px 8px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* 2. Top Header Bar */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px;
+  border-bottom: 1px solid var(--game-border);
+  background-color: rgba(14, 14, 28, 0.6);
+  backdrop-filter: blur(10px);
+}
+
+.topbar-page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.topbar-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbar-search {
+  background: var(--game-input-bg);
+  border: 1px solid var(--game-border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  color: #ffffff;
+  font-size: 0.875rem;
+  width: 200px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.topbar-search:focus {
+  border-color: var(--game-accent-purple);
+}
+
+.topbar-lang-btn,
+.topbar-account-btn {
+  background: var(--game-input-bg);
+  border: 1px solid var(--game-border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  color: #e2e8f0;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+.topbar-lang-btn:hover,
+.topbar-account-btn:hover {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: var(--game-accent-purple);
+}
+
+/* 3. Main Content Wrapper */
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.game-content-wrap {
+  padding: 28px 32px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* 4. Giant Hero Cyber Banner (Neon Skyline & Moon) */
+.game-hero-banner {
+  background: linear-gradient(135deg, rgba(28, 20, 60, 0.85) 0%, rgba(14, 14, 28, 0.95) 100%);
+  border: 1px solid var(--game-border-bright);
+  border-radius: 16px;
+  padding: 32px 36px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 40px rgba(124, 58, 237, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.game-hero-left {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 60%;
+}
+
+.game-hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--game-text-secondary);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.game-hero-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.game-hero-desc {
+  font-size: 0.9375rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.game-hero-subdesc {
+  font-size: 0.8125rem;
+  color: var(--game-text-muted);
+}
+
+.game-hero-time-box {
+  margin-top: 12px;
+  background: rgba(18, 16, 38, 0.7);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 10px;
+  padding: 12px 18px;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  width: fit-content;
+}
+
+.game-hero-time-label {
+  font-size: 0.75rem;
+  color: var(--game-text-muted);
+  font-weight: 600;
+}
+
+.game-hero-time-val {
+  font-size: 0.875rem;
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+/* Hero Right Neon Skyline & Emblem Art */
+.game-hero-art {
+  position: relative;
+  width: 320px;
+  height: 200px;
+  flex-shrink: 0;
+}
+
+.game-moon-glow {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 2px solid rgba(139, 92, 246, 0.6);
+  box-shadow: 0 0 35px rgba(124, 58, 237, 0.4), inset 0 0 25px rgba(124, 58, 237, 0.2);
+}
+
+.game-skyline-buildings {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 300px;
+  height: 170px;
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.game-building {
+  background: linear-gradient(180deg, #38256e 0%, #15132b 100%);
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-bottom: none;
+  position: relative;
+}
+.game-building::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 12px;
+  background: rgba(167, 139, 250, 0.8);
+  box-shadow: 0 0 6px rgba(167, 139, 250, 0.8);
+}
+
+.bld-1 { width: 36px; height: 110px; }
+.bld-2 { width: 44px; height: 160px; }
+.bld-3 { width: 50px; height: 135px; }
+.bld-4 { width: 38px; height: 95px; }
+
+.game-hero-visual {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 320px;
+  height: 220px;
+}
+
+.game-skyline-svg {
+  position: absolute;
+  right: 0;
+  bottom: -36px;
+  height: 220px;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.game-emblem-badge {
+  position: relative;
+  z-index: 3;
+  width: 84px;
+  height: 84px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(30, 27, 75, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.game-emblem-img {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px rgba(192, 132, 252, 0.6));
+}
+
+.game-hero-emblem-badge {
+  position: absolute;
+  top: 35px;
+  right: 45px;
+  width: 72px;
+  height: 72px;
+  background: rgba(20, 18, 42, 0.85);
+  border: 2px solid #8b5cf6;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 30px rgba(124, 58, 237, 0.6);
+  z-index: 5;
+}
+
+.game-hero-emblem-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+/* 5. Dual/Triple Glass Card Grid */
+.game-grid-2col {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 24px;
+}
+
+.game-grid-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.game-card {
+  background-color: var(--game-card-bg);
+  border: 1px solid var(--game-border);
+  border-radius: 14px;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.game-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.game-card-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.game-inner-box {
+  background-color: var(--game-card-inner-bg);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.15s ease;
+}
+.game-inner-box:hover {
+  border-color: rgba(139, 92, 246, 0.4);
+}
+
+.game-inner-box-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.game-inner-box-desc {
+  font-size: 0.8125rem;
+  color: var(--game-text-muted);
+  margin: 0;
+}
+
+.game-action-link-item {
+  background-color: var(--game-card-inner-bg);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-decoration: none;
+  color: #ffffff;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+.game-action-link-item:hover {
+  background-color: rgba(109, 68, 186, 0.2);
+  border-color: var(--game-accent-purple);
+  transform: translateX(4px);
+}
+
+.game-action-link-arrow {
+  color: var(--game-text-secondary);
+  font-size: 1.125rem;
+}
+
+/* Game Action Buttons */
+.game-btn-purple {
+  background-color: var(--game-accent-purple);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 24px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 15px rgba(109, 68, 186, 0.3);
+}
+.game-btn-purple:hover {
+  background-color: var(--game-accent-hover);
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.5);
+  transform: translateY(-1px);
+}
+
+.game-input {
+  width: 100%;
+  box-sizing: border-box;
+  background-color: var(--game-input-bg);
+  border: 1px solid var(--game-border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  color: #ffffff;
+  font-size: 0.9375rem;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.game-input:focus {
+  border-color: var(--game-accent-purple);
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+}
+
+/* Bottom Spec Caption */
+.game-bottom-spec-caption {
+  font-size: 0.6875rem;
+  color: #55556a;
+  letter-spacing: 0.5px;
+  text-align: left;
+  padding: 16px 0;
+  font-family: var(--font-mono, monospace);
+}
+
+/* Mobile Responsive */
+@media (max-width: 1023px) {
+  .app-shell { flex-direction: column; }
+  .sidebar { display: none; }
+  .game-hero-banner { flex-direction: column; gap: 20px; align-items: flex-start; }
+  .game-hero-left { max-width: 100%; }
+  .game-hero-art { align-self: center; }
+  .game-grid-2col, .game-grid-3col { grid-template-columns: 1fr; }
+}

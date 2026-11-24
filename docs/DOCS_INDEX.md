@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](DOCUMENT_AUTHORITY.md) / [한국어](DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+
+
 ## v2026.11.20.1 — 18 November UI baseline + five-language/global support authority (docs only)
 [Official EN plan](planning/NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.md) / [한국어](planning/NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.ko.md): 18 Nov PC/mobile navy-violet design binding for all eventual Spring MVC+Thymeleaf website screens, manual+auto EN/KO/JA/ZH/VI and one safe admin support/member chat launcher everywhere. Old mockup-only scope and Next runtime plans do not override latest owner directive. Current runtime and Production **not** certified by this documentation-only update.
 

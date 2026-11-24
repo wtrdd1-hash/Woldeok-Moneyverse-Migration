@@ -1,5 +1,8 @@
 # 🌙 Woldeok Moneyverse — 日本語完全ガイド
 
+> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](../docs/DOCUMENT_AUTHORITY.md) / [한국어](../docs/DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+
+
 [← Main README](../README.md) · [変更履歴](../docs/changelog/CHANGELOG.ja.md) · [ドキュメント一覧](../docs/INDEX.md) · [Production](https://easy-scraping.com) · [Test](https://test.easy-scraping.com)
 
 > Woldeok Moneyverse は、職業・クエスト・成長・WLDウォレット・ショップ・仮想株式/事業・銀行・仮想カジノを統合したコミュニティ向け仮想経済サービスです。

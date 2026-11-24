@@ -265,3 +265,39 @@ test('NUL-delimited Git diff preserves hostile filenames rather than splitting t
     assert.equal(evidence.classification, 'UNKNOWN');
   });
 });
+
+test('reviewed design notes, upstream license and immutable QA reports are closed documentation paths', () => {
+  for (const path of [
+    '.agents/skills/stitch-extract-design-md/LICENSE.upstream',
+    '.stitch/DESIGN.md', '.stitch/DESIGN.ko.md',
+    'docs/qa/evidence/2026-11-24-native-scoped-test/browser-60-external.json',
+    'docs/qa/evidence/2026-11-24-native-scoped-test/test-release-manifest.json',
+  ]) assert.equal(classifyPaths([path]), 'DOCS_ONLY', path);
+  for (const path of [
+    '.agents/skills/stitch-extract-design-md/LICENSE.upstream.js',
+    '.stitch/DESIGN.json', '.stitch/other.md',
+    'docs/qa/evidence/2026-11-24-native-scoped-test/other.json',
+    'docs/qa/evidence/other/test-release-manifest.json',
+  ]) assert.equal(classifyPaths([path]), 'UNKNOWN', path);
+});
+
+test('the exact current design authority manifest enters the control-plane lane', () => {
+  assert.equal(classifyPaths(['docs/design/CURRENT_UI_DESIGN_MANIFEST.json']), 'CONTROL_PLANE_ONLY');
+  assert.equal(classifyPaths(['docs/design/CURRENT_UI_DESIGN_MANIFEST.json', 'frontend/src/app/page.tsx']), 'MIXED');
+  assert.equal(classifyPaths(['docs/design/OTHER.json']), 'UNKNOWN');
+});
+
+test('design authority identity follows the exact manifest and refuses executable mode', () => {
+  withDocumentFixture(({ repo, commit, base }) => {
+    mkdirSync(join(repo, 'docs', 'design'), { recursive: true });
+    const path = join(repo, 'docs', 'design', 'CURRENT_UI_DESIGN_MANIFEST.json');
+    writeFileSync(path, '{"schema_version":1}\n');
+    const head = commit('add current design authority');
+    const input = buildReleaseInput({ repo, base, head });
+    assert.equal(input.classification, 'CONTROL_PLANE_ONLY');
+    assert.equal(input.controlPlaneSha, head);
+    chmodSync(path, 0o755);
+    const executable = commit('reject executable design metadata');
+    assert.equal(buildReleaseInput({ repo, base: head, head: executable }).classification, 'UNKNOWN');
+  });
+});

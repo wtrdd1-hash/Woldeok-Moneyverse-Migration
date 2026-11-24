@@ -1,5 +1,8 @@
 # 릴리스 가이드
 
+> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](DOCUMENT_AUTHORITY.md) / [한국어](DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+
+
 [English canonical](RELEASING.md) | **한국어**
 
 > 버전: v2026.09.23.404
@@ -176,3 +179,6 @@ GitOps/Kubernetes 기록은 provenance와 복구/목표 아키텍처로 유지�
 이번 적용은 DB·세션·금융 API·스케줄러·소켓·봇이 없는 화면 전용 실행 모드입니다. 홈, 도구 목록, 계산기 목록과 두 계산기만 전환하며 기존 로그인·API·회원·관리자 경로를 유지합니다. 정확한 main CI 산출물·JAR 해시·실행 프로세스·Test·브라우저 검증·무중단 전환·롤백 증거가 필요합니다.
 
 운영 소스 식별은 `/frontend-version?scope=public-presentation`을 사용합니다. 기존 Next 화면의 자동 새로고침 충돌을 막기 위해 일반 버전 응답을 유지하며, 변경된 공용 파일은 콘텐츠 버전별로 분리합니다. 별도 동시 보안 작업이 있으면 이를 유지한 역방향 롤백을 준비합니다. 전체 백엔드·금융·마이그레이션·로그인 회원 및 관리자 승격 게이트를 통과한 것으로 간주하지 않습니다. [실제 적용·검증·잔여 문제](releases/2026-11-20-native-presentation-production.ko.md).
+
+## 사용자 Test 선행 지시 — 2026-11-23
+프론트엔드·백엔드 변경은 실제 API/DB가 연결된 독립 Test에서 정확한 소스/배포본·역할·언어·반응형·복원 검증 후에만 운영 승격한다. 테스트 도메인이 운영 프론트엔드를 그대로 프록시하는 것은 독립 검증이 아니다. Test 실패·접속 불가는 승격 차단이다. 현재 작업은 테스트 전용이므로 이후 별도 사용자 지시 없이 운영에 승격하지 않는다.

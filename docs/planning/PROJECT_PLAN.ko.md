@@ -1,6 +1,18 @@
+## v2026.11.24.0818 — Stitch Skills 로컬 적용 시험
+
+> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](../DOCUMENT_AUTHORITY.md) / [한국어](../DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+
+소스 전용 디자인 추출 스킬과 11월 18일 승인 디자인 규격·정적 검사를 추가. Stitch 클라우드 디자인은 별도 MCP 연결·승인 필요; Test/운영 무변경. [상세](../development/GOOGLE_STITCH_SKILLS_PILOT_v2026.11.24.0818.ko.md).
+
 # 월덕 머니버스 — Living Project Plan
 
-> **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
+> **v2026.11.23.10 UI visual/feature audit** [180 revised PNGs](../design/game-ui-v2026.11.23.10/README.ko.md) · [audit](../qa/2026-11-23-game-ui-180-image-feature-audit.ko.md). Image file QA only; full runtime acceptance unverified.
+
+> v2026.11.23.8 신규 이미지: [실제 신규 180개 시안](../design/game-ui-v2026.11.23.8/README.ko.md) — 생성 완료/시안 검수 필요, 실제 서비스 적용 아님.
+
+> **UI/UX 단일 통합 기준 (v2026.11.23.5, 문서 전용):** [UI 디자인·문제·지침 통합 원장](../UI_UX_SINGLE_REFERENCE.ko.md). 사용자 정정: **현재 사이트 파비콘 자체가 공식 로고**이며 생성 W/왕관 로고로 대체 금지. 관리자 메뉴는 **권한 있는 관리자에게만** 표시. 본 문서 추가는 UI 구현/운영승격 증거가 아니다.
+
+> **Historical rebuild frontdoor — captured 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 
 ## v2026.11.21.2234 — AgentMemory 영상 영구 참고 및 작업 이어받기 규칙 (PLANNING / 미설치)
 

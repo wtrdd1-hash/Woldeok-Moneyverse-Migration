@@ -1,5 +1,16 @@
 # 📚 Document Catalog
 
+> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](DOCUMENT_AUTHORITY.md) / [한국어](DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+
+
+**Current visuals v2026.11.24.1:** [Nov23 v10 only](design/CURRENT_UI_DESIGN.md) · [180 route manifest](design/CURRENT_UI_DESIGN_MANIFEST.json). All earlier visual PNG sets are archived; this does not certify full implementation or Test.
+
+> **v2026.11.23.10 UI visual/feature audit** [180 revised PNGs](design/game-ui-v2026.11.23.10/README.md) · [audit](qa/2026-11-23-game-ui-180-image-feature-audit.md). Image file QA only; full runtime acceptance unverified.
+
+> v2026.11.23.8 신규 이미지: [180 new example images](design/game-ui-v2026.11.23.8/README.md) — 생성 완료/시안 검수 필요, 실제 서비스 적용 아님.
+
+**Current UI master (v2026.11.23.5):** [UI/UX Single Reference](UI_UX_SINGLE_REFERENCE.md) — exact current favicon is logo, admin nav for authorized admins only; design, defects, QA. Docs-only review pending.
+
 ## v2026.11.21.2234 — AgentMemory saved reference and multi-agent memory handoff (PLANNING)
 - [English canonical protocol](development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md) / [한국어](development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md) · [Worklog](worklog/2026-11-21-agentmemory-shared-agent-protocol-v2234.md) · [GitHub](updates/v2026.11.21.2234-agentmemory-reference-github.md). Third-party installation NOT VERIFIED, no runtime deployment.
 

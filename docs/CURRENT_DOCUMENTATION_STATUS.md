@@ -1,5 +1,8 @@
 # Current Documentation Status — DOC-2026.11.11.1500
 
+> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](DOCUMENT_AUTHORITY.md) / [한국어](DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+
+
 **English canonical** | [한국어](CURRENT_DOCUMENTATION_STATUS.ko.md)
 
 > Captured: 2026-11-11 15:08 KST; repository baseline `05e9260208db5aecc2463347885ae095c1faba2e`. This is a time-stamped documentation navigation and audit register, **not** a product authority, deployment attestation, or approval of outstanding designs. Refresh source and production evidence before acting on it.

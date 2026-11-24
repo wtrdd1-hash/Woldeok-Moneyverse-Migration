@@ -1,0 +1,1022 @@
+{
+  "source": "dbac9864e9289f550200971e7b9162a5a1e034be",
+  "origin": "http://test.easy-scraping.com",
+  "freshProfile": true,
+  "cases": 40,
+  "failed": 1,
+  "interactionsPassed": false,
+  "results": [
+    {
+      "path": "/",
+      "width": 320,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "My assets dashboard",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 320,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "내 자산 대시보드",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 320,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "マイ資産ダッシュボード",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 320,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "我的资产概览",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 320,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "Tổng quan tài sản",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 360,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "My assets dashboard",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 360,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "내 자산 대시보드",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 360,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "マイ資産ダッシュボード",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 360,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "我的资产概览",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 360,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "Tổng quan tài sản",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 390,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "My assets dashboard",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 390,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "내 자산 대시보드",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 390,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "マイ資産ダッシュボード",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 390,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "我的资产概览",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 390,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "Tổng quan tài sản",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 430,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "My assets dashboard",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 430,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "내 자산 대시보드",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 430,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "マイ資産ダッシュボード",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 430,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "我的资产概览",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 430,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 18,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "Tổng quan tài sản",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 768,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 19,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "My assets dashboard",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 768,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 19,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "내 자산 대시보드",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 768,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 19,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "マイ資産ダッシュボード",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 768,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 19,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "我的资产概览",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 768,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 19,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "Tổng quan tài sản",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1024,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "My assets dashboard",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1024,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "내 자산 대시보드",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1024,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "マイ資産ダッシュボード",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1024,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "我的资产概览",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1024,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "Tổng quan tài sản",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1440,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "My assets dashboard",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1440,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "내 자산 대시보드",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1440,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "マイ資産ダッシュボード",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1440,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "我的资产概览",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1440,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "Tổng quan tài sản",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1920,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "My assets dashboard",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1920,
+      "lang": "ko",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "ko",
+        "uiLanguage": "ko",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "내 자산 대시보드",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1920,
+      "lang": "ja",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "ja",
+        "uiLanguage": "ja",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "マイ資産ダッシュボード",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1920,
+      "lang": "zh",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "zh",
+        "uiLanguage": "zh",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "我的资产概览",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 1920,
+      "lang": "vi",
+      "metrics": {
+        "translatedElements": 23,
+        "translationErrors": [],
+        "lang": "vi",
+        "uiLanguage": "vi",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "Tổng quan tài sản",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/tools",
+      "width": 320,
+      "lang": "en",
+      "error": "support-overlap:hub-q"
+    }
+  ],
+  "screenshots": [
+    "/home/debian/mv-test-frontend-real-backend-evidence-20261123/public-browser/home-390.png",
+    "/home/debian/mv-test-frontend-real-backend-evidence-20261123/public-browser/home-1440.png",
+    "/home/debian/mv-test-frontend-real-backend-evidence-20261123/public-browser/failure-40.png"
+  ],
+  "failure": "support-overlap:hub-q"
+}

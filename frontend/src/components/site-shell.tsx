@@ -1,22 +1,34 @@
-import { ClientErrorReporter } from "@/components/client-error-reporter";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
-import { MobileBottomNav } from "@/components/mobile-bottom-nav";
+'use client';
+
+import { GameSidebar } from '@/components/game-sidebar';
+import { GameTopbar } from '@/components/game-topbar';
+import { ClientErrorReporter } from '@/components/client-error-reporter';
 
 export function SiteShell({ children }: { readonly children: React.ReactNode }) {
   return (
-    <div className="moneyverse-app-shell flex min-h-dvh flex-col w-full max-w-full overflow-x-hidden bg-[#090A0F]">
-      {/* 2026 Toss-style Clean Single Header */}
+    <div className="flex min-h-screen w-full bg-[#070810] text-[#e2e8f0] font-sans antialiased">
       <ClientErrorReporter />
-      <SiteHeader />
-      <main
-        id="main"
-        className="moneyverse-main mx-auto w-full max-w-[1440px] flex-1 px-3 sm:px-6 pb-[calc(env(safe-area-inset-bottom)+5rem)] sm:pb-28 lg:pb-16 pt-3 sm:pt-6 overflow-x-hidden"
-      >
-        {children}
-      </main>
-      <SiteFooter />
-      <MobileBottomNav />
+      {/* 1. Left Fixed Sidebar */}
+      <div className="hidden lg:block flex-shrink-0">
+        <GameSidebar />
+      </div>
+
+      {/* 2. Main Right Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <GameTopbar />
+        <main id="main" className="flex-1 p-6 lg:p-8 max-w-[1400px] w-full mx-auto">
+          {children}
+        </main>
+        {/* Footer Concept Bar */}
+        <footer className="border-t border-[#1f1d38]/60 px-8 py-4 text-xs font-mono text-[#555577] flex items-center justify-between">
+          <span>DESIGN CONCEPT · v2026.11.23.10 · ORIGINAL FAVICON PIXELS</span>
+          <div className="flex gap-4 text-[#777799]">
+            <a href="/terms" className="hover:text-white transition-colors">이용약관</a>
+            <a href="/privacy" className="hover:text-white transition-colors">개인정보처리방침</a>
+            <a href="/support" className="hover:text-white transition-colors">고객지원</a>
+          </div>
+        </footer>
+      </div>
     </div>
   );
 }

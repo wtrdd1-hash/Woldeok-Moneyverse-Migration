@@ -32,7 +32,7 @@
 
 ## 3. 🖱️ Playwright Real-Browser Click E2E Results
 
-* **Test Suite**: [`frontend/src/app/e2e-click-profitability.test.ts`](file:///c:/Users/sds/Desktop/tset/Woldeok-Moneyverse-Migration/frontend/src/app/e2e-click-profitability.test.ts)
+* **Test Suite**: [`frontend/src/app/e2e-click-profitability.test.ts`](../frontend/src/app/e2e-click-profitability.test.ts)
 * **Results**: **5 E2E Tests 100% ALL PASS**.
 
 ---

@@ -1,5 +1,10 @@
 # Woldeok Moneyverse 프로젝트 메모리 (PROJECT_MEMORY.md)
 
+> **Authority clarification — v2026.11.24.DOCSYNC.1:** This file retains dated implementation/memory records. Current decisions and release permissions are in [document authority](docs/DOCUMENT_AUTHORITY.md) / [한국어](docs/DOCUMENT_AUTHORITY.ko.md). Prior completion/version claims do not certify today's runtime.
+
+
+**Current visual source v2026.11.24.1:** Use [Nov23 v10-only UI image authority](docs/design/CURRENT_UI_DESIGN.md) and its 180-route manifest for all new designs. v8 and Nov18 images are historical only; Test/Production and final visual acceptance remain unverified.
+
 ## 2026-11-21 shared agent-memory reference (PLANNING / no installed service)
 
 The owner-designated AgentMemory reel and upstream README are preserved in [EN](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md) / [KO](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md). Every task must recall latest plans/worklogs and record sanitized start/mid/finish decisions; this is GitHub-document based until an isolated, reviewed external memory service has been actually installed and verified. No runtime or production change was made under v2026.11.21.2234.
@@ -247,10 +252,10 @@ The owner-designated AgentMemory reel and upstream README are preserved in [EN](
 ## 14. 🏛️ 단일 진실 공급원 (Single Source of Truth) 공식 마스터 문서 체계
 
 모든 개발, 기획, QA는 파편화된 구 문서를 배제하고 아래 공식 마스터 문서를 유일한 기준으로 삼는다:
-1. **[엔터프라이즈 통합 기획 및 시스템 사양 총괄]**: [`ENTERPRISE_SYSTEM_SPECIFICATION_AND_ROADMAP.ko.md`](./ENTERPRISE_SYSTEM_SPECIFICATION_AND_ROADMAP.ko.md)
-2. **[전사 통합 종합 QA 및 품질 보증 마스터 리포트]**: [`qa-reports/QA_CONSOLIDATED_MASTER_REPORT.ko.md`](./qa-reports/QA_CONSOLIDATED_MASTER_REPORT.ko.md)
+1. **[엔터프라이즈 통합 기획 및 시스템 사양 총괄]**: [`ENTERPRISE_SYSTEM_SPECIFICATION_AND_ROADMAP.ko.md`](docs/planning/ENTERPRISE_SYSTEM_SPECIFICATION_AND_ROADMAP.ko.md)
+2. **[전사 통합 종합 QA 및 품질 보증 마스터 리포트]**: `qa-reports/QA_CONSOLIDATED_MASTER_REPORT.ko.md` (historical source unavailable; original target: ./qa-reports/QA_CONSOLIDATED_MASTER_REPORT.ko.md; [link audit](docs/qa/2026-11-24-document-link-reconciliation.json))
 3. **[문서 통합 및 파일 자동 분류 결과 보고서]**: [`분류_결과_보고서.md`](./분류_결과_보고서.md)
-4. **[통합 REST API 마스터 레퍼런스]**: [`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md)
+4. **[통합 REST API 마스터 레퍼런스]**: [`API_DOCUMENTATION.md`](docs/api/API_DOCUMENTATION.md)
 5. **[누적 구현 계획서]**: [`implementation_plan.md`](./implementation_plan.md) (순수 누적 `+추가, -0 삭제` 영구 준수)
 
 
@@ -308,3 +313,7 @@ Owner directs progressive live adoption of individually completed and accepted f
 
 
 2026-11-22 measured continuation: protected native administrator catalog preview connection installed successfully (application f0336fded6068f884c87f88efedeb770fd3387d4, operational b2eb6c181bf90e865120ce4eb962135f015665e7). DB-read health/source and presentation health/source200; anonymous401/unknown404/write405 and existingAPI/maintenance boundaries passed. Public frontend is still503 maintenance; do not claim Production cutover. Browser control is disabled; authenticated/visual acceptance remainsOPEN. Receipt: docs/releases/2026-11-22-native-catalog-preview-connection.md. Both recurring Instagram design references remain required but video contents unverified.
+
+
+## v2026.11.24.0818 — Google Stitch Skills local design extraction handoff
+Owner supplied YouTube Shorts T5qdrYS7znc; verified upstream `google-labs-code/stitch-skills`. In isolated worktree, installed source-only extractor as `.agents/skills/stitch-extract-design-md` and authored `.stitch/DESIGN.md` plus Korean companion from approved November 18 Spring CSS. The local static checker confirms 11 official tokens; no Stitch MCP credential or cloud project, no source/data upload, no Test/Production deployment. When resuming, re-read integrated master and `docs/development/GOOGLE_STITCH_SKILLS_PILOT_v2026.11.24.0818.ko.md`; never infer 180-screen implementation from this design contract.

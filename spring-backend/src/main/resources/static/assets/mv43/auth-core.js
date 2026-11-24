@@ -33,5 +33,15 @@
       }
     };
   }
-  root.MV43Auth=Object.freeze({createClient,destination:()=> '/'});
+  function getDestination(){
+    try {
+      const params = new URLSearchParams(root.location.search);
+      const next = params.get('next');
+      if (next && next.startsWith('/') && !next.startsWith('//')) {
+        return next;
+      }
+    } catch(e){}
+    return '/';
+  }
+  root.MV43Auth=Object.freeze({createClient,destination:getDestination});
 })(window);

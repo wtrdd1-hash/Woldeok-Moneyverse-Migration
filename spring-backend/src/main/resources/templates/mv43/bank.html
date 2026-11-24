@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:lang="${uiLanguage}" th:attr="data-ui-language=${uiLanguage}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0C1020">
+  <meta name="description" content="W Moneyverse Bank — compound interest deposits, saving pockets, credit loans and virtual bonds">
+  <title>가상 은행 & 복리 예금 · W Moneyverse</title>
+  <link rel="stylesheet" href="/assets/mv39/site.css?v=e4fcdf2a655e85bb07e9fb593acf99f4284ad76c68a00b066edfa58a88847e15">
+  <link rel="stylesheet" href="/assets/mv43/chrome.css?v=460fe6ee77b8f955fdeb47ae1b74d3871d811af799b26ab969a9af186e38c3f3">
+  <link rel="stylesheet" href="/assets/mv43/game-ui-v10.css?v=80074a39dba0eafed22e22eb2161cc181329c1d8e16193eaf2e20a830be7b65c">
+  <link rel="stylesheet" href="/assets/mv43/bank.css?v=254f5d6c40d505e121407fc7ad522b8ed6eb82fda19a0592f0602ee6d3c58e5e">
+  <script src="/assets/mv39/i18n.js?v=5e8bad70fa78db8cd2a6015e04d37ccfa673d24ff746923187595ebcb53fd2db" defer></script>
+  <script src="/assets/mv39/money.js?v=9e95a9188599bc8d14d9743b3506f68af9fd17a63c6dd7db471e0d077d9283d5" defer></script>
+  <script src="/assets/mv43/bank.js?v=34ae739cfbc250c4ae1473749c27f5e1ed123fba572909fb7638fccafe7c418d" defer></script>
+  <th:block th:replace="~{shared/chrome :: commonHead}"></th:block>
+</head>
+<body data-page="bank">
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="app-shell">
+  <th:block th:replace="~{shared/chrome :: sidebar}"></th:block>
+  <div class="app-main">
+    <div class="app-inner">
+      <th:block th:replace="~{shared/chrome :: pageHeader}"></th:block>
+      <main id="main-content" tabindex="-1">
+
+        <!-- 1. Game-Economy Hero Banner with Neon City Skyline & W Emblem -->
+        <section class="game-hero-banner" aria-labelledby="bank-hero-title">
+          <div class="game-hero-left">
+            <div class="game-hero-eyebrow">
+              <span>✦</span>
+              <span>WOLDEOK MONEYVERSE • FINANCE</span>
+            </div>
+            <h2 id="bank-hero-title" class="game-hero-title">은행</h2>
+            <p class="game-hero-desc">
+              게임형 금융 · 가상경제 서비스<br>
+              <span class="home-hero-subdesc">실제 서비스 기능 및 권한에 따라 표시</span>
+            </p>
+            <div class="home-hero-box">
+              <span class="home-hero-box-label">서버 게임 시간 기준</span>
+              <span class="home-hero-box-val">현실 10분 = 서버 1일 · 서버 7일 = 서버 1주</span>
+            </div>
+          </div>
+
+          <div class="game-hero-visual" aria-hidden="true">
+            <svg class="game-skyline-svg" viewBox="0 0 400 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M40 220V120H70V80H90V220H130V60H160V100H180V220H220V90H240V40H260V220H300V110H330V70H350V220H400V220H0V220H40Z" fill="url(#neon-bank-skyline)" opacity="0.4"/>
+              <path d="M120 220V110H140V70H170V220H210V50H230V20H250V220H280V130H310V90H340V220Z" fill="url(#neon-bank-buildings)" opacity="0.6"/>
+              <defs>
+                <linearGradient id="neon-bank-skyline" x1="200" y1="40" x2="200" y2="220" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#8b5cf6" stop-opacity="0.6"/>
+                  <stop offset="1" stop-color="#1e1b4b" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="neon-bank-buildings" x1="230" y1="20" x2="230" y2="220" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#c084fc" stop-opacity="0.8"/>
+                  <stop offset="1" stop-color="#312e81" stop-opacity="0.1"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="game-moon-glow"></div>
+            <div class="game-emblem-badge">
+              <img src="/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5" alt="W Emblem" class="game-emblem-img">
+            </div>
+          </div>
+        </section>
+
+        <div id="page-content" class="bank-page-content">
+          <p id="bank-status-bar" class="wallet-status" role="status" aria-live="polite">은행 원장 데이터를 안전하게 불러오는 중…</p>
+
+          <!-- Toss-Bank Style Hero Summary Card -->
+          <section class="toss-hero-card" aria-label="은행 자산 및 복리 이자 요약">
+            <div class="toss-hero-header">
+              <div class="toss-hero-sub">순 금융 자산</div>
+              <div class="toss-hero-main-row">
+                <strong id="kpi-net-worth" class="toss-hero-amount">— WLD</strong>
+                <span id="badge-credit-grade" class="credit-grade-badge">신용 A1 등급</span>
+              </div>
+            </div>
+
+            <div class="toss-metrics-grid">
+              <div class="toss-metric-item">
+                <span class="toss-metric-label">현금 지갑</span>
+                <strong id="kpi-cash-bal" class="toss-metric-val">—</strong>
+              </div>
+              <div class="toss-metric-item">
+                <span class="toss-metric-label">은행 예치금 (복리)</span>
+                <strong id="kpi-deposit-bal" class="toss-metric-val highlighted">—</strong>
+              </div>
+              <div class="toss-metric-item">
+                <span class="toss-metric-label">대출 잔액</span>
+                <strong id="kpi-loan-bal" class="toss-metric-val">—</strong>
+              </div>
+            </div>
+
+            <!-- Realtime Daily Compound Interest Banner -->
+            <div class="toss-interest-banner">
+              <div class="toss-interest-left">
+                <div class="toss-interest-badge">매일 이자 받기 · 연 <span id="val-interest-rate">4.50%</span> 복리</div>
+                <div class="toss-interest-live">
+                  지금까지 쌓인 이자 <strong id="val-unclaimed-interest" class="interest-number">0</strong> WLD
+                </div>
+              </div>
+              <button type="button" id="btn-claim-interest-hero" class="btn-claim-action">지금 이자 받기</button>
+            </div>
+          </section>
+
+          <!-- Banking Function Navigation Tabs -->
+          <nav class="bank-tabs-nav" aria-label="은행 기능 선택">
+            <button type="button" class="bank-tab-btn active" data-tab="deposit-withdraw">통장 관리</button>
+            <button type="button" class="bank-tab-btn" data-tab="savings-pockets">정기예금/적금</button>
+            <button type="button" class="bank-tab-btn" data-tab="virtual-cards">가상 카드</button>
+            <button type="button" class="bank-tab-btn" data-tab="transfers-history">이체/환전 내역</button>
+          </nav>
+
+          <!-- Tab 1: Deposit & Withdraw -->
+          <section id="tab-pane-deposit-withdraw" class="bank-tab-pane active">
+            <div class="bank-dual-grid">
+              <!-- Deposit Card -->
+              <article class="card bank-form-card">
+                <div class="card-heading">
+                  <h3>예금 입금 (지갑 → 은행)</h3>
+                  <span class="tag-pill positive">연 4.5% 복리 적용</span>
+                </div>
+                <p class="form-desc">현금 지갑의 WLD를 은행 예치금으로 안전하게 보관하고 실시간 복리 이자를 누적하세요.</p>
+                <form id="form-bank-deposit">
+                  <label for="deposit-amount-input">입금 금액 (WLD)</label>
+                  <input type="number" id="deposit-amount-input" min="1" step="1" required placeholder="입금할 WLD 금액">
+                  <div class="wallet-quick" role="group">
+                    <button type="button" class="quick-amt-dep" data-amount="5000">5,000</button>
+                    <button type="button" class="quick-amt-dep" data-amount="10000">10,000</button>
+                    <button type="button" class="quick-amt-dep" data-amount="50000">50,000</button>
+                    <button type="button" id="btn-deposit-max">전액 입금</button>
+                  </div>
+                  <button type="submit" id="btn-submit-deposit" class="wallet-submit">예금 입금하기</button>
+                  <p id="msg-deposit-result" class="bank-inline-msg" role="status"></p>
+                </form>
+              </article>
+
+              <!-- Withdraw Card -->
+              <article class="card bank-form-card">
+                <div class="card-heading">
+                  <h3>예금 출금 (은행 → 지갑)</h3>
+                  <span class="tag-pill">수수료 0원</span>
+                </div>
+                <p class="form-desc">은행에 예치된 WLD를 즉시 현금 지갑으로 인출하여 자유롭게 송금하거나 투자하세요.</p>
+                <form id="form-bank-withdraw">
+                  <label for="withdraw-amount-input">출금 금액 (WLD)</label>
+                  <input type="number" id="withdraw-amount-input" min="1" step="1" required placeholder="출금할 WLD 금액">
+                  <div class="wallet-quick" role="group">
+                    <button type="button" class="quick-amt-wth" data-amount="5000">5,000</button>
+                    <button type="button" class="quick-amt-wth" data-amount="10000">10,000</button>
+                    <button type="button" class="quick-amt-wth" data-amount="50000">50,000</button>
+                    <button type="button" id="btn-withdraw-max">전액 출금</button>
+                  </div>
+                  <button type="submit" id="btn-submit-withdraw" class="wallet-submit btn-secondary">예금 인출하기</button>
+                  <p id="msg-withdraw-result" class="bank-inline-msg" role="status"></p>
+                </form>
+              </article>
+            </div>
+          </section>
+
+          <!-- Tab 2: Savings Pockets -->
+          <section id="tab-pane-savings-pockets" class="bank-tab-pane">
+            <div class="pockets-header-row">
+              <div>
+                <h3 class="section-title">내 비상금 저금통 (목표 적금 팟)</h3>
+                <p class="section-sub">목표 금액을 설정하고 용도별로 안전하게 분리 저축하세요.</p>
+              </div>
+              <button type="button" id="btn-open-create-pocket" class="btn-create-pocket">+ 새 저금통 만들기</button>
+            </div>
+
+            <div id="pockets-container" class="pockets-grid">
+              <div class="pocket-loading-placeholder">저금통 목록을 불러오는 중…</div>
+            </div>
+          </section>
+
+          <!-- Tab 3: Virtual Cards (가상 카드 관리) -->
+          <section id="tab-pane-virtual-cards" class="bank-tab-pane">
+            <div class="bank-dual-grid">
+              <!-- Virtual Card Preview -->
+              <article class="card bank-form-card" style="background:linear-gradient(145deg,#1e1b4b,#0f172a);border:1px solid #4338ca;padding:24px;border-radius:16px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                  <span style="font-size:0.875rem;font-weight:700;color:#c7d2fe;letter-spacing:0.1em;">WOLDEOK BLACK CARD</span>
+                  <svg style="width:32px;height:24px;color:#818cf8;" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+                </div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:1.25rem;letter-spacing:0.18em;color:#fff;margin:28px 0 16px;">
+                  5421 •••• •••• 8892
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+                  <div>
+                    <div style="font-size:0.6875rem;color:#94a3b8;text-transform:uppercase;">Card Holder</div>
+                    <div id="card-holder-name" style="font-size:0.875rem;font-weight:600;color:#f8fafc;">VERIFIED MEMBER</div>
+                  </div>
+                  <div>
+                    <div style="font-size:0.6875rem;color:#94a3b8;text-transform:uppercase;">Valid Thru</div>
+                    <div style="font-size:0.875rem;font-weight:600;color:#f8fafc;">11/30</div>
+                  </div>
+                  <span style="padding:4px 8px;border-radius:6px;background:#10b981;color:#fff;font-size:0.6875rem;font-weight:700;">ACTIVE</span>
+                </div>
+              </article>
+
+              <!-- Card Settings & Limits -->
+              <article class="card bank-form-card">
+                <div class="card-heading">
+                  <h3>가상 결제 한도 및 카드 설정</h3>
+                  <span class="tag-pill positive">원클릭 잠금 지원</span>
+                </div>
+                <p class="form-desc">상점 및 서비스 내 결제 시 보통예금 잔액에서 실시간 승인되는 안전 가상 카드입니다.</p>
+                <div style="display:flex;flex-direction:column;gap:14px;margin-top:16px;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(255,255,255,0.04);border-radius:8px;">
+                    <div>
+                      <div style="font-weight:600;font-size:0.875rem;">1회 결제 한도</div>
+                      <div style="font-size:0.75rem;color:#94a3b8;">부정 결제 방지용 최대 승인 한도</div>
+                    </div>
+                    <strong style="color:#a5b4fc;">100,000 WLD</strong>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(255,255,255,0.04);border-radius:8px;">
+                    <div>
+                      <div style="font-weight:600;font-size:0.875rem;">카드 결제 상태</div>
+                      <div style="font-size:0.75rem;color:#94a3b8;">분실 또는 미사용 시 즉시 일시정지</div>
+                    </div>
+                    <span id="card-status-label" style="color:#10b981;font-weight:600;font-size:0.875rem;">정상 이용 중</span>
+                  </div>
+                  <button type="button" id="btn-toggle-card-lock" class="wallet-submit btn-secondary" style="margin-top:8px;">카드 일시 잠금 / 해제</button>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <!-- Tab 4: Transfers & FX History (이체/환전 내역) -->
+          <section id="tab-pane-transfers-history" class="bank-tab-pane">
+            <article class="card">
+              <div class="card-heading">
+                <h3>은행 예금 거래 및 이체 내역</h3>
+                <span class="tag-pill">실시간 자동 동기화</span>
+              </div>
+              <p class="form-desc">월덕 은행 통장에서 발생한 예금, 인출, 복리이자 정산, 이체 기록입니다.</p>
+
+              <div class="table-scroll" tabindex="0" role="region" aria-label="은행 거래 내역">
+                <table class="wallet-table">
+                  <thead>
+                    <tr>
+                      <th>일시</th>
+                      <th>거래 구분</th>
+                      <th>금액 (WLD)</th>
+                      <th>상태</th>
+                      <th>원장 영수증 ID</th>
+                    </tr>
+                  </thead>
+                  <tbody id="bank-transfers-history-body">
+                    <tr>
+                      <td>2026. 11. 23. 오전</td>
+                      <td>복리이자 자동 지급</td>
+                      <td style="color:#10b981;font-weight:600;">+1,480 WLD</td>
+                      <td><span style="color:#10b981;">정상 완료</span></td>
+                      <td style="font-family:monospace;font-size:0.75rem;color:#94a3b8;">int-rec-92a10bf8</td>
+                    </tr>
+                    <tr>
+                      <td>2026. 11. 22. 오후</td>
+                      <td>보통예금 자율 입금</td>
+                      <td style="color:#818cf8;font-weight:600;">+50,000 WLD</td>
+                      <td><span style="color:#10b981;">정상 완료</span></td>
+                      <td style="font-family:monospace;font-size:0.75rem;color:#94a3b8;">dep-rec-41c88d01</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          </section>
+        </div>
+      </main>
+      <th:block th:replace="~{shared/chrome :: footer}"></th:block>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Create New Pocket -->
+<dialog id="modal-create-pocket" class="bank-modal">
+  <div class="bank-modal-content">
+    <div class="bank-modal-header">
+      <h3>새 비상금 저금통 팟 만들기</h3>
+      <button type="button" id="btn-close-modal-pocket" class="drawer-close" aria-label="닫기">✕</button>
+    </div>
+    <form id="form-create-pocket-action">
+      <label for="pocket-name-input">저금통 이름</label>
+      <input type="text" id="pocket-name-input" required placeholder="예: 첫 내집마련, 여행 자금, 비상금" maxlength="30">
+
+      <label for="pocket-target-input">목표 금액 (WLD)</label>
+      <input type="number" id="pocket-target-input" min="1000" step="1000" required placeholder="100,000">
+
+      <div class="modal-actions-row">
+        <button type="button" id="btn-cancel-pocket" class="wallet-button">취소</button>
+        <button type="submit" class="wallet-submit">저금통 생성</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<!-- Modal: Pocket Transfer (Deposit / Withdraw to Pocket) -->
+<dialog id="modal-transfer-pocket" class="bank-modal">
+  <div class="bank-modal-content">
+    <div class="bank-modal-header">
+      <h3 id="transfer-pocket-title">저금통 보관금 관리</h3>
+      <button type="button" id="btn-close-modal-transfer" class="drawer-close" aria-label="닫기">✕</button>
+    </div>
+    <form id="form-transfer-pocket-action">
+      <input type="hidden" id="transfer-pocket-id">
+      <div class="pocket-modal-tabs">
+        <button type="button" id="btn-pocket-mode-dep" class="pocket-mode-btn active">예금 → 저금통 채우기</button>
+        <button type="button" id="btn-pocket-mode-wth" class="pocket-mode-btn">저금통 → 예금 꺼내기</button>
+      </div>
+      <label for="transfer-pocket-amount">이동 금액 (WLD)</label>
+      <input type="number" id="transfer-pocket-amount" min="1" step="1" required placeholder="이동할 금액">
+      <div class="modal-actions-row">
+        <button type="button" id="btn-cancel-transfer-pocket" class="wallet-button">취소</button>
+        <button type="submit" id="btn-submit-transfer-pocket" class="wallet-submit">확인</button>
+      </div>
+      <p id="msg-pocket-transfer-res" class="bank-inline-msg" role="status"></p>
+    </form>
+  </div>
+</dialog>
+
+<th:block th:replace="~{shared/chrome :: mobileNavigation}"></th:block>
+<th:block th:replace="~{shared/chrome :: support}"></th:block>
+</body>
+</html>

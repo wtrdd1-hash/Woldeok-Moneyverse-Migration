@@ -1,5 +1,11 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](docs/DOCUMENT_AUTHORITY.md) / [한국어](docs/DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+
+
+## v2026.11.24.1 — CURRENT image authority for all collaborating assistants
+- **Only Nov23 v10 180-route PNGs are active for new UI:** [EN authority](docs/design/CURRENT_UI_DESIGN.md) / [한국어](docs/design/CURRENT_UI_DESIGN.ko.md) · [strict 180-route manifest](docs/design/CURRENT_UI_DESIGN_MANIFEST.json) · [v10 gallery](docs/design/game-ui-v2026.11.23.10/README.md). Nov23 v8 and Nov18 designs are archives, not inputs. Visual acceptance and runtime QA remain open.
+
 ## v2026.11.21.2234 — Saved AgentMemory reel and mandatory shared task-handoff notes (DOCS ONLY)
 - [EN source + ongoing workflow](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md) / [한국어](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md) · [Worklog KO](docs/worklog/2026-11-21-agentmemory-shared-agent-protocol-v2234.ko.md) · [GitHub update EN](docs/updates/v2026.11.21.2234-agentmemory-reference-github.md). Source reel verified by public caption metadata, upstream README retrieved; actual AgentMemory installation/automatic capture and video playback not verified. GitHub worklogs remain durable fallback; no app/Test/Production changes.
 

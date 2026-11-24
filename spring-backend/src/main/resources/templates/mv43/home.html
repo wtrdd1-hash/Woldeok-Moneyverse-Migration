@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" th:lang="${uiLanguage}" th:attr="data-ui-language=${uiLanguage}">
 <head>
   <meta charset="utf-8">
@@ -6,11 +6,15 @@
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#0C1020">
   <meta name="description" content="W Moneyverse — personal finance, investing, quests and community">
-  <title th:text="${uiCopy[uiPageKey == 'home' ? 'personalTitle' : uiPageKey]} + ' · W Moneyverse'">My assets · W Moneyverse</title>
-  <link rel="stylesheet" href="/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31">
-  <script src="/assets/mv39/i18n.js?v=ee47eefcc4e63a309d88f841372a79121535f1e1100532b388a8842910501022" defer></script>
+  <title>홈 대시보드 · W Moneyverse</title>
+  <link rel="stylesheet" href="/assets/mv39/site.css?v=e4fcdf2a655e85bb07e9fb593acf99f4284ad76c68a00b066edfa58a88847e15">
+  <link rel="stylesheet" href="/assets/mv43/chrome.css?v=460fe6ee77b8f955fdeb47ae1b74d3871d811af799b26ab969a9af186e38c3f3">
+  <link rel="stylesheet" href="/assets/mv43/game-ui-v10.css?v=80074a39dba0eafed22e22eb2161cc181329c1d8e16193eaf2e20a830be7b65c">
+  <link rel="stylesheet" href="/assets/mv43/home.css?v=9ea3585ca4d1ad0b4546e6db2665a7409ad188c626290f529ea599e8f9abf8f6">
+  <script src="/assets/mv39/i18n.js?v=5e8bad70fa78db8cd2a6015e04d37ccfa673d24ff746923187595ebcb53fd2db" defer></script>
   <script src="/assets/mv39/money.js?v=9e95a9188599bc8d14d9743b3506f68af9fd17a63c6dd7db471e0d077d9283d5" defer></script>
-  <script src="/assets/mv39/app.js?v=dd1448ca8e6f4b4cb585e0a1ee199a523b3b503f3df2b8be562058bbe897a9d4" defer></script>
+  <script src="/socket.io.min.js" defer></script>
+  <script src="/assets/mv43/chrome.js?v=d9f8a8987e748f00460eebfd7cab3ed5e07ddd75090569f9dcde64f0bb857a55" defer></script>
   <th:block th:replace="~{shared/chrome :: commonHead}"></th:block>
 </head>
 <body data-page="home" th:attr="data-page=${uiPageKey}">
@@ -20,12 +24,115 @@
   <div class="app-main">
     <div class="app-inner">
       <th:block th:replace="~{shared/chrome :: pageHeader}"></th:block>
-      <main id="main-content" tabindex="-1">
-        <section class="hero" aria-labelledby="hero-title">
-          <div><div class="eyebrow"><span aria-hidden="true">✦</span> WOLDEOK MONEYVERSE</div><h2 id="hero-title" th:attr="data-i18n=${uiPageKey == 'home' ? 'personalTitle' : uiPageKey + 'Hero'}" th:text="${uiCopy[uiPageKey == 'home' ? 'personalTitle' : uiPageKey + 'Hero']}">My assets</h2><p id="hero-description" th:attr="data-i18n=${uiPageKey + 'Lead'}" th:text="${uiCopy[uiPageKey + 'Lead']}">See your wallet, investments and activity in one place.</p></div>
-          <div class="hero-decoration" aria-hidden="true"><span class="realm-orbit"><span class="realm-core">W</span></span></div>
-        </section>
-        <div id="page-content" aria-live="polite"></div>
+      <main id="main-content" tabindex="-1"><span class="sr-only" data-i18n="personalTitle" th:text="${uiCopy['personalTitle']}">My assets dashboard</span>
+
+        <div class="home-main-wrap">
+
+          <!-- 1. Game-Economy Hero Banner with Neon City Skyline, Moon & W Emblem -->
+          <section class="home-hero-banner" aria-labelledby="home-hero-title">
+            <div class="home-hero-content">
+              <div class="home-hero-eyebrow">
+                <span>✦</span>
+                <span>WOLDEOK MONEYVERSE • HOME</span>
+              </div>
+              <h2 id="home-hero-title" class="home-hero-title">홈 대시보드</h2>
+              <p class="home-hero-desc">
+                게임형 금융 · 가상경제 서비스<br>
+                <span class="home-hero-subdesc">실제 서비스 기능 및 권한에 따라 표시</span>
+              </p>
+
+              <!-- Time scale info box (matching v10 preview spec exactly) -->
+              <div class="home-hero-box">
+                <span class="home-hero-box-label">서버 게임 시간 기준</span>
+                <span class="home-hero-box-val">현실 10분 = 서버 1일 · 서버 7일 = 서버 1주</span>
+              </div>
+            </div>
+
+            <div class="home-hero-visual" aria-hidden="true">
+              <!-- Neon Skyline Silhouette SVG -->
+              <svg class="home-skyline-svg" viewBox="0 0 400 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M40 220V120H70V80H90V220H130V60H160V100H180V220H220V90H240V40H260V220H300V110H330V70H350V220H400V220H0V220H40Z" fill="url(#neon-home-skyline)" opacity="0.4"/>
+                <path d="M120 220V110H140V70H170V220H210V50H230V20H250V220H280V130H310V90H340V220Z" fill="url(#neon-home-buildings)" opacity="0.6"/>
+                <defs>
+                  <linearGradient id="neon-home-skyline" x1="200" y1="40" x2="200" y2="220" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#8b5cf6" stop-opacity="0.6"/>
+                    <stop offset="1" stop-color="#1e1b4b" stop-opacity="0"/>
+                  </linearGradient>
+                  <linearGradient id="neon-home-buildings" x1="230" y1="20" x2="230" y2="220" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#c084fc" stop-opacity="0.8"/>
+                    <stop offset="1" stop-color="#312e81" stop-opacity="0.1"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="home-moon-glow"></div>
+              <div class="home-emblem-badge">
+                <img src="/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5" alt="W Emblem" class="home-emblem-img">
+              </div>
+            </div>
+          </section>
+
+          <!-- 2. Dual-Card 2-Column Exact Grid Layout (Matching v2026.11.23.10 preview) -->
+          <div class="home-grid-cards">
+
+            <!-- Left Card: Real Asset Status -->
+            <article class="home-card">
+              <div class="home-card-header">
+                <h3 class="home-card-heading">실제 자산 현황</h3>
+              </div>
+              <div class="home-item-list">
+
+                <div class="home-status-item">
+                  <div class="home-status-item-title">게임 진행 상태</div>
+                  <p class="home-status-item-desc" id="home-game-progress">승인된 서버 정보 또는 해당 페이지 원문을 연동</p>
+                </div>
+
+                <div class="home-status-item">
+                  <div class="home-status-item-title">최근 활동</div>
+                  <p class="home-status-item-desc" id="home-recent-activity">승인된 서버 정보 또는 해당 페이지 원문을 연동</p>
+                </div>
+
+                <div class="home-status-item">
+                  <div class="home-status-item-title">시계·퀘스트</div>
+                  <p class="home-status-item-desc" id="home-clock-quest">승인된 서버 정보 또는 해당 페이지 원문을 연동</p>
+                </div>
+
+              </div>
+            </article>
+
+            <!-- Right Card: Home Dashboard Key Links -->
+            <article class="home-card">
+              <div class="home-card-header">
+                <h3 class="home-card-heading">홈 대시보드 · 주요 항목</h3>
+              </div>
+              <div class="home-item-list">
+
+                <a href="/wallet" class="home-nav-item">
+                  <span>실제 자산 현황</span>
+                  <span class="home-nav-item-arrow">&rarr;</span>
+                </a>
+
+                <a href="/quests" class="home-nav-item">
+                  <span>게임 진행 상태</span>
+                  <span class="home-nav-item-arrow">&rarr;</span>
+                </a>
+
+                <a href="/bank" class="home-nav-item">
+                  <span>최근 활동</span>
+                  <span class="home-nav-item-arrow">&rarr;</span>
+                </a>
+
+                <a href="/status" class="home-nav-item">
+                  <span>시계·퀘스트</span>
+                  <span class="home-nav-item-arrow">&rarr;</span>
+                </a>
+
+              </div>
+            </article>
+
+          </div>
+
+        </div>
+
       </main>
       <th:block th:replace="~{shared/chrome :: footer}"></th:block>
     </div>

@@ -1,6 +1,18 @@
+## v2026.11.24.0818 — local Stitch Skills pilot
+
+> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](../DOCUMENT_AUTHORITY.md) / [한국어](../DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+
+Source-only design system extraction is locally available; approved Nov 18 DESIGN.md and test script added. Actual Stitch cloud design requires separate MCP setup/authorization; no Test/Production action. [Details](../development/GOOGLE_STITCH_SKILLS_PILOT_v2026.11.24.0818.md).
+
 # Woldeok Moneyverse — Living Project Plan
 
-> **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
+> **v2026.11.23.10 UI visual/feature audit** [180 revised PNGs](../design/game-ui-v2026.11.23.10/README.md) · [audit](../qa/2026-11-23-game-ui-180-image-feature-audit.md). Image file QA only; full runtime acceptance unverified.
+
+> v2026.11.23.8 신규 이미지: [180 new design candidates](../design/game-ui-v2026.11.23.8/README.md) — 생성 완료/시안 검수 필요, 실제 서비스 적용 아님.
+
+> **UI/UX canonical entrypoint (v2026.11.23.5, docs-only):** [Single UI/UX design, issues and implementation rules](../UI_UX_SINGLE_REFERENCE.md). Binding owner correction: the **existing site favicon** is the one and only logo (not a generated W or crown emblem); admin navigation must be rendered **only** for authorized administrators. This is documentation scope, not a released UI or QA acceptance.
+
+> **Historical rebuild frontdoor — captured 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 
 ## v2026.11.21.2234 — Saved AgentMemory development reference and task-handoff protocol (PLANNING; not installed)
 

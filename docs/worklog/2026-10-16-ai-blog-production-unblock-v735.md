@@ -1,6 +1,6 @@
 # v2026.10.16.735 — AI blog Production release blocker remediation
 
-**English canonical | [한국어](2026-10-16-ai-blog-production-unblock-v723.ko.md)**
+**English canonical | [한국어](2026-10-16-ai-blog-production-unblock-v735.ko.md)**
 
 ## START (2026-10-16 19:42 KST)
 - Operator reiterates authorization to fix blockers and actually promote to Production; previous v721 code integration/Test is not the requested end state.
