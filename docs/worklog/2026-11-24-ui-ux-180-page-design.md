@@ -19,3 +19,6 @@ The previous consolidation workspace disappeared externally; its pushed6052760bb
 
 ## Finished
 Pending. No runtime, database or production changes.
+
+### In progress — route catalog and first render
+Explicit catalog covers180unique exact routes including40administrator routes, with route-specific purpose, fields, columns, sections, actions and9state contracts. Created only render-tool sources under scripts/design. Catalog/semantics/offline-safety3tests observed RED then GREEN3/3. First ten-family desktop/mobile browser render is underway; no browser outcome is assumed yet. All preview values are marked synthetic, no live API or finance mutation.
