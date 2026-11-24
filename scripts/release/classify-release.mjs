@@ -9,6 +9,11 @@ import { pathToFileURL } from 'node:url';
 
 export const CLASSIFIER_VERSION = 'release-path-v2';
 
+const REVIEW_TOOL_PATHS = [
+  '.agents/skills/codex-gemini-pingpong/scripts/pingpong.py',
+  '.agents/skills/codex-gemini-pingpong/scripts/tests/test_pingpong.py',
+  '.agents/skills/codex-gemini-pingpong/.gitignore',
+];
 const DESIGN_AUTHORITY_PATH = 'docs/design/CURRENT_UI_DESIGN_MANIFEST.json';
 // These reviewed non-runtime records stay closed; adjacent machine payloads remain unknown.
 const REVIEWED_DOCUMENT_PATHS = new Set([
@@ -78,6 +83,7 @@ const RUNTIME_GIT_PATHS = [
 ];
 
 const CONTROL_GIT_PATHS = [
+  ...REVIEW_TOOL_PATHS,
   DESIGN_AUTHORITY_PATH,
   '.github',
   'ops',
@@ -103,7 +109,7 @@ function pathKind(path) {
   // The exact generated API schema is runtime input, never a docs-only bypass.
   // Unreviewed JSON remains UNKNOWN; exact design/report contracts are handled separately.
   if (path === 'docs/mobile-api-contract.json') return 'runtime';
-  if (path === DESIGN_AUTHORITY_PATH) return 'control';
+  if (path === DESIGN_AUTHORITY_PATH || REVIEW_TOOL_PATHS.includes(path)) return 'control';
   if (REVIEWED_DOCUMENT_PATHS.has(path)) return 'docs';
   if (/^docs\/qa\/[^/]+\.json$/.test(path)) return 'docs';
   if (matchesAny(path, DOC_PATHS)) {

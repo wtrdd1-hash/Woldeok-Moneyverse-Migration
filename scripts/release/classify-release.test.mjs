@@ -301,3 +301,12 @@ test('design authority identity follows the exact manifest and refuses executabl
     assert.equal(buildReleaseInput({ repo, base: head, head: executable }).classification, 'UNKNOWN');
   });
 });
+
+test('bounded peer-review executables are control-plane inputs, never documentation', () => {
+  for (const path of [
+    '.agents/skills/codex-gemini-pingpong/scripts/pingpong.py',
+    '.agents/skills/codex-gemini-pingpong/scripts/tests/test_pingpong.py',
+    '.agents/skills/codex-gemini-pingpong/.gitignore',
+  ]) assert.equal(classifyPaths([path]), 'CONTROL_PLANE_ONLY', path);
+  assert.equal(classifyPaths(['.agents/skills/codex-gemini-pingpong/scripts/other.py']), 'UNKNOWN');
+});

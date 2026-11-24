@@ -8,6 +8,11 @@
 
 ## v2026.11.23.12 — Instagram 27-design-resource references / native Spring adoption (PLAN ONLY)
 - [English detailed source/implementation plan](docs/planning/REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.md) / [한국어 상세 기획](docs/planning/REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.ko.md) · [machine-readable 27-link catalog](docs/design/asset-resources-v2026.11.23.12/source-catalog.json) · [worklog](docs/worklog/2026-11-23-reel-27-design-resources-v12.ko.md) · [GitHub update](docs/updates/v2026.11.23.12-reel-27-resources-github.ko.md). Official Instagram oEmbed caption verified 27 links/9 categories, video not played; no license approvals, application/Test/Production changes.
+
+## v2026.11.22.1 — Codex ↔ Gemini ping-pong Agent Skill installed on mini-PC (LOCAL TOOLING; live model exchange unverified)
+
+- [EN operating guide](docs/development/CODEX_GEMINI_PINGPONG_SKILL_v2026.11.22.1.md) / [KO](docs/development/CODEX_GEMINI_PINGPONG_SKILL_v2026.11.22.1.ko.md) · [EN/KO worklog](docs/worklog/2026-11-22-codex-gemini-pingpong-skill-v1.md) / [KO](docs/worklog/2026-11-22-codex-gemini-pingpong-skill-v1.ko.md) · [GitHub notice](docs/updates/v2026.11.22.1-codex-gemini-pingpong-github.md) · Internal change: private mini-PC record (not committed). Installed pinned Gemini CLI 0.70.0 under the user account plus a shared Agent Skill; 6/6 synthetic tests, no live Gemini/Codex authorization, no app/DB/Test/Production changes.
+
 ## v2026.11.21.2234 — Saved AgentMemory reel and mandatory shared task-handoff notes (DOCS ONLY)
 - [EN source + ongoing workflow](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md) / [한국어](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md) · [Worklog KO](docs/worklog/2026-11-21-agentmemory-shared-agent-protocol-v2234.ko.md) · [GitHub update EN](docs/updates/v2026.11.21.2234-agentmemory-reference-github.md). Source reel verified by public caption metadata, upstream README retrieved; actual AgentMemory installation/automatic capture and video playback not verified. GitHub worklogs remain durable fallback; no app/Test/Production changes.
 

@@ -54,3 +54,6 @@ Actual pnpm lint exit0 is recorded, with1085warnings/0errors; only Gradle-genera
 ### Dependency branch reconciliation
 Retained unpublished blog PR3424, sponsored disclosures PR3401, setup-java PR3404, SWC helper PR3406 and Nest Core PR3405. A fresh pnpm10 strict-peer resolution reproduced Nest12/11 incompatibility (exit1); aligned Common, Platform and Testing12 plus Swagger12 and Throttler6.8 compatible peers. Fresh strict resolution exit0. Earlier cached-lock strict commands returned0 and are not counted as a reproduction. Frozen workspace install and application suites still pending. Target backend remains Spring.
 Owner confirmed task requests authorize task-branch commits and pushes; main integration requires a separate instruction. This consolidation has explicit main-integration authorization.
+
+### Optional review tooling retained
+Integrated exact10f66b61bf source. The runner remains explicit-request-only advisory tooling; no live models invoked. Offline6/6 tests pass. Registered only its three exact executable/config paths as control-plane inputs; added neighboring-script UNKNOWN regression, observed RED1 then classifier28/28 GREEN. Current owner authority remains ahead of dated process notes.
