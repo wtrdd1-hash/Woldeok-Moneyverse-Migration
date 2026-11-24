@@ -10,10 +10,11 @@ Owner instructions (2026-11-24): 작업/예약 기록(`/srv/moneyverse-data/task
 - [x] Test DB: 운영 DB 읽기 전용 `pg_dump` → Test 컨테이너 새 DB `moneyverse_test_prodcopy_20261124` 복원 (기존 Test DB 유지 = 롤백 경로)
 - [x] 운영 블로그 원인 분석 및 Spring 공개 읽기 API 구현
 - [x] Test 백엔드에 새 jar 배포, 블로그 API/Next 렌더링 검증
-- [ ] **IN PROGRESS** — 운영 블로그: Next 블로그 서버 + 읽기 전용 Spring + nginx 블로그 경로 전환
-- [ ] Test 프론트엔드(Next) 상시 실행 + 외부 접근(test.easy-scraping.com)
-- [ ] v10 디자인 셸(사이드바/탑바/모바일 도크) 정합
-- [ ] **FINISHED** — 검증 결과/배포 상태 기록
+- [x] 운영 블로그: Next 블로그 서버 + 읽기 전용 Spring + nginx 블로그 경로 전환 (소유자 지시로 운영 반영)
+- [x] Test 프론트엔드(Next) 상시 실행 + 외부 접근(test.easy-scraping.com)
+- [x] v10 디자인 셸(사이드바/탑바/모바일 도크, 단일 다크 토큰, 공식 파비콘)
+- [x] 관리자 프레임 서버 게이트, Spring 비로그인 세션 응답 해석, 로그인 문구 복원
+- [x] **FINISHED** (이번 단계) — 아래 검증/배포 상태. 남은 작업은 "후속" 참조
 
 ## 운영 블로그 원인
 
@@ -35,3 +36,42 @@ Owner instructions (2026-11-24): 작업/예약 기록(`/srv/moneyverse-data/task
 ## 운영 블로그 런타임
 
 - `moneyverse-blog-reader-v20261124` (127.0.0.1:55470): 새 jar, 운영 DB `moneyverse_app`, Hikari read-only, 스케줄러/티커/소켓/봇 비활성, IPAddressAllow=localhost. 운영 메인 Spring 4550 무변경. 검증: 95건 반환.
+
+## 추가 변경 (프론트엔드)
+
+- `v10-tokens.css` + 테마 다크 고정: 레거시 라이트/로케일별 토큰이 다크 셸 안에서 어두운 글씨를 만들던 문제 해결.
+- `v10-nav.ts` 단일 내비 모델 → 사이드바·상단 제목·모바일 5탭 도크(홈/지갑/투자/퀘스트/계정). 사이드바 링크 prefetch 끔(Spring 경로 RSC 406 방지).
+- `app/favicon.ico` 를 공식 mv39 파비콘으로 교체(기존 파일이 공식 마크가 아니었고 public 파일을 가렸음).
+- 블로그 날짜를 Asia/Seoul 고정 → 하이드레이션 #418 원인 제거.
+- `admin/layout.tsx`: 비로그인 → /login, 비관리자 → 404. 관리자 메뉴가 익명 HTML에 노출되던 문제.
+- `lib/session.ts requireMember`: Spring 은 비로그인에 200 `signedIn:false` 를 반환 → 로그인 리다이렉트 (기존엔 통과 후 500).
+- 로그인 폼: 시안 채움 문구/미사용 `securityCode` 필드 제거, 실제 문구 복원.
+
+## 검증 (2026-11-24 KST)
+
+- `tsc --noEmit` 통과. vitest 전체 3108 중 12 실패 — **기준 커밋 6052760bb8 에서도 동일 12건 실패**(회귀 없음, 모바일 반응형 2건은 이번에 해결). 관리자 게이트/세션 신규 테스트 통과.
+- Spring `bootJar` 성공(테스트 생략: `-x test`).
+- 브라우저(Playwright Chromium, 1440×960 / 390×844): Test `/`, `/stocks`, `/login`, `/blog` JS 오류 0, 가로 넘침 0. 운영 블로그 목록·상세 정상.
+- 운영 공개 확인: `/blog` 200, `/ko/blog`→`/blog` 308, `/en|ja|zh/blog` 200, 검증 글 상세 200, 미검증 글 상세 200, 없는 글 404, `/`·`/stocks` 영향 없음.
+
+## 배포 상태
+
+| 대상 | 유닛 / 포트 | 산출물 |
+| --- | --- | --- |
+| 운영 블로그 Next | `moneyverse-blog-next-v20261124` 127.0.0.1:55472 | `/srv/moneyverse-data/releases/next-frontend-v20261124-acb32e966fd3` |
+| 운영 블로그 읽기 Spring | `moneyverse-blog-reader-v20261124` 127.0.0.1:55470 | `blog-reader-spring-v20261124-6052760bb8ff-wip/app.jar` (9ffa54ffbe 소스) |
+| Test 프론트엔드 Next | `moneyverse-test-next-frontend-v20261124` 127.0.0.1:55474 | 위 운영 블로그와 동일 산출물, Test env |
+| Test 백엔드 Spring | `moneyverse-nov18-test-backend-v20261122` 55438 + drop-in | `test-backend-blogfix-v20261124-6052760bb8ff-wip/app.jar`, DB 사본 |
+
+nginx: 운영 블로그 경로(`/blog`, `/{en,ja,zh,ko}/blog[/*]`)와 `@mv_blog_v1417_static` → 55472. test 서버 블록 전체 → 55474. 백업: `/var/backups/moneyverse-test-prodcopy-20261124/nginx-sites-moneyverse.before-*`.
+
+롤백: nginx 백업 복원 후 `nginx -t && reload`; 블로그 유닛 정지. 운영 메인 Spring 4550 은 변경하지 않음.
+
+## 후속 / 미해결
+
+- 홈(`/`) 등 일부 화면은 v10 시안 문구(실제 데이터 미연동)가 남아 있음 → 실제 API 연동 필요.
+- 주식 화면 거시지표 수치의 데이터 출처 확인 필요(하드코딩 여부).
+- Test 백엔드는 외부 네트워크 차단 → Discord/Google OAuth·텔레그램 OTP 불가. 로컬 계정 로그인만 가능. 운영 봇 토큰이 Test env 에 있어 외부 허용 시 운영 봇 중복 접속 위험.
+- Spring 4550 jar 의 `BlogVerifiedController` 스텁, `AdminBlogController` 의 테이블 직접 조회(298 에서 revoke) 정리 필요.
+- 운영 Test 는 실제 회원 데이터 사본 — 외부 공개 중이므로 접근 범위 관리 필요.
+- Next 16.4.2 보안 권고(빌드마다 차단) → 업그레이드 별도 작업 필요.
