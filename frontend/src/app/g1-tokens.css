@@ -1,11 +1,10 @@
 /*
- * G1 "Guild Ledger" — the active visual reference since the owner approved it
- * on 2026-11-24 (docs/design/game-ui-v2026.11.24.G1).
- *
- * One dark night-market theme for every route and locale. Imported last and
- * stated with higher specificity (html:root…) so the legacy ivory palette and
- * per-locale primaries in globals.css resolve to G1 without editing each page.
- * Rarity colours encode item tier or stock risk only; never decoration.
+ * DESIGN180 (PR #3443 route structures; owner-approved spec
+ * docs/superpowers/specs/2026-11-24-design180-next-implementation.md).
+ * Navy canvas, violet brand, Korean rise red / fall blue, radii <= 8px.
+ * Variable names keep the historical --g1-* prefix so every component and the
+ * legacy remap below resolve to DESIGN180 without editing each page.
+ * Imported last with html:root specificity.
  */
 html:root,
 html:root.dark,
@@ -14,36 +13,36 @@ html:root[data-point],
 html:root[data-locale][data-point] {
   color-scheme: dark;
 
-  --g1-void: #08061a;
-  --g1-night: #120e26;
-  --g1-night-2: #0c0a1c;
-  --g1-plum: #1c1638;
-  --g1-plum-2: #251c4a;
-  --g1-plum-3: #2a2050;
-  --g1-track: #2c2358;
-  --g1-line: #3a2f6b;
-  --g1-violet: #8b6cff;
-  --g1-violet-ink: #5b3fd6;
-  --g1-gold: #f2b84b;
-  --g1-gold-hi: #ffd27a;
-  --g1-gold-deep: #8a5a12;
-  --g1-gold-ink: #2a1a00;
-  --g1-moon: #ffe9b0;
-  --g1-mint: #4be3a4;
+  --g1-void: #080b16;
+  --g1-night: #0c1020;
+  --g1-night-2: #0f1425;
+  --g1-plum: #141b2e;
+  --g1-plum-2: #1b2440;
+  --g1-plum-3: #302748;
+  --g1-track: #29334b;
+  --g1-line: #2d3753;
+  --g1-violet: #a98aff;
+  --g1-violet-ink: #6a4cdb;
+  --g1-gold: #f6cf87;
+  --g1-gold-hi: #ffe0a8;
+  --g1-gold-deep: #7a6232;
+  --g1-gold-ink: #2a1e05;
+  --g1-moon: #f3f5fc;
+  --g1-mint: #67d8b2;
   --g1-ember: #ff5d73;
   --g1-ember-ink: #2b0007;
-  --g1-ember-wash: #3b1630;
+  --g1-ember-wash: #3b1d2a;
   --g1-discord: #4752c4;
   --g1-rare-common: #9ca3af;
   --g1-rare-rare: #4ba3ff;
-  --g1-rare-epic: #b67cff;
-  --g1-ink: #f6f2ff;
-  --g1-text: #f1ecff;
-  --g1-body: #ddd5f5;
-  --g1-muted: #b7acd9;
-  --g1-faint: #9a90c4;
-  --g1-font-display: 'Black Han Sans', 'Noto Sans KR Variable', sans-serif;
-  --g1-font-num: 'Orbitron', 'Noto Sans KR Variable', sans-serif;
+  --g1-rare-epic: #cbb7ff;
+  --g1-ink: #f3f5fc;
+  --g1-text: #f3f5fc;
+  --g1-body: #d5dcea;
+  --g1-muted: #b9c3d9;
+  --g1-faint: #98a7c3;
+  --g1-font-display: 'Noto Sans KR Variable', 'Noto Sans KR', sans-serif;
+  --g1-font-num: 'Noto Sans KR Variable', 'Noto Sans KR', sans-serif;
   /* QA GH-02: lighter chamfer (was 12px). */
   --g1-cut: 8px;
 
@@ -121,8 +120,8 @@ html:root body { overflow-x: clip; }
    stay in the body face so hierarchy comes from size, not weight alone. */
 .mv-shell main h1, .g1-display {
   font-family: var(--g1-font-display);
-  font-weight: 400;
-  letter-spacing: 0.01em;
+  font-weight: 700;
+  letter-spacing: -0.035em;
   text-wrap: balance;
   overflow-wrap: break-word;
   min-width: 0;
@@ -227,7 +226,7 @@ html:root body { overflow-x: clip; }
 html:root body { font-variant-numeric: tabular-nums; }
 .g1-panel { clip-path: none; border-radius: 6px; background: var(--g1-plum); border-color: var(--g1-line); }
 .g1-chamfer { clip-path: none; border-radius: 6px; }
-.mv-shell main h1 { font-size: clamp(1.5rem, 1.2rem + 0.6vw, 1.75rem); }
+.mv-shell main h1 { font-size: clamp(1.625rem, 1.3rem + 0.8vw, 2rem); line-height: 1.25; }
 
 /* G2: figures use the tabular body face; Orbitron is kept for the one big balance. */
 html:root .g1-num, html:root .mv-num { font-family: var(--font-sans, 'Noto Sans KR Variable'), sans-serif; font-weight: 700; }
