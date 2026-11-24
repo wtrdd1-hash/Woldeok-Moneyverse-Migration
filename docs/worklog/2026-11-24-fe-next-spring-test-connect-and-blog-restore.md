@@ -238,3 +238,13 @@ nginx: 운영 블로그 경로(`/blog`, `/{en,ja,zh,ko}/blog[/*]`)와 `@mv_blog_
 - 운영 nginx 회귀 2건 수정: /health·/health/spring·/api/v1/spring 누락 → 복구(200). 기존 운영의 읽기 전용 쓰기 차단(문의·채팅·프로필·알림·일자리·관리자 경제/주식/회원)이 새 블록에 빠져 있던 것 → 복구(쓰기 403, 읽기 정상). 첫 시도에서 nginx -t 실패(서버 레벨 if 안 add_header) — reload 는 실행되지 않아 운영 영향 없음, 즉시 수정.
 - 공유 .git 의 root 소유 파일 1,475개(20:50 경 root git 실행 흔적) → debian 소유로 복구(모든 작업자 커밋 차단 해소).
 - PR #3443(DESIGN180) 검토 후 구현 명세 초안: docs/superpowers/specs/2026-11-24-design180-next-implementation.md — 소유자 승인 대기(brainstorming 관문).
+
+### 13단계 — DESIGN180 구현(계획 Task 1~6) (작업자: Claude Code / Claude Opus 5.5)
+- 소유자 명세 승인("승인함 엄격한 테스트후 운영서버승격"). 계획: docs/superpowers/plans/2026-11-24-design180-next-implementation.md. 모든 작업 RED→GREEN(TDD) 기록.
+- Task 1 토큰(29cdcf49b3): 180 경로 공통 색·모서리 DESIGN180 + 소유자 보정(상승 빨강/하락 파랑, 모서리 ≤8px, 버튼 대비 4.5:1).
+- Task 2 공통 틀(eed5c651d9): 회원 메뉴(계산기 추가)·관리자 전용 메뉴(관리자에게만, /admin 에서만), 상단 바(위치·검색·언어·알림·계정), 도크 홈·퀘스트·거래소·지갑·계정, G2 상태 띠 제거, 콘텐츠 폭 1240px.
+- Task 3 페이지 머리(35a9c20940), Task 4~5 공용 부품 StatRow/StateBox + 홈 재구성(e1153d1bdf): 요약 3칸(본인 잔액·시장 상승/하락·기준금리, 실제 API, 없으면 확인 불가).
+- Task 6 엄격 검증 중 발견·수정: clear-session 외부 출처 요청 허용(강제 로그아웃 가능) → 동일 출처만(0cea59bd0d). 렌더링 화면 hallmark 위반(본문 색 직접 지정, transition-all, font-mono, 기본 팔레트) 공통 부품에서 수정.
+- 검증: tsc 통과, vitest 603 파일 / 3175 개 통과, pnpm audit 0, 180 경로(1440) 정상 166 / 건너뜀 14, JS 오류 0, 가로 넘침 0, h1=1. 보안 재점검(헤더 6종, 관리자 차단, 외부 출처 쓰기 401/403, 경로 우회 404/403) 통과.
+- 남은 hallmark 항목: "—"(검색용 h1 문구, AGENTS §6 한국어 문구 변경 금지), overflow-x clip(외부 CSS 에 있어 검사기가 못 봄), 슬롯 스크립트(해당 없음). 거래소 등 안쪽 페이지 본문은 아직 이전 구성(계획 범위 밖, 다음 단계).
+- 운영 승격 관문: 로그인한 회원·관리자 화면 증거 필요(AGENTS §7). Test OAuth 로그인 성공 로그(14:07, 16:26)는 있으나 화면 확인은 소유자 세션 필요 — 소유자 확인 요청.
