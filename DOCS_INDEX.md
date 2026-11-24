@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.24.1321 — Multi-skill installation (development only)
+- [English](docs/development/MULTI_SKILL_INSTALL_v2026.11.24.1321.md) / [한국어](docs/development/MULTI_SKILL_INSTALL_v2026.11.24.1321.ko.md). 83 skill names, 160 new verified copies; GSD isolated; external runtime tests incomplete.
+
 ## v2026.11.21.2234 — Saved AgentMemory reel and mandatory shared task-handoff notes (DOCS ONLY)
 - [EN source + ongoing workflow](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md) / [한국어](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md) · [Worklog KO](docs/worklog/2026-11-21-agentmemory-shared-agent-protocol-v2234.ko.md) · [GitHub update EN](docs/updates/v2026.11.21.2234-agentmemory-reference-github.md). Source reel verified by public caption metadata, upstream README retrieved; actual AgentMemory installation/automatic capture and video playback not verified. GitHub worklogs remain durable fallback; no app/Test/Production changes.
 
