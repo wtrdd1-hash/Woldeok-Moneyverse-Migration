@@ -8,6 +8,7 @@ import { BlogPostClient } from './[slug]/blog-post-client';
 import { BlogHubClient } from './blog-hub-client';
 import { getBlogFreshnessNotice } from './blog-freshness';
 import { getAllBlogPosts, getBlogPostBySlug } from './blog-data';
+import { isPublicBlogArticle } from './blog-public-access';
 import { verifiedPublicArticles, verifiedArticleBySlug } from './blog-verified-client';
 import {
   blogAlternateLanguages, blogHubUrl, blogUrl, canonicalBlogSlug,
@@ -85,7 +86,7 @@ export function metadataForHub(locale: BlogLocale): Metadata {
 
 export async function metadataForArticle(slug: string, locale: BlogLocale): Promise<Metadata> {
   const original = getBlogPostBySlug(slug) ?? await verifiedArticleBySlug(slug);
-  if (!original) return { title: 'Article not found', robots: { index: false, follow: false } };
+  if (!original || !isPublicBlogArticle(original)) return { title: 'Article not found', robots: { index: false, follow: false } };
   const nativeLocale = (original.country ? ({ KR: "ko", US: "en", JP: "ja", CN: "zh" } as Record<string, BlogLocale>)[original.country] : undefined) ?? locale;
   const post = getBlogCountryEdition(original, locale) ?? getBlogCountryEdition(original, nativeLocale) ?? original;
   if (!post) return { title: 'Article not found', robots: { index: false, follow: false } };
@@ -157,7 +158,7 @@ export async function renderBlogArticle(slug: string, locale: BlogLocale) {
     permanentRedirect(blogUrl(slug, locale));
   }
   const original = getBlogPostBySlug(slug) ?? await verifiedArticleBySlug(slug);
-  if (!original) notFound();
+  if (!original || !isPublicBlogArticle(original)) notFound();
   const nativeLocale = (original.country ? ({ KR: "ko", US: "en", JP: "ja", CN: "zh" } as Record<string, BlogLocale>)[original.country] : undefined) ?? locale;
   if ((original.verificationReceipt || original.verificationState === 'UNVERIFIED') && original.country && nativeLocale !== locale) {
     permanentRedirect(blogUrl(slug, nativeLocale));
@@ -181,11 +182,6 @@ export async function renderBlogArticle(slug: string, locale: BlogLocale) {
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g,'\\u003c') }} />
       )}
       <div className="container max-w-5xl mx-auto px-4 py-8">
-        {!isBlogDiscoverable(original) && (
-          <p role="alert" className="mb-5 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
-            비공개 또는 검증되지 않은 게시물입니다.
-          </p>
-        )}
         <BlogPostClient post={{ ...post, heroImage: resolvePostHeroImage(post) }} locale={locale} />
       </div>
     </>
