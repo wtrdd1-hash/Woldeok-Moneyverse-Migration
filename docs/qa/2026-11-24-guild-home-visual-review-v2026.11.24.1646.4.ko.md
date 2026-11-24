@@ -26,3 +26,16 @@
 - 해상도 1736/1440/1280/1024/768/430/390/320: 가로 넘침 0, h1 1개, JS 오류 0(Playwright Chromium, 비로그인).
 - 전체 프론트 테스트 통과(tsc 통과). 홈 관련 테스트(게스트 진입, SEO, 링크, 대비) 통과.
 - **미검증(수용 기준 미충족 → 운영 HOLD 유지):** 회원/관리자 로그인 상태 화면, 세션 만료·401/403/5xx 브라우저 시나리오, 송금 E2E(격리 합성 계정 필요 — 자체 가입이 백엔드에서 닫혀 있어 계정 생성 불가), 키보드·대비 자동 측정 리포트.
+
+## PR #3438 (`docs/guild-home-remedy-v2026.11.24.1650`) 대조 검토
+같은 QA(GH-01~08)를 근거로 한 별도 구현. 기준 브랜치는 v10 개편 스택(bc0ad80785)이며 이 브랜치와 `frontend/src/app/page.tsx` 가 충돌한다. Test Spring(55438) 실계약과 대조한 결과:
+
+| 항목 | PR #3438 | 실제 / 규칙 |
+| --- | --- | --- |
+| 시장 지표 | `/api/v1/stocks/market-summary` 호출, 실패 시 `1254.8`, `+1.42%` 고정값 표시 | 해당 API 404 → 항상 고정 시세 노출. QA §4 "고정 시세 금지" 위반 |
+| 잔액 | `cashBalance`/`depositBalance`/`netWorth` 를 `Number()` 로 표시, 없으면 0 | 실제 응답은 `totalAvailableAmount`(문자열) → 로그인 회원도 항상 0. QA "가짜 0 금지", AGENTS "잔액 Number() 금지" 위반 |
+| 서버 시간 안내 | "서버 10분 = 현실 1일" | 실제는 현실 10분(600초) = 서버 하루(`realSecondsPerDay=600`) — 반대로 표기 |
+| SEO/게스트 | 로케일 h1·메타데이터, 비회원 빠른 시작, WalletGlance, P2P 송금, 시세 실패 문구 제거 | 기존 테스트(guest-first-home, seo-sitemap-integrity, e2e-click) 계약 위반 |
+| 디자인 | 대문자 eyebrow, 그라디언트, hex 직접 지정 | QA GH-02 "승인 토큰·컴포넌트 재사용" 및 G1 규칙 위반 |
+
+권고: PR #3438 의 `page.tsx` 는 병합하지 않는다. 이 브랜치의 구현(.1646.3)이 같은 QA 를 실데이터·기존 계약 안에서 반영한다. PR 의 Spring Thymeleaf `home.html`/`home.css` 는 전환기 프레젠테이션이므로 별도 판단.
