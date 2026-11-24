@@ -51,10 +51,18 @@ class Nov18VioletBrandContractTest {
     void springThymeleafAdminAndMemberLayoutsShareVioletFocusAndActiveIndication() throws Exception {
         Path templates = Path.of(Nov18VioletBrandContractTest.class.getResource("/templates/").toURI());
         String chrome = Files.readString(templates.resolve("shared/chrome.html"), StandardCharsets.UTF_8);
-        assertTrue(chrome.contains("/css/mv-brand-violet.css"), "Native Spring pages must use same violet interaction contract");
-        byte[] bytes = Files.readAllBytes(staticRoot().resolve("css/mv-brand-violet.css"));
-        String digest = java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(bytes));
-        assertTrue(chrome.contains("/css/mv-brand-violet.css?v=" + digest), "Native page must serve exact versioned stylesheet bytes");
+        // The v10 revamp (34c7bbb387, 2026-11-24) moved the Thymeleaf chrome to
+        // versioned mv43 stylesheets; every chrome stylesheet must still be
+        // pinned to exact bytes. The violet file itself keeps its contract below.
+        java.util.regex.Matcher links = java.util.regex.Pattern.compile("href=\"(/assets/mv43/[a-z0-9-]+\\.css)\\?v=([0-9a-f]{64})\"").matcher(chrome);
+        int pinned = 0;
+        while (links.find()) {
+            byte[] bytes = Files.readAllBytes(staticRoot().resolve(links.group(1).substring(1)));
+            String digest = java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(bytes));
+            assertEquals(digest, links.group(2), links.group(1) + " must serve exact versioned stylesheet bytes");
+            pinned++;
+        }
+        assertTrue(pinned > 0, "Native Spring chrome must link pinned stylesheets");
         String css = Files.readString(staticRoot().resolve("css/mv-brand-violet.css"));
         assertTrue(css.contains("#9C83FF"));
         assertTrue(css.contains(".admin-v40"));

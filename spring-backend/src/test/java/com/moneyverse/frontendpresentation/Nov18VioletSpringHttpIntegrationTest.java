@@ -47,12 +47,16 @@ class Nov18VioletSpringHttpIntegrationTest {
 
     @Test
     void bankPageDoesNotFallBackToMissingNextCssOrOldCyanBrand() throws Exception {
+        // Since 2026-11-23 (b95625ac70) /bank.html is the member-only Thymeleaf bank
+        // (NativeBankController): a guest must be sent to sign-in, never served
+        // the page. The no-missing-Next-CSS / no-old-cyan guarantees now apply
+        // to that template.
         var response = get("/bank.html");
-        assertEquals(200, response.statusCode());
-        String html = new String(response.body(), java.nio.charset.StandardCharsets.UTF_8);
-        assertTrue(html.contains("bank-brand-hero"));
-        assertTrue(html.contains("bank-product-grid"));
-        assertFalse(html.contains("/_next/static/css/8bbd23f36a44eb75.css"));
-        assertFalse(html.contains("via-cyan-300"));
+        assertEquals(302, response.statusCode());
+        assertEquals("/login?next=%2Fbank", java.net.URI.create(response.headers().firstValue("Location").orElseThrow()).getRawPath()
+            + "?" + java.net.URI.create(response.headers().firstValue("Location").orElseThrow()).getRawQuery());
+        String template = new String(getClass().getResourceAsStream("/templates/mv43/bank.html").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        assertFalse(template.contains("/_next/static/css/8bbd23f36a44eb75.css"));
+        assertFalse(template.contains("via-cyan-300"));
     }
 }
