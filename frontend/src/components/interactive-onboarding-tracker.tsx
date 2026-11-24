@@ -308,7 +308,7 @@ export function InteractiveOnboardingTracker() {
           ) : (
             <Button
               onClick={() => setIsOpen(true)}
-              className="h-10 max-w-[calc(100vw-2rem)] px-3 min-[400px]:px-3.5 rounded-md bg-[var(--g1-plum)] hover:bg-[var(--g1-plum-2)] border border-[var(--g1-line)] text-[var(--g1-ink)] font-bold text-xs flex items-center gap-1.5 min-[400px]:gap-2 active:scale-[0.97] transition-all group/chip cursor-pointer"
+              className="h-10 max-w-[calc(100vw-2rem)] px-3 min-[400px]:px-3.5 rounded-md bg-[var(--g1-plum)] hover:bg-[var(--g1-plum-2)] border border-[var(--g1-line)] text-[var(--g1-ink)] font-bold text-xs flex items-center gap-1.5 min-[400px]:gap-2 active:scale-[0.97] transition-colors group/chip cursor-pointer"
             >
               <div className="relative">
                 <Gift className="w-4 h-4 text-[var(--g1-gold)]" aria-hidden />
