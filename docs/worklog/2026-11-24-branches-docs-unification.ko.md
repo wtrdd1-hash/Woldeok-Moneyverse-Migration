@@ -60,3 +60,6 @@ Integrated exactdad1a3c664 by content reconciliation. Its only remaining OAuth d
 
 ### Legal source branch retained
 Integrated exact0e3bbd9535. Existing candidate already contains its authored legal policy text, exporter, controller and tests plus later responsive overflow fixes, localized title behavior and persistent scoped-Test evidence. Compared every conflict: only older hashes, removed overflow constraints and absent later log addenda differed. Retained those later safeguards; no legal prose rewritten. Foreign uncommitted legal work left untouched.
+
+### Publication child tip reconciled
+Integrated exact62610a5f62 by content comparison. Publication policy/read filtering and tests already exist in the later integrated parent; retained the later legal controller, localized title contract, full bank copy and complete progress evidence. No raw table grants, fake source data or private-public publication relaxation introduced. All captured maximal heads are now checked for ancestry before final validation.
