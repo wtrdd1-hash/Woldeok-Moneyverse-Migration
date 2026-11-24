@@ -118,3 +118,12 @@ nginx: 운영 블로그 경로(`/blog`, `/{en,ja,zh,ko}/blog[/*]`)와 `@mv_blog_
 | (이번 커밋) | G1 디자인 후보 + 작업 로그 | Claude Code (Claude Opus 5.5) |
 
 배포 상태: 운영 블로그 Next/Test 프론트 = `next-frontend-v20261124-90a0fb026903`, Test 백엔드 = `test-backend-v20261124-90a0fb026903`.
+
+### 3단계 — Test 로그인 설정을 운영과 동일하게 (소유자 승인, 작업자: Claude Code / Claude Opus 5.5)
+- [x] 디스코드 OAuth client id/secret: Test 와 운영 해시 일치 확인(이미 동일).
+- [x] 구글 OAuth client id/secret: 운영 값 복사, 콜백 `https://test.easy-scraping.com/auth/google/callback`.
+- [x] Test 백엔드 외부 통신 허용(drop-in `30-oauth-egress-20261124.conf`).
+- [x] `DISCORD_BOT_TOKEN`, `TELEGRAM_BOT_TOKEN` 은 Test 에서 비움 — 토큰이 있으면 Test 가 운영 봇 계정으로 게이트웨이에 접속해 슬래시 명령 재등록, 음성 채널 입장, 실사용자에게 Test 데이터로 중복 응답하기 때문. 로그 확인: "Bot token is empty … standby".
+- [x] 사고 수정: env 파일 끝 줄바꿈 누락으로 `GOOGLE_CLIENT_ID` 가 `MONEYVERSE_FEATURES_PENSIONOPERATIONAL` 줄에 붙음 → 분리, 플래그 값 `false` 원복 확인.
+- 검증: 디스코드·구글 시작 → 각 제공자로 이동(운영과 같은 client id, test 콜백). 가짜 코드 콜백 → 디스코드 `invalid_grant`, 구글 400 — 백엔드가 제공자까지 도달함. 실제 계정 로그인 완주는 소유자 테스트로 확인 필요(제공자 콘솔에 test 콜백 등록 여부 포함).
+- 백업: `runtime.env.before-oauth-parity`.
