@@ -12,3 +12,16 @@ Rollback (seconds, no restart of Spring):
 sudo rm /etc/nginx/sites-enabled/moneyverse-next-prod-v20261124
 sudo nginx -t && sudo nginx -s reload
 ```
+
+## 2026-11-24 DESIGN180 promotion (blue/green)
+
+- Green: `moneyverse-next-frontend-green-v20261124` (port 55478), release `next-frontend-v20261124-7f1af9b4cfb1`, env `/etc/moneyverse/next-frontend-green-v20261124.env`.
+- Blue (previous G2 release `4dd2e699fd20`) keeps running on 55476 for rollback.
+- nginx: the three `127.0.0.1:55476` upstreams in the easy-scraping.com block now point at 55478 (graceful reload, no downtime). Backup of the previous block: `/var/backups/moneyverse-next-prod-cutover-20261124/nginx-next-prod.before-d180`.
+
+Rollback to the previous frontend (seconds):
+
+```sh
+sudo sed -i 's#127.0.0.1:55478#127.0.0.1:55476#g' /etc/nginx/sites-available/moneyverse-next-prod-v20261124
+sudo nginx -t && sudo nginx -s reload
+```
