@@ -986,8 +986,8 @@ export function FloatingSupportChatWidget() {
       <div data-support-launcher className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-3.5 lg:bottom-6 sm:right-6 z-40 select-none flex flex-col items-end group/support">
         {/* 데스크톱 마이크로 툴팁 배너 (호버 시 부드럽게 노출) */}
         {!isOpen && (
-          <div className="hidden md:flex items-center gap-1.5 px-3 py-1 mb-2 rounded-full bg-zinc-950/95 border border-zinc-700/80 shadow-xl text-[11px] font-bold text-zinc-100 backdrop-blur-xl opacity-0 group-hover/support:opacity-100 transition-all duration-300 transform translate-y-1 group-hover/support:translate-y-0 pointer-events-none">
-            <span className="flex size-2 rounded-full bg-emerald-500 animate-pulse" />
+          <div className="hidden md:flex items-center gap-1.5 px-3 py-1 mb-2 rounded-md bg-[var(--g1-plum-2)] border border-[var(--g1-line)] text-[11px] font-bold text-[var(--g1-ink)] opacity-0 group-hover/support:opacity-100 transition-opacity duration-200 pointer-events-none">
+            <span className="flex size-2 rounded-full bg-[var(--g1-mint)]" />
             <span>{localeLabel(locale, '1:1 채팅 · 고객지원', '1:1 Chat & Support', '1:1チャット・サポート', '1:1聊天与客服')}</span>
           </div>
         )}
@@ -1021,7 +1021,7 @@ export function FloatingSupportChatWidget() {
 
           {/* 통합 알림 뱃지 */}
           {!isOpen && totalNotificationBadge > 0 && (
-            <span className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-emerald-600 font-mono text-[11px] font-black text-white shadow-md ring-2 ring-background animate-bounce">
+            <span className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-[var(--g1-ember)] text-[11px] font-bold text-[var(--g1-ember-ink)] ring-2 ring-[var(--g1-night)]">
               {totalNotificationBadge}
             </span>
           )}

@@ -306,7 +306,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       // difference it will find.
       suppressHydrationWarning
     >
-      <body className="bg-[#090A0F] text-[#F9FAFB] min-h-screen antialiased selection:bg-[#00F59B]/20 selection:text-[#00F59B]">
+      <body className="min-h-screen bg-[var(--g1-night)] text-[var(--g1-text)] antialiased selection:bg-[var(--g1-plum-3)] selection:text-[var(--g1-ink)]">
         <AdProviderBootstrap />
         <ConsentGuard
           signedIn={viewer.signedIn}

@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { isSameOriginFinanceMutation } from '@/lib/finance-mutation-origin';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +14,11 @@ const COOKIES_TO_CLEAR = [
   'token',
 ];
 
-export async function POST() {
+export async function POST(request: Request) {
+  // Same-origin only: a cross-site form or fetch must not sign a member out.
+  if (!isSameOriginFinanceMutation(request)) {
+    return NextResponse.json({ ok: false, error: 'cross_origin_forbidden' }, { status: 403, headers: { 'cache-control': 'no-store' } });
+  }
   const cookieStore = await cookies();
   for (const name of COOKIES_TO_CLEAR) {
     try {
