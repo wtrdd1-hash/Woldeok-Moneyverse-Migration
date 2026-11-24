@@ -40,6 +40,7 @@ import '@fontsource/ibm-plex-mono/500.css';
 import './globals.css';
 import './cosmetics.css';
 import './redesign.css';
+import './v10-tokens.css';
 
 const indexingEnabled = process.env.SEO_INDEXING_ENABLED !== 'false';
 const siteUrl = (process.env.APP_BASE_URL ?? 'https://easy-scraping.com').replace(/\/$/, '');

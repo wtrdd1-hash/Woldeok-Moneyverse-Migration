@@ -1,34 +1,45 @@
 'use client';
 
+import Link from 'next/link';
 import { GameSidebar } from '@/components/game-sidebar';
 import { GameTopbar } from '@/components/game-topbar';
+import { GameMobileDock } from '@/components/game-mobile-dock';
 import { ClientErrorReporter } from '@/components/client-error-reporter';
 
+/**
+ * Nov23 v10 application frame: 240px sidebar and top bar on desktop, brand
+ * header plus five-tab dock on mobile. Pages render inside <main> only.
+ */
 export function SiteShell({ children }: { readonly children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen w-full bg-[#070810] text-[#e2e8f0] font-sans antialiased">
+    <div className="mv-shell flex min-h-screen w-full bg-[var(--mv-bg)] font-sans text-[var(--mv-text)] antialiased">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-lg focus:bg-[var(--mv-violet)] focus:px-3 focus:py-2 focus:text-[#0c1020]"
+      >
+        본문으로 건너뛰기
+      </a>
       <ClientErrorReporter />
-      {/* 1. Left Fixed Sidebar */}
-      <div className="hidden lg:block flex-shrink-0">
+      <div className="hidden shrink-0 lg:block">
         <GameSidebar />
       </div>
 
-      {/* 2. Main Right Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex min-w-0 flex-1 flex-col">
         <GameTopbar />
-        <main id="main" className="flex-1 p-6 lg:p-8 max-w-[1400px] w-full mx-auto">
+        <main id="main" className="moneyverse-main mx-auto w-full max-w-[1440px] flex-1 px-4 pb-[calc(env(safe-area-inset-bottom)+5rem)] pt-5 sm:px-6 lg:px-8 lg:pb-10 lg:pt-6">
           {children}
         </main>
-        {/* Footer Concept Bar */}
-        <footer className="border-t border-[#1f1d38]/60 px-8 py-4 text-xs font-mono text-[#555577] flex items-center justify-between">
-          <span>DESIGN CONCEPT · v2026.11.23.10 · ORIGINAL FAVICON PIXELS</span>
-          <div className="flex gap-4 text-[#777799]">
-            <a href="/terms" className="hover:text-white transition-colors">이용약관</a>
-            <a href="/privacy" className="hover:text-white transition-colors">개인정보처리방침</a>
-            <a href="/support" className="hover:text-white transition-colors">고객지원</a>
-          </div>
+        <footer className="hidden items-center justify-between gap-4 px-8 pb-6 text-xs text-[var(--mv-faint)] lg:flex">
+          <span>W Moneyverse · 게임 세계 · 금융과 경험</span>
+          <nav aria-label="정책" className="flex gap-4">
+            <Link href="/terms" prefetch={false} className="hover:text-white">이용약관</Link>
+            <Link href="/privacy" prefetch={false} className="hover:text-white">개인정보처리방침</Link>
+            <Link href="/support" prefetch={false} className="hover:text-white">고객지원</Link>
+          </nav>
         </footer>
       </div>
+
+      <GameMobileDock />
     </div>
   );
 }

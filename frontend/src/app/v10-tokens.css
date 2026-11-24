@@ -1,0 +1,102 @@
+/*
+ * Nov23 v10 game-economy UI — the single active visual reference
+ * (docs/design/CURRENT_UI_DESIGN.md, v2026.11.24.1).
+ *
+ * v10 is one dark navy/violet theme for every route and locale. The older
+ * globals.css still carries a light "ivory" palette plus per-locale primaries
+ * (emerald, cyan, gold); rendered inside the dark v10 shell those produced
+ * dark-on-dark headings on content pages such as blog articles. Rather than
+ * editing each legacy block, this file is imported last and re-states the
+ * tokens with higher specificity (html:root…), so every shadcn/Tailwind token
+ * consumer resolves to the v10 palette without touching page code.
+ */
+html:root,
+html:root.dark,
+html:root[data-locale],
+html:root[data-point],
+html:root[data-locale][data-point] {
+  color-scheme: dark;
+
+  --mv-bg: #0c1020;
+  --mv-sidebar: #0b0f1d;
+  --mv-surface: #151d32;
+  --mv-surface-2: #1c2742;
+  --mv-hero: #241d4a;
+  --mv-border: #263554;
+  --mv-border-violet: #4b3a8f;
+  --mv-violet: #9c83ff;
+  --mv-violet-strong: #7c5cff;
+  --mv-violet-pill: #3b2d6a;
+  --mv-text: #e9f1ff;
+  --mv-muted: #a8bcd8;
+  --mv-faint: #6f7fa0;
+
+  --paper: var(--mv-bg);
+  --paper-dark: #090c18;
+  --surface: var(--mv-surface);
+  --ink: var(--mv-text);
+  --ink-soft: var(--mv-muted);
+  --line: var(--mv-border);
+  --forest: #4b3a8f;
+  --forest-deep: #2a2150;
+  --forest-soft: var(--mv-violet);
+  --clay: #f5b84a;
+  --clay-soft: #2a2150;
+  --clay-ink: #f5b84a;
+  --mint: #2a2150;
+  --highlight: #2a2150;
+
+  --background: var(--mv-bg);
+  --foreground: var(--mv-text);
+  --card: var(--mv-surface);
+  --card-foreground: var(--mv-text);
+  --popover: var(--mv-surface);
+  --popover-foreground: var(--mv-text);
+  --primary: var(--mv-violet);
+  --primary-foreground: #0c1020;
+  --secondary: var(--mv-surface-2);
+  --secondary-foreground: var(--mv-text);
+  --muted: var(--mv-surface-2);
+  --muted-foreground: var(--mv-muted);
+  --accent: #2a2150;
+  --accent-foreground: #ddd2ff;
+  --destructive: #f43f5e;
+  --destructive-foreground: #ffffff;
+  --border: var(--mv-border);
+  --input: var(--mv-surface-2);
+  --ring: rgb(156 131 255 / 0.6);
+
+  --chart-1: var(--mv-violet);
+  --chart-2: #64b7ff;
+  --chart-3: #f5b84a;
+  --chart-4: #10b981;
+  --chart-5: var(--mv-muted);
+
+  --sidebar: var(--mv-sidebar);
+  --sidebar-foreground: var(--mv-muted);
+  --sidebar-primary: var(--mv-violet);
+  --sidebar-primary-foreground: #0c1020;
+  --sidebar-accent: var(--mv-violet-pill);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: var(--mv-border);
+  --sidebar-ring: var(--mv-violet);
+}
+
+html:root body {
+  background-color: var(--mv-bg);
+  color: var(--mv-text);
+}
+
+/* Financial figures never jump width while they update. */
+.mv-num {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mv-shell *,
+  .mv-shell *::before,
+  .mv-shell *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

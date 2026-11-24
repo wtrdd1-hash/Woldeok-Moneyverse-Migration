@@ -18,8 +18,11 @@ export function ThemeProvider({ children }: { readonly children: React.ReactNode
   return (
     <NextThemes
       attribute="class"
-      defaultTheme="system"
-      enableSystem
+      defaultTheme="dark"
+      // The Nov23 v10 reference is a single dark theme for every route; a
+      // light system preference must not flip tokens under the dark shell.
+      forcedTheme="dark"
+      enableSystem={false}
       disableTransitionOnChange
       storageKey={THEME_STORAGE_KEY}
     >
