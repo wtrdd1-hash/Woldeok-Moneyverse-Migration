@@ -33,7 +33,7 @@ export function G1PageHero({
         <p className="max-w-[44ch] text-sm text-[var(--g1-muted)]">{lead}</p>
         {children}
       </div>
-      <G1Scene kind={scene} className="pointer-events-none absolute bottom-0 right-0 -z-0 hidden h-full w-[60%] opacity-70 sm:block" />
+      <G1Scene kind={scene} className="pointer-events-none absolute bottom-0 right-0 -z-0 hidden h-full w-[55%] opacity-70 lg:block" />
     </section>
   );
 }
