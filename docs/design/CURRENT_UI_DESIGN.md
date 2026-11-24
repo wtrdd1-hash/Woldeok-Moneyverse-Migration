@@ -1,3 +1,5 @@
+> **SUPERSEDED 2026-11-24 — active authority is G1.** The owner approved the G1 "Guild Ledger" set ([gallery](game-ui-v2026.11.24.G1/README.md)); [CURRENT_UI_DESIGN_MANIFEST.json](CURRENT_UI_DESIGN_MANIFEST.json) now pins its 180 PNGs. v2026.11.23.10 below is archived for history and is no longer an implementation input. G1 implementation rules: tokens in `frontend/src/app/g1-tokens.css`; no tracked-caps eyebrows, tinted title phrases, decorative gradients or shadows; content radii capped at 8px; one h1 per page; figures only from live APIs.
+
 # Current UI Design Authority — Single Active Image Set
 
 **Authority update:** v2026.11.24.1 (2026-11-24 KST)

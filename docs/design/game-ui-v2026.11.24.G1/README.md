@@ -1,6 +1,6 @@
 # G1 "Guild Ledger" game-feel redesign — CANDIDATE (180 routes)
 
-**Status: CANDIDATE awaiting owner approval. Not the active design authority** — [CURRENT_UI_DESIGN.md](../CURRENT_UI_DESIGN.md) (v10) stays binding until the owner approves G1, at which point that file, the manifest and the galleries are updated together. Frontend implementation of G1 starts only after that approval.
+**Status: ACTIVE — approved by the owner on 2026-11-24.** (Previously a candidate: — [CURRENT_UI_DESIGN.md](../CURRENT_UI_DESIGN.md) (v10) stays binding until the owner approves G1, at which point that file, the manifest and the galleries are updated together. Frontend implementation of G1 starts only after that approval.
 
 Version v2026.11.24.G1 · 180 PNGs, one per route in [CURRENT_UI_DESIGN_MANIFEST.json](../CURRENT_UI_DESIGN_MANIFEST.json), each with a desktop frame and a phone frame. [한국어](README.ko.md)
 

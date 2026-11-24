@@ -1,3 +1,5 @@
+> **2026-11-24 대체됨 — 현재 기준은 G1입니다.** 소유자가 G1 "길드 원장" 시안([갤러리](game-ui-v2026.11.24.G1/README.ko.md))을 승인했고, [CURRENT_UI_DESIGN_MANIFEST.json](CURRENT_UI_DESIGN_MANIFEST.json)이 180장을 고정합니다. 아래 v2026.11.23.10 내용은 이력 보관용이며 더 이상 구현 기준이 아닙니다. G1 구현 규칙: 토큰은 `frontend/src/app/g1-tokens.css`, 대문자 eyebrow·제목 일부 강조색·장식용 그라디언트/그림자 금지, 본문 모서리 최대 8px, 페이지당 h1 하나, 수치는 실제 API에서만.
+
 # 현행 UI 디자인 단일 기준 — 작업 AI용
 
 **기준 정리 버전:** v2026.11.24.1 (2026-11-24 KST)

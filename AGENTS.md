@@ -1,11 +1,11 @@
 # AGENTS.md
 
 ## Current owner-confirmed authority — v2026.11.24.DOCSYNC.1
-Read [DOCUMENT_AUTHORITY.md](docs/DOCUMENT_AUTHORITY.md) and its [Korean counterpart](docs/DOCUMENT_AUTHORITY.ko.md). New frontend target is Next.js/React/TypeScript/Tailwind with same-origin server-only BFF to the authoritative Spring API. Existing Spring/Thymeleaf and legacy gateways remain transitional until verified replacement. Use the Nov23 v10 reference and actual favicon. Documentation and repository version claims are not live runtime acceptance.
+Read [DOCUMENT_AUTHORITY.md](docs/DOCUMENT_AUTHORITY.md) and its [Korean counterpart](docs/DOCUMENT_AUTHORITY.ko.md). New frontend target is Next.js/React/TypeScript/Tailwind with same-origin server-only BFF to the authoritative Spring API. Existing Spring/Thymeleaf and legacy gateways remain transitional until verified replacement. Use the G1 reference (owner-approved 2026-11-24) and actual favicon. Documentation and repository version claims are not live runtime acceptance.
 Automatic image preparation is permitted; actual Production cutover needs separate owner approval after independent Test. Task requests include task-branch commits/pushes; main integration requires separate instruction (explicitly authorized for the current consolidation). No generated-source UI/commit markings; factual technical references and work provenance are allowed. If other instructions conflict and latest owner direction does not resolve them, ask before replacing them.
 
 
-**Current UI image authority (v2026.11.24.1):** Before UI/frontend work, read [single active design policy](docs/design/CURRENT_UI_DESIGN.md), [strict 180-route manifest](docs/design/CURRENT_UI_DESIGN_MANIFEST.json) and [Nov23 v10-only gallery](docs/design/game-ui-v2026.11.23.10/README.md). **NEVER** use archived Nov23 v8/Nov18 images as visual implementation inputs or fallbacks. Respect latest owner instruction, integrated planning, verified APIs and separate release gates; v10 images are not proof of live functionality.
+**Current UI image authority (v2026.11.24.G1, owner-approved 2026-11-24):** Before UI/frontend work, read [design policy](docs/design/CURRENT_UI_DESIGN.md), the [180-route manifest](docs/design/CURRENT_UI_DESIGN_MANIFEST.json) and the [G1 gallery](docs/design/game-ui-v2026.11.24.G1/README.md). Nov23 v10, v8 and Nov18 images are archived and are **not** implementation inputs or fallbacks. Respect latest owner instruction, integrated planning, verified APIs and separate release gates; v10 images are not proof of live functionality.
 
 ## Optional cross-agent peer review (v2026.11.22.1)
 
