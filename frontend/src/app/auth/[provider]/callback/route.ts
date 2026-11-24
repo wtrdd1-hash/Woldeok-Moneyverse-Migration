@@ -40,7 +40,9 @@ export async function GET(
   // publicUrl now supplies that.
   const query = new URL(request.url).searchParams;
 
-  const forwarded = new URLSearchParams();
+  // Spring redirects the browser itself unless asked for JSON; this handler
+  // needs the outcome to choose the destination and relay the session cookie.
+  const forwarded = new URLSearchParams({ format: 'json' });
   for (const name of ['state', 'code', 'error'] as const) {
     const value = query.get(name);
     if (value !== null) forwarded.set(name, value);

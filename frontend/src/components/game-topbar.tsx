@@ -43,7 +43,8 @@ export function GameTopbar() {
           <LanguageSwitcher compact className="!h-10 !rounded-xl !border-[var(--mv-border-violet)] !bg-[var(--mv-surface-2)]" />
         </div>
       </div>
-      <h1 className="truncate px-4 pb-3 text-xl font-semibold text-white lg:hidden">{title}</h1>
+      {/* Not an h1: each page owns its single h1, and two per document weakens SEO. */}
+      <p className="truncate px-4 pb-3 text-xl font-semibold text-white lg:hidden" aria-hidden>{title}</p>
 
       {/* Desktop frame. */}
       <div className="hidden h-[82px] items-center justify-between gap-6 px-8 lg:flex">
