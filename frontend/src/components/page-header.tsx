@@ -1,5 +1,5 @@
 export function PageHeader({
-  eyebrow,
+  eyebrow: _eyebrow,
   title,
   action,
   children,
