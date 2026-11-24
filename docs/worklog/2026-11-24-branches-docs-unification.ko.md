@@ -44,3 +44,7 @@ The corrupted mixed rootimplementation_plan history was replaced by a current au
 ### Legacy color branch and local lint
 Retained legacy violet styling branch98c1bbff88. In the shared native head preserve the already-verified component theme/game-world/v10 resources instead of adding an older overlapping global stylesheet; the older CSS asset and its legacy-page links remain preserved. Native Node354/354pass after asset rehash.
 Actual pnpm lint exit0 is recorded, with1085warnings/0errors; only Gradle-generated copies were newly excluded. No application source rule or severity was suppressed. Source-backed feature/API/role checks and full exact CI remain required beforemain.
+
+### Dependency branch reconciliation
+Retained unpublished blog PR3424, sponsored disclosures PR3401, setup-java PR3404, SWC helper PR3406 and Nest Core PR3405. A fresh pnpm10 strict-peer resolution reproduced Nest12/11 incompatibility (exit1); aligned Common, Platform and Testing12 plus Swagger12 and Throttler6.8 compatible peers. Fresh strict resolution exit0. Earlier cached-lock strict commands returned0 and are not counted as a reproduction. Frozen workspace install and application suites still pending. Target backend remains Spring.
+Owner confirmed task requests authorize task-branch commits and pushes; main integration requires a separate instruction. This consolidation has explicit main-integration authorization.
