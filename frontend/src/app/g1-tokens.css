@@ -33,6 +33,7 @@ html:root[data-locale][data-point] {
   --g1-ember: #ff5d73;
   --g1-ember-ink: #2b0007;
   --g1-ember-wash: #3b1630;
+  --g1-discord: #4752c4;
   --g1-rare-common: #9ca3af;
   --g1-rare-rare: #4ba3ff;
   --g1-rare-epic: #b67cff;
@@ -141,14 +142,23 @@ html:root body { overflow-x: clip; }
 }
 .g1-cta {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  min-height: 44px; padding: 8px 16px; border-radius: 8px;
-  background: linear-gradient(180deg, var(--g1-gold-hi), var(--g1-gold));
-  color: var(--g1-gold-ink); font-weight: 700; box-shadow: 0 4px 0 var(--g1-gold-deep);
-  transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 140ms cubic-bezier(0.23, 1, 0.32, 1);
+  min-height: 44px; padding: 8px 16px;
+  background: var(--g1-gold); color: var(--g1-gold-ink); font-weight: 700; border-radius: 6px;
+  transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1), background-color 140ms ease-out;
 }
-.g1-cta:active { transform: scale(0.97); box-shadow: 0 2px 0 var(--g1-gold-deep); }
+.g1-cta:hover { background: var(--g1-gold-hi); }
+.g1-cta:active { transform: scale(0.97); }
 .mv-shell :focus-visible { outline: 2px solid var(--g1-gold); outline-offset: 2px; }
 
 @media (prefers-reduced-motion: reduce) {
   .mv-shell *, .mv-shell *::before, .mv-shell *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/*
+ * Design-system caps for content inside the shell (owner review 2026-11-24:
+ * no decorative gradients, shadows or pill cards). Large radii collapse to
+ * one small radius and decorative drop shadows are removed in <main>; menus
+ * and dialogs render outside <main> through portals and keep their elevation.
+ */
+.mv-shell main .rounded-2xl, .mv-shell main .rounded-3xl, .mv-shell main .rounded-xl { border-radius: 8px; }
+.mv-shell main .shadow-md, .mv-shell main .shadow-lg, .mv-shell main .shadow-xl, .mv-shell main .shadow-2xl { box-shadow: none; }

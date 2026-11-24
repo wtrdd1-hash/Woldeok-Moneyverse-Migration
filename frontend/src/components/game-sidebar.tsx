@@ -65,7 +65,7 @@ export function GameSidebar() {
 
   return (
     <aside
-      className="sticky top-0 flex h-screen w-[232px] min-w-[232px] flex-col border-r border-[var(--g1-line)] bg-[linear-gradient(180deg,var(--g1-plum),var(--g1-night-2))] px-4 pb-5 pt-5"
+      className="sticky top-0 flex h-screen w-[232px] min-w-[232px] flex-col border-r border-[var(--g1-line)] bg-[var(--g1-night-2)] px-4 pb-5 pt-5"
       aria-label="월덕 머니버스"
     >
       <Link href="/" prefetch={false} className="mb-7 flex items-center gap-3 px-1" aria-label="월덕 머니버스 홈">

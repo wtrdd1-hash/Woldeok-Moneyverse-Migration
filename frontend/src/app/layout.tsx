@@ -39,6 +39,8 @@ import '@fontsource/ibm-plex-mono/400.css';
 import '@fontsource/ibm-plex-mono/500.css';
 // G1 display and figure faces, locked locally like the others (no Google CSS at build).
 import '@fontsource/black-han-sans/400.css';
+// 400.css carries only Latin; Korean glyphs live in their own subset file.
+import '@fontsource/black-han-sans/korean-400.css';
 import '@fontsource/orbitron/600.css';
 import '@fontsource/orbitron/800.css';
 import './globals.css';

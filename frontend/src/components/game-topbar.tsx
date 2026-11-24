@@ -34,11 +34,11 @@ export function GameTopbar() {
           href="/search"
           prefetch={false}
           aria-label="메뉴와 페이지 검색"
-          className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-[var(--g1-line)] bg-[var(--g1-plum)] text-[var(--g1-muted)]"
+          className="flex size-11 shrink-0 items-center justify-center rounded-md border border-[var(--g1-line)] bg-[var(--g1-plum)] text-[var(--g1-muted)]"
         >
           <Search className="size-4" aria-hidden />
         </Link>
-        <LanguageSwitcher compact className="!h-11 !rounded-xl !border-[var(--g1-line)] !bg-[var(--g1-plum)]" />
+        <LanguageSwitcher compact className="!h-11 !rounded-md !border-[var(--g1-line)] !bg-[var(--g1-plum)]" />
         <PlayerHud compact />
       </div>
 
@@ -52,11 +52,11 @@ export function GameTopbar() {
             onChange={(event) => setQuery(event.target.value)}
             placeholder="메뉴와 페이지 검색"
             aria-label="메뉴와 페이지 검색"
-            className="h-11 w-[280px] rounded-xl border border-[var(--g1-line)] bg-[var(--g1-plum)] pl-10 pr-3 text-sm text-[var(--g1-ink)] placeholder:text-[var(--g1-faint)] focus:border-[var(--g1-gold)] focus:outline-none"
+            className="h-11 w-[280px] rounded-md border border-[var(--g1-line)] bg-[var(--g1-plum)] pl-10 pr-3 text-sm text-[var(--g1-ink)] placeholder:text-[var(--g1-faint)] focus:border-[var(--g1-gold)] focus:outline-none"
           />
         </form>
         <div className="flex items-center gap-3">
-          <LanguageSwitcher className="!h-11 !rounded-xl !border-[var(--g1-line)] !bg-[var(--g1-plum)] !px-4" />
+          <LanguageSwitcher className="!h-11 !rounded-md !border-[var(--g1-line)] !bg-[var(--g1-plum)] !px-4" />
           <PlayerHud />
         </div>
       </div>

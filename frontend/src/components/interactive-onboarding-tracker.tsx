@@ -134,8 +134,8 @@ export function InteractiveOnboardingTracker() {
     <div className="fixed bottom-20 left-3.5 z-40 lg:bottom-6 lg:left-[264px] select-none max-w-[calc(100vw-1.5rem)] overflow-hidden">
       {/* 플로팅 축하 알림 배너 */}
       {justClaimedReward && (
-        <div className="mb-2 p-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl shadow-2xl border border-emerald-400 font-bold text-xs flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <Sparkles className="w-4 h-4 animate-spin text-amber-300" />
+        <div className="mb-2 p-3 bg-[var(--g1-plum-2)] text-[var(--g1-ink)] rounded-md border border-[var(--g1-gold)] font-bold text-xs flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <Sparkles className="w-4 h-4 text-[var(--g1-gold)]" aria-hidden />
           <span>
             {t(
               `보상 획득! +${justClaimedReward.toLocaleString()} WLD가 지갑에 입금되었습니다!`,
@@ -308,10 +308,10 @@ export function InteractiveOnboardingTracker() {
           ) : (
             <Button
               onClick={() => setIsOpen(true)}
-              className="h-10 max-w-[calc(100vw-2rem)] px-3 min-[400px]:px-3.5 rounded-full bg-zinc-950/90 hover:bg-zinc-900 border border-emerald-500/40 text-white font-bold text-xs shadow-xl backdrop-blur-xl flex items-center gap-1.5 min-[400px]:gap-2 ring-1 ring-emerald-500/20 active:scale-95 transition-all group/chip cursor-pointer"
+              className="h-10 max-w-[calc(100vw-2rem)] px-3 min-[400px]:px-3.5 rounded-md bg-[var(--g1-plum)] hover:bg-[var(--g1-plum-2)] border border-[var(--g1-line)] text-[var(--g1-ink)] font-bold text-xs flex items-center gap-1.5 min-[400px]:gap-2 active:scale-[0.97] transition-all group/chip cursor-pointer"
             >
               <div className="relative">
-                <Gift className="w-4 h-4 text-emerald-400 group-hover/chip:rotate-12 transition-transform" />
+                <Gift className="w-4 h-4 text-[var(--g1-gold)]" aria-hidden />
                 {unclaimedCount > 0 && (
                   <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-amber-400 animate-ping" />
                 )}

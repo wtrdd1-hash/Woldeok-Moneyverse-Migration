@@ -46,7 +46,7 @@ export function PlayerHud({ compact = false }: { readonly compact?: boolean }) {
       <Link
         href="/login"
         prefetch={false}
-        className="flex min-h-11 items-center gap-2 rounded-full border border-[var(--g1-gold-deep)] bg-[var(--g1-plum)] py-1 pl-1 pr-4 text-sm font-semibold text-[var(--g1-ink)] transition-transform duration-150 active:scale-[0.97]"
+        className="flex min-h-11 items-center gap-2 rounded-md border border-[var(--g1-gold-deep)] bg-[var(--g1-plum)] py-1 pl-1 pr-4 text-sm font-semibold text-[var(--g1-ink)] transition-transform duration-150 active:scale-[0.97]"
       >
         {medal}
         <span className="whitespace-nowrap">{compact ? '로그인' : '로그인하고 모험 시작'}</span>
@@ -61,7 +61,7 @@ export function PlayerHud({ compact = false }: { readonly compact?: boolean }) {
       href="/wallet"
       prefetch={false}
       aria-label={amount ? `내 지갑, ${amount} WLD` : '내 지갑'}
-      className="flex min-h-11 items-center gap-3 rounded-full border border-[var(--g1-gold-deep)] bg-[var(--g1-plum)] py-1 pl-1 pr-4 transition-transform duration-150 active:scale-[0.97]"
+      className="flex min-h-11 items-center gap-3 rounded-md border border-[var(--g1-gold-deep)] bg-[var(--g1-plum)] py-1 pl-1 pr-4 transition-transform duration-150 active:scale-[0.97]"
     >
       {medal}
       {!compact && <span className="text-sm font-semibold text-[var(--g1-ink)]">내 캐릭터</span>}

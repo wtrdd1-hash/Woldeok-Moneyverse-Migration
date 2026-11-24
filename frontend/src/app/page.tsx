@@ -227,17 +227,17 @@ export default async function HomePage() {
 
         <section aria-labelledby="home-routes-heading" className="g1-panel">
           <h2 id="home-routes-heading" className="mb-2 text-lg text-[var(--g1-ink)]">어디로 갈까요</h2>
-          <ul className="grid gap-2">
+          <ul className="divide-y divide-[var(--g1-line)]">
             {QUICK_LINKS.map(({ href, label, note, icon: Icon }) => (
               <li key={href}>
                 <Link
                   href={href}
                   prefetch={false}
-                  className="flex min-h-11 items-center gap-3 rounded-lg bg-[var(--g1-plum-2)] px-3 py-2 transition-transform duration-150 ease-out active:scale-[0.97] hover:bg-[var(--g1-plum-3)]"
+                  className="group flex min-h-11 items-center gap-3 py-2 transition-colors duration-150 ease-out hover:text-[var(--g1-gold)]"
                 >
                   <Icon className="size-5 shrink-0 text-[var(--g1-gold)]" aria-hidden />
                   <span className="min-w-0">
-                    <span className="block text-sm font-semibold text-[var(--g1-ink)]">{label}</span>
+                    <span className="block text-sm font-semibold text-[var(--g1-ink)] group-hover:text-[var(--g1-gold)]">{label}</span>
                     <span className="block text-xs text-[var(--g1-muted)]">{note}</span>
                   </span>
                 </Link>

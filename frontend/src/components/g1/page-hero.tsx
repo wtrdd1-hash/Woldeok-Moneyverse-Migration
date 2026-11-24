@@ -25,15 +25,15 @@ export function G1PageHero({
   return (
     <section
       className={`g1-chamfer relative isolate overflow-clip border ${
-        danger ? 'border-[var(--g1-ember)] bg-[var(--g1-ember-wash)]' : 'border-[var(--g1-gold-deep)] bg-[linear-gradient(110deg,var(--g1-plum-3),var(--g1-plum)_55%,var(--g1-night))]'
+        danger ? 'border-[var(--g1-ember)] bg-[var(--g1-ember-wash)]' : 'border-[var(--g1-gold-deep)] bg-[var(--g1-plum)]'
       }`}
     >
       <div className="relative z-10 flex max-w-xl flex-col gap-3 p-6 sm:p-7">
-        <Heading className="g1-display text-[34px] leading-tight text-[var(--g1-ink)] [text-shadow:0_2px_0_var(--g1-void)] sm:text-[44px]">{title}</Heading>
+        <Heading className="g1-display text-[34px] leading-tight text-[var(--g1-ink)] sm:text-[44px]">{title}</Heading>
         <p className="max-w-[44ch] text-sm text-[var(--g1-muted)]">{lead}</p>
         {children}
       </div>
-      <G1Scene kind={scene} className="pointer-events-none absolute bottom-0 right-0 -z-0 h-full w-[70%] opacity-90 sm:w-[60%]" />
+      <G1Scene kind={scene} className="pointer-events-none absolute bottom-0 right-0 -z-0 h-full w-[70%] opacity-70 sm:w-[60%]" />
     </section>
   );
 }

@@ -999,10 +999,10 @@ export function FloatingSupportChatWidget() {
             setIsOpen((prev) => !prev);
           }}
           className={cn(
-            'group relative flex size-14 items-center justify-center rounded-full shadow-2xl transition-all duration-300 active:scale-95 outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-300 motion-reduce:transition-none',
+            'group relative flex size-14 items-center justify-center rounded-full transition-transform duration-150 active:scale-[0.97] outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--g1-gold)] motion-reduce:transition-none',
             isOpen
               ? 'bg-muted border-2 border-border text-foreground'
-              : 'bg-gradient-to-br from-amber-500 via-primary to-amber-600 text-primary-foreground border-2 border-amber-400/50 hover:scale-105 hover:shadow-primary/40 ring-4 ring-amber-500/20 hover:ring-amber-500/40'
+              : 'bg-[var(--g1-violet-ink)] text-[var(--g1-ink)] border border-[var(--g1-violet)] hover:bg-[var(--g1-violet)]'
           )}
           aria-expanded={isOpen}
           aria-label={localeLabel(
