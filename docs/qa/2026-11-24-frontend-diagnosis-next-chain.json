@@ -1,0 +1,17 @@
+{
+  "publicAssetPath": "/_next/static/css/828951deb2af2cbe.css",
+  "checks": [
+    {
+      "releaseDirectory": "frontend-static",
+      "expectedCssExists": false
+    },
+    {
+      "releaseDirectory": "frontend",
+      "expectedCssExists": false
+    },
+    {
+      "releaseDirectory": "frontend-static",
+      "expectedCssExists": false
+    }
+  ]
+}

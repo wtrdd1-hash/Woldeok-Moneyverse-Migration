@@ -1,0 +1,38 @@
+[
+  {
+    "host": "test.easy-scraping.com",
+    "path": "/assets/mv43/chrome.css?v=d8525be5fcded40f8c4039b426ebc1835cbf6ee01196ec70023d920189643837",
+    "status": 200,
+    "contentType": "text/css",
+    "cacheControl": "private, no-store",
+    "sha256": "460fe6ee77b8f955fdeb47ae1b74d3871d811af799b26ab969a9af186e38c3f3",
+    "bytes": 11269
+  },
+  {
+    "host": "test.easy-scraping.com",
+    "path": "/assets/mv43/chrome.css?v=813d59e41d5282c3b390ff55f64bba377a21284d608346d205c269c1015c8e8c",
+    "status": 200,
+    "contentType": "text/css",
+    "cacheControl": "private, no-store",
+    "sha256": "460fe6ee77b8f955fdeb47ae1b74d3871d811af799b26ab969a9af186e38c3f3",
+    "bytes": 11269
+  },
+  {
+    "host": "easy-scraping.com",
+    "path": "/_next/static/css/828951deb2af2cbe.css",
+    "status": 502,
+    "contentType": "text/html; charset=UTF-8",
+    "cacheControl": "private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0",
+    "sha256": "05821431205e33fdf7fbb1872b62ebc8fa2ede3a4c3f30782a22a150e5b33dc7",
+    "bytes": 6427
+  },
+  {
+    "host": "easy-scraping.com",
+    "path": "/assets/mv43/public.js",
+    "status": 403,
+    "contentType": "text/html",
+    "cacheControl": "private, no-store",
+    "sha256": "25fb23868ebf48348f9e438e00cb9b9d9b3a054f32482a781c762cc4f9cc6393",
+    "bytes": 548
+  }
+]

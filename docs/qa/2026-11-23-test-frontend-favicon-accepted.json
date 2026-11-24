@@ -1,0 +1,27 @@
+{
+  "repoSha256": "7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+  "observed": [
+    {
+      "host": "easy-scraping.com",
+      "path": "/favicon.ico",
+      "status": 200,
+      "sha256": "7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+      "bytes": 355640
+    },
+    {
+      "host": "test.easy-scraping.com",
+      "path": "/favicon.ico",
+      "status": 200,
+      "sha256": "7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+      "bytes": 355640
+    },
+    {
+      "host": "test.easy-scraping.com",
+      "path": "/assets/mv39/favicon.ico",
+      "status": 200,
+      "sha256": "7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+      "bytes": 355640
+    }
+  ],
+  "allEqual": true
+}

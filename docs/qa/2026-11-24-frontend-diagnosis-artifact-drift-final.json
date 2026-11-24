@@ -1,0 +1,223 @@
+{
+  "observedAtUTC": "2026-11-24T00:10:43.885149+00:00",
+  "pid": 2721388,
+  "sourceClaim": "7b676e602bc984ab74572d4081655fdb297d176a",
+  "stableFileCapture": true,
+  "firstObservedJarSha256": "e821295b848a1c5ffc64f909d1043ab7875b93be9dd913ce2793f49e40cace49",
+  "finalObservedJarSha256": "2c127776f33fa04a4cd35db747f2fc05201eb9494ed1de6aff7894e36aef6f11",
+  "attestedJarSha256": "a751dc6b8760967c7e3e8bcb7ca0c30fd1a73e9ad7df09548de66fe3a6893706",
+  "differentEntries": [
+    {
+      "entry": "BOOT-INF/classes/com/moneyverse/adminpresentation/AdminSourceClient$BoundedBody.class",
+      "attestedSha256": "fca04e2b8b8fecbf272cbd9f126cc7db30fb7637b77bdb59bafb53795103ea07",
+      "finalPathSha256": "d0a6334978c37f879ccf40322b6adf2a966c6b05cb47eaf54ab7cb12fffa1a3c"
+    },
+    {
+      "entry": "BOOT-INF/classes/com/moneyverse/adminpresentation/AdminSourceClient$SourceFailure.class",
+      "attestedSha256": "3647e30eab8b237c1ffb66e67ee610bcf8a9b8af6eebae2f49634eec783930fa",
+      "finalPathSha256": "aba31a3304c272be27227ad6345995e7394fb7177d07f63245b3cb05cc8bf28c"
+    },
+    {
+      "entry": "BOOT-INF/classes/com/moneyverse/adminpresentation/AdminSourceClient.class",
+      "attestedSha256": "67054f6143ada1ff6a8f29466f3010dcf0b39e387d954048c55bf429d36500d8",
+      "finalPathSha256": "637972cff569164c64fc7e2adf9458c21c692612fd19c547f4ba649f1bba0bd2"
+    },
+    {
+      "entry": "BOOT-INF/classes/com/moneyverse/api/domain/web/NativeHomeController.class",
+      "attestedSha256": "674f85aa2ef17f111af9aa7b97e98c32a47269065f6f9464d29bef778293dcb7",
+      "finalPathSha256": "132e247e69bfc10c6a5ac25ca52d408b6feb49afb1faf96c95a7b33e73a43bbe"
+    },
+    {
+      "entry": "BOOT-INF/classes/com/moneyverse/frontendpresentation/MemberPresentationPageController.class",
+      "attestedSha256": "d81837cb44b3a18c137c7e668819ddd5f49fc0a5167c71bfddc3914009aa314c",
+      "finalPathSha256": "0c3e21641ff04e82c8bd8bfb2d972cd751a3531fa3a2a6558201eac11e4fd924"
+    },
+    {
+      "entry": "BOOT-INF/classes/com/moneyverse/frontendpresentation/UnifiedFrontendApplication.class",
+      "attestedSha256": "4c52988f5fdd00570db60744934bdb54ca10a13bb034061b44809d9789e412c6",
+      "finalPathSha256": "94edd412daa08707b30f16e36389cb9c0ae13dba70e99e79fe85147eb83108a0"
+    },
+    {
+      "entry": "BOOT-INF/classes/static/_next/static/chunks/app/.well-known/indexnow.key/route-ca7a9571206e4acc.js",
+      "attestedSha256": null,
+      "finalPathSha256": "b096ec477892fff7d59d8b7c528c4ccdf77d11c558f6c6962cc4c5de4004bd25"
+    },
+    {
+      "entry": "BOOT-INF/classes/static/_next/static/chunks/next/dist/client/components/builtin/app-error-ca7a9571206e4acc.js",
+      "attestedSha256": null,
+      "finalPathSha256": "b096ec477892fff7d59d8b7c528c4ccdf77d11c558f6c6962cc4c5de4004bd25"
+    },
+    {
+      "entry": "BOOT-INF/classes/static/_next/static/chunks/next/dist/client/components/builtin/forbidden-ca7a9571206e4acc.js",
+      "attestedSha256": null,
+      "finalPathSha256": "b096ec477892fff7d59d8b7c528c4ccdf77d11c558f6c6962cc4c5de4004bd25"
+    },
+    {
+      "entry": "BOOT-INF/classes/static/_next/static/chunks/next/dist/client/components/builtin/unauthorized-ca7a9571206e4acc.js",
+      "attestedSha256": null,
+      "finalPathSha256": "b096ec477892fff7d59d8b7c528c4ccdf77d11c558f6c6962cc4c5de4004bd25"
+    },
+    {
+      "entry": "BOOT-INF/classes/static/assets/mv39/app.js",
+      "attestedSha256": "dd1448ca8e6f4b4cb585e0a1ee199a523b3b503f3df2b8be562058bbe897a9d4",
+      "finalPathSha256": "acf57a53dc0cdbe02da852b6f1882943319ff7a21f3dc94f5563c105f265b89f"
+    },
+    {
+      "entry": "BOOT-INF/classes/static/assets/mv39/i18n.js",
+      "attestedSha256": "8c7cf8e55c170e6b527f93eaf8ce5a4b6e6e16034e35566fd9e1092a710d4fec",
+      "finalPathSha256": "dfe0b7eec6f340793e3be8ca34dce6074ae4a384fd52ed6cdd260a345ea864a2"
+    },
+    {
+      "entry": "BOOT-INF/classes/static/assets/mv39/site.css",
+      "attestedSha256": "014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31",
+      "finalPathSha256": "e4fcdf2a655e85bb07e9fb593acf99f4284ad76c68a00b066edfa58a88847e15"
+    },
+    {
+      "entry": "BOOT-INF/classes/static/assets/mv43/auth-core.js",
+      "attestedSha256": "f2531bd940e0d3ba591a4e4ede875ea66b3b03365a6ac73684e0bdaeb3fd617e",
+      "finalPathSha256": "541f8030e08ccc0de1042b8ef18f224ec134cbd411d7b89768888c28967deeb3"
+    },
+    {
+      "entry": "BOOT-INF/classes/static/assets/mv43/auth.css",
+      "attestedSha256": null,
+      "finalPathSha256": "7f0f29f64e6d12bf5b71d7eef9588bac63e1dd6001e257ff2712d0995d0fe31d"
+    },
+    {
+      "entry": "BOOT-INF/classes/static/assets/mv43/auth.js",
+      "attestedSha256": "11fdfba8d53004315a1ab140deb95a5040847a0bb50add727a53785f4928cd03",
+      "finalPathSha256": "faae4c7ec6d255a979fb5c726bfe271e84b7abd227e62c3d102f0e0b28781389"
+    },
+    {
+      "entry": "BOOT-INF/classes/static/assets/mv43/bank.css",
+      "attestedSha256": null,
+      "finalPathSha256": "254f5d6c40d505e121407fc7ad522b8ed6eb82fda19a0592f0602ee6d3c58e5e"
+    },
+    {
+      "entry": "BOOT-INF/classes/static/assets/mv43/bank.js",
+      "attestedSha256": null,
+      "finalPathSha256": "34ae739cfbc250c4ae1473749c27f5e1ed123fba572909fb7638fccafe7c418d"
+    },
+    {
+      "entry": "BOOT-INF/classes/static/assets/mv43/chrome.css",
+      "attestedSha256": "813d59e41d5282c3b390ff55f64bba377a21284d608346d205c269c1015c8e8c",
+      "finalPathSha256": "460fe6ee77b8f955fdeb47ae1b74d3871d811af799b26ab969a9af186e38c3f3"
+    },
+    {
+      "entry": "BOOT-INF/classes/static/assets/mv43/home.css",
+      "attestedSha256": null,
+      "finalPathSha256": "9ea3585ca4d1ad0b4546e6db2665a7409ad188c626290f529ea599e8f9abf8f6"
+    },
+    {
+      "entry": "BOOT-INF/classes/static/assets/mv43/legal.css",
+      "attestedSha256": null,
+      "finalPathSha256": "b76365c99ae703757e7d7e6a21656cb948244447230d88592b9ed5b800abecbf"
+    },
+    {
+      "entry": "BOOT-INF/classes/static/assets/mv43/stocks.css",
+      "attestedSha256": null,
+      "finalPathSha256": "d42c6f2b72f206382b91310daa722b9b7bd82d5ddbe1183990099ffb54854c9c"
+    },
+    {
+      "entry": "BOOT-INF/classes/static/assets/mv43/stocks.js",
+      "attestedSha256": null,
+      "finalPathSha256": "f86eb71a8add318dee89ba229188dda231e9c6a517866ae694beedca615ecc1b"
+    },
+    {
+      "entry": "BOOT-INF/classes/static/assets/mv43/wallet.css",
+      "attestedSha256": null,
+      "finalPathSha256": "add768634e49346887fe995baf028d26d79c9b0d0da201336194735b3c11f16f"
+    },
+    {
+      "entry": "BOOT-INF/classes/static/assets/mv43/wallet.js",
+      "attestedSha256": "ab609c54bfe8d1524088f81fa070355fc29d072bb582ff1f0a28783df727f992",
+      "finalPathSha256": "cafcb19def32ab04557740754444cc7cbe29b01a56270a964a776ac51ded1333"
+    },
+    {
+      "entry": "BOOT-INF/classes/static/js/mv-i18n.js",
+      "attestedSha256": "abf41c3def9e64e2636d87c46c0d40853f4c1e4715d1377bb5e8c89320bebbbd",
+      "finalPathSha256": "dce77c1f670ab4ec064ea122187c52afea1f9de5732914e26e77568c8b5daf9a"
+    },
+    {
+      "entry": "BOOT-INF/classes/static/stocks.html",
+      "attestedSha256": "e684feb7566ae95052c642b3b18461dc90148086c4d1113ec8ab17ef36a41a13",
+      "finalPathSha256": "0d850a0576e9b069b969c542c728e56b2ae5621e89db664b5cc41c88867ac343"
+    },
+    {
+      "entry": "BOOT-INF/classes/static/stocks/index.html",
+      "attestedSha256": "0ffd653d387b36035efe4dd2104dd67de54ea7384b7ba223c47fba0533fec4cc",
+      "finalPathSha256": "0d850a0576e9b069b969c542c728e56b2ae5621e89db664b5cc41c88867ac343"
+    },
+    {
+      "entry": "BOOT-INF/classes/templates/mv43/admin.html",
+      "attestedSha256": "883abfd35881d85d34ceb8d0f1f5c98aa7bc58ae257ab18490271a536cc8c84d",
+      "finalPathSha256": "41632680a3e3799194e3a1297b89ba94527526d2edb95da64ab0c3b39d694337"
+    },
+    {
+      "entry": "BOOT-INF/classes/templates/mv43/auth.html",
+      "attestedSha256": "afb4a0a1cd1fd07eeeaa58baf05069e081ba35d8908fd95de3812e6711d6cd7c",
+      "finalPathSha256": "44885a23e9f9290f4534f9d8247fba6d48c04cdfea7bf636db18d5293a3d07ee"
+    },
+    {
+      "entry": "BOOT-INF/classes/templates/mv43/bank.html",
+      "attestedSha256": null,
+      "finalPathSha256": "81579aded940792c68a3d4c7b4c340f33b0e5e126884617512cb3914599af44c"
+    },
+    {
+      "entry": "BOOT-INF/classes/templates/mv43/home.html",
+      "attestedSha256": "65e12bef092d279ca74d82a0b4e465f1ba35f1c07718165901d939e2fb67b8fc",
+      "finalPathSha256": "7ec8e3f7d53b246ad271536b3567902cb533aef3326428c11c9173074526b559"
+    },
+    {
+      "entry": "BOOT-INF/classes/templates/mv43/legal-privacy-en.html",
+      "attestedSha256": null,
+      "finalPathSha256": "d1829b972ba7c168bcd79d0886fd6398c8ecc7abceb0ab8a668cf91029b0ae95"
+    },
+    {
+      "entry": "BOOT-INF/classes/templates/mv43/legal-privacy-ko.html",
+      "attestedSha256": null,
+      "finalPathSha256": "eea858e528c9888bbc4cec1386e7e373cf422a7e14adb141ee3173e73e168549"
+    },
+    {
+      "entry": "BOOT-INF/classes/templates/mv43/legal-terms-en.html",
+      "attestedSha256": null,
+      "finalPathSha256": "e858f073932b69cd6f6cca1d5d0c8a61afb7c7f9dbb6abee04875bae5f12f5ab"
+    },
+    {
+      "entry": "BOOT-INF/classes/templates/mv43/legal-terms-ko.html",
+      "attestedSha256": null,
+      "finalPathSha256": "ca19284948d16507ed94391730c38468ae26827c3d9d7c52ead2ab097e73e757"
+    },
+    {
+      "entry": "BOOT-INF/classes/templates/mv43/stocks.html",
+      "attestedSha256": null,
+      "finalPathSha256": "078c204d56c926ea99b21730d8bbcd048d76348aa85e05ebcba8c294d803e7ad"
+    },
+    {
+      "entry": "BOOT-INF/classes/templates/mv43/wallet.html",
+      "attestedSha256": "73bd6f28ee564b732b1528827b827b870c00b1b7da9ebfe590ff7d9e2ccedc79",
+      "finalPathSha256": "765e45f0c5cdb814a1cb62e76938bfc979198c6e073cc9eb3ae6736883fd781f"
+    },
+    {
+      "entry": "BOOT-INF/classes/templates/mv46/announcements.html",
+      "attestedSha256": "5048bd715186c2ae294b67e5d82777058aeece2cd06f1c290fd4081b7c17dfbf",
+      "finalPathSha256": "7180ff89ea87b403137a09e90361111c9b44096a1abc08e14093cdf0b5a0c63b"
+    },
+    {
+      "entry": "BOOT-INF/classes/templates/mv46/gallery.html",
+      "attestedSha256": "8e7805ab9e234882a55b250c1e31e32a0e462c38ae1133479a45023103753381",
+      "finalPathSha256": "4289a0022eee11b2a1a9bed04e881a2ca2bd5ff39ea39c07223f97d2039401fe"
+    },
+    {
+      "entry": "BOOT-INF/classes/templates/shared/chrome.html",
+      "attestedSha256": "11b9c509953325a99c1f1c2501ec0d6b8547e7572d2c6f2e13773fa3da5bf999",
+      "finalPathSha256": "4d6150283efd61d14a3976d53b46660c8eb4020d345ee5472896dc71c6de9643"
+    },
+    {
+      "entry": "BOOT-INF/classes/ui/mv43-copy.json",
+      "attestedSha256": "9d13f39f8c0ff0f21d409d1d1a618aad8fe98984dc21ee055e74f28a121b8aca",
+      "finalPathSha256": "13f260f1554a08853a36f9419d2379cd86f1d2e52f52538584943759c4c15259"
+    }
+  ],
+  "count": 42,
+  "accepted": false
+}
