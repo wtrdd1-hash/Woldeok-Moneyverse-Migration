@@ -57,3 +57,6 @@ Integrated committed79b3077373 only; foreign dirty worktree remains untouched. P
 
 ### OAuth historical tip comparison
 Integrated exactdad1a3c664 by content reconciliation. Its only remaining OAuth delta duplicated cookies already written by UserAuthService.loginWithOAuth; kept the current single cookie-writing path and callback response. Kept full matching server/client dictionaries, current design and asset hashes instead of older hash-only edits. Earlier removal of the fabricated harness remains intact. No auth/CSRF checks weakened.
+
+### Legal source branch retained
+Integrated exact0e3bbd9535. Existing candidate already contains its authored legal policy text, exporter, controller and tests plus later responsive overflow fixes, localized title behavior and persistent scoped-Test evidence. Compared every conflict: only older hashes, removed overflow constraints and absent later log addenda differed. Retained those later safeguards; no legal prose rewritten. Foreign uncommitted legal work left untouched.
