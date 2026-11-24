@@ -228,3 +228,7 @@ html:root body { font-variant-numeric: tabular-nums; }
 .g1-panel { clip-path: none; border-radius: 6px; background: var(--g1-plum); border-color: var(--g1-line); }
 .g1-chamfer { clip-path: none; border-radius: 6px; }
 .mv-shell main h1 { font-size: clamp(1.5rem, 1.2rem + 0.6vw, 1.75rem); }
+
+/* G2: figures use the tabular body face; Orbitron is kept for the one big balance. */
+html:root .g1-num, html:root .mv-num { font-family: var(--font-sans, 'Noto Sans KR Variable'), sans-serif; font-weight: 700; }
+html:root .g2-balance { font-family: var(--g1-font-num); }

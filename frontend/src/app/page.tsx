@@ -161,10 +161,13 @@ export default async function HomePage() {
           <h2 id="hero-balance-heading" className="text-lg text-[var(--g1-ink)]">내 자산</h2>
           {/* QA GH-04: no decorative coin; WalletGlance keeps its distinct
               unknown / signed-out / unreadable / balance states. */}
-          <p className="g1-num text-3xl text-[var(--g1-gold)]">
-            <WalletGlance />
-          </p>
-          <p className="text-sm text-[var(--g1-muted)]">원장에 기록된 사용 가능 잔액입니다.</p>
+          <MemberOnly fallback={<p className="text-sm text-[var(--g1-muted)]">로그인하면 원장에 기록된 잔액이 표시됩니다.</p>}>
+            {/* G2: Orbitron and gold only on the member's own balance. */}
+            <p className="g2-balance text-3xl text-[var(--g1-gold)]">
+              <WalletGlance />
+            </p>
+            <p className="text-sm text-[var(--g1-muted)]">원장에 기록된 사용 가능 잔액입니다.</p>
+          </MemberOnly>
           <MemberOnly
             fallback={
               <Link href="/login" prefetch={false} className="g1-cta w-fit">로그인하고 지갑 보기</Link>

@@ -18,7 +18,6 @@ import {
 import { V10_ACCOUNT_ITEM, V10_PRIMARY_NAV, isNavItemActive, type V10Icon, type V10NavItem } from '@/components/v10-nav';
 import { useMountedViewer } from '@/components/use-mounted-viewer';
 import { isAdministrator } from '@/lib/viewer-state';
-import { ServerClockPill } from '@/components/server-clock-pill';
 
 export const V10_ICONS: Record<V10Icon, LucideIcon> = {
   home: Home,
@@ -110,7 +109,6 @@ export function GameSidebar() {
       </nav>
 
       <div className="border-t border-[var(--g1-line)] pt-3">
-        <ServerClockPill />
       </div>
     </aside>
   );

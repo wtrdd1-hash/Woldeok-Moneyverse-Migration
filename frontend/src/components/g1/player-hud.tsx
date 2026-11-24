@@ -35,7 +35,7 @@ export function PlayerHud({ compact = false }: { readonly compact?: boolean }) {
   }, [viewer?.signedIn, pathname]);
 
   const medal = (
-    <span className={`relative inline-block shrink-0 rounded-full ring-2 ring-[var(--g1-gold)] ${compact ? 'size-8' : 'size-11'}`}>
+    <span className={`relative inline-block shrink-0 rounded-full ${compact ? 'size-7' : 'size-7'}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/favicon.ico" alt="" width={44} height={44} className="size-full rounded-full" />
     </span>
@@ -46,10 +46,9 @@ export function PlayerHud({ compact = false }: { readonly compact?: boolean }) {
       <Link
         href="/login"
         prefetch={false}
-        className="flex min-h-11 items-center gap-2 rounded-md border border-[var(--g1-gold-deep)] bg-[var(--g1-plum)] py-1 pl-1 pr-4 text-sm font-semibold text-[var(--g1-ink)] transition-transform duration-150 active:scale-[0.97]"
+        className="flex min-h-10 items-center rounded-md bg-[var(--g1-violet-ink)] px-4 text-sm font-bold text-[var(--g1-ink)] transition-transform duration-150 active:scale-[0.97]"
       >
-        {medal}
-        <span className="whitespace-nowrap">{compact ? '로그인' : '로그인하고 모험 시작'}</span>
+        <span className="whitespace-nowrap">로그인</span>
       </Link>
     );
   }
@@ -61,13 +60,12 @@ export function PlayerHud({ compact = false }: { readonly compact?: boolean }) {
       href="/wallet"
       prefetch={false}
       aria-label={amount ? `내 지갑, ${amount} WLD` : '내 지갑'}
-      className="flex min-h-11 items-center gap-3 rounded-md border border-[var(--g1-gold-deep)] bg-[var(--g1-plum)] py-1 pl-1 pr-4 transition-transform duration-150 active:scale-[0.97]"
+      className="flex min-h-10 items-center gap-2 rounded-md border border-[var(--g1-line)] bg-[var(--g1-plum)] py-1 pl-1.5 pr-3 transition-transform duration-150 active:scale-[0.97]"
     >
       {medal}
       {!compact && <span className="text-sm font-semibold text-[var(--g1-ink)]">내 캐릭터</span>}
       <span className="flex items-center gap-2" aria-live="polite">
-        <span aria-hidden className="size-4 rounded-full bg-[radial-gradient(circle_at_35%_35%,var(--g1-moon),var(--g1-gold)_55%,var(--g1-gold-deep))]" />
-        <span className="g1-num text-sm text-[var(--g1-gold)]">{amount ?? (summary ? '확인 불가' : '…')}</span>
+        <span className="text-sm font-bold tabular-nums text-[var(--g1-gold)]">{amount ?? (summary ? '확인 불가' : '…')}</span>
         {!compact && <span className="text-xs text-[var(--g1-muted)]">WLD</span>}
       </span>
     </Link>

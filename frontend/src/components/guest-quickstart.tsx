@@ -19,16 +19,7 @@ export function GuestQuickstart({ locale }: { readonly locale: Locale }) {
       className="g1-panel p-5 sm:p-6"
       data-testid="guest-quickstart"
     >
-      <p className="mb-2 text-xs font-semibold tracking-wide text-[var(--g1-gold)]">
-        <T
-          korean="가입 없이 시작"
-          english="Try before you sign up"
-          japanese="登録せずに体験"
-          chinese="无需注册，先体验"
-          vietnamese="Trải nghiệm không cần đăng ký"
-        />
-      </p>
-      <h2 id="guest-quickstart-heading" className="text-lg sm:text-xl font-bold text-foreground">
+      <h2 id="guest-quickstart-heading" className="text-base font-bold text-foreground">
         <T
           korean="먼저 하나를 직접 체험해 보세요"
           english="See how it works before creating an account"
@@ -50,9 +41,9 @@ export function GuestQuickstart({ locale }: { readonly locale: Locale }) {
         <Link
           href={paths.calculator}
           data-guest-entry="calculator"
-          className="group flex min-h-16 items-center gap-3 rounded-md border border-[var(--g1-line)] bg-[var(--g1-night)] p-3 hover:border-[var(--g1-gold)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
+          className="group flex min-h-12 items-center gap-3 rounded-md border border-[var(--g1-line)] bg-[var(--g1-night)] p-3 hover:border-[var(--g1-violet)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--g1-violet)]"
         >
-          <Calculator aria-hidden="true" className="size-5 shrink-0 text-[var(--g1-gold)]" />
+          <Calculator aria-hidden="true" className="size-5 shrink-0 text-[var(--g1-violet)]" />
           <span className="min-w-0 flex-1 text-sm font-semibold text-foreground">
             <T
               korean="복리 계산 직접 해보기"
@@ -67,9 +58,9 @@ export function GuestQuickstart({ locale }: { readonly locale: Locale }) {
         <Link
           href={paths.glossary}
           data-guest-entry="glossary"
-          className="group flex min-h-16 items-center gap-3 rounded-md border border-[var(--g1-line)] bg-[var(--g1-night)] p-3 hover:border-[var(--g1-gold)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
+          className="group flex min-h-12 items-center gap-3 rounded-md border border-[var(--g1-line)] bg-[var(--g1-night)] p-3 hover:border-[var(--g1-violet)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--g1-violet)]"
         >
-          <BookOpen aria-hidden="true" className="size-5 shrink-0 text-[var(--g1-gold)]" />
+          <BookOpen aria-hidden="true" className="size-5 shrink-0 text-[var(--g1-violet)]" />
           <span className="min-w-0 flex-1 text-sm font-semibold text-foreground">
             <T
               korean="경제 용어부터 배우기"
@@ -84,9 +75,9 @@ export function GuestQuickstart({ locale }: { readonly locale: Locale }) {
         <Link
           href={paths.features}
           data-guest-entry="features"
-          className="group flex min-h-16 items-center gap-3 rounded-md border border-[var(--g1-line)] bg-[var(--g1-night)] p-3 hover:border-[var(--g1-gold)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
+          className="group flex min-h-12 items-center gap-3 rounded-md border border-[var(--g1-line)] bg-[var(--g1-night)] p-3 hover:border-[var(--g1-violet)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--g1-violet)]"
         >
-          <Compass aria-hidden="true" className="size-5 shrink-0 text-[var(--g1-gold)]" />
+          <Compass aria-hidden="true" className="size-5 shrink-0 text-[var(--g1-violet)]" />
           <span className="min-w-0 flex-1 text-sm font-semibold text-foreground">
             <T
               korean="가상경제 기능 알아보기"
