@@ -22,10 +22,10 @@ vi.mock('@/components/admin-sub-nav', () => ({
 describe('Admin layout visual transition', () => {
   it('wraps the original admin navigation and content in a scoped v2 theme', () => {
     const { container } = render(<AdminLayout><p>Protected original content</p></AdminLayout>);
-    expect(container.querySelector('[data-admin-theme="v2026.11.18.17"]')).not.toBeNull();
+    expect(container.querySelector('[data-admin-theme="g1-gm"]')).not.toBeNull();
     expect(screen.getByTestId('admin-sub-nav')).toBeDefined();
     expect(screen.getByText('Protected original content')).toBeDefined();
-    expect(screen.getByText('ADMIN CONTROL CENTER')).toBeDefined();
+    expect(screen.getByText('GM 콘솔')).toBeDefined();
   });
 
   it('has a visible non-fabricated status disclaimer rather than pretending backend is healthy', () => {

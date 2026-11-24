@@ -192,7 +192,7 @@ export function AdminSubNav() {
     <>
       <div className="w-full max-w-full min-w-0 space-y-2 mb-4">
         {/* 상단: 6대 도메인 그룹 퀵 필터 + Cmd+K + 2FA 보안 승격 배지 */}
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-zinc-800/80 bg-zinc-950/90 px-3 py-2 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-[var(--g1-line)] bg-[var(--g1-plum)] px-3 py-2">
           <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none touch-pan-x max-w-full min-w-0">
             {ADMIN_GROUP_LABELS.map((grp) => {
               const isGroupActive = selectedGroup === grp.key;
@@ -204,7 +204,7 @@ export function AdminSubNav() {
                   className={cn(
                     'shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-bold transition-all min-h-[32px]',
                     isGroupActive
-                      ? 'bg-zinc-800 text-zinc-100 border border-zinc-700 shadow-xs'
+                      ? 'bg-[var(--g1-plum-3)] text-[var(--g1-ink)] border border-[var(--g1-gold-deep)]'
                       : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 border border-transparent',
                   )}
                 >
@@ -248,7 +248,7 @@ export function AdminSubNav() {
         <nav
           ref={navRef}
           aria-label="관리자 세부 내비게이션"
-          className="w-full max-w-full min-w-0 mb-4 overflow-x-auto rounded-xl sm:rounded-2xl border border-zinc-800/80 bg-zinc-950/85 backdrop-blur-2xl p-1.5 shadow-sm scrollbar-none touch-pan-x overscroll-x-contain select-none [&::-webkit-scrollbar]:hidden"
+          className="w-full max-w-full min-w-0 mb-4 overflow-x-auto rounded-md border border-[var(--g1-line)] bg-[var(--g1-plum)] p-1.5 scrollbar-none touch-pan-x overscroll-x-contain select-none [&::-webkit-scrollbar]:hidden"
         >
           <ul className="flex w-max items-center gap-1 px-2 sm:w-auto sm:flex-wrap sm:px-0">
             {visibleTabs.map((tab) => {
@@ -264,7 +264,7 @@ export function AdminSubNav() {
                     className={cn(
                       'group flex min-h-[44px] sm:min-h-9 shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all active:scale-[0.98] outline-none',
                       isActive
-                        ? 'bg-emerald-500/15 text-emerald-400 font-bold ring-1 ring-emerald-500/40 shadow-xs'
+                        ? 'bg-[var(--g1-plum-3)] text-[var(--g1-gold)] font-semibold ring-1 ring-[var(--g1-gold-deep)]'
                         : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100',
                     )}
                   >

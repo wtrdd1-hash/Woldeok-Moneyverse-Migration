@@ -1,4 +1,5 @@
 import { notFound, redirect } from 'next/navigation';
+import { ShieldHalf } from 'lucide-react';
 import { AdminSubNav } from '@/components/admin-sub-nav';
 import { currentViewer, isAdministrator } from '@/lib/viewer';
 import './admin-console-theme.css';
@@ -24,25 +25,17 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 /** Shared visual shell for the protected admin routes. */
 export function AdminConsoleFrame({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      data-admin-theme="v2026.11.18.17"
-      className="moneyverse-admin-console mx-auto w-full max-w-full min-w-0 overflow-x-clip rounded-[1.35rem] border border-violet-400/15 p-2 sm:p-4 lg:p-5"
-    >
-      <header className="moneyverse-admin-header relative mb-4 flex flex-wrap items-center justify-between gap-3 overflow-hidden rounded-2xl border border-violet-400/25 bg-gradient-to-br from-[#23204d] via-[#171f3d] to-[#0f1a31] px-4 py-4 sm:px-6 sm:py-5">
+    <div data-admin-theme="g1-gm" className="moneyverse-admin-console mx-auto grid w-full max-w-full min-w-0 gap-4 overflow-x-clip">
+      {/* G1 GM console: ember marks the operator realm (approved G1 admin previews). */}
+      <header className="moneyverse-admin-header g1-chamfer flex flex-wrap items-center justify-between gap-3 border border-[var(--g1-ember)] bg-[var(--g1-ember-wash)] px-4 py-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
-          <div aria-hidden="true" className="grid size-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-tr from-violet-500 to-sky-400 text-2xl font-black text-white shadow-lg shadow-violet-900/30">
-            W
-          </div>
+          <ShieldHalf aria-hidden="true" className="size-8 shrink-0 text-[var(--g1-ember)]" />
           <div className="min-w-0">
-            <p className="text-[10px] font-extrabold tracking-[0.12em] text-violet-200 sm:text-xs">
-              ADMIN CONTROL CENTER
-            </p>
-            <h2 className="text-lg font-extrabold tracking-tight text-white sm:text-xl">
-              월덕 머니버스 관리자 센터
-            </h2>
+            <h2 className="g1-display text-xl text-[var(--g1-ink)]">GM 콘솔</h2>
+            <p className="text-xs text-[var(--g1-muted)]">월덕 머니버스 관리자 센터</p>
           </div>
         </div>
-        <p role="note" className="max-w-xs text-xs leading-relaxed text-slate-300">
+        <p role="note" className="max-w-xs text-xs leading-relaxed text-[var(--g1-muted)]">
           서비스 상태는 각 관리자 API의 실제 조회 결과를 기준으로 표시합니다.
         </p>
       </header>
