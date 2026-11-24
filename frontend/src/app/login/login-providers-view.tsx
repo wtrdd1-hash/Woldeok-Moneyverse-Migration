@@ -106,52 +106,48 @@ export async function LoginProvidersView({
           <form action={submitLocalLogin} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <label htmlFor="auth-email" className="text-xs font-semibold text-[#cbd5e1]">
-                계정 또는 제목
+                이메일 주소
               </label>
               <input
                 id="auth-email"
                 name="email"
                 type="email"
                 autoComplete="email"
-                placeholder="검증된 입력만 제출"
+                inputMode="email"
+                maxLength={254}
+                placeholder="name@example.com"
                 required
                 className="w-full px-4 py-3 bg-[#0b0f1d] border border-slate-700/30 focus:border-[#8b5cf6] focus:bg-[#0d1326] text-white placeholder-slate-500 rounded-xl text-sm outline-none transition-all"
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="auth-password" className="text-xs font-semibold text-[#cbd5e1]">
-                비밀번호 또는 본문
-              </label>
+              <div className="flex items-center justify-between">
+                <label htmlFor="auth-password" className="text-xs font-semibold text-[#cbd5e1]">
+                  비밀번호
+                </label>
+                <a href="/forgot-password" className="text-xs text-[#b9a8ff] hover:text-white">
+                  비밀번호 찾기
+                </a>
+              </div>
               <input
                 id="auth-password"
                 name="password"
                 type="password"
                 autoComplete="current-password"
-                placeholder="검증된 입력만 제출"
+                maxLength={128}
+                placeholder="비밀번호 입력"
                 required
                 className="w-full px-4 py-3 bg-[#0b0f1d] border border-slate-700/30 focus:border-[#8b5cf6] focus:bg-[#0d1326] text-white placeholder-slate-500 rounded-xl text-sm outline-none transition-all"
               />
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="auth-security" className="text-xs font-semibold text-[#cbd5e1]">
-                확인 및 보안 절차
-              </label>
-              <input
-                id="auth-security"
-                name="securityCode"
-                type="text"
-                placeholder="검증된 입력만 제출"
-                className="w-full px-4 py-3 bg-[#0b0f1d] border border-slate-700/30 focus:border-[#8b5cf6] focus:bg-[#0d1326] text-white placeholder-slate-500 rounded-xl text-sm outline-none transition-all"
-              />
-            </div>
 
             <button
               type="submit"
               className="mt-2 w-full py-3.5 px-4 bg-[#6d44ba] hover:bg-[#7c3aed] text-white font-bold rounded-xl shadow-[0_4px_16px_rgba(109,68,186,0.4)] hover:shadow-[0_6px_20px_rgba(124,58,237,0.5)] transition-all flex items-center justify-center gap-2 text-sm"
             >
-              <span>확인 및 계속하기</span>
+              <span>자체 계정으로 로그인</span>
               <span>&rarr;</span>
             </button>
           </form>
