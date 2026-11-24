@@ -7,3 +7,7 @@
 - [x] Identify five skills and stage official sources.
 - [ ] Install and verify shared paths.
 - [ ] Record results and review.
+
+## Checkpoint
+- Server KST: 2026-11-24 12:26:18 KST
+- Three missing upstream skill directories installed. Existing skills retained. All 20 path/name/hash checks passed. No upstream installers, hooks or external generation services invoked.
