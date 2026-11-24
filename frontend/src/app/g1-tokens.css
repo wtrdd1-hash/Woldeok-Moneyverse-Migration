@@ -44,7 +44,8 @@ html:root[data-locale][data-point] {
   --g1-faint: #9a90c4;
   --g1-font-display: 'Black Han Sans', 'Noto Sans KR Variable', sans-serif;
   --g1-font-num: 'Orbitron', 'Noto Sans KR Variable', sans-serif;
-  --g1-cut: 12px;
+  /* QA GH-02: lighter chamfer (was 12px). */
+  --g1-cut: 8px;
 
   /* Legacy names some components still read (v10 shell era). */
   --mv-bg: var(--g1-night);
@@ -116,8 +117,9 @@ html:root body { background-color: var(--g1-night); color: var(--g1-text); }
 html:root { overflow-x: clip; }
 html:root body { overflow-x: clip; }
 
-/* Page headings use the G1 display face; body copy stays Noto Sans KR. */
-.mv-shell main h1, .mv-shell main h2, .g1-display {
+/* QA GH-06: only the page title uses the heavy display face; section heads
+   stay in the body face so hierarchy comes from size, not weight alone. */
+.mv-shell main h1, .g1-display {
   font-family: var(--g1-font-display);
   font-weight: 400;
   letter-spacing: 0.01em;
@@ -143,10 +145,11 @@ html:root body { overflow-x: clip; }
 .g1-cta {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   min-height: 44px; padding: 8px 16px;
-  background: var(--g1-gold); color: var(--g1-gold-ink); font-weight: 700; border-radius: 6px;
+  /* QA GH-02: gold is reserved for key figures; actions are violet. */
+  background: var(--g1-violet-ink); color: var(--g1-ink); font-weight: 700; border-radius: 6px;
   transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1), background-color 140ms ease-out;
 }
-.g1-cta:hover { background: var(--g1-gold-hi); }
+.g1-cta:hover { background: var(--g1-violet); color: var(--g1-night); }
 .g1-cta:active { transform: scale(0.97); }
 .mv-shell :focus-visible { outline: 2px solid var(--g1-gold); outline-offset: 2px; }
 
@@ -183,3 +186,5 @@ html:root body { overflow-x: clip; }
   background-color: var(--g1-plum);
   border-color: var(--g1-line);
 }
+
+.mv-shell main h2 { font-weight: 700; letter-spacing: -0.01em; }

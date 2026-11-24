@@ -6,7 +6,7 @@ import { WalletGlance } from '@/components/wallet-glance';
 import { P2PTransferModal } from '@/components/p2p-transfer-modal';
 import { PublicAdvertisement } from '@/components/public-advertisement';
 import { ServerClockPill } from '@/components/server-clock-pill';
-import { G1PageHero } from '@/components/g1/page-hero';
+import { GuestOnly, MemberOnly } from '@/components/g1/viewer-gate';
 import { apiOrNull } from '@/lib/api';
 import { getServerLocale } from '@/lib/locale-server';
 import { getStockName } from '@/lib/i18n-dictionary';
@@ -110,6 +110,14 @@ const QUICK_LINKS = [
   { href: '/tools/stock-calculator', label: '주식 수익률 계산기', note: '매수가와 매도가로 손익 계산', icon: Calculator },
 ] as const;
 
+function noticeDate(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  // Fixed zone so server and browser render the same text.
+  return date.toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', month: 'long', day: 'numeric' });
+}
+
 export default async function HomePage() {
   const locale = await getServerLocale();
   const [marketData, notices] = await Promise.all([
@@ -117,9 +125,12 @@ export default async function HomePage() {
     apiOrNull<{ announcements: Announcement[] }>('/api/v1/announcements'),
   ]);
 
-  const movers = (marketData?.stocks ?? [])
+  const priced = (marketData?.stocks ?? [])
     .map((stock) => ({ stock, bp: moveBasisPoints(stock) }))
-    .filter((row): row is { stock: StockItem; bp: bigint } => row.bp !== null)
+    .filter((row): row is { stock: StockItem; bp: bigint } => row.bp !== null);
+  const rising = priced.filter((row) => row.bp > 0n).length;
+  const falling = priced.filter((row) => row.bp < 0n).length;
+  const movers = [...priced]
     .sort((a, b) => {
       const left = a.bp < 0n ? -a.bp : a.bp;
       const right = b.bp < 0n ? -b.bp : b.bp;
@@ -127,7 +138,7 @@ export default async function HomePage() {
     })
     .slice(0, 5);
 
-  const announcements = (notices?.announcements ?? []).slice(0, 3);
+  const announcements = (notices?.announcements ?? []).slice(0, 4);
 
   return (
     <div data-page="home" className="flex flex-col gap-4">
@@ -135,61 +146,62 @@ export default async function HomePage() {
         {HOME_H1_BY_LOCALE[locale] ?? HOME_H1_BY_LOCALE.en}
       </h1>
 
-      <G1PageHero heading="h2" title="길드 홀" lead="오늘의 월덕 시장과 내 길드 진행 상황을 한 화면에서 확인합니다." scene="skyline">
-        <ServerClockPill className="w-fit" />
-      </G1PageHero>
+      {/* QA GH-01/GH-08: a compact status strip instead of a tall decorative
+          banner — what the server clock means and how the market stands now. */}
+      <section aria-labelledby="home-status-heading" className="g1-panel flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h2 id="home-status-heading" className="g1-display text-2xl text-[var(--g1-ink)]">길드 홀</h2>
+          <p className="text-sm text-[var(--g1-muted)]">오늘의 월덕 시장과 내 길드 진행 상황입니다.</p>
+        </div>
+        <dl className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm sm:flex sm:items-center sm:gap-6">
+          <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
+            <dt className="text-xs text-[var(--g1-muted)]">서버 시간 (현실 10분 = 서버 하루)</dt>
+            <dd><ServerClockPill className="w-fit" /></dd>
+          </div>
+          <div className="flex flex-col gap-1">
+            <dt className="text-xs text-[var(--g1-muted)]">오늘 상승</dt>
+            <dd className="g1-num text-lg text-[var(--g1-ember)]">{priced.length ? `${rising}종목` : '—'}</dd>
+          </div>
+          <div className="flex flex-col gap-1">
+            <dt className="text-xs text-[var(--g1-muted)]">오늘 하락</dt>
+            <dd className="g1-num text-lg text-[var(--g1-rare-rare)]">{priced.length ? `${falling}종목` : '—'}</dd>
+          </div>
+        </dl>
+      </section>
 
-      <GuestQuickstart locale={locale} />
+      {/* QA GH-03: guests keep the no-signup entry; members never see it. */}
+      <GuestOnly>
+        <GuestQuickstart locale={locale} />
+      </GuestOnly>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
         <section aria-labelledby="hero-balance-heading" className="g1-panel flex flex-col gap-3">
           <h2 id="hero-balance-heading" className="text-lg text-[var(--g1-ink)]">내 자산</h2>
-          <p className="flex items-baseline gap-3">
-            <span aria-hidden className="size-8 shrink-0 self-center rounded-full bg-[radial-gradient(circle_at_35%_35%,var(--g1-moon),var(--g1-gold)_55%,var(--g1-gold-deep))]" />
-            <span className="g1-num text-3xl text-[var(--g1-gold)]">
-              <WalletGlance />
-            </span>
+          {/* QA GH-04: no decorative coin; WalletGlance keeps its distinct
+              unknown / signed-out / unreadable / balance states. */}
+          <p className="g1-num text-3xl text-[var(--g1-gold)]">
+            <WalletGlance />
           </p>
-          <p className="text-sm text-[var(--g1-muted)]">원장에 기록된 사용 가능 잔액입니다. 거래 내역은 지갑에서 확인하세요.</p>
-          <div className="flex flex-wrap gap-2">
-            <Link href="/wallet" prefetch={false} className="g1-cta">지갑 열기</Link>
-            {/* Restored: the member-to-member transfer the pre-v10 home offered. */}
-            <P2PTransferModal triggerText="WLD 보내기" />
-          </div>
+          <p className="text-sm text-[var(--g1-muted)]">원장에 기록된 사용 가능 잔액입니다.</p>
+          <MemberOnly
+            fallback={
+              <Link href="/login" prefetch={false} className="g1-cta w-fit">로그인하고 지갑 보기</Link>
+            }
+          >
+            <div className="flex flex-wrap gap-2">
+              <Link href="/wallet" prefetch={false} className="g1-cta">지갑 열기</Link>
+              <div className="min-w-[10rem] flex-1">
+                <P2PTransferModal triggerText="WLD 보내기" />
+              </div>
+            </div>
+          </MemberOnly>
         </section>
 
-        <section aria-labelledby="home-notices-heading" className="g1-panel flex flex-col gap-2">
-          <h2 id="home-notices-heading" className="flex items-center gap-2 text-lg text-[var(--g1-ink)]">
-            <Megaphone className="size-4 text-[var(--g1-gold)]" aria-hidden />
-            길드 공지
-          </h2>
-          {announcements.length === 0 ? (
-            <p className="text-sm text-[var(--g1-muted)]">지금 게시된 공지가 없습니다.</p>
-          ) : (
-            <ul className="divide-y divide-[var(--g1-line)]">
-              {announcements.map((notice) => (
-                <li key={notice.announcementId}>
-                  <Link
-                    href={`/announcements/${encodeURIComponent(notice.announcementId)}`}
-                    prefetch={false}
-                    className="flex min-h-11 items-center justify-between gap-3 py-2 text-sm text-[var(--g1-body)] hover:text-[var(--g1-ink)]"
-                  >
-                    <span className="line-clamp-1">{notice.title}</span>
-                    {notice.isPinned && <span className="shrink-0 text-xs text-[var(--g1-gold)]">고정</span>}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-          <Link href="/announcements" prefetch={false} className="mt-auto text-sm text-[var(--g1-gold)] hover:underline">
-            공지 전체 보기
-          </Link>
-        </section>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
         <section aria-labelledby="home-market-heading" className="g1-panel">
-          <h2 id="home-market-heading" className="mb-2 text-lg text-[var(--g1-ink)]">오늘 크게 움직인 종목</h2>
+          <div className="mb-2 flex items-baseline justify-between gap-3">
+            <h2 id="home-market-heading" className="text-lg text-[var(--g1-ink)]">오늘 크게 움직인 종목</h2>
+            <Link href="/stocks" prefetch={false} className="text-sm text-[var(--g1-violet)] hover:underline">거래소</Link>
+          </div>
           {movers.length === 0 ? (
             <p className="py-6 text-sm text-[var(--g1-muted)]">시세 자료를 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.</p>
           ) : (
@@ -208,7 +220,7 @@ export default async function HomePage() {
                   return (
                     <tr key={stock.symbol} className="border-b border-[var(--g1-line)] last:border-0">
                       <td className="py-2">
-                        <Link href={`/stocks/${encodeURIComponent(stock.symbol)}`} prefetch={false} className="block hover:text-[var(--g1-gold)]">
+                        <Link href={`/stocks/${encodeURIComponent(stock.symbol)}`} prefetch={false} className="block min-h-11 py-1 hover:text-[var(--g1-violet)]">
                           <span className="font-semibold text-[var(--g1-ink)]">{getStockName(stock.symbol, locale, stock.name)}</span>
                           <span className="block text-xs text-[var(--g1-muted)]">{stock.symbol}</span>
                         </Link>
@@ -221,24 +233,50 @@ export default async function HomePage() {
               </tbody>
             </table>
           )}
-          <Link href="/stocks" prefetch={false} className="mt-3 inline-block text-sm text-[var(--g1-gold)] hover:underline">
-            거래소로 이동
-          </Link>
+        </section>
+      </div>
+
+      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        {/* QA GH-05: real titles with dates, height follows the list. */}
+        <section aria-labelledby="home-notices-heading" className="g1-panel">
+          <div className="mb-1 flex items-baseline justify-between gap-3">
+            <h2 id="home-notices-heading" className="flex items-center gap-2 text-lg text-[var(--g1-ink)]">
+              <Megaphone className="size-4 text-[var(--g1-muted)]" aria-hidden />
+              길드 공지
+            </h2>
+            <Link href="/announcements" prefetch={false} className="text-sm text-[var(--g1-violet)] hover:underline">전체 보기</Link>
+          </div>
+          {announcements.length === 0 ? (
+            <p className="py-3 text-sm text-[var(--g1-muted)]">지금 게시된 공지가 없습니다.</p>
+          ) : (
+            <ul className="divide-y divide-[var(--g1-line)]">
+              {announcements.map((notice) => (
+                <li key={notice.announcementId}>
+                  <Link
+                    href={`/announcements/${encodeURIComponent(notice.announcementId)}`}
+                    prefetch={false}
+                    className="flex min-h-11 items-center justify-between gap-3 py-2 text-sm text-[var(--g1-body)] hover:text-[var(--g1-ink)]"
+                  >
+                    <span className="line-clamp-1">{notice.isPinned ? '[고정] ' : ''}{notice.title}</span>
+                    {noticeDate(notice.publishedAt) && (
+                      <span className="g1-num shrink-0 text-xs text-[var(--g1-muted)]">{noticeDate(notice.publishedAt)}</span>
+                    )}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
         <section aria-labelledby="home-routes-heading" className="g1-panel">
-          <h2 id="home-routes-heading" className="mb-2 text-lg text-[var(--g1-ink)]">어디로 갈까요</h2>
+          <h2 id="home-routes-heading" className="mb-1 text-lg text-[var(--g1-ink)]">어디로 갈까요</h2>
           <ul className="divide-y divide-[var(--g1-line)]">
             {QUICK_LINKS.map(({ href, label, note, icon: Icon }) => (
               <li key={href}>
-                <Link
-                  href={href}
-                  prefetch={false}
-                  className="group flex min-h-11 items-center gap-3 py-2 transition-colors duration-150 ease-out hover:text-[var(--g1-gold)]"
-                >
-                  <Icon className="size-5 shrink-0 text-[var(--g1-gold)]" aria-hidden />
+                <Link href={href} prefetch={false} className="group flex min-h-11 items-center gap-3 py-2">
+                  <Icon className="size-4 shrink-0 text-[var(--g1-muted)] group-hover:text-[var(--g1-violet)]" aria-hidden />
                   <span className="min-w-0">
-                    <span className="block text-sm font-semibold text-[var(--g1-ink)] group-hover:text-[var(--g1-gold)]">{label}</span>
+                    <span className="block text-sm font-semibold text-[var(--g1-ink)] group-hover:text-[var(--g1-violet)]">{label}</span>
                     <span className="block text-xs text-[var(--g1-muted)]">{note}</span>
                   </span>
                 </Link>
