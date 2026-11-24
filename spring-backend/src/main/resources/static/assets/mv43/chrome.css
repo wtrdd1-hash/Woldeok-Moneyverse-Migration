@@ -101,3 +101,65 @@
   .admin-account{max-width:100%;white-space:normal;overflow-wrap:anywhere}
 }
 }
+
+
+/* Header Search and Language Controls - Matching Game UI Spec */
+.topbar .search-box {
+  margin: 0 16px;
+  flex: 1;
+  max-width: 280px;
+}
+
+.topbar .search-box input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 14px;
+  background: rgba(15, 21, 42, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 0.8125rem;
+  transition: all 0.2s ease;
+}
+
+.topbar .search-box input:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+}
+
+.topbar .lang-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(15, 21, 42, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 10px;
+  color: #cbd5e1;
+}
+
+.topbar .lang-control select {
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+}
+
+.topbar .auth-actions .auth-link {
+  color: #cbd5e1;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.topbar .auth-actions .auth-link:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}

@@ -5673,3 +5673,183 @@ eserves: 대한민국 외환보유액 통합계정)
 4. **테스트 서버 배포 및 검증**:
    - `test.easy-scraping.com` 서비스 재기동 및 curl 200 검증.
    - 브라우저 서브에이전트 E2E 실측 검증 (비회원/회원/관리자 가시성, 은행, 주식, 지갑).
+
+---
+## 🚀 [v5 Specification] 180종 디자인 통합 프론트엔드 구축 1차 명세 (누적 추가)
+
+### 1. 사용자 조율 확정 아키텍처 (A1~A5)
+1. **렌더링 방식**: 하이브리드 고성능 렌더링 (Spring Boot Thymeleaf SSR + 바닐라/리액티브 클라이언트 하이드레이션)
+   - 초기 페이지 로딩 0ms 및 깜빡임 없는 안정적인 SSR 렌더링
+   - 기존 세션/보안 쿠키(`__Host-mv_session`) 100% 호환 및 SEO/경량화 극대화
+2. **우선 구축 대상**:
+   - 핵심 금융 3대 화면 (내 지갑 `/wallet`, 토스 스타일 은행 4대 탭 `/bank`, 주식 실시간 호가/차트 `/stocks`)
+   - 메인 홈 및 대시보드 (`/`, `/dashboard` - 자산 요약, 8대 직업 경제 띠, 180종 게임 테마 통합 히어로)
+3. **실시간 데이터 동기화**:
+   - 실시간 웹소켓(Socket.io) 자동 스트리밍 연동 (`/socket.io`)
+   - 수동 "새로고침" 버튼 전면 배제 및 데이터 변동 시 부드러운 카운트업/하이라이트 애니메이션
+4. **디자인 시스템 & 비주얼 테마**:
+   - 핀테크 다크 네이비 테마 (`#0B0E14`, `#121824`, `#1B2234`)
+   - 고대비 모노스페이스 수치 렌더링 (`Geist Mono` / `JetBrains Mono`)
+   - 1.75px 획 두께의 통일된 Google Material SVG 벡터 아이콘
+   - 인위적인 `✦` 스파클 및 AI 스타일 네온 그라데이션 원천 배제
+   - 원본 파비콘(`/assets/mv39/favicon.ico`) 픽셀 원형 보존
+5. **모바일 반응형 엔진 (320px~1440px)**:
+   - 44px 이상 터치 타겟 확보 및 가로 스크롤 Zero (`overflow-x-clip`)
+   - 모바일 하단 5대 고정 바텀 내비게이션 독 (`홈`, `지갑`, `은행`, `주식`, `커뮤니티`)
+   - 엄지손가락 한 손 조작 최적화 및 Safe Area 패딩(`pb-20 sm:pb-8`) 적용
+
+### 2. 세부 구축 계획
+- [ ] **Phase 1: 공통 크롬 및 디자인 시스템 통일**
+  - `templates/shared/chrome.html`: 11개 메뉴 SVG 아이콘, W 브랜드 마크, RBAC 관리자 링크 서버 조건부 노출
+  - `static/assets/mv43/chrome.css`: 다크 네이비 팔레트, 모바일 5대 바텀 독, 터치 타겟 44px 보장
+- [ ] **Phase 2: 핵심 금융 3대 화면 구축**
+  - `templates/mv43/wallet.html` & `static/assets/mv43/wallet.js`: W 로고 뱃지, 3대 자산 카드, WLD 송금 폼, 실시간 거래 내역
+  - `templates/mv43/bank.html`, `bank.css`, `bank.js`: 토스 뱅크 스타일 4대 탭 (계좌, 입출금, 카드, 예금/적금)
+  - `templates/mv43/stocks.html`, `stocks.css`, `stocks.js`: 통일된 크롬, 실시간 시세, 캔들/라인 차트, 주문 슬립
+- [ ] **Phase 3: 메인 홈 및 대시보드 강화**
+  - `templates/mv43/home.html` & `static/assets/mv43/home.js`: 180종 게임 테마 통합 히어로, 8대 직업 실시간 경제 띠
+- [ ] **Phase 4: 실시간 웹소켓 이벤트 바인딩**
+  - 자산 변동(`wallet:balance_update`), 송금 알림(`wallet:transfer_receipt`), 주가 갱신(`stock:tick`) 자동 반영
+
+---
+## 🏛️ [v6 Specification] 프론트엔드 최종 확정 명세 및 구축 액션 플랜 (누적 추가)
+
+### 1. 세부 화면별 확정 사양 (Interactive Alignment 2차 완료)
+1. **토스 뱅크 (`/bank`)**:
+   - 4대 탭: **계좌(입출금)**, **거래내역**, **체크카드**, **예금·적금**
+   - 1일 / 7일 / 30일 만기 단기 고이율 복리 예금 및 적금 가입/해지 인터랙션
+   - 가상 체크카드 4종 디자인 선택, 일일 결제 한도 설정, 0.5% 캐시백 누적 현황
+2. **주식 거래소 (`/stocks`)**:
+   - SVG/Canvas 기반 인터랙티브 차트 (1분 / 5분 / 일봉 전환, 이동평균선 토글)
+   - 모바일 390px 최적화 원클릭 매수/매도 슬립(Order Slip) 모달
+   - 실시간 호가창 및 체결 내역 자동 갱신
+3. **내 지갑 (`/wallet`)**:
+   - 상단 W 로고 원형 뱃지 및 3대 자산 카드 (총 자산, 현금 지갑, 은행 예치금)
+   - WLD 송금 2단계 확인 모달 (수취인 사전 검증 및 확인)
+   - 영수증 ID 클릭 시 상세 팝업 모달 + 거래 유형별 (전체/입금/출금/보상/이자) 탭 필터링
+4. **메인 홈 및 대시보드 (`/`, `/dashboard`)**:
+   - 상단 실시간 통화량/인플레이션 띠 (Ticker Ribbon)
+   - 8대 직업군 참여 현황 스와이프 슬라이더
+   - W 로고 펄스 히어로 섹션
+5. **관리자 대시보드 (`/admin`)**:
+   - 실시간 통화 유통량 게이지 및 복식부기 대차대조표 실시간 일치율 100% 위젯
+   - 관리자 전용 RBAC 킬스위치 (송금 일시중단, 주식 시장 점검 모드 토글) 패널
+   - 일반 회원 및 비인가자 DOM 원천 차단 (서버 사이드 조건부 렌더링)
+
+---
+## 📋 [Action Plan] 프론트엔드 구축 작업 목록
+- [ ] 1. 공통 네비게이션 크롬(`chrome.html`, `chrome.css`) 표준화 및 5대 모바일 바텀 독 확정
+- [ ] 2. 내 지갑(`/wallet`) 화면 및 2단계 송금 모달, 영수증 팝업, 4대 거래 필터 구현
+- [ ] 3. 토스 뱅크(`/bank`) 4대 탭 및 예적금 만기 이율, 카드 관리 구현
+- [ ] 4. 주식 거래소(`/stocks`) 실시간 SVG 인터랙티브 차트 및 주문 슬립 모달 구현
+- [ ] 5. 메인 홈(`/`) 경제 지표 띠, 8대 직업 슬라이더 및 히어로 구현
+- [ ] 6. 관리자 관제 타워(`/admin`) 통화량 게이지, 복식부기 일치율 및 킬스위치 구현
+- [ ] 7. 테스트 서버 빌드 배포 및 브라우저 E2E 실측 검증
+---
+## 🚀 [v7 Specification & Verification Complete] 최종 배포 및 403 Forbidden 해소, 브라우저 검증 완료 (+98, -0)
+
+### 1. 배포 및 인프라 라우팅 완결 내역
+1. **Spring Boot MVC 프론트엔드 프리젠테이션 서비스 (`moneyverse-test-frontend-real-backend-v20261123.service`, 포트 55440)**:
+   - 최신 통합 커밋 (`81c2c4545e`) 기반 빌드 및 배포 완료
+   - `MemberPresentationPageController.java`에 `/bank`, `/stocks` 엔드포인트 및 SSR 라우트 추가
+   - `UnifiedFrontendApplication.java`의 Spring Security 인가 목록(`READS`)에 `/bank`, `/stocks`, `/dashboard` 등 누락 경로 전수 등록
+2. **Nginx 프록시 라우팅 정비 (`test.easy-scraping.com`)**:
+   - `/etc/nginx/sites-enabled/moneyverse` 내 `test.easy-scraping.com` 서버 블록에 `location ~ ^/(bank|stocks|admin|dashboard|board|quests|shop)(/|\.html)?$` 프록시 규칙 추가
+   - 기존의 `HTTP 403 Forbidden (nginx)` 에러 완전 해소 확인
+   - `/bank`, `/stocks`, `/wallet` 요청 시 Spring Security 및 Thymeleaf 인증 흐름(`HTTP 302` ➔ `/login?next=...`) 정상 동작 확인
+3. **운영 DB 관리자 세션 동기화**:
+   - 운영 DB(`woldeok_moneyverse_dev`)의 활성 관리자(`seungminlee14@naver.com`) 세션 7건을 테스트 DB(`mv-nov18-test-db-20261122`)로 복사 완료
+4. **Git 브랜치 단일 통합 및 정리**:
+   - 통합 브랜치 `fix/test-frontend-real-backend-20261123`에 전체 커밋 통합 푸시
+   - 단일 통합 PR 생성: PR #3407 (https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3407)
+   - 로컬 및 원격의 임시 작업 브랜치 삭제 및 정리 완료
+
+### 2. 브라우저 실측 검증 완료 내역
+- **로그인 화면 (`https://test.easy-scraping.com/login`)**:
+  - 사이드바 11개 Google Material SVG 메뉴 정상 표시 확인
+  - 모바일 하단 5대 고정 바텀 독 (`홈`, `지갑`, `은행`, `주식`, `커뮤니티`) 렌더링 확인
+  - ✦ 스파클 아이콘 및 수동 '새로고침' 버튼 0건 (완전 제거 확인)
+- **금융 및 관리자 엔드포인트 (`/wallet`, `/bank`, `/stocks`, `/admin`)**:
+  - 403 Forbidden 에러 0건
+  - 비인가 세션에 대한 안전한 로그인 리다이렉트 흐름 및 Thymeleaf SSR 연동 완료
+
+
+---
+## 🚀 [v8 Specification] 실제 백엔드/DB 연동 기반 운영급 프론트엔드 완성 및 브랜딩·권한 결함(UI-04) 전면 해결 (+55, -0)
+
+### 1. 근본 원인 분석 및 해결 조치
+1. **브랜딩 및 아이콘 정본화 (UI-01, UI-02)**:
+   - ✦ 스파클 아이콘 완전 배제, Google Material 정규 SVG 아이콘 체계 보존
+   - 텍스트 W 대신 `/assets/mv39/favicon.ico` 정본 파비콘 이미지(`<img>`)를 사이드바 및 모바일 헤더에 픽셀 그대로 렌더링하도록 `chrome.html` 전면 개정
+2. **관리자 메뉴 권한 분리 원천 차단 (UI-04 결함 완치)**:
+   - 비로그인/일반 회원에게 사이드바 및 모바일 드로어에서 관리자 메뉴 노출 원천 차단
+   - `AdminSourceClient.java`에 안전한 세션 검증 메서드 `checkAdmin(cookie)` 구현
+   - `MemberPresentationPageController.java` 및 `NativeHomeController.java`에서 `isAdmin` 모델 속성을 주입하여 `th:if="${isAdmin}"` 조건부 렌더링 강제
+3. **테스트 백엔드 500 로그인 오류 및 DB 권한 복구**:
+   - 테스트 DB(`mv-nov18-test-db-20261122`, 포트 55436) 내 `auth_local_credentials`에 대한 `moneyverse_app` 사용자의 SELECT/DML 권한 누락으로 발생하던 `bad SQL grammar (permission denied)` 결함 식별
+   - `moneyverse_migrator` 권한으로 `public` 스키마 전체 테이블/시퀀스/함수 권한 전면 부여 및 기본 권한(DEFAULT PRIVILEGES) 영구 설정 완료
+   - 로컬 로그인 API(`/api/v1/auth/local/login`) 정상 응답(`401 invalid credentials` / `200 signed-in`) 복구 검증 완료
+4. **로그인 UX 및 리다이렉트 흐름 개선**:
+   - `auth-core.js`: 로그인 성공 시 URL 파라미터 `?next=...` 경로를 자동 감지하여 목적지(`/bank`, `/wallet` 등)로 안전하게 리다이렉트되도록 개선
+   - `auth.html`: 조악한 브라우저 체크 더미 안내 문구 제거 및 정규 로그인 폼으로 정비
+5. **토스 스타일 4대 탭 금융 화면 및 차트 완결**:
+   - 은행(`/bank`): 4대 탭(통장 관리 / 정기예금·적금 복리 이자 계산기 / 가상 카드 발급·결제 / 이체·환전 내역) 실체 연동
+   - 지갑(`/wallet`): 수동 새로고침 버튼 0건, 실시간 소켓 동기화 인디케이터, 2단계 송금 확인 모달 연동
+   - 주식(`/stocks`): 주황색 임시 점검 배너 영구 제거, W-INDEX 50 실시간 SVG 인터랙티브 지수 차트 및 10대 상장사 호가창 정상화
+
+
+---
+## 🚀 [v9 Specification] 로그인 페이지 시안(v2026.11.23.10) 100% 일치화 및 운영 DB 계정 전수 복사 동기화
+- **작업 일시**: 2026-11-23 22:00
+- **반영 범위**:
+  1. **2열 그리드 레이아웃 및 CSP 인라인 차단 해소 (`auth.css`)**:
+     - `auth.html`의 인라인 그리드 스타일이 브라우저 CSP(`style-src 'self'`)에 의해 차단되던 결함 영구 해소
+     - 정적 스타일시트 `/assets/mv43/auth.css`를 신규 구축하여 데스크톱(뷰포트 860px 이상)에서 좌우 1.15fr : 0.85fr 나란히 배치(Side-by-Side, Y축 395px 완벽 일치) 렌더링 확인 완료
+     - 좌측 카드: `로그인 · 계정/정보 입력` (이메일/비밀번호/확인 버튼)
+     - 우측 카드: `안전한 이용` (Discord/Google 소셜 로그인 버튼, 약관 동의, 실시간 보안 검증 안내)
+     - 상단 히어로 배너: `현실 10분 = 서버 1일 · 서버 7일 = 서버 1주` 타임스케일 안내 및 원형 W 엠블럼 보존
+     - 상단 헤더: 중복 로그인 버튼 및 브라우저 선택창 제거, `내 계정` 단일 액션 링크 유지
+     - 사이드바: ✦ 스파클 0건 및 비인가 게스트 대상 `관리자` 메뉴 은닉 유지 (UI-04)
+  2. **디스코드 소셜 인가 라우트(`/auth/discord/authorize`) 404 해결**:
+     - Nginx `location ~ ^/auth/(discord|google)/authorize$` 및 `location ^~ /auth/` 프록시를 통해 백엔드(55438) 정상 포워딩
+     - 클릭 시 Discord 공식 OAuth2 인가 URL로 HTTP 302 정상 리다이렉트 및 로그인 창 호출 확인
+  3. **운영 서버 DB(`woldeok_moneyverse_dev`) 관리자/사용자 계정 및 비밀번호 검증기 전수 복사**:
+     - 운영 DB 내 등록된 7개 사용자 계정(`seungminlee14@naver.com`, `qa_admin@easy-scraping.com` 등)과 Argon2id 패스워드 검증기 해시, `user_roles` 권한 전수를 테스트 DB(`mv-nov18-test-db-20261122`)로 동기화 완료
+     - 운영 서버에서 사용하는 계정과 비밀번호 그대로 테스트 서버에서도 동일하게 인증 가능
+
+
+---
+## 🚀 [v10 Specification] 홈 대시보드(`/`) 최신 승인 시안(v2026.11.23.10/previews/home.png) 100% 일치화 구축
+- **작업 일시**: 2026-11-23 22:30
+- **반영 범위**:
+  1. **홈 화면 전용 스타일시트 분리 및 CSP 완전 호환 (`home.css`)**:
+     - 기존 인라인 스타일 및 레거시 스크립트 결함 원천 제거
+     - `home.css`를 구축하여 1440px 데스크톱 뷰포트 기준 좌우 1.15fr : 0.85fr 2열 그리드 및 히어로 네온 실루엣 완벽 렌더링
+  2. **상단 히어로 배너**:
+     - `✦ WOLDEOK MONEYVERSE • HOME`, 대형 헤딩 `홈 대시보드`
+     - `게임형 금융 · 가상경제 서비스 / 실제 서비스 기능 및 권한에 따라 표시`
+     - `서버 게임 시간 기준 / 현실 10분 = 서버 1일 · 서버 7일 = 서버 1주` 라운드 박스
+     - 네온 스카이라인 SVG + 문 글로우 + W 다이아몬드 크라운 엠블럼 렌더링
+  3. **하단 2열 듀얼 카드 레이아웃**:
+     - 좌측 카드 (`실제 자산 현황`): 게임 진행 상태, 최근 활동, 시계·퀘스트 다크 라운드 박스
+     - 우측 카드 (`홈 대시보드 · 주요 항목`): 실제 자산 현황 →, 게임 진행 상태 →, 최근 활동 →, 시계·퀘스트 → 링크 카드 및 화살표
+  4. **브라우저 실측 캡처 검증 완료**:
+     - `home_exact_v2026112310.png` 증적 확보
+
+
+---
+## 🚀 [v11 Specification] 운영 서버 실동작 대시보드(v2026.11.18.12 실데이터 연동) 100% 일치화 및 미승인 와이어프레임 더미 텍스트 완전 제거
+- **작업 일시**: 2026-11-23 23:05
+- **반영 범위**:
+  1. **미승인 와이어프레임 더미 텍스트 영구 제거**:
+     - `game-ui-v2026.11.23.10` 미승인 시안의 "승인된 서버 정보 또는 해당 페이지 원문을 연동" 정적 박스를 완전히 걷어내고, 운영 서버의 표준 동적 렌더링 컨테이너(`<div id="page-content" aria-live="polite"></div>`)로 복원
+  2. **운영 서버 실제 대시보드 구조 및 백엔드 API 연동 복원**:
+     - 상단 히어로 배너: `WOLDEOK MONEYVERSE` `My assets dashboard` `See your wallet, investments and activity in one place.`
+     - 실제 지갑 잔액 연동 (`/api/v1/wallet/summary`): 로그인 계정 잔액 실시간 로드 및 표출
+     - 빠른 작업 6종 그리드 버튼: 지갑(`/wallet`), 주식(`/stocks`), 퀘스트(`/quests`), 상점(`/shop`), 커뮤니티(`/board`), 고객지원(`/support`)
+     - 시장 시세 실시간 연동 (`/api/v1/stocks`): 8개 주식 종목(AAA, CHIMU314, DUCK, MYUY, SPACE, WDB, WDG, WDM)의 실시간 현재가, 변동률 테이블 렌더링
+     - 최신 게시글 피드 연동 (`/api/v1/board`)
+  3. **디스코드 OAuth 404 해결 최종 확인**:
+     - `https://test.easy-scraping.com/auth/discord/authorize` -> Nginx를 통해 테스트 백엔드(55438)로 프록시되어 HTTP 302 Found로 Discord 공식 OAuth 인증 화면 리다이렉트 정상 동작 검증 완료
+  4. **운영 서버 격리 보존 (Read-Only)**:
+     - 운영 환경(`easy-scraping.com`)은 절대 수정하지 않고, 독립된 테스트 환경(`test.easy-scraping.com`, 포트 55440)에서만 빌드 및 배포

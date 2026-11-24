@@ -6,11 +6,14 @@
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#0C1020">
   <meta name="description" content="W Moneyverse — personal finance, investing, quests and community">
-  <title th:text="${uiCopy[uiPageKey == 'home' ? 'personalTitle' : uiPageKey]} + ' · W Moneyverse'">My assets · W Moneyverse</title>
+  <title>내 자산 대시보드 · W Moneyverse</title>
   <link rel="stylesheet" href="/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31">
-  <script src="/assets/mv39/i18n.js?v=8c7cf8e55c170e6b527f93eaf8ce5a4b6e6e16034e35566fd9e1092a710d4fec" defer></script>
+  <link rel="stylesheet" href="/assets/mv43/chrome.css?v=20261123">
+  <script src="/assets/mv39/i18n.js?v=ee47eefcc4e63a309d88f841372a79121535f1e1100532b388a8842910501022" defer></script>
   <script src="/assets/mv39/money.js?v=9e95a9188599bc8d14d9743b3506f68af9fd17a63c6dd7db471e0d077d9283d5" defer></script>
   <script src="/assets/mv39/app.js?v=52ad65c1cc2a50c4f1fd932f710d423415663986e3a10776ed3668889e377bd1" defer></script>
+  <script src="/socket.io.min.js" defer></script>
+  <script src="/assets/mv43/chrome.js?v=d9f8a8987e748f00460eebfd7cab3ed5e07ddd75090569f9dcde64f0bb857a55" defer></script>
   <th:block th:replace="~{shared/chrome :: commonHead}"></th:block>
 </head>
 <body data-page="home" th:attr="data-page=${uiPageKey}">
@@ -22,20 +25,13 @@
       <th:block th:replace="~{shared/chrome :: pageHeader}"></th:block>
       <main id="main-content" tabindex="-1">
         <section class="hero" aria-labelledby="hero-title">
-        <section class="hero" aria-labelledby="hero-title">
-          <div><div class="eyebrow">WOLDEOK MONEYVERSE</div><h2 id="hero-title" th:attr="data-i18n=${uiPageKey == 'home' ? 'personalTitle' : uiPageKey + 'Hero'}" th:text="${uiCopy[uiPageKey == 'home' ? 'personalTitle' : uiPageKey + 'Hero']}">My assets</h2><p id="hero-description" th:attr="data-i18n=${uiPageKey + 'Lead'}" th:text="${uiCopy[uiPageKey + 'Lead']}">See your wallet, investments and activity in one place.</p></div>
-          <div class="hero-decoration" aria-hidden="true"><span class="realm-orbit"><span class="realm-core"><img src="/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5" width="120" height="120" alt=""></span></span></div>
-        </section>
-        <!-- Static policy summary only: never substitute this for a verified current game clock response. -->
-        <section class="game-clock-guide" aria-labelledby="game-clock-rule-title">
           <div>
-            <h3 id="game-clock-rule-title" class="game-clock-guide__title" data-i18n="gameClockTitle" th:text="${uiCopy['gameClockTitle']}">Server game time rules</h3>
-            <p class="game-clock-guide__note" data-i18n="gameClockNote" th:text="${uiCopy['gameClockNote']}">Planned rule; live calendar unverified.</p>
+            <div class="eyebrow">WOLDEOK MONEYVERSE</div>
+            <h2 id="hero-title" data-i18n="personalTitle">My assets dashboard</h2>
+            <p id="hero-description" data-i18n="homeLead">See your wallet, investments and activity in one place.</p>
           </div>
-          <div class="game-clock-guide__ratios" aria-label="Game time conversion rule" data-i18n-aria="gameClockConversion" th:attr="aria-label=${uiCopy['gameClockConversion']}">
-            <span data-i18n="gameClockRealMinutes" th:text="${uiCopy['gameClockRealMinutes']}">10 real min</span><b>=</b>
-            <span data-i18n="gameClockServerDay" th:text="${uiCopy['gameClockServerDay']}">1 server day</span>
-            <span data-i18n="gameClockServerWeek" th:text="${uiCopy['gameClockServerWeek']}">7 server days = 1 week</span>
+          <div class="hero-decoration" aria-hidden="true">
+            <span class="realm-orbit"><span class="realm-core">W</span></span>
           </div>
         </section>
         <div id="page-content" aria-live="polite"></div>
