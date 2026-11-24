@@ -44,3 +44,14 @@ setup 5cec6716767283f4675a05f5f8855b5b49c81783
 2026-11-24T18:07:25+09:00 CHECKPOINT OpenMontage composer setup attempt; no provider gateway or production services started
 2026-11-24T18:07:52+09:00 FINISH installed components verified; no application Test/Production promotion; external API credentials not configured
 ```
+
+## v2026.11.24.1814 — FreeLLMAPI gateway follow-up
+
+Owner authorized proceeding while disk cleanup is in progress. Installed pinned v0.16.42 image `ghcr.io/tashfeenahmed/freellmapi@sha256:87eeb14eed0e8815fb0b13d50611586d61139ddf542460ac27dda015bdfdb42d`. Container `moneyverse-freellmapi-local` binds `127.0.0.1:20129`, separate persistent volume, restart unless-stopped, 768 MiB RAM, 0.75 CPU, 128 PIDs, bounded logs. Ping and dashboard HTTP 200, unauthenticated models HTTP 401; existing OmniRoute health OK. Provider keys and real model calls not configured/tested. Disk cleanup untouched. No app Test/Production deployment. Main: `9876c09888ec84034eec183cf1309c85df3d7447`.
+
+```text
+2026-11-24T18:13:48+09:00 START FreeLLMAPI gateway follow-up authorized by owner; disk cleanup concurrent, no cleanup by this task
+2026-11-24T18:14:01+09:00 CHECKPOINT gateway immutable image resolved; credentials generated locally and not logged
+2026-11-24T18:14:25+09:00 CHECKPOINT gateway started; loopback ping and existing OmniRoute health verified
+2026-11-24T18:14:43+09:00 FINISH FreeLLMAPI gateway HTTP ping and dashboard 200, unauthenticated models 401, local only; no application deployment
+```
