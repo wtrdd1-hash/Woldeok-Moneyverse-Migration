@@ -1,6 +1,9 @@
 ## v2026.11.24.0818 — Google Stitch Skills source-only pilot (branch only)
 Local design extraction skill, EN/KO approved Nov-18 DESIGN.md, and 11-token CSS contract PASS. Stitch MCP, UI generation, Test and Production remain unperformed. [Details](development/GOOGLE_STITCH_SKILLS_PILOT_v2026.11.24.0818.md).
 
+## v2026.11.22.2041.1 — Instagram UI-100 visual reference and design naming guidance (PLANNING / DOCS ONLY)
+- Read Instagram official metadata plus 22-second reel; retained original URL, publisher, observed UI vocabulary, source limitations and owner-approved November 18 Spring UI mapping. EN/KO [source](research/2026-11-22-instagram-uxwoodytips-ui-100-v2041.md) / [KO](research/2026-11-22-instagram-uxwoodytips-ui-100-v2041.ko.md); [worklog](worklog/2026-11-22-instagram-ui-glossary-v2041.md). Unverified full 100-term dictionary, no app/Test/Production changes.
+
 ## v2026.11.10.1948 — National Mint UI/monetary policy verified in real Production v1947
 
 ## v2026.11.21.2234 — Permanent AgentMemory coding-reference preservation and safe task memory (DOCUMENTATION ONLY)
