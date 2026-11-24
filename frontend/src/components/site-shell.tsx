@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { GameSidebar } from '@/components/game-sidebar';
 import { GameTopbar } from '@/components/game-topbar';
 import { GameMobileDock } from '@/components/game-mobile-dock';
+import { LedgerStrip } from '@/components/g2/ledger-strip';
 import { ClientErrorReporter } from '@/components/client-error-reporter';
 
 /**
@@ -26,6 +27,7 @@ export function SiteShell({ children }: { readonly children: React.ReactNode }) 
 
       <div className="flex min-w-0 flex-1 flex-col">
         <GameTopbar />
+        <LedgerStrip />
         <main id="main" className="moneyverse-main mx-auto w-full max-w-[1440px] flex-1 px-4 pb-[calc(env(safe-area-inset-bottom)+5rem)] pt-5 sm:px-6 lg:px-8 lg:pb-10 lg:pt-6">
           {children}
         </main>

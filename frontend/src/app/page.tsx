@@ -5,7 +5,6 @@ import { GuestQuickstart } from '@/components/guest-quickstart';
 import { WalletGlance } from '@/components/wallet-glance';
 import { P2PTransferModal } from '@/components/p2p-transfer-modal';
 import { PublicAdvertisement } from '@/components/public-advertisement';
-import { ServerClockPill } from '@/components/server-clock-pill';
 import { GuestOnly, MemberOnly } from '@/components/g1/viewer-gate';
 import { apiOrNull } from '@/lib/api';
 import { getServerLocale } from '@/lib/locale-server';
@@ -128,8 +127,6 @@ export default async function HomePage() {
   const priced = (marketData?.stocks ?? [])
     .map((stock) => ({ stock, bp: moveBasisPoints(stock) }))
     .filter((row): row is { stock: StockItem; bp: bigint } => row.bp !== null);
-  const rising = priced.filter((row) => row.bp > 0n).length;
-  const falling = priced.filter((row) => row.bp < 0n).length;
   const movers = [...priced]
     .sort((a, b) => {
       const left = a.bp < 0n ? -a.bp : a.bp;
@@ -146,28 +143,13 @@ export default async function HomePage() {
         {HOME_H1_BY_LOCALE[locale] ?? HOME_H1_BY_LOCALE.en}
       </h1>
 
-      {/* QA GH-01/GH-08: a compact status strip instead of a tall decorative
-          banner — what the server clock means and how the market stands now. */}
-      <section aria-labelledby="home-status-heading" className="g1-panel flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <h2 id="home-status-heading" className="g1-display text-2xl text-[var(--g1-ink)]">길드 홀</h2>
-          <p className="text-sm text-[var(--g1-muted)]">오늘의 월덕 시장과 내 길드 진행 상황입니다.</p>
-        </div>
-        <dl className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm sm:flex sm:items-center sm:gap-6">
-          <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
-            <dt className="text-xs text-[var(--g1-muted)]">서버 시간 (현실 10분 = 서버 하루)</dt>
-            <dd><ServerClockPill className="w-fit" /></dd>
-          </div>
-          <div className="flex flex-col gap-1">
-            <dt className="text-xs text-[var(--g1-muted)]">오늘 상승</dt>
-            <dd className="g1-num text-lg text-[var(--g1-ember)]">{priced.length ? `${rising}종목` : '—'}</dd>
-          </div>
-          <div className="flex flex-col gap-1">
-            <dt className="text-xs text-[var(--g1-muted)]">오늘 하락</dt>
-            <dd className="g1-num text-lg text-[var(--g1-rare-rare)]">{priced.length ? `${falling}종목` : '—'}</dd>
-          </div>
-        </dl>
-      </section>
+      {/* G2: the global ledger strip above carries server time, market breadth,
+          base rate and balance (QA GH-01/GH-08), so the home head is just its
+          name and one line of context. */}
+      <header className="flex flex-col gap-1">
+        <h2 id="home-status-heading" className="g1-display text-[28px] leading-tight text-[var(--g1-ink)]">길드 홀</h2>
+        <p className="text-sm text-[var(--g1-muted)]">오늘의 월덕 시장과 길드 소식입니다.</p>
+      </header>
 
       {/* QA GH-03: guests keep the no-signup entry; members never see it. */}
       <GuestOnly>

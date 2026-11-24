@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { apiOrNull } from '@/lib/api';
 import { submitLocalLogin } from './actions';
-import { G1PageHero } from '@/components/g1/page-hero';
+import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,7 +24,7 @@ export async function LoginProvidersView({
 
   return (
     <div className="flex flex-col gap-4">
-      <G1PageHero title="로그인" lead="길드 문을 열고 모험을 이어가세요. 디스코드, 구글 또는 자체 계정으로 들어올 수 있습니다." scene="gate" />
+      <PageHeader title="로그인">디스코드, 구글 또는 자체 계정으로 들어옵니다.</PageHeader>
 
       {notice && (
         <p role="status" className="g1-panel text-sm text-[var(--g1-ink)]">

@@ -6,7 +6,7 @@ import { V10_ICONS } from '@/components/game-sidebar';
 import { V10_MOBILE_DOCK, isNavItemActive } from '@/components/v10-nav';
 import { useMountedViewer } from '@/components/use-mounted-viewer';
 
-/** G1 five-tab dock; the quest tab is raised in the centre as the game's main loop. */
+/** G2 five-tab dock: flat, the active tab marked in violet (approved G2 previews). */
 export function GameMobileDock() {
   const pathname = usePathname() ?? '/';
   const viewer = useMountedViewer();
@@ -21,24 +21,17 @@ export function GameMobileDock() {
           const active = isNavItemActive(item, pathname);
           const Icon = V10_ICONS[item.icon];
           const href = item.icon === 'account' && !viewer?.signedIn ? '/login' : item.href;
-          const center = item.icon === 'quest';
           return (
             <li key={item.href}>
               <Link
                 href={href}
                 prefetch={false}
                 aria-current={active ? 'page' : undefined}
-                className={`flex min-h-[60px] flex-col items-center justify-end gap-1 pb-2 text-xs transition-transform duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--g1-gold)] ${
+                className={`flex min-h-[60px] flex-col items-center justify-center gap-1 text-xs transition-transform duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--g1-gold)] ${
                   active ? 'font-semibold text-[var(--g1-ink)]' : 'text-[var(--g1-muted)]'
                 }`}
               >
-                {center ? (
-                  <span className="-mt-7 flex size-12 items-center justify-center rounded-full bg-[var(--g1-violet-ink)] text-[var(--g1-ink)] shadow-[0_0_0_4px_var(--g1-night-2)]">
-                    <Icon className="size-6" aria-hidden />
-                  </span>
-                ) : (
-                  <Icon className={`size-6 ${active ? 'text-[var(--g1-gold)]' : ''}`} aria-hidden />
-                )}
+                <Icon className={`size-5 ${active ? 'text-[var(--g1-violet)]' : ''}`} aria-hidden />
                 <span>{item.label}</span>
               </Link>
             </li>
