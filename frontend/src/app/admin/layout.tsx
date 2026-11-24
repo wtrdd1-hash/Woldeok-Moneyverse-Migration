@@ -1,11 +1,28 @@
+import { notFound, redirect } from 'next/navigation';
 import { AdminSubNav } from '@/components/admin-sub-nav';
+import { currentViewer, isAdministrator } from '@/lib/viewer';
 import './admin-console-theme.css';
 
+// Per-caller decision; never prerender or cache this frame.
+export const dynamic = 'force-dynamic';
+
 /**
- * Shared visual shell for the existing protected admin routes.
- * Server/API access remains guarded in each page and endpoint, unchanged.
+ * Server gate for every /admin route. The API still re-decides each request;
+ * this only keeps the console's menu and structure out of the HTML served to
+ * someone who is not an administrator (CURRENT_UI_DESIGN.md: administrator
+ * navigation renders only for server-authorized admins). Signed-out callers
+ * are sent to log in; signed-in non-administrators get a plain 404 so the
+ * console's existence is not confirmed to them.
  */
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const viewer = await currentViewer();
+  if (!viewer.signedIn) redirect('/login?next=%2Fadmin');
+  if (!isAdministrator(viewer)) notFound();
+  return <AdminConsoleFrame>{children}</AdminConsoleFrame>;
+}
+
+/** Shared visual shell for the protected admin routes. */
+export function AdminConsoleFrame({ children }: { children: React.ReactNode }) {
   return (
     <div
       data-admin-theme="v2026.11.18.17"
