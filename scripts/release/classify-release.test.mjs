@@ -272,10 +272,12 @@ test('reviewed design notes, upstream license and immutable QA reports are close
     '.stitch/DESIGN.md', '.stitch/DESIGN.ko.md',
     'docs/qa/evidence/2026-11-24-native-scoped-test/browser-60-external.json',
     'docs/qa/evidence/2026-11-24-native-scoped-test/test-release-manifest.json',
+    'docs/design/asset-resources-v2026.11.23.12/source-catalog.json',
   ]) assert.equal(classifyPaths([path]), 'DOCS_ONLY', path);
   for (const path of [
     '.agents/skills/stitch-extract-design-md/LICENSE.upstream.js',
     '.stitch/DESIGN.json', '.stitch/other.md',
+    'docs/design/asset-resources-v2026.11.23.12/other.json',
     'docs/qa/evidence/2026-11-24-native-scoped-test/other.json',
     'docs/qa/evidence/other/test-release-manifest.json',
   ]) assert.equal(classifyPaths([path]), 'UNKNOWN', path);

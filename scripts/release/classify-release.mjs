@@ -22,6 +22,7 @@ const REVIEWED_DOCUMENT_PATHS = new Set([
   '.stitch/DESIGN.ko.md',
   'docs/qa/evidence/2026-11-24-native-scoped-test/browser-60-external.json',
   'docs/qa/evidence/2026-11-24-native-scoped-test/test-release-manifest.json',
+  'docs/design/asset-resources-v2026.11.23.12/source-catalog.json',
 ]);
 
 

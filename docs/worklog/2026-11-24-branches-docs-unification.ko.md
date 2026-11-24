@@ -63,3 +63,6 @@ Integrated exact0e3bbd9535. Existing candidate already contains its authored leg
 
 ### Publication child tip reconciled
 Integrated exact62610a5f62 by content comparison. Publication policy/read filtering and tests already exist in the later integrated parent; retained the later legal controller, localized title contract, full bank copy and complete progress evidence. No raw table grants, fake source data or private-public publication relaxation introduced. All captured maximal heads are now checked for ancestry before final validation.
+
+### Exact discovery catalog taxonomy
+GitHub correctly refused UNKNOWN for the imported27-source discovery catalog. Read the complete JSON: discovery metadata/URLs only, no approved assets or executable content. Registered only this exact dated path as documentation, preserving adjacent JSON UNKNOWN and file-mode checks. Regression RED1 then classifier28/28 GREEN; no lane bypass.
