@@ -147,7 +147,7 @@ export function GameSidebar() {
             <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />
             </svg>
-            <span>{viewer?.signedIn ? (viewer.nickname ?? '내 계정') : '내 계정'}</span>
+            <span>내 계정</span>
           </Link>
         </nav>
       </div>

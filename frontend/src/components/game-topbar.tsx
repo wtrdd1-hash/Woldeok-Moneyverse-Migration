@@ -53,7 +53,7 @@ export function GameTopbar() {
           href={viewer?.signedIn ? '/account' : '/login'}
           className="bg-[#14142b] border border-[#2b274e] hover:border-[#7c3aed] text-xs font-bold text-[#c5c0e0] hover:text-white px-4 py-2 rounded-xl transition-all"
         >
-          {viewer?.signedIn ? (viewer.nickname ?? '내 계정') : '내 계정'}
+          {viewer?.signedIn ? '내 계정' : '내 계정'}
         </Link>
       </div>
     </header>

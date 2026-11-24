@@ -19,7 +19,7 @@ export default async function HomePage() {
   const wallet = await apiOrNull<WalletSummary>('/api/v1/wallet/summary');
 
   const signedIn = viewer?.signedIn ?? false;
-  const nickname = viewer?.nickname ?? '여행자';
+  const nickname = signedIn ? '회원' : '여행자';
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-[1240px] mx-auto animate-fade-in">
