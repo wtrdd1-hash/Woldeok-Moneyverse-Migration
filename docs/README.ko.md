@@ -1,5 +1,7 @@
 # 월덕 머니버스 문서
 
+**신규 기획 참고 v2026.11.23.12:** [27개 디자인 리소스 상세 구축기획](planning/REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.ko.md) / [영문 정본](planning/REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.md) — 사용처 검토·도입 게이트만 수립, 실제 배포 아님.
+
 **DOC-2026.11.11.1500 — [최신 문서·권위·검증 현황](CURRENT_DOCUMENTATION_STATUS.ko.md) / [English](CURRENT_DOCUMENTATION_STATUS.md).** 아래 과거 기록은 현재 운영 기능 인증이 아님. 통합기획서와 실측 영수증을 우선하며, 기록 시점 테스트 버전 API는 HTTP 502였음. 문서만 변경.
 
 

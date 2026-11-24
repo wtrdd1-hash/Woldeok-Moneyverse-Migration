@@ -1,5 +1,7 @@
 # Woldeok Moneyverse Documentation
 
+**New planning reference v2026.11.23.12:** [27 design-source implementation guide](planning/REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.md) / [한국어](planning/REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.ko.md) — discovery and adoption gates only, no app release.
+
 **DOC-2026.11.11.1500 — [Current evidence/authority navigation](CURRENT_DOCUMENTATION_STATUS.md) / [한국어](CURRENT_DOCUMENTATION_STATUS.ko.md).** This index contains historical descriptions; follow the living project plan and exact runtime evidence rather than treating old release labels as current. Documentation-only; Test version API was HTTP 502 at the recorded time.
 
 
