@@ -73,7 +73,9 @@ class UnifiedFrontendIsolationTest {
         assertEquals(List.of("/api/v1/admin/me"),sourcePaths);
     }
     @Test void incompleteFeatureCandidatesAndMutationsAreNotActivatedByComposition() throws Exception {
-        for(String path:List.of("/stocks","/shop","/board","/account","/api/v1/admin/users","/actuator/env"))assertEquals(403,get(path,COOKIE).statusCode(),path);
+        sourcePaths.clear();assertEquals(503,get("/stocks",COOKIE).statusCode(),"Finance with unverifiable member identity must fail closed");
+        sourcePaths.clear();
+        for(String path:List.of("/shop","/board","/account","/api/v1/admin/users","/actuator/env"))assertEquals(403,get(path,COOKIE).statusCode(),path);
         var request=HttpRequest.newBuilder(base.resolve("/admin/users")).header("Cookie",COOKIE).POST(HttpRequest.BodyPublishers.ofString("{}")).build();
         assertEquals(403,browser.send(request,HttpResponse.BodyHandlers.discarding()).statusCode());assertTrue(sourcePaths.isEmpty());
     }

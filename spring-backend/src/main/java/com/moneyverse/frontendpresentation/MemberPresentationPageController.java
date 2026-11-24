@@ -19,12 +19,13 @@ public final class MemberPresentationPageController {
     private final AdminSourceClient source;private final UiPageRenderer pages;
     public MemberPresentationPageController(AdminSourceClient source,UiPageRenderer pages){this.source=source;this.pages=pages;}
     private static Map<String,String> routes(){
-        var result=new HashMap<String,String>();for(String family:List.of("wallet","support","chat"))
+        var result=new HashMap<String,String>();for(String family:List.of("wallet","support","chat","bank","stocks"))
             for(String suffix:List.of("","/",".html","/index.html"))result.put("/"+family+suffix,family);
         return Map.copyOf(result);
     }
     @GetMapping(value={"/wallet","/wallet/","/wallet.html","/wallet/index.html","/support","/support/","/support.html","/support/index.html",
-        "/chat","/chat/","/chat.html","/chat/index.html"},produces=MediaType.TEXT_HTML_VALUE)
+        "/chat","/chat/","/chat.html","/chat/index.html",
+        "/bank","/bank/","/bank.html","/bank/index.html","/stocks","/stocks/","/stocks.html","/stocks/index.html"},produces=MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<String> show(HttpServletRequest request){
         Object match=request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
         String family=match instanceof String route?ROUTES.get(route):null;
@@ -38,6 +39,8 @@ public final class MemberPresentationPageController {
             return new ResponseEntity<>(pages.render("mv43/member-unavailable",request,model),headers,
                 failure.status()==403?HttpStatus.FORBIDDEN:HttpStatus.SERVICE_UNAVAILABLE);
         }
+        if(family.equals("bank")||family.equals("stocks"))
+            return new ResponseEntity<>(pages.render("mv43/member-unavailable",request,model),headers,HttpStatus.SERVICE_UNAVAILABLE);
         if("1".equals(request.getHeader("RSC"))||request.getParameter("_rsc")!=null)
             return new ResponseEntity<>("",headers,HttpStatus.NOT_ACCEPTABLE);
         return new ResponseEntity<>(pages.render("mv43/"+family,request,model),headers,HttpStatus.OK);
