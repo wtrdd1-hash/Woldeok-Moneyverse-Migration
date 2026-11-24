@@ -5800,3 +5800,95 @@ eserves: ??쒕?援??명솚蹂댁쑀???듯빀怨꾩젙)
   3. 로그인 화면 (`mv43/auth.html` & `auth.css`): v10 시안 1:1 일치 듀얼 카드(입력 폼, 소셜 로그인, 보라 버튼) 구축
   4. 은행 및 주식 (`mv43/bank.html`, `mv43/stocks.html`): v10 3열/2열 테마 카드 및 실시간 데이터 테이블 바인딩
   5. 원격 테스트 서버(55440) 배포 및 브라우저 서브에이전트 실측 대조 검증
+
+
+---
+## 🚀 [v14 Specification] Claude Code 환경 셋팅, Gemini-Claude-GPT 삼자 핑퐁 협업 시스템 및 최신 개발 스킬 10종 패키지 동기화
+- **작업 일시**: 2026-11-24 09:47 KST
+- **작업자**: **Gemini / Claude / GPT** (Tri-Agent Ping-Pong Council)
+- **작업 번호 (Task ID)**: `TASK-20261124-05`
+- **사용자 핵심 지시**: "클로드 셋팅해줘 스킬등 다 미니 pc 설치해줘 제미나이 클로드 gpt 핑퐁가능하게 셋탕하고 검색해서 개발좋은 개발 등 스킬등 다설치해봐 인스타등 다 많은정보 찾고 스킬설치해줘 깃허브 좋은것등 다확인해봐"
+- **설치 및 환경 구성 내역**:
+  1. **Claude Code CLI 글로벌 설치 & PATH 영구 등록**:
+     - `npm install -g @anthropic-ai/claude-code` 완료 (`v2.1.331`).
+     - 실행 경로: `C:\Users\sds\AppData\Roaming\npm\claude.cmd`.
+     - 사용자 환경 변수 `PATH`에 영구 등록 완료 (`claude` 전역 실행 가능).
+  2. **Claude 전역 및 프로젝트별 가이드라인 구축**:
+     - 글로벌 지침: `C:\Users\sds\.claude\CLAUDE.md` (한국어 응답, 도구 실행 전 설명, 최소 diff, 검증 우선, AI 워터마크 금지).
+     - 프로젝트 가이드: `c:\Users\sds\Desktop\tset\Woldeok-Moneyverse-Migration\CLAUDE.md` (v10 게임 테마 준수, 단일 진실 원천 누적 기록).
+  3. **Gemini ↔ Claude ↔ GPT 삼자 핑퐁 오케스트레이션 시스템 구축**:
+     - 신규 스킬: `cross-model-pingpong-orchestrator`
+     - 신규 스킬: `agent-prompt-pingpong-collaboration`
+     - 4단계 핑퐁 파이프라인 (Task 발의 $\rightarrow$ 1차 구현 $\rightarrow$ 교차 핑퐁 반론/리뷰 $\rightarrow$ 실측 자가검증 수렴).
+     - 작업 원장: 작업자 표기(`[Claude Code]`, `[Gemini]`, `[GPT-Codex]`) 및 `TASK-ID` 감사 추적.
+  4. **최신 고품질 개발 스킬 10종 에이전트 간 동기화 (`~/.gemini/custom-skills`, `~/.claude/skills`, `~/.codex/skills`)**:
+     - `cross-model-pingpong-orchestrator`: 삼자 협업 오케스트레이션 및 역할 분담.
+     - `agent-prompt-pingpong-collaboration`: 에이전트 간 비판적 피드백 및 핑퐁 리뷰 템플릿.
+     - `modern-frontend-craftsmanship`: Next.js 16, React 19, Tailwind CSS, 320px 모바일 방어.
+     - `fintech-decimal-ledger-guard`: 금융 원장, Decimal 연산, 이중 지출 방지 멱등성 락.
+     - `anti-ai-frontend-craftsmanship`: 인간 디자이너 수준의 고감도 게임/핀테크 인터랙션.
+     - `fintech-responsive-layout-engine`: 모바일 횡스크롤 제로 및 44px 터치 타깃.
+     - `multi-viewport-resilience-shield`: 전 뷰포트 레이아웃 붕괴 방지 실측 가이드.
+     - `spec-driven-development`: Addy Osmani 패턴 사양 중심 개발.
+     - `systematic-debugging`: 증상 패치가 아닌 4단계 근본 원인 해결 디버깅.
+     - `test-driven-development`: TDD 레드-그린-리팩터 사이클.
+
+
+---
+## 🚀 [v15 Specification] 글로벌 에이전트 스킬 생태계 연동 및 22종 프로덕션 스킬 풀(Pool) 동기화
+- **작업 일시**: 2026-11-24 09:53 KST
+- **작업자**: **Gemini / Claude / GPT** (Tri-Agent Ping-Pong Council)
+- **작업 번호 (Task ID)**: `TASK-20261124-06`
+- **사용자 핵심 지시**: "더많은 스킬찾아봐"
+- **적용 및 설치 내역**:
+  1. **오픈소스 글로벌 에이전트 스킬 매니저(`npx skills`) 연동**:
+     - `skills@1.9.0` 연동을 통해 글로벌 스킬 레지스트리(`skills.sh`) 실시간 검색 및 자동 설치 파이프라인 확보.
+  2. **Vercel Labs 공식 엔지니어링 스킬 4종 도입**:
+     - `vercel-react-best-practices`: React 19 / Next.js 16 공식 성능 최적화 가이드라인.
+     - `vercel-composition-patterns`: 불필요한 prop 확산 방지 및 컴포넌트 합성 아키텍처.
+     - `vercel-react-view-transitions`: View Transitions API 기반 네이티브 감도 애니메이션.
+     - `web-design-guidelines`: 웹 인터페이스 접근성 및 디자인 시스템 감사.
+  3. **Anthropic 공식 핵심 스킬 5종 도입**:
+     - `frontend-design`: 템플릿 느낌을 탈피한 독창적 비주얼 디자인 및 타이포그래피.
+     - `web-artifacts-builder`: React, Tailwind CSS, shadcn/ui 기반 고감도 웹 아티팩트 빌더.
+     - `webapp-testing`: Playwright 기반 로컬 웹앱 E2E 테스팅, 브라우저 스크린샷 및 UI 디버깅.
+     - `mcp-builder`: FastMCP 및 TypeScript 기반 고품질 MCP 서버 개발 툴킷.
+     - `theme-factory`: 테마 및 컬러/폰트 팔레트 생성/스타일링 팩토리.
+  4. **보안 및 런타임 버그 탐지 스킬 3종 도입**:
+     - `security-and-hardening`: Google Chrome 리드 Addy Osmani의 프로덕션 웹 보안 하드닝 가이드.
+     - `security-review`: Sentry 공식 보안 취약점 감사 및 위협 모델링.
+     - `find-bugs`: Sentry 공식 런타임 잠재 결함, 레이스 컨디션 및 널 참조 탐지.
+  5. **에이전트 삼자 동기화 완료 (`~/.gemini/config/skills`, `~/.claude/skills`, `~/.codex/skills`)**:
+     - 총 22종의 최고급 엔지니어링 스킬이 미니 PC의 Claude Code, Gemini, Codex 3개 에이전트에 동일하게 완전 복제 및 동기화 배포됨.
+
+
+---
+## 🚀 [v16 Specification] PR #3437(길드 홈 비주얼 QA) 및 PR #3430 반영: 8대 결함(GH-01~GH-08) 전면 해결 및 4영역 벤토 그리드(Bento Grid) 쇄신
+- **작업 일시**: 2026-11-24 16:56 KST
+- **작업자**: **Gemini / Claude / GPT** (Tri-Agent Ping-Pong Council)
+- **작업 번호 (Task ID)**: `TASK-20261124-GH-REMEDY`
+- **사용자 핵심 지시**: "https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/blob/0d6bdc94e2d5bb1593f2e50b08f3d08636c5ea77/docs/qa/2026-11-24-guild-home-visual-review-v2026.11.24.1646.ko.md?utm_source=chatgpt.com 보고진행하고 문서남겨유. 근데최신pr 보고 마젖니행할것"
+- **참조 PR 및 브랜치**:
+  - **PR #3437**: `docs: guild home visual QA v2026.11.24.1646` (Owner 스크린샷 8대 결함 분석 리포트)
+  - **PR #3430**: `fix(blog,frontend): restore Production blog details and connect Next v10 shell to Test Spring` (`fe/next-spring-test-connect-20261124`, 795 files changed)
+  - **PR #3428**: `design: v12 route-specific redesign program` (`design/v2026.11.24.12-rebuild`)
+- **8대 결함(GH-01 ~ GH-08) 해결 및 조치 내역**:
+  1. **GH-01 (P1 - 히어로 배너 슬림화)**: 높이 250px 과대 배너를 140~160px로 슬림하게 압축, 여백을 줄이고 정보 밀도 향상.
+  2. **GH-02 (P1 - 과도한 보라/금색 테두리 정돈)**: 승인된 딥 네이비(`bg-[#0c1020]`, `bg-[#11162b]`) 베이스에 바이올렛/인디고 악센트 적용, 금색 남발 방지 및 실제 WLD 통화 수치에만 한정.
+  3. **GH-03 (P1 - 게스트/회원 위계 재조정)**: 비로그인 게스트 시에는 콤팩트한 로그인 CTA를 제공하고, 로그인 회원에게는 실제 금융 원장과 시장 지표를 최우선 노출.
+  4. **GH-04 (P1/P0 - 자산 잔액 연동 & 비로그인 송금 방어)**: '잔액 확인 중' 텍스트 방치를 해소하고, 로그인 시 현금/예금/순자산을 `font-mono tabular-nums`로 표시하며, 비로그인 시 송금 접근을 원천 차단하고 로그인 유도.
+  5. **GH-05 (P1 - 공지 카드 여백 및 정보화)**: 한 줄 불안정 문구 대신 시스템/서버 공지 리스트와 날짜 뱃지를 동적 렌더링하고 하단 빈 여백 완전 제거.
+  6. **GH-06 (P1 - 타이포그래피 위계 정립)**: `font-extrabold` 과용을 배제하고 레이블-수치-설명 간 정밀한 폰트 스케일 및 `tabular-nums` 적용.
+  7. **GH-07 (P1 - 게임/가상경제 벤토 그리드 구축)**: 2열 단순 카드에서 탈피하여 **4영역 벤토 그리드(Bento Grid)** 신설:
+     - 영역 A: 내 자산 현황 (지갑 현금, 은행 예치금, 총 순자산)
+     - 영역 B: 실시간 W-INDEX 50 가상 주식 지수 및 변동률
+     - 영역 C: 실시간 시스템 공지 및 라이브 피드
+     - 하단: 은행 예적금, 주식 거래소, 카지노/아케이드, 퀘스트 퀵 액션 허브
+  8. **GH-08 (P1 - 서버 시간 명확화)**: '서버 10분 = 현실 1일' 안내 칩 및 실시간 서버 시간(10181일차 1455주 3일) 뱃지 통합.
+- **수정 및 동기화 파일**:
+  - `docs/qa/2026-11-24-guild-home-remedy-action-plan-v2026.11.24.1650.ko.md` (공식 조치 계획서 신규 작성)
+  - `frontend/src/app/page.tsx` (Next.js 16 벤토 그리드 대시보드 쇄신 완료)
+  - `spring-backend/src/main/resources/templates/mv43/home.html` (Spring Boot 템플릿 동기화)
+  - `spring-backend/src/main/resources/static/assets/mv43/home.css` (벤토 그리드 반응형 스타일 반영)
+- **검증 결과**:
+  - `npm run typecheck` (`tsc --noEmit`): **0 errors 통과**
