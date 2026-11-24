@@ -5782,3 +5782,21 @@ eserves: ??쒕?援??명솚蹂댁쑀???듯빀怨꾩젙)
   3. **320px 모바일 ~ 1440px 데스크톱 반응형 방어 아키텍처**:
      - 헤더/모달 내 상태 뱃지(`credit-grade-badge`, `tag-pill`, `stocks-profit-badge`)에 `flex-shrink: 0`을 부여하여 모바일 화면에서 찌그러짐 및 텍스트 클리핑 원천 차단.
      - 최소 44px 이상의 터치 타깃 확보 및 모바일 가로 스크롤 제로(Body Overflow Zero) 보장.
+
+---
+## 🚀 [v13 Specification] 11월 23일 v10 PR 최신 게임 테마 디자인 시안 기준 프론트엔드 전면 재구축
+- **작업 일시**: 2026-11-24 09:10 KST
+- **작업자**: **Gemini / GPT** (Antigravity Agent & Upstream Planner)
+- **작업 번호 (Task ID)**: TASK-20261124-04
+- **사용자 핵심 지시**: "처음부터 프론트엔드 다시 작성해 디자인시안보면서 많은스킬사용해. 11월23일 pr 등에있는 최신디자인기준으로구축할것"
+- **적용 스킬 체계**:
+  - `anti-ai-frontend-craftsmanship`: 뻔한 템플릿 제거, 미드나잇 사이버 펑크 네온 바이올렛 게임 테마 픽셀 퍼펙트 구현
+  - `cross-surface-visual-hierarchy-architect`: PC 1280px 데스크톱 및 390px 스마트폰 뷰포트 시각적 위계 보존
+  - `fintech-responsive-layout-engine`: 모바일 횡스크롤 제로 (Zero-Overflow), 44px 터치 타깃 확보
+  - `interactive-minigame-web-engine`: 네온 스카이라인 SVG, 달 글로우, 보석 왕관 로고 배지 인터랙티브 최적화
+- **단계별 구현 범위**:
+  1. 공통 셸 (`shared/chrome.html` & `chrome.css`): 사이드바 및 탑바 11월 23일 v10 시안 100% 일치화
+  2. 홈 대시보드 (`mv43/home.html` & `home.css`): 커밋 `3bb2cc184` v10 네온 도시/달/W 배지 히어로 + 2열 그리드 복원 및 실데이터 바인딩
+  3. 로그인 화면 (`mv43/auth.html` & `auth.css`): v10 시안 1:1 일치 듀얼 카드(입력 폼, 소셜 로그인, 보라 버튼) 구축
+  4. 은행 및 주식 (`mv43/bank.html`, `mv43/stocks.html`): v10 3열/2열 테마 카드 및 실시간 데이터 테이블 바인딩
+  5. 원격 테스트 서버(55440) 배포 및 브라우저 서브에이전트 실측 대조 검증

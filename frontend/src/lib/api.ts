@@ -79,7 +79,14 @@ interface ProblemDocument {
 }
 
 function internalToken(): string {
-  const token = process.env.INTERNAL_API_TOKEN ?? '8e5f2a1b9c3d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f';
+  const token = process.env.INTERNAL_API_TOKEN;
+  if (!token) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('FATAL: INTERNAL_API_TOKEN environment variable is missing in production');
+    }
+    // Development fallback
+    return 'dev-internal-token-local';
+  }
   return token;
 }
 

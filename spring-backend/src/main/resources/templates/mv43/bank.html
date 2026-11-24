@@ -8,7 +8,9 @@
   <meta name="description" content="W Moneyverse Bank — compound interest deposits, saving pockets, credit loans and virtual bonds">
   <title>가상 은행 & 복리 예금 · W Moneyverse</title>
   <link rel="stylesheet" href="/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31">
-  <link rel="stylesheet" href="/assets/mv43/bank.css">
+  <link rel="stylesheet" href="/assets/mv43/chrome.css?v=20261124v10">
+  <link rel="stylesheet" href="/assets/mv43/game-ui-v10.css?v=20261124v10">
+  <link rel="stylesheet" href="/assets/mv43/bank.css?v=20261124v10">
   <script src="/assets/mv39/i18n.js?v=ee47eefcc4e63a309d88f841372a79121535f1e1100532b388a8842910501022" defer></script>
   <script src="/assets/mv39/money.js?v=9e95a9188599bc8d14d9743b3506f68af9fd17a63c6dd7db471e0d077d9283d5" defer></script>
   <script src="/assets/mv43/bank.js" defer></script>
@@ -22,13 +24,45 @@
     <div class="app-inner">
       <th:block th:replace="~{shared/chrome :: pageHeader}"></th:block>
       <main id="main-content" tabindex="-1">
-        <section class="hero" aria-labelledby="hero-title">
-          <div>
-            <div class="eyebrow"><svg class="eyebrow-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M4 10v7h3v-7H4zm6 0v7h3v-7h-3zM2 22h19v-3H2v3zm14-12v7h3v-7h-3zm-4.5-9L2 6v2h19V6l-9.5-5z"/></svg> WOLDEOK BANKING</div>
-            <h2 id="hero-title">가상 은행 & 복리 예금</h2>
-            <p id="hero-description">매일 실시간 복리 이자가 붙는 월덕뱅크. 예적금, 저축 팟, 가상 신용 대출을 한곳에서 안전하게 이용하세요.</p>
+        
+        <!-- 1. Game-Economy Hero Banner with Neon City Skyline & W Emblem -->
+        <section class="game-hero-banner" aria-labelledby="bank-hero-title">
+          <div class="game-hero-left">
+            <div class="game-hero-eyebrow">
+              <span>✦</span>
+              <span>WOLDEOK MONEYVERSE • FINANCE</span>
+            </div>
+            <h2 id="bank-hero-title" class="game-hero-title">은행</h2>
+            <p class="game-hero-desc">
+              게임형 금융 · 가상경제 서비스<br>
+              <span class="home-hero-subdesc">실제 서비스 기능 및 권한에 따라 표시</span>
+            </p>
+            <div class="home-hero-box">
+              <span class="home-hero-box-label">서버 게임 시간 기준</span>
+              <span class="home-hero-box-val">현실 10분 = 서버 1일 · 서버 7일 = 서버 1주</span>
+            </div>
           </div>
-          <div class="hero-decoration" aria-hidden="true"><span class="realm-orbit"><span class="realm-core">B</span></span></div>
+
+          <div class="game-hero-visual" aria-hidden="true">
+            <svg class="game-skyline-svg" viewBox="0 0 400 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M40 220V120H70V80H90V220H130V60H160V100H180V220H220V90H240V40H260V220H300V110H330V70H350V220H400V220H0V220H40Z" fill="url(#neon-bank-skyline)" opacity="0.4"/>
+              <path d="M120 220V110H140V70H170V220H210V50H230V20H250V220H280V130H310V90H340V220Z" fill="url(#neon-bank-buildings)" opacity="0.6"/>
+              <defs>
+                <linearGradient id="neon-bank-skyline" x1="200" y1="40" x2="200" y2="220" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#8b5cf6" stop-opacity="0.6"/>
+                  <stop offset="1" stop-color="#1e1b4b" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="neon-bank-buildings" x1="230" y1="20" x2="230" y2="220" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#c084fc" stop-opacity="0.8"/>
+                  <stop offset="1" stop-color="#312e81" stop-opacity="0.1"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="game-moon-glow"></div>
+            <div class="game-emblem-badge">
+              <img src="/assets/mv39/favicon.ico" alt="W Emblem" class="game-emblem-img">
+            </div>
+          </div>
         </section>
 
         <div id="page-content" class="bank-page-content">
