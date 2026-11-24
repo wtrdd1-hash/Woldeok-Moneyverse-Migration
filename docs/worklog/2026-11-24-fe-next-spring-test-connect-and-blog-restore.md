@@ -219,3 +219,14 @@ nginx: 운영 블로그 경로(`/blog`, `/{en,ja,zh,ko}/blog[/*]`)와 `@mv_blog_
 - 디자인 기준 문서·매니페스트·AGENTS.md 를 G2 로 전환(경로별 내용·순서는 G2 경로별 시안 전까지 G1 경로별 시안 유지).
 - 검증: tsc 통과, vitest 596 파일 / 3134 개 통과, 180 경로 브라우저 검사 정상 166 / 건너뜀 14(데이터 없음), 오류 0.
 - Test 배포 `next-frontend-test-v20261124-<최신 커밋>`. **운영 승격 안 함(소유자 지시).**
+
+### 11단계 — 보안 점검·운영 후보 실검증·운영 승격 (작업자: Claude Code / Claude Opus 5.5)
+- 소유자 지시: "보안테스트 프론트엔드 실제 작동 등 실제 테스트 후 문제없으면 운영까지 승격".
+- 보안 점검(Test): 보안 헤더(CSP, HSTS, X-Frame-Options DENY, nosniff, Referrer/Permissions-Policy) 확인, 비로그인 관리자 화면 → 로그인 이동, 관리자 API 401, 외부 출처 POST(송금·로그아웃) 401/403, 외부 주소 이동(next/redirect) 없음, OAuth 콜백 목적지 고정, 경로 우회(../, %2e) 404/403, .env/.git 차단, 정적 번들에 내부 토큰·비밀값 없음.
+- 발견·수정: next 16.4.2 공개 취약점 7건(교차 응답 주입, HttpOnly 쿠키 노출, 사용자 간 캐시 노출 등) → 16.4.6 으로 올림. pnpm audit --prod 0건. 빌드 시 보안 경고도 사라짐.
+- 운영 후보: 운영 빌드(광고 미리보기 끔)를 운영 Spring 4550 에 붙여 비공개 포트에서 180 경로 검사 — 정상 166 / 건너뜀 14, JS 오류 0. 도움말 404 는 기능 설정 누락 → 운영 env 에 추가. SEO(robots, 사이트맵, canonical, index) 확인.
+- G2 경로별 시안 180장 추가(`docs/design/game-ui-v2026.11.24.G2/routes/`, sloplint 180/180 통과).
+- 운영 승격(무중단): 새 서비스 `moneyverse-next-frontend-v20261124`(55476) + nginx 새 파일(easy-scraping.com 전용 블록). 기존 블록 무수정, 되돌리기는 파일 삭제 후 reload. 상세 `ops/next-prod-cutover-v20261124/`.
+- 운영 실검사(https://easy-scraping.com): 180 경로 정상 166 / 건너뜀 14, JS 오류 0, 가로 넘침 0. 외환·예금보험·연금 503 은 전환 전과 동일(백엔드 기능 꺼짐). 기존에 깨져 있던 `/api/v1/blog/verified`(400)를 읽기 전용 블로그 API 로 바로잡음(200).
+- 미배포: 이 브랜치의 Spring 변경(로그인 CSRF state 검증 등)은 운영 Spring 에 아직 없음 — 백엔드 배포는 별도 결정 필요.
+- PR #3442 검토: "v2026.11.24.11 180장 시안"이 보관된 v2026.11.23.10 이미지와 180장 모두 동일(바이트 일치) — 소유자에게 보고.
