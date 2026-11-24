@@ -75,3 +75,46 @@ nginx: 운영 블로그 경로(`/blog`, `/{en,ja,zh,ko}/blog[/*]`)와 `@mv_blog_
 - Spring 4550 jar 의 `BlogVerifiedController` 스텁, `AdminBlogController` 의 테이블 직접 조회(298 에서 revoke) 정리 필요.
 - 운영 Test 는 실제 회원 데이터 사본 — 외부 공개 중이므로 접근 범위 관리 필요.
 - Next 16.4.2 보안 권고(빌드마다 차단) → 업그레이드 별도 작업 필요.
+
+---
+
+## 2단계 (2026-11-24 오후) — 작업자: Claude Code (Claude Opus 5.5)
+
+### 운영 블로그 전수 재점검 (소유자 최우선 지시)
+- [x] 허브 4개(`/blog`, `/en|ja|zh/blog`) 200, `index, follow`, canonical 정상, X-Robots-Tag 없음.
+- [x] 허브에서 링크된 상세 189개 전부 200, 전부 canonical + JSON-LD, 상세의 hreflang·OG·description 정상.
+- [x] 브라우저(PC 1440 / 모바일 390): 목록 141개 → 검색 33개 → 카테고리 3개 필터 동작, 글 이동/목록 복귀/언어 탭 이동 정상, 가로 넘침 0.
+- [x] **수정:** `/sitemap-blog.xml` 이 2026-11-18 고정 정적 파일(70개, 이후 글 누락)이었음 → nginx 2곳을 Next 블로그 서버의 동적 사이트맵으로 전환. 공개 응답 193개 URL, 193개 모두 200, 오늘 글 포함. 백업 `nginx-sites-moneyverse.before-sitemap-20261124`.
+- [x] **수정:** 셸의 모바일 제목이 h1 이라 모든 페이지에 h1 이 2개 → 일반 텍스트로 변경(운영 블로그 상세 h1 1개 확인).
+- 참고: 관련 계산기 링크 미리 불러오기에서 406(Spring 경로) — 클릭 이동은 200, 기능 영향 없음.
+
+### 로그인 백엔드 점검
+| 항목 | 운영 easy-scraping.com | Test |
+| --- | --- | --- |
+| 자체 로그인 API | (Spring) | 잘못된 자격증명 401 정상 |
+| 디스코드 시작 | 302 → discord.com, 콜백 운영 도메인 | Next 경로가 `oauth_session` 오류 → **수정 후 307 → discord.com (콜백 test 도메인)** |
+| 구글 시작 | 302 → Google, 콜백 운영 도메인 | client_id 비어 있음, 콜백이 운영 도메인 → **Test 환경 설정 필요(차단됨, 아래)** |
+| 콜백 토큰 교환 | — | Test 백엔드 외부 통신 차단 → 불가 (차단됨, 아래) |
+
+- **원인/수정:** Spring 은 OAuth 시작·콜백에 `format=json` 이 없으면 302 를 반환하는데 Next BFF 는 JSON 을 기대 → Next authorize/callback 이 `format=json` 사용.
+- **보안 발견/수정 (Test jar):** Spring 콜백이 URL `state` 를 어떤 UUID든 prelogin 세션으로 받아들이고 브라우저 쿠키 세션과 대조하지 않음 → 로그인 CSRF 가능. state 가 브라우저 세션과 일치해야 하도록 수정(코드 교환 전에 거부). 운영 4550 jar 에는 미적용 — 운영 반영은 별도 승인 필요.
+- 테스트: Spring 713 중 710 통과, 실패 3건은 Thymeleaf/정적 디자인 검사(이번 변경 파일과 무관). 인증 테스트 46/46 통과(신규 거부 테스트 포함). Next 인증 테스트 통과.
+- **차단됨:** Test 백엔드 외부 통신 허용 + 운영 구글 키 복사 + 봇 토큰 비우기 — 권한 검사에서 거부됨. 소유자 승인 시 진행.
+
+### G1 게임풍 디자인 후보 (승인 대기, 구현 미착수)
+- `docs/design/game-ui-v2026.11.24.G1/` 180장 + README(EN/KO), 생성기 `scripts/design/game-ui-g1/`.
+- 사용 스킬: ui-ux-pro-max, frontend-design, hallmark(sloplint 180/180 FAIL 0). 공식 기준(v10)은 변경하지 않음.
+
+### 커밋 / 작업자
+| 커밋 | 내용 | 작업자 |
+| --- | --- | --- |
+| 9ffa54ffbe | Spring 공개 검증 블로그 API | Claude Code (Claude Opus 5.5) |
+| 6e30a14f66 | v10 셸, 다크 토큰, 모바일 도크, 공식 파비콘 | Claude Code (Claude Opus 5.5) |
+| 5ae69b20ee | 블로그 날짜 시간대 고정 | Claude Code (Claude Opus 5.5) |
+| ebd7268e14 | 관리자 서버 게이트, Spring 비로그인 세션 해석 | Claude Code (Claude Opus 5.5) |
+| acb32e966f | 로그인 문구 복원 | Claude Code (Claude Opus 5.5) |
+| 2e814b691a | 작업 로그 | Claude Code (Claude Opus 5.5) |
+| 90a0fb0269 | OAuth JSON 계약, state 세션 바인딩, h1 중복 제거 | Claude Code (Claude Opus 5.5) |
+| (이번 커밋) | G1 디자인 후보 + 작업 로그 | Claude Code (Claude Opus 5.5) |
+
+배포 상태: 운영 블로그 Next/Test 프론트 = `next-frontend-v20261124-90a0fb026903`, Test 백엔드 = `test-backend-v20261124-90a0fb026903`.
