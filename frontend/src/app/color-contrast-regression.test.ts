@@ -66,8 +66,8 @@ describe('frontend rebuild contrast contract', () => {
     const source = fs.readFileSync(path.join(APP, 'page.tsx'), 'utf8');
     expect(source).not.toContain('text-white');
     expect(source).not.toContain('bg-white/[0.06]');
-    // Refreshed mobile homepage uses a slate surface palette rather than legacy zinc.
-    expect(source).toContain('text-slate-400');
+    // G1: muted copy reads the theme token, not a fixed palette shade.
+    expect(source).toContain('text-[var(--g1-muted)]');
   });
 
   it('does not use known low-contrast light-theme shop label shades', () => {

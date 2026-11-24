@@ -1,10 +1,10 @@
 /**
- * Navigation model for the Nov23 v10 shell. The sidebar, the page title in the
+ * Navigation model for the G1 shell (approved 2026-11-24; replaced the Nov23 v10 shell). The sidebar, the page title in the
  * top bar and the mobile dock all read this one list, so a route cannot be in
  * the menu with one name and titled with another.
  *
- * Labels are the Korean strings drawn in the v10 previews
- * (docs/design/game-ui-v2026.11.23.10/previews/*.png); they are product copy.
+ * Labels are the Korean strings drawn in the G1 previews
+ * (docs/design/game-ui-v2026.11.24.G1/previews/*.png); they are product copy.
  */
 
 export type V10Icon =
@@ -30,11 +30,11 @@ export const V10_PRIMARY_NAV: readonly V10NavItem[] = [
   { label: '홈', href: '/', icon: 'home' },
   { label: '지갑', href: '/wallet', icon: 'wallet', match: ['/inventory', '/mint'] },
   { label: '은행', href: '/bank', icon: 'bank', match: ['/central-bank', '/bonds', '/pension', '/kdic', '/treasury', '/fx'] },
-  { label: '투자', href: '/stocks', icon: 'invest', match: ['/businesses', '/enterprises', '/prediction', '/marketplace'] },
+  { label: '거래소', href: '/stocks', icon: 'invest', match: ['/businesses', '/enterprises', '/prediction', '/marketplace'] },
   { label: '퀘스트', href: '/quests', icon: 'quest', match: ['/work', '/progression', '/seasons', '/collections', '/arcade', '/casino', '/lobby'] },
   { label: '상점', href: '/shop', icon: 'shop' },
-  { label: '커뮤니티', href: '/board', icon: 'community', match: ['/blog', '/announcements', '/gallery', '/clubs', '/newspaper', '/feed', '/spaces', '/ko/blog', '/en/blog', '/ja/blog', '/zh/blog'] },
-  { label: '문의·채팅', href: '/support', icon: 'support', match: ['/chat', '/help'] },
+  { label: '광장', href: '/board', icon: 'community', match: ['/blog', '/announcements', '/gallery', '/clubs', '/newspaper', '/feed', '/spaces', '/ko/blog', '/en/blog', '/ja/blog', '/zh/blog'] },
+  { label: '문의', href: '/support', icon: 'support', match: ['/chat', '/help'] },
 ];
 
 export const V10_ACCOUNT_ITEM: V10NavItem = {
@@ -44,12 +44,12 @@ export const V10_ACCOUNT_ITEM: V10NavItem = {
   match: ['/profile', '/login', '/register', '/auth'],
 };
 
-/** The five tabs drawn in every v10 mobile frame: 홈 · 지갑 · 투자 · 퀘스트 · 계정. */
+/** The five tabs of every G1 mobile frame, quests raised in the centre. */
 export const V10_MOBILE_DOCK: readonly V10NavItem[] = [
   V10_PRIMARY_NAV[0]!,
   V10_PRIMARY_NAV[1]!,
-  V10_PRIMARY_NAV[3]!,
   V10_PRIMARY_NAV[4]!,
+  V10_PRIMARY_NAV[3]!,
   { ...V10_ACCOUNT_ITEM, label: '계정' },
 ];
 
@@ -74,7 +74,7 @@ const SPECIFIC_TITLES: ReadonlyArray<readonly [string, string]> = [
   ['/blog', '블로그'],
   ['/announcements', '공지사항'],
   ['/gallery', '갤러리'],
-  ['/stocks', '주식'],
+  ['/stocks', '거래소'],
   ['/central-bank', '중앙은행'],
   ['/bonds', '채권'],
   ['/pension', '연금'],
@@ -93,7 +93,7 @@ const SPECIFIC_TITLES: ReadonlyArray<readonly [string, string]> = [
 
 export function v10PageTitle(pathname: string): string {
   const path = stripLocale(pathname);
-  if (path === '/') return '홈 대시보드';
+  if (path === '/') return '길드 홀';
   for (const [prefix, title] of SPECIFIC_TITLES) {
     if (startsWithSegment(path, prefix)) return title;
   }

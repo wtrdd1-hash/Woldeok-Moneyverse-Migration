@@ -1,0 +1,154 @@
+/*
+ * G1 "Guild Ledger" — the active visual reference since the owner approved it
+ * on 2026-11-24 (docs/design/game-ui-v2026.11.24.G1).
+ *
+ * One dark night-market theme for every route and locale. Imported last and
+ * stated with higher specificity (html:root…) so the legacy ivory palette and
+ * per-locale primaries in globals.css resolve to G1 without editing each page.
+ * Rarity colours encode item tier or stock risk only; never decoration.
+ */
+html:root,
+html:root.dark,
+html:root[data-locale],
+html:root[data-point],
+html:root[data-locale][data-point] {
+  color-scheme: dark;
+
+  --g1-void: #08061a;
+  --g1-night: #120e26;
+  --g1-night-2: #0c0a1c;
+  --g1-plum: #1c1638;
+  --g1-plum-2: #251c4a;
+  --g1-plum-3: #2a2050;
+  --g1-track: #2c2358;
+  --g1-line: #3a2f6b;
+  --g1-violet: #8b6cff;
+  --g1-violet-ink: #5b3fd6;
+  --g1-gold: #f2b84b;
+  --g1-gold-hi: #ffd27a;
+  --g1-gold-deep: #8a5a12;
+  --g1-gold-ink: #2a1a00;
+  --g1-moon: #ffe9b0;
+  --g1-mint: #4be3a4;
+  --g1-ember: #ff5d73;
+  --g1-ember-ink: #2b0007;
+  --g1-ember-wash: #3b1630;
+  --g1-rare-common: #9ca3af;
+  --g1-rare-rare: #4ba3ff;
+  --g1-rare-epic: #b67cff;
+  --g1-ink: #f6f2ff;
+  --g1-text: #f1ecff;
+  --g1-body: #ddd5f5;
+  --g1-muted: #b7acd9;
+  --g1-faint: #9a90c4;
+  --g1-font-display: 'Black Han Sans', 'Noto Sans KR Variable', sans-serif;
+  --g1-font-num: 'Orbitron', 'Noto Sans KR Variable', sans-serif;
+  --g1-cut: 12px;
+
+  /* Legacy names some components still read (v10 shell era). */
+  --mv-bg: var(--g1-night);
+  --mv-sidebar: var(--g1-night-2);
+  --mv-surface: var(--g1-plum);
+  --mv-surface-2: var(--g1-plum-2);
+  --mv-border: var(--g1-line);
+  --mv-border-violet: var(--g1-line);
+  --mv-violet: var(--g1-violet);
+  --mv-violet-pill: var(--g1-plum-3);
+  --mv-text: var(--g1-text);
+  --mv-muted: var(--g1-muted);
+  --mv-faint: var(--g1-faint);
+
+  --paper: var(--g1-night);
+  --paper-dark: var(--g1-night-2);
+  --surface: var(--g1-plum);
+  --ink: var(--g1-text);
+  --ink-soft: var(--g1-muted);
+  --line: var(--g1-line);
+  --forest: var(--g1-violet-ink);
+  --forest-deep: var(--g1-plum-3);
+  --forest-soft: var(--g1-violet);
+  --clay: var(--g1-gold);
+  --clay-soft: var(--g1-plum-3);
+  --clay-ink: var(--g1-gold);
+  --mint: var(--g1-plum-3);
+  --highlight: var(--g1-plum-3);
+
+  --background: var(--g1-night);
+  --foreground: var(--g1-text);
+  --card: var(--g1-plum);
+  --card-foreground: var(--g1-text);
+  --popover: var(--g1-plum);
+  --popover-foreground: var(--g1-text);
+  --primary: var(--g1-violet);
+  --primary-foreground: var(--g1-night);
+  --secondary: var(--g1-plum-2);
+  --secondary-foreground: var(--g1-text);
+  --muted: var(--g1-plum-2);
+  --muted-foreground: var(--g1-muted);
+  --accent: var(--g1-plum-3);
+  --accent-foreground: var(--g1-gold-hi);
+  --destructive: var(--g1-ember);
+  --destructive-foreground: var(--g1-ember-ink);
+  --border: var(--g1-line);
+  --input: var(--g1-plum-2);
+  --ring: var(--g1-gold);
+  --rise: var(--g1-ember);
+  --fall: var(--g1-rare-rare);
+
+  --chart-1: var(--g1-violet);
+  --chart-2: var(--g1-gold);
+  --chart-3: var(--g1-mint);
+  --chart-4: var(--g1-rare-rare);
+  --chart-5: var(--g1-muted);
+
+  --sidebar: var(--g1-night-2);
+  --sidebar-foreground: var(--g1-muted);
+  --sidebar-primary: var(--g1-violet);
+  --sidebar-primary-foreground: var(--g1-night);
+  --sidebar-accent: var(--g1-plum-3);
+  --sidebar-accent-foreground: var(--g1-ink);
+  --sidebar-border: var(--g1-line);
+  --sidebar-ring: var(--g1-gold);
+}
+
+html:root body { background-color: var(--g1-night); color: var(--g1-text); }
+html:root { overflow-x: clip; }
+html:root body { overflow-x: clip; }
+
+/* Page headings use the G1 display face; body copy stays Noto Sans KR. */
+.mv-shell main h1, .mv-shell main h2, .g1-display {
+  font-family: var(--g1-font-display);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+.g1-num, .mv-num { font-family: var(--g1-font-num); font-variant-numeric: tabular-nums; }
+
+/* The chamfered item frame every G1 panel uses. */
+.g1-panel {
+  position: relative;
+  background: var(--g1-plum);
+  color: var(--g1-text);
+  border: 1px solid var(--g1-line);
+  padding: 16px;
+  min-width: 0;
+  clip-path: polygon(var(--g1-cut) 0, 100% 0, 100% calc(100% - var(--g1-cut)), calc(100% - var(--g1-cut)) 100%, 0 100%, 0 var(--g1-cut));
+}
+.g1-chamfer {
+  clip-path: polygon(var(--g1-cut) 0, 100% 0, 100% calc(100% - var(--g1-cut)), calc(100% - var(--g1-cut)) 100%, 0 100%, 0 var(--g1-cut));
+}
+.g1-cta {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 44px; padding: 8px 16px; border-radius: 8px;
+  background: linear-gradient(180deg, var(--g1-gold-hi), var(--g1-gold));
+  color: var(--g1-gold-ink); font-weight: 700; box-shadow: 0 4px 0 var(--g1-gold-deep);
+  transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 140ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.g1-cta:active { transform: scale(0.97); box-shadow: 0 2px 0 var(--g1-gold-deep); }
+.mv-shell :focus-visible { outline: 2px solid var(--g1-gold); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mv-shell *, .mv-shell *::before, .mv-shell *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

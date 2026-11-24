@@ -7,15 +7,15 @@ import { GameMobileDock } from '@/components/game-mobile-dock';
 import { ClientErrorReporter } from '@/components/client-error-reporter';
 
 /**
- * Nov23 v10 application frame: 240px sidebar and top bar on desktop, brand
+ * G1 application frame: 240px sidebar and top bar on desktop, brand
  * header plus five-tab dock on mobile. Pages render inside <main> only.
  */
 export function SiteShell({ children }: { readonly children: React.ReactNode }) {
   return (
-    <div className="mv-shell flex min-h-screen w-full bg-[var(--mv-bg)] font-sans text-[var(--mv-text)] antialiased">
+    <div className="mv-shell flex min-h-screen w-full bg-[var(--g1-night)] font-sans text-[var(--g1-text)] antialiased">
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-lg focus:bg-[var(--mv-violet)] focus:px-3 focus:py-2 focus:text-[#0c1020]"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-lg focus:bg-[var(--g1-gold)] focus:px-3 focus:py-2 focus:text-[var(--g1-gold-ink)]"
       >
         본문으로 건너뛰기
       </a>
@@ -29,8 +29,8 @@ export function SiteShell({ children }: { readonly children: React.ReactNode }) 
         <main id="main" className="moneyverse-main mx-auto w-full max-w-[1440px] flex-1 px-4 pb-[calc(env(safe-area-inset-bottom)+5rem)] pt-5 sm:px-6 lg:px-8 lg:pb-10 lg:pt-6">
           {children}
         </main>
-        <footer className="hidden items-center justify-between gap-4 px-8 pb-6 text-xs text-[var(--mv-faint)] lg:flex">
-          <span>W Moneyverse · 게임 세계 · 금융과 경험</span>
+        <footer className="hidden items-center justify-between gap-4 px-8 pb-6 text-xs text-[var(--g1-faint)] lg:flex">
+          <span>월덕 머니버스, 게임 세계의 금융과 경험</span>
           <nav aria-label="정책" className="flex gap-4">
             <Link href="/terms" prefetch={false} className="hover:text-white">이용약관</Link>
             <Link href="/privacy" prefetch={false} className="hover:text-white">개인정보처리방침</Link>

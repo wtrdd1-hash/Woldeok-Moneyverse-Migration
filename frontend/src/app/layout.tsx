@@ -37,10 +37,14 @@ import '@fontsource/nanum-myeongjo/800.css';
 import '@fontsource-variable/noto-sans-kr/wght.css';
 import '@fontsource/ibm-plex-mono/400.css';
 import '@fontsource/ibm-plex-mono/500.css';
+// G1 display and figure faces, locked locally like the others (no Google CSS at build).
+import '@fontsource/black-han-sans/400.css';
+import '@fontsource/orbitron/600.css';
+import '@fontsource/orbitron/800.css';
 import './globals.css';
 import './cosmetics.css';
 import './redesign.css';
-import './v10-tokens.css';
+import './g1-tokens.css';
 
 const indexingEnabled = process.env.SEO_INDEXING_ENABLED !== 'false';
 const siteUrl = (process.env.APP_BASE_URL ?? 'https://easy-scraping.com').replace(/\/$/, '');
