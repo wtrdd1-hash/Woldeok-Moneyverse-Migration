@@ -1,5 +1,6 @@
 import { homeAdSense, inArticleAdSense, multiplexAdSense } from '@/lib/adsense';
 import { AdSenseAd } from './adsense-ad';
+import { AdPreviewSlot } from './ad-preview-slot';
 
 export function PublicAdvertisement({
   slot,
@@ -17,7 +18,9 @@ export function PublicAdvertisement({
       ? inArticleAdSense
       : homeAdSense;
 
-  if (!config.enabled) return null;
+  if (!config.enabled) {
+    return process.env.NEXT_PUBLIC_AD_PREVIEW === 'true' ? <AdPreviewSlot variant={variant} className={className} /> : null;
+  }
 
   return (
     <div className={className}>

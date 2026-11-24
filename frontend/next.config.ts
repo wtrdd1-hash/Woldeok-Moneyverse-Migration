@@ -52,9 +52,29 @@ function resolveBuildId(): string {
 
 const BUILD_ID = resolveBuildId();
 
+function publicAdsEnv(): Record<string, string> {
+  const pick = (publicName: string, serverName: string) => process.env[publicName] ?? process.env[serverName];
+  const entries: Array<[string, string | undefined]> = [
+    ['NEXT_PUBLIC_ADS_ENABLED', pick('NEXT_PUBLIC_ADS_ENABLED', 'ADS_ENABLED') ?? 'true'],
+    ['NEXT_PUBLIC_ADSENSE_PUBLISHER_ID', pick('NEXT_PUBLIC_ADSENSE_PUBLISHER_ID', 'ADSENSE_PUBLISHER_ID')],
+    ['NEXT_PUBLIC_ADSENSE_HOME_SLOT', pick('NEXT_PUBLIC_ADSENSE_HOME_SLOT', 'ADSENSE_HOME_SLOT')],
+    ['NEXT_PUBLIC_ADSENSE_IN_ARTICLE_SLOT', pick('NEXT_PUBLIC_ADSENSE_IN_ARTICLE_SLOT', 'ADSENSE_IN_ARTICLE_SLOT')],
+    ['NEXT_PUBLIC_ADSENSE_MULTIPLEX_SLOT', pick('NEXT_PUBLIC_ADSENSE_MULTIPLEX_SLOT', 'ADSENSE_MULTIPLEX_SLOT')],
+  ];
+  return Object.fromEntries(entries.filter((entry): entry is [string, string] => typeof entry[1] === 'string' && entry[1] !== ''));
+}
+
 const config: NextConfig = {
   generateBuildId: () => BUILD_ID,
-  env: { NEXT_PUBLIC_BUILD_ID: BUILD_ID },
+  env: {
+    NEXT_PUBLIC_BUILD_ID: BUILD_ID,
+    // Advertising switches are read by client components too. A server-only
+    // ADS_ENABLED never reaches the browser bundle, so the server rendered no
+    // ad while the client fell back to "enabled" and rendered one: React
+    // hydration error #418 on every page with an ad slot. Inline one build-time
+    // value so both sides make the same decision.
+    ...publicAdsEnv(),
+  },
   reactStrictMode: true,
   // The API is internal. Nothing here should ever construct a browser-facing
   // URL to it, so its address is read only in server code.

@@ -4,6 +4,7 @@ import { Briefcase, Calculator, Landmark, Megaphone, ScrollText, ShoppingBag, Tr
 import { GuestQuickstart } from '@/components/guest-quickstart';
 import { WalletGlance } from '@/components/wallet-glance';
 import { P2PTransferModal } from '@/components/p2p-transfer-modal';
+import { PublicAdvertisement } from '@/components/public-advertisement';
 import { ServerClockPill } from '@/components/server-clock-pill';
 import { G1PageHero } from '@/components/g1/page-hero';
 import { apiOrNull } from '@/lib/api';
@@ -246,6 +247,9 @@ export default async function HomePage() {
           </ul>
         </section>
       </div>
+
+      {/* Policy: ads only after the page's primary content on public routes. */}
+      <PublicAdvertisement variant="display" />
     </div>
   );
 }
