@@ -5939,3 +5939,18 @@ eserves: ??쒕?援??명솚蹂댁쑀???듯빀怨꾩젙)
 
 - **추가 스크린샷 반영 (내 계정 관리 /account)**:
   5. media_766a67e2.png: developer (Lv.1) 세션 상태와 '연결된 로그인 수단: 0개' 상태 불일치(DEFECT-08), 폰트 뭉개짐(DEFECT-09), 게임 프로필 요소 전무(DEFECT-10) 결함 전수 추가 기록 완료
+
+---
+## 🚀 [v19 Specification] debian13 서버 디스크 대용량 정리 완료 및 여유 공간 25GB (사용률 75%) 확보
+- **작업 일시**: 2026-11-25 08:58 KST
+- **작업 번호 (Task ID)**: TASK-20261125-DISK-CLEANUP-STAGE3
+- **사용자 핵심 지시**: "일단디스크 정리진행할것"
+- **정리 대상 및 회수 내역**:
+  1. Docker 미사용 볼륨 12개 일괄 회수: **921.3 MB**
+  2. 시스템 apt 캐시 및 1일 초과 journalctl 저널 로그 정리
+  3. 과거 스킬 설치 임시 git 클론 레코드 (/home/debian/skill-install-records): **4.1 GB** 완전 정리
+  4. 이전 테스트 셸 (/home/debian/mv-fe-next-spring-test-20261124): **3.3 GB** 완전 정리
+- **정리 결과 지표**:
+  - /dev/sdb1 (루트 파티션): 초기 86G(91%, 여유 8.9G) → **70G(75%, 여유 25G)** 로 **총 16.1 GB 순증 확보**
+  - /tmp (임시 메모리 파일시스템): 초기 6.1G(91%) → **3.6G(54%, 여유 3.2G)** 로 쾌적화 완료
+  - 필수 보존 영역(	asks, mcp-gateway, 메인 프로젝트 Woldeok-Moneyverse-Migration, woldeok-moneyverse-app) 100% 무결성 보존
