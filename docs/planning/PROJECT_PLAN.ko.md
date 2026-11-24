@@ -1,5 +1,8 @@
 # 월덕 머니버스 — Living Project Plan
 
+> **v2026.11.24.FEARCH.1 사용자 프론트엔드 기술 선택 (문서 제안 / 운영 미적용):** 새 11/23 디자인 구현 목표는 **Next.js/React 독립 프론트엔드 + Spring Boot API/인증·금융 백엔드**로 정리한다. 구형 'Spring MVC+Thymeleaf만 사용' 문구는 역사적 기술 지시이며, 새 화면 기술 선택에만 이 결정이 우선한다. 11/23 v10 원본 180 PNG(미병합 SHA 39888c7...)·11/18/v8 보존, 로그인·회원정보·토큰·실거래는 Spring 권위, QA·Test/운영 승격 규정 유지. 전체 단일 결정 [한국어](FRONTEND_ARCHITECTURE_NOV23_NEXT_SPRING_v2026.11.24.FEARCH.1.ko.md) / [EN](FRONTEND_ARCHITECTURE_NOV23_NEXT_SPRING_v2026.11.24.FEARCH.1.md). **이 문단과 연결 문서는 Draft PR의 제안이며 main 병합/서비스 변경 전에는 실행 변경이 아니다.**
+
+
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 
 ## v2026.11.21.2234 — AgentMemory 영상 영구 참고 및 작업 이어받기 규칙 (PLANNING / 미설치)
