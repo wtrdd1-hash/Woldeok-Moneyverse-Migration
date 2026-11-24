@@ -1,0 +1,11 @@
+{
+  "scope": "isolated Test database only",
+  "readOnlyTransaction": true,
+  "appRoleRestrictedNameVerified": true,
+  "statusSourcesRawSelect": true,
+  "statusSnapshotsRawSelect": true,
+  "publicStatusFunctionExecute": true,
+  "previousRecordedRawSelect": false,
+  "thisTaskChangedGrants": false,
+  "productionPrivilegesNotMeasured": true
+}

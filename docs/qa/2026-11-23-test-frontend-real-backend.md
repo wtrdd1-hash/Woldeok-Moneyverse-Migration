@@ -1,5 +1,8 @@
 # Actual Test frontend/API audit — 2026-11-23
 
+> **Superseded for the current runtime — 2026-11-24:** the running JAR changed while retaining the7b identity. The240-case pass below remains evidence for the original attested artifact only. Current findings: [runtime/design/route diagnosis](2026-11-24-frontend-diagnosis.md). Current /api/v1/status is200 with unknown states and broadened Test raw-table SELECT; the earlier503 is historical.
+
+
 ## Current accepted slice
 
 Owner scope is **Test only**. [Test frontend](https://test.easy-scraping.com/) · [exact frontend identity](https://test.easy-scraping.com/frontend-ui-version). Production was not promoted by this task.

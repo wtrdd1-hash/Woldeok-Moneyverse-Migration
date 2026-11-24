@@ -1,0 +1,202 @@
+[
+  {
+    "name": "Woldeok-Moneyverse-Migration",
+    "head": "a61f6d8b9df05bb9f3daee9f8acff067b15abb21",
+    "branch": "detached",
+    "trackedChanges": []
+  },
+  {
+    "name": "moneyverse-ad-disclosure-20261123",
+    "head": "673a77b2f26e63f7d80d5be61112749e9018df80",
+    "branch": "refs/heads/fix/public-ads-clear-disclosure-20261123",
+    "trackedChanges": []
+  },
+  {
+    "name": "moneyverse-game-ui-art-20261123",
+    "head": "39888c7d26bdf688737a77b93a7da29e230b4168",
+    "branch": "refs/heads/fix/game-ui-180-visual-functional-qa-20261123",
+    "trackedChanges": []
+  },
+  {
+    "name": "mv-bank-feature-20261123",
+    "head": "fe497c007fde0171596491e5a4847abcf0212bfd",
+    "branch": "refs/heads/fix/issue-3366-mobile-overflow-and-logo",
+    "trackedChanges": []
+  },
+  {
+    "name": "mv-fe-c-admin-locale-20261124",
+    "head": "9876c09888ec84034eec183cf1309c85df3d7447",
+    "branch": "refs/heads/fe-c/admin-locale-20261124-0045",
+    "trackedChanges": [
+      " M spring-backend/src/main/java/com/moneyverse/api/domain/web/UiLocale.java"
+    ]
+  },
+  {
+    "name": "mv-fe-c-locale-contract-20261124",
+    "head": "b902a7f9cede8d1fbab0b98b588c16a01f25db79",
+    "branch": "refs/heads/fix/fe-c-chat-locale-contract-v2026.11.24.0826",
+    "trackedChanges": []
+  },
+  {
+    "name": "mv-fe-c-locale-route-20261124-0745",
+    "head": "e6206a46df28c2da0c503f9b19cfe9f98e3be29e",
+    "branch": "refs/heads/fe-c/support-chat-locale-route-20261124-0745",
+    "trackedChanges": []
+  },
+  {
+    "name": "mv-fe-legal-scoped-20261124",
+    "head": "38ccb1f0c6e547758da405c2a8f63f632849947e",
+    "branch": "refs/heads/fix/test-legal-scoped-responsive-20261124",
+    "trackedChanges": []
+  },
+  {
+    "name": "mv-fe-test-repair-20261124",
+    "head": "0e3bbd953558f9777c811709e8f737e382dc74a3",
+    "branch": "refs/heads/fix/test-native-legal-title-socket-20261124",
+    "trackedChanges": [
+      " M spring-backend/src/main/resources/templates/mv43/legal-privacy-en.html",
+      " M spring-backend/src/main/resources/templates/mv43/legal-privacy-ko.html",
+      " M spring-backend/src/main/resources/templates/mv43/legal-terms-en.html",
+      " M spring-backend/src/main/resources/templates/mv43/legal-terms-ko.html"
+    ]
+  },
+  {
+    "name": "mv-instagram-ui-glossary-20261122",
+    "head": "a85d42be289153ca5faf17d17d6988a59671aa50",
+    "branch": "refs/heads/docs/instagram-ui-glossary-v2026.11.22.2041.1",
+    "trackedChanges": []
+  },
+  {
+    "name": "mv-java4shell-audit-20261122",
+    "head": "1938c1b75ba89810683bfa27623f0bcc91b3ee12",
+    "branch": "refs/heads/docs/java4shell-runtime-audit-v2026.11.22.2013",
+    "trackedChanges": []
+  },
+  {
+    "name": "mv-native-admin-support-read-20261122",
+    "head": "fd3dee900376e9a2b42f23d485d07922ec98f88c",
+    "branch": "refs/heads/subtask/native-admin-support-read-20261122",
+    "trackedChanges": [
+      " M spring-backend/build.gradle.kts",
+      " M spring-backend/src/main/java/com/moneyverse/frontendpresentation/UnifiedFrontendApplication.java",
+      " M spring-backend/src/main/resources/static/assets/mv39/i18n.js",
+      " M spring-backend/src/main/resources/templates/mv28/compound.html",
+      " M spring-backend/src/main/resources/templates/mv28/layout.html",
+      " M spring-backend/src/main/resources/templates/mv28/stock.html",
+      " M spring-backend/src/main/resources/templates/mv29/status.html",
+      " M spring-backend/src/main/resources/templates/mv30/hub.html",
+      " M spring-backend/src/main/resources/templates/mv43/auth.html",
+      " M spring-backend/src/main/resources/templates/mv43/chat.html",
+      " M spring-backend/src/main/resources/templates/mv43/home.html",
+      " M spring-backend/src/main/resources/templates/mv43/member-unavailable.html",
+      " M spring-backend/src/main/resources/templates/mv43/support.html",
+      " M spring-backend/src/main/resources/templates/mv43/wallet.html",
+      " M spring-backend/src/main/resources/templates/mv46/announcements.html",
+      " M spring-backend/src/main/resources/templates/mv46/gallery.html",
+      " M spring-backend/src/main/resources/templates/shared/admin-shell.html",
+      " M spring-backend/src/main/resources/ui/mv43-copy.json",
+      " M spring-backend/src/test/java/com/moneyverse/frontendpresentation/UnifiedFrontendIsolationTest.java"
+    ]
+  },
+  {
+    "name": "mv-native-catalog-backend-inverse-20261122",
+    "head": "2e420bbaafa16435d35931d5d50652d48928b6ac",
+    "branch": "refs/heads/subtask/native-catalog-backend-inverse-20261122",
+    "trackedChanges": []
+  },
+  {
+    "name": "mv-native-catalog-canary-20261122",
+    "head": "a200554628d21643b58c50d38027801f81e7f858",
+    "branch": "refs/heads/subtask/native-catalog-canary-20261122",
+    "trackedChanges": []
+  },
+  {
+    "name": "mv-native-public-publication-20261122",
+    "head": "62610a5f6202eb65e7ac6566f5aa29076114addf",
+    "branch": "refs/heads/subtask/native-public-publication-read-20261122",
+    "trackedChanges": []
+  },
+  {
+    "name": "mv-nov18-global-style-20261122",
+    "head": "0bf9fc8426e1e8e3710053eff199e66aa6b85cf7",
+    "branch": "refs/heads/fix/nov18-global-style-contract-v2026.11.22.2304.1",
+    "trackedChanges": []
+  },
+  {
+    "name": "mv-nov18-violet-20261123",
+    "head": "588972cd189ae1e404adc926a276390e1e6ce9ae",
+    "branch": "refs/heads/fix/nov18-violet-brand-v2026.11.23.3",
+    "trackedChanges": []
+  },
+  {
+    "name": "mv-nov18-violet-all-20261123",
+    "head": "98c1bbff887138cf562f70169388f49290c8976b",
+    "branch": "refs/heads/fix/nov18-violet-all-routes-v2026.11.23.4",
+    "trackedChanges": []
+  },
+  {
+    "name": "mv-nov18-visual-unification-20261121",
+    "head": "79b3077373831adb181624b3d7d1b2d01c62b4b6",
+    "branch": "refs/heads/fix/nov18-visual-unification-20261121",
+    "trackedChanges": [
+      " M docs/worklog/2026-11-22-isolated-test-backend.ko.md",
+      " M docs/worklog/2026-11-22-isolated-test-backend.md",
+      " M ops/nov18-test-backend/README.md",
+      " M ops/nov18-test-backend/acceptance.py"
+    ]
+  },
+  {
+    "name": "mv-oauth-audit-worktree-20261122",
+    "head": "72e29034635b1ae90d3e7ae7d0f4c692d60a5530",
+    "branch": "refs/heads/audit/oauth-provider-regression-v2026.11.22.1",
+    "trackedChanges": []
+  },
+  {
+    "name": "mv-pingpong-skill-20261122",
+    "head": "10f66b61bf6e8db4413d0b1fbc03926bcdac6dde",
+    "branch": "refs/heads/feat/codex-gemini-pingpong-skill-v2026.11.22.1",
+    "trackedChanges": []
+  },
+  {
+    "name": "mv-reel-27-design-20261123",
+    "head": "9133b27e93c4f188d5cba31d5af7b49d2588df14",
+    "branch": "refs/heads/docs/reel-27-resource-architecture-v20261123-12",
+    "trackedChanges": []
+  },
+  {
+    "name": "mv-stitch-skills-20261124",
+    "head": "098d487a00cc220af5dad2fdc23a2596c8f21394",
+    "branch": "refs/heads/feat/stitch-design-skill-v2026.11.24.0818",
+    "trackedChanges": []
+  },
+  {
+    "name": "mv-test-frontend-real-backend-20261123",
+    "head": "cc428ce636cb894e5fa9b7e30f7818563c92c416",
+    "branch": "refs/heads/docs/test-frontend-acceptance-evidence-20261123",
+    "trackedChanges": []
+  },
+  {
+    "name": "mv-test-ingress-seo-semantic-20261124",
+    "head": "987be01b215dcd372165ab54c04a1caacf594dbd",
+    "branch": "refs/heads/fix/test-ingress-seo-semantic-20261124",
+    "trackedChanges": []
+  },
+  {
+    "name": "mv-ui-single-design-20261124",
+    "head": "184455833c76eb873be40ee46eff5c7dd132ab4d",
+    "branch": "refs/heads/docs/v2026.11.24.1-single-design-reference",
+    "trackedChanges": []
+  },
+  {
+    "name": "worktree",
+    "head": "29bdebbc895b87ba8ed08652ef64e0ff08dca4aa",
+    "branch": "detached",
+    "trackedChanges": []
+  },
+  {
+    "name": "worktree",
+    "head": "bed36b70ddb40f4515fb02b3f9ab5ad06f56e7d4",
+    "branch": "refs/heads/fix/fe-c-explicit-lang-priority-20261123",
+    "trackedChanges": []
+  }
+]

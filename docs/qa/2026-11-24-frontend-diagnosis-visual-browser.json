@@ -1,0 +1,1982 @@
+{
+  "freshProfiles": true,
+  "transport": "actual Nginx HTTP via host-preserving loopback resolution",
+  "rows": [
+    {
+      "host": "easy-scraping.com",
+      "path": "/",
+      "width": 1440,
+      "status": 200,
+      "finalPath": "/",
+      "errors": [
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-nXUsDOdQgu86gJDBqsbqo26sIWdrB1jlBBO07CCojLg='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked.",
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-He7xVoGCKaRryXaZTc0m6E77glkiX1GLdaos1zx7Bs0='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked."
+      ],
+      "failed": [],
+      "screenshot": "prod-home-1440.png",
+      "title": "홈 · W Moneyverse",
+      "language": "ko",
+      "h1": [
+        "홈"
+      ],
+      "body": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(12, 16, 32)",
+        "width": 1440,
+        "height": 1867.046875,
+        "left": 0,
+        "top": 0
+      },
+      "sidebar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(11, 14, 24)",
+        "width": 242,
+        "height": 900,
+        "left": 0,
+        "top": 0
+      },
+      "topbar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 1111.625,
+        "height": 65,
+        "left": 285.1875,
+        "top": 23
+      },
+      "main": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 1111.625,
+        "height": 1566.046875,
+        "left": 285.1875,
+        "top": 117
+      },
+      "overflow": false,
+      "styles": [
+        "/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31",
+        "/assets/mv43/chrome.css?v=d8525be5fcded40f8c4039b426ebc1835cbf6ee01196ec70023d920189643837"
+      ],
+      "nav": [
+        {
+          "text": "WW Moneyverse",
+          "href": "/"
+        },
+        {
+          "text": "홈",
+          "href": "/"
+        },
+        {
+          "text": "대시보드",
+          "href": "/dashboard"
+        },
+        {
+          "text": "지갑",
+          "href": "/wallet"
+        },
+        {
+          "text": "은행",
+          "href": "/bank"
+        },
+        {
+          "text": "주식",
+          "href": "/stocks"
+        },
+        {
+          "text": "퀘스트",
+          "href": "/quests"
+        },
+        {
+          "text": "상점",
+          "href": "/shop"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "/board"
+        },
+        {
+          "text": "문의·채팅",
+          "href": "/support"
+        },
+        {
+          "text": "내 계정",
+          "href": "/account"
+        },
+        {
+          "text": "관리자",
+          "href": "/admin"
+        },
+        {
+          "text": "로그인",
+          "href": "/login"
+        }
+      ],
+      "placeholderLabels": []
+    },
+    {
+      "host": "easy-scraping.com",
+      "path": "/login",
+      "width": 1440,
+      "status": 200,
+      "finalPath": "/login",
+      "errors": [
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-nXUsDOdQgu86gJDBqsbqo26sIWdrB1jlBBO07CCojLg='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked.",
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-He7xVoGCKaRryXaZTc0m6E77glkiX1GLdaos1zx7Bs0='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked."
+      ],
+      "failed": [],
+      "screenshot": "prod-login-1440.png",
+      "title": "로그인 · W Moneyverse",
+      "language": "ko",
+      "h1": [
+        "로그인"
+      ],
+      "body": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(12, 16, 32)",
+        "width": 1440,
+        "height": 1346.984375,
+        "left": 0,
+        "top": 0
+      },
+      "sidebar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(11, 14, 24)",
+        "width": 242,
+        "height": 900,
+        "left": 0,
+        "top": 0
+      },
+      "topbar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 1111.625,
+        "height": 65,
+        "left": 285.1875,
+        "top": 23
+      },
+      "main": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 1111.625,
+        "height": 1045.984375,
+        "left": 285.1875,
+        "top": 117
+      },
+      "overflow": false,
+      "styles": [
+        "/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31",
+        "/assets/mv43/chrome.css?v=d8525be5fcded40f8c4039b426ebc1835cbf6ee01196ec70023d920189643837"
+      ],
+      "nav": [
+        {
+          "text": "WW Moneyverse",
+          "href": "/"
+        },
+        {
+          "text": "홈",
+          "href": "/"
+        },
+        {
+          "text": "대시보드",
+          "href": "/dashboard"
+        },
+        {
+          "text": "지갑",
+          "href": "/wallet"
+        },
+        {
+          "text": "은행",
+          "href": "/bank"
+        },
+        {
+          "text": "주식",
+          "href": "/stocks"
+        },
+        {
+          "text": "퀘스트",
+          "href": "/quests"
+        },
+        {
+          "text": "상점",
+          "href": "/shop"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "/board"
+        },
+        {
+          "text": "문의·채팅",
+          "href": "/support"
+        },
+        {
+          "text": "내 계정",
+          "href": "/account"
+        },
+        {
+          "text": "관리자",
+          "href": "/admin"
+        },
+        {
+          "text": "로그인",
+          "href": "/login"
+        }
+      ],
+      "placeholderLabels": []
+    },
+    {
+      "host": "easy-scraping.com",
+      "path": "/terms",
+      "width": 1440,
+      "status": 200,
+      "finalPath": "/",
+      "errors": [
+        "Refused to apply style from 'http://easy-scraping.com/_next/static/css/828951deb2af2cbe.css' because its MIME type ('text/html') is not a supported stylesheet MIME type, and strict MIME checking is enabled.",
+        "TypeError: crypto.randomUUID is not a function\n    at o (http://easy-scraping.com/_next/static/chunks/app/layout-2deaf97c2e134386.js:1:34574)\n    at http://easy-scraping.com/_next/static/chunks/app/layout-2deaf97c2e134386.js:1:36165\n    at iC (http://easy-scraping.com/_next/static/chunks/c8b2c4ae-13313ee16281bd70.js:1:93963)\n    at e (http://easy-scraping.com/_next/static/chunks/c8b2c4ae-13313ee16281bd70.js:1:120194)\n    at ux (http://easy-scraping.com/_next/static/chunks/c8b2c4ae-13313ee16281bd",
+        "Failed to load resource: the server responded with a status of 406 ()",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-nXUsDOdQgu86gJDBqsbqo26sIWdrB1jlBBO07CCojLg='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked.",
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-He7xVoGCKaRryXaZTc0m6E77glkiX1GLdaos1zx7Bs0='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked."
+      ],
+      "failed": [
+        {
+          "url": "http://easy-scraping.com/",
+          "status": 406
+        },
+        {
+          "url": "http://easy-scraping.com/api/v1/telemetry/client-error",
+          "status": 404
+        }
+      ],
+      "screenshot": "prod-terms-1440.png",
+      "title": "홈 · W Moneyverse",
+      "language": "ko",
+      "h1": [
+        "홈"
+      ],
+      "body": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(12, 16, 32)",
+        "width": 1440,
+        "height": 1867.046875,
+        "left": 0,
+        "top": 0
+      },
+      "sidebar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(11, 14, 24)",
+        "width": 242,
+        "height": 900,
+        "left": 0,
+        "top": 0
+      },
+      "topbar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 1111.625,
+        "height": 65,
+        "left": 285.1875,
+        "top": 23
+      },
+      "main": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 1111.625,
+        "height": 1566.046875,
+        "left": 285.1875,
+        "top": 117
+      },
+      "overflow": false,
+      "styles": [
+        "/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31",
+        "/assets/mv43/chrome.css?v=d8525be5fcded40f8c4039b426ebc1835cbf6ee01196ec70023d920189643837"
+      ],
+      "nav": [
+        {
+          "text": "WW Moneyverse",
+          "href": "/"
+        },
+        {
+          "text": "홈",
+          "href": "/"
+        },
+        {
+          "text": "대시보드",
+          "href": "/dashboard"
+        },
+        {
+          "text": "지갑",
+          "href": "/wallet"
+        },
+        {
+          "text": "은행",
+          "href": "/bank"
+        },
+        {
+          "text": "주식",
+          "href": "/stocks"
+        },
+        {
+          "text": "퀘스트",
+          "href": "/quests"
+        },
+        {
+          "text": "상점",
+          "href": "/shop"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "/board"
+        },
+        {
+          "text": "문의·채팅",
+          "href": "/support"
+        },
+        {
+          "text": "내 계정",
+          "href": "/account"
+        },
+        {
+          "text": "관리자",
+          "href": "/admin"
+        },
+        {
+          "text": "로그인",
+          "href": "/login"
+        }
+      ],
+      "placeholderLabels": []
+    },
+    {
+      "host": "easy-scraping.com",
+      "path": "/tools",
+      "width": 1440,
+      "status": 200,
+      "finalPath": "/tools",
+      "errors": [
+        "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+        "Refused to execute script from 'http://easy-scraping.com/assets/mv43/public.js?v=0058c4f7f01a179219b2eced9d24058e65e278ecb9634c661e97f26c09a95980' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled."
+      ],
+      "failed": [
+        {
+          "url": "http://easy-scraping.com/assets/mv43/public.js",
+          "status": 403
+        }
+      ],
+      "screenshot": "prod-tools-1440.png",
+      "title": "금융 도구 · W Moneyverse",
+      "language": "ko",
+      "h1": [
+        "금융 도구",
+        "하나의 공간, 금융 도구 탐색"
+      ],
+      "body": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(12, 16, 32)",
+        "width": 1440,
+        "height": 2930.359375,
+        "left": 0,
+        "top": 0
+      },
+      "sidebar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(11, 14, 24)",
+        "width": 242,
+        "height": 900,
+        "left": 0,
+        "top": 0
+      },
+      "topbar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 1111.625,
+        "height": 65,
+        "left": 285.1875,
+        "top": 23
+      },
+      "main": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 1111.625,
+        "height": 2638.359375,
+        "left": 285.1875,
+        "top": 108
+      },
+      "overflow": false,
+      "styles": [
+        "/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31",
+        "/assets/mv43/public.css?v=6a6a264de0f0c2e9d7daba2b10938d5743dc345a1acde077a0240b261236fa16",
+        "/assets/mv43/chrome.css?v=d8525be5fcded40f8c4039b426ebc1835cbf6ee01196ec70023d920189643837"
+      ],
+      "nav": [
+        {
+          "text": "WW Moneyverse",
+          "href": "/"
+        },
+        {
+          "text": "홈",
+          "href": "/"
+        },
+        {
+          "text": "대시보드",
+          "href": "/dashboard"
+        },
+        {
+          "text": "지갑",
+          "href": "/wallet"
+        },
+        {
+          "text": "은행",
+          "href": "/bank"
+        },
+        {
+          "text": "주식",
+          "href": "/stocks"
+        },
+        {
+          "text": "퀘스트",
+          "href": "/quests"
+        },
+        {
+          "text": "상점",
+          "href": "/shop"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "/board"
+        },
+        {
+          "text": "문의·채팅",
+          "href": "/support"
+        },
+        {
+          "text": "내 계정",
+          "href": "/account"
+        },
+        {
+          "text": "관리자",
+          "href": "/admin"
+        },
+        {
+          "text": "로그인",
+          "href": "/login"
+        }
+      ],
+      "placeholderLabels": []
+    },
+    {
+      "host": "easy-scraping.com",
+      "path": "/shop",
+      "width": 1440,
+      "status": 200,
+      "finalPath": "/shop",
+      "errors": [],
+      "failed": [],
+      "screenshot": "prod-shop-1440.png",
+      "title": "상점 · Woldeok Moneyverse",
+      "language": "ko",
+      "h1": [
+        "상점"
+      ],
+      "body": {
+        "font": "Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(12, 16, 32)",
+        "width": 1440,
+        "height": 900,
+        "left": 0,
+        "top": 0
+      },
+      "sidebar": null,
+      "topbar": null,
+      "main": {
+        "font": "Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 1100,
+        "height": 900,
+        "left": 275,
+        "top": 0
+      },
+      "overflow": false,
+      "styles": [
+        "https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap",
+        "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200",
+        "/css/mv-theme-nov18.css"
+      ],
+      "nav": [],
+      "placeholderLabels": []
+    },
+    {
+      "host": "easy-scraping.com",
+      "path": "/status",
+      "width": 1440,
+      "status": 200,
+      "finalPath": "/status",
+      "errors": [],
+      "failed": [],
+      "screenshot": "prod-status-1440.png",
+      "title": "서비스 상태 · Woldeok Moneyverse",
+      "language": "ko",
+      "h1": [
+        "서비스 상태"
+      ],
+      "body": {
+        "font": "Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(12, 16, 32)",
+        "width": 1440,
+        "height": 900,
+        "left": 0,
+        "top": 0
+      },
+      "sidebar": null,
+      "topbar": null,
+      "main": {
+        "font": "Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 1100,
+        "height": 900,
+        "left": 275,
+        "top": 0
+      },
+      "overflow": false,
+      "styles": [
+        "https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap",
+        "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200",
+        "/css/mv-theme-nov18.css"
+      ],
+      "nav": [],
+      "placeholderLabels": []
+    },
+    {
+      "host": "easy-scraping.com",
+      "path": "/",
+      "width": 390,
+      "status": 200,
+      "finalPath": "/",
+      "errors": [
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-nXUsDOdQgu86gJDBqsbqo26sIWdrB1jlBBO07CCojLg='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked.",
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-He7xVoGCKaRryXaZTc0m6E77glkiX1GLdaos1zx7Bs0='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked."
+      ],
+      "failed": [],
+      "screenshot": "prod-home-390.png",
+      "title": "홈 · W Moneyverse",
+      "language": "ko",
+      "h1": [
+        "홈"
+      ],
+      "body": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(12, 16, 32)",
+        "width": 390,
+        "height": 2190.953125,
+        "left": 0,
+        "top": 0
+      },
+      "sidebar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(11, 14, 24)",
+        "width": 0,
+        "height": 0,
+        "left": 0,
+        "top": 0
+      },
+      "topbar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 350,
+        "height": 59,
+        "left": 20,
+        "top": 23
+      },
+      "main": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 350,
+        "height": 1696.953125,
+        "left": 20,
+        "top": 99
+      },
+      "overflow": false,
+      "styles": [
+        "/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31",
+        "/assets/mv43/chrome.css?v=d8525be5fcded40f8c4039b426ebc1835cbf6ee01196ec70023d920189643837"
+      ],
+      "nav": [
+        {
+          "text": "로그인",
+          "href": "/login"
+        }
+      ],
+      "placeholderLabels": []
+    },
+    {
+      "host": "easy-scraping.com",
+      "path": "/login",
+      "width": 390,
+      "status": 200,
+      "finalPath": "/login",
+      "errors": [
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-nXUsDOdQgu86gJDBqsbqo26sIWdrB1jlBBO07CCojLg='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked.",
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-He7xVoGCKaRryXaZTc0m6E77glkiX1GLdaos1zx7Bs0='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked."
+      ],
+      "failed": [],
+      "screenshot": "prod-login-390.png",
+      "title": "로그인 · W Moneyverse",
+      "language": "ko",
+      "h1": [
+        "로그인"
+      ],
+      "body": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(12, 16, 32)",
+        "width": 390,
+        "height": 1641.078125,
+        "left": 0,
+        "top": 0
+      },
+      "sidebar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(11, 14, 24)",
+        "width": 0,
+        "height": 0,
+        "left": 0,
+        "top": 0
+      },
+      "topbar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 350,
+        "height": 59,
+        "left": 20,
+        "top": 23
+      },
+      "main": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 350,
+        "height": 1147.078125,
+        "left": 20,
+        "top": 99
+      },
+      "overflow": false,
+      "styles": [
+        "/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31",
+        "/assets/mv43/chrome.css?v=d8525be5fcded40f8c4039b426ebc1835cbf6ee01196ec70023d920189643837"
+      ],
+      "nav": [
+        {
+          "text": "로그인",
+          "href": "/login"
+        }
+      ],
+      "placeholderLabels": []
+    },
+    {
+      "host": "easy-scraping.com",
+      "path": "/terms",
+      "width": 390,
+      "status": 200,
+      "finalPath": "/",
+      "errors": [
+        "Refused to apply style from 'http://easy-scraping.com/_next/static/css/828951deb2af2cbe.css' because its MIME type ('text/html') is not a supported stylesheet MIME type, and strict MIME checking is enabled.",
+        "TypeError: crypto.randomUUID is not a function\n    at o (http://easy-scraping.com/_next/static/chunks/app/layout-2deaf97c2e134386.js:1:34574)\n    at http://easy-scraping.com/_next/static/chunks/app/layout-2deaf97c2e134386.js:1:36165\n    at iC (http://easy-scraping.com/_next/static/chunks/c8b2c4ae-13313ee16281bd70.js:1:93963)\n    at e (http://easy-scraping.com/_next/static/chunks/c8b2c4ae-13313ee16281bd70.js:1:120194)\n    at ux (http://easy-scraping.com/_next/static/chunks/c8b2c4ae-13313ee16281bd",
+        "Failed to load resource: the server responded with a status of 406 ()",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-nXUsDOdQgu86gJDBqsbqo26sIWdrB1jlBBO07CCojLg='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked.",
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-He7xVoGCKaRryXaZTc0m6E77glkiX1GLdaos1zx7Bs0='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked."
+      ],
+      "failed": [
+        {
+          "url": "http://easy-scraping.com/",
+          "status": 406
+        },
+        {
+          "url": "http://easy-scraping.com/api/v1/telemetry/client-error",
+          "status": 404
+        }
+      ],
+      "screenshot": "prod-terms-390.png",
+      "title": "홈 · W Moneyverse",
+      "language": "ko",
+      "h1": [
+        "홈"
+      ],
+      "body": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(12, 16, 32)",
+        "width": 390,
+        "height": 2190.953125,
+        "left": 0,
+        "top": 0
+      },
+      "sidebar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(11, 14, 24)",
+        "width": 0,
+        "height": 0,
+        "left": 0,
+        "top": 0
+      },
+      "topbar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 350,
+        "height": 59,
+        "left": 20,
+        "top": 23
+      },
+      "main": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 350,
+        "height": 1696.953125,
+        "left": 20,
+        "top": 99
+      },
+      "overflow": false,
+      "styles": [
+        "/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31",
+        "/assets/mv43/chrome.css?v=d8525be5fcded40f8c4039b426ebc1835cbf6ee01196ec70023d920189643837"
+      ],
+      "nav": [
+        {
+          "text": "로그인",
+          "href": "/login"
+        }
+      ],
+      "placeholderLabels": []
+    },
+    {
+      "host": "easy-scraping.com",
+      "path": "/tools",
+      "width": 390,
+      "status": 200,
+      "finalPath": "/tools",
+      "errors": [
+        "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+        "Refused to execute script from 'http://easy-scraping.com/assets/mv43/public.js?v=0058c4f7f01a179219b2eced9d24058e65e278ecb9634c661e97f26c09a95980' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled."
+      ],
+      "failed": [
+        {
+          "url": "http://easy-scraping.com/assets/mv43/public.js",
+          "status": 403
+        }
+      ],
+      "screenshot": "prod-tools-390.png",
+      "title": "금융 도구 · W Moneyverse",
+      "language": "ko",
+      "h1": [
+        "금융 도구",
+        "하나의 공간, 금융 도구 탐색"
+      ],
+      "body": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(12, 16, 32)",
+        "width": 390,
+        "height": 5831.265625,
+        "left": 0,
+        "top": 0
+      },
+      "sidebar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(11, 14, 24)",
+        "width": 0,
+        "height": 0,
+        "left": 0,
+        "top": 0
+      },
+      "topbar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 350,
+        "height": 59,
+        "left": 20,
+        "top": 23
+      },
+      "main": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 350,
+        "height": 5334.265625,
+        "left": 20,
+        "top": 102
+      },
+      "overflow": false,
+      "styles": [
+        "/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31",
+        "/assets/mv43/public.css?v=6a6a264de0f0c2e9d7daba2b10938d5743dc345a1acde077a0240b261236fa16",
+        "/assets/mv43/chrome.css?v=d8525be5fcded40f8c4039b426ebc1835cbf6ee01196ec70023d920189643837"
+      ],
+      "nav": [
+        {
+          "text": "로그인",
+          "href": "/login"
+        }
+      ],
+      "placeholderLabels": []
+    },
+    {
+      "host": "easy-scraping.com",
+      "path": "/shop",
+      "width": 390,
+      "status": 200,
+      "finalPath": "/shop",
+      "errors": [],
+      "failed": [],
+      "screenshot": "prod-shop-390.png",
+      "title": "상점 · Woldeok Moneyverse",
+      "language": "ko",
+      "h1": [
+        "상점"
+      ],
+      "body": {
+        "font": "Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(12, 16, 32)",
+        "width": 390,
+        "height": 939,
+        "left": 0,
+        "top": 0
+      },
+      "sidebar": null,
+      "topbar": null,
+      "main": {
+        "font": "Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 390,
+        "height": 865,
+        "left": 0,
+        "top": 0
+      },
+      "overflow": false,
+      "styles": [
+        "https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap",
+        "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200",
+        "/css/mv-theme-nov18.css"
+      ],
+      "nav": [],
+      "placeholderLabels": []
+    },
+    {
+      "host": "easy-scraping.com",
+      "path": "/status",
+      "width": 390,
+      "status": 200,
+      "finalPath": "/status",
+      "errors": [],
+      "failed": [],
+      "screenshot": "prod-status-390.png",
+      "title": "서비스 상태 · Woldeok Moneyverse",
+      "language": "ko",
+      "h1": [
+        "서비스 상태"
+      ],
+      "body": {
+        "font": "Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(12, 16, 32)",
+        "width": 390,
+        "height": 939,
+        "left": 0,
+        "top": 0
+      },
+      "sidebar": null,
+      "topbar": null,
+      "main": {
+        "font": "Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 390,
+        "height": 865,
+        "left": 0,
+        "top": 0
+      },
+      "overflow": false,
+      "styles": [
+        "https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap",
+        "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200",
+        "/css/mv-theme-nov18.css"
+      ],
+      "nav": [],
+      "placeholderLabels": []
+    },
+    {
+      "host": "test.easy-scraping.com",
+      "path": "/",
+      "width": 1440,
+      "status": 200,
+      "finalPath": "/",
+      "errors": [
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-LZajMKvZrTTZOAqYIFB9hyr/TZeleUXvfWGMtj7wzIE='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked.",
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-LZajMKvZrTTZOAqYIFB9hyr/TZeleUXvfWGMtj7wzIE='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked.",
+        "WebSocket connection to 'ws://test.easy-scraping.com/socket.io/?EIO=4&transport=websocket' failed: Error during WebSocket handshake: Unexpected response code: 404"
+      ],
+      "failed": [],
+      "screenshot": "test-home-1440.png",
+      "title": "홈 · W Moneyverse",
+      "language": "ko",
+      "h1": [
+        "홈"
+      ],
+      "body": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(12, 16, 32)",
+        "width": 1440,
+        "height": 1881,
+        "left": 0,
+        "top": 0
+      },
+      "sidebar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 242,
+        "height": 900,
+        "left": 0,
+        "top": 0
+      },
+      "topbar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 1111.625,
+        "height": 79,
+        "left": 285.1875,
+        "top": 23
+      },
+      "main": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 1111.625,
+        "height": 1587,
+        "left": 285.1875,
+        "top": 131
+      },
+      "overflow": false,
+      "styles": [
+        "/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31",
+        "/assets/mv43/chrome.css?v=20261123",
+        "/assets/mv43/chrome.css?v=d8525be5fcded40f8c4039b426ebc1835cbf6ee01196ec70023d920189643837",
+        "/assets/mv43/game-world.css?v=7126a07f2dccc9c42177f659d6d26d11d0f204684c39ede9b9a5ca09724e6bed"
+      ],
+      "nav": [
+        {
+          "text": "W Moneyverse",
+          "href": "/"
+        },
+        {
+          "text": "홈",
+          "href": "/"
+        },
+        {
+          "text": "대시보드",
+          "href": "/dashboard"
+        },
+        {
+          "text": "지갑",
+          "href": "/wallet"
+        },
+        {
+          "text": "은행",
+          "href": "/bank"
+        },
+        {
+          "text": "주식",
+          "href": "/stocks"
+        },
+        {
+          "text": "퀘스트",
+          "href": "/quests"
+        },
+        {
+          "text": "상점",
+          "href": "/shop"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "/board"
+        },
+        {
+          "text": "문의·채팅",
+          "href": "/support"
+        },
+        {
+          "text": "내 계정",
+          "href": "/account"
+        },
+        {
+          "text": "로그인",
+          "href": "/login"
+        }
+      ],
+      "placeholderLabels": []
+    },
+    {
+      "host": "test.easy-scraping.com",
+      "path": "/login",
+      "width": 1440,
+      "status": 200,
+      "finalPath": "/login",
+      "errors": [
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-LZajMKvZrTTZOAqYIFB9hyr/TZeleUXvfWGMtj7wzIE='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked.",
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-LZajMKvZrTTZOAqYIFB9hyr/TZeleUXvfWGMtj7wzIE='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked."
+      ],
+      "failed": [],
+      "screenshot": "test-login-1440.png",
+      "title": "로그인 · W Moneyverse",
+      "language": "ko",
+      "h1": [
+        "로그인"
+      ],
+      "body": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(12, 16, 32)",
+        "width": 1440,
+        "height": 1317.5,
+        "left": 0,
+        "top": 0
+      },
+      "sidebar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 242,
+        "height": 900,
+        "left": 0,
+        "top": 0
+      },
+      "topbar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 1111.625,
+        "height": 79,
+        "left": 285.1875,
+        "top": 23
+      },
+      "main": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 1111.625,
+        "height": 1052.5,
+        "left": 285.1875,
+        "top": 102
+      },
+      "overflow": false,
+      "styles": [
+        "/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31",
+        "/assets/mv43/auth.css?v=2026112310",
+        "/assets/mv43/chrome.css?v=d8525be5fcded40f8c4039b426ebc1835cbf6ee01196ec70023d920189643837",
+        "/assets/mv43/game-world.css?v=7126a07f2dccc9c42177f659d6d26d11d0f204684c39ede9b9a5ca09724e6bed"
+      ],
+      "nav": [
+        {
+          "text": "W Moneyverse",
+          "href": "/"
+        },
+        {
+          "text": "홈",
+          "href": "/"
+        },
+        {
+          "text": "대시보드",
+          "href": "/dashboard"
+        },
+        {
+          "text": "지갑",
+          "href": "/wallet"
+        },
+        {
+          "text": "은행",
+          "href": "/bank"
+        },
+        {
+          "text": "주식",
+          "href": "/stocks"
+        },
+        {
+          "text": "퀘스트",
+          "href": "/quests"
+        },
+        {
+          "text": "상점",
+          "href": "/shop"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "/board"
+        },
+        {
+          "text": "문의·채팅",
+          "href": "/support"
+        },
+        {
+          "text": "내 계정",
+          "href": "/account"
+        },
+        {
+          "text": "내 계정",
+          "href": "/account"
+        }
+      ],
+      "placeholderLabels": []
+    },
+    {
+      "host": "test.easy-scraping.com",
+      "path": "/terms",
+      "width": 1440,
+      "status": 200,
+      "finalPath": "/terms",
+      "errors": [],
+      "failed": [],
+      "screenshot": "test-terms-1440.png",
+      "title": "이용약관 · W Moneyverse",
+      "language": "ko",
+      "h1": [
+        "이용약관",
+        "이용약관"
+      ],
+      "body": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(12, 16, 32)",
+        "width": 1440,
+        "height": 4334.734375,
+        "left": 0,
+        "top": 0
+      },
+      "sidebar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 242,
+        "height": 900,
+        "left": 0,
+        "top": 0
+      },
+      "topbar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 1111.625,
+        "height": 79,
+        "left": 285.1875,
+        "top": 23
+      },
+      "main": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 960,
+        "height": 4069.734375,
+        "left": 361,
+        "top": 102
+      },
+      "overflow": false,
+      "styles": [
+        "/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31",
+        "/assets/mv43/chrome.css?v=813d59e41d5282c3b390ff55f64bba377a21284d608346d205c269c1015c8e8c",
+        "/assets/mv43/legal.css?v=b76365c99ae703757e7d7e6a21656cb948244447230d88592b9ed5b800abecbf",
+        "/assets/mv43/chrome.css?v=813d59e41d5282c3b390ff55f64bba377a21284d608346d205c269c1015c8e8c",
+        "/assets/mv43/game-world.css?v=7126a07f2dccc9c42177f659d6d26d11d0f204684c39ede9b9a5ca09724e6bed"
+      ],
+      "nav": [
+        {
+          "text": "W Moneyverse",
+          "href": "/"
+        },
+        {
+          "text": "⌂홈",
+          "href": "/"
+        },
+        {
+          "text": "▣지갑",
+          "href": "/wallet"
+        },
+        {
+          "text": "↗주식",
+          "href": "/stocks"
+        },
+        {
+          "text": "✧퀘스트",
+          "href": "/quests"
+        },
+        {
+          "text": "◈상점",
+          "href": "/shop"
+        },
+        {
+          "text": "☷커뮤니티",
+          "href": "/board"
+        },
+        {
+          "text": "◉문의·채팅",
+          "href": "/support"
+        },
+        {
+          "text": "♙내 계정",
+          "href": "/account"
+        },
+        {
+          "text": "로그인",
+          "href": "/login"
+        }
+      ],
+      "placeholderLabels": []
+    },
+    {
+      "host": "test.easy-scraping.com",
+      "path": "/tools",
+      "width": 1440,
+      "status": 200,
+      "finalPath": "/tools",
+      "errors": [],
+      "failed": [],
+      "screenshot": "test-tools-1440.png",
+      "title": "금융 도구 · W Moneyverse",
+      "language": "ko",
+      "h1": [
+        "금융 도구",
+        "하나의 공간, 금융 도구 탐색"
+      ],
+      "body": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(12, 16, 32)",
+        "width": 1440,
+        "height": 2963.71875,
+        "left": 0,
+        "top": 0
+      },
+      "sidebar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 242,
+        "height": 900,
+        "left": 0,
+        "top": 0
+      },
+      "topbar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 1111.625,
+        "height": 79,
+        "left": 285.1875,
+        "top": 23
+      },
+      "main": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 1111.625,
+        "height": 2678.71875,
+        "left": 285.1875,
+        "top": 122
+      },
+      "overflow": false,
+      "styles": [
+        "/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31",
+        "/assets/mv43/public.css?v=6a6a264de0f0c2e9d7daba2b10938d5743dc345a1acde077a0240b261236fa16",
+        "/assets/mv43/chrome.css?v=d8525be5fcded40f8c4039b426ebc1835cbf6ee01196ec70023d920189643837",
+        "/assets/mv43/game-world.css?v=7126a07f2dccc9c42177f659d6d26d11d0f204684c39ede9b9a5ca09724e6bed"
+      ],
+      "nav": [
+        {
+          "text": "W Moneyverse",
+          "href": "/"
+        },
+        {
+          "text": "홈",
+          "href": "/"
+        },
+        {
+          "text": "대시보드",
+          "href": "/dashboard"
+        },
+        {
+          "text": "지갑",
+          "href": "/wallet"
+        },
+        {
+          "text": "은행",
+          "href": "/bank"
+        },
+        {
+          "text": "주식",
+          "href": "/stocks"
+        },
+        {
+          "text": "퀘스트",
+          "href": "/quests"
+        },
+        {
+          "text": "상점",
+          "href": "/shop"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "/board"
+        },
+        {
+          "text": "문의·채팅",
+          "href": "/support"
+        },
+        {
+          "text": "내 계정",
+          "href": "/account"
+        },
+        {
+          "text": "로그인",
+          "href": "/login"
+        }
+      ],
+      "placeholderLabels": []
+    },
+    {
+      "host": "test.easy-scraping.com",
+      "path": "/shop",
+      "width": 1440,
+      "status": 403,
+      "finalPath": "/shop",
+      "errors": [
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ],
+      "failed": [
+        {
+          "url": "http://test.easy-scraping.com/shop",
+          "status": 403
+        }
+      ],
+      "screenshot": "test-shop-1440.png",
+      "title": "",
+      "language": "",
+      "h1": [],
+      "body": {
+        "font": "\"Times New Roman\"",
+        "fontSize": "16px",
+        "color": "rgb(0, 0, 0)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 1424,
+        "height": 0,
+        "left": 8,
+        "top": 8
+      },
+      "sidebar": null,
+      "topbar": null,
+      "main": null,
+      "overflow": false,
+      "styles": [],
+      "nav": [],
+      "placeholderLabels": []
+    },
+    {
+      "host": "test.easy-scraping.com",
+      "path": "/status",
+      "width": 1440,
+      "status": 200,
+      "finalPath": "/status",
+      "errors": [
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-LZajMKvZrTTZOAqYIFB9hyr/TZeleUXvfWGMtj7wzIE='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked.",
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-LZajMKvZrTTZOAqYIFB9hyr/TZeleUXvfWGMtj7wzIE='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked."
+      ],
+      "failed": [],
+      "screenshot": "test-status-1440.png",
+      "title": "서비스 상태 · W Moneyverse",
+      "language": "ko",
+      "h1": [
+        "서비스 상태",
+        "서비스 상태"
+      ],
+      "body": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(12, 16, 32)",
+        "width": 1440,
+        "height": 1486.671875,
+        "left": 0,
+        "top": 0
+      },
+      "sidebar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 242,
+        "height": 900,
+        "left": 0,
+        "top": 0
+      },
+      "topbar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 1111.625,
+        "height": 79,
+        "left": 285.1875,
+        "top": 23
+      },
+      "main": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 1111.625,
+        "height": 1201.671875,
+        "left": 285.1875,
+        "top": 122
+      },
+      "overflow": false,
+      "styles": [
+        "/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31",
+        "/assets/mv43/public.css?v=6a6a264de0f0c2e9d7daba2b10938d5743dc345a1acde077a0240b261236fa16",
+        "/assets/mv43/chrome.css?v=d8525be5fcded40f8c4039b426ebc1835cbf6ee01196ec70023d920189643837",
+        "/assets/mv43/game-world.css?v=7126a07f2dccc9c42177f659d6d26d11d0f204684c39ede9b9a5ca09724e6bed"
+      ],
+      "nav": [
+        {
+          "text": "W Moneyverse",
+          "href": "/"
+        },
+        {
+          "text": "홈",
+          "href": "/"
+        },
+        {
+          "text": "대시보드",
+          "href": "/dashboard"
+        },
+        {
+          "text": "지갑",
+          "href": "/wallet"
+        },
+        {
+          "text": "은행",
+          "href": "/bank"
+        },
+        {
+          "text": "주식",
+          "href": "/stocks"
+        },
+        {
+          "text": "퀘스트",
+          "href": "/quests"
+        },
+        {
+          "text": "상점",
+          "href": "/shop"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "/board"
+        },
+        {
+          "text": "문의·채팅",
+          "href": "/support"
+        },
+        {
+          "text": "내 계정",
+          "href": "/account"
+        },
+        {
+          "text": "로그인",
+          "href": "/login"
+        }
+      ],
+      "placeholderLabels": []
+    },
+    {
+      "host": "test.easy-scraping.com",
+      "path": "/",
+      "width": 390,
+      "status": 200,
+      "finalPath": "/",
+      "errors": [
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-LZajMKvZrTTZOAqYIFB9hyr/TZeleUXvfWGMtj7wzIE='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked.",
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-LZajMKvZrTTZOAqYIFB9hyr/TZeleUXvfWGMtj7wzIE='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked.",
+        "WebSocket connection to 'ws://test.easy-scraping.com/socket.io/?EIO=4&transport=websocket' failed: Error during WebSocket handshake: Unexpected response code: 404"
+      ],
+      "failed": [],
+      "screenshot": "test-home-390.png",
+      "title": "홈 · W Moneyverse",
+      "language": "ko",
+      "h1": [
+        "홈"
+      ],
+      "body": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(12, 16, 32)",
+        "width": 390,
+        "height": 2210.1875,
+        "left": 0,
+        "top": 0
+      },
+      "sidebar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 0,
+        "height": 0,
+        "left": 0,
+        "top": 0
+      },
+      "topbar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 362,
+        "height": 172,
+        "left": 14,
+        "top": 14
+      },
+      "main": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 362,
+        "height": 1712.6875,
+        "left": 14,
+        "top": 203
+      },
+      "overflow": false,
+      "styles": [
+        "/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31",
+        "/assets/mv43/chrome.css?v=20261123",
+        "/assets/mv43/chrome.css?v=d8525be5fcded40f8c4039b426ebc1835cbf6ee01196ec70023d920189643837",
+        "/assets/mv43/game-world.css?v=7126a07f2dccc9c42177f659d6d26d11d0f204684c39ede9b9a5ca09724e6bed"
+      ],
+      "nav": [
+        {
+          "text": "로그인",
+          "href": "/login"
+        }
+      ],
+      "placeholderLabels": []
+    },
+    {
+      "host": "test.easy-scraping.com",
+      "path": "/login",
+      "width": 390,
+      "status": 200,
+      "finalPath": "/login",
+      "errors": [
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-LZajMKvZrTTZOAqYIFB9hyr/TZeleUXvfWGMtj7wzIE='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked.",
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-LZajMKvZrTTZOAqYIFB9hyr/TZeleUXvfWGMtj7wzIE='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked."
+      ],
+      "failed": [],
+      "screenshot": "test-login-390.png",
+      "title": "로그인 · W Moneyverse",
+      "language": "ko",
+      "h1": [
+        "로그인"
+      ],
+      "body": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(12, 16, 32)",
+        "width": 390,
+        "height": 2079.15625,
+        "left": 0,
+        "top": 0
+      },
+      "sidebar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 0,
+        "height": 0,
+        "left": 0,
+        "top": 0
+      },
+      "topbar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 362,
+        "height": 172,
+        "left": 14,
+        "top": 14
+      },
+      "main": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 362,
+        "height": 1598.65625,
+        "left": 14,
+        "top": 186
+      },
+      "overflow": false,
+      "styles": [
+        "/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31",
+        "/assets/mv43/auth.css?v=2026112310",
+        "/assets/mv43/chrome.css?v=d8525be5fcded40f8c4039b426ebc1835cbf6ee01196ec70023d920189643837",
+        "/assets/mv43/game-world.css?v=7126a07f2dccc9c42177f659d6d26d11d0f204684c39ede9b9a5ca09724e6bed"
+      ],
+      "nav": [
+        {
+          "text": "내 계정",
+          "href": "/account"
+        }
+      ],
+      "placeholderLabels": []
+    },
+    {
+      "host": "test.easy-scraping.com",
+      "path": "/terms",
+      "width": 390,
+      "status": 200,
+      "finalPath": "/terms",
+      "errors": [],
+      "failed": [],
+      "screenshot": "test-terms-390.png",
+      "title": "이용약관 · W Moneyverse",
+      "language": "ko",
+      "h1": [
+        "이용약관",
+        "이용약관"
+      ],
+      "body": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(12, 16, 32)",
+        "width": 390,
+        "height": 5801.828125,
+        "left": 0,
+        "top": 0
+      },
+      "sidebar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 0,
+        "height": 0,
+        "left": 0,
+        "top": 0
+      },
+      "topbar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 362,
+        "height": 122,
+        "left": 14,
+        "top": 14
+      },
+      "main": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 362,
+        "height": 5371.328125,
+        "left": 14,
+        "top": 136
+      },
+      "overflow": false,
+      "styles": [
+        "/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31",
+        "/assets/mv43/chrome.css?v=813d59e41d5282c3b390ff55f64bba377a21284d608346d205c269c1015c8e8c",
+        "/assets/mv43/legal.css?v=b76365c99ae703757e7d7e6a21656cb948244447230d88592b9ed5b800abecbf",
+        "/assets/mv43/chrome.css?v=813d59e41d5282c3b390ff55f64bba377a21284d608346d205c269c1015c8e8c",
+        "/assets/mv43/game-world.css?v=7126a07f2dccc9c42177f659d6d26d11d0f204684c39ede9b9a5ca09724e6bed"
+      ],
+      "nav": [
+        {
+          "text": "로그인",
+          "href": "/login"
+        }
+      ],
+      "placeholderLabels": []
+    },
+    {
+      "host": "test.easy-scraping.com",
+      "path": "/tools",
+      "width": 390,
+      "status": 200,
+      "finalPath": "/tools",
+      "errors": [],
+      "failed": [],
+      "screenshot": "test-tools-390.png",
+      "title": "금융 도구 · W Moneyverse",
+      "language": "ko",
+      "h1": [
+        "금융 도구",
+        "하나의 공간, 금융 도구 탐색"
+      ],
+      "body": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(12, 16, 32)",
+        "width": 390,
+        "height": 5824.953125,
+        "left": 0,
+        "top": 0
+      },
+      "sidebar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 0,
+        "height": 0,
+        "left": 0,
+        "top": 0
+      },
+      "topbar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 362,
+        "height": 172,
+        "left": 14,
+        "top": 14
+      },
+      "main": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 362,
+        "height": 5324.453125,
+        "left": 14,
+        "top": 206
+      },
+      "overflow": false,
+      "styles": [
+        "/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31",
+        "/assets/mv43/public.css?v=6a6a264de0f0c2e9d7daba2b10938d5743dc345a1acde077a0240b261236fa16",
+        "/assets/mv43/chrome.css?v=d8525be5fcded40f8c4039b426ebc1835cbf6ee01196ec70023d920189643837",
+        "/assets/mv43/game-world.css?v=7126a07f2dccc9c42177f659d6d26d11d0f204684c39ede9b9a5ca09724e6bed"
+      ],
+      "nav": [
+        {
+          "text": "로그인",
+          "href": "/login"
+        }
+      ],
+      "placeholderLabels": []
+    },
+    {
+      "host": "test.easy-scraping.com",
+      "path": "/shop",
+      "width": 390,
+      "status": 403,
+      "finalPath": "/shop",
+      "errors": [
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ],
+      "failed": [
+        {
+          "url": "http://test.easy-scraping.com/shop",
+          "status": 403
+        }
+      ],
+      "screenshot": "test-shop-390.png",
+      "title": "",
+      "language": "",
+      "h1": [],
+      "body": {
+        "font": "\"Times New Roman\"",
+        "fontSize": "16px",
+        "color": "rgb(0, 0, 0)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 374,
+        "height": 0,
+        "left": 8,
+        "top": 8
+      },
+      "sidebar": null,
+      "topbar": null,
+      "main": null,
+      "overflow": false,
+      "styles": [],
+      "nav": [],
+      "placeholderLabels": []
+    },
+    {
+      "host": "test.easy-scraping.com",
+      "path": "/status",
+      "width": 390,
+      "status": 200,
+      "finalPath": "/status",
+      "errors": [
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-LZajMKvZrTTZOAqYIFB9hyr/TZeleUXvfWGMtj7wzIE='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked.",
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-LZajMKvZrTTZOAqYIFB9hyr/TZeleUXvfWGMtj7wzIE='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked."
+      ],
+      "failed": [],
+      "screenshot": "test-status-390.png",
+      "title": "서비스 상태 · W Moneyverse",
+      "language": "ko",
+      "h1": [
+        "서비스 상태",
+        "서비스 상태"
+      ],
+      "body": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgb(12, 16, 32)",
+        "width": 390,
+        "height": 2129.734375,
+        "left": 0,
+        "top": 0
+      },
+      "sidebar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 0,
+        "height": 0,
+        "left": 0,
+        "top": 0
+      },
+      "topbar": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 362,
+        "height": 172,
+        "left": 14,
+        "top": 14
+      },
+      "main": {
+        "font": "Inter, system-ui, -apple-system, \"Segoe UI\", \"Noto Sans KR\", \"Noto Sans SC\", sans-serif",
+        "fontSize": "15px",
+        "color": "rgb(233, 241, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "width": 362,
+        "height": 1629.234375,
+        "left": 14,
+        "top": 206
+      },
+      "overflow": false,
+      "styles": [
+        "/assets/mv39/site.css?v=014db2fb80894d65243679662aa7abb859ced8787b8e6e62071936001533da31",
+        "/assets/mv43/public.css?v=6a6a264de0f0c2e9d7daba2b10938d5743dc345a1acde077a0240b261236fa16",
+        "/assets/mv43/chrome.css?v=d8525be5fcded40f8c4039b426ebc1835cbf6ee01196ec70023d920189643837",
+        "/assets/mv43/game-world.css?v=7126a07f2dccc9c42177f659d6d26d11d0f204684c39ede9b9a5ca09724e6bed"
+      ],
+      "nav": [
+        {
+          "text": "로그인",
+          "href": "/login"
+        }
+      ],
+      "placeholderLabels": []
+    }
+  ]
+}

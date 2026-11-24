@@ -1,5 +1,8 @@
 # 실제 백엔드 연결 테스트 프론트엔드 — 2026-11-23
 
+> Current runtime acceptance HOLD — 2026-11-24. A different JAR retains the old7b build identity. Earlier Test acceptance is historical, not current. [Latest diagnosis](../qa/2026-11-24-frontend-diagnosis.md) / [한국어](../qa/2026-11-24-frontend-diagnosis.ko.md).
+
+
 ## 현재 체크포인트 — Test 연결 범위 검증 완료
 
 완료 범위: 독립 Test 프론트엔드 연결, 정확한 CI 산출물, 공통 번역·파비콘·문의창 수정 및 명시한240조건 브라우저 검사.180경로 전체 구현·회원/관리자/금융 기능 검증은 OPEN이다. 운영 승격하지 않았다.
@@ -78,8 +81,12 @@ Production was not promoted. The recurring Test-before-Production rule is record
 
 ### Before work — 2026-11-24 expanded diagnosis
 Owner requests comparison of all MiniPC/GitHub work, why the UI differs from the approved design, and why some pages are blocked. Continue read-only runtime/source/ingress/security comparison. Do not infer that earlier240-case evidence accepts another application SHA or every route.
-- [ ] Inventory active public Test/Production identities, presentation/API boundaries and worktrees.
-- [ ] Compare GitHub integration/PR/source and design authority.
-- [ ] Reproduce representative missing, denied, login-required and source-failed routes at each boundary.
-- [ ] Inspect actual desktop/mobile page styling and classify visual defects.
-- [ ] Publish evidence-linked causes and remaining actions without Production promotion.
+- [x] Inventory active public Test/Production identities, presentation/API boundaries and worktrees.
+- [x] Compare GitHub integration/PR/source and design authority.
+- [x] Reproduce representative missing, denied, login-required and source-failed routes at each boundary.
+- [x] Inspect actual desktop/mobile page styling and classify visual defects.
+- [x] Publish evidence-linked causes and remaining actions without Production promotion.
+
+### Finished diagnosis — 2026-11-24 (implementation defects remain OPEN)
+Inspected28worktrees/36running related services/70recent PRs,294anonymous routeGETs,24origin-browser views and5externalHTTPS screens. Added paired diagnosis and sanitized evidence. Found34entry drift from the attested7b JAR while retaining its identity; missing native handlers causing403; Production design-example shop; broken legacy CSS502 and edge-only public.js403; incompatible shared CSS versions; favicon-to-W and mobile support-overlap regressions; socket404; Test status raw-table SELECT nowtrue. Current state is HOLD, not240cases accepted.
+Do not misreport inactive retired unit names as site downtime. Four worktrees are dirty; preserve them. Main remains9876c09888; consolidated remotea61 has77unmerged commits and failing runtime/Spring checks. No Production deploy, service shutdown, grant mutation, branch deletion or application-code repair in this diagnosis. Old status503/7b acceptance records are superseded by the current time-bounded observations.

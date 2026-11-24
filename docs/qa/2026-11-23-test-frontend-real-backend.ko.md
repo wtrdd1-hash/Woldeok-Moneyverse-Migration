@@ -1,5 +1,8 @@
 # 실제 Test 프론트엔드·백엔드 점검 — 2026-11-23
 
+> **현재 실행본에는 적용 불가 — 2026-11-24:** 실행 JAR이 변경됐으나 표시 SHA는7b로 유지된다. 아래240조건 통과는 원래 검증 산출물의 역사 증거다. [현재 디자인·경로·산출물 원인 분석](2026-11-24-frontend-diagnosis.ko.md)을 따른다. 현재 상태 API는200/unknown이며 Test 원본 테이블 SELECT가 확대돼 있다. 이전503은 역사 기록이다.
+
+
 ## 현재 검증된 범위
 
 최신 사용자 지시는 **테스트 서버에서만 구현**이다. [테스트 화면](https://test.easy-scraping.com/) · [배포본 식별](https://test.easy-scraping.com/frontend-ui-version). 이 작업으로 운영 승격하지 않았다.
