@@ -182,3 +182,14 @@ GitOps/Kubernetes 기록은 provenance와 복구/목표 아키텍처로 유지�
 
 ## 사용자 Test 선행 지시 — 2026-11-23
 프론트엔드·백엔드 변경은 실제 API/DB가 연결된 독립 Test에서 정확한 소스/배포본·역할·언어·반응형·복원 검증 후에만 운영 승격한다. 테스트 도메인이 운영 프론트엔드를 그대로 프록시하는 것은 독립 검증이 아니다. Test 실패·접속 불가는 승격 차단이다. 현재 작업은 테스트 전용이므로 이후 별도 사용자 지시 없이 운영에 승격하지 않는다.
+
+
+## Owner directive — mandatory Test before Production (2026-11-22)
+
+Every frontend and backend change must run as its exact source/artifact in the isolated Test environment before Production promotion. Verify the changed routes, real backend contracts, authorization failures, relevant database behavior, desktop/mobile layouts and required checks. Resolve observed failures before promotion; skipped or unreachable required checks are blockers, never passes. Promote the same tested artifact, preserve sessions and rollback, and record the Test and Production evidence in the task log.
+
+Keep the Test website reachable for its accepted public frontend routes. Public Test access does not authorize exposing administrator data, bypassing authentication, enabling Production financial writes, or replacing a Test backend with invented data. Unaccepted/private routes retain their explicit admission boundaries.
+
+
+## 사용자 고정 지시 — Test 검증 후 운영 승격
+프론트엔드와 백엔드는 항상 같은 후보 코드·산출물을 Test 서버에 먼저 연결하고 검증합니다. 접속 장애, 필요한 API/DB/권한 검사, PC·모바일 화면 검사에서 문제가 있으면 해결한 뒤 운영으로 승격합니다. 생략되거나 실행하지 못한 필수 검사는 통과로 기록하지 않습니다. 기존 세션과 롤백 산출물을 보존하고, Test·운영의 실제 버전과 결과를 작업 기록에 남깁니다.

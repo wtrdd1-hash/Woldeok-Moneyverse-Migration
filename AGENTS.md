@@ -525,3 +525,10 @@ reason and the test fails without one.
 
 ## Owner Test-first directive — 2026-11-23
 Always implement and verify frontend/backend candidates on an independently identified Test runtime with a real backend before any Production promotion. A Test hostname proxying the Production frontend is not independent acceptance. Bind evidence to exact source/artifact, actual API/DB, role/locale/viewport checks and inverse receipts. Failed/unreachable Test blocks promotion. Latest task scope is Test-only: do not promote this candidate to Production without a later owner instruction.
+
+
+## Owner directive — mandatory Test before Production (2026-11-22)
+
+Every frontend and backend change must run as its exact source/artifact in the isolated Test environment before Production promotion. Verify the changed routes, real backend contracts, authorization failures, relevant database behavior, desktop/mobile layouts and required checks. Resolve observed failures before promotion; skipped or unreachable required checks are blockers, never passes. Promote the same tested artifact, preserve sessions and rollback, and record the Test and Production evidence in the task log.
+
+Keep the Test website reachable for its accepted public frontend routes. Public Test access does not authorize exposing administrator data, bypassing authentication, enabling Production financial writes, or replacing a Test backend with invented data. Unaccepted/private routes retain their explicit admission boundaries.

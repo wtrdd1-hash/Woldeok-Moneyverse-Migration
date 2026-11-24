@@ -1,0 +1,111 @@
+{
+  "applicationSource": "f0336fded6068f884c87f88efedeb770fd3387d4",
+  "jarSha256": "8a1c75c685ad31805a772ff9af6a94e6f7fd2e57f66809412ac2e900b1d6f38c",
+  "apiOrigin": "http://127.0.0.1:55438",
+  "processIdentity": {
+    "unit": "moneyverse-nov18-test-backend-v20261122.service",
+    "pid": 566098,
+    "openJarMatches": true,
+    "openJarSha256": "8a1c75c685ad31805a772ff9af6a94e6f7fd2e57f66809412ac2e900b1d6f38c",
+    "sourceVersion": "f0336fded6068f884c87f88efedeb770fd3387d4",
+    "cwd": "/run/moneyverse-nov18-test-backend"
+  },
+  "database": {
+    "name": "moneyverse_nov18_public_test",
+    "role": "moneyverse_app",
+    "readOnly": true,
+    "superuser": false,
+    "createRole": false,
+    "createDb": false,
+    "transactionReadOnly": "on",
+    "syntheticOnly": true,
+    "currentDatabaseName": "moneyverse_nov18_public_test",
+    "host": "127.0.0.1",
+    "port": 55436,
+    "containerId": "4cf69a9cd8a6ddefe76902860ddb7d051d603f45d8a192859a0d573f5e788774",
+    "imageDigest": "sha256:18cfe3ef5e6815560c98237d6216d1e5119702fb0f3894c8785dd58b8bbe5d73",
+    "volume": "mv-nov18-test-db-20261122-data",
+    "source": "f0336fded6068f884c87f88efedeb770fd3387d4",
+    "migrationsCount": 348,
+    "migrationParity": true,
+    "syntheticCounts": {
+      "users": 0,
+      "identities": 0,
+      "sessions": 0
+    },
+    "appConnections": 1,
+    "effectivePoolReadOnly": true,
+    "permissions": {
+      "stockTableReadable": false,
+      "coreMoneyExecutable": false
+    }
+  },
+  "runtimeConfiguration": {
+    "schedulingEnabled": "false",
+    "tickerEnabled": "false",
+    "botOffline": true,
+    "sqlInitMode": "never",
+    "hibernateDdlAuto": "none",
+    "network": {
+      "IPAddressAllow": "127.0.0.0/8 ::1/128",
+      "IPAddressDeny": "0.0.0.0/0 ::/0",
+      "DynamicUser": "yes"
+    }
+  },
+  "continuity": {
+    "servicePolicy": {
+      "Restart": "on-failure",
+      "RestartUSec": "3s",
+      "SuccessExitStatus": "143",
+      "UnitFileState": "enabled",
+      "StartLimitIntervalUSec": "5min",
+      "StartLimitBurst": "5"
+    },
+    "containerRestartPolicy": "unless-stopped",
+    "verified": true
+  },
+  "checks": {
+    "sourceIdentity": true,
+    "databaseIsolation": true,
+    "readOnly": true,
+    "migrationParity": true,
+    "anonymousSession": true,
+    "walletDenied": true,
+    "guestSummaryRedacted": true,
+    "adminDenied": true,
+    "stockCanonical": true,
+    "boardCanonical": true,
+    "forgedActorDenied": true,
+    "syntheticOnly": true,
+    "jobsConfiguredOff": true,
+    "botOffline": true,
+    "loopbackSandbox": true,
+    "testCors": true,
+    "privilegeBoundary": true
+  },
+  "httpStatuses": {
+    "version": 200,
+    "session": 200,
+    "wallet": 401,
+    "walletBalance": 401,
+    "walletSummary": 200,
+    "forgedWalletSummary": 200,
+    "admin": 401,
+    "stock": 200,
+    "board": 200,
+    "forgedWallet": 401,
+    "forgedAdmin": 401,
+    "forgedPortfolio": 401,
+    "testOrigin": 200,
+    "productionOrigin": 403
+  },
+  "canonicalRowCounts": {
+    "stocks": 10,
+    "board": 0
+  },
+  "accepted": true,
+  "limitations": [
+    "Anonymous public reads and denial boundaries only. No member/admin positive session, financial mutation, full route inventory, or Production backend acceptance.",
+    "Read-only proof combines effective Hikari DEBUG configuration with independent app-role read-only SQL; no diagnostic endpoint added to application."
+  ]
+}

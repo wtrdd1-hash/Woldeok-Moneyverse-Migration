@@ -51,3 +51,6 @@ Owner confirmed task requests authorize task-branch commits and pushes; main int
 
 ### Optional review tooling retained
 Integrated exact10f66b61bf source. The runner remains explicit-request-only advisory tooling; no live models invoked. Offline6/6 tests pass. Registered only its three exact executable/config paths as control-plane inputs; added neighboring-script UNKNOWN regression, observed RED1 then classifier28/28 GREEN. Current owner authority remains ahead of dated process notes.
+
+### Prior Test operations branch retained
+Integrated committed79b3077373 only; foreign dirty worktree remains untouched. Preserved Nov23 candidate home design and added the existing real-data page-content consumer anchor. Did not reintroduce the old simulated treasury/market/ledger terminal. Incoming real-data-contract assertions retained. Offline gateway19/19 and isolated-backend12/12 pass; no install, routing, service switch or financial write executed. Test-first directives agree with current authority and remain mandatory.
