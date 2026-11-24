@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Living Project Plan
 
+> **v2026.11.24.FEARCH.1 — OWNER FRONTEND ARCHITECTURE DECISION (DRAFT, no runtime cutover):** Target for *new* 23 Nov UI is **separate Next.js/React frontend + Spring Boot authoritative API/auth/finance**. Older mandatory Spring MVC/Thymeleaf phrasing is historical for frontend technology only; preserve active legacy frontend and all business, design, security and Test/Production promotion constraints. Retain 23 Nov v10 unmerged immutable SHA 39888c7..., original 18 Nov and v8 assets, and require full identity/session/real-data QA. [English canonical decision](FRONTEND_ARCHITECTURE_NOV23_NEXT_SPRING_v2026.11.24.FEARCH.1.md) / [KO](FRONTEND_ARCHITECTURE_NOV23_NEXT_SPRING_v2026.11.24.FEARCH.1.ko.md). **Draft PR only, not effective on protected main until merged; no server switch.**
+
+
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 
 ## v2026.11.21.2234 — Saved AgentMemory development reference and task-handoff protocol (PLANNING; not installed)
