@@ -255,3 +255,11 @@ nginx: 운영 블로그 경로(`/blog`, `/{en,ja,zh,ko}/blog[/*]`)와 `@mv_blog_
 - 전체 실행에서 발견·수정: next 16.4.6 업그레이드 때 ESLint 플러그인이 16.4.2 로 남아 루트 보안 검사가 실패하고 하위 테스트가 실행되지 않던 회귀 → 16.4.6 정렬(7f1af9b4cf).
 - 폭 검사 도구 수정(networkidle 대기 → load+2초): Test 100건, 운영 100건(20 경로×320/390/768/1100/1440) 문제 0.
 - 운영 승격(무중단 blue/green): 운영 빌드 `next-frontend-v20261124-7f1af9b4cfb1` 를 새 서비스(55478)로 띄워 비공개 확인 후 nginx 전환. 이전 G2 릴리스(55476)는 되돌리기용으로 계속 실행. 운영 180 경로 정상 166 / 건너뜀 14, JS 오류 0, 가로 넘침 0. 읽기 전용 쓰기 차단 403, clear-session 외부 출처 403, /health·socket.io 200.
+
+### 15단계 — CI 동등 전체 테스트(실제 PostgreSQL 포함) (작업자: Claude Code / Claude Opus 5.5)
+- 소유자 지시: "승인 및 전체적 테스트 제대로 진행할 것".
+- CI(.github/workflows/ci.yml)와 같은 구성으로 일회용 PostgreSQL 17.11 컨테이너(127.0.0.1:55490, 운영·Test DB 무관)를 띄우고 packages/database/ci-apply.mjs 로 마이그레이션 349개 적용(테이블 271). 호스트에 psql 이 없어 컨테이너 내부 psql 을 부르는 임시 래퍼 사용(작업 후 삭제). GitHub 실행기가 자동으로 넣는 GITHUB_ACTIONS=true 를 일회용 DB 대상 명령에만 지정.
+- 최종 결과(새 DB, CI 순서): 마이그레이션 적용 통과, typecheck 통과, lint 오류 0(경고 1085 기존), 루트 node 34/34, contract 41/41, database 94/94(건너뜀 0), NestJS backend 3669 통과(+116 건너뜀), frontend 3175/3175, bot 11/11, Spring 713/713, Spring PostgreSQL 통합 24/24.
+- 발견·수정: (1) database 테스트 파일 병렬 실행 시 국고 원장 교착(deadlock) 간헐 실패 → 파일 순차 실행(새 DB 3회 연속 94/94). (2) Spring 실패 3건 근본 원인 — 11/18 보관 디자인을 검사하던 테스트가 이후 의도된 변경(#3365 로그인 재작성, v10 chrome 교체, 은행 회원 전용화)과 충돌 → 현재 동작을 더 엄격히 검사하도록 갱신(비로그인 /bank.html → /login?next=%2Fbank, chrome CSS 바이트 고정, Next CSS·청록 없음 유지). 커밋 caba74a35f.
+- 남은 건너뜀: backend 116개(34 파일)는 기능별 전용 격리 DB 변수(예: TREASURY_V572_ISOLATED_DATABASE_URL)를 요구하는 일회성 증명 테스트로 CI 도 실행하지 않음. 참고로 공용 DB 로 지정해 실행해 보았으나 스키마 중복 생성·낮은 권한 계정 요구·전용 DB 이름 요구로 환경 불일치 실패(코드 결함 증거 아님).
+- 통합 실행 중 실수: DB 패키지용 포트 없는 주소를 백엔드에도 넘겨 5432 연결 거부로 515건 실패 — 5432 에는 아무 서비스도 없음을 확인(다른 DB 접근 없음), 패키지별 올바른 주소로 재실행해 통과.
