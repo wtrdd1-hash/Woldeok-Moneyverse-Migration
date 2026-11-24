@@ -1,0 +1,56 @@
+name: Generate v11 visual repair candidates
+on:
+  push:
+    branches:
+      - fix/v2026.11.24-visual-repair
+    paths:
+      - scripts/repair-v10-preview-icons.py
+      - .github/workflows/generate-v11-visual-repair.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'Pillow>=11,<13'
+      - name: Generate 180 images and verify source hashes
+        run: python scripts/repair-v10-preview-icons.py
+      - name: Check generated count and PNG integrity
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from PIL import Image
+          p=Path('docs/design/game-ui-v2026.11.24.11')
+          records=json.loads((p/'repair-audit.json').read_text())
+          assert len(records)==180
+          assert len(list((p/'previews').glob('*.png')))==180
+          for r in records:
+              with Image.open(r['candidate']) as im:
+                  im.verify()
+          print('PASS: 180 generated PNG candidates, structural integrity')
+          PY
+      - name: Commit isolated candidates to repair branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/design/game-ui-v2026.11.24.11/previews/*.png docs/design/game-ui-v2026.11.24.11/repair-audit.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'artifacts: generate 180 unapproved v11 visual repair candidates'
+            git push origin HEAD:fix/v2026.11.24-visual-repair
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v11-180-candidate-pngs
+          path: |
+            docs/design/game-ui-v2026.11.24.11/previews/*.png
+            docs/design/game-ui-v2026.11.24.11/repair-audit.json
+          retention-days: 14
