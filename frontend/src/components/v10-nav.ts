@@ -16,6 +16,7 @@ export type V10Icon =
   | 'shop'
   | 'community'
   | 'support'
+  | 'tools'
   | 'account';
 
 export interface V10NavItem {
@@ -37,6 +38,53 @@ export const V10_PRIMARY_NAV: readonly V10NavItem[] = [
   { label: '문의', href: '/support', icon: 'support', match: ['/chat', '/help'] },
 ];
 
+/** DESIGN180 "Tools": calculators and guides, between community and account. */
+export const V10_TOOLS_ITEM: V10NavItem = {
+  label: '계산기',
+  href: '/calculators',
+  icon: 'tools',
+  match: ['/tools', '/guide', '/ko/tools', '/en/tools', '/ja/tools', '/zh/tools', '/vi/tools', '/en/guide', '/ko/guide'],
+};
+
+/** DESIGN180 member order: 홈 지갑 은행 거래소 퀘스트 상점 광장 계산기 (+ 내 계정). */
+export const D180_MEMBER_NAV: readonly V10NavItem[] = [
+  V10_PRIMARY_NAV[0]!,
+  V10_PRIMARY_NAV[1]!,
+  V10_PRIMARY_NAV[2]!,
+  V10_PRIMARY_NAV[3]!,
+  V10_PRIMARY_NAV[4]!,
+  V10_PRIMARY_NAV[5]!,
+  V10_PRIMARY_NAV[6]!,
+  V10_TOOLS_ITEM,
+];
+
+export type D180AdminIcon = 'overview' | 'members' | 'economy' | 'shop' | 'content' | 'support' | 'security' | 'audit';
+
+export interface D180AdminItem {
+  readonly label: string;
+  readonly href: string;
+  readonly icon: D180AdminIcon;
+  readonly match?: readonly string[];
+}
+
+/** DESIGN180 administrator navigation; rendered only for a server-reported administrator. */
+export const D180_ADMIN_NAV: readonly D180AdminItem[] = [
+  { label: '개요', href: '/admin', icon: 'overview' },
+  { label: '회원', href: '/admin/users', icon: 'members' },
+  { label: '경제', href: '/admin/economy', icon: 'economy', match: ['/admin/bank', '/admin/central-bank', '/admin/bonds', '/admin/treasury', '/admin/mint', '/admin/money-flow', '/admin/market', '/admin/enterprises', '/admin/fx', '/admin/kdic', '/admin/pension', '/admin/work'] },
+  { label: '상점', href: '/admin/shop', icon: 'shop', match: ['/admin/catalog'] },
+  { label: '콘텐츠', href: '/admin/content', icon: 'content', match: ['/admin/blog', '/admin/seo', '/admin/seo-audit', '/admin/discord', '/admin/help', '/admin/analytics'] },
+  { label: '문의', href: '/admin/support', icon: 'support' },
+  { label: '보안', href: '/admin/security', icon: 'security', match: ['/admin/safety', '/admin/controls', '/admin/api-health', '/admin/operations'] },
+  { label: '감사 기록', href: '/admin/logs', icon: 'audit' },
+];
+
+export function isAdminItemActive(item: D180AdminItem, pathname: string): boolean {
+  if (item.href === '/admin') return pathname === '/admin';
+  const hit = (p: string) => pathname === p || pathname.startsWith(p + '/');
+  return hit(item.href) || (item.match ?? []).some(hit);
+}
+
 export const V10_ACCOUNT_ITEM: V10NavItem = {
   label: '내 계정',
   href: '/account',
@@ -44,12 +92,12 @@ export const V10_ACCOUNT_ITEM: V10NavItem = {
   match: ['/profile', '/login', '/register', '/auth'],
 };
 
-/** The five tabs of every G1 mobile frame, quests raised in the centre. */
+/** DESIGN180 mobile dock: 홈 퀘스트 거래소 지갑 계정. */
 export const V10_MOBILE_DOCK: readonly V10NavItem[] = [
   V10_PRIMARY_NAV[0]!,
-  V10_PRIMARY_NAV[1]!,
   V10_PRIMARY_NAV[4]!,
   V10_PRIMARY_NAV[3]!,
+  V10_PRIMARY_NAV[1]!,
   { ...V10_ACCOUNT_ITEM, label: '계정' },
 ];
 

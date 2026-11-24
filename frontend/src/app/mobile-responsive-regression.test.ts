@@ -7,11 +7,11 @@ function source(path: string): string {
 }
 
 describe('mobile responsive overflow guards', () => {
-  it('preserves the 1440px content cap instead of overriding it with the global overflow guard', () => {
+  it('preserves the DESIGN180 1240px content cap instead of overriding it with the global overflow guard', () => {
     const css = source('globals.css');
     const shell = source('../components/site-shell.tsx');
-    expect(shell).toContain('max-w-[1440px]');
-    expect(css).toMatch(/\.moneyverse-main\s*\{\s*max-width:\s*min\(100%,\s*1440px\)\s*!important;/);
+    expect(shell).toContain('max-w-[1240px]');
+    expect(css).toMatch(/\.moneyverse-main\s*\{\s*max-width:\s*min\(100%,\s*1240px\)\s*!important;/);
   });
 
   it('keeps the global drawer and five-tab bottom navigation inside narrow viewports', () => {
@@ -72,7 +72,7 @@ describe('ultra-narrow responsive guards', () => {
     const shell = source('../components/site-shell.tsx');
     const bottomNav = source('../components/mobile-bottom-nav.tsx');
 
-    expect(shell).toContain('pb-[calc(env(safe-area-inset-bottom)+5rem)]');
+    expect(shell).toContain('pb-[calc(env(safe-area-inset-bottom)+6.25rem)]');
     expect(bottomNav).toContain('min-h-[44px]');
     expect(bottomNav).toContain('pb-[env(safe-area-inset-bottom)]');
   });

@@ -4,12 +4,11 @@ import Link from 'next/link';
 import { GameSidebar } from '@/components/game-sidebar';
 import { GameTopbar } from '@/components/game-topbar';
 import { GameMobileDock } from '@/components/game-mobile-dock';
-import { LedgerStrip } from '@/components/g2/ledger-strip';
 import { ClientErrorReporter } from '@/components/client-error-reporter';
 
 /**
- * G1 application frame: 240px sidebar and top bar on desktop, brand
- * header plus five-tab dock on mobile. Pages render inside <main> only.
+ * DESIGN180 application frame: 224px sidebar and 64px top bar on desktop,
+ * compact header plus five-tab dock on mobile. Pages render inside <main> only.
  */
 export function SiteShell({ children }: { readonly children: React.ReactNode }) {
   return (
@@ -27,8 +26,7 @@ export function SiteShell({ children }: { readonly children: React.ReactNode }) 
 
       <div className="flex min-w-0 flex-1 flex-col">
         <GameTopbar />
-        <LedgerStrip />
-        <main id="main" className="moneyverse-main mx-auto w-full max-w-[1440px] flex-1 px-4 pb-[calc(env(safe-area-inset-bottom)+5rem)] pt-5 sm:px-6 lg:px-8 lg:pb-10 lg:pt-6">
+        <main id="main" className="moneyverse-main mx-auto w-full max-w-[1240px] flex-1 px-4 pb-[calc(env(safe-area-inset-bottom)+6.25rem)] pt-6 sm:px-6 lg:px-9 lg:pb-12 lg:pt-8">
           {children}
         </main>
         <footer className="hidden items-center justify-end gap-4 py-0 pb-6 pl-8 pr-28 text-xs text-[var(--g1-faint)] lg:flex">

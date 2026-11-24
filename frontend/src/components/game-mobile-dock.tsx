@@ -6,7 +6,7 @@ import { V10_ICONS } from '@/components/game-sidebar';
 import { V10_MOBILE_DOCK, isNavItemActive } from '@/components/v10-nav';
 import { useMountedViewer } from '@/components/use-mounted-viewer';
 
-/** G2 five-tab dock: flat, the active tab marked in violet (approved G2 previews). */
+/** DESIGN180 five-tab dock: 홈 퀘스트 거래소 지갑 계정, active tab in brand violet. */
 export function GameMobileDock() {
   const pathname = usePathname() ?? '/';
   const viewer = useMountedViewer();
@@ -27,7 +27,7 @@ export function GameMobileDock() {
                 href={href}
                 prefetch={false}
                 aria-current={active ? 'page' : undefined}
-                className={`flex min-h-[60px] flex-col items-center justify-center gap-1 text-xs transition-transform duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--g1-gold)] ${
+                className={`flex min-h-[60px] flex-col items-center justify-center gap-1 text-xs transition-transform duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--g1-violet)] ${
                   active ? 'font-semibold text-[var(--g1-ink)]' : 'text-[var(--g1-muted)]'
                 }`}
               >
