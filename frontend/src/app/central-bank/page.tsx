@@ -1,10 +1,9 @@
+import { PageHeader } from '@/components/page-header';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
-  Landmark,
   Percent,
   TrendingUp,
-  ShieldCheck,
   Scale,
   Activity,
   Layers,
@@ -89,26 +88,9 @@ export default async function PublicCentralBankPage() {
 
   return (
     <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
-      {/* Top Header */}
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline" className="gap-1 border-primary/40 bg-primary/10 text-primary font-medium shrink-0">
-            <Landmark className="size-3.5" />
-            대한민국 중앙은행 통화신용정책
-          </Badge>
-          <Badge variant="outline" className="gap-1 border-emerald-500/40 bg-emerald-500/10 text-emerald-400 font-mono shrink-0">
-            <ShieldCheck className="size-3.5" />
-            PostgreSQL 원장 실시간 검증
-          </Badge>
-        </div>
-        <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
-          한국은행 금융통화위원회 통화정책 공시
-        </h1>
-        <p className="text-muted-foreground text-sm sm:text-base max-w-3xl leading-relaxed">
-          머니버스 거시경제 통화질서 수호와 물가안정을 위한 금융통화위원회 의결 기준금리, 지급준비율,
-          본원·협의·광의 통화량(M0, M1, M2) 및 통화승수 지표를 시민과 투자자에게 투명하게 공시합니다.
-        </p>
-      </div>
+      <PageHeader title="한국은행 금융통화위원회 통화정책 공시">
+        머니버스 거시경제 통화질서 수호와 물가안정을 위한 금융통화위원회 의결 기준금리, 지급준비율, 본원·협의·광의 통화량(M0, M1, M2) 및 통화승수 지표를 시민과 투자자에게 투명하게 공시합니다.
+      </PageHeader>
 
       {/* 4 Key Policy Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

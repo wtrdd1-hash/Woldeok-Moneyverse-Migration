@@ -1,10 +1,10 @@
+import { PageHeader } from '@/components/page-header';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
   Calculator,
   TrendingUp,
   Landmark,
-  Sparkles,
   ArrowRight,
   ShieldCheck,
   HelpCircle,
@@ -548,19 +548,7 @@ export default async function ToolsHubPage() {
 
   return (
     <div className="min-h-screen pb-24 space-y-8">
-      {/* 1. 상단 대형 토스형 헤더 */}
-      <div className="toss-card p-6 sm:p-8 space-y-3">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-semibold">
-          <Sparkles className="size-3.5" />
-          <span>{copy.badge}</span>
-        </div>
-        <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
-          {copy.heading}
-        </h1>
-        <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed">
-          {copy.description}
-        </p>
-      </div>
+      <PageHeader title={copy.heading}>{copy.description}</PageHeader>
 
       {/* 2. 탭 기반 계산기 분류 */}
       <Tabs defaultValue="all" className="space-y-6">

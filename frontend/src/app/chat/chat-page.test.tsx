@@ -12,7 +12,7 @@ vi.mock('@/lib/mutate', () => ({ mutate }));
 vi.mock('@/lib/session', () => ({ requireMember: vi.fn().mockResolvedValue(undefined) }));
 vi.mock('@/lib/locale-server', () => ({ getServerLocale: vi.fn().mockResolvedValue('ko') }));
 vi.mock('@/lib/viewer', () => ({ currentViewer: vi.fn().mockResolvedValue({}), isAdministrator: vi.fn().mockReturnValue(false) }));
-vi.mock('next/navigation', () => ({ redirect }));
+vi.mock('next/navigation', () => ({ redirect, usePathname: () => '/chat' }));
 vi.mock('./chat-view', () => ({ ChatView: () => <div data-testid="verified-inbox" /> }));
 vi.mock('./compose-message-dialog', () => ({ ComposeMessageDialog: () => null }));
 

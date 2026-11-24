@@ -1,3 +1,5 @@
+import { RouteSceneArt } from '@/components/g1/route-scene-art';
+
 export function PageHeader({
   eyebrow: _eyebrow,
   title,
@@ -10,9 +12,12 @@ export function PageHeader({
   readonly children?: React.ReactNode;
 }) {
   return (
-    <header className="grid w-full max-w-full min-w-0 grid-cols-[minmax(0,1fr)] gap-2 sm:gap-3 border-b border-[var(--g1-line)] pb-4 sm:pb-6 overflow-hidden">
+    <header className="g1-chamfer relative isolate grid w-full max-w-full min-w-0 grid-cols-[minmax(0,1fr)] gap-3 overflow-hidden border border-[var(--g1-gold-deep)] bg-[var(--g1-plum)] p-5 sm:p-7">
+      {/* G1 banner (approved 2026-11-24): the page's single h1, its lead and
+          action, with the route's decorative scene on wide screens only. */}
+      <RouteSceneArt className="pointer-events-none absolute bottom-0 right-0 -z-10 hidden h-full w-[45%] opacity-60 lg:block" />
       <div className="flex flex-wrap items-start justify-between gap-3 min-w-0">
-        <div className="min-w-0 space-y-1.5">
+        <div className="min-w-0 lg:max-w-[60%]">
           {/* `eyebrow` stays in the API for callers, but G1 does not draw
               tracked-caps labels above headings (owner design review
               2026-11-24); the title alone names the page. */}
@@ -23,7 +28,7 @@ export function PageHeader({
         {action && <div className="shrink-0 pt-1">{action}</div>}
       </div>
       {children && (
-        <div className="min-w-0 max-w-3xl text-xs sm:text-sm leading-relaxed sm:leading-7 text-muted-foreground [overflow-wrap:anywhere] [word-break:keep-all]">
+        <div className="min-w-0 max-w-3xl text-sm leading-relaxed text-[var(--g1-muted)] [overflow-wrap:anywhere] [word-break:keep-all] lg:max-w-[58%]">
           {children}
         </div>
       )}
@@ -31,10 +36,6 @@ export function PageHeader({
   );
 }
 
-/**
- * Kept so existing titles still compile. It no longer recolours part of a
- * heading: one tinted phrase inside a title read as decoration, not meaning.
- */
 export function Accent({ children }: { readonly children: React.ReactNode }) {
   return <em className="not-italic">{children}</em>;
 }

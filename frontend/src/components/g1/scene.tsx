@@ -143,7 +143,7 @@ function Body({ kind, h }: { readonly kind: G1SceneKind; readonly h: number }) {
   }
 }
 
-export function G1Scene({ kind, className }: { readonly kind: G1SceneKind; readonly className?: string }) {
+export function G1Scene({ kind, className }: { readonly kind: G1SceneKind; readonly className?: string | undefined }) {
   const w = 520;
   const h = 200;
   return (

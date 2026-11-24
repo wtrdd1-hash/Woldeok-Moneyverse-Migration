@@ -1,3 +1,4 @@
+import { PageHeader } from '@/components/page-header';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { api } from '@/lib/api';
@@ -38,7 +39,7 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
     : [];
   return <main data-page="support" className="mv-page mv-page--community mx-auto grid w-full max-w-5xl gap-5 p-4 md:grid-cols-[320px_1fr]">
     <section className="grid content-start gap-4">
-      <div><h1 className="text-2xl font-black">관리자 문의</h1><p className="text-sm text-muted-foreground">관리자와 1:1로 대화합니다. 문의 내용과 답변은 처리 기록으로 저장됩니다.</p></div>
+      <PageHeader title="관리자 문의">관리자와 1:1로 대화합니다. 문의 내용과 답변은 처리 기록으로 저장됩니다.</PageHeader>
       <section aria-label="최근 문의 상태 요약" className="rounded-xl border bg-card p-3">
         <h2 className="text-sm font-bold">최근 최대 100건 기준 문의 현황</h2>
         {!summary ? (
