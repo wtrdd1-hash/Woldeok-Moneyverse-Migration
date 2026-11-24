@@ -5,7 +5,9 @@ import { pages } from './catalog.mjs';
 import { renderPage } from './render-page.mjs';
 const args=process.argv.slice(2);
 const sample=args.includes('--sample');
-const output=resolve(args[args.indexOf('--out')+1]||'artifacts/design-ui-ux-180');
+const outIndex=args.indexOf('--out');
+if(outIndex>=0&&!args[outIndex+1])throw new Error('--out requires a directory');
+const output=resolve(outIndex>=0?args[outIndex+1]:'artifacts/design-ui-ux-180');
 const modulePath=process.env.DESIGN_PLAYWRIGHT_MODULE;
 if(!modulePath)throw new Error('Set DESIGN_PLAYWRIGHT_MODULE to an already installed Playwright ESM module.');
 const {chromium}=await import(modulePath.startsWith('/')?pathToFileURL(modulePath).href:modulePath);
@@ -31,10 +33,15 @@ for(const p of chosen) {
     const hit=e.matches('input[type=checkbox]')?e.closest('label').getBoundingClientRect():r;
     return hit.width<43.9||hit.height<43.9;
    }).map(e=>({tag:e.tagName,label:e.getAttribute('aria-label')||e.textContent?.slice(0,50),width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height}));
+   const help=document.querySelector('.support-button');
+   const hr=help?.getBoundingClientRect();
+   const occluded=hr&&getComputedStyle(help).display!=='none'?[...document.querySelectorAll('.form button,.form input,.form select,.form textarea')].filter(e=>{
+    const r=e.getBoundingClientRect();return r.width&&r.height&&Math.min(r.right,hr.right)>Math.max(r.left,hr.left)&&Math.min(r.bottom,hr.bottom)>Math.max(r.top,hr.top);
+   }).map(e=>e.getAttribute('aria-label')||e.closest('label')?.textContent||e.textContent):[];
    const ids=[...document.querySelectorAll('[id]')].map(e=>e.id);
    const duplicateIds=ids.filter((id,i)=>ids.indexOf(id)!==i);
    const unlabeled=[...document.querySelectorAll('input,select,textarea')].filter(e=>!e.labels?.length&&!e.getAttribute('aria-label')).length;
-   return {overflow,small,duplicateIds,unlabeled,height:root.scrollHeight};
+   return {overflow,small,duplicateIds,unlabeled,occluded,height:root.scrollHeight};
   });
   const row={route:p.route,family:p.family,width,...check};
   results.push(row);
@@ -44,7 +51,7 @@ for(const p of chosen) {
 }
 writeFileSync(join(output,'browser-checks.json'),JSON.stringify({scope:'Synthetic offline design artifacts only',routes:chosen.length,cases:results.length,attemptedExternal,errors,results},null,2)+'\n');
 await browser.close();
-const failures=results.filter(r=>r.overflow>1||r.small.length||r.duplicateIds.length||r.unlabeled);
+const failures=results.filter(r=>r.overflow>1||r.small.length||r.duplicateIds.length||r.unlabeled||r.occluded.length);
 console.log(JSON.stringify({routes:chosen.length,cases:results.length,failures:failures.length,attemptedExternal,errors}));
 if(failures.length){console.log(JSON.stringify(failures.slice(0,20)));process.exitCode=1;}
 if(attemptedExternal||errors.length)process.exitCode=1;

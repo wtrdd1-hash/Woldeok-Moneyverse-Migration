@@ -17,10 +17,13 @@
 Wrong form semantics on creation/upload; mobile action loss; admin navigation in member screens; illustrative values mistaken for live balances; long labels/large numeric strings.
 
 ## Tasks
-- [ ] Write route-catalog semantic/coverage tests; run RED for missing outputs.
-- [ ] Build catalog with route-specific titles, fields, columns, actions, family and state contract. Validate180unique routes and expected signatures.
-- [ ] Build render-only CSS/templates. Generate only local previews, no production components.
-- [ ] Render sample families; inspect screenshots, correct issues, then render all180.
-- [ ] Run all180×5viewport checks and representative locale/state checks; capture360screens.
-- [ ] Publish paired Markdown galleries/specifications and source hashes; verify links, scope, security and release classification.
-- [ ] Fresh design/spec review, fix material findings, push and create PR. No main merge or deployment.
+- [x] Write route-catalog semantic/coverage tests; run RED for missing outputs.
+- [x] Build catalog with route-specific titles, fields, columns, actions, family and state contract. Validate180unique routes and expected signatures.
+- [x] Build render-only CSS/templates. Generate only local previews, no production components.
+- [x] Render sample families; inspect screenshots, correct issues, then render all180.
+- [x] Run all180×5viewport checks and representative locale/state checks; capture360screens.
+- [x] Publish paired Markdown galleries/specifications and source hashes; verify links, scope, security and release classification.
+- [x] Fresh design/spec review, fix material findings, push and create PR. No main merge or deployment.
+
+## Outcome
+360primary PNGs,23supplement specimens,180route contracts;900+169browser cases and33source/control tests passed. Final review findings fixed with RED→GREEN regressions. No runtime implementation or deployment. Visual approval remains pending in PR3443.

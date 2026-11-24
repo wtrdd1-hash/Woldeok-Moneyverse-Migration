@@ -73,7 +73,7 @@ const calculators = [
 ];
 for(const [slug,title,purpose,fields,sections] of calculators)
  define('/tools/'+slug,title,'calculator',purpose,fields.split('|'),['Year','Contributions','Returns','Total'],sections.split('|'),['Calculate estimate','Reset inputs']);
-define('/tools/quant-studio','Quant studio','Compare strategies using transparent hypothetical assumptions.','quant',['Universe','Date range','Strategy','Benchmark'],['Metric','Strategy','Benchmark'],['Strategy builder','Performance comparison','Drawdown'],['Run backtest','Save scenario']);
+define('/tools/quant-studio','Quant studio','quant','Compare strategies using transparent hypothetical assumptions.',['Universe','Date range','Strategy','Benchmark'],['Metric','Strategy','Benchmark'],['Strategy builder','Performance comparison','Drawdown'],['Run backtest','Save scenario']);
 
 define('/','Your Moneyverse','home','A calmer place to follow your money, community and next adventure.',[],['Activity','Type','Amount','Time'],['Wallet overview','Your next steps','Community highlights'],['Open wallet','Explore quests']);
 define('/dashboard','My dashboard','dashboard','Keep your personal finances and activity in one place.',[],['Activity','Account','Amount','Time'],['Asset allocation','Recent activity','Personal goals'],['Manage goals','Open wallet']);
@@ -208,6 +208,17 @@ for(const [r,t,f,p,fields,sections,act] of [
 
 define('/shop','Moneyverse shop','shop','Find useful items with clear prices, availability and purchase review.',['Search products','Category','Availability'],['Product','Price','Stock','Visibility'],['Featured products','Product catalog','Purchase history'],['Open product','View inventory']);
 define('/shop/catalog','Product catalog','shop','Browse the complete catalog and understand every purchase.',['Search catalog','Category','Sort by'],['Product','Price','Stock','Availability'],['Catalog filters','Product grid','Product details'],['Review product','View inventory']);
+const calculatorColumns = {
+ 'loan-interest-calculator':['Period','Payment','Interest','Principal','Remaining'],
+ 'salary-calculator':['Item','Annual amount','Monthly amount'],
+ 'capital-gains-tax-calculator':['Item','Taxable base','Rate','Estimated tax'],
+ 'gift-tax-calculator':['Item','Allowance','Taxable base','Estimated tax'],
+ 'dividend-tax-calculator':['Payment date','Gross amount','Withholding','Net amount'],
+ 'pension-tax-calculator':['Contribution','Deduction limit','Applicable rate','Estimated deduction'],
+ 'tax-calculator':['Bracket','Taxable base','Rate','Estimated tax'],
+ 'kimchi-premium-calculator':['Market','Price','Currency','Source time'],
+ 'stock-calculator':['Metric','Buy assumption','Sell assumption','Outcome'],
+};
 function resolve(route) {
  const canonical = route.replace(/^\/\[locale\]/, '');
  let result = definitions.get(canonical);
@@ -222,14 +233,14 @@ function resolve(route) {
  if (!result) throw new Error('Missing explicit route design: '+route);
  const admin = route.startsWith('/admin');
  const navigation = admin ? 'admin' : /^\/(wallet)/.test(canonical) ? 'wallet'
-  : /^\/bank/.test(canonical) ? 'bank' : /^\/stocks/.test(canonical) ? 'stocks'
+  : /^\/shop/.test(canonical) ? 'shop' : /^\/bank/.test(canonical) ? 'bank' : /^\/stocks/.test(canonical) ? 'stocks'
   : ['home','dashboard'].includes(result.family) ? 'home'
   : /^(auth|account|profile|security|notifications|privacy|invitation)/.test(result.family) ? 'account'
   : ['feed','editorial','board','article','gallery','photo','upload','clubs','club','club-create','members','chat','discussion','newspaper'].includes(result.family) ? 'community'
   : ['calculator','quant','tools'].includes(result.family) ? 'tools' : 'explore';
  return {
   ...result, route, id: route === '/' ? 'home' : route.slice(1).replaceAll('/','--').replaceAll('[','_').replaceAll(']','_'),
-  fields: [...result.fields], columns: [...result.columns],
+  fields: [...result.fields], columns: [...(calculatorColumns[canonical.split('/')[2]]||result.columns)], unit: result.family==='calculator' ? (canonical.includes('farming-calculator')?'WLD':'KRW') : result.family==='quant'?'%':'WLD',
   sections: preset ? ['Saved scenario',...result.sections] : [...result.sections],
   actions: [...result.actions], states: [...states], navigation, role: admin?'administrator':'member-or-public',
   preset, localeAlias: route.startsWith('/[locale]/'), visualApproval:'PROPOSED', functionality:'DESIGN_ONLY',

@@ -21,7 +21,7 @@ export function panel(title,body,extra='',link=''){return '<section class="panel
 export function hint(text){return '<div class="hint">'+icon('shield',17)+'<p>'+esc(text)+'</p></div>';}
 export function summary(rows){return rows.map(([label,value])=>'<div class="summary-line"><span>'+esc(label)+'</span><strong class="num">'+esc(value)+'</strong></div>').join('');}
 export function stats(labels=['Available balance','Saved for goals','Recent activity'],values=['128,450 WLD','64,000 WLD','12 movements']){
- return '<div class="stats">'+labels.map((label,i)=>'<div class="stat"><div class="stat-label">'+esc(label)+'</div><strong class="num">'+esc(values[i]||'Preview')+'</strong><small>'+['Design sample balance','For illustration only','Synthetic history'][i%3]+'</small></div>').join('')+'</div>';
+ return '<div class="stats">'+labels.map((label,i)=>'<div class="stat"><div class="stat-label">'+esc(label)+'</div><strong class="num">'+esc(values[i]||'Preview')+'</strong><small>'+['Synthetic example','For illustration only','Synthetic history'][i%3]+'</small></div>').join('')+'</div>';
 }
 export function toolbar(fields=[]){return '<div class="toolbar">'+fields.slice(0,3).map((field,i)=>i===0?'<input aria-label="'+esc(field)+'" placeholder="'+esc(field)+'…" autocomplete="off">':'<select aria-label="'+esc(field)+'"><option>'+esc(field)+'</option><option>All</option></select>').join('')+'</div>';}
 export function tabs(values){return '<div class="tabs" role="tablist" aria-label="Preview sections">'+values.map((v,i)=>'<button type="button" role="tab" aria-selected="'+(i===0)+'" class="tab '+(i===0?'active':'')+'">'+esc(v)+'</button>').join('')+'</div>';}
@@ -33,13 +33,13 @@ export function form(fields,action='Review changes',options={}){return '<div cla
  const select=/direction|side|type|method|policy|category|band|relationship|provider|channel|visibility|language|zone|condition|strategy|universe|benchmark|dependants/.test(lower);
  const type=lower.includes('password')?'password':lower.includes('email')?'email':lower.includes('date')?'date':'text';
  const value=!options.blank&&/amount|principal|price|salary|contribution|balance|assets|income|expenses/.test(lower)?'1,000':!options.blank&&/years/.test(lower)?'5':!options.blank&&/months/.test(lower)?'24':!options.blank&&/rate|return|yield/.test(lower)?'3.5':!options.blank&&/quantity|shares/.test(lower)?'10':'';
- return '<label class="field" for="'+id+'"><span>'+esc(label)+'</span>'+(select?'<select id="'+id+'" name="'+id+'"><option>Select '+esc(label.toLowerCase())+'</option><option>Design example</option></select>':'<input id="'+id+'" name="'+id+'" type="'+type+'" '+(type==='text'&&value?'inputmode="decimal"':'')+' value="'+value+'" placeholder="'+esc(label)+'…" autocomplete="'+(type==='password'?'new-password':type==='email'?'email':'off')+'">')+'</label>';
+ return '<label class="field" for="'+id+'"><span>'+esc(label)+'</span>'+(select?'<select id="'+id+'" name="'+id+'"><option>Select '+esc(label.toLowerCase())+'</option><option>Design example</option></select>':'<input id="'+id+'" name="'+id+'" type="'+type+'" '+(type==='text'&&value?'inputmode="decimal"':'')+' value="'+value+'" placeholder="'+esc(label)+'…" autocomplete="'+(type==='password'?(options.signIn?'current-password':'new-password'):type==='email'?'email':'off')+'">')+'</label>';
  }).join('')+'<div class="form-footer">'+button('Cancel','small')+button(action,'primary')+'</div></div>';}
 const sampleNames = ['Design sample A','Design sample B','Design sample C','Design sample D'];
-function cellValue(col,i,family) {
+function cellValue(col,i,family,unit='WLD') {
  const c=col.toLowerCase();
  if(/state|status|visibility|result/.test(c)) return badge(['Active','Review','Paused','Draft'][i%4],['good','warn','','violet'][i%4]);
- if(/price|amount|balance|principal|available|spent|requested|allocated|cost|revenue|value|total|returns|contribution|saved|goal/.test(c)) return '<span class="num">'+['12,800','4,250','7,500','980'][i%4]+' WLD</span>';
+ if(/price|amount|balance|principal|available|spent|requested|allocated|cost|revenue|value|total|returns|contribution|saved|goal/.test(c)) return '<span class="num">'+['12,800','4,250','7,500','980'][i%4]+' '+esc(unit)+'</span>';
  if(/change|yield|rate|spread/.test(c)) return '<span class="num '+(i%2?'negative':'positive')+'">'+(i%2?'−0.8%':'+2.4%')+'</span>';
  if(/date|time|updated|seen|quoted|checked|published|joined|maturity/.test(c))return '<span class="num">24 Nov, 10:'+['30','15','05','00'][i%4]+'</span>';
  if(/stock|volume|quantity|occurrence|attempt|score|rank|unread|shares|submissions/.test(c))return '<span class="num">'+['80','24','12','6'][i%4]+'</span>';
@@ -49,12 +49,15 @@ function cellValue(col,i,family) {
  if(/title|headline|article|discussion|content/.test(c))return '<span class="cell-main">'+['Getting started in Moneyverse','A community worth building','Your next small step','A guide to safer trading'][i%4]+'</span>';
  if(/sequence|reference|order|transaction|delivery|claim|issuance|report|application/.test(c))return '<span class="cell-main num">DEMO-'+String(i+1).padStart(4,'0')+'</span><span class="cell-sub">Design fixture reference</span>';
  if(/endpoint|url/.test(c))return '<span class="num">/example/preview/'+(i+1)+'</span>';
+ if(/side/.test(c))return ['Buy','Sell'][i%2];
+ if(/direction|movement/.test(c))return (family==='bank'?['Deposit','Withdrawal']:['Incoming','Outgoing'])[i%2];
+ if(/account/.test(c))return ['Design wallet','Design savings','Design wallet','Design savings'][i%4];
  if(/method/.test(c))return 'GET';
  if(/latency/.test(c))return '<span class="num">— ms</span>';
  if(/action/.test(c))return ['Update settings','Review request','Open record','Publish content'][i%4];
  return '<span class="cell-main">'+sampleNames[i%4]+'</span><span class="cell-sub">'+esc(family)+' preview</span>';
 }
-export function table(columns,family='records',count=4){return '<div class="table-wrap mobile-cards"><table><thead><tr>'+columns.map(c=>'<th scope="col">'+esc(c)+'</th>').join('')+'<th scope="col">Details</th></tr></thead><tbody>'+Array.from({length:count},(_,i)=>'<tr>'+columns.map(c=>'<td data-label="'+esc(c)+'"><div>'+cellValue(c,i,family)+'</div></td>').join('')+'<td data-label="Details">'+button('Open','small')+'</td></tr>').join('')+'</tbody></table></div><div class="table-foot"><span>'+count+' synthetic records</span><div class="row-actions">'+button('Previous','small')+button('Next','small')+'</div></div>';}
+export function table(columns,family='records',count=4,unit='WLD'){return '<div class="table-wrap mobile-cards"><table><thead><tr>'+columns.map(c=>'<th scope="col">'+esc(c)+'</th>').join('')+'<th scope="col">Details</th></tr></thead><tbody>'+Array.from({length:count},(_,i)=>'<tr>'+columns.map(c=>'<td data-label="'+esc(c)+'"><div>'+cellValue(c,i,family,unit)+'</div></td>').join('')+'<td data-label="Details">'+button('Open','small')+'</td></tr>').join('')+'</tbody></table></div><div class="table-foot"><span>'+count+' synthetic records</span><div class="row-actions">'+button('Previous','small')+button('Next','small')+'</div></div>';}
 export function rows(items,kind='document'){return items.map((text,i)=>'<div class="list-row"><span class="row-icon">'+icon(kind)+'</span><div><h3>'+esc(text)+'</h3><p>'+['A clear next step, at your pace.','Review the details before continuing.','Keep your community activity in view.'][i%3]+'</p></div><span class="end">'+icon('arrow',16)+'</span></div>').join('');}
 export function chart(candles=false){const w=640,h=250;let out='<svg role="img" aria-label="Illustrative '+(candles?'candlestick':'projection')+' chart, synthetic values" viewBox="0 0 '+w+' '+h+'">';
  for(let i=0;i<5;i++)out+='<path d="M8 '+(25+i*43)+'H600" stroke="#2d3753" stroke-width="1"/><text x="606" y="'+(29+i*43)+'" fill="#99a8c4" font-size="9">'+(140-i*10)+'</text>';
