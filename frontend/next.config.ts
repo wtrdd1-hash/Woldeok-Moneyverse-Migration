@@ -313,16 +313,23 @@ const config: NextConfig = {
   },
 
   async rewrites() {
-    return [
-      {
-        source: '/api/v1/:path*',
-        destination: '/app-api/v1/:path*',
-      },
-      {
-        source: '/api/:path*',
-        destination: `${process.env.API_ORIGIN || 'http://127.0.0.1:4550'}/api/:path*`,
-      },
-    ];
+    // `fallback`, not the default `afterFiles`: these catch-alls must run only
+    // after every Next route, including dynamic BFF handlers such as
+    // /api/stocks/[id]/candles, or they shadow them (src/api-rewrite-order.test.ts).
+    return {
+      beforeFiles: [],
+      afterFiles: [],
+      fallback: [
+        {
+          source: '/api/v1/:path*',
+          destination: '/app-api/v1/:path*',
+        },
+        {
+          source: '/api/:path*',
+          destination: `${process.env.API_ORIGIN || 'http://127.0.0.1:4550'}/api/:path*`,
+        },
+      ],
+    };
   },
 };
 
