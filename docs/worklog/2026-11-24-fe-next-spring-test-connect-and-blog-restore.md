@@ -127,3 +127,10 @@ nginx: 운영 블로그 경로(`/blog`, `/{en,ja,zh,ko}/blog[/*]`)와 `@mv_blog_
 - [x] 사고 수정: env 파일 끝 줄바꿈 누락으로 `GOOGLE_CLIENT_ID` 가 `MONEYVERSE_FEATURES_PENSIONOPERATIONAL` 줄에 붙음 → 분리, 플래그 값 `false` 원복 확인.
 - 검증: 디스코드·구글 시작 → 각 제공자로 이동(운영과 같은 client id, test 콜백). 가짜 코드 콜백 → 디스코드 `invalid_grant`, 구글 400 — 백엔드가 제공자까지 도달함. 실제 계정 로그인 완주는 소유자 테스트로 확인 필요(제공자 콘솔에 test 콜백 등록 여부 포함).
 - 백업: `runtime.env.before-oauth-parity`.
+
+### 4단계 — G1 프론트엔드 구축 1차 (소유자 승인, 작업자: Claude Code / Claude Opus 5.5) — 진행 중
+- [x] G1 토큰 레이어(`g1-tokens.css`), Black Han Sans·Orbitron 로컬 서체, 셸(레일·플레이어 HUD·5탭 도크, 관리자만 GM 메뉴).
+- [x] 홈을 공개 API(시세·공지·서버 시계)로 재구축, 로케일 SEO 메타데이터와 P2P 송금 복구. HUD 는 실제 잔액만 표시(레벨 API 없음).
+- [x] 테스트: 전체 실패 12 → 기존 무관 1건(로그인 터치 타깃 문자열 검사)으로 감소 예상, 디자인 문자열 고정 테스트는 G1 의미 검사로 교체. tsc 통과.
+- [x] Test 배포 `next-frontend-v20261124-8aedda403ef0` (모바일 HUD 수정 e84207eaf1 은 아직 미배포). 운영 블로그 서버에는 G1 미반영.
+- [ ] 남은 일: e84207eaf1 빌드·Test 배포, 제목 서체 적용 확인(스크린샷상 Black Han Sans 미적용 의심), 모바일 상단바 재확인, 페이지별 G1 히어로 적용(지갑·은행·거래소·퀘스트·상점·광장·문의·계정·관리자), 디자인 기준 문서(CURRENT_UI_DESIGN·manifest) G1 전환, 운영 블로그 서버 반영.
