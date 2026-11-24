@@ -14,7 +14,18 @@ describe('AdSenseAd', () => {
     });
     route.pathname = '/tools';
     const { container } = render(<AdSenseAd publisherId="ca-pub-5220225531544323" slot="2118692561" />);
-    expect(screen.getByText('SPONSORED ADVERTISEMENT')).toBeDefined();
+    expect(screen.getByText(/Advertisement.*Sponsored advertisement/)).toBeDefined();
+    expect(container.querySelector('ins.adsbygoogle')).not.toBeNull();
+  });
+
+  it('labels Korean ads visibly without implying that inventory is filled', () => {
+    vi.spyOn(viewerHook, 'useViewer').mockReturnValue({
+      signedIn: false, consentCurrent: true, adminRoles: [],
+    });
+    route.pathname = '/ko/blog/educational-post';
+    const { container } = render(<AdSenseAd publisherId="ca-pub-5220225531544323" slot="6000051656" />);
+    expect(screen.getByText(/광고.*Sponsored advertisement/)).toBeDefined();
+    expect(container.querySelector('section[data-testid="sponsored-ad-container"]')).not.toBeNull();
     expect(container.querySelector('ins.adsbygoogle')).not.toBeNull();
   });
 
@@ -40,7 +51,7 @@ describe('AdSenseAd', () => {
     });
     route.pathname = '/tools';
     const { container } = render(<AdSenseAd publisherId="ca-pub-5220225531544323" slot="2118692561" />);
-    expect(screen.queryByText('SPONSORED ADVERTISEMENT')).toBeNull();
+    expect(screen.queryByText(/Sponsored advertisement/)).toBeNull();
     expect(container.querySelector('ins.adsbygoogle')).toBeNull();
   });
 });
