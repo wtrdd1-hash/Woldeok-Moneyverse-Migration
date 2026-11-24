@@ -185,6 +185,29 @@ def screen(key: str):
         d = '<div class="grid">' + panel("자체 계정", local, "c6") + panel("간편 로그인", social, "c6") + "</div>"
         m = '<h1>로그인</h1>' + panel("간편 로그인", social) + panel("자체 계정", local)
         return "account", "로그인", "디스코드, 구글 또는 자체 계정으로 들어옵니다.", "", d, m, False
+    if key == "article":
+        body = '<article class="prose"><p class="muted" style="font-size:12px">달빛기사, 서버 D+10181, 조회 1,204</p><p>정기예금은 만기까지 기다리면 연 3.80%의 이자를 받습니다. 시즌 퀘스트 중 "길드 정기예금 가입"을 함께 완료하면 보상 200 WLD를 추가로 받습니다.</p><p>예금 기간 동안 원금은 인출할 수 없으니 거래소 주문에 쓸 현금은 따로 남겨 두세요.</p><h3>정리</h3><ul><li>만기 서버 4주</li><li>중도 해지 시 이자 없음</li><li>퀘스트 보상은 완료 확인 뒤 원장에 기록</li></ul></article>'
+        d = '<div class="grid">' + panel("본문", body, "c8") + panel("댓글 3", lst([("등불상인: 정리 감사합니다", "D+10181"), ("별헤는밤: 만기 알림도 오나요?", "D+10181"), ("운영진: 만기 하루 전 알림이 갑니다", "D+10182")]), "c4", pad=False) + "</div>"
+        m = '<h1>글 상세</h1>' + panel("본문", body)
+        return "board", "글 상세", "본문과 작성 정보, 댓글입니다.", "", d, m, True
+    if key == "account":
+        d = ('<div class="grid">' + panel("프로필", kv([("닉네임", "달빛기사", ""), ("길드 등급", "등불지기", ""), ("가입", "서버 D+9012", ""), ("로그인 수단", "디스코드", "")]), "c6")
+             + panel("보안", kv([("최근 로그인", "서버 D+10182 21:02", ""), ("활성 세션", "2개", ""), ("2단계 인증", "꺼짐", "")]) + '<a class="btn secondary" href="#" style="margin-top:16px">다른 기기 로그아웃</a>', "c6")
+             + panel("알림", kv([("퀘스트 보상", "켜짐", "ok"), ("문의 답변", "켜짐", "ok"), ("시장 급변", "꺼짐", "")]), "c6")
+             + panel("데이터", lst([("내 데이터 내려받기", "요청"), ("계정 삭제 요청", "30일 유예")]), "c6", pad=False) + "</div>")
+        m = '<h1>내 계정</h1>' + panel("프로필", kv([("닉네임", "달빛기사", ""), ("로그인 수단", "디스코드", "")]))
+        return "account", "내 계정", "프로필, 보안, 알림을 관리합니다.", "", d, m, True
+    if key == "status":
+        comps = [("웹 화면", "정상", "live"), ("게임 API", "정상", "live"), ("원장 데이터베이스", "정상", "live"), ("시세 엔진", "정상", "live"), ("블로그", "정상", "live")]
+        tbl = table(["구성 요소", "상태", "마지막 확인"], [(E(n), f'<span class="pill {c}">{t}</span>', "1분 전") for n, t, c in comps])
+        d = '<div class="grid">' + panel("구성 요소", tbl, "c8", pad=False) + panel("최근 장애", '<p class="empty">최근 30일 동안 기록된 장애가 없습니다.</p>', "c4") + "</div>"
+        m = '<h1>서비스 상태</h1>' + panel("구성 요소", tbl, pad=False)
+        return "", "서비스 상태", "구성 요소별 상태입니다.", "", d, m, False
+    if key == "doc":
+        body = '<article class="prose"><p class="muted" style="font-size:12px">시행 2026년 10월 1일</p><h3>1. 목적</h3><p>이 문서는 월덕 머니버스 이용 조건을 설명합니다. WLD는 게임 재화이며 현금이나 금융상품이 아닙니다.</p><h3>2. 계정</h3><p>계정 정보는 본인이 관리하며, 다른 사람과 공유하지 않습니다.</p><h3>3. 문의</h3><p>궁금한 점은 문의 메뉴로 보내 주세요.</p></article>'
+        d = '<div class="grid">' + panel("목차", lst([("1. 목적", ""), ("2. 계정", ""), ("3. 문의", "")]), "c3", pad=False) + panel("본문", body, "c9") + "</div>"
+        m = '<h1>문서</h1>' + panel("본문", body)
+        return "", "문서", "필요한 내용을 짧게 정리했습니다.", "", d, m, False
     raise KeyError(key)
 
 
@@ -192,7 +215,10 @@ SCREENS = ["home-guest", "home-member", "wallet", "bank", "stocks", "stock-detai
 
 
 def page(key: str) -> str:
-    active, title, lead, actions, desk, mob, signed = screen(key)
+    return frame(key, *screen(key))
+
+
+def frame(key: str, active: str, title: str, lead: str, actions: str, desk: str, mob: str, signed: bool) -> str:
     nav = ""
     for label, ic in NAV:
         if ic is None:

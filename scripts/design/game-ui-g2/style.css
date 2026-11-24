@@ -172,3 +172,5 @@ ul, ol { list-style: none; }
 .dock a.on { color: var(--text); font-weight: 700; } .dock a.on svg { color: var(--violet); }
 
 @media (prefers-reduced-motion: reduce) { .btn { transition: none; } .btn:active { transform: none; } }
+
+.prose { display: grid; gap: 12px; max-width: 68ch; line-height: 1.7; } .prose h3 { font-size: 16px; margin-top: 8px; } .prose ul { padding-left: 20px; display: grid; gap: 4px; }
