@@ -11,7 +11,7 @@ function boot(file,{amount='9007199254740993',walletOk=true,signedIn=true,wallet
   for(const match of source.matchAll(/<([a-z]+)[^>]*\bid="([^"]+)"[^>]*>([^<]*)/g))elements[match[2]]={textContent:match[3],innerHTML:'',dataset:{},style:{},setAttribute(key,value){this[key]=value;}};
   const state={amount,walletOk,signedIn,walletSignedIn,walletStatus,stocks,marketOk:true};let tick;
   const window=new EventTarget();window.MVI18n={getLocale:()=> 'en'};
-  const document={getElementById:id=>elements[id]??null,documentElement:{lang:'en'},addEventListener(){}};
+  const document={getElementById:id=>elements[id]??null,querySelectorAll:()=>[],querySelector:()=>null,documentElement:{lang:'en'},addEventListener(){}};
   const fetch=async path=>({status:path.includes('/summary')&&!state.walletOk?state.walletStatus:200,ok:path.includes('/stocks')?state.marketOk:path.includes('/summary')?state.walletOk:true,json:async()=>path.includes('/session')?{authenticated:state.signedIn,user:state.signedIn?{displayName:'Test member',roles:[]}:null}:path.includes('/summary')?{signedIn:state.walletSignedIn,totalAvailableAmount:state.amount}:{stocks:state.stocks}});
   const sandbox={document,window,fetch,console,AbortSignal,MutationObserver:class{observe(){}},setInterval:callback=>{tick=callback;}};
   for(const match of source.matchAll(/<script>([\s\S]*?)<\/script>/g))runInNewContext(match[1],sandbox);
