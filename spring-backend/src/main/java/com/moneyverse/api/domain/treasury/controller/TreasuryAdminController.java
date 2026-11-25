@@ -90,9 +90,7 @@ public class TreasuryAdminController {
     @Operation(summary = "조폐국 화폐발행 국고 직행 충전")
     @PostMapping(path = {
             "/api/v1/admin/treasury/mint-topup",
-            "/api/admin/treasury/mint-topup",
-            "/api/treasury/mint-topup",
-            "/api/v1/treasury/mint-topup"
+            "/api/admin/treasury/mint-topup"
     })
     public ApiResponse<TreasuryOperationResult> mintTopup(
             @Valid @RequestBody MintTopupRequest request
@@ -110,9 +108,7 @@ public class TreasuryAdminController {
     @Operation(summary = "국고 관리자 임금 지급")
     @PostMapping(path = {
             "/api/v1/admin/treasury/salary/disburse",
-            "/api/admin/treasury/salary/disburse",
-            "/api/treasury/salary/disburse",
-            "/api/v1/treasury/salary/disburse"
+            "/api/admin/treasury/salary/disburse"
     })
     public ApiResponse<TreasuryOperationResult> disburseSalary(
             @Valid @RequestBody SalaryDisburseRequest request
@@ -128,9 +124,7 @@ public class TreasuryAdminController {
     @Operation(summary = "국부펀드(SWF) 스냅샷 조회")
     @GetMapping(path = {
             "/api/v1/admin/treasury/swf",
-            "/api/admin/treasury/swf",
-            "/api/treasury/swf",
-            "/api/v1/treasury/swf"
+            "/api/admin/treasury/swf"
     })
     public ResponseEntity<Map<String, Object>> getSwfSnapshot() {
         log.info("[API] GET swf snapshot received");
@@ -144,9 +138,7 @@ public class TreasuryAdminController {
     @Operation(summary = "국부펀드(SWF) 정책 설정 변경")
     @PutMapping(path = {
             "/api/v1/admin/treasury/swf",
-            "/api/admin/treasury/swf",
-            "/api/treasury/swf",
-            "/api/v1/treasury/swf"
+            "/api/admin/treasury/swf"
     })
     public ResponseEntity<Map<String, Object>> updateSwfPolicy(
             @RequestBody Map<String, Object> body
@@ -162,9 +154,7 @@ public class TreasuryAdminController {
     @Operation(summary = "국부펀드(SWF) 자동투자 리밸런싱 실행")
     @PostMapping(path = {
             "/api/v1/admin/treasury/swf/rebalance",
-            "/api/admin/treasury/swf/rebalance",
-            "/api/treasury/swf/rebalance",
-            "/api/v1/treasury/swf/rebalance"
+            "/api/admin/treasury/swf/rebalance"
     })
     public ApiResponse<Map<String, Object>> rebalanceSwf(
             @RequestBody(required = false) SwfRebalanceRequest request
@@ -180,9 +170,7 @@ public class TreasuryAdminController {
     @Operation(summary = "국부펀드(SWF) 평가액 국고 환원")
     @PostMapping(path = {
             "/api/v1/admin/treasury/swf/liquidate",
-            "/api/admin/treasury/swf/liquidate",
-            "/api/treasury/swf/liquidate",
-            "/api/v1/treasury/swf/liquidate"
+            "/api/admin/treasury/swf/liquidate"
     })
     public ApiResponse<Map<String, Object>> liquidateSwf(
             @Valid @RequestBody SwfLiquidateRequest request
