@@ -353,7 +353,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <ThemeProvider>
               <ViewportScrollGuardian />
               <SiteShell>{children}</SiteShell>
-              <Toaster />
+              {/* Top-center so toasts never stack on the support launcher or dock (QA 2026-11-25). */}
+              <Toaster position="top-center" />
               <StaleTabNotice />
               <RouteAwareFloatingUtilities />
               <SessionKeepAlive />

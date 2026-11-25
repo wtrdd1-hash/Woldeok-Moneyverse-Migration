@@ -236,6 +236,14 @@ export function FloatingSupportChatWidget() {
 
   // 팝오버 열림/닫힘 및 메인 탭 ('support' | 'direct')
   const [isOpen, setIsOpen] = useState(false);
+  // Wide screens make room for the open panel instead of covering the page
+  // (owner QA 2026-11-25: the panel hid 길드 공지 and 다음 할 일).
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isOpen) root.dataset.supportOpen = 'true';
+    else delete root.dataset.supportOpen;
+    return () => { delete root.dataset.supportOpen; };
+  }, [isOpen]);
   const [activeTab, setActiveTab] = useState<'support' | 'direct'>('support');
 
   // 고객센터(Support) 상태
@@ -378,7 +386,9 @@ export function FloatingSupportChatWidget() {
   );
 
   // 알림 감지 레퍼런스
-  const prevWaitingCount = useRef<number>(0);
+  // null until the first read: a reply that was already waiting at page load is
+  // not new, and must not toast on every navigation (owner QA 2026-11-25).
+  const prevWaitingCount = useRef<number | null>(null);
   const prevDirectUnread = useRef<number>(0);
   const prevSupportMsgCount = useRef<number>(0);
   const prevDirectMsgCount = useRef<number>(0);
@@ -423,13 +433,14 @@ export function FloatingSupportChatWidget() {
 
         // 관리자 새 답변 감지 시 차임벨 및 토스트
         const waitingCount = list.filter((t) => t.status === 'waiting_user').length;
-        if (prevWaitingCount.current < waitingCount) {
+        if (prevWaitingCount.current !== null && prevWaitingCount.current < waitingCount) {
           if (!isMuted) {
             synthSound.playNotificationChime();
           }
           toast.success(
             localeLabel(locale, '관리자 답변이 도착했습니다!', 'New admin reply received!', 'サポートからの回答が届きました！', '客服回复已送达！'),
             {
+              id: 'support-admin-reply',
               description: localeLabel(
                 locale,
                 '1:1 문의 대화창에서 확인해 보세요.',
