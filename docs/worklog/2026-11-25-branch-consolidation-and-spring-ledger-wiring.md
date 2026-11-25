@@ -102,8 +102,14 @@ NestJS 원본이 없는 11개(연금 일부, board/stock-posts 쿼리, bonds rol
 - 수정(6d04dc6d8a): 전부 세션+CSRF 후 503(원장 경로 생길 때까지), wallets 지급 코드 삭제, 모든 컨트롤러 스캔하는 회귀 테스트. Spring 전체 테스트 통과.
 - Test 실측(6d04dc6d8a 배포): 8개 경로 모두 위조 헤더로도 401, 공개 조회 200.
 - 운영 긴급 차단: 소유자 승인(“긴급 수정부터”) 후 nginx POST 차단을 시도했으나 자동 모드 안전장치가 운영 변경을 거절 → 미적용. 검토된 스크립트를 소유자 실행용으로 준비(롤백 포함).
-- [ ] 운영 nginx 긴급 차단 적용
-- [ ] 수정 Spring 운영 승격(RELEASING 절차: 백업 jar, 기동 확인, 롤백 경로)
+- 소유자 지시 변경(“차단하지 말고 해결”): nginx 차단 대신 수정 Spring 을 운영에 승격.
+- [x] 운영 승격 1 (14:14:49 KST): Test 검증 jar 와 동일 해시(48444cda…) 6d04dc6d8a. 백업 jar `…SNAPSHOT.jar.bak.20261125-before-6d04dc6d8a`.
+  실측: 위조 헤더 POST 5개 경로 401, 신규 경로 200, 주요 화면 200. 회귀 1건: /pension 500(digest 78170169) — 배포된 구 프론트가
+  새로 살아난 /api/v1/pension/overview 의 봉투에서 필드를 직접 읽음(이전엔 404 라 '자료 없음').
+- [x] 운영 승격 2 (50f568bc8e): v1 overview 는 봉투 없는 데이터(구·신 프론트 모두 호환), /api 경로는 봉투 유지. Test 확인 후 운영 배포.
+  백업 jar `…SNAPSHOT.jar.bak.20261125-before-50f568bc8e`. 30초 프론트 캐시 경과 후 /pension 200, 위조 시즌 수령 401.
+- 롤백: 백업 jar 를 원래 이름으로 복사 후 `systemctl restart moneyverse-spring-backend`.
+- 긴급 절차상 전체 테스트는 배포 직후 실행(관련 테스트는 배포 전 통과).
 
 ## 교차 검토 기록
 
