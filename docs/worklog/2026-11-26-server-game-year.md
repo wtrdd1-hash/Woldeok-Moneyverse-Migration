@@ -7,3 +7,5 @@ Version: v2026.11.26.GAMEYEAR.1
 - [ ] Review calendar and finance contracts.
 - [ ] Update paired specifications and plans.
 - [ ] Verify boundaries and publish.
+
+- Checkpoint (2026-11-26T08:56:05+09:00): reviewed integrated/project plan, clock spec, migration 190, Spring DTO/service, E542-04. Proposed 365 days; found fabricated fallback.

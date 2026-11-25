@@ -1,3 +1,7 @@
+## v2026.11.26.GAMEYEAR.1 — 서버 고유 연도 (기획만)
+
+365서버일/년(현실 219000초) 제안, 기존 epoch가 1년 시작점. 기존 일/주 유지, 연도 표시만 추가하며 연간 금융 정산·초기화 없음. E542-04 차단 유지. Spring 가짜 시계 fallback 수정 후 단계별 구현/검증. [서버 시계 명세](SERVER_GAME_CLOCK_SPEC.ko.md).
+
 ## v2026.11.24.0818 — Stitch Skills 로컬 적용 시험
 
 > **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](../DOCUMENT_AUTHORITY.md) / [한국어](../DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
