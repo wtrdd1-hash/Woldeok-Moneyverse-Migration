@@ -71,7 +71,7 @@ Upgrade the frontend's `next` dependency and lockfile to `16.4.5` or later after
 
 ## Environment and release observations
 
-`docs/INFRASTRUCTURE.md` declares `test.easy-scraping.com` as the exact-SHA Test release gate. A non-authenticated `GET /health` probe on 2026-11-25 returned HTTP 404 from that Test public origin, while Production returned HTTP 200. This is a release-validation discrepancy, not proof of a security vulnerability: the Test frontend may intentionally not proxy that endpoint. Before any promotion, operators must verify the documented Test command and exact deployed SHA through the intended service path.
+`docs/INFRASTRUCTURE.md` declares `test.easy-scraping.com` as the exact-SHA Test release gate. The sanitised [public probe evidence](evidence/2026-11-25-test-health-probe.md) records a point-in-time HTTP 404 for `/health` at that Test public origin while Production returned HTTP 200. This is a release-validation discrepancy, not proof of a security vulnerability: the Test frontend may intentionally not proxy that endpoint. Before any promotion, operators must verify the documented Test command and exact deployed SHA through the intended service path.
 
 Historical material saying that the Test namespace was removed conflicts with the current infrastructure document. Treat the current infrastructure document and observed service state as the source to reconcile; do not treat a data-changing Test request as safe until isolation from Production is demonstrated.
 

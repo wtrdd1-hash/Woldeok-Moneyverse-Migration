@@ -22,7 +22,7 @@ Perform a read-only security review of the application code, release boundary, a
 
 - Recorded two Medium findings: weak local password policy and an affected Next.js dependency version.
 - Recorded the Test health-route discrepancy as a release-validation blocker, not as a vulnerability.
-- Verification completed: diff whitespace check, raw-control-byte scan, repository-security scan, two existing advisory-floor test files, and dependency audit.
+- Verification completed: diff whitespace check, raw-control-byte scan, repository-security scan, the HTTP advisory-floor test, the Next advisory-floor test, and dependency audit.
 - No application suite was run because this fresh audit worktree has no installed dependencies; this is recorded as a limitation.
 - Independent review was requested but could not access the SSH-only unpushed worktree; review must be repeated after the branch is available remotely.
 
