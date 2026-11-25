@@ -18,7 +18,6 @@ import java.util.*;
 public class StockLeagueController {
 
     private static final Logger log = LoggerFactory.getLogger(StockLeagueController.class);
-    private static final UUID DEFAULT_FALLBACK_USER = UUID.fromString("5f7b8b44-e4aa-40b8-b93a-800ec0151d20");
 
     private final StockLeagueService leagueService;
 
@@ -32,7 +31,7 @@ public class StockLeagueController {
                 return UUID.fromString(headerUserId.trim());
             } catch (Exception ignored) {}
         }
-        return DEFAULT_FALLBACK_USER;
+        throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED, "SESSION_REQUIRED");
     }
 
     @Operation(summary = "?꾩옱 吏꾪뻾 以묒씤 二쇱떇 梨뷀뵾?몄떗 由ш렇 ?꾪솴 諛?由щ뜑蹂대뱶, 怨좊옒 ?몃젅?대뜑 紐⑸줉 議고쉶")
@@ -50,9 +49,10 @@ public class StockLeagueController {
         List<StockLeagueParticipantDto> leaderboard = leagueService.getLeaderboard(currentSeason.getId(), 20);
         List<StockLeagueParticipantDto> whales = leagueService.getWhales(10);
 
-        UUID currentUserId = resolveUserId(request, headerUserId);
-        StockLeagueParticipantDto myParticipation = leagueService.getMyParticipation(currentSeason.getId(), currentUserId);
-        List<CopyTradingSubscriptionDto> mySubscriptions = leagueService.getMySubscriptions(currentUserId);
+        // Public read: a visitor without identity simply has no participation (no fixed fallback member).
+        UUID currentUserId = (headerUserId == null || headerUserId.isBlank()) ? null : resolveUserId(request, headerUserId);
+        StockLeagueParticipantDto myParticipation = currentUserId == null ? null : leagueService.getMyParticipation(currentSeason.getId(), currentUserId);
+        List<CopyTradingSubscriptionDto> mySubscriptions = currentUserId == null ? List.of() : leagueService.getMySubscriptions(currentUserId);
 
         return ResponseEntity.ok(new CurrentLeagueResponse(
                 true, currentSeason, leaderboard, whales, myParticipation, mySubscriptions
@@ -60,7 +60,7 @@ public class StockLeagueController {
     }
 
     @Operation(summary = "二쇱떇 梨뷀뵾?몄떗 由ш렇 李멸? ?좎껌")
-    @PostMapping(path = { "/api/v1/stocks/league/join", "/api/stocks/league/join", "/stocks/league/join" })
+    @PostMapping(path = { "/api/v1/stocks/league/join", "/api/stocks/league/join" })
     public ResponseEntity<?> joinLeague(
             HttpServletRequest request,
             @RequestHeader(value = "X-User-Id", required = false) String headerUserId) {
@@ -104,7 +104,7 @@ public class StockLeagueController {
     }
 
     @Operation(summary = "移댄뵾 ?몃젅?대뵫 援щ룆 痍⑥냼")
-    @PostMapping(path = { "/api/v1/stocks/league/copy-trade/cancel", "/api/stocks/league/copy-trade/cancel", "/stocks/league/copy-trade/cancel" })
+    @PostMapping(path = { "/api/v1/stocks/league/copy-trade/cancel", "/api/stocks/league/copy-trade/cancel" })
     public ResponseEntity<?> cancelCopyTrading(
             HttpServletRequest request,
             @RequestBody CancelCopyTradingRequest body,

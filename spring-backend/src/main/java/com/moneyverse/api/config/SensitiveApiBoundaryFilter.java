@@ -64,7 +64,10 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
                 || normalized.startsWith("/api/work/") || normalized.startsWith("/api/v1/work/")
                 || normalized.startsWith("/api/stocks/orders") || normalized.startsWith("/api/v1/stocks/orders")
                 || normalized.startsWith("/api/stocks/portfolio") || normalized.startsWith("/api/v1/stocks/portfolio")
-                || normalized.startsWith("/api/arena/battles") || normalized.startsWith("/api/v1/arena/battles");
+                || normalized.startsWith("/api/arena/battles") || normalized.startsWith("/api/v1/arena/battles")
+                // Security review 2026-11-25: these writes resolved the member from a header.
+                || normalized.matches("^/api/(v1/)?stocks/league/(join|copy-trade/(subscribe|cancel))/?$")
+                || normalized.matches("^/api/(v1/)?crafting/execute/?$");
     }
 
     static boolean isAdminDiagnosticsPath(String p) {

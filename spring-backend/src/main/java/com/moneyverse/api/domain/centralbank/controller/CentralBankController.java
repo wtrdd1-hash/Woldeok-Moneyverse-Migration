@@ -36,7 +36,7 @@ public class CentralBankController {
     @PutMapping("/base-rate")
     @Operation(summary = "援?? 湲곗?湲덈━(Base Rate) 寃곗젙 諛?怨듭떆 (湲덉쑖?듯솕?꾩썝??")
     public ApiResponse<Map<String, Object>> updateBaseRate(
-            @RequestHeader(value = "X-Admin-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String adminId,
+            @RequestHeader(value = "X-Admin-Id", required = false) String adminId,
             @Valid @RequestBody UpdateBaseRateRequest request) {
         Map<String, Object> result = centralBankService.updateBaseRate(request.getBaseRateBps(), request.getReason(), adminId);
         return ApiResponse.ok(result, (String) result.get("message"));
@@ -51,7 +51,7 @@ public class CentralBankController {
     @PutMapping("/reserve-requirement")
     @Operation(summary = "?쒖쨷 ?곸뾽???踰뺤젙 吏湲됱?鍮꾩쑉 媛깆떊 諛?怨듭떆")
     public ApiResponse<Map<String, Object>> updateReserveRequirement(
-            @RequestHeader(value = "X-Admin-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String adminId,
+            @RequestHeader(value = "X-Admin-Id", required = false) String adminId,
             @Valid @RequestBody UpdateReserveRequirementRequest request) {
         Map<String, Object> result = centralBankService.updateReserveRequirement(request.getReserveRatioBps(), request.getReason(), adminId);
         return ApiResponse.ok(result, (String) result.get("message"));

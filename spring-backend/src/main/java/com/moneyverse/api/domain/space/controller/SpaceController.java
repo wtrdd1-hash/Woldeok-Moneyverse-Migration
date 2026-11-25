@@ -25,11 +25,13 @@ public class SpaceController {
     private UUID resolveUserUuid(String xUserId, String xActorUserId) {
         String raw = (xUserId != null && !xUserId.isBlank()) ? xUserId.trim()
                 : (xActorUserId != null && !xActorUserId.isBlank()) ? xActorUserId.trim()
-                : "5f7b8b44-e4aa-40b8-b93a-800ec0151d20";
+                : null;
+        // No fixed fallback member (security review 2026-11-25): the session filter supplies the actor.
+        if (raw == null) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED, "SESSION_REQUIRED");
         try {
             return UUID.fromString(raw);
         } catch (IllegalArgumentException e) {
-            return UUID.fromString("5f7b8b44-e4aa-40b8-b93a-800ec0151d20");
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED, "SESSION_REQUIRED");
         }
     }
 
