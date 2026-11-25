@@ -1,3 +1,5 @@
+**v2026.11.26.0857 — mandatory mobile menu and natural localization:** [integrated defect/acceptance record](../worklog/2026-11-26-mobile-navigation-localization-v2026.11.26.0857.md). NAV-01/I18N-01/I18N-02 OPEN; EN default, KO second, JA/ZH/VI; role-safe complete menu and natural five-locale SSR/browser QA required before promotion. Documentation only.
+
 ## v2026.11.24.0818 — Stitch Skills design-contract pilot (not deployed)
 
 > **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](../DOCUMENT_AUTHORITY.md) / [한국어](../DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.

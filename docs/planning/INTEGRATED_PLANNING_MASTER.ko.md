@@ -1,3 +1,5 @@
+**v2026.11.26.0857 — 모바일 전체 메뉴·자연스러운 다국어 필수 기준:** [통합 결함·수용 조건](../worklog/2026-11-26-mobile-navigation-localization-v2026.11.26.0857.ko.md). NAV-01/I18N-01/I18N-02 OPEN. 영어 기본·한국어 두 번째·JA/ZH/VI, 권한별 전체 메뉴와 자연스러운 5언어 SSR/브라우저 QA를 승격 전에 필수 검증한다. 문서 전용.
+
 ## v2026.11.24.0818 — Stitch Skills 공식 디자인 계약 시범 (배포 없음)
 
 > **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](../DOCUMENT_AUTHORITY.md) / [한국어](../DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
