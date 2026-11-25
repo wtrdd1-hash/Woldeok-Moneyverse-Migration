@@ -150,7 +150,7 @@ html:root body { overflow-x: clip; }
 }
 .g1-cta:hover { background: var(--g1-violet); color: var(--g1-night); }
 .g1-cta:active { transform: scale(0.97); }
-.mv-shell :focus-visible { outline: 2px solid var(--g1-gold); outline-offset: 2px; }
+.mv-shell :focus-visible { outline: 2px solid var(--g1-violet); outline-offset: 2px; }
 
 @media (prefers-reduced-motion: reduce) {
   .mv-shell *, .mv-shell *::before, .mv-shell *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
@@ -231,3 +231,34 @@ html:root body { font-variant-numeric: tabular-nums; }
 /* G2: figures use the tabular body face; Orbitron is kept for the one big balance. */
 html:root .g1-num, html:root .mv-num { font-family: var(--font-sans, 'Noto Sans KR Variable'), sans-serif; font-weight: 700; }
 html:root .g2-balance { font-family: var(--g1-font-num); }
+
+/*
+ * Interaction finish (2026-11-25, emil-design-eng review):
+ * - presses answer immediately (scale 0.97, 160ms strong ease-out);
+ * - `transition-all` is narrowed to paint/compositor properties so layout
+ *   never animates;
+ * - hover lift only on devices that really hover;
+ * - money and counts use tabular figures in the body face, not a mono face.
+ */
+:root { --ease-out: cubic-bezier(0.23, 1, 0.32, 1); }
+.mv-shell .transition-all {
+  transition-property: color, background-color, border-color, opacity, transform, box-shadow;
+  transition-timing-function: var(--ease-out);
+}
+.mv-shell :is(button, [role='button'], a.inline-flex):not(:disabled):not([role='tab']):not([role='switch']) {
+  transition-property: color, background-color, border-color, opacity, transform;
+  transition-duration: 160ms;
+  transition-timing-function: var(--ease-out);
+}
+.mv-shell :is(button, [role='button'], a.inline-flex):not(:disabled):not([role='tab']):not([role='switch']):active {
+  transform: scale(0.97);
+}
+@media (hover: none) {
+  .mv-shell [class*='hover:-translate-y'], .mv-shell [class*='hover:scale'] { transform: none !important; }
+}
+.mv-shell .tabular, .mv-shell .tabular-nums { font-variant-numeric: tabular-nums; }
+.mv-shell main .tabular { font-family: inherit; }
+.mv-shell main table { font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) {
+  .mv-shell :is(button, [role='button'], a.inline-flex):active { transform: none; }
+}

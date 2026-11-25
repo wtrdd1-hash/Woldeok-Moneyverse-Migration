@@ -9,8 +9,8 @@ export interface StatItem {
   readonly label: string;
   /** null means the source did not answer; rendered as 확인 불가, never 0. */
   readonly value: React.ReactNode | null;
-  readonly note?: React.ReactNode;
-  readonly tone?: 'rise' | 'fall' | 'ok';
+  readonly note?: React.ReactNode | undefined;
+  readonly tone?: 'rise' | 'fall' | 'ok' | undefined;
 }
 
 const TONE = { rise: 'text-[var(--g1-ember)]', fall: 'text-[var(--g1-rare-rare)]', ok: 'text-[var(--g1-mint)]' } as const;
