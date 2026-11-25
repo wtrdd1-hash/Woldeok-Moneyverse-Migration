@@ -1,7 +1,9 @@
+import { NextResponse } from 'next/server';
 import { ALL_PSEO_POPULAR_SLUGS } from '@/config/pseo-stocks.config';
 import { ALL_SEO_PRESETS } from '@/config/seo-presets.config';
 import { submitToIndexNow } from '@/lib/indexnow';
 import { seoResponse, verifySeoOperator, verifySeoWriteOrigin } from '@/lib/admin-seo-authority';
+import { isSameOriginFinanceMutation } from '@/lib/finance-mutation-origin';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +14,10 @@ interface IndexingRequestPayload {
 
 /** IndexNow notification requires an elevated operator. It does NOT prove Google indexing. */
 export async function POST(req: Request) {
+  // Shared same-origin guard (independent review 2026-11-25).
+  if (!isSameOriginFinanceMutation(req)) {
+    return NextResponse.json({ error: 'Forbidden request' }, { status: 403, headers: { 'cache-control': 'private, no-store' } });
+  }
   const wrongOrigin = verifySeoWriteOrigin(req);
   if (wrongOrigin) return wrongOrigin;
   const denied = await verifySeoOperator();

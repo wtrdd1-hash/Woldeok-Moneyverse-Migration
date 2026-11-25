@@ -1,18 +1,16 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { ApiError } from '@/lib/api';
 import { mutate } from '@/lib/mutate';
+import { isSameOriginFinanceMutation } from '@/lib/finance-mutation-origin';
 
 export const dynamic = 'force-dynamic';
 
 const headers = { 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex, nofollow' };
 
 export async function POST(req: NextRequest) {
-  const origin = req.headers.get('origin');
-  const reqUrl = req.url || "http://localhost";
-  const canonical = process.env.APP_BASE_URL
-    ? new URL(process.env.APP_BASE_URL).origin
-    : new URL(reqUrl).origin;
-  if (origin && origin !== canonical) {
+  // Shared same-origin guard (QA 2026-11-25): the hand-rolled check here either
+  // failed open without an Origin or refused every proxied browser request.
+  if (!isSameOriginFinanceMutation(req)) {
     return NextResponse.json({ error: '요청 출처가 허용되지 않았습니다.' }, { status: 403, headers });
   }
 

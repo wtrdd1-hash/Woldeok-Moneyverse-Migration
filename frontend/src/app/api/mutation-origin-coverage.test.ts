@@ -25,7 +25,15 @@ describe('BFF write routes', () => {
     .filter((p) => /export (async )?function (POST|PUT|PATCH|DELETE)|export const (POST|PUT|PATCH|DELETE)/.test(readFileSync(p, 'utf8')))
     .map((p) => relative(root, p))
     .filter((r) => !SECRET_AUTHENTICATED.has(r))
-    .filter((r) => !/isSameOriginFinanceMutation|origin/i.test(readFileSync(join(root, r), 'utf8')));
+    .filter((r) => {
+      // Independent review 2026-11-25: matching the word 'origin' let 19
+      // hand-rolled checks pass (some fail-open, some refusing every proxied
+      // browser). Every write handler must call the shared guard itself.
+      const src = readFileSync(join(root, r), 'utf8');
+      const handlers = src.match(/export (async )?function (POST|PUT|PATCH|DELETE)\b/g) ?? [];
+      const calls = src.match(/isSameOriginFinanceMutation\(/g) ?? [];
+      return calls.length < handlers.length;
+    });
   it('all check the request origin', () => {
     expect(offenders).toEqual([]);
   });

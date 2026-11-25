@@ -17,7 +17,7 @@ describe('Treasury grant apply route contract', () => {
   it('rejects incomplete application body with 400 Bad Request', async () => {
     const request = new Request('http://localhost/api/treasury/apply-grant', {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: { origin: 'http://localhost',  'content-type': 'application/json' },
       body: JSON.stringify({ applicantName: '테스터' }),
     });
     const response = await grantRoute.POST(request);
@@ -31,7 +31,7 @@ describe('Treasury grant apply route contract', () => {
   it('successfully submits valid application and returns 200 OK', async () => {
     const request = new Request('http://localhost/api/treasury/apply-grant', {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: { origin: 'http://localhost',  'content-type': 'application/json' },
       body: JSON.stringify({
         applicantName: '홍길동',
         businessName: '네오스마트팜',
