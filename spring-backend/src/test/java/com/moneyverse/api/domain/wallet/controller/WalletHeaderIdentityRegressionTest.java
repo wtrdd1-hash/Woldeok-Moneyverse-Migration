@@ -16,7 +16,7 @@ class WalletHeaderIdentityRegressionTest {
     private final WalletService service = mock(WalletService.class);
     private final UserAuthService auth = mock(UserAuthService.class);
     private final HttpServletRequest request = mock(HttpServletRequest.class);
-    private final WalletController wallet = new WalletController(service, auth);
+    private final WalletController wallet = new WalletController(service, auth, org.mockito.Mockito.mock(com.moneyverse.api.domain.identity.service.MemberApiGuard.class));
 
     @Test void anonymousRandomActorHeaderMustNotRevealWalletSummary() {
         when(auth.resolveSession(request)).thenReturn(Optional.empty());
