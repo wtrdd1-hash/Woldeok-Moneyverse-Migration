@@ -167,7 +167,16 @@ NestJS 원본이 없는 11개(연금 일부, board/stock-posts 쿼리, bonds rol
   재실행: 광장 작성→같은 키 재요청→읽기→댓글→수정→삭제→404, CSRF 없는 작성 403, 클럽·개인정보 200, 연금 납입(현금 0) 400, 카지노 403.
   로그인 화면 22개 중 20개 200(2개는 없는 주소 404), 프론트 오류 0.
   운영: 함수 정의 백업 `/var/backups/moneyverse-prod-before-351-202611251604.sql`, 351 적용, jar 1e369b5421 배포(백업 …before-1e369b5421), 운영 DB 앱 권한 롤백 검증 성공.
-- 의존성 취약점·오프호스트 백업(P0, PR #3448) 미점검/미완료.
+- [해결 0bd4da14be, cd46b21fde] Java 의존성 취약점: OSV(정확한 해석 버전) 조회 결과 19개 라이브러리 124건(심각 16·높음 46: Tomcat 인증/제약 우회·RCE,
+  Thymeleaf 표현식 범위 탈출, Netty HTTP/2·SNI·스머글링, jackson PTV 우회, pgjdbc 채널 바인딩 다운그레이드, Spring Security 등).
+  Spring Boot 3.3.5(지원 종료)→3.5.16, Tomcat 10.1.62·Netty 4.1.141·Jackson 2.21.9·pgjdbc 42.7.15(42.7.4 하드코딩 제거)·commons-lang3 3.22.0·log4j 2.26.1·
+  BouncyCastle 1.87·lavaplayer 2.2.7, 간접 의존성 제약(commons-io 2.22.0·jsoup 1.24.1·org.json 20260814·rhino 1.7.15.1).
+  업그레이드 영향 수정: Thymeleaf #ctx 금지(CVE 수정 자체) → 템플릿 변수 직접 참조, TreasuryVault 생성 ID 선채움 제거(Hibernate 6.6).
+  재조회: 152개 중 1건(spring-webmvc XsltView/SSE, Spring 7 에서만 수정) — 미사용 확인 + UnpatchedSpringFeatureGuardTest. 프론트 pnpm audit 0건, Next 16.4.6(최신).
+  E2E 재실행 중 기존 결함 발견: /api/v1/banking/pockets 처리기 중복(로그인 회원 500) + 중복 이체가 원장 없는 함수 호출·DB 오류 노출 → PocketController 단일화.
+  Test: API 전수·로그인 E2E·화면 전부 정상, 오류 0. 운영 배포(백업 …before-cd46b21fde), 화면 12개 200, 30분 오류 감시.
+- 저장소 규칙 위반 정정: AGENTS.md 는 커밋에 Co-Authored-By: Claude 금지. 이번 세션 이전 커밋들에 포함됨(일부 main 병합) — 이력 재작성은 하지 않고 이후 커밋부터 제외.
+- 오프호스트 백업(P0, PR #3448) 미완료.
 - 로그인 회원 실사용 E2E 검증 경로 없음(테스트 계정 필요). 2026-11-14 내부 조폐 충전 6건 소유자 확인 필요.
 
 ## PR #3448(전체 기획 재검토) 반영
