@@ -1,3 +1,7 @@
+## v2026.11.26.GAMEYEAR.1 — Server calendar year (planning only)
+
+Proposed 365 server days/year (219000 real seconds), Year 1 at existing epoch, preserve day/week windows. Calendar display only; no annual financial settlement or reset; E542-04 remains blocked. Correct fabricated Spring clock fallback before gated implementation. [Server clock contract](SERVER_GAME_CLOCK_SPEC.md#6-moneyverse-year-extension--v20261126gameyear1-planning-candidate).
+
 ## v2026.11.24.0818 — local Stitch Skills pilot
 
 > **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](../DOCUMENT_AUTHORITY.md) / [한국어](../DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
