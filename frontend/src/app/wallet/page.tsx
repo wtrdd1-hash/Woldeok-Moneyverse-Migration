@@ -26,6 +26,9 @@ import { TranslatedText as T } from '@/components/translated-text';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
+import { PageHeader } from '@/components/page-header';
+import { StatRow } from '@/components/d180/primitives';
+import { readWalletOverview } from '@/lib/wallet-overview';
 import { formatMoment, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { CitizenTaxReceiptCard } from '@/components/citizen-tax-receipt-card';
@@ -64,36 +67,27 @@ function signedPercent(bpsText: string): string {
   return `${prefix}${(Math.abs(bps) / 100).toLocaleString('ko-KR', { maximumFractionDigits: 2 })}%`;
 }
 
-const GUEST_WALLET_OVERVIEW: Overview = {
-  userId: 'guest',
-  balances: {
-    currency: 'WLD',
-    cash: { availableAmount: '0', updatedAt: new Date().toISOString() },
-    bank: { availableAmount: '0', updatedAt: new Date().toISOString() },
-    totalAvailableAmount: '0',
-  },
-  recentTransactions: [],
-};
-
 export default async function WalletPage() {
-  let isGuest = false;
-  try {
-    const session = await apiOrNull<{ csrfToken: string }>('/api/v1/auth/session');
-    if (!session) {
-      isGuest = true;
-    }
-  } catch {
-    isGuest = true;
-  }
+  await requireMember();
 
-  const [rawWallet, loanData, rewardAvailability, portfolioData] = await Promise.all([
-    isGuest ? null : apiOrNull<Overview>('/api/v1/wallet?recent=50'),
-    isGuest ? null : apiOrNull<{ loans: LoanView[] }>('/api/v1/bank/loans'),
-    isGuest ? null : apiOrNull<RewardAvailability>('/api/v1/rewards/availability'),
-    isGuest ? null : apiOrNull<{ holdings: PortfolioHoldingInput[] }>('/api/v1/stocks/portfolio'),
+  const [walletRaw, loanData, rewardAvailability, portfolioData] = await Promise.all([
+    apiOrNull<unknown>('/api/v1/wallet?recent=50'),
+    apiOrNull<{ loans: LoanView[] }>('/api/v1/bank/loans'),
+    apiOrNull<RewardAvailability>('/api/v1/rewards/availability'),
+    apiOrNull<{ holdings: PortfolioHoldingInput[] }>('/api/v1/stocks/portfolio'),
   ]);
 
-  const wallet = rawWallet ?? GUEST_WALLET_OVERVIEW;
+  const wallet: Overview | null = readWalletOverview(walletRaw);
+  if (!wallet) {
+    return (
+      <div data-page="wallet" className="min-h-screen pb-24 space-y-6">
+        <EmptyState
+          title={<T korean="지금은 지갑을 불러올 수 없어요." english="Cannot load wallet at this time." />}
+          description={<T korean="잠시 후 다시 확인해 주세요." english="Please try again in a few moments." />}
+        />
+      </div>
+    );
+  }
 
   const { balances, recentTransactions, userId } = wallet;
   const loans = loanData?.loans ?? [];
@@ -115,94 +109,37 @@ export default async function WalletPage() {
 
   const cashAvailable = BigInt(balances.cash.availableAmount || '0');
   const bankAvailable = BigInt(balances.bank.availableAmount || '0');
-  const grandTotalAmount = cashAvailable + bankAvailable + actualStocksValue;
+  // portfolioData null = the API did not answer; [] holdings = verified none.
+  const stocksKnown = portfolioData !== null && (stockHoldings.length === 0 || stockAnalysis !== null);
+  const grandTotalAmount = cashAvailable + bankAvailable + (stocksKnown ? actualStocksValue : 0n);
 
   return (
     <div data-page="wallet" className="min-h-screen pb-24 space-y-6">
       <LiveRefresh />
 
-      {isGuest && (
-        <div className="rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/15 via-purple-500/10 to-transparent p-5 flex flex-wrap items-center justify-between gap-4 shadow-lg backdrop-blur-sm">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-primary text-primary-foreground">게스트 모드</span>
-              <h2 className="text-sm font-bold text-white">지갑 둘러보기 모드로 접속되었습니다.</h2>
-            </div>
-            <p className="text-xs text-zinc-400">
-              실제 WLD 자산 입출금, 즉시 송금, 대출 및 포트폴리오를 관리하시려면 로그인해 주세요.
-            </p>
-          </div>
-          <Link href="/login" className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-all shadow-md">
-            로그인하러 가기 →
-          </Link>
-        </div>
-      )}
+      {/* DESIGN180 page head + one StatRow (QA 2026-11-25). A portfolio the API
+          did not answer is 확인 불가, never 0, and is left out of the total. */}
+      <PageHeader title="지갑">원장에 기록된 현금과 은행 예금, 보유 주식 평가액입니다.</PageHeader>
+      <StatRow
+        label="내 자산 요약"
+        items={[
+          {
+            label: stocksKnown ? '총 자산' : '현금 + 예금',
+            value: <>{groupDigits(grandTotalAmount.toString())} <span className="text-sm font-medium text-[var(--g1-muted)]">WLD</span></>,
+            note: stocksKnown ? '현금 + 예금 + 주식 평가액' : '주식 평가액을 확인하지 못해 제외했어요',
+          },
+          { label: '활동 현금', value: <><Amount value={balances.cash.availableAmount} /> WLD</>, note: '즉시 사용 가능' },
+          { label: '은행 예금', value: <><Amount value={balances.bank.availableAmount} /> WLD</>, note: '은행 금고에 예치' },
+          {
+            label: '주식 평가액',
+            value: stocksKnown ? <>{groupDigits(actualStocksValue.toString())} WLD</> : null,
+            tone: isStockProfit ? 'rise' : isStockLoss ? 'fall' : undefined,
+            note: stockAnalysis ? `평가 손익 ${signedPercent(stockAnalysis.total_gain_loss_bps)}` : stocksKnown ? '보유 주식 없음' : undefined,
+          },
+        ]}
+      />
 
-      {/* 1. 상단 토스형 내 자산 메인 히어로 카드 */}
       <div className="toss-card p-6 sm:p-8 space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <div className="size-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-              <Wallet className="size-5" />
-            </div>
-            <div>
-              <span className="text-xs text-muted-foreground font-semibold">내 가상 자산 총액</span>
-              <h1 className="text-sm font-bold text-foreground">현금 + 은행 예금 + 가상 주식 합산</h1>
-            </div>
-          </div>
-          <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-muted/60 text-muted-foreground border border-border/50">
-            {balances.currency}
-          </span>
-        </div>
-
-        {/* 큼직한 총 잔액 */}
-        <div className="space-y-1">
-          <div className="font-fintech text-4xl sm:text-5xl font-black text-foreground tracking-tight tabular-nums">
-            {groupDigits(grandTotalAmount.toString())}{' '}
-            <span className="text-xl sm:text-2xl font-bold text-muted-foreground">WLD</span>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            유동 현금과 금융 예치금, 실시간 주식 평가액이 실시간 반영된 통합 순자산입니다.
-          </p>
-        </div>
-
-        {/* 지갑 세부 잔액 스트립 (활동 현금 vs 은행 예금 vs 가상 주식) */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 rounded-2xl bg-muted/20 border border-border/40">
-          <div className="space-y-0.5">
-            <span className="text-xs text-muted-foreground block font-medium">활동 현금 (즉시 사용)</span>
-            <div className="font-fintech font-bold text-base sm:text-lg text-primary tabular-nums">
-              <Amount value={balances.cash.availableAmount} /> WLD
-            </div>
-          </div>
-          <div className="space-y-0.5">
-            <span className="text-xs text-muted-foreground block font-medium">은행 예금 (복리 적립 중)</span>
-            <div className="font-fintech font-bold text-base sm:text-lg text-foreground tabular-nums">
-              <Amount value={balances.bank.availableAmount} /> WLD
-            </div>
-          </div>
-          <div className="space-y-0.5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground block font-medium">가상 주식 평가액</span>
-              {stockAnalysis && (
-                <span
-                  className={`text-[11px] font-mono tabular-nums font-bold px-1.5 py-0.5 rounded ${
-                    isStockProfit
-                      ? 'bg-red-500/10 text-red-600 dark:text-red-400'
-                      : isStockLoss
-                      ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                      : 'bg-muted text-muted-foreground'
-                  }`}
-                >
-                  {signedPercent(stockAnalysis.total_gain_loss_bps)}
-                </span>
-              )}
-            </div>
-            <div className="font-fintech font-bold text-base sm:text-lg text-foreground tabular-nums">
-              {groupDigits(actualStocksValue.toString())} WLD
-            </div>
-          </div>
-        </div>
-
         {/* 일일 보상 수령 바 */}
         <RewardButtons availability={rewardAvailability} />
 
