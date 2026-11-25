@@ -91,10 +91,10 @@ function pathKind(path) {
   // The exact generated API schema is runtime input, never a docs-only bypass.
   // Every other JSON file under docs remains UNKNOWN/fail-closed.
   if (path === 'docs/mobile-api-contract.json') return 'runtime';
-  if (/^docs\/qa\/[^/]+\.json$/.test(path)) return 'docs';
+  if (/^docs\/(?:qa|design)\/[^/]+\.json$/.test(path)) return 'docs';
   if (matchesAny(path, DOC_PATHS)) {
     // An executable or machine-readable payload inside docs must not bypass release verification.
-    if ((path.startsWith('docs/') || path.startsWith('.agents/')) && !/\.(?:md|mdx|txt|png|jpe?g|gif|webp|pdf)$/.test(path)) return 'unknown';
+    if ((path.startsWith('docs/') || path.startsWith('.agents/')) && !/\.(?:md|mdx|txt|png|jpe?g|gif|webp|pdf|upstream)$/.test(path)) return 'unknown';
     return 'docs';
   }
   if (matchesAny(path, CONTROL_PATHS)) return 'control';
