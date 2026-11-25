@@ -16,7 +16,7 @@ export function SiteShell({ children }: { readonly children: React.ReactNode }) 
       {/* 2. Main Right Area */}
       <div className="flex-1 flex flex-col min-w-0">
         <GameTopbar />
-        <main id="main" className="flex-1 p-6 lg:p-8 max-w-[1400px] w-full mx-auto">
+        <main id="main" className="flex-1 p-6 lg:p-8 max-w-[1440px] w-full mx-auto pb-[calc(env(safe-area-inset-bottom)+5rem)]">
           {children}
         </main>
         {/* Footer Concept Bar */}
