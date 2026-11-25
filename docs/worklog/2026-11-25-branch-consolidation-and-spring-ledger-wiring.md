@@ -80,7 +80,9 @@ NestJS 원본이 없는 11개(연금 일부, board/stock-posts 쿼리, bonds rol
   (bank_get_my_standing·bank_my_credit_facts, Nest 계산식·등급표 그대로). 실DB: 채권 1,000 → 만기 1,030 원장 영수증(롤백). Test: 신용등급·요약 200, 현금 0 채권 409, 대출 없음 미리보기 400·상환 409. 운영 배포.
 - [x] 사업 지분·보유 목록·보상 가능 여부(07f9622c55): business_equity_standing·business_my_ownerships_v2·wallet_reward_availability. Test 실값 확인, 운영 배포.
 - 출석 룰렛: Nest 가 앱에서 economy_post_transaction 직접 호출 + Math.random 보상(규칙 위반) → 원장 래퍼 함수 없이는 구현 불가, 프론트도 호출 안 함 → 미연결 유지.
-- [ ] 남은 404(2026-11-25 Test 재대조 26개, 대조 방식 한계 약 8개 제외): 알림 검색, 상점 보유, 지갑 거래 상세, 국고 공시, 조폐 증명서, 시중 금리, 기업 공개, 사업 부스트, 채권 롤오버, OAuth 재인증, 초기 게임·선호 설정, 관리자 SEO 6
+- [x] 상점 보유(shop_my_items_v2, attention 필터 status/filter 모두 허용), 지갑 거래 상세(Nest 단일 쿼리·이름표 그대로, 남의 거래 404) (5cc65edb9a).
+- [x] 미검증 원천 4곳은 404 대신 정직한 503: 국고 공시(RELEASING 정책 PUBLIC_TREASURY_RECONCILIATION_PENDING), 알림 검색(Nest 기본 꺼짐), 시중 금리, 조폐 증명서. 운영 배포, 오류 0·운영 프론트 오류 0.
+- [ ] 남은 404 20개(대조 방식 한계 약 8개 포함): 기업 공개, 사업 부스트, 채권 롤오버, OAuth 재인증, 초기 게임·선호 설정, 관리자 SEO 6, 출석 3(프론트 미호출)
 - [ ] 관리자 SEO
 - [ ] Spring 감사 P0 7건: DB 함수 연결 또는 명시적 실패로 전환
 - [ ] 계약 재대조: 404 0건 목표, 남는 항목은 사유 기록
