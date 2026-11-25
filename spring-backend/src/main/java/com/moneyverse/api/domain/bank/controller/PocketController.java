@@ -92,6 +92,8 @@ public class PocketController {
         try {
             Map<String, Object> result = pocketService.transferPocket(userId.get(), pocketId, direction, amount);
             return ResponseEntity.ok(ApiResponse.ok(result, "Transfer successful"));
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            throw e;
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
