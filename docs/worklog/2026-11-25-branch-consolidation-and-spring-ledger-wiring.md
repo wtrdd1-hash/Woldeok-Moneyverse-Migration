@@ -260,3 +260,9 @@ NestJS 원본이 없는 11개(연금 일부, board/stock-posts 쿼리, bonds rol
 남은 원격 브랜치: `audit/all-planning-review-20261125`, `audit/spring-backend-architecture-20261125`, `docs/guild-home-remedy-v2026.11.24.1650`, `feat/spring-ledger-wiring-20261125`, `feat/total-game-ui-revamp-v2026.11.24.11`, `main`
 
 복구: `git push origin <sha>:refs/heads/<branch>`
+
+## 2026-11-25 저녁 — 사업 화면 장애, 프론트 점검
+- [x] /businesses 로그인 회원 전원 오류(digest 2910198970): /api/v1/business-types 가 "내 사업" 처리기로 잘못 연결돼 응답 모양 불일치 → BusinessTypesController(카탈로그 = business_catalog − 보유, 구매 = 원장 기록 business_purchase + 세션·CSRF·중복방지 키) (3ded518b19). Test 확인 후 운영 반영, 오류 0.
+- [x] 프론트 Test 재배포(28db9bf3ee → f1eb43d34f), 비로그인 10쪽·로그인 12쪽 200. 화면 캡처 도구: Playwright 브라우저를 /srv/moneyverse-data/tools/ms-playwright 에 설치(기존 ~/.cache 링크는 건드리지 않음).
+- [x] 연금 제목이 휴대폰에서 5줄로 깨지던 문제 수정(f1eb43d34f, 한국어 문구 그대로). 운영 프론트는 아직 예전 릴리스(승격 전).
+- [ ] 화면 아래 떠 있는 온보딩·상담 버튼이 휴대폰에서 내용 일부를 가림 — 디자인 결정 필요.
