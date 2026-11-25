@@ -462,6 +462,11 @@ public class UserAuthService {
      * Changes password.
      */
     @Transactional
+    /** The same Argon2id parameters every stored verifier uses. */
+    public String encodePassword(String raw) {
+        return passwordEncoder.encode(raw);
+    }
+
     public void changePassword(UUID userId, String newPassword) {
         String encoded = passwordEncoder.encode(newPassword);
         Instant now = Instant.now();
