@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useMountedViewer } from '@/components/use-mounted-viewer';
 import { addDays, parseGameClock, passbookDate, weekDayOf, type GameClock } from '@/lib/game-calendar';
 import { groupDigits } from '@/lib/money';
 import type { WalletHistoryPage } from '@/app/wallet/activity/types';
@@ -54,8 +55,12 @@ async function readJson(path: string): Promise<unknown> {
  */
 export function WeeklyPassbook() {
   const [state, setState] = useState<{ clock: GameClock; history: WalletHistoryPage } | null>(null);
+  const viewer = useMountedViewer();
+  const signedIn = viewer?.signedIn === true;
 
   useEffect(() => {
+    // Guests have no ledger: never ask for one (it only produced a 401 in the console).
+    if (!signedIn) return;
     let live = true;
     void (async () => {
       try {
@@ -71,9 +76,9 @@ export function WeeklyPassbook() {
       }
     })();
     return () => { live = false; };
-  }, []);
+  }, [signedIn]);
 
-  if (!state) return null;
+  if (!signedIn || !state) return null;
   const { clock, history } = state;
   const columns = weekColumns(clock, history);
   const week = clock.weekIndex + 1;
