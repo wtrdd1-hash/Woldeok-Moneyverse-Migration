@@ -1,3 +1,4 @@
+import { readBoardPosts } from '@/lib/board-posts';
 import { publicApi } from '@/lib/api';
 import { buildUrlsetXml, canonicalUrl, type SitemapUrlEntry } from '@/lib/seo';
 
@@ -31,9 +32,9 @@ export async function GET() {
   ];
 
   try {
-    const data = await publicApi<{ posts: PostItem[] }>('/api/v1/board/public/stock-posts', 3600);
-    if (data?.posts) {
-      for (const post of data.posts) {
+    const posts = readBoardPosts(await publicApi<unknown>('/api/v1/board/stock-posts', 3600));
+    if (posts) {
+      for (const post of posts) {
         entries.push({
           loc: canonicalUrl(`/board/${post.postId}`),
           lastmod: post.updatedAt || post.createdAt || RELEASE_TIMESTAMP,

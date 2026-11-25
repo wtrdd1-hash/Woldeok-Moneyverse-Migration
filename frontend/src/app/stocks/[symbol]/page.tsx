@@ -19,6 +19,7 @@ import { EmptyState } from '@/components/empty-state';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { readBoardPosts } from '@/lib/board-posts';
 import { apiOrNull } from '@/lib/api';
 import { getServerLocale } from '@/lib/locale-server';
 import { localeLabel } from '@/lib/locale';
@@ -160,14 +161,15 @@ export default async function StockHubPage({
   const [portfolio, watchlist, discussion, alertResult, receiptsResult, pulseResult] = await Promise.all([
     apiOrNull<{ holdings: HubHolding[] }>('/api/v1/stocks/portfolio'),
     apiOrNull<{ stocks: WatchlistRow[] }>('/api/v1/stocks/watchlist'),
-    apiOrNull<{ posts: PostSummary[] }>(`/api/v1/board/public/stock-posts?stock=${encodedSymbol}`),
+    apiOrNull<unknown>(`/api/v1/board/stock-posts?stockSymbol=${encodedSymbol}`).then(readBoardPosts),
     apiOrNull<{ alerts: StockAlertRule[] }>('/api/v1/stocks/alerts'),
     apiOrNull<{ receipts: StockHaltReceipt[] }>('/api/v1/stocks/halt-receipts'),
     apiOrNull<{ success: boolean; data: { leadHeadline: string; updatedAt: string } }>('/api/v1/newspaper/pulse'),
   ]);
   const holding = findHoldingForStock(portfolio?.holdings ?? [], stock.id);
   const watching = (watchlist?.stocks ?? []).some((row) => row.stock_id === stock.id);
-  const posts = discussion?.posts ?? [];
+  // The DB list carries no stance/disclosure, so no stance badge is invented.
+  const posts = (discussion ?? []).map((p) => ({ ...p, stock: null }));
   const stockAlerts = (alertResult?.alerts ?? []).filter((rule) => rule.stock_id === stock.id);
   const stockReceipt = (receiptsResult?.receipts ?? []).find((r) => r.stock_id === stock.id);
   const newsList = pulseResult?.data?.leadHeadline && pulseResult.data.leadHeadline !== '현재 진행 중인 시장 소식이 없습니다'

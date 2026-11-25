@@ -16,12 +16,18 @@ describe('DESIGN180 home', () => {
     expect(source).toContain('href="/quests"');
   });
 
-  it('summarises balance, market breadth and base rate in one StatRow from live sources', () => {
+  it('summarises balance, market breadth and listed stocks in one StatRow from live sources', () => {
     expect(source).toContain("import { StatRow } from '@/components/d180/primitives'");
-    expect(source).toContain("'/api/v1/economy/macro-pulse'");
     expect(source).toContain("label: '사용 가능 잔액'");
     expect(source).toContain("label: '오늘 시장'");
-    expect(source).toContain("label: '기준금리'");
+    expect(source).toContain("label: '상장 종목'");
+  });
+
+  it('never shows the Spring macro-pulse figures, which are hard-coded (3.25% etc.)', () => {
+    // Regression 2026-11-25: MacroPulseService.getMacroPulse() returns
+    // constants, so production showed an invented 기준금리 3.25%.
+    expect(source).not.toContain('macro-pulse');
+    expect(source).not.toContain('기준금리');
   });
 
   it('drops the G1/G2 panel and display styles', () => {

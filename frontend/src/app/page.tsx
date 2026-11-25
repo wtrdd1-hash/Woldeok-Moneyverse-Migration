@@ -121,10 +121,9 @@ function noticeDate(value: string | null | undefined): string | null {
 
 export default async function HomePage() {
   const locale = await getServerLocale();
-  const [marketData, notices, macro] = await Promise.all([
+  const [marketData, notices] = await Promise.all([
     apiOrNull<{ stocks: StockItem[] }>('/api/v1/stocks'),
     apiOrNull<{ announcements: Announcement[] }>('/api/v1/announcements'),
-    apiOrNull<{ baseInterestRatePct?: unknown }>('/api/v1/economy/macro-pulse'),
   ]);
 
   const priced = (marketData?.stocks ?? [])
@@ -139,10 +138,9 @@ export default async function HomePage() {
     .slice(0, 5);
   const rising = priced.filter((row) => row.bp > 0n).length;
   const falling = priced.filter((row) => row.bp < 0n).length;
-  const baseRate =
-    typeof macro?.baseInterestRatePct === 'number' && Number.isFinite(macro.baseInterestRatePct)
-      ? `${macro.baseInterestRatePct.toFixed(2)}%`
-      : null;
+  // Listed stocks come from the same exchange answer as the movers, so the
+  // cell is null (확인 불가) exactly when the exchange did not answer.
+  const listed = Array.isArray(marketData?.stocks) ? marketData.stocks.length.toLocaleString('ko-KR') : null;
 
   const announcements = (notices?.announcements ?? []).slice(0, 4);
   const panel = 'min-w-0 rounded-lg border border-[var(--g1-line)] bg-[var(--g1-plum)]';
@@ -199,7 +197,7 @@ export default async function HomePage() {
               ),
               note: '개장가 대비 종목 수',
             },
-            { label: '기준금리', value: baseRate, note: '중앙은행 발표' },
+            { label: '상장 종목', value: listed, note: '거래소에서 거래 중' },
           ]}
         />
       </section>

@@ -26,6 +26,7 @@ import { TranslatedText as T } from '@/components/translated-text';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
+import { readWalletOverview } from '@/lib/wallet-overview';
 import { formatMoment, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { CitizenTaxReceiptCard } from '@/components/citizen-tax-receipt-card';
@@ -67,13 +68,14 @@ function signedPercent(bpsText: string): string {
 export default async function WalletPage() {
   await requireMember();
 
-  const [wallet, loanData, rewardAvailability, portfolioData] = await Promise.all([
-    apiOrNull<Overview>('/api/v1/wallet?recent=50'),
+  const [walletRaw, loanData, rewardAvailability, portfolioData] = await Promise.all([
+    apiOrNull<unknown>('/api/v1/wallet?recent=50'),
     apiOrNull<{ loans: LoanView[] }>('/api/v1/bank/loans'),
     apiOrNull<RewardAvailability>('/api/v1/rewards/availability'),
     apiOrNull<{ holdings: PortfolioHoldingInput[] }>('/api/v1/stocks/portfolio'),
   ]);
 
+  const wallet: Overview | null = readWalletOverview(walletRaw);
   if (!wallet) {
     return (
       <div data-page="wallet" className="min-h-screen pb-24 space-y-6">
