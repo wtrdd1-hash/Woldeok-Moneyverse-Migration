@@ -6027,3 +6027,15 @@ pm install -g @google/gemini-cli@0.71.1 권한 실패
      - ~/.gemini/skills 74종, ~/.agents/skills 131종으로 순수 고유(Unique) 스킬 총 205종 분리 배치 완료 ──▶ Skill conflict detected 경고 0건 달성
   3. **GEMINI.md 전역 단일화**:
      - ~/GEMINI.md를 정리하고 공식 전역 경로인 ~/.gemini/GEMINI.md로 일원화 ──▶ 중복 파일 감지 해결
+
+---
+## 🚀 [v23 Specification] Gemini CLI 인증 분석(개인 OAuth 지원 중단 확인) 및 Google AI Studio API 키 대기 모드 초기화
+- **작업 일시**: 2026-11-25 09:52 KST
+- **작업 번호 (Task ID)**: TASK-20261125-GEMINI-CLI-AUTH-RESET
+- **근본 원인 포렌식 결과**:
+  1. **개인 구글 계정 OAuth 지원 중단**: Gemini CLI에서 oauth-personal 호출 시 구글 공식 메시지 This client is no longer supported for Gemini Code Assist for individuals. To continue using Gemini, please migrate to the Antigravity suite of products 반환 확인.
+  2. **API 키 만료 (API_KEY_INVALID)**: 기존 gemini-credentials.json에 저장되어 있던 API 키가 만료되어 400 Bad Request 발생.
+- **조치 완료 내역**:
+  1. 만료된 ~/.gemini/gemini-credentials.json 파일 완전 삭제 및 초기화.
+  2. ~/.gemini/settings.json을 gemini-api-key 모드로 안전 재설정.
+  3. 미니PC 터미널에서 gemini 실행 시 즉시 새 API 키 입력 프롬프트가 뜨도록 구성 완료.
