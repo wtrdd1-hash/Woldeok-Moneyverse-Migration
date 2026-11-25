@@ -81,6 +81,7 @@ NestJS 원본이 없는 11개(연금 일부, board/stock-posts 쿼리, bonds rol
 - [ ] 관리자 SEO
 - [ ] Spring 감사 P0 7건: DB 함수 연결 또는 명시적 실패로 전환
 - [ ] 계약 재대조: 404 0건 목표, 남는 항목은 사유 기록
+  - 2026-11-25 Test 재대조(82a308f3c6 배포 후): 404 57→40. 이 중 5개는 대조 방식 한계(테스트 id `1` 은 UUID 아님, 쿼리 문자열 경로 2, 화면에서 중단한 구형 연금 2). 실제 남은 공백 약 35개: 은행 채권·신용·상환 6, 클럽 4, 참여 5, 사업 3, SEO 관리자 6, OAuth 재인증 1, 기타(시즌 이벤트·알림 검색·상점 보유·지갑 거래 상세·보상·국고 공시·조폐 증명서·시중 금리·기업 공개).
 - [ ] Test 서버 안정성: 로그인 회원 실화면 검증 경로 확보(테스트 계정 세션)
 
 ## P0 보안 발견 (2026-11-25, 읽기 전용 조회로 확인, 변경 없음)
@@ -98,6 +99,8 @@ NestJS 원본이 없는 11개(연금 일부, board/stock-posts 쿼리, bonds rol
 - Gemini 1라운드(연금·광장·동의·계정복구 신규 코드): 3건 지적(Long 파싱 오버플로, principal_wld 타입, DELETE 본문 미파싱).
   검증: 앞의 둘은 소스(단락 평가)와 DB 함수 시그니처(text)로 반박, 셋째는 MockMvc 테스트(6df27c8808)로 반박.
 - Gemini 2라운드: 3건 모두 WITHDRAWN, 새 결함 NONE.
+- Gemini 3라운드(카지노·계정복구·동의): ① 개장 상태 조회 실패 시 한도 초과 409 가 403 으로 둔갑 → 타당, 실패 테스트 확인 후 수정(6a7ebdb220).
+  ② 메일 링크가 기본 URL 하위 경로를 잃음 → Nest 원본과 동일·루트 배포라 미변경(사유 기록).
 - 저장소 스킬 적용: test-driven-development(테스트 선작성, 계정복구는 변이 시험으로 실패 확인), systematic-debugging(메일 mock 원인 규명 후 수정),
   requesting/receiving-code-review(외부 모델 검토와 근거 기반 판정), verification-before-completion(실DB·Test HTTP 실측 후 보고).
 
