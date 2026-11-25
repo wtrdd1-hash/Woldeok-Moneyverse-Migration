@@ -10,7 +10,7 @@ import { EmptyState } from '@/components/empty-state';
 import { isLoggedInMember } from '@/lib/session';
 import { canonicalUrl } from '@/lib/seo';
 import { ShopStoreView, type CatalogItem } from './shop-store-view';
-import { cashBalanceFromWallet, type CanonicalWalletOverview } from './wallet-balance';
+import { cashBalanceFromWallet } from './wallet-balance';
 import { ShopMembershipSection } from './shop-membership-section';
 import { parseShopUpkeepCap, shopCatalogueQuery } from './shop-upkeep-cap';
 
@@ -51,7 +51,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             `/api/v1/shop/public-catalog${querySuffix}`,
             60,
           ),
-    loggedIn ? apiOrNull<CanonicalWalletOverview>('/api/v1/wallet') : null,
+    loggedIn ? apiOrNull<unknown>('/api/v1/wallet') : null,
     loggedIn
       ? apiOrNull<{ chosenName?: string; discordUsername?: string; avatarUrl?: string }>(
           '/api/v1/profile',
