@@ -20,6 +20,7 @@ import java.util.UUID;
  */
 @Service
 public class CasinoLedgerService {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CasinoLedgerService.class);
     private static final String ISO = "'YYYY-MM-DD\"T\"HH24:MI:SS.MS\"Z\"'";
     private static final String PLAY_TAIL = "play.net_amount::text AS net_amount, play.transaction_id::text AS transaction_id, play.replayed, "
             + "play.win_probability_ppm, play.payout_multiplier_ppm, play.worst_case_loss::text AS worst_case_loss";
@@ -126,6 +127,7 @@ public class CasinoLedgerService {
 
     /** Same meaning as the NestJS mapping: rule refusal 409 (with a code), caller refusal 403, anything else 503. */
     static ResponseStatusException translate(RuntimeException e) {
+        logDbFailure("casino", e);
         Throwable cause = NestedExceptionUtils.getMostSpecificCause(e);
         if (cause instanceof SQLException sql && sql.getSQLState() != null) {
             String state = sql.getSQLState();
@@ -149,5 +151,12 @@ public class CasinoLedgerService {
 
     private static ResponseStatusException unavailable(String code) {
         return new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, code);
+    }
+
+    /** Logs the cause of a refused/unavailable DB call (SQLSTATE + message, no parameters). */
+    static void logDbFailure(String where, Throwable e) {
+        Throwable c = org.springframework.core.NestedExceptionUtils.getMostSpecificCause(e);
+        String state = c instanceof java.sql.SQLException sql ? sql.getSQLState() : "-";
+        log.warn("[{}] db call failed: {} sqlstate={} {}", where, c.getClass().getSimpleName(), state, String.valueOf(c.getMessage()).replaceAll("\\s+", " "));
     }
 }

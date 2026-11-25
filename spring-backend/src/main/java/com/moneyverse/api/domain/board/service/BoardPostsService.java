@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
  */
 @Service
 public class BoardPostsService {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BoardPostsService.class);
     public static final Pattern STORAGE_KEY = Pattern.compile("^[0-9a-f-]{36}\\.(png|jpg|webp)$");
     private static final int LIST_LIMIT = 50;
     private static final int COMMENT_LIMIT = 200;
@@ -157,6 +158,7 @@ public class BoardPostsService {
         } catch (ResponseStatusException e) {
             throw e;
         } catch (RuntimeException e) {
+            logDbFailure("board", e);
             Throwable cause = NestedExceptionUtils.getMostSpecificCause(e);
             if (cause instanceof SQLException sql && sql.getSQLState() != null && REFUSALS.contains(sql.getSQLState())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BOARD_REQUEST_REFUSED");
@@ -167,5 +169,12 @@ public class BoardPostsService {
 
     private static ResponseStatusException unavailable(String code) {
         return new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, code);
+    }
+
+    /** Logs the cause of a refused/unavailable DB call (SQLSTATE + message, no parameters). */
+    static void logDbFailure(String where, Throwable e) {
+        Throwable c = org.springframework.core.NestedExceptionUtils.getMostSpecificCause(e);
+        String state = c instanceof java.sql.SQLException sql ? sql.getSQLState() : "-";
+        log.warn("[{}] db call failed: {} sqlstate={} {}", where, c.getClass().getSimpleName(), state, String.valueOf(c.getMessage()).replaceAll("\\s+", " "));
     }
 }

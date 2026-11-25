@@ -13,9 +13,10 @@ import java.util.UUID;
 /** Club reads ported from the NestJS ClubRepository. A DB failure is 503, never an empty list. */
 @Service
 public class ClubReadService {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ClubReadService.class);
     private static final String ISO = "'YYYY-MM-DD\"T\"HH24:MI:SS.MS\"Z\"'";
     private static final String CLUB_COLUMNS = "c.id::text AS id, c.tag, c.name, c.description, c.owner_id::text AS owner_id, "
-            + "COALESCE(u.display_name, '클럽장') AS owner_name, c.join_mode, c.status, c.level, c.experience::text AS experience, "
+            + "COALESCE(public.member_board_author_name(c.owner_id), '클럽장') AS owner_name, c.join_mode, c.status, c.level, c.experience::text AS experience, "
             + "c.member_count, to_char(c.created_at AT TIME ZONE 'UTC', " + ISO + ") AS created_at, "
             + "(cm_actor.user_id IS NOT NULL) AS is_my_club, cm_actor.role AS my_role";
     private final JdbcClient jdbc;
@@ -37,9 +38,9 @@ public class ClubReadService {
     }
 
     public List<Map<String, Object>> members(UUID club, UUID actor, int limit, int offset) {
-        return run(() -> jdbc.sql("SELECT cm.club_id::text AS club_id, cm.user_id::text AS user_id, COALESCE(u.display_name, '클럽원') AS display_name, "
-                        + "p.avatar_key, cm.role, to_char(cm.joined_at AT TIME ZONE 'UTC', " + ISO + ") AS joined_at, (cm.user_id = ?::uuid) AS is_me "
-                        + "FROM public.club_members cm JOIN public.users u ON u.id = cm.user_id LEFT JOIN public.user_profiles p ON p.user_id = u.id "
+        return run(() -> jdbc.sql("SELECT cm.club_id::text AS club_id, cm.user_id::text AS user_id, COALESCE(public.member_board_author_name(cm.user_id), '클럽원') AS display_name, "
+                        + "p.image_url AS avatar_key, cm.role, to_char(cm.joined_at AT TIME ZONE 'UTC', " + ISO + ") AS joined_at, (cm.user_id = ?::uuid) AS is_me "
+                        + "FROM public.club_members cm JOIN public.users u ON u.id = cm.user_id LEFT JOIN public.member_profiles p ON p.user_id = u.id "
                         + "WHERE cm.club_id = ?::uuid ORDER BY CASE cm.role WHEN 'owner' THEN 1 WHEN 'steward' THEN 2 WHEN 'moderator' THEN 3 ELSE 4 END, cm.joined_at "
                         + "LIMIT ? OFFSET ?")
                 .param(actor).param(club).param(limit).param(offset).query().listOfRows());
@@ -55,7 +56,7 @@ public class ClubReadService {
     }
 
     public List<Map<String, Object>> feed(UUID club, int limit) {
-        return run(() -> jdbc.sql("SELECT f.id::text AS id, f.club_id::text AS club_id, f.author_id::text AS author_id, COALESCE(u.display_name, '회원') AS author_name, "
+        return run(() -> jdbc.sql("SELECT f.id::text AS id, f.club_id::text AS club_id, f.author_id::text AS author_id, COALESCE(public.member_board_author_name(f.author_id), '회원') AS author_name, "
                         + "f.title, f.body, f.is_announcement, to_char(f.created_at AT TIME ZONE 'UTC', " + ISO + ") AS created_at "
                         + "FROM public.club_feed_posts f JOIN public.users u ON u.id = f.author_id WHERE f.club_id = ?::uuid "
                         + "ORDER BY f.is_announcement DESC, f.created_at DESC LIMIT ?")
@@ -71,6 +72,13 @@ public class ClubReadService {
 
     private static <T> T run(Call<T> call) {
         try { return call.get(); }
-        catch (RuntimeException e) { throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "CLUB_SOURCE_UNAVAILABLE"); }
+        catch (RuntimeException e) { logDbFailure("club", e); throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "CLUB_SOURCE_UNAVAILABLE"); }
+    }
+
+    /** Logs the cause of a refused/unavailable DB call (SQLSTATE + message, no parameters). */
+    static void logDbFailure(String where, Throwable e) {
+        Throwable c = org.springframework.core.NestedExceptionUtils.getMostSpecificCause(e);
+        String state = c instanceof java.sql.SQLException sql ? sql.getSQLState() : "-";
+        log.warn("[{}] db call failed: {} sqlstate={} {}", where, c.getClass().getSimpleName(), state, String.valueOf(c.getMessage()).replaceAll("\\s+", " "));
     }
 }

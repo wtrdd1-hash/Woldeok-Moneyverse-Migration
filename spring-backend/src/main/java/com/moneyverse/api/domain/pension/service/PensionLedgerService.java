@@ -19,6 +19,7 @@ import java.util.UUID;
  */
 @Service
 public class PensionLedgerService {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PensionLedgerService.class);
     /** The DB functions refuse more than 50 rows (22023). */
     public static final int HISTORY_LIMIT = 50;
     private static final String ISO = "to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS.MS\"Z\"')";
@@ -80,6 +81,7 @@ public class PensionLedgerService {
 
     private static ResponseStatusException translate(RuntimeException e) {
         if (e instanceof ResponseStatusException rse) return rse;
+        logDbFailure("pension", e);
         Throwable cause = NestedExceptionUtils.getMostSpecificCause(e);
         if (cause instanceof SQLException sql && sql.getSQLState() != null && REFUSALS.contains(sql.getSQLState())) {
             return new ResponseStatusException(HttpStatus.BAD_REQUEST, "PENSION_LEDGER_REFUSED");
@@ -89,5 +91,12 @@ public class PensionLedgerService {
 
     private static ResponseStatusException unavailable(String code) {
         return new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, code);
+    }
+
+    /** Logs the cause of a refused/unavailable DB call (SQLSTATE + message, no parameters). */
+    static void logDbFailure(String where, Throwable e) {
+        Throwable c = org.springframework.core.NestedExceptionUtils.getMostSpecificCause(e);
+        String state = c instanceof java.sql.SQLException sql ? sql.getSQLState() : "-";
+        log.warn("[{}] db call failed: {} sqlstate={} {}", where, c.getClass().getSimpleName(), state, String.valueOf(c.getMessage()).replaceAll("\\s+", " "));
     }
 }
