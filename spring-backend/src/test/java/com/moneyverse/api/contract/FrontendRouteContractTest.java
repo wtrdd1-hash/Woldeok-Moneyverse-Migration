@@ -62,9 +62,9 @@ class FrontendRouteContractTest {
         System.out.println("[route-contract] checked=" + checked + " missing=" + missing.size());
         missing.forEach(m -> System.out.println("[route-contract] MISSING " + m));
         org.junit.jupiter.api.Assertions.assertTrue(checked > 250, "contract file looks truncated");
-        // Ratchet: 94 routes still unported on 2026-11-26 (mostly admin consoles). The number may
+        // Ratchet: 4 left on 2026-11-26, all extraction artefacts (query strings glued to a path, a generic template). The number may
         // only go down; lower it whenever routes are ported.
-        org.junit.jupiter.api.Assertions.assertTrue(missing.size() <= 94,
+        org.junit.jupiter.api.Assertions.assertTrue(missing.size() <= 4,
                 "new frontend calls without a Spring handler: " + missing.size());
     }
 }
