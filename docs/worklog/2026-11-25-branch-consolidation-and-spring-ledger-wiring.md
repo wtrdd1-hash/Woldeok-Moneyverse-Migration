@@ -91,7 +91,15 @@ NestJS 원본이 없는 11개(연금 일부, board/stock-posts 쿼리, bonds rol
 - AGENTS.md 보안 경계("앱 역할은 SECURITY DEFINER 함수만, UPDATE 3·DELETE 0")와 정면 충돌. 앱이 침해되면 잔액·감사 행을 직접 고칠 수 있다.
 - 바로 회수하면 운영 Spring(UserAuthService 등 auth_sessions/auth_local_credentials 직접 UPDATE)이 깨지므로 미조치.
 - 계획: ① Spring 직접 DML 사용처 전수 ② 최소 권한 마이그레이션을 Test 에서 검증 ③ 소유자 승인 후 운영. 이 작업 체크리스트에 추가.
-- [ ] 앱 역할 최소 권한 복원(Test 우선)
+- [x] 앱 역할 최소 권한 복원 — 마이그레이션 347·348·349(미적용이던 저장소 마이그레이션) + 350(신규) 적용.
+  - 사전 조사: 앱 권한으로 실행되며 DML 하는 함수 0개(트리거 포함 전부 definer), Spring 호출 함수 96개 모두 앱 명시 EXECUTE(347 안전),
+    JPA 쓰기 0, Spring 직접 DML 테이블·컬럼 목록화. 없는 대상(users.display_name 등, profiles·system_audit_logs)은 원래부터 동작 안 하던 코드.
+  - Test: ACL 백업 `/var/backups/moneyverse-test-prodcopy-20261124/acl-before-347-350-202611251500.sql`, 적용, 앱 역할 허용/거부 행렬
+    (허용 7·거부 9 모두 기대대로), 실회원 원장 호출(롤백) 성공, Test API 280+화면 15 호출 중 권한 오류 0.
+  - 운영(15:02~): 전체 백업 `/var/backups/moneyverse-prod-before-347-350-202611251502/full.dump`(190MB, 테이블 277 데이터) + acl.sql,
+    적용 후 앱 DELETE 277→1(photos), 테이블 단위 UPDATE 277→2(auth_sessions, stock_league_participants), ledger_postings·account_balances 수정/
+    audit_logs 삭제 불가. 운영 API·화면 호출 중 권한 오류 0, 30분 실시간 감시.
+  - 롤백: acl.sql 재적용(권한 복원) — 데이터 변경 없음.
 
 ## 치명 보안 결함 — 헤더로 회원 지정 + 원장 밖 지급 (2026-11-25)
 
