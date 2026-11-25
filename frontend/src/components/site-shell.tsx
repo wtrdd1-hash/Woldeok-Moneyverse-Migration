@@ -5,6 +5,7 @@ import { GameSidebar } from '@/components/game-sidebar';
 import { GameTopbar } from '@/components/game-topbar';
 import { GameMobileDock } from '@/components/game-mobile-dock';
 import { ClientErrorReporter } from '@/components/client-error-reporter';
+import { FieldLabelLinker } from '@/components/field-label-linker';
 
 /**
  * DESIGN180 application frame: 224px sidebar and 64px top bar on desktop,
@@ -20,6 +21,7 @@ export function SiteShell({ children }: { readonly children: React.ReactNode }) 
         본문으로 건너뛰기
       </a>
       <ClientErrorReporter />
+      <FieldLabelLinker />
       <div className="hidden shrink-0 lg:block">
         <GameSidebar />
       </div>

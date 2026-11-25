@@ -177,15 +177,15 @@ const POPULAR_COMPOUND_CALCULATORS: readonly HubLinkItem[] = [
     highlight: true,
   },
   {
-    title: '5천만원 5년 연 8% 복리 굴리기 시뮬레이터',
-    desc: '목돈 5,000만원을 고배당 복리로 굴렸을 때 자산 증가 그래프',
-    href: '/tools/compound-calculator/50m-5y-8p',
+    title: '5천만원 1년 정기예금 연 7% 이자 계산기',
+    desc: '목돈 5,000만원을 1년간 연 7% 복리로 굴렸을 때의 만기 수령액',
+    href: '/tools/compound-calculator/50m-1y-7p',
     tag: '목돈 굴리기',
   },
   {
-    title: '월 50만원 10년 1억 만들기 적금 계산기',
-    desc: '소액 적립식 투자로 10년 뒤 1억원 종잣돈 만드는 법',
-    href: '/tools/compound-calculator/monthly-500k-10y',
+    title: '월 100만원 5년 1억 모으기 적금 계산기',
+    desc: '매월 100만원 적립식 복리로 1억원에 도달하는 과정',
+    href: '/tools/compound-calculator/monthly-1m-5y',
     tag: '장기 적립',
   },
 ];

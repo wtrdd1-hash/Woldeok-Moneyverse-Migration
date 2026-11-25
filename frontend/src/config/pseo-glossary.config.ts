@@ -34,7 +34,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     descriptionZh: '市盈率（P/E）是股票价格与每股收益（EPS）的比率。较低的市盈率通常意味着股票估值偏低，而较高的市盈率反映了市场对公司未来增长的高预期。',
     keyTakeawayKo: 'PER이 낮다고 무조건 매수하기보다, 기업의 이익 성장세가 지속 가능한지 확인해야 합니다.',
     keyTakeawayEn: 'Always verify if earnings growth is sustainable before buying low P/E stocks.',
-    relatedCalculatorUrl: '/tools/cagr-calculator',
+    relatedCalculatorUrl: '/tools/compound-calculator',
     relatedCalculatorLabelKo: '복리 수익률(CAGR) 계산기 바로가기',
     relatedTickers: ['005930', 'AAPL', 'NVDA']
   },
@@ -72,7 +72,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     descriptionZh: '净资产收益率（ROE）衡量公司利用股东投入的资本赚取利润的能力，是巴菲特最推崇的核心指标之一。',
     keyTakeawayKo: '부채를 과도하게 끌어써서 인위적으로 ROE를 끌어올린 레버리지 착시 현상을 주의해야 합니다.',
     keyTakeawayEn: 'Watch out for artificial ROE spikes caused by excessive debt leverage.',
-    relatedCalculatorUrl: '/tools/cagr-calculator',
+    relatedCalculatorUrl: '/tools/compound-calculator',
     relatedCalculatorLabelKo: '연평균 복리 성장률(CAGR) 계산기',
     relatedTickers: ['AAPL', 'MSFT', '005930']
   },
@@ -186,7 +186,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     descriptionZh: '复合年均增长率（CAGR）是指一项投资在特定时期内的年度复合收益率，能有效平滑短期市场波动。',
     keyTakeawayKo: '단순 산술평균 수익률에 속지 말고, 실제 자산 증식 속도를 측정하려면 반드시 CAGR을 계산해야 합니다.',
     keyTakeawayEn: 'Always use CAGR rather than arithmetic averages to measure realistic wealth compounding.',
-    relatedCalculatorUrl: '/tools/cagr-calculator',
+    relatedCalculatorUrl: '/tools/compound-calculator',
     relatedCalculatorLabelKo: 'CAGR 복리 수익률 계산기',
     relatedTickers: ['SPY', 'QQQ', 'AAPL']
   },
@@ -205,7 +205,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     descriptionZh: '每股收益（EPS）是公司净利润与总发行股数的比率，体现每一股所创造的纯利润。',
     keyTakeawayKo: 'EPS가 매년 우상향하는 기업은 경기 침체기에도 강력한 가격 결정력을 지닌 우량주일 확률이 높습니다.',
     keyTakeawayEn: 'Companies with consistently expanding EPS often possess strong pricing power.',
-    relatedCalculatorUrl: '/tools/cagr-calculator',
+    relatedCalculatorUrl: '/tools/compound-calculator',
     relatedCalculatorLabelKo: '기업 이익 복리 성장률 계산기',
     relatedTickers: ['NVDA', 'AAPL', '005930']
   },
@@ -262,7 +262,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     descriptionZh: '轧空是指股价意外暴涨迫使大量空头被迫平仓买入股票止损，从而进一步推升股价暴涨的连锁反应。',
     keyTakeawayKo: '숏스퀴즈로 인한 폭등은 펀더멘털과 무관한 수급 왜곡이므로 고점 추격 매수는 매우 위험합니다.',
     keyTakeawayEn: 'Avoid chasing peaks during short squeezes as prices rapidly mean-revert once covering ends.',
-    relatedCalculatorUrl: '/tools/cagr-calculator',
+    relatedCalculatorUrl: '/tools/compound-calculator',
     relatedCalculatorLabelKo: '수익률 변동 시뮬레이터',
     relatedTickers: ['GME', 'AMC', 'TSLA']
   },
@@ -300,7 +300,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     descriptionZh: '市值是指一家上市公司发行在外的所有股票按当前市场价格计算的总价值。',
     keyTakeawayKo: '주가 액면가가 낮아 보인다고 저렴한 주식이 아니며, 반드시 시가총액을 확인해야 합니다.',
     keyTakeawayEn: 'Never judge a stock\'s price cheapness by its nominal share price; look at market cap.',
-    relatedCalculatorUrl: '/tools/cagr-calculator',
+    relatedCalculatorUrl: '/tools/compound-calculator',
     relatedCalculatorLabelKo: '기업 가치 성장 시뮬레이터',
     relatedTickers: ['AAPL', 'MSFT', '005930']
   },
@@ -319,7 +319,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     descriptionZh: 'EBITDA指息税折旧摊销前利润，消除了不同税率、利息支出及折旧会计政策的影响，直观反映企业核心现金盈利能力。',
     keyTakeawayKo: '대규모 설비투자가 계속 필요한 장치산업에서는 설비 재투자 비용이 누락되므로 맹신을 주의해야 합니다.',
     keyTakeawayEn: 'Be cautious in capital-intensive industries where necessary CapEx is excluded.',
-    relatedCalculatorUrl: '/tools/cagr-calculator',
+    relatedCalculatorUrl: '/tools/compound-calculator',
     relatedCalculatorLabelKo: '기업 현금흐름 CAGR 계산기',
     relatedTickers: ['TSMC', '005930', 'AMZN']
   },
@@ -338,7 +338,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     descriptionZh: '企业价值倍数（EV/EBITDA）衡量收购整家公司所需的企业价值需要多少年核心经营利润来收回投资成本。',
     keyTakeawayKo: '순부채가 많은 기업도 부채 규모를 반영해 평가하므로 PER보다 더 엄밀한 인수가격 산정이 가능합니다.',
     keyTakeawayEn: 'Accounts for corporate debt structure better than traditional P/E ratios.',
-    relatedCalculatorUrl: '/tools/cagr-calculator',
+    relatedCalculatorUrl: '/tools/compound-calculator',
     relatedCalculatorLabelKo: '기업 가치 회수 기간 시뮬레이터',
     relatedTickers: ['005930', 'TSMC', 'AAPL']
   },
@@ -357,7 +357,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     descriptionZh: '营业利润率是营业利润与销售收入的比率，体现企业主营业务的定价权和成本控制能力。',
     keyTakeawayKo: '영업이익률이 꾸준히 20%를 넘는 기업은 동종 업계 경쟁자들을 압도하는 강력한 해자를 가지고 있습니다.',
     keyTakeawayEn: 'Margins consistently exceeding 20% indicate a robust competitive moat.',
-    relatedCalculatorUrl: '/tools/cagr-calculator',
+    relatedCalculatorUrl: '/tools/compound-calculator',
     relatedCalculatorLabelKo: '수익성 복리 시뮬레이터',
     relatedTickers: ['NVDA', 'MSFT', 'AAPL']
   },
@@ -376,7 +376,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     descriptionZh: '净利润率是最终归属于股东的净利润占营业收入的百分比，反映企业最终的盈利转化底线。',
     keyTakeawayKo: '일회성 자산 매각으로 일시적으로 튄 순이익률인지 지속 가능한 순이익인지 손익계산서를 확인해야 합니다.',
     keyTakeawayEn: 'Differentiate one-off asset sale windfalls from core recurring profitability.',
-    relatedCalculatorUrl: '/tools/cagr-calculator',
+    relatedCalculatorUrl: '/tools/compound-calculator',
     relatedCalculatorLabelKo: '순이익 성장률 계산기',
     relatedTickers: ['AAPL', 'GOOGL', '005930']
   },
@@ -490,7 +490,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     descriptionZh: '经营活动产生的现金流量净额反映企业核心业务实际收到的真金白银，是检验真实盈利质量的试金石。',
     keyTakeawayKo: '당기순이익은 큰데 영업현금흐름이 마이너스(-)라면 분식회계나 매출채권 회수 불능 위험을 의심해야 합니다.',
     keyTakeawayEn: 'Divergence between growing net income and negative OCF often signals accounting red flags.',
-    relatedCalculatorUrl: '/tools/cagr-calculator',
+    relatedCalculatorUrl: '/tools/compound-calculator',
     relatedCalculatorLabelKo: '현금 창출 복리 성장률 계산기',
     relatedTickers: ['AAPL', 'MSFT', 'AMZN']
   },
@@ -528,7 +528,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     descriptionZh: '定期定额定投（DCA）是指不择时机在固定周期投入固定金额购买资产，通过长期均摊拉低平均持仓成本。',
     keyTakeawayKo: '우상향하는 지수 ETF(S&P 500, 나스닥 100)와 결합했을 때 가장 강력한 자산 증식 효과를 발휘합니다.',
     keyTakeawayEn: 'Combines most powerfully with broad-market index ETFs with long-term upward trajectories.',
-    relatedCalculatorUrl: '/tools/cagr-calculator',
+    relatedCalculatorUrl: '/tools/compound-calculator',
     relatedCalculatorLabelKo: '적립식 복리 적금 & 투자 계산기',
     relatedTickers: ['SPY', 'VOO', 'QQQ']
   },
@@ -585,7 +585,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     descriptionZh: '贝塔系数衡量个股或投资组合相对于整体市场基准波动的敏感度和系统性风险。',
     keyTakeawayKo: '상승장에서는 고베타 성장주가 유리하고, 하락장이나 침체기에는 저베타 방어주가 자산을 지켜줍니다.',
     keyTakeawayEn: 'Deploy high-beta stocks in bull runs and low-beta defensives during market turmoil.',
-    relatedCalculatorUrl: '/tools/cagr-calculator',
+    relatedCalculatorUrl: '/tools/compound-calculator',
     relatedCalculatorLabelKo: '포트폴리오 변동성 시뮬레이터',
     relatedTickers: ['TSLA', 'NVDA', 'KO']
   },
@@ -604,7 +604,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     descriptionZh: '通货膨胀是指流通中的货币贬值导致的商品和劳务价格总体水平持续上涨，削弱实际购买力。',
     keyTakeawayKo: '단순 은행 예금은 인플레이션 세금에 의해 실질 자산이 매년 축소되므로 복리 자산 배분이 필수입니다.',
     keyTakeawayEn: 'Keeping idle cash guarantees purchasing power erosion against compounding inflation.',
-    relatedCalculatorUrl: '/tools/cagr-calculator',
+    relatedCalculatorUrl: '/tools/compound-calculator',
     relatedCalculatorLabelKo: '실질 복리 자산 가치 계산기',
     relatedTickers: ['SPY', 'GLD']
   },
@@ -680,7 +680,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     descriptionZh: '分批止盈是指在达到目标收益时逐步卖出部分持仓锁定利润，剩余仓位继续跟随主升浪趋势。',
     keyTakeawayKo: '원금을 회수한 상태에서 남은 물량으로 편안하게 복리 상승을 누리는 심리적 안정이 핵심입니다.',
     keyTakeawayEn: 'Taking off initial principal allows psychological tranquility to ride remainder runners.',
-    relatedCalculatorUrl: '/tools/cagr-calculator',
+    relatedCalculatorUrl: '/tools/compound-calculator',
     relatedCalculatorLabelKo: '복리 수익 보존 계산기',
     relatedTickers: ['NVDA', 'AAPL']
   },
@@ -737,7 +737,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     descriptionZh: '复利效应是指投资所得收益继续并入本金生息，随时间推移资产呈现指数级爆炸增长的规律。',
     keyTakeawayKo: '복리의 가장 위대한 조력자는 "시간"이므로 하루라도 일찍 투자를 시작하고 지속하는 것이 핵심입니다.',
     keyTakeawayEn: 'Time is compounding\'s greatest fuel; starting earlier yields dramatically superior wealth.',
-    relatedCalculatorUrl: '/tools/cagr-calculator',
+    relatedCalculatorUrl: '/tools/compound-calculator',
     relatedCalculatorLabelKo: '복리 계산기 바로가기',
     relatedTickers: ['VOO', 'SCHD']
   },
@@ -775,7 +775,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     descriptionZh: '交易型开放式指数基金（ETF）是一种跟踪特定指数并在证券交易所挂牌上市实时交易的基金，兼具分散与流动性。',
     keyTakeawayKo: '개별 기업 분석에 시간이 부족한 직장인에게는 S&P 500 및 나스닥 ETF 모아가기가 최선의 정답입니다.',
     keyTakeawayEn: 'Broad-market index ETFs represent the optimal default for busy retail investors.',
-    relatedCalculatorUrl: '/tools/cagr-calculator',
+    relatedCalculatorUrl: '/tools/compound-calculator',
     relatedCalculatorLabelKo: 'ETF 복리 투자 수익률 계산기',
     relatedTickers: ['SPY', 'QQQ', 'SCHD']
   },
@@ -832,7 +832,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     descriptionZh: '流动性陷阱是指央行无论如何降息增发货币，企业和居民依然选择持有现金而不愿消费投资的宏观停滞状态。',
     keyTakeawayKo: '유동성 함정기에는 현금 가치가 방어되는 반면 기업 이익은 정체되므로 배당 파이프라인의 견고성이 중요해집니다.',
     keyTakeawayEn: 'Focus on cash-rich monopolistic companies capable of preserving cash-flow during macro stagnation.',
-    relatedCalculatorUrl: '/tools/cagr-calculator',
+    relatedCalculatorUrl: '/tools/compound-calculator',
     relatedCalculatorLabelKo: '자산 보존 시뮬레이터',
     relatedTickers: ['TLT', 'GLD']
   },
@@ -851,7 +851,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     descriptionZh: '股票回购注销减少了市场流通股总量，直接提高每股收益（EPS），具有相较现金分红无需扣除股息税的节税优势。',
     keyTakeawayKo: '애플(AAPL)은 매년 수백억 달러 규모의 자사주 소각을 단행하여 주가의 장기 우상향을 이끌어왔습니다.',
     keyTakeawayEn: 'Apple demonstrates how systematic buybacks serve as a relentless structural engine for share appreciation.',
-    relatedCalculatorUrl: '/tools/cagr-calculator',
+    relatedCalculatorUrl: '/tools/compound-calculator',
     relatedCalculatorLabelKo: '주당순이익 복리 성장 계산기',
     relatedTickers: ['AAPL', 'GOOGL', 'NVDA']
   },
@@ -908,7 +908,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     descriptionZh: '短期国债收益率反超长期国债收益率的异常现象，被公认为过去半个世纪预测经济衰退最精准的先行指标。',
     keyTakeawayKo: '금리역전 자체보다, 역전이 해소되며 정상화되는 시점에 실제 경기 침체와 주가 조정이 본격화되는 패턴이 잦습니다.',
     keyTakeawayEn: 'Major stock market corrections historically cluster around the subsequent re-steepening un-inversion phase.',
-    relatedCalculatorUrl: '/tools/cagr-calculator',
+    relatedCalculatorUrl: '/tools/compound-calculator',
     relatedCalculatorLabelKo: '경기 사이클 자산배분 계산기',
     relatedTickers: ['TLT', 'SHY', 'SPY']
   },
@@ -946,7 +946,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     descriptionZh: '夏普比率衡量每承担一单位总风险所获得的超额投资回报，是衡量投资组合真实收益质量的标尺。',
     keyTakeawayKo: '수익률이 20%라도 변동성이 40%라면, 수익률 12%에 변동성 8%인 자산배분 전략보다 위험 대비 비효율적입니다.',
     keyTakeawayEn: 'Prioritize higher risk-adjusted efficiency rather than chasing raw unhedged returns.',
-    relatedCalculatorUrl: '/tools/cagr-calculator',
+    relatedCalculatorUrl: '/tools/compound-calculator',
     relatedCalculatorLabelKo: '자산 배분 샤프 지수 계산기',
     relatedTickers: ['SPY', 'QQQ']
   },
@@ -965,7 +965,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     descriptionZh: '复合年均增长率（CAGR）是衡量某项资产在特定多年度周期内按复利计算的几何平均年化回报率，有效消除短期波动偏差。',
     keyTakeawayKo: '장기 투자의 진정한 성과는 단순 누적 수익률이 아닌 CAGR과 MDD의 비율로 측정해야 합니다.',
     keyTakeawayEn: 'True long-term performance is governed by CAGR normalized against drawdown risks.',
-    relatedCalculatorUrl: '/tools/cagr-calculator',
+    relatedCalculatorUrl: '/tools/compound-calculator',
     relatedCalculatorLabelKo: 'CAGR 연평균 복리 계산기 바로가기',
     relatedTickers: ['SPY', 'QQQ', 'VOO']
   }

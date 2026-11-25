@@ -262,3 +262,8 @@ html:root .g2-balance { font-family: var(--g1-font-num); }
 @media (prefers-reduced-motion: reduce) {
   .mv-shell :is(button, [role='button'], a.inline-flex):active { transform: none; }
 }
+
+/* Contrast floor on the dark canvas (axe color-contrast, live audit 2026-11-25):
+   zinc-500 and dark:amber-700 text fell under 4.5:1 on #0c1020 panels. */
+.mv-shell main .text-zinc-500, .mv-shell main .text-zinc-600, .mv-shell main .text-slate-500 { color: var(--g1-muted); }
+.mv-shell main .dark\:text-amber-700, .mv-shell main .text-amber-700 { color: var(--g1-gold); }

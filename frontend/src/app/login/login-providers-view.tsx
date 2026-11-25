@@ -79,7 +79,7 @@ export async function LoginProvidersView({
           </form>
           <p className="text-sm text-[var(--g1-muted)]">
             처음이신가요?{' '}
-            <Link href="/register" prefetch={false} className="text-[var(--g1-gold)] hover:underline">
+            <Link href="/register" prefetch={false} className="inline-flex min-h-11 items-center font-semibold text-[var(--g1-violet)] underline underline-offset-4">
               회원가입
             </Link>
           </p>
