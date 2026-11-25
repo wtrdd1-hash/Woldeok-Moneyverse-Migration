@@ -37,6 +37,9 @@ Google의 소스 전용 추출 스킬을 프로젝트 내부에 설치하고 11�
 ## v2026.11.24.1321 — Multi-skill development installation / 개발 스킬 설치
 [Inventory and verification](../development/MULTI_SKILL_INSTALL_v2026.11.24.1321.ko.md). Existing Superpowers and release gates retained; no deployment or automatic schedule change.
 
+## v2026.11.24.1340 — Token-tool reference / Graphify development engine
+[Verification](../development/TOKEN_TOOL_REEL_REVIEW_v2026.11.24.1340.ko.md). Exact reel tools unverified; existing workflow and release gates unchanged.
+
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 
 ## v2026.11.21.2234 — AgentMemory 영상/도구 영구 참고 및 기록 공유 (PLANNING / 문서만)
