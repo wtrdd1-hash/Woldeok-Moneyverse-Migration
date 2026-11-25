@@ -81,7 +81,17 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String p = request.getRequestURI();
-        return !isMemberPrivatePath(p) && !isAdminDiagnosticsPath(p);
+        return !isMemberPrivatePath(p) && !isAdminDiagnosticsPath(p)
+                && !(isWrite(request) && isSessionOnlyWritePath(p));
+    }
+
+    /**
+     * Writes that checked the session but not the CSRF token (security review
+     * 2026-11-25). Only their writes are filtered; their public reads are not.
+     */
+    static boolean isSessionOnlyWritePath(String p) {
+        String n = p.startsWith("/app-api/") ? p.replaceFirst("^/app-api", "/api") : p;
+        return n.matches("^/api/(v1/)?(profile/image|collections/[^/]+|stocks/alerts(/[^/]+)?|privacy/requests|board/stock-posts)/?$");
     }
 
     @Override

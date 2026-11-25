@@ -42,10 +42,9 @@ public class DiscordController {
 
     @PostMapping("/announcements")
     public ResponseEntity<Map<String, Object>> dispatchAnnouncement(@RequestBody(required = false) Map<String, Object> body) {
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("dispatchedAt", new Date().toInstant().toString());
-        res.put("targetChannelId", body != null ? body.get("channelId") : "1023470382965080084");
-        return ResponseEntity.ok(res);
+        // Security review 2026-11-25: this answered success with a dispatch time while sending
+        // nothing, to anyone. No announcement is sent from this route; say so.
+        return ResponseEntity.status(503).body(Map.of("success", false, "code", "DISCORD_ANNOUNCEMENT_NOT_AVAILABLE",
+                "message", "Announcements are not sent from this endpoint"));
     }
 }
