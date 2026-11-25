@@ -33,7 +33,7 @@ public class ProgressionController {
         }
     }
 
-    @GetMapping({"", "/", "/status"})
+    @GetMapping("/status")
     @Operation(summary = "유저 성장 단계 및 업적 요약 조회")
     public ResponseEntity<ProgressionStatusResponse> status(
             @RequestHeader(value = "X-User-Id", required = false) String xUserId,
@@ -63,13 +63,4 @@ public class ProgressionController {
         return ResponseEntity.ok(progressionService.creditStatus(userId));
     }
 
-    @GetMapping("/early-game")
-    @Operation(summary = "초심자 온보딩 가이드 및 퀘스트 상태 조회")
-    public ResponseEntity<EarlyGameStatusResponse> earlyGame(
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId,
-            @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId
-    ) {
-        UUID userId = resolveUserUuid(xUserId, xActorUserId);
-        return ResponseEntity.ok(progressionService.earlyGameStatus(userId));
-    }
 }

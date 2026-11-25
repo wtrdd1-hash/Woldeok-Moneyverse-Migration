@@ -49,6 +49,7 @@ dependencies {
 
     // Database
     runtimeOnly("org.postgresql:postgresql") // version from extra["postgresql.version"]
+    testImplementation("org.postgresql:postgresql") // PGobject in row-shape tests
     testImplementation("com.h2database:h2:2.3.232")
 
     // OpenAPI 3.0 / Swagger UI
