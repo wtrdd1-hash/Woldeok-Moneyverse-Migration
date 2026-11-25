@@ -93,6 +93,18 @@ NestJS 원본이 없는 11개(연금 일부, board/stock-posts 쿼리, bonds rol
 - 계획: ① Spring 직접 DML 사용처 전수 ② 최소 권한 마이그레이션을 Test 에서 검증 ③ 소유자 승인 후 운영. 이 작업 체크리스트에 추가.
 - [ ] 앱 역할 최소 권한 복원(Test 우선)
 
+## 치명 보안 결함 — 헤더로 회원 지정 + 원장 밖 지급 (2026-11-25)
+
+- POST /seasons/rewards/claim, /marketplace/listings(+/{id}/buy), /bonds/subscribe, /bonds/repo-loans/{borrow,repay},
+  /arena/rooms(+join, cancel), /market/secret-auction/{id}/bid 가 세션 필터 밖에서 x-user-id 헤더(없으면 고정 회원)로 회원을 정함.
+  시즌 수령은 요청마다 wallets 에 10,000 WLD 를 원장 없이 직접 더하고 "원장 검증 통과"라고 응답(DB 의 season_claim_reward 는 정산 불가로 거절하는데 우회).
+- 운영 jar(빌드 출처 unverified, 2026-11-23)에 같은 코드가 있음을 읽기 전용으로 확인. 운영 nginx 의 /api/ 는 x-user-id 를 지우지 않음.
+- 수정(6d04dc6d8a): 전부 세션+CSRF 후 503(원장 경로 생길 때까지), wallets 지급 코드 삭제, 모든 컨트롤러 스캔하는 회귀 테스트. Spring 전체 테스트 통과.
+- Test 실측(6d04dc6d8a 배포): 8개 경로 모두 위조 헤더로도 401, 공개 조회 200.
+- 운영 긴급 차단: 소유자 승인(“긴급 수정부터”) 후 nginx POST 차단을 시도했으나 자동 모드 안전장치가 운영 변경을 거절 → 미적용. 검토된 스크립트를 소유자 실행용으로 준비(롤백 포함).
+- [ ] 운영 nginx 긴급 차단 적용
+- [ ] 수정 Spring 운영 승격(RELEASING 절차: 백업 jar, 기동 확인, 롤백 경로)
+
 ## 교차 검토 기록
 
 - 2026-11-25 Codex: 사용 한도로 11-27 13:57 까지 불가(실측). Gemini: 기본 모델 일일 한도 소진, gemini-3.5-flash-lite 응답 확인(PONG).
