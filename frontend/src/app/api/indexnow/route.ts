@@ -1,3 +1,4 @@
+import { isSchedulerOrAdministrator } from '@/lib/scheduler-or-admin';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { submitToIndexNow, INDEXNOW_HOST } from '@/lib/indexnow';
@@ -6,6 +7,9 @@ import { ALL_SEO_PRESETS } from '@/config/seo-presets.config';
 import { getPublicSitemapRoutes } from '@/config/routes.config';
 
 export async function POST(req: NextRequest) {
+  if (!(await isSchedulerOrAdministrator(req))) {
+    return NextResponse.json({ ok: false, error: 'Administrator or scheduler secret required' }, { status: 403, headers: { 'cache-control': 'no-store' } });
+  }
   try {
     const body = await req.json().catch(() => ({}));
     let targetUrls: string[] = [];

@@ -25,11 +25,19 @@ class Nov18SharedStyleContractTest {
         long navigationPages = 0;
         for (Path page : pages) {
             String html = Files.readString(page, StandardCharsets.UTF_8);
-            assertTrue(html.contains("href=\"/css/mv-theme-nov18.css\""), page + " missing shared palette");
+            // login.html was rewritten by the OAuth restore (#3365, 2026-11-22) and
+            // carries its own stylesheet; the Nov18 palette/shell files are an
+            // archived authority there. Its dock must still keep five tabs.
+            boolean nov18Styled = !page.getFileName().toString().equals("login.html");
+            if (nov18Styled) {
+                assertTrue(html.contains("href=\"/css/mv-theme-nov18.css\""), page + " missing shared palette");
+            }
             if (html.contains("class=\"mobile-bottom-dock\"")) {
                 navigationPages++;
-                assertTrue(html.contains("href=\"/css/mv-shell-nov18.css\""), page + " missing the shared desktop/mobile shell");
-                assertTrue(html.contains("class=\"home-sidebar\""), page + " missing desktop shell");
+                if (nov18Styled) {
+                    assertTrue(html.contains("href=\"/css/mv-shell-nov18.css\""), page + " missing the shared desktop/mobile shell");
+                    assertTrue(html.contains("class=\"home-sidebar\""), page + " missing desktop shell");
+                }
                 String dock = html.substring(html.indexOf("class=\"mobile-bottom-dock\""));
                 dock = dock.substring(0, dock.indexOf("</nav>"));
                 assertEquals(5, dock.split("<a ", -1).length - 1, page + " must retain the five mobile tabs");

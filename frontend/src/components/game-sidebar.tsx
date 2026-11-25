@@ -2,160 +2,142 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useViewer } from '@/lib/use-viewer';
-import type { Viewer } from '@/lib/viewer-state';
+import {
+  Calculator,
+  FileText,
+  History,
+  Home,
+  Landmark,
+  LayoutDashboard,
+  LifeBuoy,
+  MessageCircle,
+  ScrollText,
+  ShieldCheck,
+  ShoppingBag,
+  TrendingUp,
+  UserRound,
+  Users,
+  Wallet,
+  type LucideIcon,
+} from 'lucide-react';
+import {
+  D180_ADMIN_NAV,
+  D180_MEMBER_NAV,
+  V10_ACCOUNT_ITEM,
+  isAdminItemActive,
+  isNavItemActive,
+  type D180AdminIcon,
+  type V10Icon,
+} from '@/components/v10-nav';
+import { useMountedViewer } from '@/components/use-mounted-viewer';
+import { isAdministrator } from '@/lib/viewer-state';
 
-interface NavItem {
-  readonly label: string;
-  readonly href: string;
-  readonly icon: React.ReactNode;
+export const V10_ICONS: Record<V10Icon, LucideIcon> = {
+  home: Home,
+  wallet: Wallet,
+  bank: Landmark,
+  invest: TrendingUp,
+  quest: ScrollText,
+  shop: ShoppingBag,
+  community: Users,
+  support: MessageCircle,
+  tools: Calculator,
+  account: UserRound,
+};
+
+const ADMIN_ICONS: Record<D180AdminIcon, LucideIcon> = {
+  overview: LayoutDashboard,
+  members: UserRound,
+  economy: Landmark,
+  shop: ShoppingBag,
+  content: FileText,
+  support: LifeBuoy,
+  security: ShieldCheck,
+  audit: History,
+};
+
+/** DESIGN180 nav row: 44px target, 8px radius, active = raised violet wash. */
+const ITEM =
+  'group flex min-h-11 items-center gap-3 rounded-lg px-3 text-[13px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--g1-violet)]';
+const ON = 'bg-[var(--g1-plum-3)] font-bold text-[var(--g1-ink)]';
+const OFF = 'text-[var(--g1-muted)] hover:bg-[var(--g1-plum)] hover:text-[var(--g1-ink)]';
+
+function Row({ href, label, Icon, active }: { href: string; label: string; Icon: LucideIcon; active: boolean }) {
+  return (
+    <Link
+      href={href}
+      // Sibling routes may still be served by the Spring presentation, which
+      // answers RSC prefetches with 406; a plain navigation is always correct.
+      prefetch={false}
+      aria-current={active ? 'page' : undefined}
+      className={`${ITEM} ${active ? ON : OFF}`}
+    >
+      <Icon className="size-[18px] shrink-0" aria-hidden />
+      <span>{label}</span>
+    </Link>
+  );
 }
 
+/**
+ * DESIGN180 sidebar (PR #3443; spec docs/superpowers/specs/2026-11-24-design180-next-implementation.md).
+ * Members see the community navigation; a server-reported administrator on an
+ * /admin route sees the separate administrator navigation. The /admin layout
+ * still gates every request on the server.
+ */
 export function GameSidebar() {
-  const pathname = usePathname();
-  const rawViewer = useViewer();
-  const viewer = (rawViewer && typeof rawViewer === 'object' && 'viewer' in rawViewer ? (rawViewer as { viewer: Viewer | null }).viewer : rawViewer) as Viewer | null;
-
-  const navItems: NavItem[] = [
-    {
-      label: '홈',
-      href: '/',
-      icon: (
-        <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-          <line x1="9" y1="9" x2="15" y2="15" />
-          <line x1="15" y1="9" x2="9" y2="15" />
-        </svg>
-      ),
-    },
-    {
-      label: '지갑',
-      href: '/wallet',
-      icon: (
-        <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="3" y="5" width="18" height="14" rx="2" />
-          <circle cx="16" cy="12" r="2" />
-        </svg>
-      ),
-    },
-    {
-      label: '은행',
-      href: '/bank',
-      icon: (
-        <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M4 10v7h3v-7H4zm6 0v7h3v-7h-3zM2 22h19v-3H2v3zm14-12v7h3v-7h-3zm-4.5-9L2 6v2h19V6l-9.5-5z" />
-        </svg>
-      ),
-    },
-    {
-      label: '투자',
-      href: '/stocks',
-      icon: (
-        <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <line x1="7" y1="17" x2="17" y2="7" />
-          <polyline points="7 7 17 7 17 17" />
-        </svg>
-      ),
-    },
-    {
-      label: '퀘스트',
-      href: '/quests',
-      icon: (
-        <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-          <line x1="9" y1="15" x2="15" y2="9" />
-          <line x1="9" y1="9" x2="15" y2="15" />
-        </svg>
-      ),
-    },
-    {
-      label: '상점',
-      href: '/shop',
-      icon: (
-        <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-          <line x1="3" y1="6" x2="21" y2="6" />
-          <path d="M16 10a4 4 0 0 1-8 0" />
-        </svg>
-      ),
-    },
-    {
-      label: '커뮤니티',
-      href: '/board',
-      icon: (
-        <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <circle cx="12" cy="12" r="4" />
-        </svg>
-      ),
-    },
-    {
-      label: '문의·채팅',
-      href: '/support',
-      icon: (
-        <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-        </svg>
-      ),
-    },
-  ];
-
-  const isAccountActive = pathname === '/account' || pathname === '/login' || pathname.startsWith('/auth');
+  const pathname = usePathname() ?? '/';
+  const viewer = useMountedViewer();
+  const admin = viewer ? isAdministrator(viewer) : false;
+  const adminView = admin && (pathname === '/admin' || pathname.startsWith('/admin/'));
 
   return (
-    <aside className="w-[230px] min-w-[230px] bg-[#0c0c16] border-r border-[#1f1d38] flex flex-col justify-between p-5 min-h-screen text-[#8c88ab]">
-      <div>
-        {/* Brand Logo & Title */}
-        <Link href="/" className="flex items-center gap-3 mb-8 px-1">
-          <div className="w-9 h-9 rounded-xl bg-[#1a1738] border border-[#6b4ec2] flex items-center justify-center shadow-[0_0_15px_rgba(107,78,194,0.4)]">
-            {/* Real Favicon Pixel Logo */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/favicon.ico" alt="W" className="w-6 h-6 object-contain" />
+    <aside
+      className="sticky top-0 flex h-screen w-[224px] min-w-[224px] flex-col border-r border-[var(--g1-line)] bg-[var(--g1-night-2)] px-3.5 pb-4 pt-6"
+      aria-label="월덕 머니버스"
+    >
+      <Link href="/" prefetch={false} className="mb-6 flex items-center gap-2.5 px-2" aria-label="월덕 머니버스 홈">
+        {/* The real favicon is the only brand mark. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/favicon.ico" alt="" width={34} height={34} className="size-[34px] rounded-[9px]" />
+        <span className="flex flex-col leading-tight">
+          <span className="text-base font-bold tracking-[-0.03em] text-[var(--g1-ink)]">월덕 머니버스</span>
+          <span className="text-[10px] text-[var(--g1-muted)]">월덕 커뮤니티</span>
+        </span>
+      </Link>
+
+      {adminView ? (
+        <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto" aria-label="관리자 메뉴">
+          <p className="px-3 pb-1.5 text-[11px] text-[var(--g1-faint)]">관리자</p>
+          {D180_ADMIN_NAV.map((item) => (
+            <Row key={item.href} href={item.href} label={item.label} Icon={ADMIN_ICONS[item.icon]} active={isAdminItemActive(item, pathname)} />
+          ))}
+          <div className="mt-4 border-t border-[var(--g1-line)] pt-3">
+            <Row href="/" label="회원 화면으로" Icon={Home} active={false} />
           </div>
-          <span className="font-extrabold text-white text-base tracking-tight">W Moneyverse</span>
-        </Link>
-
-        {/* 8 Primary Navigation Links */}
-        <nav className="flex flex-col gap-1.5" aria-label="메인 내비게이션">
-          {navItems.map((item) => {
-            const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                  isActive
-                    ? 'bg-[#3b2d6a] text-white font-bold shadow-[0_0_15px_rgba(59,45,106,0.4)]'
-                    : 'hover:bg-[#16152b] hover:text-[#d0c8f0]'
-                }`}
-              >
-                {item.icon}
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-
-          {/* 9. 내 계정 / 로그인 */}
-          <Link
-            href={viewer?.signedIn ? '/account' : '/login'}
-            className={`flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all mt-1 ${
-              isAccountActive
-                ? 'bg-[#3b2d6a] text-white font-bold shadow-[0_0_15px_rgba(59,45,106,0.4)]'
-                : 'hover:bg-[#16152b] hover:text-[#d0c8f0]'
-            }`}
-          >
-            <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-            </svg>
-            <span>내 계정</span>
-          </Link>
         </nav>
-      </div>
+      ) : (
+        <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto" aria-label="메인 메뉴">
+          <p className="px-3 pb-1.5 text-[11px] text-[var(--g1-faint)]">내 머니버스</p>
+          {D180_MEMBER_NAV.map((item) => (
+            <Row key={item.href} href={item.href} label={item.label} Icon={V10_ICONS[item.icon]} active={isNavItemActive(item, pathname)} />
+          ))}
+          <Row
+            href={viewer?.signedIn ? '/account' : '/login'}
+            label={V10_ACCOUNT_ITEM.label}
+            Icon={V10_ICONS.account}
+            active={isNavItemActive(V10_ACCOUNT_ITEM, pathname)}
+          />
+          {admin && (
+            <div className="mt-4 border-t border-[var(--g1-line)] pt-3">
+              <Row href="/admin" label="관리자 콘솔" Icon={ShieldCheck} active={false} />
+            </div>
+          )}
+        </nav>
+      )}
 
-      {/* Sidebar Footer Caption */}
-      <div className="pt-4 border-t border-[#1f1d38]/80 text-[11px] text-[#555577] tracking-wider font-mono">
-        게임 세계 · 금융과 경험
-      </div>
+      <p className="border-t border-[var(--g1-line)] px-2.5 pt-3.5 text-[11px] leading-relaxed text-[var(--g1-faint)]">
+        {adminView ? '권한이 확인된 운영자 전용' : '함께 만드는 가상 경제'}
+      </p>
     </aside>
   );
 }

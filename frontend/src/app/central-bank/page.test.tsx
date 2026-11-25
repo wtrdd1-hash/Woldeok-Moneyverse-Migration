@@ -64,13 +64,14 @@ describe('PublicCentralBankPage', () => {
     expect(metadata.robots).toEqual({ index: true, follow: true });
   });
 
-  it('renders gracefully with fallback defaults when publicApi returns null', async () => {
+  it('shows 확인 불가, never invented defaults, when publicApi returns null', async () => {
     publicApiMock.mockResolvedValue(null);
 
     const html = renderToStaticMarkup(await PublicCentralBankPage());
     expect(html).toContain('한국은행 금융통화위원회 통화정책 공시');
-    expect(html).toContain('3.50%');
-    expect(html).toContain('7.00%');
-    expect(html).toContain('0 WLD');
+    expect(html).toContain('확인 불가');
+    expect(html).not.toContain('3.50%');
+    expect(html).not.toContain('7.00%');
+    expect(html).not.toContain('0 WLD');
   });
 });

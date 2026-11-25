@@ -890,7 +890,7 @@ nav {
 
 /* The global viewport shield must not undo the 1440px desktop content cap. */
 .moneyverse-main {
-  max-width: min(100%, 1440px) !important;
+  max-width: min(100%, 1240px) !important;
 }
 
 img,
@@ -1016,4 +1016,16 @@ iframe {
 .toss-card-primary:hover {
   border-color: rgba(16, 185, 129, 0.4);
   box-shadow: 0 16px 40px -4px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(16, 185, 129, 0.25);
+}
+
+/* Support panel open on a wide screen: shift the page left of the 380px panel
+   rather than drawing over it (QA 2026-11-25). Narrow screens keep the overlay. */
+@media (min-width: 1280px) {
+  html[data-support-open] .moneyverse-main {
+    margin-right: max(1.5rem, calc(380px + 3rem - (100vw - 224px - 1240px) / 2));
+    transition: margin-right 200ms ease-out;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-support-open] .moneyverse-main { transition: none; }
 }

@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Tag(name = "Marketplace", description = "플레이어 간 아이템 및 자산 거래 P2P 마켓플레이스 API")
 @RestController
-@RequestMapping("/api/marketplace")
+@RequestMapping({"/api/marketplace", "/api/v1/marketplace"})
 public class MarketplaceController {
 
     private final MarketplaceService marketplaceService;

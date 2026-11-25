@@ -51,42 +51,37 @@ public class CentralBankService {
 
     @Transactional(readOnly = true)
     public Map<String, Object> getBaseRate() {
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("baseRateBps", 350);
-        res.put("baseRatePercent", "3.50%");
-        res.put("taylorRuleRatePercent", "3.65%");
-        res.put("disclosedAt", "2026-11-14T07:00:00Z");
-        return res;
+        // Source-truth gate (QA 2026-11-25): this method returned hard-coded
+        // figures or claimed a write it never made. Unavailable until it is
+        // backed by the database; never a fabricated answer.
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "CENTRALBANK_CANONICAL_SOURCE_UNAVAILABLE");
     }
 
     @Transactional
     public Map<String, Object> updateBaseRate(Integer baseRateBps, String reason, String actorId) {
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("baseRateBps", baseRateBps);
-        res.put("reason", reason);
-        res.put("actorId", actorId);
-        res.put("message", "국가 기준금리가 성공적으로 갱신 고시되었습니다.");
-        return res;
+        // Source-truth gate (QA 2026-11-25): this method returned hard-coded
+        // figures or claimed a write it never made. Unavailable until it is
+        // backed by the database; never a fabricated answer.
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "CENTRALBANK_CANONICAL_SOURCE_UNAVAILABLE");
     }
 
     @Transactional(readOnly = true)
     public Map<String, Object> getReserveRequirement() {
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("reserveRatioBps", 700);
-        res.put("reserveRatioPercent", "7.00%");
-        res.put("effectiveDate", "2026-11-14");
-        return res;
+        // Source-truth gate (QA 2026-11-25): this method returned hard-coded
+        // figures or claimed a write it never made. Unavailable until it is
+        // backed by the database; never a fabricated answer.
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "CENTRALBANK_CANONICAL_SOURCE_UNAVAILABLE");
     }
 
     @Transactional
     public Map<String, Object> updateReserveRequirement(Integer ratioBps, String reason, String actorId) {
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("reserveRatioBps", ratioBps);
-        res.put("reason", reason);
-        res.put("actorId", actorId);
-        res.put("message", "상업은행 법정 지급준비율이 성공적으로 공시되었습니다.");
-        return res;
+        // Source-truth gate (QA 2026-11-25): this method returned hard-coded
+        // figures or claimed a write it never made. Unavailable until it is
+        // backed by the database; never a fabricated answer.
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "CENTRALBANK_CANONICAL_SOURCE_UNAVAILABLE");
     }
 }

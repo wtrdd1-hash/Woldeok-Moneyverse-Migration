@@ -399,7 +399,7 @@ export default async function GuidePage() {
                 </Link>
               </Button>
               <Button asChild variant="outline" size="sm" className="h-9 text-xs font-bold rounded-xl border-slate-700 text-slate-300 hover:text-slate-100 flex-1">
-                <Link href="/tools/compound-interest">
+                <Link href="/tools/compound-calculator">
                   <span>복리 계산기</span>
                 </Link>
               </Button>

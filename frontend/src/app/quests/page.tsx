@@ -7,6 +7,7 @@ import { apiOrNull } from '@/lib/api';
 import { requireMember } from '@/lib/session';
 import type { FirstDayStep, TodayEvent } from './early-events';
 import { firstDaySummary } from './early-events';
+import { isEarlyGameBoard, isEngagementBoard, readFirstDaySteps, readTodayEvent } from './early-events-reader';
 import { FirstDayFlow, TodayEventCard } from './early-events-parts';
 import type { EarlyGameBoard } from './early-game';
 import { CollectionCard, WeeklyGoalCard } from './early-game-parts';
@@ -69,10 +70,15 @@ export default async function QuestsPage() {
   // 101 computes every figure in it from work receipts, shop purchases and
   // ledger postings rather than from anything a member reported.
   const [board, earlyGame, today, firstDay, rawVipChest] = await Promise.all([
-    apiOrNull<EngagementBoard>('/api/v1/engagement'),
-    apiOrNull<EarlyGameBoard>('/api/v1/engagement/early-game'),
-    apiOrNull<{ event: TodayEvent | null }>('/api/v1/early-game/today'),
-    apiOrNull<{ steps: readonly FirstDayStep[] }>('/api/v1/early-game/first-day'),
+    // Spring answers /engagement with a streak status, not the dashboard: only
+    // a body with the dashboard's own arrays is read (2026-11-25 regression).
+    apiOrNull<unknown>('/api/v1/engagement').then((raw) => (isEngagementBoard(raw) ? raw : null)),
+    apiOrNull<unknown>('/api/v1/engagement/early-game').then((raw) => (isEarlyGameBoard(raw) ? raw : null)),
+    apiOrNull<unknown>('/api/v1/early-game/today').then(readTodayEvent),
+    apiOrNull<unknown>('/api/v1/early-game/first-day').then((raw) => {
+      const steps = readFirstDaySteps(raw);
+      return steps ? { steps } : null;
+    }),
     apiOrNull<unknown>('/api/v1/engagement/dopamine/vip-chest/status'),
   ]);
 

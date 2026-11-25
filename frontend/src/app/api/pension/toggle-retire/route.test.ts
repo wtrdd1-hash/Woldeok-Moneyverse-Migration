@@ -31,7 +31,7 @@ describe('Pension retirement browser gateway CSRF boundary', () => {
     const response = await POST(post('https://easy-scraping.com'));
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ status: 'RETIRED_RECEIVING' });
-    expect(mutate).toHaveBeenCalledWith('/api/v1/pension/toggle-retire', { method: 'POST' });
+    expect(mutate).toHaveBeenCalledWith('/api/v1/pension/toggle-retirement', { method: 'POST' });
     expect(api).not.toHaveBeenCalled();
   });
 });

@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Tag(name = "Central Bank", description = "以묒븰????듯솕??吏??諛?湲곗?湲덈━/吏湲됱?鍮꾩쑉 ?뺤콉 API")
 @RestController
-@RequestMapping("/api/central-bank")
+@RequestMapping({"/api/central-bank", "/api/v1/central-bank"})
 public class CentralBankController {
 
     private final CentralBankService centralBankService;

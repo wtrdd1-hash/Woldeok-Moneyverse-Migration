@@ -88,9 +88,10 @@ public class Phase12TradingAndDerivativesIntegrationTest {
     @Test
     @DisplayName("7. 종목 토론방 공개 목록 조회 200 OK 및 비인가 작성 401 차단")
     void testStockCommunityController() throws Exception {
+        // QA 2026-11-25: the public list was one hard-coded post ("stock-post-01");
+        // the DB-backed list is /api/v1/board/stock-posts. This placeholder is 503.
         mockMvc.perform(get("/board/public/stock-posts"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.posts").isArray());
+                .andExpect(status().isServiceUnavailable());
 
         mockMvc.perform(post("/board/stock-posts")
                         .contentType(MediaType.APPLICATION_JSON)

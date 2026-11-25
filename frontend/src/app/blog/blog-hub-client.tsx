@@ -146,11 +146,11 @@ export function BlogHubClient({ initialPosts, locale = 'ko' }: Props) {
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <span className="font-semibold text-foreground">{featuredPost.author.name}</span>
               <span>·</span>
-              <span className="font-mono">{new Date(featuredPost.publishedAt).toLocaleDateString('ko-KR')}</span>
+              <span className="font-mono">{new Date(featuredPost.publishedAt).toLocaleDateString('ko-KR',{timeZone:'Asia/Seoul'})}</span>
               {shouldShowReadership(featuredPost) && <>
                 <span>·</span>
                 <span className="font-mono flex items-center gap-1">
-                  <Eye className="size-3" /> {featuredPost.views.toLocaleString()}회
+                  <Eye className="size-3" /> {featuredPost.views.toLocaleString('en-US')}회
                 </span>
               </>}
             </div>
@@ -239,7 +239,7 @@ export function BlogHubClient({ initialPosts, locale = 'ko' }: Props) {
 
                   <div className="pt-2 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground">
                     <span className="font-mono text-[11px]">
-                      {new Date(post.publishedAt).toLocaleDateString('ko-KR')}
+                      {new Date(post.publishedAt).toLocaleDateString('ko-KR',{timeZone:'Asia/Seoul'})}
                     </span>
                     <Link
                       href={blogUrl(post.slug,locale).replace("https://easy-scraping.com","")}

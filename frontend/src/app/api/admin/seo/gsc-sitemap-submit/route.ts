@@ -1,6 +1,8 @@
+import { NextResponse } from 'next/server';
 import { ApiError } from '@/lib/api';
 import { mutate } from '@/lib/mutate';
 import { seoResponse, verifySeoOperator, verifySeoWriteOrigin } from '@/lib/admin-seo-authority';
+import { isSameOriginFinanceMutation } from '@/lib/finance-mutation-origin';
 
 export const dynamic = 'force-dynamic';
 
@@ -78,6 +80,10 @@ function verifiedGscReceipt(input: unknown, requestedSitemap: string): VerifiedG
 
 /** Delegate the actual GSC submission to the authenticated+CSRF-protected Nest endpoint. */
 export async function POST(req: Request) {
+  // Shared same-origin guard (independent review 2026-11-25).
+  if (!isSameOriginFinanceMutation(req)) {
+    return NextResponse.json({ error: 'Forbidden request' }, { status: 403, headers: { 'cache-control': 'private, no-store' } });
+  }
   const wrongOrigin = verifySeoWriteOrigin(req);
   if (wrongOrigin) return wrongOrigin;
   const denied = await verifySeoOperator();

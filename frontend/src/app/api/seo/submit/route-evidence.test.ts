@@ -7,7 +7,7 @@ vi.mock('@/lib/mutate', () => ({ mutate: vi.fn() }));
 
 afterEach(() => vi.resetAllMocks());
 const request = () => new NextRequest('http://localhost/api/seo/submit', {
-  method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}',
+  method: 'POST', headers: { origin: 'http://localhost',  'content-type': 'application/json' }, body: '{}',
 });
 
 describe('SEO submission gateway receipt contract', () => {

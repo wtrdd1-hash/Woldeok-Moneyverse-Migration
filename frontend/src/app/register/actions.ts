@@ -76,6 +76,14 @@ export async function submitLocalRegister(formData: FormData): Promise<never> {
     if (error instanceof ApiError && error.status === 403) {
       redirect('/register?error=policy_or_password_violation');
     }
+    // The Spring API has no consent endpoint yet (404) and deliberately
+    // refuses local sign-up (503 LOCAL_REGISTRATION_CONTRACT_UNAVAILABLE)
+    // until consent and age are persisted with the account. Say so plainly
+    // instead of "try again later", which no retry could ever satisfy; never
+    // continue to register without a recorded consent.
+    if (error instanceof ApiError && (error.status === 404 || error.status === 503)) {
+      redirect('/register?error=local_registration_unavailable');
+    }
     redirect('/register?error=registration_failed');
   }
 }

@@ -24,8 +24,10 @@ export function getBlogAdPlan(blockCount: number): {
 
 
 /** Real ad disclosure, never a synthetic filled creative or gameplay CTA. */
-export function publicAdDisclosure(pathname: string | null): string {
-  const locale = pathname?.match(/^\/(en|ko|ja|zh|vi)(?:\/|$)/)?.[1] || 'en';
+export function publicAdDisclosure(pathname: string | null, selectedLocale?: string): string {
+  // A path prefix wins; an unprefixed path follows the viewer's selected
+  // language (Korean by default), so the Korean home no longer says "Advertisement".
+  const locale = pathname?.match(/^\/(en|ko|ja|zh|vi)(?:\/|$)/)?.[1] || selectedLocale || 'en';
   const labels: Record<string, string> = {
     en: 'Advertisement',
     ko: '광고',

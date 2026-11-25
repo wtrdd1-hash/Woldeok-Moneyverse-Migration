@@ -51,7 +51,7 @@ describe('Admin Mint Bureau BFF Routes', () => {
 
   it('rejects unsupported TREASURY envelope in policy proposal before any backend mutation', async () => {
     const req = {
-      headers: new Headers(),
+      url: 'http://localhost/api/admin/mint', headers: new Headers({ origin: 'http://localhost' }),
       json: async () => ({ order_type: 'MINT', target_envelope: 'TREASURY',
         max_amount_wld: '10000000', reason: '운영 국고 증액 정책 발의 감사 사유', valid_duration_hours: 72 }),
     } as never;
@@ -64,7 +64,7 @@ describe('Admin Mint Bureau BFF Routes', () => {
   it('accepts a supported policy proposal using existing DB constraints', async () => {
     vi.mocked(mutate).mockResolvedValueOnce({ id: 'new-policy-1' } as never);
     const req = {
-      headers: new Headers(),
+      url: 'http://localhost/api/admin/mint', headers: new Headers({ origin: 'http://localhost' }),
       json: async () => ({ order_type: 'MINT', target_envelope: 'WORK_REWARD',
         max_amount_wld: '10000000', reason: '승인 가능한 작업 보상 한도 정책', valid_duration_hours: 72 }),
     } as never;
@@ -76,7 +76,7 @@ describe('Admin Mint Bureau BFF Routes', () => {
 
   it('accepts a separate new Treasury issuance policy but rejects unsupported generic TREASURY', async () => {
     vi.mocked(mutate).mockResolvedValueOnce({ id: 'new-policy-treasury' } as never);
-    const req = { headers: new Headers(), json: async () => ({order_type:'MINT',
+    const req = { url: 'http://localhost/api/admin/mint', headers: new Headers({ origin: 'http://localhost' }), json: async () => ({order_type:'MINT',
       target_envelope:'TREASURY_ISSUANCE',max_amount_wld:'1000000',
       reason:'관리자 국고 발행 승인 정책 감사 사유 충분합니다',valid_duration_hours:24}) } as never;
     const res = await ordersRoute.POST(req);
@@ -127,7 +127,7 @@ describe('Admin Mint Bureau BFF Routes', () => {
   it('POST execute-mint executes authorized mint via backend', async () => {
     vi.mocked(mutate).mockResolvedValueOnce({ id: 'cert-123', amount_wld: '100000' } as never);
     const req = {
-      headers: new Headers(),
+      url: 'http://localhost/api/admin/mint', headers: new Headers({ origin: 'http://localhost' }),
       json: async () => ({
         policy_order_id: 'order-1',
         amount_wld: '100000',
@@ -148,7 +148,7 @@ describe('Admin Mint Bureau BFF Routes', () => {
   it('POST execute-retire executes retirement via backend', async () => {
     vi.mocked(mutate).mockResolvedValueOnce({ id: 'retire-cert-1', amount_wld: '50000' } as never);
     const req = {
-      headers: new Headers(),
+      url: 'http://localhost/api/admin/mint', headers: new Headers({ origin: 'http://localhost' }),
       json: async () => ({
         policy_order_id: null,
         amount_wld: '50000',
@@ -170,7 +170,7 @@ describe('Admin Mint Bureau BFF Routes', () => {
   it('POST freeze toggles freeze or unfreeze correctly', async () => {
     vi.mocked(mutate).mockResolvedValueOnce({ is_issuance_frozen: true } as never);
     const freezeReq = {
-      headers: new Headers(),
+      url: 'http://localhost/api/admin/mint', headers: new Headers({ origin: 'http://localhost' }),
       json: async () => ({ freeze: true, reason: '긴급 동결' }),
     } as never;
     const freezeRes = await freezeRoute.POST(freezeReq);
@@ -179,7 +179,7 @@ describe('Admin Mint Bureau BFF Routes', () => {
 
     vi.mocked(mutate).mockResolvedValueOnce({ is_issuance_frozen: false } as never);
     const unfreezeReq = {
-      headers: new Headers(),
+      url: 'http://localhost/api/admin/mint', headers: new Headers({ origin: 'http://localhost' }),
       json: async () => ({ freeze: false }),
     } as never;
     const unfreezeRes = await freezeRoute.POST(unfreezeReq);

@@ -15,10 +15,13 @@ vi.mock('@/lib/api', () => {
 
 import { POST } from './route';
 
+
+const sameOrigin = (path = '/api/test') => new Request(`http://localhost${path}`, { method: 'POST', headers: { origin: 'http://localhost', 'content-type': 'application/json' }, body: '{}' });
+
 describe('bond coupon Next gateway', () => {
   it('dispatches manual coupon settlement and returns 200 on success', async () => {
     api.mockResolvedValueOnce({ ok: true, distributedCoupons: 5 });
-    const response = await POST();
+    const response = await POST(sameOrigin());
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
     expect(await response.json()).toEqual({ ok: true, distributedCoupons: 5 });
@@ -27,7 +30,7 @@ describe('bond coupon Next gateway', () => {
   it('handles ApiError correctly and passes through status code', async () => {
     const { ApiError } = await import('@/lib/api');
     api.mockRejectedValueOnce(new ApiError(403, '권한이 없습니다.'));
-    const response = await POST();
+    const response = await POST(sameOrigin());
     expect(response.status).toBe(403);
     expect((await response.json()).error).toBe('권한이 없습니다.');
   });

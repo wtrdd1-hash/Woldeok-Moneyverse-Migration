@@ -2,10 +2,16 @@ import { NextResponse } from 'next/server';
 import { api } from '@/lib/api';
 import { viewerOrUnknown } from '@/lib/viewer';
 import { randomUUID } from 'crypto';
+import { isSameOriginFinanceMutation } from '@/lib/finance-mutation-origin';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(): Promise<NextResponse> {
+export async function POST(request: Request): Promise<NextResponse> {
+  // Same-origin only (QA 2026-11-25): the BFF spends its own CSRF token, so
+  // the Origin check is the only cross-site defence for this write.
+  if (!isSameOriginFinanceMutation(request)) {
+    return NextResponse.json({ error: '요청 출처가 허용되지 않았습니다.' }, { status: 403, headers: { 'cache-control': 'private, no-store' } });
+  }
   const viewer = await viewerOrUnknown();
 
   if (!viewer || !viewer.signedIn) {

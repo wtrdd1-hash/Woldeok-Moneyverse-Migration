@@ -6,6 +6,18 @@
 
 [English source record](research/2026-11-22-instagram-uxwoodytips-ui-100-v2041.md) / [한국어 기록](research/2026-11-22-instagram-uxwoodytips-ui-100-v2041.ko.md) and [original reel](https://www.instagram.com/reel/DgB83_Fh4NP/); verified partial UI names from the video are mapped to existing Spring/Nov18 plans. Full 100-entry glossary not retrieved. No app or Production changes.
 
+## v2026.11.24.1319 — Claudex Loop development skill installation (no deployment)
+- [English](development/CLAUDEX_LOOP_INSTALL_v2026.11.24.1319.md) / [한국어](development/CLAUDEX_LOOP_INSTALL_v2026.11.24.1319.ko.md) · [GitHub update](updates/v2026.11.24.1319-claudex-loop-github.md). Offline tests 37/37; live cross-provider loop not executed.
+
+## v2026.11.24.1321 — Multi-skill installation (development only)
+- [English](development/MULTI_SKILL_INSTALL_v2026.11.24.1321.md) / [한국어](development/MULTI_SKILL_INSTALL_v2026.11.24.1321.ko.md). 83 skill names, 160 new verified copies; GSD isolated; external runtime tests incomplete.
+
+## v2026.11.24.1340 — Token-tool reel review / Graphify engine
+- [English](development/TOKEN_TOOL_REEL_REVIEW_v2026.11.24.1340.md) / [한국어](development/TOKEN_TOOL_REEL_REVIEW_v2026.11.24.1340.ko.md). Exact four tool names unverified; Graphify isolated engine installed. No deployment.
+
+## v2026.11.24.1345 — OmniRoute isolated development gateway
+- [English](development/OMNIROUTE_INSTALL_v2026.11.24.1345.md) / [한국어](development/OMNIROUTE_INSTALL_v2026.11.24.1345.ko.md). Local health and auth rejection verified; provider integration pending. No app deployment.
+
 ## v2026.11.20.1 — 18 November UI baseline + five-language/global support authority (docs only)
 [Official EN plan](planning/NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.md) / [한국어](planning/NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.ko.md): 18 Nov PC/mobile navy-violet design binding for all eventual Spring MVC+Thymeleaf website screens, manual+auto EN/KO/JA/ZH/VI and one safe admin support/member chat launcher everywhere. Old mockup-only scope and Next runtime plans do not override latest owner directive. Current runtime and Production **not** certified by this documentation-only update.
 

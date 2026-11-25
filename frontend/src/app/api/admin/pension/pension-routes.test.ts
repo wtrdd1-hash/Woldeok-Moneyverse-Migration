@@ -37,6 +37,9 @@ const payout = {
   created_at: '2026-10-27T00:00:00.000Z',
 };
 
+
+const sameOrigin = (path = '/api/test') => new Request(`http://localhost${path}`, { method: 'POST', headers: { origin: 'http://localhost', 'content-type': 'application/json' }, body: '{}' });
+
 describe('NPS Next.js BFF boundary', () => {
   beforeEach(() => mockApi.mockReset());
   it('returns exact verified overview with private no-store', async () => {
@@ -68,7 +71,7 @@ describe('NPS Next.js BFF boundary', () => {
       total_payout_wld: '0',
       payouts_count: 0,
     });
-    const response = await distributePOST();
+    const response = await distributePOST(sameOrigin());
     expect(response.status).toBe(200);
     expect(mockApi).toHaveBeenCalledWith('/api/v1/admin/pension/distribute-payouts', { method: 'POST' });
   });

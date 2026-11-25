@@ -5,7 +5,7 @@ import { POST } from './route';
 
 describe('P0 SWF rebalance web gateway', () => {
   it('returns 503 without forwarding a financial mutation to backend', async () => {
-    const response = await POST();
+    const response = await POST(new Request('http://localhost/api/admin/treasury/swf', { method: 'POST', headers: { origin: 'http://localhost' } }));
     expect(response.status).toBe(503);
     expect(await response.json()).toMatchObject({ error: 'SWF_LEDGER_SETTLEMENT_UNAVAILABLE' });
     expect(api).not.toHaveBeenCalled();

@@ -18,6 +18,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
+import { readWalletOverview } from '@/lib/wallet-overview';
+import { readBankStanding } from './standing-reader';
 import { getServerLocale } from '@/lib/locale-server';
 import { localeLabel } from '@/lib/locale';
 import { compareAmounts, groupDigits } from '@/lib/money';
@@ -53,10 +55,10 @@ export default async function BankPage() {
   const isEn = locale === 'en';
 
   const [standing, pockets, creditRating, memberIdentity] = await Promise.all([
-    apiOrNull<BankStanding>('/api/v1/banking/standing'),
-    apiOrNull<SavingPocket[]>('/api/v1/banking/pockets'),
+    apiOrNull<unknown>('/api/v1/banking/standing').then(readBankStanding),
+    apiOrNull<unknown>('/api/v1/banking/pockets').then((raw) => (Array.isArray(raw) ? (raw as SavingPocket[]) : null)),
     apiOrNull<CreditRatingData>('/api/v1/banking/credit-rating'),
-    apiOrNull<{ userId: string }>('/api/v1/wallet?recent=1'),
+    apiOrNull<unknown>('/api/v1/wallet?recent=1').then(readWalletOverview),
   ]);
 
   if (!standing) {

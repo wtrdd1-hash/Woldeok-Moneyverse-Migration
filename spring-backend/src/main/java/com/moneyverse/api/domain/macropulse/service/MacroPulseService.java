@@ -21,34 +21,26 @@ public class MacroPulseService {
     }
 
     public MacroPulseResponse getMacroPulse() {
-        return new MacroPulseResponse(
-                true,
-                3.8,
-                3.25,
-                2.1,
-                150_000_000_000L,
-                4_250_000_000L,
-                "EXPANSIONARY_GOLDEN_GROWTH"
-        );
+        // Source-truth gate (QA 2026-11-25): this method returned hard-coded
+        // figures or claimed a write it never made. Unavailable until it is
+        // backed by the database; never a fabricated answer.
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "MACROPULSE_CANONICAL_SOURCE_UNAVAILABLE");
     }
 
     public BurnEventListResponse getBurnEvents() {
-        return new BurnEventListResponse(
-                true,
-                List.of(
-                        new BurnEventItem("burn-2026-q3", "3분기 카지노 하우스엣지 수익 100% 통화 소각", "디플레이션 촉진 및 화폐 가치 안정화", 1_500_000_000L, Instant.now().minus(2, ChronoUnit.DAYS).toString()),
-                        new BurnEventItem("burn-2026-q2", "2분기 부동산 거래세 및 보유세 특별 소각", "토지 투기 방지 및 통화 환수", 2_750_000_000L, Instant.now().minus(30, ChronoUnit.DAYS).toString())
-                )
-        );
+        // Source-truth gate (QA 2026-11-25): this method returned hard-coded
+        // figures or claimed a write it never made. Unavailable until it is
+        // backed by the database; never a fabricated answer.
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "MACROPULSE_CANONICAL_SOURCE_UNAVAILABLE");
     }
 
     public HotTimeStatusResponse getHotTimeStatus() {
-        return new HotTimeStatusResponse(
-                true,
-                true,
-                1.5,
-                2.0,
-                Instant.now().plus(4, ChronoUnit.HOURS).toString()
-        );
+        // Source-truth gate (QA 2026-11-25): this method returned hard-coded
+        // figures or claimed a write it never made. Unavailable until it is
+        // backed by the database; never a fabricated answer.
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "MACROPULSE_CANONICAL_SOURCE_UNAVAILABLE");
     }
 }

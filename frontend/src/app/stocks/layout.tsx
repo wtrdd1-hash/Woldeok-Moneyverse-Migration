@@ -1,3 +1,4 @@
+import { StocksHeading } from './stocks-heading';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { StocksSubNav } from './stocks-sub-nav';
@@ -17,7 +18,7 @@ export default async function StocksLayout({ children }: { readonly children: Re
       {/* 1. 주식 거래소 통합 헤더 (5개 언어 완벽 지원) */}
       <div className="space-y-1.5 pt-2">
         <div className="flex items-center gap-2.5">
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-100 tracking-tight">
+          <StocksHeading className="text-2xl sm:text-3xl font-black text-slate-100 tracking-tight">
             {localeLabel(
               locale,
               '가상 주식 거래소',
@@ -26,7 +27,7 @@ export default async function StocksLayout({ children }: { readonly children: Re
               '虚拟股票交易所',
               'Sàn giao dịch Cổ phiếu ảo'
             )}
-          </h1>
+          </StocksHeading>
           <LiveBadge />
         </div>
         <p className="text-xs sm:text-sm text-slate-400 font-medium">

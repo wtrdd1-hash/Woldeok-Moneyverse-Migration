@@ -10,7 +10,7 @@ import { apiOrNull } from '@/lib/api';
 import { getServerLocale } from '@/lib/locale-server';
 import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
-import type { Overview } from '../wallet/sides';
+import { readWalletOverview } from '@/lib/wallet-overview';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -62,7 +62,7 @@ export default async function DashboardPage() {
   const isEn = locale === 'en';
 
   const [wallet, watchlist, portfolio, history, alertEvents] = await Promise.all([
-    apiOrNull<Overview>('/api/v1/wallet?recent=6'),
+    apiOrNull<unknown>('/api/v1/wallet?recent=6').then(readWalletOverview),
     apiOrNull<{ stocks: WatchlistRow[] }>('/api/v1/stocks/watchlist'),
     apiOrNull<{ holdings: HoldingRow[] }>('/api/v1/stocks/portfolio'),
     apiOrNull<{ trades: TradeRow[] }>('/api/v1/stocks/history'),

@@ -13,9 +13,10 @@ describe('Stocks Copy-Trading League & Whale Leaderboard (/stocks/league)', () =
     expect(pageSource).toContain('Whale League');
   });
 
-  it('renders Whale leaderboard with top return rates and badges', () => {
-    expect(clientSource).toContain('여의도_헤지펀드_마스터');
-    expect(clientSource).toContain('184.2');
+  it('renders the leaderboard only from the API, never invented traders (QA 2026-11-25)', () => {
+    expect(clientSource).not.toContain('여의도_헤지펀드_마스터');
+    expect(clientSource).not.toContain('defaultWhales');
+    expect(clientSource).toContain('리그 순위를 불러올 수 없어요');
     expect(clientSource).toContain('카피 트레이딩');
     expect(clientSource).toContain('followersCount');
   });

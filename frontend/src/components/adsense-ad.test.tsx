@@ -14,7 +14,8 @@ describe('AdSenseAd', () => {
     });
     route.pathname = '/tools';
     const { container } = render(<AdSenseAd publisherId="ca-pub-5220225531544323" slot="2118692561" />);
-    expect(screen.getByText(/Advertisement.*Sponsored advertisement/)).toBeDefined();
+    // An unprefixed path follows the selected language, Korean by default.
+    expect(screen.getByText(/광고.*Sponsored advertisement/)).toBeDefined();
     expect(container.querySelector('ins.adsbygoogle')).not.toBeNull();
   });
 

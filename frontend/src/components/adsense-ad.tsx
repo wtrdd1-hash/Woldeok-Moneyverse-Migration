@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useViewer } from '@/lib/use-viewer';
 import { usePathname } from 'next/navigation';
+import { useLocale } from '@/components/locale-provider';
 import { isEligiblePublicAdPath, publicAdDisclosure } from '@/lib/ad-placement-policy';
 import { isAdministrator } from '@/lib/viewer-state';
 
@@ -32,6 +33,7 @@ export function AdSenseAd({
 }) {
   const viewer = useViewer();
   const pathname = usePathname();
+  const { locale: selectedLocale } = useLocale();
   const canDisplay = Boolean(viewer && !isAdministrator(viewer) && isEligiblePublicAdPath(pathname));
   const requested = useRef(false);
   const adRef = useRef<HTMLModElement | null>(null);
@@ -110,16 +112,16 @@ export function AdSenseAd({
   // Do not render ads before the viewer is known, on private/transaction pages, or on an empty slot.
   if (!canDisplay || (status === 'unfilled' || status === 'optimized')) return null;
 
-  const disclosure = publicAdDisclosure(pathname);
+  const disclosure = publicAdDisclosure(pathname, selectedLocale);
   return (
     <section
       aria-label={disclosure + ' / Sponsored advertisement'}
       data-testid="sponsored-ad-container"
-      className="my-6 w-full min-w-0 overflow-hidden rounded-xl border border-border/55 bg-muted/15 px-3 py-4 sm:px-5 sm:py-5"
+      className="my-6 w-full min-w-0 overflow-hidden border border-[var(--g1-line)] px-4 py-3"
     >
       <div className="mx-auto w-full max-w-[970px] min-w-0 text-center">
-        <p className="mb-3 text-xs font-bold tracking-wide text-foreground/80">
-          {disclosure} <span aria-hidden="true">·</span> Sponsored advertisement
+        <p className="mb-2 text-left text-xs text-[var(--g1-muted)]">
+          {disclosure} (Sponsored advertisement)
         </p>
         <ins
           ref={adRef}

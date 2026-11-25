@@ -16,12 +16,15 @@ vi.mock('@/lib/api', () => ({
 }));
 vi.mock('@/lib/mutate', () => ({ mutate: vi.fn() }));
 
+
+const sameOrigin = (path = '/api/test') => new Request(`http://localhost${path}`, { method: 'POST', headers: { origin: 'http://localhost', 'content-type': 'application/json' }, body: '{}' });
+
 describe('SEO daily digest proxy truth', () => {
   afterEach(() => vi.resetAllMocks());
 
   it('must never fabricate successful Discord dispatch on backend failure', async () => {
     vi.mocked(mutate).mockRejectedValue(new Error('backend unreachable'));
-    const response = await POST();
+    const response = await POST(sameOrigin());
     const json = await response.json();
     expect(response.status).toBe(503);
     expect(json.discordNotified).toBeUndefined();
@@ -30,14 +33,14 @@ describe('SEO daily digest proxy truth', () => {
 
   it('preserves an explicit unauthorized response', async () => {
     vi.mocked(mutate).mockRejectedValue(new ApiError(403, 'not authorized'));
-    expect((await POST()).status).toBe(403);
+    expect((await POST(sameOrigin())).status).toBe(403);
   });
 
   it('uses session-preserving authenticated API for read and CSRF-backed mutation for write', async () => {
     vi.mocked(api).mockResolvedValueOnce({ message: 'none', discordNotified: false });
     vi.mocked(mutate).mockResolvedValueOnce({ message: 'delivered', discordNotified: true });
     expect((await GET()).status).toBe(200);
-    expect((await POST()).status).toBe(200);
+    expect((await POST(sameOrigin())).status).toBe(200);
     expect(api).toHaveBeenCalledWith('/api/v1/seo/gsc/digest-report');
     expect(mutate).toHaveBeenCalledWith('/api/v1/seo/gsc/digest-report', {
       method: 'POST',

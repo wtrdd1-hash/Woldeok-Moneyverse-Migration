@@ -5,7 +5,7 @@ vi.mock('@/lib/mutate', () => ({ mutate }));
 import { POST } from './route';
 
 const request = () => new Request('https://example.test/api/notifications', {
-  method: 'POST', headers: { 'content-type': 'application/json', 'x-moneyverse-notification-action': '1', 'sec-fetch-site': 'same-origin' },
+  method: 'POST', headers: { origin: 'https://example.test',  'content-type': 'application/json', 'x-moneyverse-notification-action': '1', 'sec-fetch-site': 'same-origin' },
   body: JSON.stringify({ markAll: true }),
 });
 

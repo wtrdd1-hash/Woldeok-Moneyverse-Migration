@@ -1,0 +1,1262 @@
+[
+ {
+  "route": "/",
+  "name": "home",
+  "archetype": "home",
+  "layout": "home-guest",
+  "title": "길드 홀"
+ },
+ {
+  "route": "/[locale]/blog",
+  "name": "-locale--blog",
+  "archetype": "community",
+  "layout": "board",
+  "title": "블로그"
+ },
+ {
+  "route": "/[locale]/blog/[slug]",
+  "name": "-locale--blog--slug-",
+  "archetype": "article",
+  "layout": "article",
+  "title": "블로그 글 상세"
+ },
+ {
+  "route": "/[locale]/guide/glossary",
+  "name": "-locale--guide-glossary",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "용어 사전"
+ },
+ {
+  "route": "/[locale]/guide/glossary/[term]",
+  "name": "-locale--guide-glossary--term-",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "용어 사전 용어 상세"
+ },
+ {
+  "route": "/[locale]/tools/compound-interest-calculator",
+  "name": "-locale--tools-compound-interest-calculator",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "복리 계산기"
+ },
+ {
+  "route": "/[locale]/tools/compound-interest-calculator/[preset]",
+  "name": "-locale--tools-compound-interest-calculator--preset-",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "복리 계산기 프리셋"
+ },
+ {
+  "route": "/account",
+  "name": "account",
+  "archetype": "account",
+  "layout": "account",
+  "title": "내 계정"
+ },
+ {
+  "route": "/account-deletion",
+  "name": "account-deletion",
+  "archetype": "account",
+  "layout": "account",
+  "title": "계정 삭제"
+ },
+ {
+  "route": "/account/notifications",
+  "name": "account-notifications",
+  "archetype": "account",
+  "layout": "account",
+  "title": "알림"
+ },
+ {
+  "route": "/account/privacy",
+  "name": "account-privacy",
+  "archetype": "account",
+  "layout": "account",
+  "title": "개인정보"
+ },
+ {
+  "route": "/account/security",
+  "name": "account-security",
+  "archetype": "account",
+  "layout": "account",
+  "title": "보안"
+ },
+ {
+  "route": "/admin",
+  "name": "admin",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "GM 콘솔"
+ },
+ {
+  "route": "/admin/analytics",
+  "name": "admin-analytics",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "분석"
+ },
+ {
+  "route": "/admin/api-health",
+  "name": "admin-api-health",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "API 상태"
+ },
+ {
+  "route": "/admin/bank",
+  "name": "admin-bank",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "은행"
+ },
+ {
+  "route": "/admin/blog",
+  "name": "admin-blog",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "블로그"
+ },
+ {
+  "route": "/admin/bonds",
+  "name": "admin-bonds",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "국채"
+ },
+ {
+  "route": "/admin/catalog",
+  "name": "admin-catalog",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "카탈로그"
+ },
+ {
+  "route": "/admin/central-bank",
+  "name": "admin-central-bank",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "중앙은행"
+ },
+ {
+  "route": "/admin/content",
+  "name": "admin-content",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "콘텐츠"
+ },
+ {
+  "route": "/admin/controls",
+  "name": "admin-controls",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "기능 스위치"
+ },
+ {
+  "route": "/admin/discord",
+  "name": "admin-discord",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "디스코드"
+ },
+ {
+  "route": "/admin/economy",
+  "name": "admin-economy",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "경제"
+ },
+ {
+  "route": "/admin/economy/scenario-lab",
+  "name": "admin-economy-scenario-lab",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "시나리오 실험실"
+ },
+ {
+  "route": "/admin/enterprises",
+  "name": "admin-enterprises",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "공기업"
+ },
+ {
+  "route": "/admin/fx",
+  "name": "admin-fx",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "외환시장"
+ },
+ {
+  "route": "/admin/help",
+  "name": "admin-help",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "도움말"
+ },
+ {
+  "route": "/admin/kdic",
+  "name": "admin-kdic",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "예금보험"
+ },
+ {
+  "route": "/admin/logs",
+  "name": "admin-logs",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "로그"
+ },
+ {
+  "route": "/admin/logs/activity",
+  "name": "admin-logs-activity",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "활동"
+ },
+ {
+  "route": "/admin/logs/delivery",
+  "name": "admin-logs-delivery",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "전송"
+ },
+ {
+  "route": "/admin/logs/errors",
+  "name": "admin-logs-errors",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "오류"
+ },
+ {
+  "route": "/admin/logs/integrity",
+  "name": "admin-logs-integrity",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "무결성"
+ },
+ {
+  "route": "/admin/logs/system",
+  "name": "admin-logs-system",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "시스템"
+ },
+ {
+  "route": "/admin/market",
+  "name": "admin-market",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "시장"
+ },
+ {
+  "route": "/admin/market/ai-news",
+  "name": "admin-market-ai-news",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "AI 뉴스"
+ },
+ {
+  "route": "/admin/mint",
+  "name": "admin-mint",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "조폐국"
+ },
+ {
+  "route": "/admin/money-flow",
+  "name": "admin-money-flow",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "자금 흐름"
+ },
+ {
+  "route": "/admin/operations/storage",
+  "name": "admin-operations-storage",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "저장소"
+ },
+ {
+  "route": "/admin/pension",
+  "name": "admin-pension",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "국민연금"
+ },
+ {
+  "route": "/admin/safety",
+  "name": "admin-safety",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "안전"
+ },
+ {
+  "route": "/admin/security",
+  "name": "admin-security",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "보안"
+ },
+ {
+  "route": "/admin/seo",
+  "name": "admin-seo",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "검색 노출"
+ },
+ {
+  "route": "/admin/seo-audit",
+  "name": "admin-seo-audit",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "검색 감사"
+ },
+ {
+  "route": "/admin/shop",
+  "name": "admin-shop",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "상점"
+ },
+ {
+  "route": "/admin/support",
+  "name": "admin-support",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "문의"
+ },
+ {
+  "route": "/admin/treasury",
+  "name": "admin-treasury",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "국고"
+ },
+ {
+  "route": "/admin/treasury/grants",
+  "name": "admin-treasury-grants",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "grants"
+ },
+ {
+  "route": "/admin/users",
+  "name": "admin-users",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "회원"
+ },
+ {
+  "route": "/admin/users/[id]",
+  "name": "admin-users--id-",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "회원 상세"
+ },
+ {
+  "route": "/admin/work",
+  "name": "admin-work",
+  "archetype": "admin",
+  "layout": "admin",
+  "title": "직업"
+ },
+ {
+  "route": "/advisor",
+  "name": "advisor",
+  "archetype": "support",
+  "layout": "support",
+  "title": "덕이 상담소"
+ },
+ {
+  "route": "/announcements",
+  "name": "announcements",
+  "archetype": "community",
+  "layout": "board",
+  "title": "공지"
+ },
+ {
+  "route": "/announcements/[announcementId]",
+  "name": "announcements--announcementId-",
+  "archetype": "article",
+  "layout": "article",
+  "title": "공지 상세"
+ },
+ {
+  "route": "/arcade",
+  "name": "arcade",
+  "archetype": "quest",
+  "layout": "quests",
+  "title": "아케이드"
+ },
+ {
+  "route": "/bank",
+  "name": "bank",
+  "archetype": "bank",
+  "layout": "bank",
+  "title": "은행"
+ },
+ {
+  "route": "/bank/savings-pot",
+  "name": "bank-savings-pot",
+  "archetype": "bank",
+  "layout": "bank",
+  "title": "적금 pot"
+ },
+ {
+  "route": "/blog",
+  "name": "blog",
+  "archetype": "community",
+  "layout": "board",
+  "title": "블로그"
+ },
+ {
+  "route": "/blog/[slug]",
+  "name": "blog--slug-",
+  "archetype": "article",
+  "layout": "article",
+  "title": "블로그 글 상세"
+ },
+ {
+  "route": "/board",
+  "name": "board",
+  "archetype": "community",
+  "layout": "board",
+  "title": "광장"
+ },
+ {
+  "route": "/board/[postId]",
+  "name": "board--postId-",
+  "archetype": "article",
+  "layout": "article",
+  "title": "광장 상세"
+ },
+ {
+  "route": "/bonds",
+  "name": "bonds",
+  "archetype": "bank",
+  "layout": "bank",
+  "title": "국채"
+ },
+ {
+  "route": "/businesses",
+  "name": "businesses",
+  "archetype": "market",
+  "layout": "stocks",
+  "title": "사업"
+ },
+ {
+  "route": "/businesses/ventures",
+  "name": "businesses-ventures",
+  "archetype": "market",
+  "layout": "stocks",
+  "title": "ventures"
+ },
+ {
+  "route": "/calculators",
+  "name": "calculators",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "계산기 모음"
+ },
+ {
+  "route": "/calendar",
+  "name": "calendar",
+  "archetype": "quest",
+  "layout": "quests",
+  "title": "달력"
+ },
+ {
+  "route": "/casino",
+  "name": "casino",
+  "archetype": "quest",
+  "layout": "quests",
+  "title": "카지노"
+ },
+ {
+  "route": "/central-bank",
+  "name": "central-bank",
+  "archetype": "bank",
+  "layout": "bank",
+  "title": "중앙은행"
+ },
+ {
+  "route": "/chat",
+  "name": "chat",
+  "archetype": "support",
+  "layout": "support",
+  "title": "채팅"
+ },
+ {
+  "route": "/clubs",
+  "name": "clubs",
+  "archetype": "community",
+  "layout": "board",
+  "title": "클럽"
+ },
+ {
+  "route": "/clubs/[clubId]",
+  "name": "clubs--clubId-",
+  "archetype": "article",
+  "layout": "article",
+  "title": "클럽 상세"
+ },
+ {
+  "route": "/clubs/[clubId]/members",
+  "name": "clubs--clubId--members",
+  "archetype": "article",
+  "layout": "article",
+  "title": "members"
+ },
+ {
+  "route": "/clubs/new",
+  "name": "clubs-new",
+  "archetype": "community",
+  "layout": "board",
+  "title": "새로 만들기"
+ },
+ {
+  "route": "/clubs/warfare",
+  "name": "clubs-warfare",
+  "archetype": "community",
+  "layout": "board",
+  "title": "warfare"
+ },
+ {
+  "route": "/collections",
+  "name": "collections",
+  "archetype": "wallet",
+  "layout": "wallet",
+  "title": "도감"
+ },
+ {
+  "route": "/dashboard",
+  "name": "dashboard",
+  "archetype": "wallet",
+  "layout": "wallet",
+  "title": "대시보드"
+ },
+ {
+  "route": "/data-deletion",
+  "name": "data-deletion",
+  "archetype": "account",
+  "layout": "account",
+  "title": "데이터 삭제"
+ },
+ {
+  "route": "/design-preview",
+  "name": "design-preview",
+  "archetype": "doc",
+  "layout": "doc",
+  "title": "디자인 미리보기"
+ },
+ {
+  "route": "/developer",
+  "name": "developer",
+  "archetype": "doc",
+  "layout": "doc",
+  "title": "개발자"
+ },
+ {
+  "route": "/enterprises",
+  "name": "enterprises",
+  "archetype": "market",
+  "layout": "stocks",
+  "title": "공기업"
+ },
+ {
+  "route": "/features",
+  "name": "features",
+  "archetype": "doc",
+  "layout": "doc",
+  "title": "기능 안내"
+ },
+ {
+  "route": "/forgot-password",
+  "name": "forgot-password",
+  "archetype": "auth",
+  "layout": "login",
+  "title": "비밀번호 찾기"
+ },
+ {
+  "route": "/fx",
+  "name": "fx",
+  "archetype": "bank",
+  "layout": "bank",
+  "title": "외환시장"
+ },
+ {
+  "route": "/gallery",
+  "name": "gallery",
+  "archetype": "community",
+  "layout": "board",
+  "title": "갤러리"
+ },
+ {
+  "route": "/gallery/[photoId]",
+  "name": "gallery--photoId-",
+  "archetype": "article",
+  "layout": "article",
+  "title": "갤러리 상세"
+ },
+ {
+  "route": "/gallery/submit",
+  "name": "gallery-submit",
+  "archetype": "community",
+  "layout": "board",
+  "title": "submit"
+ },
+ {
+  "route": "/guide",
+  "name": "guide",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "가이드"
+ },
+ {
+  "route": "/guide/career-mastery",
+  "name": "guide-career-mastery",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "career mastery"
+ },
+ {
+  "route": "/guide/dopamine-system",
+  "name": "guide-dopamine-system",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "dopamine system"
+ },
+ {
+  "route": "/guide/glossary",
+  "name": "guide-glossary",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "용어 사전"
+ },
+ {
+  "route": "/guide/glossary/[term]",
+  "name": "guide-glossary--term-",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "용어 사전 용어 상세"
+ },
+ {
+  "route": "/guide/stock-trading",
+  "name": "guide-stock-trading",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "주식 수익률 trading"
+ },
+ {
+  "route": "/guide/virtual-banking",
+  "name": "guide-virtual-banking",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "virtual banking"
+ },
+ {
+  "route": "/help",
+  "name": "help",
+  "archetype": "support",
+  "layout": "support",
+  "title": "도움말"
+ },
+ {
+  "route": "/help/[slug]",
+  "name": "help--slug-",
+  "archetype": "support",
+  "layout": "support",
+  "title": "도움말 글 상세"
+ },
+ {
+  "route": "/inventory",
+  "name": "inventory",
+  "archetype": "wallet",
+  "layout": "wallet",
+  "title": "인벤토리"
+ },
+ {
+  "route": "/invite/[code]",
+  "name": "invite--code-",
+  "archetype": "auth",
+  "layout": "login",
+  "title": "초대 상세"
+ },
+ {
+  "route": "/kdic",
+  "name": "kdic",
+  "archetype": "bank",
+  "layout": "bank",
+  "title": "예금보험"
+ },
+ {
+  "route": "/lobby",
+  "name": "lobby",
+  "archetype": "quest",
+  "layout": "quests",
+  "title": "로비"
+ },
+ {
+  "route": "/login",
+  "name": "login",
+  "archetype": "auth",
+  "layout": "login",
+  "title": "로그인"
+ },
+ {
+  "route": "/login/providers",
+  "name": "login-providers",
+  "archetype": "auth",
+  "layout": "login",
+  "title": "로그인 방법"
+ },
+ {
+  "route": "/marketplace",
+  "name": "marketplace",
+  "archetype": "shop",
+  "layout": "shop",
+  "title": "장터"
+ },
+ {
+  "route": "/marketplace/auction",
+  "name": "marketplace-auction",
+  "archetype": "shop",
+  "layout": "shop",
+  "title": "auction"
+ },
+ {
+  "route": "/mint",
+  "name": "mint",
+  "archetype": "wallet",
+  "layout": "wallet",
+  "title": "조폐국"
+ },
+ {
+  "route": "/newspaper",
+  "name": "newspaper",
+  "archetype": "community",
+  "layout": "board",
+  "title": "월덕 신문"
+ },
+ {
+  "route": "/pension",
+  "name": "pension",
+  "archetype": "bank",
+  "layout": "bank",
+  "title": "국민연금"
+ },
+ {
+  "route": "/prediction",
+  "name": "prediction",
+  "archetype": "market",
+  "layout": "stocks",
+  "title": "예측 시장"
+ },
+ {
+  "route": "/privacy",
+  "name": "privacy",
+  "archetype": "doc",
+  "layout": "doc",
+  "title": "개인정보"
+ },
+ {
+  "route": "/profile",
+  "name": "profile",
+  "archetype": "account",
+  "layout": "account",
+  "title": "프로필"
+ },
+ {
+  "route": "/profile/[userId]",
+  "name": "profile--userId-",
+  "archetype": "account",
+  "layout": "account",
+  "title": "프로필 상세"
+ },
+ {
+  "route": "/profile/settings",
+  "name": "profile-settings",
+  "archetype": "account",
+  "layout": "account",
+  "title": "설정"
+ },
+ {
+  "route": "/progression",
+  "name": "progression",
+  "archetype": "quest",
+  "layout": "quests",
+  "title": "성장"
+ },
+ {
+  "route": "/progression/prestige",
+  "name": "progression-prestige",
+  "archetype": "quest",
+  "layout": "quests",
+  "title": "prestige"
+ },
+ {
+  "route": "/quests",
+  "name": "quests",
+  "archetype": "quest",
+  "layout": "quests",
+  "title": "퀘스트"
+ },
+ {
+  "route": "/register",
+  "name": "register",
+  "archetype": "auth",
+  "layout": "login",
+  "title": "모험가 등록"
+ },
+ {
+  "route": "/reset-password",
+  "name": "reset-password",
+  "archetype": "auth",
+  "layout": "login",
+  "title": "비밀번호 재설정"
+ },
+ {
+  "route": "/roadmap",
+  "name": "roadmap",
+  "archetype": "doc",
+  "layout": "doc",
+  "title": "로드맵"
+ },
+ {
+  "route": "/safety",
+  "name": "safety",
+  "archetype": "doc",
+  "layout": "doc",
+  "title": "안전"
+ },
+ {
+  "route": "/safety/takedown",
+  "name": "safety-takedown",
+  "archetype": "doc",
+  "layout": "doc",
+  "title": "takedown"
+ },
+ {
+  "route": "/search",
+  "name": "search",
+  "archetype": "doc",
+  "layout": "doc",
+  "title": "검색"
+ },
+ {
+  "route": "/seasons",
+  "name": "seasons",
+  "archetype": "quest",
+  "layout": "quests",
+  "title": "시즌"
+ },
+ {
+  "route": "/shop",
+  "name": "shop",
+  "archetype": "shop",
+  "layout": "shop",
+  "title": "상점"
+ },
+ {
+  "route": "/shop/catalog",
+  "name": "shop-catalog",
+  "archetype": "shop",
+  "layout": "shop",
+  "title": "카탈로그"
+ },
+ {
+  "route": "/spaces",
+  "name": "spaces",
+  "archetype": "community",
+  "layout": "board",
+  "title": "공간"
+ },
+ {
+  "route": "/spaces/real-estate",
+  "name": "spaces-real-estate",
+  "archetype": "community",
+  "layout": "board",
+  "title": "real estate"
+ },
+ {
+  "route": "/status",
+  "name": "status",
+  "archetype": "status",
+  "layout": "status",
+  "title": "서버 상태"
+ },
+ {
+  "route": "/stocks",
+  "name": "stocks",
+  "archetype": "market",
+  "layout": "stocks",
+  "title": "거래소"
+ },
+ {
+  "route": "/stocks/[symbol]",
+  "name": "stocks--symbol-",
+  "archetype": "market",
+  "layout": "stock-detail",
+  "title": "종목 상세"
+ },
+ {
+  "route": "/stocks/alerts",
+  "name": "stocks-alerts",
+  "archetype": "market",
+  "layout": "stocks",
+  "title": "조건부 알림"
+ },
+ {
+  "route": "/stocks/community",
+  "name": "stocks-community",
+  "archetype": "market",
+  "layout": "stocks",
+  "title": "community"
+ },
+ {
+  "route": "/stocks/compare",
+  "name": "stocks-compare",
+  "archetype": "market",
+  "layout": "stocks",
+  "title": "종목 비교"
+ },
+ {
+  "route": "/stocks/derivatives",
+  "name": "stocks-derivatives",
+  "archetype": "market",
+  "layout": "stocks",
+  "title": "derivatives"
+ },
+ {
+  "route": "/stocks/history",
+  "name": "stocks-history",
+  "archetype": "market",
+  "layout": "stocks",
+  "title": "거래 내역"
+ },
+ {
+  "route": "/stocks/league",
+  "name": "stocks-league",
+  "archetype": "market",
+  "layout": "stocks",
+  "title": "league"
+ },
+ {
+  "route": "/stocks/portfolio",
+  "name": "stocks-portfolio",
+  "archetype": "market",
+  "layout": "stocks",
+  "title": "포트폴리오"
+ },
+ {
+  "route": "/stocks/watchlist",
+  "name": "stocks-watchlist",
+  "archetype": "market",
+  "layout": "stocks",
+  "title": "관심 종목"
+ },
+ {
+  "route": "/support",
+  "name": "support",
+  "archetype": "support",
+  "layout": "support",
+  "title": "문의"
+ },
+ {
+  "route": "/terms",
+  "name": "terms",
+  "archetype": "doc",
+  "layout": "doc",
+  "title": "이용약관"
+ },
+ {
+  "route": "/tools",
+  "name": "tools",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "계산기"
+ },
+ {
+  "route": "/tools/capital-gains-tax-calculator",
+  "name": "tools-capital-gains-tax-calculator",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "양도세 차익 세금 계산기"
+ },
+ {
+  "route": "/tools/capital-gains-tax-calculator/[preset]",
+  "name": "tools-capital-gains-tax-calculator--preset-",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "양도세 차익 세금 계산기 프리셋"
+ },
+ {
+  "route": "/tools/compound-calculator",
+  "name": "tools-compound-calculator",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "복리 계산기"
+ },
+ {
+  "route": "/tools/compound-calculator/[preset]",
+  "name": "tools-compound-calculator--preset-",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "복리 계산기 프리셋"
+ },
+ {
+  "route": "/tools/crypto-apy-calculator",
+  "name": "tools-crypto-apy-calculator",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "crypto apy 계산기"
+ },
+ {
+  "route": "/tools/dividend-tax-calculator",
+  "name": "tools-dividend-tax-calculator",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "배당 세금 계산기"
+ },
+ {
+  "route": "/tools/dividend-tax-calculator/[ticker]",
+  "name": "tools-dividend-tax-calculator--ticker-",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "배당 세금 계산기 상세"
+ },
+ {
+  "route": "/tools/farming-calculator",
+  "name": "tools-farming-calculator",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "farming 계산기"
+ },
+ {
+  "route": "/tools/farming-calculator/[preset]",
+  "name": "tools-farming-calculator--preset-",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "farming 계산기 프리셋"
+ },
+ {
+  "route": "/tools/fire-calculator",
+  "name": "tools-fire-calculator",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "fire 계산기"
+ },
+ {
+  "route": "/tools/gift-tax-calculator",
+  "name": "tools-gift-tax-calculator",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "gift 세금 계산기"
+ },
+ {
+  "route": "/tools/gift-tax-calculator/[preset]",
+  "name": "tools-gift-tax-calculator--preset-",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "gift 세금 계산기 프리셋"
+ },
+ {
+  "route": "/tools/goal-wealth-calculator",
+  "name": "tools-goal-wealth-calculator",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "goal wealth 계산기"
+ },
+ {
+  "route": "/tools/isa-calculator",
+  "name": "tools-isa-calculator",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "ISA 계산기"
+ },
+ {
+  "route": "/tools/isa-calculator/[slug]",
+  "name": "tools-isa-calculator--slug-",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "ISA 계산기 글 상세"
+ },
+ {
+  "route": "/tools/kimchi-premium-calculator",
+  "name": "tools-kimchi-premium-calculator",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "kimchi premium 계산기"
+ },
+ {
+  "route": "/tools/kimchi-premium-calculator/[preset]",
+  "name": "tools-kimchi-premium-calculator--preset-",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "kimchi premium 계산기 프리셋"
+ },
+ {
+  "route": "/tools/loan-interest-calculator",
+  "name": "tools-loan-interest-calculator",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "대출 이자 계산기"
+ },
+ {
+  "route": "/tools/loan-interest-calculator/[preset]",
+  "name": "tools-loan-interest-calculator--preset-",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "대출 이자 계산기 프리셋"
+ },
+ {
+  "route": "/tools/pension-tax-calculator",
+  "name": "tools-pension-tax-calculator",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "연금 세금 계산기"
+ },
+ {
+  "route": "/tools/pension-tax-calculator/[slug]",
+  "name": "tools-pension-tax-calculator--slug-",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "연금 세금 계산기 글 상세"
+ },
+ {
+  "route": "/tools/quant-studio",
+  "name": "tools-quant-studio",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "quant studio"
+ },
+ {
+  "route": "/tools/real-estate-calculator",
+  "name": "tools-real-estate-calculator",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "real estate 계산기"
+ },
+ {
+  "route": "/tools/real-estate-calculator/[preset]",
+  "name": "tools-real-estate-calculator--preset-",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "real estate 계산기 프리셋"
+ },
+ {
+  "route": "/tools/retirement-calculator",
+  "name": "tools-retirement-calculator",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "노후 자금 계산기"
+ },
+ {
+  "route": "/tools/retirement-calculator/[slug]",
+  "name": "tools-retirement-calculator--slug-",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "노후 자금 계산기 글 상세"
+ },
+ {
+  "route": "/tools/salary-calculator",
+  "name": "tools-salary-calculator",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "연봉 실수령 계산기"
+ },
+ {
+  "route": "/tools/salary-calculator/[preset]",
+  "name": "tools-salary-calculator--preset-",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "연봉 실수령 계산기 프리셋"
+ },
+ {
+  "route": "/tools/stock-calculator",
+  "name": "tools-stock-calculator",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "주식 수익률 계산기"
+ },
+ {
+  "route": "/tools/stock-calculator/[preset]",
+  "name": "tools-stock-calculator--preset-",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "주식 수익률 계산기 프리셋"
+ },
+ {
+  "route": "/tools/tax-calculator",
+  "name": "tools-tax-calculator",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "세금 계산기"
+ },
+ {
+  "route": "/tools/youth-leap-calculator",
+  "name": "tools-youth-leap-calculator",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "youth leap 계산기"
+ },
+ {
+  "route": "/tools/youth-leap-calculator/[preset]",
+  "name": "tools-youth-leap-calculator--preset-",
+  "archetype": "tool",
+  "layout": "calculator",
+  "title": "youth leap 계산기 프리셋"
+ },
+ {
+  "route": "/treasury",
+  "name": "treasury",
+  "archetype": "bank",
+  "layout": "bank",
+  "title": "국고"
+ },
+ {
+  "route": "/verify-email",
+  "name": "verify-email",
+  "archetype": "doc",
+  "layout": "doc",
+  "title": "verify email"
+ },
+ {
+  "route": "/verify-email-change",
+  "name": "verify-email-change",
+  "archetype": "doc",
+  "layout": "doc",
+  "title": "verify email change"
+ },
+ {
+  "route": "/wallet",
+  "name": "wallet",
+  "archetype": "wallet",
+  "layout": "wallet",
+  "title": "지갑"
+ },
+ {
+  "route": "/wallet/activity",
+  "name": "wallet-activity",
+  "archetype": "wallet",
+  "layout": "wallet",
+  "title": "활동"
+ },
+ {
+  "route": "/wallet/activity/transactions/[transactionId]",
+  "name": "wallet-activity-transactions--transactionId-",
+  "archetype": "wallet",
+  "layout": "wallet",
+  "title": "거래 기록 상세"
+ },
+ {
+  "route": "/work",
+  "name": "work",
+  "archetype": "doc",
+  "layout": "doc",
+  "title": "직업"
+ }
+]

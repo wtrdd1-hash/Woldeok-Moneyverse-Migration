@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { isLoggedInMember } from '@/lib/session';
 import type { TreasuryDaoProposal } from '@/app/treasury/treasury.types';
+import { isSameOriginFinanceMutation } from '@/lib/finance-mutation-origin';
 
 export const dynamic = 'force-dynamic';
 
@@ -116,6 +117,11 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  // Same-origin only (QA 2026-11-25): the BFF spends its own CSRF token, so
+  // the Origin check is the only cross-site defence for this write.
+  if (!isSameOriginFinanceMutation(request)) {
+    return NextResponse.json({ error: '요청 출처가 허용되지 않았습니다.' }, { status: 403, headers: { 'cache-control': 'private, no-store' } });
+  }
   try {
     const isLoggedIn = await isLoggedInMember();
     if (!isLoggedIn) {
@@ -197,6 +203,11 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
+  // Same-origin only (QA 2026-11-25): the BFF spends its own CSRF token, so
+  // the Origin check is the only cross-site defence for this write.
+  if (!isSameOriginFinanceMutation(request)) {
+    return NextResponse.json({ error: '요청 출처가 허용되지 않았습니다.' }, { status: 403, headers: { 'cache-control': 'private, no-store' } });
+  }
   try {
     const isLoggedIn = await isLoggedInMember();
     if (!isLoggedIn) {

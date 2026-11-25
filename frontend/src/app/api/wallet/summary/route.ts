@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { apiOrNull } from '@/lib/api';
+import { readWalletOverview } from '@/lib/wallet-overview';
 import { currentViewer } from '@/lib/viewer';
 import { NO_SUMMARY } from '@/lib/wallet-summary';
 import type { WalletSummary } from '@/lib/wallet-summary';
@@ -30,9 +31,7 @@ export async function GET(): Promise<NextResponse> {
   const viewer = await currentViewer();
   if (!viewer.signedIn) return NextResponse.json(NO_SUMMARY, { headers });
 
-  const wallet = await apiOrNull<unknown>('/api/v1/wallet');
-  const balances = wallet && typeof wallet === 'object' && !Array.isArray(wallet) && 'balances' in wallet
-    ? wallet.balances : null;
+  const balances = readWalletOverview(await apiOrNull<unknown>('/api/v1/wallet'))?.balances ?? null;
   if (!balances || typeof balances !== 'object' || Array.isArray(balances) ||
       !('currency' in balances) || balances.currency !== 'WLD' ||
       !('totalAvailableAmount' in balances) || !isWldAmount(balances.totalAvailableAmount)) {
