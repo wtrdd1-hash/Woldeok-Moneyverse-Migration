@@ -13,6 +13,9 @@
 
 - [EN operating guide](docs/development/CODEX_GEMINI_PINGPONG_SKILL_v2026.11.22.1.md) / [KO](docs/development/CODEX_GEMINI_PINGPONG_SKILL_v2026.11.22.1.ko.md) · [EN/KO worklog](docs/worklog/2026-11-22-codex-gemini-pingpong-skill-v1.md) / [KO](docs/worklog/2026-11-22-codex-gemini-pingpong-skill-v1.ko.md) · [GitHub notice](docs/updates/v2026.11.22.1-codex-gemini-pingpong-github.md) · Internal change: private mini-PC record (not committed). Installed pinned Gemini CLI 0.70.0 under the user account plus a shared Agent Skill; 6/6 synthetic tests, no live Gemini/Codex authorization, no app/DB/Test/Production changes.
 
+## v2026.11.24.1319 — Claudex Loop development skill installation (no deployment)
+- [English](docs/development/CLAUDEX_LOOP_INSTALL_v2026.11.24.1319.md) / [한국어](docs/development/CLAUDEX_LOOP_INSTALL_v2026.11.24.1319.ko.md) · [GitHub update](docs/updates/v2026.11.24.1319-claudex-loop-github.md). Offline tests 37/37; live cross-provider loop not executed.
+
 ## v2026.11.21.2234 — Saved AgentMemory reel and mandatory shared task-handoff notes (DOCS ONLY)
 - [EN source + ongoing workflow](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md) / [한국어](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md) · [Worklog KO](docs/worklog/2026-11-21-agentmemory-shared-agent-protocol-v2234.ko.md) · [GitHub update EN](docs/updates/v2026.11.21.2234-agentmemory-reference-github.md). Source reel verified by public caption metadata, upstream README retrieved; actual AgentMemory installation/automatic capture and video playback not verified. GitHub worklogs remain durable fallback; no app/Test/Production changes.
 

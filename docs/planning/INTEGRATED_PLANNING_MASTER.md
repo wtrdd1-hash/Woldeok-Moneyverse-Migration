@@ -37,6 +37,9 @@ New [canonical specification](REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.1
 
 Refer to [EN protocol](../development/CODEX_GEMINI_PINGPONG_SKILL_v2026.11.22.1.md) / [한국어](../development/CODEX_GEMINI_PINGPONG_SKILL_v2026.11.22.1.ko.md). Branch-isolated, read-only, limited-round peer review may support project planning and QA; it cannot change this authority, overlap Gemini file ownership, merge PRs, replace source-backed tests, or authorize Production. Installation and six synthetic tests only; real cross-model exchange/credentials remain unverified. No runtime or product-scope change.
 
+## v2026.11.24.1319 — Claudex Loop skill installation (development only)
+[Installation and verification](../development/CLAUDEX_LOOP_INSTALL_v2026.11.24.1319.md). Existing Gemini collaboration and release gates remain unchanged; live cross-model loop not executed.
+
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 
 ## v2026.11.21.2234 — AgentMemory link retained for all future work handoffs (PLANNING; DOCS ONLY)
