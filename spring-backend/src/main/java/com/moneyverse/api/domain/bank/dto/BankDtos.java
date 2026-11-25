@@ -21,6 +21,11 @@ public class BankDtos {
         private String bondHoldingsValueWld;
         private Map<String, Object> activeLoan;
         private List<Map<String, Object>> bonds;
+        /** public.bank_get_my_standing object, unmodified (Next contract; QA 2026-11-25). */
+        private Map<String, Object> canonical;
+
+        public Map<String, Object> getCanonical() { return canonical; }
+        public void setCanonical(Map<String, Object> canonical) { this.canonical = canonical; }
 
         public BankStanding() {}
 
