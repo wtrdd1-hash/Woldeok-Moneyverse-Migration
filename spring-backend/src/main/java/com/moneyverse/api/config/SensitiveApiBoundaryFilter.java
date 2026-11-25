@@ -55,6 +55,11 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
                 || normalized.matches("^/api/(v1/)?(space|spaces)(/.*)?$")
                    && !normalized.matches("^/api/(v1/)?(space|spaces)/real-estate/districts/?$")
                 || normalized.matches("^/api/(v1/)?progression(/.*)?$")
+                // Owner-scoped reads added 2026-11-25: a forged actor header is refused, not ignored.
+                || normalized.matches("^/api/(v1/)?(engagement|early-game|business-types|business-equity|rewards/availability)(/.*)?$")
+                || normalized.matches("^/api/(v1/)?wallet/activity(/.*)?$")
+                || normalized.matches("^/api/(v1/)?businesses/my-v2/?$")
+                || normalized.matches("^/api/(v1/)?shop/holdings/?$")
                 || normalized.matches("^/api/(v1/)?advisor(/.*)?$")
                 // OWASP API1:2023 BOLA prevention for casino betting, inventory, work assignments and stock orders
                 || normalized.startsWith("/api/casino/play") || normalized.startsWith("/api/v1/casino/play")
