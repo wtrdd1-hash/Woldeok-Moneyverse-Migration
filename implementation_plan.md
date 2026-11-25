@@ -6039,3 +6039,14 @@ pm install -g @google/gemini-cli@0.71.1 권한 실패
   1. 만료된 ~/.gemini/gemini-credentials.json 파일 완전 삭제 및 초기화.
   2. ~/.gemini/settings.json을 gemini-api-key 모드로 안전 재설정.
   3. 미니PC 터미널에서 gemini 실행 시 즉시 새 API 키 입력 프롬프트가 뜨도록 구성 완료.
+
+---
+## 🚀 [v24 Specification] settings.json 포맷 정규화(Base64 인코딩 주입) 및 JSON 파싱 에러 완전 해소
+- **작업 일시**: 2026-11-25 09:55 KST
+- **작업 번호 (Task ID)**: TASK-20261125-SETTINGS-JSON-SYNTAX-FIX
+- **사용자 오류 보고**: Error in /home/debian/.gemini/settings.json: Expected property name or '}' in JSON at position 4
+- **근본 원인**: PowerShell 셸 문자열 전송 시 큰따옴표가 이스케이프 해제되어 속성명이 따옴표 없이 기록되었음.
+- **해결 완료**:
+  1. Base64 디코딩 방식으로 {"security":{"auth":{"selectedType":"gemini-api-key"}}} 완벽한 유효 JSON으로 재기록.
+  2. python3 -m json.tool ~/.gemini/settings.json 파싱 무결성 100% 검증 통과.
+  3. gemini --version 실행 시 파싱 에러 0건 및 0.71.1 정상 출력 확인.
