@@ -9,10 +9,12 @@ import { currentViewer, isAdministrator } from '@/lib/viewer';
  * site's IndexNow key.
  */
 export async function isSchedulerOrAdministrator(req: Request): Promise<boolean> {
-  const secret = process.env.INTERNAL_API_SECRET || process.env.CRON_SECRET;
+  // Either configured secret is accepted (review 2026-11-25: a cron sending
+  // CRON_SECRET failed whenever INTERNAL_API_SECRET was also set).
   const presented = req.headers.get('x-cron-secret') || req.headers.get('x-internal-secret')
     || req.headers.get('authorization')?.replace(/^Bearer /, '');
-  if (secret && presented) {
+  for (const secret of [process.env.INTERNAL_API_SECRET, process.env.CRON_SECRET]) {
+    if (!secret || !presented) continue;
     const a = Buffer.from(secret), b = Buffer.from(presented);
     if (a.length === b.length && timingSafeEqual(a, b)) return true;
   }

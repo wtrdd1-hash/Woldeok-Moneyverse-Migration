@@ -33,3 +33,11 @@ describe('linkFieldLabels', () => {
     expect(container.querySelectorAll('[aria-labelledby]').length).toBe(0);
   });
 });
+
+describe('linkFieldLabels with a checkbox label in the group (review 2026-11-25)', () => {
+  it('does not name a text field after a checkbox label', () => {
+    const { container } = render(<main><div><label><input type="checkbox" />자동</label><input type="text" /></div></main>);
+    linkFieldLabels(container);
+    expect(container.querySelector('input[type=text]')!.hasAttribute('aria-labelledby')).toBe(false);
+  });
+});

@@ -17,11 +17,13 @@ export function linkFieldLabels(root: ParentNode): void {
     if (c.labels?.length || c.hasAttribute('aria-label') || c.hasAttribute('aria-labelledby')) return;
     let group: HTMLElement | null = c.parentElement;
     for (let depth = 0; group && depth < 3; depth += 1, group = group.parentElement) {
-      const labels = group.querySelectorAll('label, [data-slot="label"]');
+      // A label wrapping a checkbox/radio names that control, not this one.
+      const labels = [...group.querySelectorAll('label, [data-slot="label"]')].filter((l) => !l.querySelector('input[type=checkbox], input[type=radio]'));
       if (labels.length === 0) continue;
       const peers = group.querySelectorAll('input:not([type=hidden]):not([type=radio]):not([type=checkbox]), select, textarea');
       if (labels.length !== 1 || peers.length !== 1) return;
       const label = labels[0] as HTMLElement;
+      if (group.querySelector('label input[type=checkbox], label input[type=radio]')) return;
       if (!label.id) label.id = `mv-field-label-${Date.now().toString(36)}-${(n += 1)}`;
       c.setAttribute('aria-labelledby', label.id);
       return;
