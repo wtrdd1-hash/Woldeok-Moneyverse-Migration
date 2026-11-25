@@ -35,6 +35,9 @@ public class AccountRecoveryController {
             "qwerty123", "qwertyuiop", "11111111", "iloveyou", "admin123", "letmein1", "00000000");
 
     private final UserAuthService auth;
+    /** At most 3 reset mails per address per hour; the answer stays identical (no enumeration). */
+    private final com.moneyverse.api.domain.identity.service.LoginAttemptLimiter resetLimiter =
+            new com.moneyverse.api.domain.identity.service.LoginAttemptLimiter(3, Duration.ofHours(1));
     private final AccountRecoveryService recovery;
     private final VerificationMailer mailer;
 
@@ -49,6 +52,10 @@ public class AccountRecoveryController {
     public ResponseEntity<?> requestPasswordReset(@RequestBody(required = false) Map<String, Object> body) {
         String email = email(body);
         if (email == null) return code(HttpStatus.BAD_REQUEST, "EMAIL_INVALID");
+        if (resetLimiter.blocked(email, Instant.now())) {
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(Map.of("accepted", true));
+        }
+        resetLimiter.recordFailure(email, Instant.now());
         String token = UserAuthService.generateRandomToken();
         boolean accepted;
         try {
