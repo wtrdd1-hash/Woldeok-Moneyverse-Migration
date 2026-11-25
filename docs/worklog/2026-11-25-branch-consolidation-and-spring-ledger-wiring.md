@@ -159,6 +159,14 @@ NestJS 원본이 없는 11개(연금 일부, board/stock-posts 쿼리, bonds rol
   IP 기준이 아닌 이유: BFF 경유로 Spring 이 보는 IP 는 모두 127.0.0.1. JSON 로그인 500 응답의 내부 예외 문구 노출 제거. Test 실측 401×10→429, 운영 반영.
   한계: 프로세스 메모리 기반(단일 인스턴스), 5만 키 초과 시 전체 초기화.
 - 인프라: Spring 4550/9092 는 nft 로 lo 외 차단 확인. 운영 DB 5433 은 브리지 외 모든 인터페이스에서 DNAT(내부망에서 PostgreSQL 접속 시도 가능, 비밀번호 필요) → 소유자 결정 필요.
+- [해결] 운영 DB 5433 외부 인터페이스 차단(소유자 승인): nft 테이블 inet moneyverse_db_guard_v20261125(prerouting, ens18 dport 5433 drop),
+  부팅 유지 유닛 moneyverse-db-port-guard-v20261125.service. Spring→DB·화면 정상. 롤백: systemctl disable --now 해당 유닛.
+- [해결] 로그인 회원 실사용 E2E: Test DB 전용 시험 계정(qa-e2e-20261125@test.invalid, 정식 가입 함수, 실제 회원 사본 미변경).
+  첫 실행에서 결함 2건 발견: (1) DB 함수 member_board_create_with_image 가 42702(author_user_id 모호)로 항상 실패 → 운영 포함 광장 글쓰기 불가였음
+  → 마이그레이션 351(별칭 1곳) (2) 클럽 SQL 이 없는 컬럼(users.display_name, user_profiles) 사용 → 현재 스키마로 수정. 원인 미기록 문제도 수정(SQLSTATE 로그).
+  재실행: 광장 작성→같은 키 재요청→읽기→댓글→수정→삭제→404, CSRF 없는 작성 403, 클럽·개인정보 200, 연금 납입(현금 0) 400, 카지노 403.
+  로그인 화면 22개 중 20개 200(2개는 없는 주소 404), 프론트 오류 0.
+  운영: 함수 정의 백업 `/var/backups/moneyverse-prod-before-351-202611251604.sql`, 351 적용, jar 1e369b5421 배포(백업 …before-1e369b5421), 운영 DB 앱 권한 롤백 검증 성공.
 - 의존성 취약점·오프호스트 백업(P0, PR #3448) 미점검/미완료.
 - 로그인 회원 실사용 E2E 검증 경로 없음(테스트 계정 필요). 2026-11-14 내부 조폐 충전 6건 소유자 확인 필요.
 
