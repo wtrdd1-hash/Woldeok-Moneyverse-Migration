@@ -294,3 +294,23 @@ nginx: 운영 블로그 경로(`/blog`, `/{en,ja,zh,ko}/blog[/*]`)와 `@mv_blog_
 - 미검증: 로그인 회원/관리자 실화면(테스트 계정 세션 없음 — 이메일 가입 닫힘, DB 세션 생성은 권한 정책상 하지 않음). 운영 서버 미배포.
 
 남은 일(백엔드 계약 공백): 프론트가 부르는 Spring 경로 51개 404(인증 동의·비밀번호 재설정·이메일 변경·지갑 거래내역·인벤토리·출석·시즌·연금·클럽·마켓 목록·도움말 글 등), 봉투 형식 불일치 26곳(채권·아레나·예보·국고 등), 광장 글 상세 API 없음.
+
+### 17단계 (2026-11-25) — 독립 리뷰 지적 수정·프론트↔Spring 계약 전수 대조 — 작업자: Claude Code (Claude Opus 5.5, claude-opus-5-5)
+
+상태: **진행 중** → **완료(테스트 서버 배포·검증, 운영 미배포)**
+
+1. 링크·계산기 입력 이름·대비(42f23f78d6), www 운영 출처 허용(7743028c8e), /stocks 하드코딩 'LIVE' 공시 피드 제거(54d61d2e2a).
+2. 손으로 쓴 Origin 검사 14곳 → 공용 가드(8ec2db3cdb). 원인: nginx 뒤에서 new URL(req.url).origin 이 내부 주소라 실제 회원 POST 가 403(연금·덕이 상담·SEO 감사), 일부는 Origin 없으면 통과.
+3. 상점 잔액 미확인을 0 으로 보여 '잔액 부족' 처리하던 결함(472df8df7c). 오류 로그 API 바이트 상한·클라이언트당 분당 20건(385dd6207d). 체크박스 레이블 오연결, 크론 비밀 둘 다 허용(c42d7f06be).
+4. 계약 전수 대조: 프론트가 부르는 백엔드 경로 280개를 Test Spring 에 직접 호출. 404 66건 중 이중 매핑 누락 4개 컨트롤러(연금·중앙은행·마켓·시즌)에 /api/v1 추가(3e9773b835, FrontendV1AliasMappingTest).
+5. /pension: toggle-retire→toggle-retirement, ApiResponse 봉투 해제(lib/spring-envelope), 현금은 정본 지갑에서(이전엔 /wallet/summary 에 없는 필드를 읽어 항상 0 WLD), Spring 에 없는 납입·수령 이력은 '불러올 수 없음'(cb2d66b886).
+
+검증
+- frontend 618 파일 3229/3229, typecheck·build 통과. Spring 전체 테스트 통과(exit 0).
+- 테스트 서버 배포: 프론트 next-frontend-test-v20261124-cb2d66b88652, Spring test-backend-v20261125-cb2d66b88652(drop-in 40-qa-fix-20261125.conf, 이전 conf 백업 /var/backups/40-qa-fix-20261125.conf.before-cb2d66b88652).
+- 실측: 같은 출처 POST 는 인증·검증 단계까지 진행, Origin 없음·외부 출처 403(7개 경로). 오류 로그 21번째 요청부터 429. /pension 에 실제 공시값(운용자산 60,000 WLD, 지급률 5.20%). 계약 대조 404 66→57.
+
+남은 일(소유자 결정 필요)
+- Spring 에 구현 자체가 없는 경로 57개: seo 6, pension 6, auth 6, engagement 5, casino 5, board 5, banking 5, clubs 4, shop 2, businesses 2, wallet 1, treasury 1, seasons 1, rewards 1, notifications 1, mint 1, enterprises 1, central-bank 1, business-equity 1, bonds 1, bank 1.
+- /pension 화면 문구는 "원장 정산 검증 완료·실시간 가동"인데 Spring 연금 쓰기는 503 PENSION_LEDGER_NOT_CERTIFIED. 문구/플래그(PENSION_LEDGER_SETTLEMENT_PAUSED=false) 정정 여부.
+- 운영 미배포.
