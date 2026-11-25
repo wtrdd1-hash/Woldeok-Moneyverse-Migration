@@ -15,8 +15,12 @@ import java.util.*;
 public class ActivityController {
 
     private final ActivityService activityService;
+    private final com.moneyverse.api.domain.identity.service.UserAuthService auth;
+    /** One page visit sends a handful of events; a larger batch is abuse (security review 2026-11-25). */
+    public static final int MAX_EVENTS = 50;
 
-    public ActivityController(ActivityService activityService) {
+    public ActivityController(ActivityService activityService, com.moneyverse.api.domain.identity.service.UserAuthService auth) {
+        this.auth = auth;
         this.activityService = activityService;
     }
 
@@ -40,7 +44,14 @@ public class ActivityController {
             @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId,
             HttpServletRequest request
     ) {
-        UUID userId = resolveUserUuid(xUserId, xActorUserId);
+        // Identity comes from the session only; identity headers are ignored (anyone can send them).
+        if (req == null || req.events() == null || req.events().size() > MAX_EVENTS) {
+            return ResponseEntity.badRequest().body(new IngestEventsResponse(false, 0));
+        }
+        UUID userId = auth.resolveSession(request)
+                .filter(com.moneyverse.api.domain.identity.service.UserAuthService.SessionInfo::isSignedIn)
+                .map(com.moneyverse.api.domain.identity.service.UserAuthService.SessionInfo::getUserId)
+                .orElse(null);
         String ip = request.getRemoteAddr();
         String userAgent = request.getHeader("User-Agent");
         return ResponseEntity.ok(activityService.recordEvents(userId, req.events(), ip, userAgent));
