@@ -76,8 +76,11 @@ NestJS 원본이 없는 11개(연금 일부, board/stock-posts 쿼리, bonds rol
   - OAuth 재인증(auth/{provider}/reauthentication)은 남음.
 - [x] 카지노(f790c3b14e): coin/dice/theme plays, history, self-limit 조회·설정, clock. 감사 P0: 기존 /play·/dice/play 가 X-User-Id 헤더(고정 기본 회원)로 회원을 정하던 것 → 410, 재발 방지 테스트. Test DB: 읽기 정상, 카지노 스위치 disabled 라 DB 가 플레이 거절 → API 403 casino_disabled. 개장은 소유자 결정(공정성 시험 선행 규칙).
 - [ ] 클럽
-- [ ] 은행: 채권·신용·상환
-- [ ] 사업·참여·시즌·알림 검색·상점 보유·지갑 거래 상세·보상·국고 공시·조폐 증명서·시중 금리
+- [x] 은행(9495303f8a): 채권 매수·환매(bank_purchase_bond/redeem_bond, 원장), 대출 상환 /bank/loans/{id}/repayments(bank_repay), 상환 미리보기·계좌 요약·신용등급
+  (bank_get_my_standing·bank_my_credit_facts, Nest 계산식·등급표 그대로). 실DB: 채권 1,000 → 만기 1,030 원장 영수증(롤백). Test: 신용등급·요약 200, 현금 0 채권 409, 대출 없음 미리보기 400·상환 409. 운영 배포.
+- [x] 사업 지분·보유 목록·보상 가능 여부(07f9622c55): business_equity_standing·business_my_ownerships_v2·wallet_reward_availability. Test 실값 확인, 운영 배포.
+- 출석 룰렛: Nest 가 앱에서 economy_post_transaction 직접 호출 + Math.random 보상(규칙 위반) → 원장 래퍼 함수 없이는 구현 불가, 프론트도 호출 안 함 → 미연결 유지.
+- [ ] 남은 404(2026-11-25 Test 재대조 26개, 대조 방식 한계 약 8개 제외): 알림 검색, 상점 보유, 지갑 거래 상세, 국고 공시, 조폐 증명서, 시중 금리, 기업 공개, 사업 부스트, 채권 롤오버, OAuth 재인증, 초기 게임·선호 설정, 관리자 SEO 6
 - [ ] 관리자 SEO
 - [ ] Spring 감사 P0 7건: DB 함수 연결 또는 명시적 실패로 전환
 - [ ] 계약 재대조: 404 0건 목표, 남는 항목은 사유 기록
