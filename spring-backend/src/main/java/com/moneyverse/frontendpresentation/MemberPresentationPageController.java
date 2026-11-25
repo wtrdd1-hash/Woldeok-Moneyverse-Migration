@@ -33,7 +33,6 @@ public final class MemberPresentationPageController {
         Map<String,Object> model=new HashMap<>();
         model.put("uiPageKey",family.equals("support")?"msgSupport":family.equals("chat")?"msgChat":"wallet");
         model.put("memberRefresh",canonical);
-        model.put("isAdmin",source.checkAdmin(cookie));
         if(cookie==null)return login(headers,canonical);
         try{verify(source.read("/api/v1/auth/me",cookie));}
         catch(AdminSourceClient.SourceFailure failure){
