@@ -72,8 +72,9 @@ NestJS 원본이 없는 11개(연금 일부, board/stock-posts 쿼리, bonds rol
 
 - [x] 연금(882887c441, 1f4ebffbf7): funded/contribute·withdraw(treasury_core_post), funded/position, my-contributions, my-payouts. 구형 패널은 백엔드 보류와 일치하게 중단·정직한 문구. 실DB(앱 계정, 롤백) 검증: 납입 영수증, 같은 키 재요청 replayed=true, 적립 1,000 반영, 환급 950/수수료 50, 잔액 부족은 DB 거절. 이력 상한 50(DB 규칙)을 실DB 검증에서 발견해 수정.
 - [x] 광장(1f4ebffbf7): posts 목록·상세·작성·수정·삭제, 댓글 목록·작성·삭제, public/posts/{id}(+comments). Test 실측: 공개 글 200·실제 본문, 없는 글 404, 회원 경로 비로그인 401, /board/{id} 화면에 실제 제목.
-- [ ] 인증: 약관 동의, 비밀번호 재설정, 이메일 변경(Test 는 외부 메일 차단 → 토큰 생성까지 검증)
-- [ ] 카지노: 플레이·기록·자기 한도
+- [x] 인증(8aa4269c60, cc652916f1): PUT /auth/consent(회원 DB 함수·로그인 전 공개 정책만), 비밀번호 재설정 요청/완료, 이메일 변경 요청/완료, SMTP 발송기(Nest 와 같은 SMTP_* 변수·경로·문구). 실DB(앱 계정, 롤백): 동의 t/구버전 f, 재설정 발급·모르는 주소 f·1회 사용 t→재사용 f, 가짜 토큰 f. Test 는 외부 메일 차단이라 실제 발송은 미검증.
+  - OAuth 재인증(auth/{provider}/reauthentication)은 남음.
+- [x] 카지노(f790c3b14e): coin/dice/theme plays, history, self-limit 조회·설정, clock. 감사 P0: 기존 /play·/dice/play 가 X-User-Id 헤더(고정 기본 회원)로 회원을 정하던 것 → 410, 재발 방지 테스트. Test DB: 읽기 정상, 카지노 스위치 disabled 라 DB 가 플레이 거절 → API 403 casino_disabled. 개장은 소유자 결정(공정성 시험 선행 규칙).
 - [ ] 클럽
 - [ ] 은행: 채권·신용·상환
 - [ ] 사업·참여·시즌·알림 검색·상점 보유·지갑 거래 상세·보상·국고 공시·조폐 증명서·시중 금리
@@ -81,6 +82,15 @@ NestJS 원본이 없는 11개(연금 일부, board/stock-posts 쿼리, bonds rol
 - [ ] Spring 감사 P0 7건: DB 함수 연결 또는 명시적 실패로 전환
 - [ ] 계약 재대조: 404 0건 목표, 남는 항목은 사유 기록
 - [ ] Test 서버 안정성: 로그인 회원 실화면 검증 경로 확보(테스트 계정 세션)
+
+## 교차 검토 기록
+
+- 2026-11-25 Codex: 사용 한도로 11-27 13:57 까지 불가(실측). Gemini: 기본 모델 일일 한도 소진, gemini-3.5-flash-lite 응답 확인(PONG).
+- Gemini 1라운드(연금·광장·동의·계정복구 신규 코드): 3건 지적(Long 파싱 오버플로, principal_wld 타입, DELETE 본문 미파싱).
+  검증: 앞의 둘은 소스(단락 평가)와 DB 함수 시그니처(text)로 반박, 셋째는 MockMvc 테스트(6df27c8808)로 반박.
+- Gemini 2라운드: 3건 모두 WITHDRAWN, 새 결함 NONE.
+- 저장소 스킬 적용: test-driven-development(테스트 선작성, 계정복구는 변이 시험으로 실패 확인), systematic-debugging(메일 mock 원인 규명 후 수정),
+  requesting/receiving-code-review(외부 모델 검토와 근거 기반 판정), verification-before-completion(실DB·Test HTTP 실측 후 보고).
 
 ## 부록 A. 삭제한 브랜치와 마지막 SHA
 
