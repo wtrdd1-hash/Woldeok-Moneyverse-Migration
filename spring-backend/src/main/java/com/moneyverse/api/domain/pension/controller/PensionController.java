@@ -45,8 +45,13 @@ public class PensionController {
 
     @GetMapping("/overview")
     @Operation(summary = "대국민 국민연금 기금 운용 현황 및 벤치마크 지표 공개")
-    public ApiResponse<PensionOverview> getOverview() {
-        return ApiResponse.ok(pensionService.getOverview());
+    public Object getOverview(HttpServletRequest request) {
+        PensionOverview overview = pensionService.getOverview();
+        // /api/v1 is the Next BFF contract and answers the bare payload: the deployed
+        // page reads its fields directly (prod 500, digest 78170169, 2026-11-25).
+        // The legacy /api path keeps the ApiResponse envelope for existing callers.
+        String uri = request.getRequestURI();
+        return uri != null && uri.startsWith("/api/v1/") ? overview : ApiResponse.ok(overview);
     }
 
     @GetMapping("/my-account")
