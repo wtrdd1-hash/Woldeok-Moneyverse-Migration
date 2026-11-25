@@ -18,6 +18,7 @@ Read-only audit of the current Spring Boot module against the authoritative Nest
 - An interim report records bank identity and false-success defects, permissive security configuration, explicit unavailable functions, and open parity work. No member or financial data has been changed.
 - Gradle test was interrupted after repeated test-environment stock scheduler SQL and source-unavailable warnings; exit 1 is an interruption and is not a full-suite result.
 - Investigate test scheduler isolation before repeating the suite.
+- Reviewed additional financial, privacy, safety, gameplay and activity service paths; recorded source evidence and limitations in two domain review reports. Full feature parity remains open.
 
 ## Finished
 
