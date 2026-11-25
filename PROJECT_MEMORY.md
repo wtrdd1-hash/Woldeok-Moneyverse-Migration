@@ -102,8 +102,8 @@ The owner-designated AgentMemory reel and upstream README are preserved in [EN](
   - 작업 시작 전 최신 기획서 내용을 반드시 재확인한다.
   - 구현 중간에도 설계 변경점이나 의문 사항이 발생하면 즉시 기획서를 대조하고 사용자 피드백을 수렴하여 업데이트한다.
 - **문서 표준 유지:**
-  - `docs/PROJECT-DOCUMENT-POLICY-KO.md` 문서 운영 정책을 철저히 준수한다.
-  - 문서 전용 변경은 `main`에 직접 반영 가능하나, 코드/배포가 수반될 때는 정규 개발 워크플로우를 따른다.
+  - `docs/DOCUMENTATION_POLICY.md` 및 `docs/DOCUMENTATION_POLICY.ko.md` 문서 거버넌스 정책을 철저히 준수한다.
+  - 모든 문서 및 코드 변경은 `main` 직접 반영이 엄격히 금지되며, 반드시 전용 토픽 브랜치(`feat/`, `docs/`, `fix/`) 및 Pull Request를 통해서만 검증 후 통합한다.
 
 ---
 

@@ -55,18 +55,8 @@ export default function PageError({
       // ignore
     }
 
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          window.location.href = "/";
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
+    // Telemetry logged; allow user to review or retry without abrupt automatic kickout
+    setCountdown(0);
   }, [error]);
 
   return (
@@ -80,8 +70,8 @@ export default function PageError({
           화면을 정상적으로 불러오지 못했습니다.
         </h1>
         <p className="leading-relaxed text-zinc-400 text-sm [word-break:keep-all]">
-          요청하신 페이지 로드 중 예외가 감지되어 상세 원인이 시스템 원장에 자동 기록되었습니다.
-          방문자의 원활한 이용을 위해 <strong className="text-primary font-bold">{countdown}초 후 홈 화면으로 자동 이동</strong>합니다.
+          요청하신 페이지 로드 중 일시적인 예외가 감지되어 상세 원인이 시스템 원장에 자동 기록되었습니다.
+          아래 버튼을 눌러 새로고침하시거나 홈 화면으로 이동하실 수 있습니다.
         </p>
       </div>
 

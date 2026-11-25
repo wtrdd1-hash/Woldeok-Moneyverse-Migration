@@ -37,9 +37,9 @@ The Superpowers workflow is a release requirement, not advisory guidance. A chan
 
 ## 1. Orientation, and the one rule
 
-Woldeok Moneyverse (월덕 머니버스) is a Korean community's virtual economy: a double-entry ledger, a wallet, a shop, a stock market, a bank, businesses, a casino, a member board, and a Minecraft server status feed. This repository is that application rebuilt on Next.js, NestJS and PostgreSQL.
+Woldeok Moneyverse (월덕 머니버스) is a Korean community's virtual economy: a double-entry ledger, a wallet, a shop, a stock market, a bank, businesses, a casino, a member board, and a Minecraft server status feed. This repository is that application rebuilt on Next.js, Java Spring Boot 3.3.5, and PostgreSQL.
 
-The original was not Express. It was a single Node 20 ESM application with no framework at all — raw `node:http`, sequential `if` routing, 18 EJS views, browser TypeScript compiled to global scripts, a socket.io lobby, `pg` and `jose` (`docs/superpowers/specs/2026-08-27-nextjs-nestjs-rebuild-design.md:10`). That framing governs the scope of everything you do here. The rebuild replaced the HTTP, session and view layers. It did not move the economy, because the economy was never in Node.
+The original was not Express. It was a single Node 20 ESM application with no framework at all — raw `node:http`, sequential `if` routing, 18 EJS views, browser TypeScript compiled to global scripts, a socket.io lobby, `pg` and `jose` (`docs/superpowers/specs/2026-08-27-nextjs-nestjs-rebuild-design.md:10`). That framing governs the scope of everything you do here. The rebuild replaced the HTTP, session and view layers with Next.js frontend and canonical Java Spring Boot 3.3.5 backend. It did not move the economy, because the economy was never in Node.
 
 The repository is private (`wtrdd1-hash/Woldeok-Moneyverse-Migration`). Two stacks are deployed, and members hold real balances in the production one. A wrong migration is not a broken build.
 
@@ -83,8 +83,9 @@ One caution before you read a `42501` as a missing grant: it usually is not. Fif
 | Path | What it is |
 | --- | --- |
 | `frontend/` | Next.js App Router with shadcn/ui. Everything the browser loads except `/socket.io/`. |
-| `backend/` | NestJS API. Reachable from the compose network, plus the two edge exceptions below. |
-| `packages/contract/` | Types shared by both applications, and `src/route-map.ts`. Built before anything type-checks against it — its `dist` is what the dependents see. |
+| `spring-backend/` | Canonical Java Spring Boot 3.3.5 API and presentation service. Reachable from the edge and internal networks. |
+| `backend/` | Legacy NestJS prototype reference (retired in favor of `spring-backend/`). |
+| `packages/contract/` | Types shared across services, and `src/route-map.ts`. Built before anything type-checks against it — its `dist` is what the dependents see. |
 | `packages/database/` | `init/`, the numbered `migrations/`, `migrate.sh`, `production-checksums.json`, `verify/`, `test/migration-parity.test.ts`. The schema is owned here; Prisma introspects it and never migrates it. |
 | `deploy/` | Data and recovery scripts left over from the retired Docker host; **not the release path**. See `deploy/README.md` and `docs/INFRASTRUCTURE.md`. |
 | `ops/` | Cloudflare tunnel and DNS scripts. They run on the deployment host, never here. |
@@ -97,7 +98,7 @@ Two things on disk are not part of the repository. `packages/minecraft-agent/`, 
 ### The request path
 
 ```
-browser ──▶ edge (nginx) ──▶ Next ──▶ NestJS ──▶ SECURITY DEFINER function ──▶ tables
+browser ──▶ edge (nginx) ──▶ Next.js (BFF) ──▶ Spring Boot 3.3.5 ──▶ SECURITY DEFINER function ──▶ tables
                              server actions, route handlers
 ```
 

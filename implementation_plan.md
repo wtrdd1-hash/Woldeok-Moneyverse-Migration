@@ -5954,3 +5954,41 @@ eserves: ??쒕?援??명솚蹂댁쑀???듯빀怨꾩젙)
   - /dev/sdb1 (루트 파티션): 초기 86G(91%, 여유 8.9G) → **70G(75%, 여유 25G)** 로 **총 16.1 GB 순증 확보**
   - /tmp (임시 메모리 파일시스템): 초기 6.1G(91%) → **3.6G(54%, 여유 3.2G)** 로 쾌적화 완료
   - 필수 보존 영역(	asks, mcp-gateway, 메인 프로젝트 Woldeok-Moneyverse-Migration, woldeok-moneyverse-app) 100% 무결성 보존
+
+---
+## 🚀 [v20 Specification] 전 저장소 문서 전수 교차 재분석(C01~C10 충돌 해소), 테스트 서버 가동 및 실서버 QA/보안 검증, 승인된 데이터 변환 격리 검증 및 운영 승격 파이프라인
+- **작업 일시**: 2026-11-25 09:20 KST
+- **작업 번호 (Task ID)**: TASK-20261125-CROSS-REPO-DOC-AUDIT-AND-TEST-GATE
+- **사용자 핵심 지시**:
+  1. "프로젝트에모든 문서로 다 분석하고 충돌되는 내영있는지확인할것"
+  2. "또한 정정할부분는 qa 및코드 테스트 서버후 운영승격하고 qa 및 보안테스트 테스트서버켜서 진행할것"
+  3. "데이터변환 테스트서버에서 는 승인 내용을하고 충돌안되게 전체 문서재분석해줘"
+- **외부 감사(PR #3444) 대비 Antigravity 실체적 검증 및 팩트 확정**:
+  - 외부 감사(ChatGPT/PR #3444)는 Desktop Commander 오프라인으로 인해 "서버 기동, DB 접근, QA, 보안 시험, 데이터 변환 불가"로 기록하고 운영 승격을 보류함.
+  - Antigravity는 debian13 서버에 직접 SSH/Root 접근이 가능하며, 서버 상태 확인 결과 정상 가동(Uptime 46일, 디스크 여유 25GB) 중임을 실측 검증 완료.
+  - 테스트 인프라 실측:
+    - Nginx: test.easy-scraping.com -> 127.0.0.1:55474 (Next.js 프론트엔드)
+    - 백엔드: 127.0.0.1:55438 (Spring Boot 테스트 API, PID 3091877)
+    - 테스트 DB: 127.0.0.1:55436 (mv-nov18-test-db-20261122, 완벽 격리)
+- **10대 충돌 항목(C01~C10) 전수 재분석 및 정정 방안**:
+  - **C01 (아키텍처 불일치 - P0)**: AGENTS.md의 Node/NestJS 표기 vs README.md/PROJECT_PLAN.md의 Spring Boot 전환 표기.
+    - 실측 결과: 실제 백엔드는 Java Spring Boot 3.3.5 (운영 포트 4550, 테스트 포트 55438) 및 Next.js 16/React 19 프론트엔드로 100% 가동 중. AGENTS.md의 레거시 NestJS 문구를 Java Spring Boot 3.3.5 표준으로 일괄 정정.
+  - **C02 & C03 (문서 정책 및 거버넌스 - P0/P1)**: PROJECT_MEMORY.md의 main 직접 반영 허용 및 폐기 문서(PROJECT-DOCUMENT-POLICY-KO.md) 참조 충돌.
+    - 조치 방안: DOCUMENTATION_POLICY.md를 최상위 단일 규정으로 확정하고, main 직접 커밋을 절대 금지하며 토픽 브랜치 + PR 머지 원칙 준수. PROJECT_MEMORY.md의 폐기 링크를 현행 정책 문서로 교정.
+  - **C04 (배포 상태 및 가용성 충돌 - P0)**: 과거 부분 운영 배포 성공 기록 vs 503 유지보수 기록.
+    - 조치 방안: 과거 시점의 스냅샷과 현재의 가용성을 명확히 분리 표기. 현재 운영 승격은 보류(HOLD) 상태이며, 테스트 서버 검증 100% 통과 전까지 운영 반영을 엄격 차단.
+  - **C05 (UI 디자인 권위 불일치 - P0)**: 11월 18일 승인 UI vs 11월 24일 180페이지 게임 UI 권위.
+    - 조치 방안: CURRENT_UI_DESIGN_MANIFEST.json v2026.11.24.11을 최신 유일 권위로 확정하고, 사용자가 보고한 실서비스 10대 결함(DEFECT-01~10: 퀘스트 리다이렉트 튕김, 지갑 3319858667 에러, 잔액 확인 불가, GM 콘솔 메뉴 과부하)을 코드 및 테스트 서버에 정밀 반영.
+  - **C06 & C10 (DB 보안 및 데이터 변환 안전성 - P0)**: SECURITY DEFINER 권한 경계 및 데이터 변환 시 운영 원장 보호.
+    - 조치 방안: 운영 DB 쓰기 접근 절대 금지. 포트 55436의 격리된 mv-nov18-test-db-20261122에서만 승인된 테이블/필드에 대한 dry-run 데이터 변환 및 복식부기 원장 검증(audit_verify_double_entry_ledger()) 수행.
+  - **C07 & C08 (Android 앱 저장소와의 교차 API 계약 - P1)**: woldeok-moneyverse-app의 구 API 스냅샷 혼재.
+    - 조치 방안: Spring Boot의 최신 DTO/엔드포인트 계약을 기준으로 앱 API 스펙을 동기화하고, 구 스냅샷은 [HISTORICAL] 아카이브로 명시.
+  - **C09 (오류 상태 스냅샷 혼재 - P1)**: 502/503/403 등 과거 오류 기록 혼재.
+    - 조치 방안: 각 오류 기록에 측정 일시(Timestamp) 및 측정 환경(Test/Prod)을 명시하여 현재 정상 지표와 혼동 방지.
+- **테스트 서버 가동 및 QA/보안 테스트 실행 계획**:
+  1. Claude Code가 수정한 Spring 백엔드 API DTO 일치성 빌드 및 테스트 완료 여부 확인.
+  2. Next.js 프론트엔드 최신 수정본(quests, wallet, page, account, admin)의 build 검증.
+  3. 테스트 서버(포트 55474 및 55438)에 최신 빌드 배포 및 무중단 재기동.
+  4. 테스트 도메인(test.easy-scraping.com) 대상 자동화 QA 및 보안 검증(비로그인 게스트 모드, 지갑 DTO 응답, 세션/CSRF, DB 권한 거부 테스트) 수행.
+  5. 격리된 테스트 DB에서 승인된 데이터 변환 dry-run 검증 및 원장 무결성 확인.
+  6. 전수 통과 확인 후 운영 승격 최종 보고서 작성.

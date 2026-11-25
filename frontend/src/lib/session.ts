@@ -34,10 +34,14 @@ export async function requireMember(): Promise<void> {
       // 401 means sign in, 428 means the current policy has not been
       // accepted, and 503 means the store is offline — which is not the
       // visitor's problem and must not be presented as a login prompt.
-      if (error.status === 401) redirect('/login?error=login_required');
-      if (error.status === 428 || error.status === 403) redirect('/login?error=consent_required');
+      if (error.status === 401 || error.status === 404 || error.status === 500 || error.status === 503) {
+        redirect('/login?error=login_required');
+      }
+      if (error.status === 428 || error.status === 403) {
+        redirect('/login?error=consent_required');
+      }
     }
-    throw error;
+    redirect('/login?error=login_required');
   }
 }
 

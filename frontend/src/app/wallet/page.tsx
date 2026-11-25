@@ -64,26 +64,36 @@ function signedPercent(bpsText: string): string {
   return `${prefix}${(Math.abs(bps) / 100).toLocaleString('ko-KR', { maximumFractionDigits: 2 })}%`;
 }
 
-export default async function WalletPage() {
-  await requireMember();
+const GUEST_WALLET_OVERVIEW: Overview = {
+  userId: 'guest',
+  balances: {
+    currency: 'WLD',
+    cash: { availableAmount: '0', updatedAt: new Date().toISOString() },
+    bank: { availableAmount: '0', updatedAt: new Date().toISOString() },
+    totalAvailableAmount: '0',
+  },
+  recentTransactions: [],
+};
 
-  const [wallet, loanData, rewardAvailability, portfolioData] = await Promise.all([
-    apiOrNull<Overview>('/api/v1/wallet?recent=50'),
-    apiOrNull<{ loans: LoanView[] }>('/api/v1/bank/loans'),
-    apiOrNull<RewardAvailability>('/api/v1/rewards/availability'),
-    apiOrNull<{ holdings: PortfolioHoldingInput[] }>('/api/v1/stocks/portfolio'),
+export default async function WalletPage() {
+  let isGuest = false;
+  try {
+    const session = await apiOrNull<{ csrfToken: string }>('/api/v1/auth/session');
+    if (!session) {
+      isGuest = true;
+    }
+  } catch {
+    isGuest = true;
+  }
+
+  const [rawWallet, loanData, rewardAvailability, portfolioData] = await Promise.all([
+    isGuest ? null : apiOrNull<Overview>('/api/v1/wallet?recent=50'),
+    isGuest ? null : apiOrNull<{ loans: LoanView[] }>('/api/v1/bank/loans'),
+    isGuest ? null : apiOrNull<RewardAvailability>('/api/v1/rewards/availability'),
+    isGuest ? null : apiOrNull<{ holdings: PortfolioHoldingInput[] }>('/api/v1/stocks/portfolio'),
   ]);
 
-  if (!wallet) {
-    return (
-      <div data-page="wallet" className="min-h-screen pb-24 space-y-6">
-        <EmptyState
-          title={<T korean="지금은 지갑을 불러올 수 없어요." english="Cannot load wallet at this time." />}
-          description={<T korean="잠시 후 다시 확인해 주세요." english="Please try again in a few moments." />}
-        />
-      </div>
-    );
-  }
+  const wallet = rawWallet ?? GUEST_WALLET_OVERVIEW;
 
   const { balances, recentTransactions, userId } = wallet;
   const loans = loanData?.loans ?? [];
@@ -110,6 +120,23 @@ export default async function WalletPage() {
   return (
     <div data-page="wallet" className="min-h-screen pb-24 space-y-6">
       <LiveRefresh />
+
+      {isGuest && (
+        <div className="rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/15 via-purple-500/10 to-transparent p-5 flex flex-wrap items-center justify-between gap-4 shadow-lg backdrop-blur-sm">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-primary text-primary-foreground">게스트 모드</span>
+              <h2 className="text-sm font-bold text-white">지갑 둘러보기 모드로 접속되었습니다.</h2>
+            </div>
+            <p className="text-xs text-zinc-400">
+              실제 WLD 자산 입출금, 즉시 송금, 대출 및 포트폴리오를 관리하시려면 로그인해 주세요.
+            </p>
+          </div>
+          <Link href="/login" className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-all shadow-md">
+            로그인하러 가기 →
+          </Link>
+        </div>
+      )}
 
       {/* 1. 상단 토스형 내 자산 메인 히어로 카드 */}
       <div className="toss-card p-6 sm:p-8 space-y-6">
