@@ -20,6 +20,9 @@ vi.mock('@/lib/api', () => {
   };
 });
 
+
+const sameOrigin = (path = '/api/test') => new Request(`http://localhost${path}`, { method: 'POST', headers: { origin: 'http://localhost', 'content-type': 'application/json' }, body: '{}' });
+
 describe('SOE dividend remittance proxy', () => {
   it('forwards request to backend harvest endpoint and returns json result', async () => {
     apiMock.mockResolvedValueOnce({
@@ -31,7 +34,7 @@ describe('SOE dividend remittance proxy', () => {
       ledger_transaction_id: 'tx-1234',
     });
 
-    const response = await POST();
+    const response = await POST(sameOrigin());
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({
       code: 'SOE_DIVIDEND_HARVESTED',
@@ -45,7 +48,7 @@ describe('SOE dividend remittance proxy', () => {
   it('handles backend error gracefully with 500 when unknown error occurs', async () => {
     apiMock.mockRejectedValueOnce(new Error('Unknown connection issue'));
 
-    const response = await POST();
+    const response = await POST(sameOrigin());
     expect(response.status).toBe(500);
     expect(await response.json()).toMatchObject({
       code: 'SOE_DIVIDEND_HARVEST_FAILED',

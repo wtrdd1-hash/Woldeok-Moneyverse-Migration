@@ -13,6 +13,9 @@ vi.mock('@/lib/api', () => {
   };
 });
 
+
+const sameOrigin = (path = '/api/test') => new Request(`http://localhost${path}`, { method: 'POST', headers: { origin: 'http://localhost', 'content-type': 'application/json' }, body: '{}' });
+
 describe('POST /api/admin/pension/distribute', () => {
   it('forwards payout execution to backend canonical endpoint and returns 200', async () => {
     const { api } = await import('@/lib/api');
@@ -23,7 +26,7 @@ describe('POST /api/admin/pension/distribute', () => {
       total_payout_wld: '0',
     });
 
-    const response = await POST();
+    const response = await POST(sameOrigin());
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.success).toBe(true);
@@ -34,7 +37,7 @@ describe('POST /api/admin/pension/distribute', () => {
     const { api, ApiError } = await import('@/lib/api');
     vi.mocked(api).mockRejectedValueOnce(new ApiError(403, '권한이 없습니다.'));
 
-    const response = await POST();
+    const response = await POST(sameOrigin());
     expect(response.status).toBe(403);
     const body = await response.json();
     expect(body.error).toBe('권한이 없습니다.');

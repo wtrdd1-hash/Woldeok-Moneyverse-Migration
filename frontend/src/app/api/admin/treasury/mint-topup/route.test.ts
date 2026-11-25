@@ -25,7 +25,7 @@ describe('Admin mint topup gateway route contract', () => {
 
     const req = new Request('http://localhost:3000/api/admin/treasury/mint-topup', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { origin: 'http://localhost:3000',  'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
 

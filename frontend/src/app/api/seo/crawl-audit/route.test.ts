@@ -16,6 +16,9 @@ vi.mock('@/lib/api', () => ({
 }));
 vi.mock('@/lib/mutate', () => ({ mutate: vi.fn() }));
 
+
+const sameOrigin = (path = '/api/test') => new Request(`http://localhost${path}`, { method: 'POST', headers: { origin: 'http://localhost', 'content-type': 'application/json' }, body: '{}' });
+
 describe('SEO crawl-audit proxy fail-closed behavior', () => {
   afterEach(() => vi.resetAllMocks());
 
@@ -30,7 +33,7 @@ describe('SEO crawl-audit proxy fail-closed behavior', () => {
 
   it('does not invent a completed crawl when POST cannot reach the backend', async () => {
     vi.mocked(mutate).mockRejectedValue(new Error('offline'));
-    const response = await POST();
+    const response = await POST(sameOrigin());
     const result = await response.json();
     expect(response.status).toBe(503);
     expect(result.healthyUrls).toBeUndefined();
@@ -41,7 +44,7 @@ describe('SEO crawl-audit proxy fail-closed behavior', () => {
     vi.mocked(api).mockResolvedValueOnce({ status: 'not_run', healthyUrls: 0 });
     vi.mocked(mutate).mockResolvedValueOnce({ totalUrlsChecked: 2, healthyUrls: 2 });
     expect((await GET()).status).toBe(200);
-    expect((await POST()).status).toBe(200);
+    expect((await POST(sameOrigin())).status).toBe(200);
     expect(api).toHaveBeenCalledWith('/api/v1/seo/crawl-audit', { timeoutMs: 20_000 });
     expect(mutate).toHaveBeenCalledWith('/api/v1/seo/crawl-audit', {
       method: 'POST',
