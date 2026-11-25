@@ -1,51 +1,35 @@
-import React from 'react';
-import { describe, it, expect, afterEach } from 'vitest';
-import { render, fireEvent, cleanup } from '@testing-library/react';
-import AuctionMarketplacePage from './page';
+import { describe, expect, it, vi } from 'vitest';
+import { renderToStaticMarkup } from 'react-dom/server';
 
-describe('AuctionMarketplacePage Component', () => {
-  afterEach(() => {
-    cleanup();
+/**
+ * QA 2026-11-25: /marketplace/auction showed invented lots ("황금 호가창 네온
+ * 테마 (1기 한정)") and a stream of invented bids. It now lists the
+ * black_market_auctions rows the API returns, read-only.
+ */
+const apiOrNull = vi.fn();
+vi.mock('@/lib/api', () => ({ apiOrNull: (...a: unknown[]) => apiOrNull(...a) }));
+const { default: AuctionPage } = await import('./page');
+
+const LOT = {
+  id: 'be1af0dc-718a-4949-9d01-8aefeca992d6', itemTitle: '불멸의 골드 드래곤 아우라', itemDescription: '신화급 치장',
+  remainingSeconds: 3600, startingBid: 5000000, currentBid: 5200000, bidCount: 3, status: 'active',
+};
+
+describe('auction page', () => {
+  it('lists the API lots with their real bids', async () => {
+    apiOrNull.mockResolvedValue({ success: true, data: { auctions: [LOT] } });
+    const html = renderToStaticMarkup(await AuctionPage());
+    expect(html).toContain('불멸의 골드 드래곤 아우라');
+    expect(html).toContain('5,200,000');
+    expect(html).not.toContain('황금 호가창 네온 테마');
   });
-
-  it('renders auction page header, stats, and initial auction items', () => {
-    const { container } = render(<AuctionMarketplacePage />);
-
-    expect(container.textContent).toContain('Steam형 P2P 아티팩트 경매장');
-    expect(container.textContent).toContain('총 소각된 거래 수수료');
-    expect(container.textContent).toContain('황금 호가창 네온 테마 (1기 한정)');
+  it('marks a lot whose time is up as closed', async () => {
+    apiOrNull.mockResolvedValue({ success: true, data: { auctions: [{ ...LOT, remainingSeconds: 0 }] } });
+    expect(renderToStaticMarkup(await AuctionPage())).toContain('마감');
   });
-
-  it('filters auction items when category button is clicked', () => {
-    const { container, getByRole } = render(<AuctionMarketplacePage />);
-
-    // Click '칭호/엠블럼' filter
-    const titleFilter = getByRole('button', { name: /📜 칭호\/엠블럼/i });
-    fireEvent.click(titleFilter);
-
-    // Should display the title item and not the theme item
-    expect(container.textContent).toContain('[전설] 시장을 뒤흔드는 자 칭호');
-    expect(container.textContent).not.toContain('황금 호가창 네온 테마 (1기 한정)');
-  });
-
-  it('opens bid modal but confirms preview without changing real account', () => {
-    const { container, getAllByRole, getByRole } = render(<AuctionMarketplacePage />);
-
-    // Click first item bid button
-    const bidButtons = getAllByRole('button', { name: '입찰하기 (Bid)' });
-    const firstBidBtn = bidButtons[0];
-    if (!firstBidBtn) throw new Error('Bid button not found');
-    fireEvent.click(firstBidBtn);
-
-    expect(container.textContent).toContain('아티팩트 경매 입찰하기');
-    expect(container.textContent).toContain('5% 거래 수수료 소각');
-
-    // Confirm bid
-    const confirmBidBtn = getByRole('button', { name: '입찰 확정' });
-    fireEvent.click(confirmBidBtn);
-
-    // Notification appears
-    expect(container.textContent).toContain('경매 미리보기 화면입니다.');
-    expect(container.textContent).not.toContain('입찰 성공!');
+  it('shows an unavailable state, not invented lots, when the API does not answer', async () => {
+    apiOrNull.mockResolvedValue(null);
+    const html = renderToStaticMarkup(await AuctionPage());
+    expect(html).toContain('불러올 수 없');
   });
 });
