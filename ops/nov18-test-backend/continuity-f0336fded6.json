@@ -1,0 +1,61 @@
+{
+  "applicationSource": "f0336fded6068f884c87f88efedeb770fd3387d4",
+  "jarSha256": "8a1c75c685ad31805a772ff9af6a94e6f7fd2e57f66809412ac2e900b1d6f38c",
+  "phase": "accepted",
+  "beforePid": 556244,
+  "unitBefore": {
+    "dev": 2065,
+    "ino": 1833335,
+    "uid": 0,
+    "mode": 384,
+    "sha256": "6b52270d5ff8fab5feb011029103c336083b8cf45ed7e1daca53bbc5997b5b33"
+  },
+  "originalBootstrapUnit": {
+    "dev": 2065,
+    "ino": 1702683,
+    "uid": 0,
+    "mode": 384,
+    "sha256": "6b52270d5ff8fab5feb011029103c336083b8cf45ed7e1daca53bbc5997b5b33"
+  },
+  "environmentUnchanged": true,
+  "containerId": "4cf69a9cd8a6ddefe76902860ddb7d051d603f45d8a192859a0d573f5e788774",
+  "containerRestartBefore": "no",
+  "sourceDigestDelta": {
+    "backend.py": {
+      "after": "30543876a516d75cfca94fde651bab103ad6152d6bcff4062fdac75fcfd94cb8",
+      "before": "ce60f0fcf0d2d3585538a2a0bd77ba990f2c40b77e41e9dcf3757db3ba7f32a0"
+    },
+    "install.py": {
+      "after": "81ba6860043bbdc3125ec3f005ec19b898a5142cb78e67fb2fde3670f108c22e",
+      "before": "890d6f31a41219ee320613903445e84e4fbbae31d8b37210aec407d1ea36c3dc"
+    },
+    "acceptance.py": {
+      "after": "885cb434a22cd1b661ea4c731ec3720ccbb2c63e8c9aee5037f70b755cdf3891",
+      "before": "202d143b4d9120ecca18c6fdbfcd43bff31bebcd424434b84a74647ff6bfa8f1"
+    },
+    "test_backend.py": {
+      "after": "2faeb390ab2012ddabfa2dca8773e029f885ef343734fc2955f78dbb8fbc9475",
+      "before": "b39e880c92c6ef8c20c85128b813491f853d10c8ebd004e69e1b507aa8d037d4"
+    },
+    "continuity.py": {
+      "after": "03c173a6c45c1a6c2d79922194f252abbf03bf4a74091f4f8c42743597f92aeb"
+    }
+  },
+  "unitAfter": {
+    "dev": 2065,
+    "ino": 1833336,
+    "uid": 0,
+    "mode": 384,
+    "sha256": "7c38e2ac1ffb776f99743f4c8e057cbbcbcc6bd3708221e18bb0bdd8bcac2ac4"
+  },
+  "afterPid": 566098,
+  "bootLink": {
+    "dev": 2065,
+    "ino": 1833335,
+    "uid": 0,
+    "mode": 511,
+    "target": "/etc/systemd/system/moneyverse-nov18-test-backend-v20261122.service"
+  },
+  "containerRestartAfter": "unless-stopped",
+  "acceptanceSha256": "c901a1b525c179b4729305db82902ef63aba80cfcd0b379d860e1a880ab7f331"
+}

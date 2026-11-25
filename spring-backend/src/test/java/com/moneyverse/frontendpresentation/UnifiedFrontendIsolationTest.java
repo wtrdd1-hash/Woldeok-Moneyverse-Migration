@@ -73,7 +73,9 @@ class UnifiedFrontendIsolationTest {
         assertEquals(List.of("/api/v1/admin/me"),sourcePaths);
     }
     @Test void incompleteFeatureCandidatesAndMutationsAreNotActivatedByComposition() throws Exception {
-        for(String path:List.of("/stocks","/shop","/board","/account","/api/v1/admin/users","/actuator/env"))assertEquals(403,get(path,COOKIE).statusCode(),path);
+        sourcePaths.clear();assertEquals(503,get("/stocks",COOKIE).statusCode(),"Finance with unverifiable member identity must fail closed");
+        sourcePaths.clear();
+        for(String path:List.of("/shop","/board","/account","/api/v1/admin/users","/actuator/env"))assertEquals(403,get(path,COOKIE).statusCode(),path);
         var request=HttpRequest.newBuilder(base.resolve("/admin/users")).header("Cookie",COOKIE).POST(HttpRequest.BodyPublishers.ofString("{}")).build();
         assertEquals(403,browser.send(request,HttpResponse.BodyHandlers.discarding()).statusCode());assertTrue(sourcePaths.isEmpty());
     }
@@ -120,7 +122,7 @@ class UnifiedFrontendIsolationTest {
         bodies.put("/api/v1/auth/me",memberProof());
         for(String route:List.of("/wallet","/support","/chat")){
             sourcePaths.clear();var response=get(route,COOKIE);assertEquals(200,response.statusCode(),route);
-            assertEquals(List.of("/api/v1/auth/me"),sourcePaths);assertTrue(response.body().contains("class=\"app-shell\""));
+            assertEquals(List.of("/api/v1/auth/me","/api/v1/admin/me"),sourcePaths);assertTrue(response.body().contains("class=\"app-shell\""));
             assertTrue(response.body().contains("/assets/mv39/favicon.ico?v="));assertTrue(response.body().contains("no-store")||response.headers().firstValue("Cache-Control").orElse("").contains("no-store"));
             assertTrue(response.headers().firstValue("X-Robots-Tag").orElse("").contains("noindex"));
             assertFalse(response.body().contains("99999999999999999999999999999999999999"));assertFalse(response.body().contains("00000000-0000-4000-8000-000000000001"));

@@ -57,3 +57,31 @@ describe('blog administrator entry point', () => {
     }
   });
 });
+
+import { adminGroupTabs } from './admin-sub-nav';
+
+/**
+ * Owner QA 2026-11-25 §2.3: all 29 console links were drawn as one grid. The
+ * DESIGN180 sidebar already lists the eight groups; the strip shows only the
+ * pages inside the current group.
+ */
+describe('adminGroupTabs', () => {
+  it('shows only the economy pages inside 경제', () => {
+    const hrefs = adminGroupTabs('/admin/central-bank').map((t) => t.href);
+    expect(hrefs).toContain('/admin/economy');
+    expect(hrefs).toContain('/admin/mint');
+    expect(hrefs).not.toContain('/admin/users');
+    expect(hrefs.length).toBeLessThan(ADMIN_TABS.length);
+  });
+  it('shows a single-page group as just that page', () => {
+    expect(adminGroupTabs('/admin/support').map((t) => t.href)).toEqual(['/admin/support']);
+  });
+  it('every console page belongs to exactly one sidebar group', () => {
+    const seen = new Map<string, number>();
+    for (const tab of ADMIN_TABS) {
+      const n = adminGroupTabs(tab.href).some((t) => t.href === tab.href) ? 1 : 0;
+      seen.set(tab.href, n);
+    }
+    expect([...seen].filter(([, n]) => n !== 1)).toEqual([]);
+  });
+});

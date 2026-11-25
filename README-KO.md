@@ -1,5 +1,8 @@
 # 🌙 월덕 머니버스 (Woldeok Moneyverse) — 공식 정본 문서
 
+> **Authority clarification — v2026.11.24.DOCSYNC.1:** This file retains dated implementation/memory records. Current decisions and release permissions are in [document authority](docs/DOCUMENT_AUTHORITY.md) / [한국어](docs/DOCUMENT_AUTHORITY.ko.md). Prior completion/version claims do not certify today's runtime.
+
+
 > **호스팅 도메인**: `https://easy-scraping.com`  
 > **현재 릴리즈**: `prod-v2026.11.11.2330-ccd699e99a` (Next.js 16+, NestJS 11+, PostgreSQL 16)  
 > **핵심 원칙**: 헌법적 금융 안전 거버넌스, 완전 복식부기 원장, 2FA 관리자 OTP 보안, 320px~1440px+ 다중 뷰포트 레이아웃 무결성
@@ -22,7 +25,7 @@
 
 ## 📚 주요 마스터 문서 및 아키텍처 명세서
 
-- 🌐 **[정본 종합 시스템 아키텍처 및 무결성 명세서 (v312)](docs/moneyverse_full_system_architecture_spec.md)**
+- 🌐 **정본 종합 시스템 아키텍처 및 무결성 명세서 (v312) (historical source unavailable; original target: docs/moneyverse_full_system_architecture_spec.md; [link audit](docs/qa/2026-11-24-document-link-reconciliation.json))**
 - 🏆 **[통합 개발 진행상황 및 마스터 레퍼런스 총서](docs/DEVELOPMENT_STATUS_AND_MASTER_REFERENCE.ko.md)**
 - 🌟 **[공식 마스터 통합 문서 허브 (5대 도메인 총괄 색인)](docs/DOCS_INDEX.md)**
 - 🏛️ **[거시 경제 6대 기둥 총괄 기획서](docs/MACRO_SOVEREIGN_ECONOMIC_SYSTEM_MASTER_SPEC.ko.md)**

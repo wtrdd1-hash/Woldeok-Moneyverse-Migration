@@ -1,4 +1,7 @@
 ## v2026.11.24.0818 — Stitch Skills design-contract pilot (not deployed)
+
+> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](../DOCUMENT_AUTHORITY.md) / [한국어](../DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+
 Google's source-only extraction skill is available project-locally and the November 18 approved web design has an EN/KO machine-readable `.stitch/DESIGN.md`; 11 CSS token checks PASS. Preserve Spring/Thymeleaf, real API data and independent Test requirements. No Stitch MCP, cloud screens or deployments. [Details](../development/GOOGLE_STITCH_SKILLS_PILOT_v2026.11.24.0818.md).
 
 # Woldeok Moneyverse — Integrated Planning Master
@@ -11,6 +14,40 @@ Google's source-only extraction skill is available project-locally and the Novem
 > v2026.11.23.8 신규 이미지: [180 new images](../design/game-ui-v2026.11.23.8/README.md) — 생성 완료/시안 검수 필요, 실제 서비스 적용 아님.
 
 > **UI consolidation reference (v2026.11.23.5, docs-only):** [UI/UX single source and QA issues](../UI_UX_SINGLE_REFERENCE.md). The *current favicon itself* is the brand logo; admin nav only for authorized administrators, never guests/non-admins. Previous generated emblem mockups are not approved brand references. Exact-runtime QA remains OPEN.
+
+> **Historical rebuild frontdoor — captured 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
+
+## v2026.11.22.2041.1 — Instagram 100 UI names source reference (PLANNING; DOCS ONLY)
+
+The owner-designated integrated design reference: [Instagram reel](https://www.instagram.com/reel/DgB83_Fh4NP/) by @uxwoodytips (2026-11-21) demonstrates the value of precise component and UX terminology when instructing AI. Public Instagram metadata and 22-second video frames were actually reviewed; examples include toggle/checkbox/radio, bento/card grids, modal/bottom-sheet/drawer, date range, pagination and floating versus sticky action. **The full 100-term dictionary was not retrieved and is NOT claimed as verified.** Preserve the [English reference](../research/2026-11-22-instagram-uxwoodytips-ui-100-v2041.md) / [Korean reference](../research/2026-11-22-instagram-uxwoodytips-ui-100-v2041.ko.md) with provenance and project-specific usage notes. Current owner approval: the November 18 Spring-web visual authority, EN+KO/JA/ZH/VI localization, global chat/support, Google/Discord authentication and real-source finance protections remain unchanged. No code, Test, Production, DB or authentication deployment.
+
+## v2026.11.23.12 — 27-source reel design adoption: authority and acceptance gate (PLANNING ONLY)
+
+New [canonical specification](REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.md) / [한국어](REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.ko.md) incorporates the owner-provided [27-source reel](https://www.instagram.com/reel/DgB15siSolR/) at **design reference level**, not new service authority. Verified Instagram oEmbed caption: 9 groups, 27 names; no playback verification. Mandatory: Nov18 approved visual tokens/logo, Spring native UI, real DB/API, EN→KO→JA→ZH→VI, clear ad labels, per-asset license gate, G0-G6 visual/functional/Test/rollback QA. The other branch's 180 game-theme PNGs are unapproved concepts, not actual runtime pages. [Discovery-only catalog](../design/asset-resources-v2026.11.23.12/source-catalog.json), [start/mid/end worklog](../worklog/2026-11-23-reel-27-design-resources-v12.md). No new code/images/Test/Production changes. Start/mid main `9876c09888ec84034eec183cf1309c85df3d7447`.
+
+> **v2026.11.24.FEARCH.1 — OWNER FRONTEND ARCHITECTURE DECISION (DRAFT, no runtime cutover):** Target for *new* 23 Nov UI is **separate Next.js/React frontend + Spring Boot authoritative API/auth/finance**. Older mandatory Spring MVC/Thymeleaf phrasing is historical for frontend technology only; preserve active legacy frontend and all business, design, security and Test/Production promotion constraints. Retain 23 Nov v10 unmerged immutable SHA 39888c7..., original 18 Nov and v8 assets, and require full identity/session/real-data QA. [English canonical decision](FRONTEND_ARCHITECTURE_NOV23_NEXT_SPRING_v2026.11.24.FEARCH.1.md) / [KO](FRONTEND_ARCHITECTURE_NOV23_NEXT_SPRING_v2026.11.24.FEARCH.1.ko.md). **Draft PR only, not effective on protected main until merged; no server switch.**
+
+### Historical Test-governance proposal — captured 2026-11-23
+
+> **v2026.11.23.1 strict Test governance (review proposal / docs only):** [Mandatory Test server gates](../operations/STRICT_TEST_SERVER_GOVERNANCE_v2026.11.23.1.md). Historical 4550 is Spring API, not verified Test. Mini-PC offline; live PID/firewall unverified. Production promotion BLOCKED until isolation, auth, exact-SHA Test QA and zero-downtime release gates pass.
+
+> v2026.11.23.11 public advertisement disclosure / 공개 광고 표시: [Ad display and policy QA](../qa/2026-11-23-public-ad-display-audit-v2026.11.23.11.md) — source change candidate only, native Spring Test and Production not verified. Protected routes remain ad-free.
+
+## v2026.11.22.1 — Codex/Gemini advisory skill handoff (LOCAL TOOL INSTALL; RELEASE HOLD)
+
+Refer to [EN protocol](../development/CODEX_GEMINI_PINGPONG_SKILL_v2026.11.22.1.md) / [한국어](../development/CODEX_GEMINI_PINGPONG_SKILL_v2026.11.22.1.ko.md). Branch-isolated, read-only, limited-round peer review may support project planning and QA; it cannot change this authority, overlap Gemini file ownership, merge PRs, replace source-backed tests, or authorize Production. Installation and six synthetic tests only; real cross-model exchange/credentials remain unverified. No runtime or product-scope change.
+
+## v2026.11.24.1319 — Claudex Loop skill installation (development only)
+[Installation and verification](../development/CLAUDEX_LOOP_INSTALL_v2026.11.24.1319.md). Existing Gemini collaboration and release gates remain unchanged; live cross-model loop not executed.
+
+## v2026.11.24.1321 — Multi-skill development installation / 개발 스킬 설치
+[Inventory and verification](../development/MULTI_SKILL_INSTALL_v2026.11.24.1321.md). Existing Superpowers and release gates retained; no deployment or automatic schedule change.
+
+## v2026.11.24.1340 — Token-tool reference / Graphify development engine
+[Verification](../development/TOKEN_TOOL_REEL_REVIEW_v2026.11.24.1340.md). Exact reel tools unverified; existing workflow and release gates unchanged.
+
+## v2026.11.24.1345 — OmniRoute isolated gateway / 개발 게이트웨이
+[Installation and verification](../development/OMNIROUTE_INSTALL_v2026.11.24.1345.md). Local only; no client routing or application release changes.
 
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 

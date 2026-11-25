@@ -1,41 +1,37 @@
 export function PageHeader({
-  eyebrow,
+  eyebrow: _eyebrow,
   title,
+  titleAs: Title = 'h1',
   action,
   children,
 }: {
   readonly eyebrow?: string;
   readonly title: React.ReactNode;
+  /** h2 when the page already renders its own (e.g. SEO) h1. */
+  readonly titleAs?: 'h1' | 'h2';
   readonly action?: React.ReactNode;
   readonly children?: React.ReactNode;
 }) {
   return (
-    <header className="grid w-full max-w-full min-w-0 grid-cols-[minmax(0,1fr)] gap-2 sm:gap-3 border-b border-border pb-4 sm:pb-7 overflow-hidden">
-      <div className="flex flex-wrap items-start justify-between gap-3 min-w-0">
-        <div className="min-w-0 space-y-1.5">
-          {eyebrow && (
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20 font-mono text-[10px] font-bold uppercase tracking-wider shrink-0">
-              <span className="size-1 rounded-full bg-primary animate-pulse" />
-              <span className="truncate">{eyebrow}</span>
-            </span>
-          )}
-          <h1 className="max-w-full min-w-0 text-[clamp(1.35rem,3.2vw,2.75rem)] font-black leading-[1.15] tracking-[-0.04em] break-words">
-            {title}
-          </h1>
-        </div>
-        {action && <div className="shrink-0 pt-1">{action}</div>}
+    <header className="mb-6 grid w-full max-w-full min-w-0 grid-cols-[minmax(0,1fr)] gap-4 overflow-hidden sm:flex sm:items-start sm:justify-between sm:gap-6">
+      {/* DESIGN180 page head: the page's single h1 with its lead underneath,
+          page actions on the right. `eyebrow` stays in the API (91 callers)
+          but is never drawn (owner direction: no eyebrow labels). */}
+      <div className="min-w-0">
+        <Title className="max-w-full min-w-0 break-words text-[clamp(1.625rem,1.3rem+0.8vw,2rem)] font-bold leading-tight tracking-[-0.035em] text-[var(--g1-ink)]">{title}</Title>
+        {children && (
+          <div className="mt-2 min-w-0 max-w-[640px] text-sm leading-relaxed text-[var(--g1-muted)] [overflow-wrap:anywhere] [word-break:keep-all]">
+            {children}
+          </div>
+        )}
       </div>
-      {children && (
-        <div className="min-w-0 max-w-3xl text-xs sm:text-sm leading-relaxed sm:leading-7 text-muted-foreground [overflow-wrap:anywhere] [word-break:keep-all]">
-          {children}
-        </div>
-      )}
+      {action && <div className="flex shrink-0 flex-wrap gap-2">{action}</div>}
     </header>
   );
 }
 
 export function Accent({ children }: { readonly children: React.ReactNode }) {
-  return <em className="not-italic font-black text-primary">{children}</em>;
+  return <em className="not-italic">{children}</em>;
 }
 
 export function SectionHeader({
@@ -51,9 +47,8 @@ export function SectionHeader({
 }) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-3">
-      <div className="grid gap-2">
-        <p className="eyebrow">{eyebrow}</p>
-        <h2 id={id} className="text-xl font-extrabold leading-tight sm:text-2xl">
+      <div className="grid gap-2" data-section={eyebrow}>
+        <h2 id={id} className="text-xl leading-tight text-[var(--g1-ink)] sm:text-2xl">
           {title}
         </h2>
       </div>

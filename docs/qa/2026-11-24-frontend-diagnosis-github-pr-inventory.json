@@ -1,0 +1,702 @@
+[
+  {
+    "baseRefName": "fix/test-frontend-real-backend-20261123",
+    "headRefName": "docs/v2026.11.24.1-single-design-reference",
+    "isDraft": false,
+    "mergedAt": null,
+    "number": 3417,
+    "state": "OPEN",
+    "title": "docs(ui): make Nov 23 v10 the only active 180-route visual reference (v2026.11.24.1)",
+    "updatedAt": "2026-11-23T23:29:51Z"
+  },
+  {
+    "baseRefName": "fe-c/support-chat-locale-route-20261124-0745",
+    "headRefName": "fix/fe-c-chat-locale-contract-v2026.11.24.0826",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3416,
+    "state": "OPEN",
+    "title": "test(fe-c): fix 4 locale contract failures, 670/670 Java green v2026.11.24.4",
+    "updatedAt": "2026-11-23T23:28:31Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "feat/stitch-design-skill-v2026.11.24.0818",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3415,
+    "state": "OPEN",
+    "title": "docs(stitch): v2026.11.24.0818 Google Stitch Skills source-only design pilot",
+    "updatedAt": "2026-11-23T23:27:37Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "audit/fe-automation-verification-20261124-0758",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3414,
+    "state": "OPEN",
+    "title": "docs(qa): verify frontend scheduled runs vs real Test implementation v2026.11.24.0758",
+    "updatedAt": "2026-11-23T22:59:39Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "fe-c/support-chat-locale-route-20261124-0745",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3413,
+    "state": "OPEN",
+    "title": "fix(FE-C): support/chat locale aliases and explicit language precedence",
+    "updatedAt": "2026-11-23T22:49:17Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "fix/test-ingress-seo-semantic-20261124",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3412,
+    "state": "OPEN",
+    "title": "fix(test): isolated robots/sitemap semantic repair v2026.11.24.3",
+    "updatedAt": "2026-11-23T15:56:05Z"
+  },
+  {
+    "baseRefName": "fix/test-frontend-real-backend-20261123",
+    "headRefName": "fix/test-legal-scoped-responsive-20261124",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3411,
+    "state": "OPEN",
+    "title": "fix(test-ui): repair legal pages, Socket.IO script, publication titles & mobile overflow v2026.11.24.2",
+    "updatedAt": "2026-11-23T21:26:00Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "docs/auto-fe-v10-test-deploy-20261123",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3410,
+    "state": "OPEN",
+    "title": "docs(automation): strengthen FE A/B/C and QA1/QA2 for v10 Spring UI → gated Test release vAUTO.FE.TEST.2026.11.23.3",
+    "updatedAt": "2026-11-23T14:32:46Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "audit/frontend-readiness-20261123-2300",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3409,
+    "state": "OPEN",
+    "title": "docs(qa): audit Nov 23 automated frontend Test acceptance (147 live routes, HOLD) v2026.11.23.FEQA.2300.1",
+    "updatedAt": "2026-11-23T14:12:29Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "docs/reel-27-resource-architecture-v20261123-12",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3408,
+    "state": "OPEN",
+    "title": "docs(planning): integrate Instagram 27 design-resource reference and native Spring acceptance plan v2026.11.23.12",
+    "updatedAt": "2026-11-23T10:23:31Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "fix/test-frontend-real-backend-20261123",
+    "isDraft": false,
+    "mergedAt": null,
+    "number": 3407,
+    "state": "OPEN",
+    "title": "feat(consolidated): unify UI/UX navigation, SVG icons, Toss bank tabs, real backend integration and QA documentation",
+    "updatedAt": "2026-11-23T14:16:14Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "dependabot/npm_and_yarn/swc/helpers-0.5.24",
+    "isDraft": false,
+    "mergedAt": null,
+    "number": 3406,
+    "state": "OPEN",
+    "title": "build(deps): bump @swc/helpers from 0.5.23 to 0.5.24",
+    "updatedAt": "2026-11-23T09:52:19Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "dependabot/npm_and_yarn/nestjs/core-12.5.1",
+    "isDraft": false,
+    "mergedAt": null,
+    "number": 3405,
+    "state": "OPEN",
+    "title": "build(deps): bump @nestjs/core from 11.2.3 to 12.5.1",
+    "updatedAt": "2026-11-23T09:51:46Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "dependabot/github_actions/actions/setup-java-6.3.0",
+    "isDraft": false,
+    "mergedAt": null,
+    "number": 3404,
+    "state": "OPEN",
+    "title": "build(deps): bump actions/setup-java from 5.7.0 to 6.3.0",
+    "updatedAt": "2026-11-23T09:50:38Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "docs/strict-test-server-governance-v2026.11.23.1",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3403,
+    "state": "OPEN",
+    "title": "docs: enforce strict Test server governance and clarify port 4550 (v2026.11.23.1)",
+    "updatedAt": "2026-11-23T08:08:39Z"
+  },
+  {
+    "baseRefName": "fix/game-ui-180-visual-functional-qa-20261123",
+    "headRefName": "fix/test-frontend-real-backend-20261123",
+    "isDraft": false,
+    "mergedAt": null,
+    "number": 3402,
+    "state": "CLOSED",
+    "title": "feat(ui): independently connect Test frontend to real backend",
+    "updatedAt": "2026-11-23T09:58:36Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "fix/public-ads-clear-disclosure-20261123",
+    "isDraft": false,
+    "mergedAt": null,
+    "number": 3401,
+    "state": "OPEN",
+    "title": "fix(ads): clear five-language sponsored labeling and KO/VI public placement v2026.11.23.11",
+    "updatedAt": "2026-11-23T07:13:46Z"
+  },
+  {
+    "baseRefName": "feat/game-ui-180-single-master-20261123",
+    "headRefName": "fix/game-ui-180-visual-functional-qa-20261123",
+    "isDraft": false,
+    "mergedAt": null,
+    "number": 3400,
+    "state": "CLOSED",
+    "title": "fix(design): audit and correct all 180 game UI images; log functional coverage gaps v2026.11.23.10",
+    "updatedAt": "2026-11-23T09:58:38Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "feat/game-ui-180-single-master-20261123",
+    "isDraft": false,
+    "mergedAt": null,
+    "number": 3399,
+    "state": "CLOSED",
+    "title": "feat(ui): integrate 180 new game-design PNGs, Spring theme and single bilingual UI master v2026.11.23.9",
+    "updatedAt": "2026-11-23T09:58:34Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "feat/game-ui-180-real-png-v20261123",
+    "isDraft": false,
+    "mergedAt": null,
+    "number": 3398,
+    "state": "CLOSED",
+    "title": "design(ui): 180 REAL game-style PC/mobile PNGs + favicon + unified master docs v2026.11.23.8",
+    "updatedAt": "2026-11-23T06:09:30Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "feat/game-ui-all-pages-handoff-20261123",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3397,
+    "state": "CLOSED",
+    "title": "feat(ui): shared game-economy theme, exact favicon hero and 180-page design handoff (v2026.11.23.6)",
+    "updatedAt": "2026-11-23T06:09:31Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "docs/ui-canonical-favicon-correction-20261123",
+    "isDraft": false,
+    "mergedAt": null,
+    "number": 3396,
+    "state": "CLOSED",
+    "title": "docs(ui): restore canonical favicon logo, admin-only navigation and permanent UI master links (v2026.11.23.5)",
+    "updatedAt": "2026-11-23T06:09:30Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "fix/nov18-game-ui-clock-logo-20261123",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3395,
+    "state": "CLOSED",
+    "title": "feat(ui): Nov18 game-style home, approved emblem, clock-policy context (v2026.11.23.3)",
+    "updatedAt": "2026-11-23T05:36:21Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "fix/bank-ui-rate-basis-20261123",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3394,
+    "state": "CLOSED",
+    "title": "feat(bank-ui): refine Spring bank design and explain daily vs annual rates (v2026.11.23.2)",
+    "updatedAt": "2026-11-23T05:36:15Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "docs/ui-single-reference-20261123",
+    "isDraft": false,
+    "mergedAt": null,
+    "number": 3393,
+    "state": "CLOSED",
+    "title": "docs(ui): consolidate Nov 18 design, UI defects and standards (v2026.11.23.1)",
+    "updatedAt": "2026-11-23T05:36:11Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "docs/realtime-smooth-ux-v2026.11.23.1",
+    "isDraft": false,
+    "mergedAt": null,
+    "number": 3392,
+    "state": "CLOSED",
+    "title": "docs: v2026.11.23.1 smoother live dashboard updates (EN/KO)",
+    "updatedAt": "2026-11-23T05:35:54Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "docs/test-admin-favicon-parity-v20261123-2",
+    "isDraft": false,
+    "mergedAt": null,
+    "number": 3391,
+    "state": "CLOSED",
+    "title": "docs(ops): test admin auth gap and favicon parity v2026.11.23.2",
+    "updatedAt": "2026-11-23T05:36:04Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "docs/test-external-access-v20261123-1",
+    "isDraft": false,
+    "mergedAt": null,
+    "number": 3390,
+    "state": "CLOSED",
+    "title": "docs(ops): record external test access v2026.11.23.1",
+    "updatedAt": "2026-11-23T05:36:07Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "docs/strict-test-to-prod-gate-v2026.11.23.1",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3389,
+    "state": "CLOSED",
+    "title": "docs: v2026.11.23.1 strict Test-to-Production release gates",
+    "updatedAt": "2026-11-23T05:36:01Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "docs/all-issues-consent-policy-master-20261123",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3387,
+    "state": "CLOSED",
+    "title": "docs(policy): v2026.11.23.10 one master for all UI defects + Terms/Privacy 6-month consent",
+    "updatedAt": "2026-11-23T05:35:36Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "docs/dashboard-source-logo-ui-audit-20261123",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3385,
+    "state": "CLOSED",
+    "title": "docs(qa): v2026.11.23.9 dashboard source data, favicon logo order and design regression",
+    "updatedAt": "2026-11-23T05:35:47Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "docs/consolidated-ui-regressions-20261123",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3383,
+    "state": "CLOSED",
+    "title": "docs(qa): v2026.11.23.8 consolidate /admin/users, /admin/logs, /bank UI screenshot findings",
+    "updatedAt": "2026-11-23T05:35:43Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "docs/bank-ui-i18n-regression-20261123",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3381,
+    "state": "CLOSED",
+    "title": "docs(qa): v2026.11.23.7 /bank missing translation and unified UI regression",
+    "updatedAt": "2026-11-23T05:35:40Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "docs/admin-users-ui-regression-20261123",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3379,
+    "state": "CLOSED",
+    "title": "docs(qa): v2026.11.23.6 record /admin/users unified UI regression and precision QA requirements",
+    "updatedAt": "2026-11-23T05:35:33Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "fix/fe-c-explicit-lang-priority-20261123",
+    "isDraft": false,
+    "mergedAt": null,
+    "number": 3377,
+    "state": "CLOSED",
+    "title": "fix(web): FE-C explicit public locale precedence with TDD",
+    "updatedAt": "2026-11-23T05:36:18Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "design/nov18-unified-all-180-20261123",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3376,
+    "state": "CLOSED",
+    "title": "docs(design): v2026.11.23.5 adopt single official UI and archive old design authority",
+    "updatedAt": "2026-11-23T05:35:29Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "docs/nov18-ui-coverage-correction-20261123",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3375,
+    "state": "CLOSED",
+    "title": "docs(ui): v2026.11.23.1 November 18 functional UI correction order",
+    "updatedAt": "2026-11-23T05:35:51Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "docs/spring-consolidation-audit-20261123",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3373,
+    "state": "CLOSED",
+    "title": "docs(spring): consolidate migration status and staged acceptance v2026.11.23.1",
+    "updatedAt": "2026-11-23T05:35:58Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "fix/issue-3366-mobile-overflow-and-logo",
+    "isDraft": false,
+    "mergedAt": null,
+    "number": 3372,
+    "state": "CLOSED",
+    "title": "fix(ui,mobile): fix issue #3366 broken brand mark logo and 512px horizontal overflow",
+    "updatedAt": "2026-11-23T09:57:45Z"
+  },
+  {
+    "baseRefName": "fix/nov18-violet-brand-v2026.11.23.3",
+    "headRefName": "fix/nov18-violet-all-routes-v2026.11.23.4",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3371,
+    "state": "CLOSED",
+    "title": "fix(ui): expand Nov18 violet/navy design across legacy Spring static routes v2026.11.23.4",
+    "updatedAt": "2026-11-23T05:36:25Z"
+  },
+  {
+    "baseRefName": "fix/nov18-global-style-contract-v2026.11.22.2304.1",
+    "headRefName": "fix/nov18-violet-brand-v2026.11.23.3",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3370,
+    "state": "CLOSED",
+    "title": "fix(ui): unify Nov18 Spring violet brand and bank responsive layout v2026.11.23.3",
+    "updatedAt": "2026-11-23T05:36:28Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "audit/nov18-palette-layout-v2026.11.23.2",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3369,
+    "state": "CLOSED",
+    "title": "docs(qa): re-audit Nov18 180-page color and layout fidelity v2026.11.23.2",
+    "updatedAt": "2026-11-23T05:35:22Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "audit/wallet-bank-design-v2026.11.23.1",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3368,
+    "state": "CLOSED",
+    "title": "docs(audit): wallet deposit/withdraw design vs Spring runtime v2026.11.23.1",
+    "updatedAt": "2026-11-23T05:35:25Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "fix/nov18-global-style-contract-v2026.11.22.2304.1",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3367,
+    "state": "CLOSED",
+    "title": "fix(ui): v2026.11.22.2304.1 Nov18 shared shell CSS, mobile safe-area and visual contract tests",
+    "updatedAt": "2026-11-23T05:35:03Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "fix/oauth-and-remove-harness",
+    "isDraft": false,
+    "mergedAt": "2026-11-22T14:57:58Z",
+    "number": 3365,
+    "state": "MERGED",
+    "title": "fix(auth,ui): Google and Discord OAuth restore, remove unauthorized harness widget",
+    "updatedAt": "2026-11-22T14:58:04Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "docs/nov18-ui-runtime-drift-audit-v2026.11.22.2151.1",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3364,
+    "state": "CLOSED",
+    "title": "docs(audit): v2026.11.22.2151.1 trace Nov18 UI inconsistency across source, Nginx and runtime",
+    "updatedAt": "2026-11-23T05:34:16Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "feat/codex-gemini-pingpong-skill-v2026.11.22.1",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3363,
+    "state": "CLOSED",
+    "title": "feat(agents): install Codex ↔ Gemini peer-review skill v2026.11.22.1",
+    "updatedAt": "2026-11-23T05:34:27Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "feat/v115-complete-pages-shell-unification-20261122",
+    "isDraft": false,
+    "mergedAt": "2026-11-22T12:21:28Z",
+    "number": 3362,
+    "state": "MERGED",
+    "title": "feat(ui): unify all remaining subpages with Nov 18 standard 240px sidebar and 5-tab mobile dock",
+    "updatedAt": "2026-11-22T12:21:30Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "docs/instagram-ui-glossary-v2026.11.22.2041.1",
+    "isDraft": false,
+    "mergedAt": null,
+    "number": 3361,
+    "state": "CLOSED",
+    "title": "docs: record verified UI naming reel reference v2026.11.22.2041.1",
+    "updatedAt": "2026-11-23T05:34:02Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "audit/oauth-provider-regression-v2026.11.22.1",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3360,
+    "state": "CLOSED",
+    "title": "docs(auth): v2026.11.22.1 investigate missing Google and failing Discord OAuth login",
+    "updatedAt": "2026-11-23T05:33:44Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "feat/v114-subpages-shell-unification-20261122",
+    "isDraft": false,
+    "mergedAt": "2026-11-22T11:43:33Z",
+    "number": 3359,
+    "state": "MERGED",
+    "title": "feat(ui): unify user subpages (bank, arcade, casino, pension, work, bonds, businesses) with Nov 18 standard 240px sidebar and 5-tab mobile dock",
+    "updatedAt": "2026-11-22T11:43:39Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "docs/java4shell-runtime-audit-v2026.11.22.2013",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3358,
+    "state": "CLOSED",
+    "title": "docs(security): Java4Shell runtime audit v2026.11.22.2013",
+    "updatedAt": "2026-11-23T05:34:09Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "fix/nov18-visual-unification-20261121",
+    "isDraft": false,
+    "mergedAt": null,
+    "number": 3357,
+    "state": "CLOSED",
+    "title": "feat(ops): restore verified Test-first Nov18 frontend delivery",
+    "updatedAt": "2026-11-23T05:35:05Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "feat/v113-home-orbit-cockpit",
+    "isDraft": false,
+    "mergedAt": "2026-11-22T10:45:07Z",
+    "number": 3356,
+    "state": "MERGED",
+    "title": "feat(ui): integrate Harness2 AI orbit and live macOS terminal cockpit into Thymeleaf home template",
+    "updatedAt": "2026-11-22T10:45:13Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "feat/v113-all-pages-nov18-spring-frontend-rebuild-20261122",
+    "isDraft": false,
+    "mergedAt": "2026-11-22T09:48:43Z",
+    "number": 3355,
+    "state": "MERGED",
+    "title": "feat(ui): unify all user and admin pages with Nov 18 standard Dark Navy 240px sidebar and 5-tab mobile dock",
+    "updatedAt": "2026-11-22T09:48:50Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "fix/nov18-visual-unification-20261121",
+    "isDraft": false,
+    "mergedAt": "2026-11-22T08:12:43Z",
+    "number": 3354,
+    "state": "MERGED",
+    "title": "fix(ops): start the protected native catalog read canary safely",
+    "updatedAt": "2026-11-22T08:12:45Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "feat/frontend-spring-backend-connection-v20261122",
+    "isDraft": false,
+    "mergedAt": "2026-11-21T17:49:51Z",
+    "number": 3353,
+    "state": "MERGED",
+    "title": "feat: connect Next.js frontend to Spring Boot 3.3 backend",
+    "updatedAt": "2026-11-21T17:49:53Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "fix/nov18-visual-unification-20261121",
+    "isDraft": false,
+    "mergedAt": "2026-11-21T17:32:29Z",
+    "number": 3352,
+    "state": "MERGED",
+    "title": "fix: prepare a recoverable canonical administrator read preview",
+    "updatedAt": "2026-11-21T17:32:29Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "fix/nov18-visual-unification-20261121",
+    "isDraft": false,
+    "mergedAt": "2026-11-21T16:32:40Z",
+    "number": 3351,
+    "state": "MERGED",
+    "title": "feat: render canonical announcements and gallery in the native Nov18 frontend",
+    "updatedAt": "2026-11-21T16:48:36Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "fix/nov18-visual-unification-20261121",
+    "isDraft": false,
+    "mergedAt": "2026-11-21T15:37:14Z",
+    "number": 3350,
+    "state": "MERGED",
+    "title": "fix: connect a closed native catalog preview to the real read authority",
+    "updatedAt": "2026-11-21T16:18:22Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "fix/nov18-visual-unification-20261121",
+    "isDraft": false,
+    "mergedAt": "2026-11-21T14:28:00Z",
+    "number": 3349,
+    "state": "MERGED",
+    "title": "feat: add truthful native status and an artifact-bound administrator preview",
+    "updatedAt": "2026-11-21T14:28:00Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "docs/agentmemory-shared-agent-protocol-v2026.11.21.2234",
+    "isDraft": false,
+    "mergedAt": "2026-11-21T13:43:52Z",
+    "number": 3348,
+    "state": "MERGED",
+    "title": "docs(memory): v2026.11.21.2234 AgentMemory reference and shared-agent handoff protocol",
+    "updatedAt": "2026-11-21T13:44:30Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "fix/nov18-visual-unification-20261121",
+    "isDraft": false,
+    "mergedAt": "2026-11-21T13:35:27Z",
+    "number": 3347,
+    "state": "MERGED",
+    "title": "feat: native Nov18 admin catalog with canonical source and private-state cleanup",
+    "updatedAt": "2026-11-21T13:35:27Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "fix/nov18-visual-unification-20261121",
+    "isDraft": false,
+    "mergedAt": "2026-11-21T12:35:16Z",
+    "number": 3346,
+    "state": "MERGED",
+    "title": "ops: gate frontend documents during the approved native rebuild",
+    "updatedAt": "2026-11-21T12:35:16Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "feat/v111-owasp-stripe-nist-security-hardening-20261121",
+    "isDraft": false,
+    "mergedAt": "2026-11-21T15:57:47Z",
+    "number": 3345,
+    "state": "MERGED",
+    "title": "sec(v111): OWASP API1 BOLA shield expansion, brand official icon alignment, and design specs",
+    "updatedAt": "2026-11-21T15:57:53Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "docs/review-reel-web-ui-references-v20261121-2",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3344,
+    "state": "CLOSED",
+    "title": "docs: review Instagram UI resources against Nov 18 Spring website design v2026.11.21.2",
+    "updatedAt": "2026-11-23T05:34:23Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "docs/nov18-banking-wallet-card-ux-v20261121-1",
+    "isDraft": true,
+    "mergedAt": null,
+    "number": 3343,
+    "state": "CLOSED",
+    "title": "docs: Nov 18 banking, transfers, deposits and virtual card UX v2026.11.21.1",
+    "updatedAt": "2026-11-23T05:34:12Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "feat/v110-cloudflare-security-hardening-20261121",
+    "isDraft": false,
+    "mergedAt": "2026-11-21T12:06:40Z",
+    "number": 3342,
+    "state": "MERGED",
+    "title": "sec(v110): Cloudflare security-audit hardening - app-api forgery shield and PII anonymization",
+    "updatedAt": "2026-11-21T12:06:49Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "audit/all-functions-nov18-20261121",
+    "isDraft": false,
+    "mergedAt": "2026-11-21T11:29:25Z",
+    "number": 3341,
+    "state": "MERGED",
+    "title": "docs: record full-route Nov18 design and functionality audit",
+    "updatedAt": "2026-11-21T11:30:41Z"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "docs/frontend-prototype-integrity-release-20261121",
+    "isDraft": false,
+    "mergedAt": "2026-11-21T10:09:55Z",
+    "number": 3340,
+    "state": "MERGED",
+    "title": "docs: record five-page prototype integrity production verification",
+    "updatedAt": "2026-11-21T10:11:17Z"
+  }
+]

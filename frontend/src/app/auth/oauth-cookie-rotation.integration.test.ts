@@ -53,7 +53,7 @@ describe('OAuth cookie compatibility across Spring and Nest', () => {
     );
     expect(response.status).toBe(307);
     expect(response.headers.get('location')).toContain('https://discord.com/oauth2/authorize');
-    expect(internalApi).toHaveBeenCalledWith('/auth/discord/authorize', {
+    expect(internalApi).toHaveBeenCalledWith('/auth/discord/authorize?format=json', {
       cookieHeader: 'mv_session=issued-spring-session',
     });
     const cookies = response.headers.getSetCookie();

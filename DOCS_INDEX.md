@@ -1,7 +1,29 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](docs/DOCUMENT_AUTHORITY.md) / [한국어](docs/DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+
+
 ## v2026.11.24.1 — CURRENT image authority for all collaborating assistants
 - **Only Nov23 v10 180-route PNGs are active for new UI:** [EN authority](docs/design/CURRENT_UI_DESIGN.md) / [한국어](docs/design/CURRENT_UI_DESIGN.ko.md) · [strict 180-route manifest](docs/design/CURRENT_UI_DESIGN_MANIFEST.json) · [v10 gallery](docs/design/game-ui-v2026.11.23.10/README.md). Nov23 v8 and Nov18 designs are archives, not inputs. Visual acceptance and runtime QA remain open.
+
+## v2026.11.23.12 — Instagram 27-design-resource references / native Spring adoption (PLAN ONLY)
+- [English detailed source/implementation plan](docs/planning/REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.md) / [한국어 상세 기획](docs/planning/REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.ko.md) · [machine-readable 27-link catalog](docs/design/asset-resources-v2026.11.23.12/source-catalog.json) · [worklog](docs/worklog/2026-11-23-reel-27-design-resources-v12.ko.md) · [GitHub update](docs/updates/v2026.11.23.12-reel-27-resources-github.ko.md). Official Instagram oEmbed caption verified 27 links/9 categories, video not played; no license approvals, application/Test/Production changes.
+
+## v2026.11.22.1 — Codex ↔ Gemini ping-pong Agent Skill installed on mini-PC (LOCAL TOOLING; live model exchange unverified)
+
+- [EN operating guide](docs/development/CODEX_GEMINI_PINGPONG_SKILL_v2026.11.22.1.md) / [KO](docs/development/CODEX_GEMINI_PINGPONG_SKILL_v2026.11.22.1.ko.md) · [EN/KO worklog](docs/worklog/2026-11-22-codex-gemini-pingpong-skill-v1.md) / [KO](docs/worklog/2026-11-22-codex-gemini-pingpong-skill-v1.ko.md) · [GitHub notice](docs/updates/v2026.11.22.1-codex-gemini-pingpong-github.md) · Internal change: private mini-PC record (not committed). Installed pinned Gemini CLI 0.70.0 under the user account plus a shared Agent Skill; 6/6 synthetic tests, no live Gemini/Codex authorization, no app/DB/Test/Production changes.
+
+## v2026.11.24.1319 — Claudex Loop development skill installation (no deployment)
+- [English](docs/development/CLAUDEX_LOOP_INSTALL_v2026.11.24.1319.md) / [한국어](docs/development/CLAUDEX_LOOP_INSTALL_v2026.11.24.1319.ko.md) · [GitHub update](docs/updates/v2026.11.24.1319-claudex-loop-github.md). Offline tests 37/37; live cross-provider loop not executed.
+
+## v2026.11.24.1321 — Multi-skill installation (development only)
+- [English](docs/development/MULTI_SKILL_INSTALL_v2026.11.24.1321.md) / [한국어](docs/development/MULTI_SKILL_INSTALL_v2026.11.24.1321.ko.md). 83 skill names, 160 new verified copies; GSD isolated; external runtime tests incomplete.
+
+## v2026.11.24.1340 — Token-tool reel review / Graphify engine
+- [English](docs/development/TOKEN_TOOL_REEL_REVIEW_v2026.11.24.1340.md) / [한국어](docs/development/TOKEN_TOOL_REEL_REVIEW_v2026.11.24.1340.ko.md). Exact four tool names unverified; Graphify isolated engine installed. No deployment.
+
+## v2026.11.24.1345 — OmniRoute isolated development gateway
+- [English](docs/development/OMNIROUTE_INSTALL_v2026.11.24.1345.md) / [한국어](docs/development/OMNIROUTE_INSTALL_v2026.11.24.1345.ko.md). Local health and auth rejection verified; provider integration pending. No app deployment.
 
 ## v2026.11.21.2234 — Saved AgentMemory reel and mandatory shared task-handoff notes (DOCS ONLY)
 - [EN source + ongoing workflow](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md) / [한국어](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md) · [Worklog KO](docs/worklog/2026-11-21-agentmemory-shared-agent-protocol-v2234.ko.md) · [GitHub update EN](docs/updates/v2026.11.21.2234-agentmemory-reference-github.md). Source reel verified by public caption metadata, upstream README retrieved; actual AgentMemory installation/automatic capture and video playback not verified. GitHub worklogs remain durable fallback; no app/Test/Production changes.

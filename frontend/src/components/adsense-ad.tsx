@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useViewer } from '@/lib/use-viewer';
 import { usePathname } from 'next/navigation';
-import { isEligiblePublicAdPath } from '@/lib/ad-placement-policy';
+import { useLocale } from '@/components/locale-provider';
+import { isEligiblePublicAdPath, publicAdDisclosure } from '@/lib/ad-placement-policy';
 import { isAdministrator } from '@/lib/viewer-state';
 
 declare global {
@@ -32,6 +33,7 @@ export function AdSenseAd({
 }) {
   const viewer = useViewer();
   const pathname = usePathname();
+  const { locale: selectedLocale } = useLocale();
   const canDisplay = Boolean(viewer && !isAdministrator(viewer) && isEligiblePublicAdPath(pathname));
   const requested = useRef(false);
   const adRef = useRef<HTMLModElement | null>(null);
@@ -110,11 +112,16 @@ export function AdSenseAd({
   // Do not render ads before the viewer is known, on private/transaction pages, or on an empty slot.
   if (!canDisplay || (status === 'unfilled' || status === 'optimized')) return null;
 
+  const disclosure = publicAdDisclosure(pathname, selectedLocale);
   return (
-    <section aria-label="스폰서 광고" className="my-5 border-y border-border/30 py-4 sm:my-6 sm:py-5">
-      <div className="mx-auto w-full max-w-[970px] text-center">
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/80">
-          SPONSORED ADVERTISEMENT
+    <section
+      aria-label={disclosure + ' / Sponsored advertisement'}
+      data-testid="sponsored-ad-container"
+      className="my-6 w-full min-w-0 overflow-hidden border border-[var(--g1-line)] px-4 py-3"
+    >
+      <div className="mx-auto w-full max-w-[970px] min-w-0 text-center">
+        <p className="mb-2 text-left text-xs text-[var(--g1-muted)]">
+          {disclosure} (Sponsored advertisement)
         </p>
         <ins
           ref={adRef}

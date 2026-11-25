@@ -1,0 +1,31 @@
+{
+  "source": "7b676e602bc984ab74572d4081655fdb297d176a",
+  "freshGuestProfiles": true,
+  "results": [
+    {
+      "width": 1440,
+      "source": "7b676e602bc984ab74572d4081655fdb297d176a",
+      "supportPosition": "static",
+      "inToolbar": true,
+      "adminLinks": 0,
+      "overflow": false,
+      "supportOpenEscapeFocus": true,
+      "homeMenu": "desktop-navigation"
+    },
+    {
+      "width": 390,
+      "source": "7b676e602bc984ab74572d4081655fdb297d176a",
+      "supportPosition": "static",
+      "inToolbar": true,
+      "adminLinks": 0,
+      "overflow": false,
+      "supportOpenEscapeFocus": true,
+      "homeMenu": "verified"
+    },
+    {
+      "authDraftLanguageRetention": true,
+      "posts": 0,
+      "credentialValuesRecorded": false
+    }
+  ]
+}

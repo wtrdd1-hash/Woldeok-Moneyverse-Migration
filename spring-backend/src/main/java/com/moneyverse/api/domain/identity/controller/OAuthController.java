@@ -160,6 +160,28 @@ public class OAuthController {
             return ResponseEntity.badRequest().body(Map.of("outcome", "error", "error", "unsupported_provider"));
         }
 
+        // The state must name the prelogin session this browser already holds.
+        // Accepting any UUID let a crafted callback link sign a visitor into
+        // someone else's account (login CSRF), and completeOAuthLogin would even
+        // revive an arbitrary session row by that id. Checked before the code
+        // exchange so a forged state never reaches the provider.
+        UUID claimedSession = null;
+        if (state != null && !state.isBlank()) {
+            try {
+                claimedSession = UUID.fromString(state.trim());
+            } catch (IllegalArgumentException ignored) {
+                // falls through to the refusal below
+            }
+        }
+        UUID browserSession = authService.resolveSession(request).map(SessionInfo::getSessionId).orElse(null);
+        if (claimedSession == null || !claimedSession.equals(browserSession)) {
+            log.warn("[OAuth] State does not match the browser session: provider={}", p);
+            if (!wantsJson) {
+                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_session")).build();
+            }
+            return ResponseEntity.badRequest().body(Map.of("outcome", "error", "error", "oauth_session"));
+        }
+
         try {
             String providerSubjectId;
             String displayName;

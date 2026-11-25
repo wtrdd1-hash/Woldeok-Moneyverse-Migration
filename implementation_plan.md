@@ -6050,3 +6050,23 @@ pm install -g @google/gemini-cli@0.71.1 권한 실패
   1. Base64 디코딩 방식으로 {"security":{"auth":{"selectedType":"gemini-api-key"}}} 완벽한 유효 JSON으로 재기록.
   2. python3 -m json.tool ~/.gemini/settings.json 파싱 무결성 100% 검증 통과.
   3. gemini --version 실행 시 파싱 에러 0건 및 0.71.1 정상 출력 확인.
+
+
+---
+## 🚀 [v25 Specification] PR #3442 메인 통합(Merge into main) 및 원격/로컬 브랜치·PR 전수 정리
+- **작업 일시**: 2026-11-25 15:35 KST
+- **작업 번호 (Task ID)**: TASK-20261125-MAIN-INTEGRATION-AND-BRANCH-CLEANUP
+- **사용자 핵심 지시**: "pr 정리및 다 브래치정리해서 메인통합해줘"
+- **통합 및 정리 실행 계획**:
+  1. **origin/main 머지 충돌 41개 전수 해결 및 커밋**:
+     - 180종 다크 게이밍 및 네오 핀테크 UI 디자인 권위 문서(`docs/design/CURRENT_UI_DESIGN*`, `CURRENT_UI_DESIGN_MANIFEST.json`) 보존 및 소유자 승인 G1/G2 공지 조화 통합.
+     - `spring-backend` 프론트엔드 라우트 격리 계약 및 asset 해시 계약 100% 무결성 유지.
+     - v1~v24 누적 사양 보존(Zero-Deletion) 충돌 해결.
+  2. **PR #3442 푸시 및 상태 검증**:
+     - `feat/total-game-ui-revamp-v2026.11.24.11` 브랜치에 머지 커밋 생성 및 `origin`으로 안전 푸시.
+     - GitHub CLI(`gh pr view 3442`)로 CI 통과 및 병합 가능(MERGEABLE) 상태 확인.
+  3. **main 브랜치 병합 (Merge into main)**:
+     - PR #3442를 `main` 브랜치에 머지 완료.
+  4. **전체 브랜치 및 PR 정리**:
+     - 열려 있는 DRAFT/중복 PR(#3438, #3446, #3447, #3448 등) 상태 점검 및 정리.
+     - main에 병합 완료된 로컬 및 원격 임시 브랜치 정리.

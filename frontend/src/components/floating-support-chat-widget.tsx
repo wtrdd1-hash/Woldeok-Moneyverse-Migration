@@ -236,6 +236,14 @@ export function FloatingSupportChatWidget() {
 
   // 팝오버 열림/닫힘 및 메인 탭 ('support' | 'direct')
   const [isOpen, setIsOpen] = useState(false);
+  // Wide screens make room for the open panel instead of covering the page
+  // (owner QA 2026-11-25: the panel hid 길드 공지 and 다음 할 일).
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isOpen) root.dataset.supportOpen = 'true';
+    else delete root.dataset.supportOpen;
+    return () => { delete root.dataset.supportOpen; };
+  }, [isOpen]);
   const [activeTab, setActiveTab] = useState<'support' | 'direct'>('support');
 
   // 고객센터(Support) 상태
@@ -378,7 +386,9 @@ export function FloatingSupportChatWidget() {
   );
 
   // 알림 감지 레퍼런스
-  const prevWaitingCount = useRef<number>(0);
+  // null until the first read: a reply that was already waiting at page load is
+  // not new, and must not toast on every navigation (owner QA 2026-11-25).
+  const prevWaitingCount = useRef<number | null>(null);
   const prevDirectUnread = useRef<number>(0);
   const prevSupportMsgCount = useRef<number>(0);
   const prevDirectMsgCount = useRef<number>(0);
@@ -423,13 +433,14 @@ export function FloatingSupportChatWidget() {
 
         // 관리자 새 답변 감지 시 차임벨 및 토스트
         const waitingCount = list.filter((t) => t.status === 'waiting_user').length;
-        if (prevWaitingCount.current < waitingCount) {
+        if (prevWaitingCount.current !== null && prevWaitingCount.current < waitingCount) {
           if (!isMuted) {
             synthSound.playNotificationChime();
           }
           toast.success(
             localeLabel(locale, '관리자 답변이 도착했습니다!', 'New admin reply received!', 'サポートからの回答が届きました！', '客服回复已送达！'),
             {
+              id: 'support-admin-reply',
               description: localeLabel(
                 locale,
                 '1:1 문의 대화창에서 확인해 보세요.',
@@ -983,11 +994,11 @@ export function FloatingSupportChatWidget() {
   return (
     <>
       {/* 1. 플로팅 챗 버블 트리거 버튼 */}
-      <div data-support-launcher className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-3.5 sm:bottom-6 sm:right-6 z-40 select-none flex flex-col items-end group/support">
+      <div data-support-launcher className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-3.5 lg:bottom-6 sm:right-6 z-40 select-none flex flex-col items-end group/support">
         {/* 데스크톱 마이크로 툴팁 배너 (호버 시 부드럽게 노출) */}
         {!isOpen && (
-          <div className="hidden md:flex items-center gap-1.5 px-3 py-1 mb-2 rounded-full bg-zinc-950/95 border border-zinc-700/80 shadow-xl text-[11px] font-bold text-zinc-100 backdrop-blur-xl opacity-0 group-hover/support:opacity-100 transition-all duration-300 transform translate-y-1 group-hover/support:translate-y-0 pointer-events-none">
-            <span className="flex size-2 rounded-full bg-emerald-500 animate-pulse" />
+          <div className="hidden md:flex items-center gap-1.5 px-3 py-1 mb-2 rounded-md bg-[var(--g1-plum-2)] border border-[var(--g1-line)] text-[11px] font-bold text-[var(--g1-ink)] opacity-0 group-hover/support:opacity-100 transition-opacity duration-200 pointer-events-none">
+            <span className="flex size-2 rounded-full bg-[var(--g1-mint)]" />
             <span>{localeLabel(locale, '1:1 채팅 · 고객지원', '1:1 Chat & Support', '1:1チャット・サポート', '1:1聊天与客服')}</span>
           </div>
         )}
@@ -999,10 +1010,10 @@ export function FloatingSupportChatWidget() {
             setIsOpen((prev) => !prev);
           }}
           className={cn(
-            'group relative flex size-14 items-center justify-center rounded-full shadow-2xl transition-all duration-300 active:scale-95 outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-300 motion-reduce:transition-none',
+            'group relative flex size-14 items-center justify-center rounded-full transition-transform duration-150 active:scale-[0.97] outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--g1-gold)] motion-reduce:transition-none',
             isOpen
               ? 'bg-muted border-2 border-border text-foreground'
-              : 'bg-gradient-to-br from-amber-500 via-primary to-amber-600 text-primary-foreground border-2 border-amber-400/50 hover:scale-105 hover:shadow-primary/40 ring-4 ring-amber-500/20 hover:ring-amber-500/40'
+              : 'bg-[var(--g1-violet-ink)] text-[var(--g1-ink)] border border-[var(--g1-violet)] hover:bg-[var(--g1-violet)]'
           )}
           aria-expanded={isOpen}
           aria-label={localeLabel(
@@ -1021,7 +1032,7 @@ export function FloatingSupportChatWidget() {
 
           {/* 통합 알림 뱃지 */}
           {!isOpen && totalNotificationBadge > 0 && (
-            <span className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-emerald-600 font-mono text-[11px] font-black text-white shadow-md ring-2 ring-background animate-bounce">
+            <span className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-[var(--g1-ember)] text-[11px] font-bold text-[var(--g1-ember-ink)] ring-2 ring-[var(--g1-night)]">
               {totalNotificationBadge}
             </span>
           )}
@@ -1032,7 +1043,7 @@ export function FloatingSupportChatWidget() {
       {isOpen && (
         <div
           ref={popupRef}
-          className="fixed bottom-[calc(9.5rem+env(safe-area-inset-bottom))] sm:bottom-22 right-3.5 sm:right-6 z-40 w-[calc(100vw-1.75rem)] max-w-[380px] h-[min(550px,calc(100dvh-12rem-env(safe-area-inset-bottom)))] flex flex-col rounded-2xl border border-border/80 bg-card/95 backdrop-blur-2xl shadow-2xl overflow-hidden animate-in fade-in-0 zoom-in-95 duration-200 text-foreground"
+          className="fixed bottom-[calc(9.5rem+env(safe-area-inset-bottom))] lg:bottom-22 right-3.5 sm:right-6 z-40 w-[calc(100vw-1.75rem)] max-w-[380px] h-[min(550px,calc(100dvh-12rem-env(safe-area-inset-bottom)))] flex flex-col rounded-2xl border border-border/80 bg-card/95 backdrop-blur-2xl shadow-2xl overflow-hidden animate-in fade-in-0 zoom-in-95 duration-200 text-foreground"
         >
           {/* A. 팝오버 상단 글로벌 헤더 */}
           <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/70 bg-muted/40 shrink-0">

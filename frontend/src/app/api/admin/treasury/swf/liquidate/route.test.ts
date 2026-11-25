@@ -17,7 +17,7 @@ describe('v641 SWF liquidation web gateway', () => {
 
     const req = new Request('http://localhost:3000/api/admin/treasury/swf/liquidate', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { origin: 'http://localhost:3000',  'Content-Type': 'application/json' },
       body: JSON.stringify({ targetPortfolioAumWld: '20000000' }),
     });
 

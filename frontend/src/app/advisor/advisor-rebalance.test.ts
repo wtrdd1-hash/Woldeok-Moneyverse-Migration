@@ -10,7 +10,7 @@ describe('Advisor 1-Click Rebalance Execution API', () => {
   it('returns successful rebalance execution receipt with filled trades', async () => {
     const req = new Request('http://localhost:3000/api/advisor/deoki/rebalance/execute', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { origin: 'http://localhost:3000',  'Content-Type': 'application/json' },
       body: JSON.stringify({
         targetStocksRatio: 55,
         targetBondsRatio: 20,

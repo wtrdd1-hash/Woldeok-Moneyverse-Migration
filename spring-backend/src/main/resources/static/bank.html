@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko" class="dark">
 <head>
   <meta charset="utf-8">
@@ -10,8 +10,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
-  <link rel="stylesheet" href="/_next/static/css/8bbd23f36a44eb75.css">
+
   <link rel="stylesheet" href="/css/mv-theme-nov18.css">
+<link rel="stylesheet" href="/css/mv-shell-nov18.css">
   <style>
     :root {
       --mv-bg: #0c1020;
@@ -243,12 +244,12 @@
       text-decoration: none;
     }
     .btn-primary {
-      background: linear-gradient(135deg, #7c3aed, #4f46e5);
+      background: linear-gradient(135deg, var(--mv-brand-violet, #9C83FF), #7C5CFC);
       color: white;
-      box-shadow: 0 4px 14px 0 rgba(124, 58, 237, 0.39);
+      box-shadow: 0 4px 14px rgba(156, 131, 255, 0.28);
     }
     .btn-primary:hover {
-      background: linear-gradient(135deg, #6d28d9, #4338ca);
+      background: linear-gradient(135deg, var(--mv-brand-violet-hover, #B4A0FF), #8F72FF);
       transform: scale(1.02);
     }
     .btn-secondary {
@@ -364,22 +365,22 @@
       </header>
 
       <!-- Hero Header Banner -->
-      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-900/40 via-indigo-950/30 to-purple-950/20 border border-blue-500/20 p-8 sm:p-12 mb-10">
+      <div class="bank-brand-hero relative overflow-hidden rounded-3xl p-8 sm:p-12 mb-10">
         <div class="relative z-10 max-w-2xl">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-bold mb-4">
-            <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
-            실시간 복식부기 불변 원장 가동 중
+          <div class="bank-brand-eyebrow inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold mb-4">
+            <span class="bank-brand-dot w-2 h-2 rounded-full"></span>
+            WLD 가상은행 · 금융 상품 안내
           </div>
-          <h2 class="text-3xl sm:text-5xl font-black tracking-tight text-white mb-4 leading-tight">
+          <h2 class="bank-hero-title text-3xl sm:text-5xl font-black tracking-tight text-white mb-4 leading-tight">
             실시간 복리 이자가<br>
-            <span class="bg-gradient-to-r from-blue-400 via-cyan-300 to-emerald-400 bg-clip-text text-transparent">매초 불어나는 월덱뱅크</span>
+            <span class="bank-brand-headline">매초 불어나는 월덱뱅크</span>
           </h2>
-          <p class="text-zinc-400 text-base sm:text-lg mb-8 leading-relaxed">
+          <p class="bank-hero-copy text-zinc-400 text-base sm:text-lg mb-8 leading-relaxed">
             가상화폐 WLD를 안전하게 예치하고, 매초 실시간으로 쌓이는 복리 이자를 체감해 보세요. 
             100% 모의 가상경제 엔진으로 운영되어 원금 손실 위험 없이 금융 복리의 원리를 배울 수 있습니다.
           </p>
-          <div class="flex flex-wrap gap-4">
-            <a href="/login" class="btn-action btn-primary">
+          <div class="bank-hero-actions flex flex-wrap gap-4">
+            <a href="/login" class="btn-action btn-primary mv-brand-action">
               내 가상 통장 개설하기
             </a>
             <a href="/tools/compound-calculator" class="btn-action btn-secondary">
@@ -390,60 +391,60 @@
       </div>
 
       <!-- 4 Bento Grid Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      <div class="bank-product-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         <div class="bank-card flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 mb-5">
+            <div class="bank-brand-product-icon w-12 h-12 rounded-xl flex items-center justify-center mb-5">
               <span class="material-symbols-outlined">payments</span>
             </div>
             <h3 class="text-xl font-bold text-white mb-2">보통예금 (자유입출)</h3>
             <p class="text-zinc-400 text-sm leading-relaxed mb-4">언제든 자유롭게 입출금 가능한 계좌. 기본 연 3.2%의 복리 이자가 초 단위로 정산됩니다.</p>
           </div>
-          <div class="pt-4 border-t border-white/5 flex items-center justify-between">
+          <div class="bank-product-meta pt-4 border-t border-white/5 flex items-center justify-between">
             <span class="text-xs text-zinc-500">기본 금리</span>
-            <span class="text-emerald-400 font-extrabold text-lg">연 3.20%</span>
+            <span class="bank-brand-rate font-extrabold text-lg">연 3.20%</span>
           </div>
         </div>
 
         <div class="bank-card flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-5">
+            <div class="bank-brand-product-icon w-12 h-12 rounded-xl flex items-center justify-center mb-5">
               <span class="material-symbols-outlined">savings</span>
             </div>
             <h3 class="text-xl font-bold text-white mb-2">정기적금 (복리챌린지)</h3>
             <p class="text-zinc-400 text-sm leading-relaxed mb-4">매일 퀘스트 완수 시 추가 우대금리 최대 +5.0% 지급. 목표 달성률에 따른 추가 보너스.</p>
           </div>
-          <div class="pt-4 border-t border-white/5 flex items-center justify-between">
+          <div class="bank-product-meta pt-4 border-t border-white/5 flex items-center justify-between">
             <span class="text-xs text-zinc-500">최고 우대금리</span>
-            <span class="text-purple-400 font-extrabold text-lg">최대 8.50%</span>
+            <span class="bank-brand-rate font-extrabold text-lg">최대 8.50%</span>
           </div>
         </div>
 
         <div class="bank-card flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-5">
+            <div class="bank-brand-product-icon w-12 h-12 rounded-xl flex items-center justify-center mb-5">
               <span class="material-symbols-outlined">credit_score</span>
             </div>
             <h3 class="text-xl font-bold text-white mb-2">신용대출 시뮬레이션</h3>
             <p class="text-zinc-400 text-sm leading-relaxed mb-4">가상 주식 보유액과 거래 이력 기반 신용한도 측정. 대출 상환 스케줄 및 이자 계산기 연동.</p>
           </div>
-          <div class="pt-4 border-t border-white/5 flex items-center justify-between">
+          <div class="bank-product-meta pt-4 border-t border-white/5 flex items-center justify-between">
             <span class="text-xs text-zinc-500">최저 금리</span>
-            <span class="text-cyan-400 font-extrabold text-lg">연 4.10%~</span>
+            <span class="bank-brand-rate font-extrabold text-lg">연 4.10%~</span>
           </div>
         </div>
 
         <div class="bank-card flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-5">
+            <div class="bank-brand-product-icon w-12 h-12 rounded-xl flex items-center justify-center mb-5">
               <span class="material-symbols-outlined">shield</span>
             </div>
             <h3 class="text-xl font-bold text-white mb-2">KDIC 예금자보호</h3>
             <p class="text-zinc-400 text-sm leading-relaxed mb-4">월덱 가상 예금자보호 기금 5,000만 WLD 한도 가상 원금 보장 시스템 운영.</p>
           </div>
-          <div class="pt-4 border-t border-white/5 flex items-center justify-between">
+          <div class="bank-product-meta pt-4 border-t border-white/5 flex items-center justify-between">
             <span class="text-xs text-zinc-500">보호 한도</span>
-            <span class="text-amber-400 font-extrabold text-sm">인당 5,000만 WLD</span>
+            <span class="bank-brand-rate font-extrabold text-sm">인당 5,000만 WLD</span>
           </div>
         </div>
       </div>

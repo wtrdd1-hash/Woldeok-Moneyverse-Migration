@@ -50,7 +50,8 @@ export interface CatalogItem {
 interface ShopStoreViewProps {
   readonly items: CatalogItem[];
   readonly allowCompare?: boolean;
-  readonly userBalance: string;
+  /** null = unknown; purchases stay disabled rather than guessing. */
+  readonly userBalance: string | null;
   readonly currentUsername?: string | undefined;
   readonly userAvatarUrl?: string | null | undefined;
 }
@@ -191,7 +192,7 @@ export function ShopStoreView({
         {filteredItems.map((item) => {
           const isOwned = item.user_owned_quantity > 0;
           const isLimited = item.is_limited;
-          const canAfford = compareAmounts(userBalance, item.price) >= 0;
+          const canAfford = userBalance !== null && compareAmounts(userBalance, item.price) >= 0;
 
           return (
             <div
@@ -467,7 +468,7 @@ export function ShopStoreView({
                   <p className="font-extrabold text-sm text-amber-700 dark:text-amber-300">
                     {groupDigits(buyingItem.price)} WLD
                   </p>
-                  <p className="text-[11px] text-muted-foreground">내 잔액: {groupDigits(userBalance)} WLD</p>
+                  <p className="text-[11px] text-muted-foreground">내 잔액: {userBalance === null ? '확인 불가' : `${groupDigits(userBalance)} WLD`}</p>
                 </div>
               </div>
 
@@ -488,11 +489,11 @@ export function ShopStoreView({
                 </button>
                 <button
                   type="button"
-                  disabled={Boolean(buyStatus) || compareAmounts(userBalance, buyingItem.price) < 0}
+                  disabled={Boolean(buyStatus) || userBalance === null || compareAmounts(userBalance, buyingItem.price) < 0}
                   onClick={() => handleBuy(buyingItem)}
                   className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold shadow-md shadow-amber-500/20 disabled:opacity-50 transition-all"
                 >
-                  {compareAmounts(userBalance, buyingItem.price) < 0 ? '잔액 부족' : '확인 및 결제'}
+                  {userBalance === null ? '잔액 확인 불가' : compareAmounts(userBalance, buyingItem.price) < 0 ? '잔액 부족' : '확인 및 결제'}
                 </button>
               </div>
             </div>

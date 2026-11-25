@@ -1,5 +1,8 @@
 # UI/UX Single Reference — Current Favicon as the Sole Logo
 
+> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](DOCUMENT_AUTHORITY.md) / [한국어](DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+
+
 > **Binding visual authority v2026.11.24.1:** **ONLY the [Nov23 v10 180 PNGs](design/game-ui-v2026.11.23.10/README.md)** may guide new UI implementation. The [strict manifest](design/CURRENT_UI_DESIGN_MANIFEST.json) and [authority policy](design/CURRENT_UI_DESIGN.md) define the selected route images. v8 and Nov18 PNGs are **ARCHIVED / NOT FOR IMPLEMENTATION**. The current selection does not imply final artistic approval or running E2E verification.
 
 > **Latest v2026.11.23.10:** all 180 PNGs file-QA pass; route-specific blog detail, bank, admin and other layouts revised. [New gallery](design/game-ui-v2026.11.23.10/README.md) and [image/feature QA](qa/2026-11-23-game-ui-180-image-feature-audit.md). Live feature acceptance, Test and Production remain unverified. Earlier v8 files preserved.

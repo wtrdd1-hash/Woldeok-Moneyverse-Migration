@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { ApiError } from '@/lib/api';
 import { mutate } from '@/lib/mutate';
+import { isSameOriginFinanceMutation } from '@/lib/finance-mutation-origin';
 
 export const dynamic = 'force-dynamic';
 const json = (data: unknown, status: number) => NextResponse.json(data, {
@@ -10,11 +11,9 @@ const statuses = new Set(['ACTIVE', 'PAUSED', 'PRIVATIZING']);
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function PUT(request: Request) {
-  // The Next same-origin boundary preserves browser cookies and uses one-use
-  // server-side CSRF. Never accept an untrusted forwarded host.
-  const canonical = process.env.APP_BASE_URL
-    ? new URL(process.env.APP_BASE_URL).origin : new URL(request.url).origin;
-  if (request.headers.get('origin') !== canonical) {
+  // Shared same-origin guard (QA 2026-11-25): the hand-rolled check here either
+  // failed open without an Origin or refused every proxied browser request.
+  if (!isSameOriginFinanceMutation(request)) {
     return json({ code: 'SOE_ORIGIN_DENIED' }, 403);
   }
   let body: unknown;

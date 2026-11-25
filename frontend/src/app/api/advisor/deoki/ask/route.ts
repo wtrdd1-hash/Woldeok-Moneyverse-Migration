@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { api } from '@/lib/api';
+import { isSameOriginFinanceMutation } from '@/lib/finance-mutation-origin';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,10 +14,9 @@ function unavailable(error: unknown): NextResponse {
 }
 
 export async function POST(req: Request): Promise<NextResponse> {
-  // This BFF obtains a server-side CSRF token: first enforce browser same-origin.
-  const origin = req.headers.get('origin');
-  const site = req.headers.get('sec-fetch-site');
-  if (!origin || origin !== new URL(req.url).origin || (site !== null && site !== 'same-origin')) {
+  // Shared same-origin guard (QA 2026-11-25): the hand-rolled check here either
+  // failed open without an Origin or refused every proxied browser request.
+  if (!isSameOriginFinanceMutation(req)) {
     return NextResponse.json({ ok: false, error: 'forbidden_origin' }, { status: 403, headers: PRIVATE_HEADERS });
   }
 

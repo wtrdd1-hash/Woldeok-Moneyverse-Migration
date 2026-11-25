@@ -1,0 +1,169 @@
+{
+  "freshProfiles": true,
+  "network": "external HTTPS; no host resolver overrides",
+  "rows": [
+    {
+      "host": "easy-scraping.com",
+      "path": "/terms",
+      "width": 1440,
+      "errors": [
+        "Failed to load resource: the server responded with a status of 502 ()",
+        "Failed to load resource: the server responded with a status of 406 ()",
+        "Failed to load resource: the server responded with a status of 502 ()",
+        "Failed to load resource: the server responded with a status of 406 ()",
+        "TimeoutError"
+      ],
+      "failed": [
+        {
+          "path": "/_next/static/css/828951deb2af2cbe.css",
+          "status": 502
+        },
+        {
+          "path": "/",
+          "status": 406
+        },
+        {
+          "path": "/_next/static/css/828951deb2af2cbe.css",
+          "status": 502
+        },
+        {
+          "path": "/",
+          "status": 406
+        }
+      ],
+      "screenshot": "https-prod-terms-1440.png",
+      "isSecureContext": true,
+      "href": "https://easy-scraping.com/terms?lang=ko",
+      "title": "이용약관 · 월덕 머니버스",
+      "h1": [
+        "이용약관"
+      ],
+      "overflow": false,
+      "overlaps": []
+    },
+    {
+      "host": "easy-scraping.com",
+      "path": "/tools",
+      "width": 1440,
+      "status": 200,
+      "errors": [
+        "Failed to load resource: the server responded with a status of 403 ()",
+        "Refused to execute script from 'https://easy-scraping.com/assets/mv43/public.js?v=0058c4f7f01a179219b2eced9d24058e65e278ecb9634c661e97f26c09a95980' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled."
+      ],
+      "failed": [
+        {
+          "path": "/assets/mv43/public.js",
+          "status": 403
+        }
+      ],
+      "screenshot": "https-prod-tools-1440.png",
+      "isSecureContext": true,
+      "href": "https://easy-scraping.com/tools?lang=ko",
+      "title": "금융 도구 · W Moneyverse",
+      "h1": [
+        "금융 도구",
+        "하나의 공간, 금융 도구 탐색"
+      ],
+      "overflow": false,
+      "topbarHeight": 65,
+      "overlaps": []
+    },
+    {
+      "host": "test.easy-scraping.com",
+      "path": "/",
+      "width": 390,
+      "status": 200,
+      "errors": [
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-LZajMKvZrTTZOAqYIFB9hyr/TZeleUXvfWGMtj7wzIE='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked.",
+        "Applying inline style violates the following Content Security Policy directive 'style-src 'self''. Either the 'unsafe-inline' keyword, a hash ('sha256-LZajMKvZrTTZOAqYIFB9hyr/TZeleUXvfWGMtj7wzIE='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked.",
+        "Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092' violates the following Content Security Policy directive: \"script-src 'self'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.",
+        "WebSocket connection to 'wss://test.easy-scraping.com/socket.io/?EIO=4&transport=websocket' failed: Error during WebSocket handshake: Unexpected response code: 404"
+      ],
+      "failed": [],
+      "screenshot": "https-test-home-390.png",
+      "isSecureContext": true,
+      "href": "https://test.easy-scraping.com/?lang=ko",
+      "title": "홈 · W Moneyverse",
+      "h1": [
+        "홈"
+      ],
+      "overflow": false,
+      "topbarHeight": 172,
+      "overlaps": [
+        {
+          "floating": {
+            "id": "mv-support-launcher",
+            "class": "support-fab"
+          },
+          "control": {
+            "id": "",
+            "href": "/shop",
+            "text": "상점›"
+          },
+          "intersection": {
+            "width": 56,
+            "height": 40.1875
+          }
+        },
+        {
+          "floating": {
+            "id": "mv-support-launcher",
+            "class": "support-fab"
+          },
+          "control": {
+            "id": "",
+            "href": "/support",
+            "text": "문의·채팅›"
+          },
+          "intersection": {
+            "width": 56,
+            "height": 6.8125
+          }
+        }
+      ]
+    },
+    {
+      "host": "test.easy-scraping.com",
+      "path": "/shop",
+      "width": 1440,
+      "status": 403,
+      "errors": [
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ],
+      "failed": [
+        {
+          "path": "/shop",
+          "status": 403
+        }
+      ],
+      "screenshot": "https-test-shop-1440.png",
+      "isSecureContext": true,
+      "href": "https://test.easy-scraping.com/shop?lang=ko",
+      "title": "",
+      "h1": [],
+      "overflow": false,
+      "overlaps": []
+    },
+    {
+      "host": "test.easy-scraping.com",
+      "path": "/terms",
+      "width": 1440,
+      "status": 200,
+      "errors": [
+        "Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092' violates the following Content Security Policy directive: \"script-src 'self'\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked."
+      ],
+      "failed": [],
+      "screenshot": "https-test-terms-1440.png",
+      "isSecureContext": true,
+      "href": "https://test.easy-scraping.com/terms?lang=ko",
+      "title": "이용약관 · W Moneyverse",
+      "h1": [
+        "이용약관",
+        "이용약관"
+      ],
+      "overflow": false,
+      "topbarHeight": 79,
+      "overlaps": []
+    }
+  ]
+}

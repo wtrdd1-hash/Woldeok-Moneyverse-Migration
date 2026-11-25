@@ -1,6 +1,7 @@
 package com.moneyverse.api.domain.identity.controller;
 
 import com.moneyverse.api.common.response.ApiResponse;
+import com.moneyverse.api.domain.admin.service.EncryptionService;
 import com.moneyverse.api.domain.identity.dto.IdentityDtos.UserProfile;
 import com.moneyverse.api.domain.identity.service.ProfileService;
 import com.moneyverse.api.domain.identity.service.UserAuthService;
@@ -22,8 +23,11 @@ public class AccountController {
     private final UserAuthService authService;
     private final ProfileService profileService;
     private final JdbcTemplate jdbcTemplate;
+    private final EncryptionService encryptionService;
 
-    public AccountController(UserAuthService authService, ProfileService profileService, JdbcTemplate jdbcTemplate) {
+    public AccountController(UserAuthService authService, ProfileService profileService, JdbcTemplate jdbcTemplate,
+                             EncryptionService encryptionService) {
+        this.encryptionService = encryptionService;
         this.authService = authService;
         this.profileService = profileService;
         this.jdbcTemplate = jdbcTemplate;
@@ -90,24 +94,33 @@ public class AccountController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("detail", "login required"));
         }
 
-        List<Map<String, Object>> identities = new ArrayList<>();
-
-        // Check local email
+        // Parity with the NestJS contract (account.repository.linkedIdentities):
+        // every linked identity — Discord, Google and local e-mail — comes from
+        // public.account_list_my_identities. The former local-credentials-only
+        // query reported 0 identities for every OAuth member (QA 2026-11-25).
+        List<Map<String, Object>> identities;
         try {
-            List<Map<String, Object>> localCreds = jdbcTemplate.query(
-                "SELECT email, verified_at, disabled_at FROM auth_local_credentials WHERE user_id = ?",
+            identities = jdbcTemplate.query(
+                "SELECT identity_id::text AS identity_id, provider::text AS provider, display_name, linked_at "
+                    + "FROM public.account_list_my_identities(?)",
                 (rs, rowNum) -> {
                     Map<String, Object> iden = new LinkedHashMap<>();
-                    iden.put("provider", "local_email");
-                    iden.put("email", rs.getString("email"));
-                    iden.put("verified", rs.getTimestamp("verified_at") != null);
-                    iden.put("disabled", rs.getTimestamp("disabled_at") != null);
+                    iden.put("identityId", rs.getString("identity_id"));
+                    iden.put("provider", rs.getString("provider"));
+                    String name = rs.getString("display_name");
+                    String plain = encryptionService.decrypt(name);
+                    iden.put("displayName", plain == null ? "" : plain);
+                    java.sql.Timestamp linked = rs.getTimestamp("linked_at");
+                    iden.put("linkedAt", linked == null ? null : linked.toInstant().toString());
                     return iden;
                 },
                 userId.get()
             );
-            identities.addAll(localCreds);
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            // Unknown is not "no identities": answer unavailable, never an empty list.
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Map.of("detail", "identity source unavailable"));
+        }
 
         return ResponseEntity.ok(Map.of("identities", identities));
     }

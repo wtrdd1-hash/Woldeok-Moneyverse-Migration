@@ -1,5 +1,8 @@
 # UI/UX 통합 기준 — 현재 사이트 파비콘/로고 및 결함 원장
 
+> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](DOCUMENT_AUTHORITY.md) / [한국어](DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+
+
 > **현행 시각 기준 v2026.11.24.1:** 새 UI 구현에는 **[11월23일 v10 이미지 180개](design/game-ui-v2026.11.23.10/README.ko.md)만** 사용한다. [180경로 매니페스트](design/CURRENT_UI_DESIGN_MANIFEST.json)·[단일 기준 정책](design/CURRENT_UI_DESIGN.ko.md) 확인 필수. v8·11월18일 PNG는 **보관 / 구현 사용 금지**. v10 최종 디자인 승인과 실제 서버 E2E는 별개 미완료.
 
 > **최신 v2026.11.23.10:** 180개 신규 시안 전수 파일 검사 통과, 블로그 상세·은행·관리자 등 화면 구조 수정. [신규 시안 갤러리](design/game-ui-v2026.11.23.10/README.ko.md) 및 [기능/이미지 QA](qa/2026-11-23-game-ui-180-image-feature-audit.ko.md). 180개 기능 실제 정상 여부와 Test/운영 승격은 미검증. v8 원본 시안은 보존.

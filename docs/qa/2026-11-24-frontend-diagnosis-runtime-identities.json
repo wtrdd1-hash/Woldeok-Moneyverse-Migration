@@ -1,0 +1,35 @@
+[
+  {
+    "unit": "moneyverse-test-frontend-real-backend-v20261123.service",
+    "pid": 2175042,
+    "jarName": "app.jar",
+    "jarSha256": "e821295b848a1c5ffc64f909d1043ab7875b93be9dd913ce2793f49e40cace49",
+    "buildInfo": "build.artifact=moneyverse-spring-backend\nbuild.group=com.moneyverse\nbuild.name=moneyverse-spring-backend\nbuild.runtimeKind=spring-native\nbuild.sourceRevision=7b676e602bc984ab74572d4081655fdb297d176a\nbuild.time=2026-11-23T08\\:36\\:44.893603702Z\nbuild.version=0.0.1-SNAPSHOT\n",
+    "files": {
+      "BOOT-INF/classes/static/assets/mv43/chrome.css": "460fe6ee77b8f955fdeb47ae1b74d3871d811af799b26ab969a9af186e38c3f3",
+      "BOOT-INF/classes/templates/mv43/home.html": "7ec8e3f7d53b246ad271536b3567902cb533aef3326428c11c9173074526b559"
+    }
+  },
+  {
+    "unit": "moneyverse-test-frontend-scoped-v20261124.service",
+    "pid": 2278060,
+    "jarName": "app.jar",
+    "jarSha256": "fbc2bd0367d6a9739a6ed61232b228177786040b7b62fbae0969622d54a96c87",
+    "buildInfo": "build.artifact=moneyverse-spring-backend\nbuild.group=com.moneyverse\nbuild.name=moneyverse-spring-backend\nbuild.runtimeKind=spring-native\nbuild.sourceRevision=6eee110a03932764b01e15bc93faf829282bfa1a\nbuild.time=2026-11-23T15\\:39\\:18.860566429Z\nbuild.version=0.0.1-SNAPSHOT\n",
+    "files": {
+      "BOOT-INF/classes/static/assets/mv43/chrome.css": "813d59e41d5282c3b390ff55f64bba377a21284d608346d205c269c1015c8e8c",
+      "BOOT-INF/classes/templates/mv43/home.html": "65e12bef092d279ca74d82a0b4e465f1ba35f1c07718165901d939e2fb67b8fc"
+    }
+  },
+  {
+    "unit": "moneyverse-spring-backend.service",
+    "pid": 1734473,
+    "jarName": "moneyverse-spring-backend-0.0.1-SNAPSHOT.jar",
+    "jarSha256": "b5b8e8016f257fca7c028683b875749a9d58aba3385b178f2227e2707ca155e0",
+    "buildInfo": "build.artifact=moneyverse-spring-backend\nbuild.group=com.moneyverse\nbuild.name=moneyverse-spring-backend\nbuild.runtimeKind=spring-native\nbuild.sourceRevision=unverified\nbuild.time=2026-11-23T06\\:17\\:48.643248497Z\nbuild.version=0.0.1-SNAPSHOT\n",
+    "files": {
+      "BOOT-INF/classes/static/assets/mv43/chrome.css": "8227a3108c8443d8d8306be97ee2d44118795597e612a8647587d8c7664d35b8",
+      "BOOT-INF/classes/templates/mv43/home.html": "03049b55d6ff284e102a770dc40469e28dbe06ca947c7d68b16918a11ac2b29c"
+    }
+  }
+]

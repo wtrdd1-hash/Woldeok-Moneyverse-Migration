@@ -373,6 +373,3 @@
     LOCALES: SUPPORTED_LOCALES
   };
 })();
-
-
-

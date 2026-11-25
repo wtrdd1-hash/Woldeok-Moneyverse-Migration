@@ -1,0 +1,21 @@
+[Unit]
+Description=Moneyverse production Next frontend (DESIGN180, green) v20261124
+After=network.target moneyverse-blog-reader-v20261124.service
+Wants=moneyverse-blog-reader-v20261124.service
+
+[Service]
+Type=simple
+User=debian
+Group=debian
+WorkingDirectory=/srv/moneyverse-data/releases/next-frontend-v20261124-7f1af9b4cfb1/frontend
+EnvironmentFile=/etc/moneyverse/next-frontend-green-v20261124.env
+ExecStart=/usr/bin/node /srv/moneyverse-data/releases/next-frontend-v20261124-7f1af9b4cfb1/frontend/server.js
+Restart=on-failure
+RestartSec=4
+MemoryMax=640M
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target

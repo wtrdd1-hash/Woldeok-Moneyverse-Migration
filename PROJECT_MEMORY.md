@@ -1,5 +1,8 @@
 # Woldeok Moneyverse 프로젝트 메모리 (PROJECT_MEMORY.md)
 
+> **Authority clarification — v2026.11.24.DOCSYNC.1:** This file retains dated implementation/memory records. Current decisions and release permissions are in [document authority](docs/DOCUMENT_AUTHORITY.md) / [한국어](docs/DOCUMENT_AUTHORITY.ko.md). Prior completion/version claims do not certify today's runtime.
+
+
 **Current visual source v2026.11.24.1:** Use [Nov23 v10-only UI image authority](docs/design/CURRENT_UI_DESIGN.md) and its 180-route manifest for all new designs. v8 and Nov18 images are historical only; Test/Production and final visual acceptance remain unverified.
 
 ## 2026-11-21 shared agent-memory reference (PLANNING / no installed service)
@@ -249,10 +252,10 @@ The owner-designated AgentMemory reel and upstream README are preserved in [EN](
 ## 14. 🏛️ 단일 진실 공급원 (Single Source of Truth) 공식 마스터 문서 체계
 
 모든 개발, 기획, QA는 파편화된 구 문서를 배제하고 아래 공식 마스터 문서를 유일한 기준으로 삼는다:
-1. **[엔터프라이즈 통합 기획 및 시스템 사양 총괄]**: [`ENTERPRISE_SYSTEM_SPECIFICATION_AND_ROADMAP.ko.md`](./ENTERPRISE_SYSTEM_SPECIFICATION_AND_ROADMAP.ko.md)
-2. **[전사 통합 종합 QA 및 품질 보증 마스터 리포트]**: [`qa-reports/QA_CONSOLIDATED_MASTER_REPORT.ko.md`](./qa-reports/QA_CONSOLIDATED_MASTER_REPORT.ko.md)
+1. **[엔터프라이즈 통합 기획 및 시스템 사양 총괄]**: [`ENTERPRISE_SYSTEM_SPECIFICATION_AND_ROADMAP.ko.md`](docs/planning/ENTERPRISE_SYSTEM_SPECIFICATION_AND_ROADMAP.ko.md)
+2. **[전사 통합 종합 QA 및 품질 보증 마스터 리포트]**: `qa-reports/QA_CONSOLIDATED_MASTER_REPORT.ko.md` (historical source unavailable; original target: ./qa-reports/QA_CONSOLIDATED_MASTER_REPORT.ko.md; [link audit](docs/qa/2026-11-24-document-link-reconciliation.json))
 3. **[문서 통합 및 파일 자동 분류 결과 보고서]**: [`분류_결과_보고서.md`](./분류_결과_보고서.md)
-4. **[통합 REST API 마스터 레퍼런스]**: [`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md)
+4. **[통합 REST API 마스터 레퍼런스]**: [`API_DOCUMENTATION.md`](docs/api/API_DOCUMENTATION.md)
 5. **[누적 구현 계획서]**: [`implementation_plan.md`](./implementation_plan.md) (순수 누적 `+추가, -0 삭제` 영구 준수)
 
 

@@ -1,10 +1,9 @@
+import { PageHeader } from '@/components/page-header';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
-  Landmark,
   Percent,
   TrendingUp,
-  ShieldCheck,
   Scale,
   Activity,
   Layers,
@@ -68,8 +67,12 @@ interface CommercialRates {
 }
 
 function formatWld(amountStr: string | null | undefined): string {
-  if (!amountStr || !/^\d+$/.test(amountStr)) return '0 WLD';
+  if (!amountStr || !/^\d+$/.test(amountStr)) return '확인 불가';
   return `${new Intl.NumberFormat('ko-KR').format(BigInt(amountStr))} WLD`;
+}
+
+function fixed(value: number | null | undefined, digits: number, unit: string): string {
+  return typeof value === 'number' && Number.isFinite(value) ? `${value.toFixed(digits)}${unit}` : '확인 불가';
 }
 
 export default async function PublicCentralBankPage() {
@@ -80,35 +83,20 @@ export default async function PublicCentralBankPage() {
     publicApi<CommercialRates>('/api/v1/central-bank/commercial-rates', 30),
   ]);
 
-  const currentBaseRate = baseRate?.base_rate_pct ?? commercialRates?.base_rate_pct ?? 3.5;
-  const targetInflation = baseRate?.target_inflation_pct ?? 2.0;
-  const currentReserveReq = reserveReq?.reserve_requirement_pct ?? 7.0;
-  const depositRate = commercialRates?.deposit_rate_pct ?? 3.2;
-  const loanRate = commercialRates?.loan_rate_base_pct ?? 5.2;
-  const spread = commercialRates?.spread_pct ?? 2.0;
+  // A figure the API did not answer is shown as 확인 불가, never a default
+  // (regression 2026-11-25: every one of these reads was a Spring 404).
+  const currentBaseRate = baseRate?.base_rate_pct ?? commercialRates?.base_rate_pct;
+  const targetInflation = baseRate?.target_inflation_pct;
+  const currentReserveReq = reserveReq?.reserve_requirement_pct;
+  const depositRate = commercialRates?.deposit_rate_pct;
+  const loanRate = commercialRates?.loan_rate_base_pct;
+  const spread = commercialRates?.spread_pct;
 
   return (
     <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
-      {/* Top Header */}
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline" className="gap-1 border-primary/40 bg-primary/10 text-primary font-medium shrink-0">
-            <Landmark className="size-3.5" />
-            대한민국 중앙은행 통화신용정책
-          </Badge>
-          <Badge variant="outline" className="gap-1 border-emerald-500/40 bg-emerald-500/10 text-emerald-400 font-mono shrink-0">
-            <ShieldCheck className="size-3.5" />
-            PostgreSQL 원장 실시간 검증
-          </Badge>
-        </div>
-        <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
-          한국은행 금융통화위원회 통화정책 공시
-        </h1>
-        <p className="text-muted-foreground text-sm sm:text-base max-w-3xl leading-relaxed">
-          머니버스 거시경제 통화질서 수호와 물가안정을 위한 금융통화위원회 의결 기준금리, 지급준비율,
-          본원·협의·광의 통화량(M0, M1, M2) 및 통화승수 지표를 시민과 투자자에게 투명하게 공시합니다.
-        </p>
-      </div>
+      <PageHeader title="한국은행 금융통화위원회 통화정책 공시">
+        머니버스 거시경제 통화질서 수호와 물가안정을 위한 금융통화위원회 의결 기준금리, 지급준비율, 본원·협의·광의 통화량(M0, M1, M2) 및 통화승수 지표를 시민과 투자자에게 투명하게 공시합니다.
+      </PageHeader>
 
       {/* 4 Key Policy Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -119,11 +107,11 @@ export default async function PublicCentralBankPage() {
               <Percent className="size-4 text-emerald-400" />
             </div>
             <CardTitle className="text-3xl font-black font-mono tracking-tight text-emerald-400">
-              {currentBaseRate.toFixed(2)}%
+              {fixed(currentBaseRate, 2, '%')}
             </CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
-            목표 인플레이션율 <span className="font-mono font-bold text-foreground">{targetInflation.toFixed(2)}%</span> 대응
+            목표 인플레이션율 <span className="font-mono font-bold text-foreground">{fixed(targetInflation, 2, '%')}</span> 대응
           </CardContent>
         </Card>
 
@@ -134,7 +122,7 @@ export default async function PublicCentralBankPage() {
               <Scale className="size-4 text-sky-400" />
             </div>
             <CardTitle className="text-3xl font-black font-mono tracking-tight text-sky-400">
-              {currentReserveReq.toFixed(2)}%
+              {fixed(currentReserveReq, 2, '%')}
             </CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
@@ -149,11 +137,11 @@ export default async function PublicCentralBankPage() {
               <Activity className="size-4 text-amber-400" />
             </div>
             <CardTitle className="text-3xl font-black font-mono tracking-tight text-amber-400">
-              {depositRate.toFixed(2)}% / {loanRate.toFixed(2)}%
+              {fixed(depositRate, 2, '%')} / {fixed(loanRate, 2, '%')}
             </CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
-            예금 / 대출 기준 (스프레드 <span className="font-mono font-bold text-foreground">{spread.toFixed(2)}%p</span>)
+            예금 / 대출 기준 (스프레드 <span className="font-mono font-bold text-foreground">{fixed(spread, 2, '%p')}</span>)
           </CardContent>
         </Card>
 
@@ -164,11 +152,11 @@ export default async function PublicCentralBankPage() {
               <TrendingUp className="size-4 text-purple-400" />
             </div>
             <CardTitle className="text-3xl font-black font-mono tracking-tight text-purple-400">
-              {aggregates?.multipliers?.money_multiplier?.toFixed(2) ?? '1.00'}배
+              {fixed(aggregates?.multipliers?.money_multiplier, 2, '배')}
             </CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
-            지준 충족도 <span className="font-mono font-bold text-foreground">{aggregates?.multipliers?.reserve_coverage_ratio?.toFixed(1) ?? '100.0'}%</span>
+            지준 충족도 <span className="font-mono font-bold text-foreground">{fixed(aggregates?.multipliers?.reserve_coverage_ratio, 1, '%')}</span>
           </CardContent>
         </Card>
       </div>

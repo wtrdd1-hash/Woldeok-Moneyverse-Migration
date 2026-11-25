@@ -35,36 +35,27 @@ public class EarlyGameController {
 
     @GetMapping("/today")
     public ResponseEntity<Map<String, Object>> today(HttpServletRequest request) {
-        String userId = getUserIdOrThrow(request);
-        Map<String, Object> event = new LinkedHashMap<>();
-        event.put("id", "early-event-" + UUID.randomUUID());
-        event.put("name", "첫 날의 출석 보너스");
-        event.put("rewardWld", 50000);
-        event.put("isClaimed", false);
-        return ResponseEntity.ok(Map.of("event", event));
+        getUserIdOrThrow(request);
+        // Source-truth gate (QA 2026-11-25): hard-coded steps/events and a
+        // claim that reported 50,000 WLD without any ledger posting.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "EARLYGAME_CANONICAL_SOURCE_UNAVAILABLE");
     }
 
     @GetMapping("/first-day")
     public ResponseEntity<Map<String, Object>> firstDay(HttpServletRequest request) {
-        String userId = getUserIdOrThrow(request);
-        List<Map<String, Object>> steps = List.of(
-                Map.of("step", 1, "title", "계정 생성 및 프로필 설정", "completed", true),
-                Map.of("step", 2, "title", "첫 가상 주식 매수 체결", "completed", false),
-                Map.of("step", 3, "title", "상업은행 목표 저축 포켓 개설", "completed", false),
-                Map.of("step", 4, "title", "커뮤니티 첫 글 작성", "completed", false)
-        );
-        return ResponseEntity.ok(Map.of("steps", steps));
+        getUserIdOrThrow(request);
+        // Source-truth gate (QA 2026-11-25): hard-coded steps/events and a
+        // claim that reported 50,000 WLD without any ledger posting.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "EARLYGAME_CANONICAL_SOURCE_UNAVAILABLE");
     }
 
     @PostMapping("/claims")
     public ResponseEntity<Map<String, Object>> claim(
             HttpServletRequest request,
             @RequestBody(required = false) Map<String, Object> body) {
-        String userId = getUserIdOrThrow(request);
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "claimedWld", 50000,
-                "claimedAt", new Date().toInstant().toString()
-        ));
+        getUserIdOrThrow(request);
+        // Source-truth gate (QA 2026-11-25): hard-coded steps/events and a
+        // claim that reported 50,000 WLD without any ledger posting.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "EARLYGAME_CANONICAL_SOURCE_UNAVAILABLE");
     }
 }

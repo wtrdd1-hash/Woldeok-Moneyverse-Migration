@@ -13,6 +13,7 @@ import { DELETE } from './route';
 const deleteRequest = (slug: string, purge = false) =>
   new Request(`https://easy-scraping.com/api/admin/blog/${slug}${purge ? '?purge=true' : ''}`, {
     method: 'DELETE',
+    headers: { origin: 'https://easy-scraping.com' },
   });
 
 describe('Admin Blog Delete & Withdraw API', () => {

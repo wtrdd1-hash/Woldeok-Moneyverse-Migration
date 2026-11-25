@@ -1,3 +1,7 @@
+> **Current authority (2026-11-24): G2 "Guild Ledger Terminal", owner-approved.** Visual rules come from the [13 G2 references](game-ui-v2026.11.24.G2/README.md): ledger status strip on every page (live API values only), hairline 6px panels without chamfers, one violet action colour, gold and Orbitron only on the member's own balance, tabular body figures, grouped navigation (GM for administrators only), page head as title plus one line. Each route's content and order follow the G1 per-route previews ([gallery](game-ui-v2026.11.24.G1/README.md)) until G2 per-route previews exist. Tokens: `frontend/src/app/g1-tokens.css` (G2 section).
+
+> **SUPERSEDED 2026-11-24 — active authority is G1.** The owner approved the G1 "Guild Ledger" set ([gallery](game-ui-v2026.11.24.G1/README.md)); [CURRENT_UI_DESIGN_MANIFEST.json](CURRENT_UI_DESIGN_MANIFEST.json) now pins its 180 PNGs. v2026.11.23.10 below is archived for history and is no longer an implementation input. G1 implementation rules: tokens in `frontend/src/app/g1-tokens.css`; no tracked-caps eyebrows, tinted title phrases, decorative gradients or shadows; content radii capped at 8px; one h1 per page; figures only from live APIs.
+
 # Current UI Design Authority — Single Active Image Set
 
 **Authority update:** v2026.11.24.2 (2026-11-24 KST)

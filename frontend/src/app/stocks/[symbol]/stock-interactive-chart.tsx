@@ -204,14 +204,16 @@ export function StockInteractiveChart({
   const isUp = diff >= 0;
   const changeRate = openNum > 0 ? ((diff / openNum) * 100).toFixed(2) : '0.00';
 
-  // 타임프레임별 백엔드 인터벌 초 매핑 (1D: 15분, 1W: 1시간, 1M: 1일, 1Y: 1주)
+  // Backend interval seconds per timeframe. Spring accepts only
+  // 60/300/1800/3600/7200/14400/86400/604800; 900 (15m) answered 400, so the
+  // daily view uses 30-minute candles. (1D: 30분, 1W: 1시간, 1M: 1일, 1Y: 1주)
   const intervalSeconds = useMemo(() => {
     switch (timeframe) {
-      case '1D': return 900;
+      case '1D': return 1800;
       case '1W': return 3600;
       case '1M': return 86400;
       case '1Y': return 604800;
-      default: return 900;
+      default: return 1800;
     }
   }, [timeframe]);
 

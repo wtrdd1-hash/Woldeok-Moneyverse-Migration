@@ -24,26 +24,19 @@ public class CasinoService {
 
     @Transactional(readOnly = true)
     public CasinoStats getStats() {
-        return new CasinoStats("25000000", "23750000", 15420L, "95.00%", "5000000");
+        // Source-truth gate (QA 2026-11-25): this method returned hard-coded
+        // figures or claimed a write it never made. Unavailable until it is
+        // backed by the database; never a fabricated answer.
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "CASINO_CANONICAL_SOURCE_UNAVAILABLE");
     }
 
     @Transactional
     public Map<String, Object> play(String userId, CasinoPlayRequest req) {
-        long bet = req.getBetAmountWld();
-        boolean win = random.nextDouble() < 0.48; // 48% 승률
-        double multiplier = win ? 2.0 : 0.0;
-        long payout = (long) (bet * multiplier);
-
-        String txId = UUID.randomUUID().toString();
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("txId", txId);
-        res.put("userId", userId);
-        res.put("betAmountWld", bet);
-        res.put("payoutWld", payout);
-        res.put("multiplier", multiplier);
-        res.put("win", win);
-        res.put("message", win ? "축하합니다! 베팅 승리로 " + payout + " WLD를 획득하셨습니다!" : "아쉽게도 낙첨되었습니다.");
-        return res;
+        // Source-truth gate (QA 2026-11-25): this method returned hard-coded
+        // figures or claimed a write it never made. Unavailable until it is
+        // backed by the database; never a fabricated answer.
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "CASINO_CANONICAL_SOURCE_UNAVAILABLE");
     }
 }

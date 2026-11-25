@@ -12,7 +12,7 @@ describe('v1503 admin durable monetary policy BFF', () => {
   beforeEach(() => { api.mockReset(); currentViewer.mockReset(); isAdministrator.mockReset(); });
 
   const req = (body: object) => new Request('http://localhost/api/admin/central-bank/policy', {
-    method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
+    method: 'PUT', headers: { origin: 'http://localhost',  'content-type': 'application/json' }, body: JSON.stringify(body),
   });
 
   it('denies unauthorized requests before touching the backend', async () => {

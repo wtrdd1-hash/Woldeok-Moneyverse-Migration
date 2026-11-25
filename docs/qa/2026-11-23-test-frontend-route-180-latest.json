@@ -1,0 +1,1541 @@
+{
+  "applicationSource": "7b676e602bc984ab74572d4081655fdb297d176a",
+  "backendSource": "f0336fded6068f884c87f88efedeb770fd3387d4",
+  "origin": "https://test.easy-scraping.com",
+  "transport": "Host-preserving Test Nginx origin on loopback; separate external HTTPS probe",
+  "startedAt": "2026-11-23T10:00:05.870147+00:00",
+  "method": "GET",
+  "guestOnly": true,
+  "noMutation": true,
+  "wholeSiteAccepted": false,
+  "counts": {
+    "GUEST_HTML_AVAILABLE": 15,
+    "FIXTURE_REQUIRED": 33,
+    "HTTP_403": 117,
+    "AUTH_REQUIRED": 14,
+    "HTTP_503": 1
+  },
+  "routes": [
+    {
+      "route": "/",
+      "page": "홈 대시보드",
+      "state": "GUEST_HTML_AVAILABLE",
+      "status": 200,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 9710
+    },
+    {
+      "route": "/[locale]/blog",
+      "page": "블로그",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/[locale]/blog/[slug]",
+      "page": "블로그 · 상세",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/[locale]/guide/glossary",
+      "page": "가이드 · 용어사전",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/[locale]/guide/glossary/[term]",
+      "page": "가이드 · 용어사전 · 용어",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/[locale]/tools/compound-interest-calculator",
+      "page": "금융 도구 · 복리 계산기",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/[locale]/tools/compound-interest-calculator/[preset]",
+      "page": "금융 도구 · 복리 계산기 · 프리셋",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/account",
+      "page": "계정",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/account-deletion",
+      "page": "계정 삭제",
+      "state": "GUEST_HTML_AVAILABLE",
+      "status": 200,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 8590
+    },
+    {
+      "route": "/account/notifications",
+      "page": "계정 · 알림",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/account/privacy",
+      "page": "계정 · 개인정보",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/account/security",
+      "page": "계정 · 보안",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin",
+      "page": "관리자 대시보드",
+      "state": "AUTH_REQUIRED",
+      "status": 302,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 0
+    },
+    {
+      "route": "/admin/analytics",
+      "page": "관리자 · 분석",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/api-health",
+      "page": "관리자 · API 상태",
+      "state": "AUTH_REQUIRED",
+      "status": 302,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 0
+    },
+    {
+      "route": "/admin/bank",
+      "page": "관리자 · 은행",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/blog",
+      "page": "관리자 · 블로그",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/bonds",
+      "page": "관리자 · 국채",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/catalog",
+      "page": "관리자 · 카탈로그",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/central-bank",
+      "page": "관리자 · 중앙은행",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/content",
+      "page": "관리자 · 콘텐츠",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/controls",
+      "page": "관리자 · 기능 제어",
+      "state": "AUTH_REQUIRED",
+      "status": 302,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 0
+    },
+    {
+      "route": "/admin/discord",
+      "page": "관리자 · 디스코드",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/economy",
+      "page": "관리자 · 경제 운영",
+      "state": "AUTH_REQUIRED",
+      "status": 302,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 0
+    },
+    {
+      "route": "/admin/economy/scenario-lab",
+      "page": "관리자 · 경제 운영 · 경제 시나리오",
+      "state": "AUTH_REQUIRED",
+      "status": 302,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 0
+    },
+    {
+      "route": "/admin/enterprises",
+      "page": "관리자 · 국영기업",
+      "state": "AUTH_REQUIRED",
+      "status": 302,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 0
+    },
+    {
+      "route": "/admin/fx",
+      "page": "관리자 · 외환",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/help",
+      "page": "관리자 · 도움말",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/kdic",
+      "page": "관리자 · 예금보험",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/logs",
+      "page": "관리자 · 로그",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/logs/activity",
+      "page": "관리자 · 로그 · 활동",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/logs/delivery",
+      "page": "관리자 · 로그 · 전송",
+      "state": "AUTH_REQUIRED",
+      "status": 302,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 0
+    },
+    {
+      "route": "/admin/logs/errors",
+      "page": "관리자 · 로그 · 오류",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/logs/integrity",
+      "page": "관리자 · 로그 · 무결성",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/logs/system",
+      "page": "관리자 · 로그 · 시스템",
+      "state": "AUTH_REQUIRED",
+      "status": 302,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 0
+    },
+    {
+      "route": "/admin/market",
+      "page": "관리자 · 시장",
+      "state": "AUTH_REQUIRED",
+      "status": 302,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 0
+    },
+    {
+      "route": "/admin/market/ai-news",
+      "page": "관리자 · 시장 · AI 뉴스",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/mint",
+      "page": "관리자 · 조폐국",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/money-flow",
+      "page": "관리자 · 자금 흐름",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/operations/storage",
+      "page": "관리자 · 운영 · 저장소",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/pension",
+      "page": "관리자 · 연금",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/safety",
+      "page": "관리자 · 안전",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/security",
+      "page": "관리자 · 보안",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/seo",
+      "page": "관리자 · 검색 최적화",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/seo-audit",
+      "page": "관리자 · SEO 감사",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/shop",
+      "page": "관리자 · 상점",
+      "state": "AUTH_REQUIRED",
+      "status": 302,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 0
+    },
+    {
+      "route": "/admin/support",
+      "page": "관리자 · 고객지원",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/treasury",
+      "page": "관리자 · 국고",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/treasury/grants",
+      "page": "관리자 · 국고 · 지원금",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/admin/users",
+      "page": "관리자 · 회원",
+      "state": "AUTH_REQUIRED",
+      "status": 302,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 0
+    },
+    {
+      "route": "/admin/users/[id]",
+      "page": "관리자 · 회원 · 상세",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/admin/work",
+      "page": "관리자 · 직업",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/advisor",
+      "page": "자산 가이드",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/announcements",
+      "page": "공지사항",
+      "state": "GUEST_HTML_AVAILABLE",
+      "status": 200,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 9384
+    },
+    {
+      "route": "/announcements/[announcementId]",
+      "page": "공지사항 · 공지 상세",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/arcade",
+      "page": "아케이드",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/bank",
+      "page": "은행",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/bank/savings-pot",
+      "page": "은행 · 적금",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/blog",
+      "page": "블로그",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/blog/[slug]",
+      "page": "블로그 · 상세",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/board",
+      "page": "게시판",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/board/[postId]",
+      "page": "게시판 · 게시글 상세",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/bonds",
+      "page": "국채",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/businesses",
+      "page": "사업",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/businesses/ventures",
+      "page": "사업 · 스타트업",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/calculators",
+      "page": "계산기",
+      "state": "GUEST_HTML_AVAILABLE",
+      "status": 200,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 27296
+    },
+    {
+      "route": "/calendar",
+      "page": "일정",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/casino",
+      "page": "카지노",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/central-bank",
+      "page": "중앙은행",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/chat",
+      "page": "채팅",
+      "state": "AUTH_REQUIRED",
+      "status": 302,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 0
+    },
+    {
+      "route": "/clubs",
+      "page": "클럽",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/clubs/[clubId]",
+      "page": "클럽 · 클럽 상세",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/clubs/[clubId]/members",
+      "page": "클럽 · 클럽 상세 · 멤버",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/clubs/new",
+      "page": "클럽 · 신규",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/clubs/warfare",
+      "page": "클럽 · 클럽전",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/collections",
+      "page": "컬렉션",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/dashboard",
+      "page": "대시보드",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/data-deletion",
+      "page": "데이터 삭제",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/design-preview",
+      "page": "디자인 미리보기",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/developer",
+      "page": "개발자",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/enterprises",
+      "page": "국영기업",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/features",
+      "page": "기능",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/forgot-password",
+      "page": "비밀번호 찾기",
+      "state": "GUEST_HTML_AVAILABLE",
+      "status": 200,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 8582
+    },
+    {
+      "route": "/fx",
+      "page": "외환",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/gallery",
+      "page": "갤러리",
+      "state": "GUEST_HTML_AVAILABLE",
+      "status": 200,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 9342
+    },
+    {
+      "route": "/gallery/[photoId]",
+      "page": "갤러리 · 사진 상세",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/gallery/submit",
+      "page": "갤러리 · 등록",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/guide",
+      "page": "가이드",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/guide/career-mastery",
+      "page": "가이드 · 직업 숙련",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/guide/dopamine-system",
+      "page": "가이드 · 성장",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/guide/glossary",
+      "page": "가이드 · 용어사전",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/guide/glossary/[term]",
+      "page": "가이드 · 용어사전 · 용어",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/guide/stock-trading",
+      "page": "가이드 · 주식 거래",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/guide/virtual-banking",
+      "page": "가이드 · 가상 은행",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/help",
+      "page": "도움말",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/help/[slug]",
+      "page": "도움말 · 상세",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/inventory",
+      "page": "보관함",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/invite/[code]",
+      "page": "초대 · 초대 링크",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/kdic",
+      "page": "예금보험",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/lobby",
+      "page": "로비",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/login",
+      "page": "로그인",
+      "state": "GUEST_HTML_AVAILABLE",
+      "status": 200,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 10625
+    },
+    {
+      "route": "/login/providers",
+      "page": "로그인 · 소셜 인증",
+      "state": "GUEST_HTML_AVAILABLE",
+      "status": 200,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 10625
+    },
+    {
+      "route": "/marketplace",
+      "page": "마켓",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/marketplace/auction",
+      "page": "마켓 · 경매",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/mint",
+      "page": "조폐국",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/newspaper",
+      "page": "신문",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/pension",
+      "page": "연금",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/prediction",
+      "page": "예측",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/privacy",
+      "page": "개인정보",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/profile",
+      "page": "프로필",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/profile/[userId]",
+      "page": "프로필 · 사용자 상세",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/profile/settings",
+      "page": "프로필 · 설정",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/progression",
+      "page": "성장",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/progression/prestige",
+      "page": "성장 · 명성",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/quests",
+      "page": "퀘스트",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/register",
+      "page": "회원가입",
+      "state": "GUEST_HTML_AVAILABLE",
+      "status": 200,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 10840
+    },
+    {
+      "route": "/reset-password",
+      "page": "비밀번호 재설정",
+      "state": "GUEST_HTML_AVAILABLE",
+      "status": 200,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 8703
+    },
+    {
+      "route": "/roadmap",
+      "page": "로드맵",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/safety",
+      "page": "안전",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/safety/takedown",
+      "page": "안전 · 게시 중단",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/search",
+      "page": "검색",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/seasons",
+      "page": "시즌",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/shop",
+      "page": "상점",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/shop/catalog",
+      "page": "상점 · 카탈로그",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/spaces",
+      "page": "공간",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/spaces/real-estate",
+      "page": "공간 · 부동산",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/status",
+      "page": "상태",
+      "state": "HTTP_503",
+      "status": 503,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 10754
+    },
+    {
+      "route": "/stocks",
+      "page": "주식",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/stocks/[symbol]",
+      "page": "주식 · 종목 상세",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/stocks/alerts",
+      "page": "주식 · 알림",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/stocks/community",
+      "page": "주식 · 토론",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/stocks/compare",
+      "page": "주식 · 비교",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/stocks/derivatives",
+      "page": "주식 · 파생상품",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/stocks/history",
+      "page": "주식 · 내역",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/stocks/league",
+      "page": "주식 · 리그",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/stocks/portfolio",
+      "page": "주식 · 포트폴리오",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/stocks/watchlist",
+      "page": "주식 · 관심종목",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/support",
+      "page": "고객지원",
+      "state": "AUTH_REQUIRED",
+      "status": 302,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 0
+    },
+    {
+      "route": "/terms",
+      "page": "이용약관",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/tools",
+      "page": "금융 도구",
+      "state": "GUEST_HTML_AVAILABLE",
+      "status": 200,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 27199
+    },
+    {
+      "route": "/tools/capital-gains-tax-calculator",
+      "page": "금융 도구 · 양도세 계산기",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/tools/capital-gains-tax-calculator/[preset]",
+      "page": "금융 도구 · 양도세 계산기 · 프리셋",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/tools/compound-calculator",
+      "page": "금융 도구 · 복리 계산기",
+      "state": "GUEST_HTML_AVAILABLE",
+      "status": 200,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 14278
+    },
+    {
+      "route": "/tools/compound-calculator/[preset]",
+      "page": "금융 도구 · 복리 계산기 · 프리셋",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/tools/crypto-apy-calculator",
+      "page": "금융 도구 · 가상자산 수익률 계산기",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/tools/dividend-tax-calculator",
+      "page": "금융 도구 · 배당세 계산기",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/tools/dividend-tax-calculator/[ticker]",
+      "page": "금융 도구 · 배당세 계산기 · 종목",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/tools/farming-calculator",
+      "page": "금융 도구 · 직업 수익 계산기",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/tools/farming-calculator/[preset]",
+      "page": "금융 도구 · 직업 수익 계산기 · 프리셋",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/tools/fire-calculator",
+      "page": "금융 도구 · 경제적 자유 계산기",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/tools/gift-tax-calculator",
+      "page": "금융 도구 · 증여세 계산기",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/tools/gift-tax-calculator/[preset]",
+      "page": "금융 도구 · 증여세 계산기 · 프리셋",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/tools/goal-wealth-calculator",
+      "page": "금융 도구 · 목표 자산 계산기",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/tools/isa-calculator",
+      "page": "금융 도구 · ISA 계산기",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/tools/isa-calculator/[slug]",
+      "page": "금융 도구 · ISA 계산기 · 상세",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/tools/kimchi-premium-calculator",
+      "page": "금융 도구 · 김치 프리미엄 계산기",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/tools/kimchi-premium-calculator/[preset]",
+      "page": "금융 도구 · 김치 프리미엄 계산기 · 프리셋",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/tools/loan-interest-calculator",
+      "page": "금융 도구 · 대출 이자 계산기",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/tools/loan-interest-calculator/[preset]",
+      "page": "금융 도구 · 대출 이자 계산기 · 프리셋",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/tools/pension-tax-calculator",
+      "page": "금융 도구 · 연금 세금 계산기",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/tools/pension-tax-calculator/[slug]",
+      "page": "금융 도구 · 연금 세금 계산기 · 상세",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/tools/quant-studio",
+      "page": "금융 도구 · 퀀트 스튜디오",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/tools/real-estate-calculator",
+      "page": "금융 도구 · 부동산 계산기",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/tools/real-estate-calculator/[preset]",
+      "page": "금융 도구 · 부동산 계산기 · 프리셋",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/tools/retirement-calculator",
+      "page": "금융 도구 · 은퇴 계산기",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/tools/retirement-calculator/[slug]",
+      "page": "금융 도구 · 은퇴 계산기 · 상세",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/tools/salary-calculator",
+      "page": "금융 도구 · 급여 계산기",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/tools/salary-calculator/[preset]",
+      "page": "금융 도구 · 급여 계산기 · 프리셋",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/tools/stock-calculator",
+      "page": "금융 도구 · 주식 계산기",
+      "state": "GUEST_HTML_AVAILABLE",
+      "status": 200,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 13620
+    },
+    {
+      "route": "/tools/stock-calculator/[preset]",
+      "page": "금융 도구 · 주식 계산기 · 프리셋",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/tools/tax-calculator",
+      "page": "금융 도구 · 세금 계산기",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/tools/youth-leap-calculator",
+      "page": "금융 도구 · 청년도약 계산기",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/tools/youth-leap-calculator/[preset]",
+      "page": "금융 도구 · 청년도약 계산기 · 프리셋",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/treasury",
+      "page": "국고",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/verify-email",
+      "page": "이메일 확인",
+      "state": "GUEST_HTML_AVAILABLE",
+      "status": 200,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 8570
+    },
+    {
+      "route": "/verify-email-change",
+      "page": "이메일 변경 확인",
+      "state": "GUEST_HTML_AVAILABLE",
+      "status": 200,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 8613
+    },
+    {
+      "route": "/wallet",
+      "page": "지갑",
+      "state": "AUTH_REQUIRED",
+      "status": 302,
+      "renderer": "Spring-MVC-Thymeleaf",
+      "contentType": "text/html;charset=UTF-8",
+      "bytes": 0
+    },
+    {
+      "route": "/wallet/activity",
+      "page": "지갑 · 활동",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    },
+    {
+      "route": "/wallet/activity/transactions/[transactionId]",
+      "page": "지갑 · 활동 · 거래 상세 · 거래 상세",
+      "state": "FIXTURE_REQUIRED",
+      "reason": "Dynamic route needs an owned Test fixture; no invented identifier was requested"
+    },
+    {
+      "route": "/work",
+      "page": "직업",
+      "state": "HTTP_403",
+      "status": 403,
+      "renderer": null,
+      "contentType": null,
+      "bytes": 0
+    }
+  ]
+}

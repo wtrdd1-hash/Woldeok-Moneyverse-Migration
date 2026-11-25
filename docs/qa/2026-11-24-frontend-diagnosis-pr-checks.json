@@ -1,0 +1,336 @@
+{
+  "3407": {
+    "headRefOid": "a61f6d8b9df05bb9f3daee9f8acff067b15abb21",
+    "mergedAt": null,
+    "state": "OPEN",
+    "checks": [
+      {
+        "name": "release-input",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "classify",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "verify / classify",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "policy",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "runtime-check",
+        "conclusion": "FAILURE",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "verify / policy",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "verify / runtime-check",
+        "conclusion": "FAILURE",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "spring-web-check",
+        "conclusion": "FAILURE",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "verify / spring-web-check",
+        "conclusion": "FAILURE",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "build",
+        "conclusion": "SKIPPED",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "non-runtime-summary",
+        "conclusion": "SKIPPED",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "dispatch-production-gate",
+        "conclusion": "SKIPPED",
+        "status": "COMPLETED"
+      }
+    ]
+  },
+  "3411": {
+    "headRefOid": "38ccb1f0c6e547758da405c2a8f63f632849947e",
+    "mergedAt": null,
+    "state": "OPEN",
+    "checks": [
+      {
+        "name": "release-input",
+        "conclusion": "FAILURE",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "classify",
+        "conclusion": "FAILURE",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "verify",
+        "conclusion": "SKIPPED",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "policy",
+        "conclusion": "SKIPPED",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "runtime-check",
+        "conclusion": "SKIPPED",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "spring-web-check",
+        "conclusion": "SKIPPED",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "build",
+        "conclusion": "SKIPPED",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "non-runtime-summary",
+        "conclusion": "SKIPPED",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "dispatch-production-gate",
+        "conclusion": "SKIPPED",
+        "status": "COMPLETED"
+      }
+    ]
+  },
+  "3412": {
+    "headRefOid": "987be01b215dcd372165ab54c04a1caacf594dbd",
+    "mergedAt": null,
+    "state": "OPEN",
+    "checks": [
+      {
+        "name": "release-input",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "classify",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "verify / classify",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "policy",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "runtime-check",
+        "conclusion": "SKIPPED",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "verify / policy",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "verify / runtime-check",
+        "conclusion": "SKIPPED",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "spring-web-check",
+        "conclusion": "SKIPPED",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "verify / spring-web-check",
+        "conclusion": "SKIPPED",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "build",
+        "conclusion": "SKIPPED",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "non-runtime-summary",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "dispatch-production-gate",
+        "conclusion": "SKIPPED",
+        "status": "COMPLETED"
+      }
+    ]
+  },
+  "3413": {
+    "headRefOid": "e6206a46df28c2da0c503f9b19cfe9f98e3be29e",
+    "mergedAt": null,
+    "state": "OPEN",
+    "checks": [
+      {
+        "name": "classify",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "policy",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "runtime-check",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "spring-web-check",
+        "conclusion": "FAILURE",
+        "status": "COMPLETED"
+      }
+    ]
+  },
+  "3414": {
+    "headRefOid": "68a1271be7e77e3bcb375be687ea9310238294d5",
+    "mergedAt": null,
+    "state": "OPEN",
+    "checks": [
+      {
+        "name": "classify",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "policy",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "runtime-check",
+        "conclusion": "SKIPPED",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "spring-web-check",
+        "conclusion": "SKIPPED",
+        "status": "COMPLETED"
+      }
+    ]
+  },
+  "3416": {
+    "headRefOid": "b902a7f9cede8d1fbab0b98b588c16a01f25db79",
+    "mergedAt": null,
+    "state": "OPEN",
+    "checks": [
+      {
+        "name": "release-input",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "classify",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "verify / classify",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "policy",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "verify / policy",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "runtime-check",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "verify / runtime-check",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "spring-web-check",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "verify / spring-web-check",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "build",
+        "conclusion": "SUCCESS",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "non-runtime-summary",
+        "conclusion": "SKIPPED",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "dispatch-production-gate",
+        "conclusion": "SKIPPED",
+        "status": "COMPLETED"
+      }
+    ]
+  },
+  "3417": {
+    "headRefOid": "184455833c76eb873be40ee46eff5c7dd132ab4d",
+    "mergedAt": null,
+    "state": "OPEN",
+    "checks": [
+      {
+        "name": "classify",
+        "conclusion": "FAILURE",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "policy",
+        "conclusion": "SKIPPED",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "runtime-check",
+        "conclusion": "SKIPPED",
+        "status": "COMPLETED"
+      },
+      {
+        "name": "spring-web-check",
+        "conclusion": "SKIPPED",
+        "status": "COMPLETED"
+      }
+    ]
+  }
+}

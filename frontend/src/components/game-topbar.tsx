@@ -1,60 +1,78 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useViewer } from '@/lib/use-viewer';
-import type { Viewer } from '@/lib/viewer-state';
-
-const PAGE_TITLES: Record<string, string> = {
-  '/': '홈 대시보드',
-  '/wallet': '지갑',
-  '/bank': '은행',
-  '/stocks': '투자',
-  '/quests': '퀘스트',
-  '/shop': '상점',
-  '/board': '커뮤니티',
-  '/support': '문의·채팅',
-  '/login': '로그인',
-  '/account': '내 계정',
-};
+import { usePathname, useRouter } from 'next/navigation';
+import { useState, type FormEvent } from 'react';
+import { Bell, Search } from 'lucide-react';
+import { LanguageSwitcher } from '@/components/language-switcher';
+import { PlayerHud } from '@/components/g1/player-hud';
+import { v10PageTitle } from '@/components/v10-nav';
+import { useMountedViewer } from '@/components/use-mounted-viewer';
 
 export function GameTopbar() {
-  const pathname = usePathname();
-  const rawViewer = useViewer();
-  const viewer = (rawViewer && typeof rawViewer === 'object' && 'viewer' in rawViewer ? (rawViewer as { viewer: Viewer | null }).viewer : rawViewer) as Viewer | null;
+  const pathname = usePathname() ?? '/';
+  const router = useRouter();
+  const [query, setQuery] = useState('');
+  const title = v10PageTitle(pathname);
+  const viewer = useMountedViewer();
 
-  const currentTitle = PAGE_TITLES[pathname] ?? '홈 대시보드';
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const q = query.trim();
+    router.push(q ? `/search?q=${encodeURIComponent(q)}` : '/search');
+  }
 
   return (
-    <header className="h-[72px] border-b border-[#1f1d38] px-8 flex items-center justify-between bg-[#0b0c16]/90 backdrop-blur-md sticky top-0 z-20">
-      {/* Left Page Title */}
-      <h1 className="text-2xl font-black text-white tracking-tight">{currentTitle}</h1>
+    <header className="sticky top-0 z-30 border-b border-[var(--g1-line)] bg-[var(--g1-night)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--g1-night)]/80">
+      {/* Mobile frame: brand and page name, compact HUD (G1 phone previews). */}
+      <div className="flex items-center gap-2 px-3 py-2 lg:hidden">
+        <Link href="/" prefetch={false} className="flex min-w-0 flex-1 items-center gap-2" aria-label="월덕 머니버스 홈">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/favicon.ico" alt="" width={32} height={32} className="size-8 rounded-lg" />
+          {/* Not an h1: each page owns its single h1. */}
+          <span className="truncate text-[15px] font-bold text-[var(--g1-ink)]">{title}</span>
+        </Link>
+        <Link
+          href="/search"
+          prefetch={false}
+          aria-label="메뉴와 페이지 검색"
+          className="flex size-11 shrink-0 items-center justify-center rounded-md border border-[var(--g1-line)] bg-[var(--g1-plum)] text-[var(--g1-muted)]"
+        >
+          <Search className="size-4" aria-hidden />
+        </Link>
+        <LanguageSwitcher compact className="!h-11 !rounded-md !border-[var(--g1-line)] !bg-[var(--g1-plum)]" />
+        <PlayerHud compact />
+      </div>
 
-      {/* Right Controls: Search, Language, Account */}
-      <div className="flex items-center gap-3">
-        {/* Search Box */}
-        <div className="relative">
+      {/* Desktop frame. */}
+      {/* DESIGN180 desktop bar: location on the left, tools on the right. */}
+      <div className="hidden h-[68px] items-center justify-between gap-6 px-9 lg:flex">
+        <p className="min-w-0 truncate text-[13px] text-[var(--g1-muted)]">{title}</p>
+        <div className="flex items-center gap-3">
+        <form role="search" onSubmit={submit} className="relative">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--g1-faint)]" aria-hidden />
           <input
             type="search"
-            placeholder="메뉴 · 페이지 검색"
-            aria-label="메뉴 및 페이지 검색"
-            className="w-56 bg-[#14142b] border border-[#2b274e] rounded-xl px-4 py-2 text-xs text-white placeholder-[#686888] focus:outline-none focus:border-[#7c3aed] transition-all"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="메뉴와 페이지 검색"
+            aria-label="메뉴와 페이지 검색"
+            className="h-10 w-[250px] rounded-lg border border-[var(--g1-line)] bg-transparent pl-10 pr-3 text-xs text-[var(--g1-ink)] placeholder:text-[var(--g1-faint)] focus:border-[var(--g1-violet)] focus:outline-none"
           />
+        </form>
+          <LanguageSwitcher className="!h-11 !rounded-lg !border-[var(--g1-line)] !bg-transparent !px-4" />
+          {viewer?.signedIn && (
+            <Link
+              href="/account/notifications"
+              prefetch={false}
+              aria-label="알림"
+              className="flex size-11 items-center justify-center rounded-lg border border-[var(--g1-line)] text-[var(--g1-muted)] hover:text-[var(--g1-ink)]"
+            >
+              <Bell className="size-[18px]" aria-hidden />
+            </Link>
+          )}
+          <PlayerHud />
         </div>
-
-        {/* Language Select Pill */}
-        <div className="bg-[#1e1d3d] border border-[#3d3568] rounded-xl px-3 py-1.5 flex items-center gap-1.5 text-xs text-[#dcd8f0] font-semibold cursor-pointer">
-          <span>한국어</span>
-          <span className="text-[10px] text-[#9a82e2]">🌐</span>
-        </div>
-
-        {/* My Account Button / Profile */}
-        <Link
-          href={viewer?.signedIn ? '/account' : '/login'}
-          className="bg-[#14142b] border border-[#2b274e] hover:border-[#7c3aed] text-xs font-bold text-[#c5c0e0] hover:text-white px-4 py-2 rounded-xl transition-all"
-        >
-          {viewer?.signedIn ? '내 계정' : '내 계정'}
-        </Link>
       </div>
     </header>
   );

@@ -132,8 +132,9 @@ describe('UI Multi-Viewport Resilience & Zero-Clipping Invariants', () => {
     const shop = readFileSync(join(__dirname, 'shop/page.tsx'), 'utf8');
     const shopStore = readFileSync(join(__dirname, 'shop/shop-store-view.tsx'), 'utf8');
 
-    expect(home).toContain("isUp ? 'text-red-400' : 'text-blue-400'");
-    expect(home).toContain('min-h-[44px]');
+    // Korean convention survives the G1 tokens: a rise is ember (red), a fall is blue.
+    expect(home).toContain("bp > 0n ? 'text-[var(--g1-ember)]' : bp < 0n ? 'text-[var(--g1-rare-rare)]'");
+    expect(home).toContain('min-h-11');
 
     expect(wallet).toContain('triggerVariant="trading-sell"');
     expect(wallet).toContain('triggerVariant="trading-buy"');

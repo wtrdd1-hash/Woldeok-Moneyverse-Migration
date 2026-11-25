@@ -370,33 +370,14 @@
   mask-image: linear-gradient(to bottom, black, transparent 72%);
 }
 .moneyverse-main { animation: moneyverse-page-in 220ms ease-out both; }
-.moneyverse-card {
-  border-color: color-mix(in srgb, var(--border) 82%, var(--primary) 18%);
-  box-shadow: 0 .5rem 1.25rem rgb(24 28 25 / 0.06), 0 .125rem .35rem rgb(24 28 25 / 0.05);
-  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
-}
-@media (hover: hover) and (pointer: fine) {
-  .moneyverse-card:hover {
-    transform: translateY(-2px);
-    border-color: color-mix(in srgb, var(--primary) 28%, var(--border));
-    box-shadow: 0 .85rem 2rem rgb(24 28 25 / 0.09), 0 .2rem .5rem rgb(24 28 25 / 0.06);
-  }
-}
-.moneyverse-button {
-  min-height: 2.25rem;
-  box-shadow: 0 .125rem .3rem rgb(24 28 25 / 0.08);
-  transform: translateZ(0);
-}
-.moneyverse-button:not(:disabled):active {
-  transform: translateY(1px);
-  box-shadow: none;
-}
-.moneyverse-button:focus-visible {
-  box-shadow: 0 0 0 .25rem color-mix(in srgb, var(--ring) 32%, transparent);
-}
-.dark .moneyverse-card {
-  box-shadow: 0 .5rem 1.4rem rgb(0 0 0 / 0.24), inset 0 1px rgb(255 255 255 / 0.025);
-}
+/*
+ * G1 (owner design review 2026-11-24): cards are flat ledger panels. The old
+ * hover lift and soft shadows made every card look clickable, including the
+ * many that are not; interactive cards style their own hover.
+ */
+.moneyverse-card { box-shadow: none; }
+.moneyverse-button { min-height: 2.25rem; }
+.moneyverse-button:focus-visible { box-shadow: 0 0 0 2px var(--g1-gold); }
 @keyframes moneyverse-page-in {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }

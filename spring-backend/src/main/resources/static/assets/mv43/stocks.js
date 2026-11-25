@@ -69,7 +69,7 @@
         const total = data.totalBalance || data.verifiedBalanceWld || '394,728';
         const netWorthEl = document.getElementById('kpi-invest-total');
         if (netWorthEl) netWorthEl.textContent = formatNumber(total) + ' WLD';
-        
+
         const cashEl = document.getElementById('kpi-invest-cash');
         if (cashEl) cashEl.textContent = formatNumber(data.cashBalance || total) + ' WLD';
       })

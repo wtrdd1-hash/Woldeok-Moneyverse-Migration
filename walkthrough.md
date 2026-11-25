@@ -1,9 +1,12 @@
 # 🚀 [v456] 도파민 보상 루프 & 지속 가능한 수익화 BM 완료 보고서
 
-> **배포 버전**: `prod-v456`  
-> **배포 일시**: 2026-09-26 22:12 KST  
-> **배포 방식**: 무중단 블루-그린 승격 (`zero-downtime blue-green switch`)  
-> **DB 활성 세션**: **1,377 세션 무손실 100% 보존**  
+> **Authority clarification — v2026.11.24.DOCSYNC.1:** This file retains dated implementation/memory records. Current decisions and release permissions are in [document authority](docs/DOCUMENT_AUTHORITY.md) / [한국어](docs/DOCUMENT_AUTHORITY.ko.md). Prior completion/version claims do not certify today's runtime.
+
+
+> **배포 버전**: `prod-v456`
+> **배포 일시**: 2026-09-26 22:12 KST
+> **배포 방식**: 무중단 블루-그린 승격 (`zero-downtime blue-green switch`)
+> **DB 활성 세션**: **1,377 세션 무손실 100% 보존**
 > **테스트 결과**: **128개 파일 / 833개 테스트 전수 100% PASS**
 
 ---
@@ -76,11 +79,11 @@ flowchart TD
 
 ## 🚀 [v625] 토스형 주주 라운지 DB 실시간 바인딩 & 24/7 디스코드 금융 봇 연동 완료 보고서
 
-> **배포 버전**: `prod-v625`  
-> **배포 일시**: 2026-10-14 21:50 KST  
-> **배포 방식**: GitHub Actions CI/CD 승격 (`Build Test Candidate` 100% PASS)  
-> **공식 기획 정본**: [`ENTERPRISE_SYSTEM_SPECIFICATION_AND_ROADMAP.ko.md`](./ENTERPRISE_SYSTEM_SPECIFICATION_AND_ROADMAP.ko.md)  
-> **공식 QA 정본**: [`qa-reports/QA_CONSOLIDATED_MASTER_REPORT.ko.md`](./qa-reports/QA_CONSOLIDATED_MASTER_REPORT.ko.md)
+> **배포 버전**: `prod-v625`
+> **배포 일시**: 2026-10-14 21:50 KST
+> **배포 방식**: GitHub Actions CI/CD 승격 (`Build Test Candidate` 100% PASS)
+> **공식 기획 정본**: [`ENTERPRISE_SYSTEM_SPECIFICATION_AND_ROADMAP.ko.md`](docs/planning/ENTERPRISE_SYSTEM_SPECIFICATION_AND_ROADMAP.ko.md)
+> **공식 QA 정본**: `qa-reports/QA_CONSOLIDATED_MASTER_REPORT.ko.md` (historical source unavailable; original target: ./qa-reports/QA_CONSOLIDATED_MASTER_REPORT.ko.md; [link audit](docs/qa/2026-11-24-document-link-reconciliation.json))
 
 ---
 

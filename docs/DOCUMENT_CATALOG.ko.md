@@ -1,5 +1,8 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
+> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](DOCUMENT_AUTHORITY.md) / [한국어](DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+
+
 **현행 디자인 v2026.11.24.1:** [11월23일 v10만](design/CURRENT_UI_DESIGN.ko.md) · [180경로 매니페스트](design/CURRENT_UI_DESIGN_MANIFEST.json). 이전 이미지 구현 사용 금지. 전체 기능 Test는 미완료.
 
 > **v2026.11.23.10 UI visual/feature audit** [180 revised PNGs](design/game-ui-v2026.11.23.10/README.ko.md) · [audit](qa/2026-11-23-game-ui-180-image-feature-audit.ko.md). Image file QA only; full runtime acceptance unverified.
@@ -7,6 +10,8 @@
 > v2026.11.23.8 신규 이미지: [180개 새 예시 이미지](design/game-ui-v2026.11.23.8/README.ko.md) — 생성 완료/시안 검수 필요, 실제 서비스 적용 아님.
 
 **현재 UI 통합 기준 (v2026.11.23.5):** [UI/UX 통합 문서](UI_UX_SINGLE_REFERENCE.ko.md) — 현재 파비콘이 로고, 관리자 메뉴 관리자 전용; 화면·문제·QA 원장. 문서 검토 중.
+
+> v2026.11.23.11 public advertisement disclosure / 공개 광고 표시: [Ad display and policy QA](qa/2026-11-23-public-ad-display-audit-v2026.11.23.11.ko.md) — source change candidate only, native Spring Test and Production not verified. Protected routes remain ad-free.
 
 **DOC-2026.11.11.1500 — [최신 문서·권위·검증 현황](CURRENT_DOCUMENTATION_STATUS.ko.md) / [English](CURRENT_DOCUMENTATION_STATUS.md).** 아래 과거 기록은 현재 운영 기능 인증이 아님. 통합기획서와 실측 영수증을 우선하며, 기록 시점 테스트 버전 API는 HTTP 502였음. 문서만 변경.
 

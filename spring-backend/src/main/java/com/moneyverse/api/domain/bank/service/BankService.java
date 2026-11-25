@@ -39,6 +39,7 @@ public class BankService {
             if (jsonRaw != null && !jsonRaw.isBlank()) {
                 Map<String, Object> data = objectMapper.readValue(jsonRaw, new TypeReference<Map<String, Object>>() {});
                 BankStanding standing = new BankStanding();
+                standing.setCanonical(data);
                 standing.setCashBalanceWld(String.valueOf(data.getOrDefault("cash_balance", "0")));
                 standing.setDepositBalanceWld(String.valueOf(data.getOrDefault("bank_balance", "0")));
                 standing.setAccruedInterestWld(String.valueOf(data.getOrDefault("unclaimed_interest", "0")));
@@ -46,7 +47,7 @@ public class BankService {
                 standing.setDailyInterestRatePct(String.valueOf(data.getOrDefault("daily_interest_rate_pct", "0.0123")) + "%");
                 standing.setCreditGrade(String.valueOf(data.getOrDefault("credit_grade", "A1")));
                 standing.setCreditLimitWld(String.valueOf(data.getOrDefault("credit_limit", "5000000")));
-                
+
                 Object activeLoanObj = data.get("active_loan");
                 if (activeLoanObj instanceof Map) {
                     @SuppressWarnings("unchecked")

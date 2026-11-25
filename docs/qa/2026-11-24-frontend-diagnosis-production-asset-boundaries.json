@@ -1,0 +1,58 @@
+[
+  {
+    "lane": "edge",
+    "path": "/_next/static/css/828951deb2af2cbe.css",
+    "status": 502,
+    "contentType": "text/html",
+    "bytes": 150
+  },
+  {
+    "lane": "edge",
+    "path": "/assets/mv43/public.js",
+    "status": 403,
+    "contentType": "text/html",
+    "bytes": 146
+  },
+  {
+    "lane": "edge",
+    "path": "/assets/mv43/chrome.css",
+    "status": 200,
+    "contentType": "text/css",
+    "bytes": 8956
+  },
+  {
+    "lane": "edge",
+    "path": "/terms",
+    "status": 200,
+    "contentType": "text/html",
+    "bytes": 92562
+  },
+  {
+    "lane": "full-backend",
+    "path": "/_next/static/css/828951deb2af2cbe.css",
+    "status": 404,
+    "contentType": "application/json",
+    "bytes": 126
+  },
+  {
+    "lane": "full-backend",
+    "path": "/assets/mv43/public.js",
+    "status": 200,
+    "contentType": "text/javascript",
+    "bytes": 1819
+  },
+  {
+    "lane": "full-backend",
+    "path": "/assets/mv43/chrome.css",
+    "status": 200,
+    "contentType": "text/css",
+    "bytes": 8956
+  },
+  {
+    "lane": "full-backend",
+    "path": "/terms",
+    "status": 200,
+    "contentType": "text/html",
+    "bytes": 92503
+  }
+]

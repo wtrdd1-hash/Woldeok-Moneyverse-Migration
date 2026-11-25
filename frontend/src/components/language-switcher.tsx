@@ -95,15 +95,15 @@ export function LanguageSwitcher({
         <Button
           variant="outline"
           size="sm"
-          className={`h-10 sm:h-11 min-h-[40px] items-center gap-1 sm:gap-1.5 rounded-xl px-2 sm:px-3 text-xs font-black text-foreground border-border/70 hover:bg-secondary/80 transition-all active:scale-[0.98] shrink-0 outline-none ${className}`}
+          className={`h-10 sm:h-11 min-h-[40px] items-center gap-1 sm:gap-1.5 rounded-xl px-2 sm:px-3 text-xs font-black text-foreground border-border/70 hover:bg-secondary/80 transition-colors active:scale-[0.98] shrink-0 outline-none ${className}`}
           aria-label={ariaMap[locale] || 'Change language and currency'}
         >
-          <Globe2 className="size-4 text-amber-500 shrink-0" />
-          <span aria-hidden className="font-mono font-bold tracking-tight">
+          <Globe2 className="size-4 text-[var(--g1-violet)] shrink-0" />
+          <span aria-hidden className="font-bold">
             {locale.toUpperCase()}
           </span>
           {!compact && (
-            <span className="hidden min-[480px]:inline text-[10px] text-muted-foreground font-mono">
+            <span className="hidden min-[480px]:inline text-[10px] text-muted-foreground">
               ({CURRENCY_CONFIG[currency]?.symbol || '₩'})
             </span>
           )}
@@ -126,7 +126,7 @@ export function LanguageSwitcher({
           onSelect={resetLocaleToAuto}
           className="min-h-11 rounded-xl px-3 font-medium transition-colors cursor-pointer"
         >
-          <Globe2 className="size-4 text-amber-500" />
+          <Globe2 className="size-4 text-[var(--g1-violet)]" />
           <span className="ml-2 text-xs font-semibold">{automaticLabel[locale]}</span>
         </DropdownMenuItem>
         {LANGUAGE_OPTIONS.map((option) => (
@@ -139,7 +139,7 @@ export function LanguageSwitcher({
               {option.shortLabel}
             </span>
             <span className="ml-2 text-xs font-semibold">{option.label}</span>
-            {locale === option.value && <Check className="ml-auto size-4 text-amber-500 font-bold" />}
+            {locale === option.value && <Check className="ml-auto size-4 text-[var(--g1-violet)] font-bold" />}
           </DropdownMenuItem>
         ))}
 
@@ -147,7 +147,7 @@ export function LanguageSwitcher({
 
         {/* 2. Currency Selection */}
         <div className="flex items-center gap-1.5 px-3 py-1 text-[11px] font-semibold text-muted-foreground">
-          <Coins className="size-3.5 text-amber-500" />
+          <Coins className="size-3.5 text-[var(--g1-violet)]" />
           <span>{currencyLabelMap[locale] || 'Display Currency'}</span>
         </div>
         {ALL_CURRENCIES.map((code: Currency) => {
@@ -159,11 +159,11 @@ export function LanguageSwitcher({
               onSelect={() => setCurrency(code)}
               className="min-h-11 rounded-xl px-3 font-medium transition-colors cursor-pointer"
             >
-              <span className="grid size-6 place-items-center rounded-md bg-amber-500/10 font-mono text-xs font-black text-amber-500">
+              <span className="grid size-6 place-items-center rounded-md bg-[var(--g1-plum-3)] text-xs font-bold text-[var(--g1-violet)]">
                 {meta.symbol}
               </span>
               <span className="ml-2 text-xs font-medium">{meta.name[locale] || meta.name.ko}</span>
-              {isSelected && <Check className="ml-auto size-4 text-amber-500 font-bold" />}
+              {isSelected && <Check className="ml-auto size-4 text-[var(--g1-violet)] font-bold" />}
             </DropdownMenuItem>
           );
         })}

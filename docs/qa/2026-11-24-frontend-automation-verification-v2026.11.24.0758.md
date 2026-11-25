@@ -1,6 +1,6 @@
 # Frontend Scheduled Automation & Implementation Verification — v2026.11.24.0758
 
-Status: **SCHEDULER ACTIVE / FRONTEND INCOMPLETE / FULL TEST & PRODUCTION RELEASE HOLD**  
+Status: **SCHEDULER ACTIVE / FRONTEND INCOMPLETE / FULL TEST & PRODUCTION RELEASE HOLD**
 Date: 2026-11-24 KST. Korean companion: [한국어](2026-11-24-frontend-automation-verification-v2026.11.24.0758.ko.md).
 
 ## Authority and source checkpoints
@@ -37,5 +37,5 @@ Date: 2026-11-24 KST. Korean companion: [한국어](2026-11-24-frontend-automati
 - Test deployment only by QA-2 after independent gates and rollback verified. Production promotion remains HOLD.
 
 ## Release notes
-Internal: diagnostic audit v2026.11.24.0758, no runtime change.  
+Internal: diagnostic audit v2026.11.24.0758, no runtime change.
 GitHub: docs-only report branch; Draft PR for review; **not** an implementation or release milestone.

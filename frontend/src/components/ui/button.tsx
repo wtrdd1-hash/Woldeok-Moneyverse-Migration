@@ -5,28 +5,28 @@ import { Slot } from 'radix-ui';
 import { cn } from '@/lib/cn';
 
 const buttonVariants = cva(
-  'moneyverse-button inline-flex shrink-0 max-w-full touch-manipulation items-center justify-center gap-2 rounded-xl border border-transparent text-sm font-bold whitespace-nowrap transition-all duration-150 active:scale-[0.98] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/25 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=size-])]:size-4',
+  'moneyverse-button inline-flex shrink-0 max-w-full touch-manipulation items-center justify-center gap-2 rounded-md border border-transparent text-sm font-semibold whitespace-nowrap transition-[background-color,border-color,color,transform] duration-150 ease-out active:scale-[0.97] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/25 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=size-])]:size-4',
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        default: 'bg-[var(--g1-violet-ink)] text-[var(--g1-ink)] hover:bg-[var(--g1-violet)] hover:text-[var(--g1-night)]',
         destructive:
           'bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20',
-        outline: 'border-border bg-card text-foreground hover:border-input hover:bg-muted',
-        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
-        ghost: 'hover:bg-muted hover:text-foreground',
-        link: 'h-auto min-h-0 rounded-none p-0 text-primary underline-offset-4 hover:underline',
+        outline: 'border-[var(--g1-line)] bg-transparent text-[var(--g1-ink)] hover:border-[var(--g1-gold)] hover:bg-[var(--g1-plum-2)]',
+        secondary: 'bg-[var(--g1-plum-2)] text-[var(--g1-ink)] hover:bg-[var(--g1-plum-3)]',
+        ghost: 'text-[var(--g1-muted)] hover:bg-[var(--g1-plum-2)] hover:text-[var(--g1-ink)]',
+        link: 'h-auto min-h-0 rounded-none p-0 text-[var(--g1-gold)] underline-offset-4 hover:underline',
         // 핀테크·거버넌스 도메인 특화 시맨틱 Variant
         stepup:
-          'bg-amber-500 text-zinc-950 border-amber-400/60 hover:bg-amber-400 shadow-sm shadow-amber-500/20 focus-visible:ring-amber-400/40',
+          'bg-amber-500 text-zinc-950 border-amber-400/60 hover:bg-amber-400 focus-visible:ring-amber-400/40',
         killswitch:
-          'bg-rose-950/70 border-rose-500/80 text-rose-300 hover:bg-rose-900/90 hover:text-white shadow-[0_0_15px_rgba(244,63,94,0.2)] focus-visible:ring-rose-500/40',
+          'bg-rose-950/70 border-rose-500/80 text-rose-300 hover:bg-rose-900/90 hover:text-white focus-visible:ring-rose-500/40',
         'trading-buy':
-          'bg-red-500 text-white hover:bg-red-600 shadow-sm shadow-red-500/20 focus-visible:ring-red-500/35',
+          'bg-red-500 text-white hover:bg-red-600 focus-visible:ring-red-500/35',
         'trading-sell':
-          'bg-blue-500 text-white hover:bg-blue-600 shadow-sm shadow-blue-500/20 focus-visible:ring-blue-500/35',
+          'bg-blue-500 text-white hover:bg-blue-600 focus-visible:ring-blue-500/35',
         surface:
-          'bg-zinc-900/90 border-zinc-800 text-zinc-100 hover:border-zinc-600 hover:bg-zinc-800/90',
+          'bg-[var(--g1-plum)] border-[var(--g1-line)] text-[var(--g1-ink)] hover:border-[var(--g1-gold)] hover:bg-[var(--g1-plum-2)]',
       },
       size: {
         default: 'min-h-[44px] h-11 px-4 py-2 has-[>svg]:px-3',

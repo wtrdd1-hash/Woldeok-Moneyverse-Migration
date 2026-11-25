@@ -1,4 +1,7 @@
 ## v2026.09.23.383 — 개발 B: 자산 강제 조정 idempotency 계약 강화
+
+> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](../docs/DOCUMENT_AUTHORITY.md) / [한국어](../docs/DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+
 - 최신 main에서 관리자 자산 override가 idempotency key 누락 시 API가 random UUID를 생성해 재시도마다 별도 경제 명령이 될 수 있는 P0/P1 경계를 확인했습니다.
 - API DTO에서 caller-owned UUID를 필수화하고 controller fallback 생성을 제거했습니다. 기존 관리자 프론트는 이미 UUID를 보내므로 사용자 흐름은 유지됩니다.
 - focused DTO 2/2, backend typecheck, changed-file ESLint, 전체 backend Vitest 89 files / 942 tests 통과. DB 환경이 없는 52 files / 361 tests는 skip되어 real PostgreSQL gate는 별도 required CI에서 확인합니다.

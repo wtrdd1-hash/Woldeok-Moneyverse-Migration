@@ -30,7 +30,11 @@ export async function GET(
     await relaySetCookie(setCookie);
     const cookieHeader = sessionCookiePair(setCookie);
     const client = new URL(request.url).searchParams.get('client');
-    const suffix = client === 'mobile' ? '?client=mobile' : '';
+    // Spring answers a browser-style 302 unless asked for JSON; fetch would then
+    // follow the redirect to the provider and this handler never saw the URL.
+    const query = new URLSearchParams({ format: 'json' });
+    if (client === 'mobile') query.set('client', 'mobile');
+    const suffix = `?${query}`;
     const { authorizationUrl } = await api<{ authorizationUrl: string }>(
       `/auth/${encodeURIComponent(provider)}/authorize${suffix}`,
       cookieHeader && !session.signedIn ? { cookieHeader } : {},

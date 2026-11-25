@@ -12,10 +12,10 @@ import { localeLabel } from '@/lib/locale';
 import { getStockName } from '@/lib/i18n-dictionary';
 import { MarketPricesProvider } from '@/lib/use-market-prices';
 import dynamicImport from 'next/dynamic';
-import { StockDisclosureTicker } from '@/components/stock-disclosure-ticker';
 import { GlobalMacroPulseTicker } from '@/components/global-macro-pulse-ticker';
 import { normalizeStockSort, sortMarketStocks } from './stock-market-sort';
 import { canonicalUrl } from '@/lib/seo';
+import { StatRow } from '@/components/d180/primitives';
 
 const TradeDialog = dynamicImport(
   () => import('./trade-dialog').then((mod) => mod.TradeDialog),
@@ -111,7 +111,7 @@ export default async function StocksPage({
   const decliningCount = stocks.length - advancingCount;
 
   const filterOptions = [
-    { value: 'default', label: localeLabel(locale, '전체 10종목', 'All 10 Stocks', '全10銘柄', '全部10只股票') },
+    { value: 'default', label: localeLabel(locale, `전체 ${stocks.length}종목`, `All ${stocks.length}`, `全${stocks.length}銘柄`, `全部${stocks.length}只`) },
     { value: 'change', label: localeLabel(locale, '급등·급락순', 'Top Movers', '変動率順', '涨跌幅榜') },
     { value: 'price', label: localeLabel(locale, '가격순', 'By Price', '価格順', '价格高低') },
     { value: 'name', label: localeLabel(locale, '이름순', 'By Name', '名前順', '名称排序') },
@@ -123,56 +123,19 @@ export default async function StocksPage({
         {/* 1. Global Macro & Disclosure Ticker */}
         <div className="space-y-4">
           <GlobalMacroPulseTicker />
-          <StockDisclosureTicker />
+          {/* The disclosure feed was a hard-coded dataset shown as LIVE and
+              'verified official' with price-impact ranges (QA 2026-11-25). */}
         </div>
 
-        {/* 1.5 Neo Navy Market Status Strip */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="rounded-2xl bg-[#0f1422] border border-slate-800/80 p-3.5 sm:p-4 min-w-0">
-            <p className="text-[11px] font-semibold text-slate-400">
-              {localeLabel(locale, '상장 종목', 'Listed Equities', '上場銘柄', '上市标的')}
-            </p>
-            <p className="text-lg sm:text-xl font-black font-mono tabular-nums text-slate-100 mt-1">
-              {stocks.length}
-              <span className="text-xs font-normal text-slate-400 ml-1">
-                {localeLabel(locale, '종목', 'stocks', '銘柄', '只')}
-              </span>
-            </p>
-          </div>
-          <div className="rounded-2xl bg-[#0f1422] border border-slate-800/80 p-3.5 sm:p-4 min-w-0">
-            <p className="text-[11px] font-semibold text-slate-400">
-              {localeLabel(locale, '상승 / 하락 흐름', 'Advancing / Declining', '騰落比率', '涨跌分布')}
-            </p>
-            <p className="text-lg sm:text-xl font-black font-mono tabular-nums mt-1 flex items-center gap-1.5">
-              <span className="text-red-400">{advancingCount}</span>
-              <span className="text-slate-600 text-sm">/</span>
-              <span className="text-blue-400">{decliningCount}</span>
-            </p>
-          </div>
-          <div className="rounded-2xl bg-[#0f1422] border border-slate-800/80 p-3.5 sm:p-4 min-w-0">
-            <p className="text-[11px] font-semibold text-slate-400">
-              {localeLabel(locale, '주문 표준 (KRX)', 'Order Semantics', '売買カラー標準', '交易配色规范')}
-            </p>
-            <p className="text-xs sm:text-sm font-bold text-slate-200 mt-1.5 flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-center gap-1 text-red-400">
-                <span className="size-2 rounded-full bg-red-500" />
-                {localeLabel(locale, '매수·상승', 'Buy/Up', '買い・上昇', '买入/上涨')}
-              </span>
-              <span className="inline-flex items-center gap-1 text-blue-400">
-                <span className="size-2 rounded-full bg-blue-500" />
-                {localeLabel(locale, '매도·하락', 'Sell/Down', '売り・下落', '卖出/下跌')}
-              </span>
-            </p>
-          </div>
-          <div className="rounded-2xl bg-[#0f1422] border border-slate-800/80 p-3.5 sm:p-4 min-w-0">
-            <p className="text-[11px] font-semibold text-slate-400">
-              {localeLabel(locale, '트레이딩 워크스페이스', 'Trading Desk', 'デスク構成', '交易界面')}
-            </p>
-            <p className="text-xs sm:text-sm font-bold text-emerald-400 mt-1.5 truncate">
-              {localeLabel(locale, '3단 매트릭스 · 실시간 틱', '3-Col Matrix · Live Tick', '3カラム・リアルタイム', '三栏矩阵 · 实时行情')}
-            </p>
-          </div>
-        </div>
+        {/* DESIGN180 StatRow from the exchange answer only; filler cards removed. */}
+        <StatRow
+          label={localeLabel(locale, '시장 요약', 'Market summary', '市場サマリー', '市场概要')}
+          items={[
+            { label: localeLabel(locale, '상장 종목', 'Listed', '上場銘柄', '上市标的'), value: marketData ? `${stocks.length}` : null },
+            { label: localeLabel(locale, '상승', 'Advancing', '上昇', '上涨'), value: marketData ? `${advancingCount}` : null, tone: 'rise' },
+            { label: localeLabel(locale, '하락', 'Declining', '下落', '下跌'), value: marketData ? `${decliningCount}` : null, tone: 'fall' },
+          ]}
+        />
 
         {/* 2. Toss Style Filter Tabs */}
         <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-800/60">

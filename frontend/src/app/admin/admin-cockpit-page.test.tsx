@@ -15,9 +15,9 @@ import AdminPage from './page';
 describe('administrator cockpit API failure rendering', () => {
   it('withholds fabricated global population, all-green control and chain-integrity claims', async () => {
     const markup = renderToStaticMarkup(await AdminPage({ searchParams: Promise.resolve({}) }));
-    expect(markup).toContain('일부 지표 확인 불가');
+    expect(markup).toContain('지표를 불러오지 못했어요');
     expect(markup).toContain('원장 정합성 확인 불가');
-    expect(markup).toContain('전체 인구 아님');
+    expect(markup).toContain('전체 회원 수 아님');
     expect(markup).not.toContain('14대 API 온라인');
     expect(markup).not.toContain('전 기능 정상 가동');
     expect(markup).not.toContain('SHA-256 원장 체인 무결성 확인');

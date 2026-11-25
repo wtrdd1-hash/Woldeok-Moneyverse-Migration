@@ -1,0 +1,258 @@
+{
+  "repaired": [
+    {
+      "document": "PROJECT_MEMORY.md",
+      "oldTarget": "./API_DOCUMENTATION.md",
+      "newTarget": "docs/api/API_DOCUMENTATION.md"
+    },
+    {
+      "document": "PROJECT_MEMORY.md",
+      "oldTarget": "./ENTERPRISE_SYSTEM_SPECIFICATION_AND_ROADMAP.ko.md",
+      "newTarget": "docs/planning/ENTERPRISE_SYSTEM_SPECIFICATION_AND_ROADMAP.ko.md"
+    },
+    {
+      "document": "docs/ECONOMIC_PROFITABILITY_AUDIT.ko.md",
+      "oldTarget": "file:///c:/Users/sds/Desktop/tset/Woldeok-Moneyverse-Migration/frontend/src/app/e2e-click-profitability.test.ts",
+      "newTarget": "../frontend/src/app/e2e-click-profitability.test.ts"
+    },
+    {
+      "document": "docs/ECONOMIC_PROFITABILITY_AUDIT.md",
+      "oldTarget": "file:///c:/Users/sds/Desktop/tset/Woldeok-Moneyverse-Migration/frontend/src/app/e2e-click-profitability.test.ts",
+      "newTarget": "../frontend/src/app/e2e-click-profitability.test.ts"
+    },
+    {
+      "document": "docs/OFFICIAL_BRAND_ICON_SPEC.ko.md",
+      "oldTarget": "file:///c:/Users/sds/Desktop/tset/Woldeok-Moneyverse-Migration/docs/design/OFFICIAL_BRAND_ICON_GUIDELINES.ko.md",
+      "newTarget": "design/OFFICIAL_BRAND_ICON_GUIDELINES.ko.md"
+    },
+    {
+      "document": "docs/OFFICIAL_BRAND_ICON_SPEC.ko.md",
+      "oldTarget": "file:///c:/Users/sds/Desktop/tset/Woldeok-Moneyverse-Migration/frontend/public/images/woldeok-official-icon.png",
+      "newTarget": "../frontend/public/images/woldeok-official-icon.png"
+    },
+    {
+      "document": "docs/api/API_DOCUMENTATION.md",
+      "oldTarget": "./Woldeok-Moneyverse-Migration/docs/api/01-auth-and-account.md",
+      "newTarget": "01-auth-and-account.md"
+    },
+    {
+      "document": "docs/api/API_DOCUMENTATION.md",
+      "oldTarget": "./Woldeok-Moneyverse-Migration/docs/api/02-wallet-and-banking.md",
+      "newTarget": "02-wallet-and-banking.md"
+    },
+    {
+      "document": "docs/api/API_DOCUMENTATION.md",
+      "oldTarget": "./Woldeok-Moneyverse-Migration/docs/api/03-stocks-and-businesses.md",
+      "newTarget": "03-stocks-and-businesses.md"
+    },
+    {
+      "document": "docs/api/API_DOCUMENTATION.md",
+      "oldTarget": "./Woldeok-Moneyverse-Migration/docs/api/04-marketplace-and-crafting.md",
+      "newTarget": "04-marketplace-and-crafting.md"
+    },
+    {
+      "document": "docs/api/API_DOCUMENTATION.md",
+      "oldTarget": "./Woldeok-Moneyverse-Migration/docs/api/05-spaces-clubs-seasons.md",
+      "newTarget": "05-spaces-clubs-seasons.md"
+    },
+    {
+      "document": "docs/api/API_DOCUMENTATION.md",
+      "oldTarget": "./Woldeok-Moneyverse-Migration/docs/api/06-gameplay-work-casino.md",
+      "newTarget": "06-gameplay-work-casino.md"
+    },
+    {
+      "document": "docs/api/API_DOCUMENTATION.md",
+      "oldTarget": "./Woldeok-Moneyverse-Migration/docs/api/07-community-board-chat.md",
+      "newTarget": "07-community-board-chat.md"
+    },
+    {
+      "document": "docs/api/API_DOCUMENTATION.md",
+      "oldTarget": "./Woldeok-Moneyverse-Migration/docs/api/08-admin-control-tower.md",
+      "newTarget": "08-admin-control-tower.md"
+    },
+    {
+      "document": "docs/changelog/CHANGELOG.ko.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.ko.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.ko.md"
+    },
+    {
+      "document": "docs/changelog/CHANGELOG.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.md"
+    },
+    {
+      "document": "docs/updates/v2026.10.28.1424-planning-collection-showcase-github.ko.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.ko.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.ko.md"
+    },
+    {
+      "document": "docs/updates/v2026.10.28.1424-planning-collection-showcase-github.ko.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.md"
+    },
+    {
+      "document": "docs/updates/v2026.10.28.1424-planning-collection-showcase-github.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.ko.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.ko.md"
+    },
+    {
+      "document": "docs/updates/v2026.10.28.1424-planning-collection-showcase-github.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.md"
+    },
+    {
+      "document": "docs/updates/v2026.10.28.1424-planning-collection-showcase-internal.ko.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.ko.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.ko.md"
+    },
+    {
+      "document": "docs/updates/v2026.10.28.1424-planning-collection-showcase-internal.ko.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.md"
+    },
+    {
+      "document": "docs/updates/v2026.10.28.1424-planning-collection-showcase-internal.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.ko.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.ko.md"
+    },
+    {
+      "document": "docs/updates/v2026.10.28.1424-planning-collection-showcase-internal.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.md"
+    },
+    {
+      "document": "docs/updates/v2026.10.28.1426-planning-collection-proof-github.ko.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.ko.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.ko.md"
+    },
+    {
+      "document": "docs/updates/v2026.10.28.1426-planning-collection-proof-github.ko.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.md"
+    },
+    {
+      "document": "docs/updates/v2026.10.28.1426-planning-collection-proof-internal.ko.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.ko.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.ko.md"
+    },
+    {
+      "document": "docs/updates/v2026.10.28.1426-planning-collection-proof-internal.ko.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.md"
+    },
+    {
+      "document": "docs/updates/v2026.10.28.1426-planning-collection-proof-internal.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.ko.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.ko.md"
+    },
+    {
+      "document": "docs/updates/v2026.10.28.1426-planning-collection-proof-internal.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.md"
+    },
+    {
+      "document": "docs/updates/v2026.10.30.1504-planning-wallet-transaction-detail-github.ko.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.ko.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.ko.md"
+    },
+    {
+      "document": "docs/updates/v2026.10.30.1504-planning-wallet-transaction-detail-github.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.md"
+    },
+    {
+      "document": "docs/updates/v2026.10.30.1504-planning-wallet-transaction-detail-internal.ko.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.ko.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.ko.md"
+    },
+    {
+      "document": "docs/updates/v2026.10.30.1504-planning-wallet-transaction-detail-internal.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.md"
+    },
+    {
+      "document": "docs/worklog/2026-10-28-planning-v1426-collection-proof-integrity.ko.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.ko.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.ko.md"
+    },
+    {
+      "document": "docs/worklog/2026-10-28-planning-v1426-collection-proof-integrity.ko.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.md"
+    },
+    {
+      "document": "docs/worklog/2026-10-30-planning-v1504-wallet-transaction-detail.ko.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.ko.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.ko.md"
+    },
+    {
+      "document": "docs/worklog/2026-10-30-planning-v1504-wallet-transaction-detail.md",
+      "oldTarget": "INTEGRATED_PLANNING_MASTER.md",
+      "newTarget": "../planning/INTEGRATED_PLANNING_MASTER.md"
+    },
+    {
+      "document": "implementation_plan.md",
+      "oldTarget": "file:///c:/Users/sds/Desktop/tset/Woldeok-Moneyverse-Migration/frontend/next.config.ts",
+      "newTarget": "frontend/next.config.ts"
+    },
+    {
+      "document": "implementation_plan.md",
+      "oldTarget": "file:///c:/Users/sds/Desktop/tset/Woldeok-Moneyverse-Migration/frontend/src/app/frontend-version/route.ts",
+      "newTarget": "frontend/src/app/frontend-version/route.ts"
+    },
+    {
+      "document": "implementation_plan.md",
+      "oldTarget": "file:///c:/Users/sds/Desktop/tset/Woldeok-Moneyverse-Migration/frontend/src/components/site-header.tsx",
+      "newTarget": "frontend/src/components/site-header.tsx"
+    },
+    {
+      "document": "implementation_plan.md",
+      "oldTarget": "file:///c:/Users/sds/Desktop/tset/Woldeok-Moneyverse-Migration/frontend/src/components/stale-tab-notice.tsx",
+      "newTarget": "frontend/src/components/stale-tab-notice.tsx"
+    },
+    {
+      "document": "walkthrough.md",
+      "oldTarget": "./ENTERPRISE_SYSTEM_SPECIFICATION_AND_ROADMAP.ko.md",
+      "newTarget": "docs/planning/ENTERPRISE_SYSTEM_SPECIFICATION_AND_ROADMAP.ko.md"
+    },
+    {
+      "document": "docs/worklog/2026-10-16-ai-blog-production-unblock-v735.ko.md",
+      "oldTarget": "2026-10-16-ai-blog-production-unblock-v723.md",
+      "newTarget": "2026-10-16-ai-blog-production-unblock-v735.md",
+      "reason": "existing exact-version source/language counterpart"
+    },
+    {
+      "document": "docs/worklog/2026-10-16-ai-blog-production-unblock-v735.md",
+      "oldTarget": "2026-10-16-ai-blog-production-unblock-v723.ko.md",
+      "newTarget": "2026-10-16-ai-blog-production-unblock-v735.ko.md",
+      "reason": "existing exact-version source/language counterpart"
+    }
+  ],
+  "unresolved": [
+    {
+      "document": "PROJECT_MEMORY.md",
+      "target": "./qa-reports/QA_CONSOLIDATED_MASTER_REPORT.ko.md",
+      "classification": "unresolved-historical-target",
+      "disposition": "Unavailable source explicitly annotated; original path preserved, no replacement evidence fabricated"
+    },
+    {
+      "document": "README-KO.md",
+      "target": "docs/moneyverse_full_system_architecture_spec.md",
+      "classification": "unresolved-historical-target",
+      "disposition": "Unavailable source explicitly annotated; original path preserved, no replacement evidence fabricated"
+    },
+    {
+      "document": "docs/CURRENT_RUNTIME_BASELINE.ko.md",
+      "target": "worklog/2026-11-08-branch-merge-and-v1770-promotion.ko.md",
+      "classification": "unresolved-historical-target",
+      "disposition": "Unavailable source explicitly annotated; original path preserved, no replacement evidence fabricated"
+    },
+    {
+      "document": "walkthrough.md",
+      "target": "./qa-reports/QA_CONSOLIDATED_MASTER_REPORT.ko.md",
+      "classification": "unresolved-historical-target",
+      "disposition": "Unavailable source explicitly annotated; original path preserved, no replacement evidence fabricated"
+    }
+  ],
+  "note": "Website routes and upstream skill examples are excluded from missing repository-file counts. No target or evidence file was fabricated."
+}

@@ -187,3 +187,26 @@
 }
 
 .mobile-bottom-dock a .icon { font-size: 20px; }
+
+/* Nov18 mobile safe-area contract.  The dock exists only on pages whose five
+   real navigation links are present.  Do not synthesize dead-end tabs. */
+@media (max-width: 1023px) {
+  .mobile-bottom-dock {
+    height: calc(60px + env(safe-area-inset-bottom)) !important;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .mobile-bottom-dock a {
+    min-width: 44px;
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+  body:has(.mobile-bottom-dock) {
+    padding-bottom: calc(76px + env(safe-area-inset-bottom)) !important;
+  }
+  body:has(.mobile-bottom-dock) .mv-floating-chat-btn {
+    bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+  }
+}
+@media (min-width: 1024px) {
+  .mobile-bottom-dock { display: none !important; }
+}

@@ -1,3 +1,4 @@
+import { isSchedulerOrAdministrator } from '@/lib/scheduler-or-admin';
 import { NextResponse } from 'next/server';
 
 const INDEXNOW_KEY = '7ebcf7a3424141ee8dbba209efbe8085';
@@ -5,6 +6,9 @@ const HOST = 'easy-scraping.com';
 const KEY_LOCATION = 'https://easy-scraping.com/7ebcf7a3424141ee8dbba209efbe8085.txt';
 
 export async function POST(req: Request) {
+  if (!(await isSchedulerOrAdministrator(req))) {
+    return NextResponse.json({ ok: false, error: 'Administrator or scheduler secret required' }, { status: 403, headers: { 'cache-control': 'no-store' } });
+  }
   try {
     const body = await req.json().catch(() => ({}));
     const urls: string[] = Array.isArray(body?.urls) && body.urls.length > 0

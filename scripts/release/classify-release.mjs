@@ -9,6 +9,23 @@ import { pathToFileURL } from 'node:url';
 
 export const CLASSIFIER_VERSION = 'release-path-v2';
 
+const REVIEW_TOOL_PATHS = [
+  '.agents/skills/codex-gemini-pingpong/scripts/pingpong.py',
+  '.agents/skills/codex-gemini-pingpong/scripts/tests/test_pingpong.py',
+  '.agents/skills/codex-gemini-pingpong/.gitignore',
+];
+const DESIGN_AUTHORITY_PATH = 'docs/design/CURRENT_UI_DESIGN_MANIFEST.json';
+// These reviewed non-runtime records stay closed; adjacent machine payloads remain unknown.
+const REVIEWED_DOCUMENT_PATHS = new Set([
+  '.agents/skills/stitch-extract-design-md/LICENSE.upstream',
+  '.stitch/DESIGN.md',
+  '.stitch/DESIGN.ko.md',
+  'docs/qa/evidence/2026-11-24-native-scoped-test/browser-60-external.json',
+  'docs/qa/evidence/2026-11-24-native-scoped-test/test-release-manifest.json',
+  'docs/design/asset-resources-v2026.11.23.12/source-catalog.json',
+]);
+
+
 const DOC_PATHS = [
   /^\.agents\//,
   /^\.stitch\//,
@@ -68,6 +85,8 @@ const RUNTIME_GIT_PATHS = [
 ];
 
 const CONTROL_GIT_PATHS = [
+  ...REVIEW_TOOL_PATHS,
+  DESIGN_AUTHORITY_PATH,
   '.github',
   'ops',
   'deploy',
@@ -90,8 +109,10 @@ function pathKind(path) {
   });
   if (!path || path.startsWith('/') || path.split('/').includes('..') || unsafeCharacter) return 'unknown';
   // The exact generated API schema is runtime input, never a docs-only bypass.
-  // Every other JSON file under docs remains UNKNOWN/fail-closed.
+  // Unreviewed JSON remains UNKNOWN; exact design/report contracts are handled separately.
   if (path === 'docs/mobile-api-contract.json') return 'runtime';
+  if (path === DESIGN_AUTHORITY_PATH || REVIEW_TOOL_PATHS.includes(path)) return 'control';
+  if (REVIEWED_DOCUMENT_PATHS.has(path)) return 'docs';
   if (/^docs\/(?:qa|design)\/(?:.+)?\.json$/.test(path)) return 'docs';
   if (matchesAny(path, DOC_PATHS)) {
     // An executable or machine-readable payload inside docs must not bypass release verification.
@@ -175,7 +196,7 @@ export function buildReleaseInput({ repo = process.cwd(), base, head }) {
     repositoryHeadSha,
   ]).sort();
   const unsafeDocumentBlob = changedPaths.some((path) => {
-    if (pathKind(path) !== 'docs' && path !== 'docs/mobile-api-contract.json') return false;
+    if (pathKind(path) !== 'docs' && path !== 'docs/mobile-api-contract.json' && path !== DESIGN_AUTHORITY_PATH) return false;
     const before = isSafeDocumentBlob(root, baseSha, path);
     const after = isSafeDocumentBlob(root, repositoryHeadSha, path);
     return (before === null && after === null) || before === false || after === false;

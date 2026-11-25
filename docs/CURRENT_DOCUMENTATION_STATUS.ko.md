@@ -1,5 +1,8 @@
 # 최신 문서 현황 — DOC-2026.11.11.1500
 
+> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](DOCUMENT_AUTHORITY.md) / [한국어](DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+
+
 [English canonical](CURRENT_DOCUMENTATION_STATUS.md) | **한국어**
 
 > 기준 시점: 2026-11-11 15:08 KST, 웹 저장소 기준 `05e9260208db5aecc2463347885ae095c1faba2e`. 이 페이지는 **문서 탐색·점검 기록**이며 새로운 기획 권위, 배포 증빙, 미검증 기능의 완료 선언이 아닙니다.
