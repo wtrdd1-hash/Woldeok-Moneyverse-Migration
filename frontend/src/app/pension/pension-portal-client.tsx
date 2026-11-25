@@ -269,10 +269,10 @@ export function PensionPortalClient({
       {/* 상단 헤더 */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border/40 pb-5">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
-              <ShieldCheck className="h-8 w-8 text-emerald-500" />
-              국가 국민연금공단 (National Pension Service)
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="min-w-0 text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
+              <ShieldCheck className="h-6 w-6 shrink-0 text-emerald-500 sm:h-8 sm:w-8" aria-hidden="true" />
+              <span>국가 국민연금공단<span className="hidden sm:inline"> (National Pension Service)</span></span>
             </h1>
             <Badge variant="outline" className="border-emerald-500/40 text-emerald-400 bg-emerald-500/10">
               NPS 기존 기록 조회
