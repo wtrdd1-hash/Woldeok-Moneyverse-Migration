@@ -1,4 +1,53 @@
 {
+  "navBank": [
+    "Bank",
+    "은행",
+    "銀行",
+    "银行",
+    "Ngân hàng"
+  ],
+  "bank": [
+    "Bank",
+    "은행",
+    "銀行",
+    "银行",
+    "Ngân hàng"
+  ],
+  "bankHero": [
+    "Virtual Banking",
+    "가상 은행 & 복리 예금",
+    "仮想銀行",
+    "虚拟银行",
+    "Ngân hàng ảo"
+  ],
+  "bankLead": [
+    "Compound deposit interest, savings pockets and smart loans",
+    "매일 실시간 복리 이자가 붙는 월덕뱅크. 예적금, 저축 팟, 가상 신용 대출",
+    "複利預金とスマートローン",
+    "复利存款与智能贷款",
+    "Lãi suất tiền gửi và khoản vay"
+  ],
+  "bankDeposit": [
+    "Deposit",
+    "예금 입금",
+    "預金",
+    "存款",
+    "Gửi tiền"
+  ],
+  "bankWithdraw": [
+    "Withdraw",
+    "예금 출금",
+    "出金",
+    "取款",
+    "Rút tiền"
+  ],
+  "bankInterestClaim": [
+    "Claim interest now",
+    "지금 이자 받기",
+    "今すぐ利息を受け取る",
+    "立即领取利息",
+    "Nhận lãi ngay"
+  ],
   "publicationAnnouncements": [
     "Announcements",
     "운영 소식",
@@ -755,26 +804,12 @@
     "首页",
     "Trang chủ"
   ],
-  "dashboard": [
-    "Dashboard",
-    "대시보드",
-    "ダッシュボード",
-    "控制面板",
-    "Bảng điều khiển"
-  ],
   "wallet": [
     "Wallet",
     "지갑",
     "ウォレット",
     "钱包",
     "Ví"
-  ],
-  "bank": [
-    "Bank",
-    "은행",
-    "銀行",
-    "银行",
-    "Ngân hàng"
   ],
   "stocks": [
     "Stocks",
@@ -1370,6 +1405,13 @@
     "市場管理",
     "市场管理",
     "Thị trường"
+  ],
+  "dashboard": [
+    "Dashboard",
+    "대시보드",
+    "ダッシュボード",
+    "控制面板",
+    "Bảng điều khiển"
   ],
   "adminConsole": [
     "Administration",
