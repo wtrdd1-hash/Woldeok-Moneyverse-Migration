@@ -27,7 +27,8 @@ public class PublicStocksReadOnlyPage {
         this(stockService, null);
     }
 
-    public PublicStocksReadOnlyPage(StockService stockService, NativeHomeController home) {
+    @org.springframework.beans.factory.annotation.Autowired
+    public PublicStocksReadOnlyPage(StockService stockService, @org.springframework.beans.factory.annotation.Autowired(required = false) NativeHomeController home) {
         this.stockService = stockService;
         this.home = home;
     }

@@ -1,4 +1,4 @@
-﻿<!doctype html><html xmlns:th="http://www.thymeleaf.org"><head><th:block th:fragment="commonHead"><link rel="icon" type="image/x-icon" href="/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5"><link rel="stylesheet" href="/assets/mv43/chrome.css?v=460fe6ee77b8f955fdeb47ae1b74d3871d811af799b26ab969a9af186e38c3f3"><link rel="stylesheet" href="/assets/mv43/game-ui-v10.css?v=80074a39dba0eafed22e22eb2161cc181329c1d8e16193eaf2e20a830be7b65c"><script src="/socket.io.min.js" defer></script><script src="/assets/mv43/chrome.js?v=d9f8a8987e748f00460eebfd7cab3ed5e07ddd75090569f9dcde64f0bb857a55" defer></script></th:block></head><body>
+﻿<!doctype html><html xmlns:th="http://www.thymeleaf.org"><head><th:block th:fragment="commonHead"><link rel="icon" type="image/x-icon" href="/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5"><link rel="stylesheet" href="/assets/mv43/chrome.css?v=460fe6ee77b8f955fdeb47ae1b74d3871d811af799b26ab969a9af186e38c3f3"><link rel="stylesheet" href="/assets/mv43/game-world.css?v=7ce958fab884d8eee36cc6debd421606d106d714f154a4f9463cc9b6fe5cd751"><link rel="stylesheet" href="/assets/mv43/game-ui-v10.css?v=80074a39dba0eafed22e22eb2161cc181329c1d8e16193eaf2e20a830be7b65c"><script src="/socket.io.min.js" defer></script><script src="/assets/mv43/chrome.js?v=d9f8a8987e748f00460eebfd7cab3ed5e07ddd75090569f9dcde64f0bb857a55" defer></script></th:block></head><body>
   <aside th:fragment="sidebar" class="sidebar" aria-label="Main navigation" data-i18n-aria="navigationMain" th:attr="aria-label=${uiCopy['navigationMain']}">
     <a href="/" class="brand"><img class="brand-mark" src="/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5" alt="" width="32" height="32"><span class="brand-title">W Moneyverse</span></a>
     <nav class="side-links" aria-label="Primary navigation" data-i18n-aria="navigationMain">
@@ -66,6 +66,7 @@
       <a th:if="${uiPageKey != 'login' && uiPageKey != 'auth'}" href="/login" class="auth-link" data-i18n="login">내 계정</a>
       <a th:if="${uiPageKey == 'login' || uiPageKey == 'auth'}" href="/account" class="auth-link">내 계정</a>
     </div>
+    <th:block th:replace="~{shared/chrome :: supportLauncher}"></th:block>
   </header>
   <footer th:fragment="footer" class="footer">
     <div class="footer-concept-bar">DESIGN CONCEPT · v2026.11.23.10 · ORIGINAL FAVICON PIXELS · <span th:text="${uiPageKey != null ? '/' + uiPageKey : '/'}">/</span></div>
@@ -101,8 +102,10 @@
   <a class="bottom-tab" href="/board" th:attr="aria-current=${uiPageKey == 'board' ? 'page' : null}"><svg class="tab-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg><span data-i18n="board" th:text="${uiCopy['board'] != null ? uiCopy['board'] : '커뮤니티'}">커뮤니티</span></a>
 </nav>
 </th:block>
-<th:block th:fragment="support">
+<th:block th:fragment="supportLauncher">
 <button type="button" id="mv-support-launcher" class="support-fab" aria-haspopup="dialog" aria-controls="mv-support-panel" aria-label="Help & chat" th:attr="aria-label=${uiCopy['support']}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="24" height="24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+</th:block>
+<th:block th:fragment="support">
 <dialog id="mv-support-panel" class="mv-support-panel" aria-labelledby="mv-support-heading">
   <header class="mv-support-heading"><h2 id="mv-support-heading" data-i18n="supportHero" th:text="${uiCopy['supportHero']}">Contact support</h2>
     <button type="button" id="mv-support-close" class="mv-support-close" aria-label="Close" th:attr="aria-label=${uiCopy['close']}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="18" y2="6"/></svg></button></header>
