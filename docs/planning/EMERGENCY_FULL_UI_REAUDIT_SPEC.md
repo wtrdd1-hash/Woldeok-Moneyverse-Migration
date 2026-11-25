@@ -1,5 +1,7 @@
 # Emergency Full UI Re-audit & Remediation Specification — v2026.10.05.530
 
+> **2026-11-25 owner-confirmed branch candidate:** English default and /en·/ko·/ja·/zh·/vi page URL prefixes. The [new decision](deltas/v2026.11.25.PLANREVIEW.1.md#planrev-dec-02--all-published-language-pages-use-a-prefix) supersedes conflicting older Korean-default/unprefixed-canonical/ko-alias clauses below. No live URL or runtime change.
+
 **English canonical** | [한국어](EMERGENCY_FULL_UI_REAUDIT_SPEC.ko.md)
 
 > Version: v2026.10.05.530

@@ -1,5 +1,7 @@
 # Moneyverse Feature, SEO and Growth Expansion — v2026.10.14.604
 
+> **2026-11-25 owner-confirmed branch candidate:** English default and /en·/ko·/ja·/zh·/vi page URL prefixes. The [new decision](deltas/v2026.11.25.PLANREVIEW.1.md#planrev-dec-02--all-published-language-pages-use-a-prefix) supersedes conflicting older Korean-default/unprefixed-canonical/ko-alias clauses below. No live URL or runtime change.
+
 > Status: PLANNING / proposed, not adopted or deployed. Korean companion: FEATURE_SEO_GROWTH_EXPANSION_SPEC.ko.md.
 > Authority: PROJECT_PLAN → INTEGRATED_PLANNING_MASTER; preserve v530 UI blocker, v523 conservation and v527 keyword admission.
 

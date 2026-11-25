@@ -1,5 +1,7 @@
 # 기획 문서
 
+> **2026-11-25 사용자 확정 기획 조정(main 병합 전):** 가상 예금보호는 회원별·기관별, 언어 URL은 EN/KO/JA/ZH/VI 모두 접두사를 사용합니다. [결정·범위·기존 계약 우선순위](deltas/v2026.11.25.PLANREVIEW.1.ko.md). 실제 기능·URL·운영 변경이 아닙니다.
+
 [English canonical](README.md) | **한국어**
 
 현재 living plan과 상세 제품/엔지니어링 명세를 보관합니다.

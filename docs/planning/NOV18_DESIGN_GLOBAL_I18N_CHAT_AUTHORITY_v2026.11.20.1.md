@@ -1,5 +1,7 @@
 # November 18 Design Baseline — Global Language and Support/Chat Implementation Authority
 
+> **2026-11-25 owner-confirmed branch candidate:** English default and /en·/ko·/ja·/zh·/vi page URL prefixes. The [new decision](deltas/v2026.11.25.PLANREVIEW.1.md#planrev-dec-02--all-published-language-pages-use-a-prefix) supersedes conflicting older Korean-default/unprefixed-canonical/ko-alias clauses below. No live URL or runtime change.
+
 > **2026-11-21 13:22 KST current, scoped:** The delivery log now uses main7d58568e3041 and the Nov18 shared shell. Nine observed administrator read routes are unified; the prior eight remain e2fb and public5remain93a3. Delivery Test40cases/Production15cases, prior8before-and-after16layouts each and Test-stop independence passed. The other27administrator routes, whole site and mutations remain OPEN, including misleading API-health metrics and account/support/chat403. [Delivery acceptance](../releases/2026-11-21-nov18-admin-delivery-production.ko.md). Earlier eight-route records below are historical acceptance snapshots.
 
 

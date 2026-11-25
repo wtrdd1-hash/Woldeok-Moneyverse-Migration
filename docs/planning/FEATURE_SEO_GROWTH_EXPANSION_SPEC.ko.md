@@ -1,5 +1,7 @@
 # Moneyverse 기능·SEO·성장 통합 상세 기획 — v2026.10.14.604
 
+> **2026-11-25 사용자 확정·브랜치 후보:** 영어 기본과 /en·/ko·/ja·/zh·/vi 화면 URL 접두사를 사용합니다. 아래의 과거 한국어 기본·무접두사 canonical·/ko 별칭 조항은 [새 결정](deltas/v2026.11.25.PLANREVIEW.1.ko.md#planrev-dec-02--모든-게시-언어의-화면-url-접두사)이 우선합니다. 실제 URL·운영은 변경하지 않았습니다.
+
 > 상태: PLANNING / 제안, 미채택. 운영·테스트·색인·수익 성과 미검증.
 > 상위 권위: PROJECT_PLAN.md → INTEGRATED_PLANNING_MASTER.md. 기존 v530 UI 차단, v523 통화보존, v527 SEO 수요 게이트를 유지한다.
 > 영문 정본: FEATURE_SEO_GROWTH_EXPANSION_SPEC.md

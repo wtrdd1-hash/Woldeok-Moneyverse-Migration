@@ -1,5 +1,7 @@
 # 월덕 머니버스 — Living Project Plan
 
+> **2026-11-25 사용자 확정 기획 조정(main 병합 전):** 가상 예금보호는 회원별·기관별, 언어 URL은 EN/KO/JA/ZH/VI 모두 접두사를 사용합니다. [결정·범위·기존 계약 우선순위](deltas/v2026.11.25.PLANREVIEW.1.ko.md). 실제 기능·URL·운영 변경이 아닙니다.
+
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 
 ## v2026.11.21.2234 — AgentMemory 영상 영구 참고 및 작업 이어받기 규칙 (PLANNING / 미설치)

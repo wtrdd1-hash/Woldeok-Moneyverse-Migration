@@ -1,5 +1,7 @@
 # 11월 18일 디자인 기준 확정 — 전 페이지 다국어·관리자 문의·채팅 통합 명세
 
+> **2026-11-25 사용자 확정·브랜치 후보:** 영어 기본과 /en·/ko·/ja·/zh·/vi 화면 URL 접두사를 사용합니다. 아래의 과거 한국어 기본·무접두사 canonical·/ko 별칭 조항은 [새 결정](deltas/v2026.11.25.PLANREVIEW.1.ko.md#planrev-dec-02--모든-게시-언어의-화면-url-접두사)이 우선합니다. 실제 URL·운영은 변경하지 않았습니다.
+
 > **2026-11-21 현재 운영: 프론트엔드 재구축 점검 중.** 사용자 명시 승인으로 main93a31e3e44의 Nginx 문서 전용503 안내를 운영 적용하고, DB-free frontend-presentation 운영/Test 두 unit을 중지·비활성화했다. 공유 API/DB/session은 유지한다. 아래 native26 활성화 기록은 이전 시점이다. 새 전체 프론트엔드는 아직 승격하지 않았다. [적용·검증·복원 기록](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md).
 
 > **2026-11-21 후속 운영 수정 — canonical5 표시 무결성:** shop/stocks/quests/board/status의 CSS 닫힘·큰 정수 금액·초기/실패 샘플 잔류·합성 curve를 source8ba9139b2fcd로 수정했다. Test75/운영10 해당 검사 통과. **실제 업무 기능·전체 Nov18 통일은 여전히 미완료**이며 초기 즉시 언어 클릭도 미수용이다. [수용·실패·미해결 기록](../releases/2026-11-21-prototype-integrity-production.ko.md). 아래 전체 감사는 수정 전 시점의 역사 증거다.
