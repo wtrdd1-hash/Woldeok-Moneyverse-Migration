@@ -1,11 +1,21 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.3.5"
-    id("io.spring.dependency-management") version "1.1.6"
+    id("org.springframework.boot") version "3.5.16"
+    id("io.spring.dependency-management") version "1.1.7"
 }
 
 group = "com.moneyverse"
 version = "0.0.1-SNAPSHOT"
+
+// Security review 2026-11-25: Spring Boot 3.5.16 still manages vulnerable versions of these
+// (OSV: Tomcat < 10.1.58 auth/constraint bypass, Netty < 4.1.137 SNI/HTTP2/smuggling,
+// jackson-databind < 2.21.7 PTV bypass/DoS, pgjdbc < 42.7.12 channel-binding downgrade).
+extra["tomcat.version"] = "10.1.62"
+extra["netty.version"] = "4.1.141.Final"
+extra["jackson-bom.version"] = "2.21.9"
+extra["postgresql.version"] = "42.7.15"
+extra["commons-lang3.version"] = "3.22.0"
+extra["log4j2.version"] = "2.26.1"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
@@ -17,6 +27,16 @@ repositories {
 }
 
 dependencies {
+    // Security review 2026-11-25: transitive libraries (mostly via lavaplayer) with known CVEs,
+    // raised to their fixed releases (OSV): commons-io >= 2.14.0, jsoup >= 1.23.1,
+    // org.json >= 20260719, rhino >= 1.7.15.1.
+    constraints {
+        implementation("commons-io:commons-io:2.22.0")
+        implementation("org.jsoup:jsoup:1.24.1")
+        implementation("org.json:json:20260814")
+        implementation("org.mozilla:rhino:1.7.15.1")
+        implementation("org.mozilla:rhino-engine:1.7.15.1")
+    }
     // Spring Boot Starters
     implementation("org.springframework.boot:spring-boot-starter-web")
     // Owner directive v28: all website frontend HTML rendered in Spring.
@@ -28,7 +48,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 
     // Database
-    runtimeOnly("org.postgresql:postgresql:42.7.4")
+    runtimeOnly("org.postgresql:postgresql") // version from extra["postgresql.version"]
     testImplementation("com.h2database:h2:2.3.232")
 
     // OpenAPI 3.0 / Swagger UI
@@ -49,11 +69,11 @@ dependencies {
     implementation("moe.kyokobot.libdave:natives-win-x86-64:0.1.2")
 
     // Lavaplayer 2.2.3 & Natives (Audio Engine for Discord Music & Voice Stay)
-    implementation("dev.arbjerg:lavaplayer:2.2.3")
-    implementation("dev.arbjerg:lavaplayer-natives:2.2.3")
+    implementation("dev.arbjerg:lavaplayer:2.2.7")
+    implementation("dev.arbjerg:lavaplayer-natives:2.2.7")
 
     // Security Cryptography (Argon2id)
-    implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
+    implementation("org.bouncycastle:bcprov-jdk18on:1.87")
 
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")

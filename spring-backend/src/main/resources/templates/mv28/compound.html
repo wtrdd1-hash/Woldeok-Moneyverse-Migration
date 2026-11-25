@@ -19,7 +19,7 @@
   </section>
   <div class="main-grid">
     <section class="panel form-panel" aria-labelledby="calc-form-title"><div class="panel-header"><span class="panel-step">01</span><div><h2 id="calc-form-title" data-i18n="publicText3" th:text="${uiCopy['publicText3']}">Projection inputs</h2><p data-i18n="publicText4" th:text="${uiCopy['publicText4']}">Adjust inputs</p></div></div>
-      <div th:if="${error != null}" class="alert" role="alert"><strong data-i18n="publicInputError" th:text="${uiCopy['publicInputError']}">Please correct the input.</strong><span th:attr="data-i18n=${errorCopyKey}" th:text="${#ctx.getVariable('uiCopy').get(#ctx.getVariable('errorCopyKey'))}">Input error</span></div>
+      <div th:if="${error != null}" class="alert" role="alert"><strong data-i18n="publicInputError" th:text="${uiCopy['publicInputError']}">Please correct the input.</strong><span th:attr="data-i18n=${errorCopyKey}" th:text="${uiCopy.get(errorCopyKey)}">Input error</span></div>
       <form method="get" action="/tools/compound-calculator" aria-labelledby="calc-form-title" class="calculator-form">
         <input type="hidden" name="lang" th:value="${language}">
         <div class="form-field"><label for="principal" data-i18n="publicPrincipal" th:text="${uiCopy['publicPrincipal']}">Initial principal</label><input id="principal" name="principal" type="number" inputmode="decimal" min="0" max="1000000000000" step="0.01" required th:value="${values.principal}" value="100000"><small data-i18n="publicText7" th:text="${uiCopy['publicText7']}">Currency</small></div>
@@ -32,7 +32,7 @@
       </form>
     </section>
     <section class="panel result-panel" aria-labelledby="calc-results-title" th:if="${error == null}"><div class="panel-header"><span class="panel-step">02</span><div><h2 id="calc-results-title" data-i18n="publicText17" th:text="${uiCopy['publicText17']}">Projection summary</h2><p data-i18n="publicText18" th:text="${uiCopy['publicText18']}">Results</p></div></div>
-      <p class="notice" data-i18n="publicSubmittedNotice" th:text="${uiCopy['publicSubmittedNotice']}">Results show the last submitted calculation.</p><div class="results-grid" role="status" aria-live="polite"><div class="result-card" th:each="metric : ${result.metrics()}" th:classappend="${metric.key() == 'total-final'} ? ' is-primary' : ''" th:attr="data-testid=${metric.key()}"><span class="result-label" th:attr="data-i18n=${'publicMetric_' + metric.key().replace('-','_')}" th:text="${#ctx.getVariable('uiCopy').get('publicMetric_' + metric.key().replace('-','_'))}">Metric</span><strong th:text="${metric.value()} + ${metric.suffix()}">0</strong></div></div>
+      <p class="notice" data-i18n="publicSubmittedNotice" th:text="${uiCopy['publicSubmittedNotice']}">Results show the last submitted calculation.</p><div class="results-grid" role="status" aria-live="polite"><div class="result-card" th:each="metric : ${result.metrics()}" th:classappend="${metric.key() == 'total-final'} ? ' is-primary' : ''" th:attr="data-testid=${metric.key()}"><span class="result-label" th:attr="data-i18n=${'publicMetric_' + metric.key().replace('-','_')}" th:text="${uiCopy.get('publicMetric_' + metric.key().replace('-','_'))}">Metric</span><strong th:text="${metric.value()} + ${metric.suffix()}">0</strong></div></div>
       <div class="notice" data-i18n="publicCompoundDescription" th:text="${uiCopy['publicCompoundDescription']}">Illustrative projection only.</div>
     </section>
   </div>
