@@ -5,6 +5,7 @@ import { GuestQuickstart } from '@/components/guest-quickstart';
 import { PageHeader } from '@/components/page-header';
 import { StatRow } from '@/components/d180/primitives';
 import { WalletGlance } from '@/components/wallet-glance';
+import { WeeklyPassbook } from '@/components/passbook/weekly-passbook';
 import { P2PTransferModal } from '@/components/p2p-transfer-modal';
 import { PublicAdvertisement } from '@/components/public-advertisement';
 import { GuestOnly, MemberOnly } from '@/components/g1/viewer-gate';
@@ -174,6 +175,9 @@ export default async function HomePage() {
       <GuestOnly>
         <GuestQuickstart locale={locale} />
       </GuestOnly>
+
+      {/* Redesign 2026-11-26: this game week as a passbook page (members; renders nothing otherwise). */}
+      <WeeklyPassbook />
 
       <section aria-labelledby="hero-balance-heading">
         <h2 id="hero-balance-heading" className="sr-only">오늘의 요약</h2>
