@@ -478,12 +478,10 @@ public class UserAuthService {
 
     public void setSessionCookie(HttpServletResponse response, String rawToken) {
         if (response == null) return;
-        Cookie cookie = new Cookie("mv_session", rawToken);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(30 * 24 * 60 * 60); // 30 days
-        response.addCookie(cookie);
+        // SameSite=Lax on the legacy cookie too (security review 2026-11-25): resolveSession
+        // falls back to it, so without SameSite a cross-site POST could ride on it.
+        response.addHeader("Set-Cookie",
+            "mv_session=" + rawToken + "; Path=/; Max-Age=" + (30 * 24 * 60 * 60) + "; HttpOnly; Secure; SameSite=Lax");
 
         response.addHeader("Set-Cookie",
             "__Host-mv_session=" + rawToken + "; Path=/; Max-Age=" + (30 * 24 * 60 * 60) + "; HttpOnly; Secure; SameSite=Lax");
