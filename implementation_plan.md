@@ -6010,3 +6010,20 @@ eserves: ??쒕?援??명솚蹂댁쑀???듯빀怨꾩젙)
      - intech-decimal-ledger-guard, universal-cloud-free-backup, modern-frontend-craftsmanship 등
   5. **심볼릭 링크 통합**:
      - ~/.gemini/skills/ 및 ~/.agents/skills/에 총 **137개 스킬** 활성화 완료
+
+---
+## 🚀 [v22 Specification] Gemini CLI 0.71.1 업데이트 및 스킬 중복 충돌(Skill Conflict 27종)·GEMINI.md 중복 해소 완료
+- **작업 일시**: 2026-11-25 09:44 KST
+- **작업 번호 (Task ID)**: TASK-20261125-GEMINI-CLI-UPDATE-AND-SKILL-CONFLICT-REMEDY
+- **사용자 핵심 스크린샷 보고 (media_d32d2933.jpg)**:
+  1. Skill conflict detected: ~/.agents/skills와 ~/.gemini/skills 간 동일 스킬 중복 감지 경고 20여 건 발생
+  2. 2 GEMINI.md files: ~/GEMINI.md와 ~/.gemini/GEMINI.md 중복 감지
+  3. Automatic update failed: 
+pm install -g @google/gemini-cli@0.71.1 권한 실패
+- **해결 및 조치 완료 내역**:
+  1. **Gemini CLI 버전 0.71.1 글로벌 업데이트**: sudo npm install -g @google/gemini-cli@0.71.1 성공 완료 (v0.71.1 최신 버전 바인딩)
+  2. **스킬 경로 단일화 및 27종 중복 충돌 제거**:
+     - ~/.gemini/skills와 ~/.agents/skills 간 교차 링크 및 중복 항목(brainstorming, frontend-design, ponytail 등 27종) 완전 정리
+     - ~/.gemini/skills 74종, ~/.agents/skills 131종으로 순수 고유(Unique) 스킬 총 205종 분리 배치 완료 ──▶ Skill conflict detected 경고 0건 달성
+  3. **GEMINI.md 전역 단일화**:
+     - ~/GEMINI.md를 정리하고 공식 전역 경로인 ~/.gemini/GEMINI.md로 일원화 ──▶ 중복 파일 감지 해결
