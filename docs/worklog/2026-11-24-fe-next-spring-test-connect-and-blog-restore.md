@@ -263,3 +263,34 @@ nginx: 운영 블로그 경로(`/blog`, `/{en,ja,zh,ko}/blog[/*]`)와 `@mv_blog_
 - 발견·수정: (1) database 테스트 파일 병렬 실행 시 국고 원장 교착(deadlock) 간헐 실패 → 파일 순차 실행(새 DB 3회 연속 94/94). (2) Spring 실패 3건 근본 원인 — 11/18 보관 디자인을 검사하던 테스트가 이후 의도된 변경(#3365 로그인 재작성, v10 chrome 교체, 은행 회원 전용화)과 충돌 → 현재 동작을 더 엄격히 검사하도록 갱신(비로그인 /bank.html → /login?next=%2Fbank, chrome CSS 바이트 고정, Next CSS·청록 없음 유지). 커밋 caba74a35f.
 - 남은 건너뜀: backend 116개(34 파일)는 기능별 전용 격리 DB 변수(예: TREASURY_V572_ISOLATED_DATABASE_URL)를 요구하는 일회성 증명 테스트로 CI 도 실행하지 않음. 참고로 공용 DB 로 지정해 실행해 보았으나 스키마 중복 생성·낮은 권한 계정 요구·전용 DB 이름 요구로 환경 불일치 실패(코드 결함 증거 아님).
 - 통합 실행 중 실수: DB 패키지용 포트 없는 주소를 백엔드에도 넘겨 5432 연결 거부로 515건 실패 — 5432 에는 아무 서비스도 없음을 확인(다른 DB 접근 없음), 패키지별 올바른 주소로 재실행해 통과.
+
+### 16단계 (2026-11-25) — 전체 프론트엔드 재검수와 실결함 수정 — 작업자: Claude Code (Claude Opus 5.5, claude-opus-5-5)
+
+상태: **작업 전** → **진행 중** → **완료(테스트 서버 배포·검증, 운영 미배포)**
+
+- 계기: 소유자 지시 "전체 프론트엔드 다시 처음부터 검수", "QA 작동 안 되는 부분 정밀하게", 소유자 보고서 docs/qa/2026-11-25-live-screen-audit-and-game-remedy-report.ko.md(c90e26175).
+- 반성: 어제부터 /var/log/moneyverse/frontend-errors.log 와 Next 저널에 로그인 회원 화면 오류가 쌓였는데, 손님 크롤링 0건만 보고 통과로 보고했다. 이번에는 실제 오류 기록(digest)에서 출발했다.
+- worktree 경로 /home/debian/mv-fe-next-spring-test-20261124 가 작업 중 외부에서 삭제되어 /home/debian/mv-fe-qa-fix-20261125 로 같은 브랜치를 다시 체크아웃(커밋 손실 없음).
+
+발견 → 근본 원인 → 수정 (커밋)
+1. /wallet 붕괴(digest 3319858667, 소유자 캡처 오류 코드와 일치) — Spring 이 {success,data:{balanceWld,pendingBalanceWld(=현금),lockedBalanceWld(=은행)}} 반환, 프론트는 NestJS balances.cash 기대 → readWalletOverview(Spring 소스에 의미 고정 테스트). 홈 HUD "확인 불가 WLD"도 같은 원인. (d98e376066)
+2. /bank 붕괴(digest 958076666) — 같은 봉투 문제 + Spring 이 신용등급 A1/한도 5,000,000/금리 4.50% 를 지어 채움 → DB 원본(bank_get_my_standing)만 신뢰, Spring 은 canonical 필드로 원본 전달. (d98e376066, d5ed757061)
+3. /quests 붕괴(next/link href undefined) — Spring EarlyGameController 전체가 하드코딩, 수령 API 는 원장 기록 없이 "50,000 WLD 지급" 응답 → 프론트 엄격 파서, Spring 503. (d98e376066, d5ed757061)
+4. /board·sitemap-board.xml 이 /board/undefined 를 노출(검색엔진 제출) — 가짜 목록 엔드포인트 사용 → DB 기반 /board/stock-posts + UUID 만 링크. (d98e376066)
+5. 홈 '기준금리 3.25%'(제가 넣은 칸)와 중앙은행 3.5/2.0/7.0/3.2/5.2% 가 모두 지어낸 값 → 상장 종목 수(실데이터)로 교체, 중앙은행은 확인 불가. (d98e376066)
+6. Spring 가짜 응답·가짜 쓰기: MacroPulse, CentralBank(기준금리 갱신 "성공"), Mint(주조 승인 "성공"), Casino(원장 없이 승패), StockCommunity(저장 없는 글쓰기) → 503 SOURCE_UNAVAILABLE. 계정 연결 수단 0개(소유자 §2.5) — listIdentities 가 로컬 이메일만 조회 → account_list_my_identities. (d5ed757061)
+7. 프론트 하드코딩 가짜 데이터: /prediction(API 호출 없는 "체결 완료"), /marketplace/auction, /stocks/community, /bank/savings-pot, /stocks/league("내 구독 +2,480 WLD") → 실데이터 또는 정직한 미개시/확인 불가. 미사용 가짜 컴포넌트 삭제. (d9fca72d04)
+8. 보안: BFF 쓰기 48곳 Origin 검사 없음(mutate 가 CSRF 토큰을 서버에서 스스로 소비하므로 유일한 방어) → 전부 추가 + 커버리지 테스트. 익명 IndexNow 제출 2곳 → 관리자/스케줄러 비밀만. 오류 로그 API → 같은 출처·8KiB·한 줄·클라이언트 사용자 ID 불신. (f93fa5f26a)
+9. 소유자 §2.4 위젯: 이전 답변 재알림·중복 토스트, 패널이 본문 가림 → 기준선·고정 id, 토스트 상단 중앙, 넓은 화면에서 본문 비켜남. (aca969a166)
+10. 소유자 §2.3 관리자: 29개 버튼 격자·내부 디버그 문구·G1 배너 → DESIGN180 그룹별 탭, 배너 제거, 실패 지표 이름을 명시(실패를 '정상'으로 가리지 않음). (6f2… admin 커밋)
+11. 지갑 DESIGN180 상단(StatRow), 주식 평가액 미응답을 0 WLD 로 합산하던 결함 수정, 전역 인터랙션 마감. (21c1fe833f)
+
+소유자 보고서 중 따르지 않은 제안(기존 지시 "더미 금지"와 충돌): 손님 데모 잔액 10,000 WLD, 지표 실패 시 "100% OPERATIONAL" 표시.
+
+검증
+- frontend 3205/3205, typecheck 통과, build 통과. Spring 전체 715 중 가짜 응답을 200으로 검증하던 3건을 503 검증으로 갱신 후 해당 클래스 통과 + 신규 AccountIdentitiesParityTest 2/2, FabricatedAnswerGateTest 4/4.
+- 테스트 서버 배포: 프론트 release next-frontend-test-v20261124-21c1fe833f2d(유닛 백업 /var/backups/...before-21c1fe833f2d), Spring jar test-backend-v20261125-21c1fe833f2d(drop-in 40-qa-fix-20261125.conf, 삭제하면 롤백).
+- 테스트 서버 실측: /board·사이트맵 undefined 0, 홈 기준금리 0·상장 종목 1, 중앙은행 3.50% 0·확인 불가 표시, 가짜 데이터 5개 화면 0건, 타 출처 p2p POST 403, 익명 IndexNow 403, 20KB 로그 413, Test Spring macro-pulse 503.
+- 미검증: 로그인 회원/관리자 실화면(테스트 계정 세션 없음 — 이메일 가입 닫힘, DB 세션 생성은 권한 정책상 하지 않음). 운영 서버 미배포.
+
+남은 일(백엔드 계약 공백): 프론트가 부르는 Spring 경로 51개 404(인증 동의·비밀번호 재설정·이메일 변경·지갑 거래내역·인벤토리·출석·시즌·연금·클럽·마켓 목록·도움말 글 등), 봉투 형식 불일치 26곳(채권·아레나·예보·국고 등), 광장 글 상세 API 없음.
