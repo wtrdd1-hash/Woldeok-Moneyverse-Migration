@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { FundedTreasuryPensionPanel } from './funded-treasury-pension-panel';
-import { publicApi, api } from '@/lib/api';
+import { publicApi, apiOrNull } from '@/lib/api';
 import { isLoggedInMember } from '@/lib/session';
-import { canonicalIntegerString } from '@/lib/money';
+import { cashBalanceFromWallet } from '@/app/shop/wallet-balance';
+import { springData } from '@/lib/spring-envelope';
 import { canonicalUrl } from '@/lib/seo';
 import {
   PensionPortalClient,
@@ -36,37 +37,29 @@ export const metadata: Metadata = {
 };
 
 export default async function PublicPensionPage() {
-  const overviewData = await publicApi<NationalPensionOverview>('/api/v1/pension/overview', 30);
-
-  const overview = overviewData ?? null;
+  // Spring wraps both reads in ApiResponse; unwrap instead of reading fields off the envelope.
+  const overview = springData<NationalPensionOverview>(await publicApi<unknown>('/api/v1/pension/overview', 30));
 
   let myAccount: MyPensionAccount | null = null;
-  let contributions: ContributionLog[] = [];
-  let payouts: PayoutLog[] = [];
-  let userCashBalance = '0';
+  // null = could not be read. Spring has no my-contributions / my-payouts yet,
+  // and /wallet/summary carries no cash field, so neither may read as 0 / empty
+  // (QA 2026-11-25). Cash comes from the canonical wallet, as on /shop.
+  let contributions: ContributionLog[] | null = null;
+  let payouts: PayoutLog[] | null = null;
+  let userCashBalance: string | null = null;
   const isLoggedIn = await isLoggedInMember();
 
-  try {
+  if (isLoggedIn) {
     const [acc, contribs, payLogs, wallet] = await Promise.all([
-      api<MyPensionAccount>('/api/v1/pension/my-account'),
-      api<ContributionLog[]>('/api/v1/pension/my-contributions').catch(() => []),
-      api<PayoutLog[]>('/api/v1/pension/my-payouts').catch(() => []),
-      api<{ cashBalance?: string | number; balance?: string | number }>('/api/v1/wallet/summary').catch(() => null),
+      apiOrNull<unknown>('/api/v1/pension/my-account').then((r) => springData<MyPensionAccount>(r)),
+      apiOrNull<ContributionLog[]>('/api/v1/pension/my-contributions'),
+      apiOrNull<PayoutLog[]>('/api/v1/pension/my-payouts'),
+      apiOrNull<unknown>('/api/v1/wallet'),
     ]);
-
-    if (acc && acc.id) {
-      myAccount = acc;
-    }
-    if (Array.isArray(contribs)) {
-      contributions = contribs;
-    }
-    if (Array.isArray(payLogs)) {
-      payouts = payLogs;
-    }
-    const walletData = wallet as { cashBalance?: string | number; balance?: string | number } | null;
-    userCashBalance = canonicalIntegerString(walletData?.cashBalance ?? walletData?.balance ?? '0') ?? '0';
-  } catch {
-    // Session state comes from the real session, not legacy pension account existence.
+    if (acc && acc.id) myAccount = acc;
+    if (Array.isArray(contribs)) contributions = contribs;
+    if (Array.isArray(payLogs)) payouts = payLogs;
+    userCashBalance = cashBalanceFromWallet(wallet);
   }
 
   return (

@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const data = await mutate('/api/v1/pension/toggle-retire', { method: 'POST' });
+    const data = await mutate('/api/v1/pension/toggle-retirement', { method: 'POST' });
     return NextResponse.json(data, { headers: privateHeaders });
   } catch (error: unknown) {
     const failure = error as { message?: string; status?: number } | null;
