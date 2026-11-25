@@ -111,6 +111,30 @@ NestJS 원본이 없는 11개(연금 일부, board/stock-posts 쿼리, bonds rol
 - 롤백: 백업 jar 를 원래 이름으로 복사 후 `systemctl restart moneyverse-spring-backend`.
 - 긴급 절차상 전체 테스트는 배포 직후 실행(관련 테스트는 배포 전 통과).
 
+## 백엔드 보안 정밀 점검 2차 (2026-11-25, 소유자 승인: 재검토·DB 재구축 허용)
+
+- 쓰기 핸들러 전수: 보호 필터(관리자·민감 경로) 밖이면서 코드에 인증 흔적이 없는 쓰기 41개 산출(공개가 정상인 재설정·로그·검색 포함).
+- 치명 3: TreasuryAdminController 의 쓰기(조폐 국고 충전·관리자 급여·SWF 정책/재조정/청산)가 /api/treasury/** 별칭으로도 매핑돼
+  관리자 필터 밖. Test 에서 익명 빈 POST /api/treasury/swf/rebalance 가 200(실행). → 별칭 삭제(25f7b2afd3), AdminRouteAliasRegressionTest.
+  운영 배포(백업 `…jar.bak.20261125-before-25f7b2afd3`): 별칭 4개 404, 주요 화면 200.
+  접근 로그: 외부 IP 호출 없음. 2026-11-14 내부(127.0.0.1·192.168.100.1)에서 mint-topup 200 6회, seasons claim 200 1회 → 소유자 확인 필요.
+- 저축 포켓(a0631a5cb9): 입금이 현금 차감 없이 포켓 증가, 출금이 현금 미지급, 보관 시 잔액 0. DB 에도 복식부기 포켓 이체 없음
+  (uuid 판은 없는 컬럼 수정, text 판은 postings 없이 account_balances 직접 수정) → 이체·보관 503. 운영 포켓 0개라 부풀린 잔액 없음.
+- 시즌 수령: 운영에는 wallets 테이블이 없어 Spring 의 직접 지급은 실패했고(오류 삼키고 '성공' 거짓 응답) 실제 화폐 생성 피해 없음.
+- DB: SECURITY DEFINER 583개 중 search_path 미고정 6개(bank_customize_pocket·bank_transfer_pocket·bank_archive_pocket text 판,
+  treasury_bond_distribute_daily_coupons, treasury_bond_subscribe, treasury_disburse_admin_salary), public 우선 7개.
+  app·PUBLIC 모두 public 스키마 CREATE 불가라 현재 탈취 경로는 없음 → 최소권한 마이그레이션에서 함께 고정.
+- Spring 직접 DML 대상 약 28개 테이블 목록화(최소권한 복원 입력).
+
+## PR #3448(전체 기획 재검토) 반영
+
+- DEC-01 예금보호 회원별·기관별 500,000 WLD(게임 설계, 실제 보험 아님) — KDIC 503 유지, 변경 없음.
+- DEC-02 모든 언어 화면 URL 접두사(/en·/ko·/ja·/zh·/vi), API·콜백 유지 — 프론트 UI 단계 체크리스트에 추가.
+- PLANREV-16 게스트 열람은 공개 안전 경로만, 관리자 경계 유지 — UI 단계 원칙.
+- PLANREV-02 국고 이동을 소각·발행으로 분류하지 않음 — 원장 검토 기준.
+- PLANREV-15 definer search_path 표준(pg_catalog, pg_temp) — 위 6개 함수 포함 최소권한 마이그레이션에서 반영.
+- 카지노·FX·KDIC 의도된 503 차단 유지(이번 작업과 일치).
+
 ## 교차 검토 기록
 
 - 2026-11-25 Codex: 사용 한도로 11-27 13:57 까지 불가(실측). Gemini: 기본 모델 일일 한도 소진, gemini-3.5-flash-lite 응답 확인(PONG).
