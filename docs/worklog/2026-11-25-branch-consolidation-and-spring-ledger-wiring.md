@@ -83,6 +83,15 @@ NestJS 원본이 없는 11개(연금 일부, board/stock-posts 쿼리, bonds rol
 - [ ] 계약 재대조: 404 0건 목표, 남는 항목은 사유 기록
 - [ ] Test 서버 안정성: 로그인 회원 실화면 검증 경로 확보(테스트 계정 세션)
 
+## P0 보안 발견 (2026-11-25, 읽기 전용 조회로 확인, 변경 없음)
+
+- `moneyverse_app` 역할에 public 테이블 UPDATE·DELETE 가 **직접 부여**돼 있다: 운영 DB 282개 grant(테이블 277개 전부), 테스트 DB 동일.
+  상속 아님(member_of 없음, superuser/bypassrls 아님), RLS 테이블 0개.
+- AGENTS.md 보안 경계("앱 역할은 SECURITY DEFINER 함수만, UPDATE 3·DELETE 0")와 정면 충돌. 앱이 침해되면 잔액·감사 행을 직접 고칠 수 있다.
+- 바로 회수하면 운영 Spring(UserAuthService 등 auth_sessions/auth_local_credentials 직접 UPDATE)이 깨지므로 미조치.
+- 계획: ① Spring 직접 DML 사용처 전수 ② 최소 권한 마이그레이션을 Test 에서 검증 ③ 소유자 승인 후 운영. 이 작업 체크리스트에 추가.
+- [ ] 앱 역할 최소 권한 복원(Test 우선)
+
 ## 교차 검토 기록
 
 - 2026-11-25 Codex: 사용 한도로 11-27 13:57 까지 불가(실측). Gemini: 기본 모델 일일 한도 소진, gemini-3.5-flash-lite 응답 확인(PONG).
