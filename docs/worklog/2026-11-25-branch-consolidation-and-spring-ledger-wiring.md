@@ -29,7 +29,8 @@
 - [x] 포함 관계 분석
 - [x] 문서 브랜치 15개 통합
 - [x] CI classify / policy 수정
-- [ ] #3426 main 병합(필수 검사 통과 대기)
+- [x] #3426 필수 검사 classify·policy·runtime-check·spring-web-check 전부 통과
+- [ ] #3426 main 병합 — **소유자 승인 리뷰 1건 필요**(main 보호 규칙, 작성 계정 자기 승인 불가; 관리자 우회는 하지 않음)
 - [ ] 포함 검증 후 브랜치 삭제·PR 닫기
 - [ ] 디자인 후보 3개 archive 태그 후 삭제
 
@@ -69,8 +70,8 @@ NestJS 원본이 없는 11개(연금 일부, board/stock-posts 쿼리, bonds rol
 
 ## 4. 실행 순서와 체크리스트
 
-- [ ] 연금: 이력 조회 2종 + 납입(pension_funded_contribute) → PENSION_LEDGER_NOT_CERTIFIED 해소, 화면 문구 정정
-- [ ] 광장: 글 목록·상세·작성·수정·삭제·댓글
+- [x] 연금(882887c441, 1f4ebffbf7): funded/contribute·withdraw(treasury_core_post), funded/position, my-contributions, my-payouts. 구형 패널은 백엔드 보류와 일치하게 중단·정직한 문구. 실DB(앱 계정, 롤백) 검증: 납입 영수증, 같은 키 재요청 replayed=true, 적립 1,000 반영, 환급 950/수수료 50, 잔액 부족은 DB 거절. 이력 상한 50(DB 규칙)을 실DB 검증에서 발견해 수정.
+- [x] 광장(1f4ebffbf7): posts 목록·상세·작성·수정·삭제, 댓글 목록·작성·삭제, public/posts/{id}(+comments). Test 실측: 공개 글 200·실제 본문, 없는 글 404, 회원 경로 비로그인 401, /board/{id} 화면에 실제 제목.
 - [ ] 인증: 약관 동의, 비밀번호 재설정, 이메일 변경(Test 는 외부 메일 차단 → 토큰 생성까지 검증)
 - [ ] 카지노: 플레이·기록·자기 한도
 - [ ] 클럽
