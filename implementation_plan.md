@@ -5992,3 +5992,21 @@ eserves: ??쒕?援??명솚蹂댁쑀???듯빀怨꾩젙)
   4. 테스트 도메인(test.easy-scraping.com) 대상 자동화 QA 및 보안 검증(비로그인 게스트 모드, 지갑 DTO 응답, 세션/CSRF, DB 권한 거부 테스트) 수행.
   5. 격리된 테스트 DB에서 승인된 데이터 변환 dry-run 검증 및 원장 무결성 확인.
   6. 전수 통과 확인 후 운영 승격 최종 보고서 작성.
+
+---
+## 🚀 [v21 Specification] 미니PC(debian13) 제미나이 전역 설정 및 스킬 137종, MCP 구성 실시간 동기화 완료
+- **작업 일시**: 2026-11-25 09:40 KST
+- **작업 번호 (Task ID)**: TASK-20261125-MINIPC-GEMINI-CONFIG-SYNC
+- **사용자 핵심 지시**: "자다시 미니pc 제미나이 설정날려줘"
+- **동기화 및 배포 내역**:
+  1. **GEMINI.md 전역 마스터 프롬프트 및 규칙 (88,557 bytes)**:
+     - 원격 위치 3개소에 전수 배포: ~/.gemini/GEMINI.md, ~/GEMINI.md, /home/debian/Woldeok-Moneyverse-Migration/GEMINI.md
+     - UTF-8 인코딩 및 전역 자가 잠금 완화, 한국어 간결체/대화체 조화, 실무형 코딩 에이전트 파이프라인 100% 동기화
+  2. **MCP 구성 (mcp_config.json)**:
+     - ~/.gemini/mcp_config.json 배포 (Stitch UI 디자인 MCP 및 Easy-scraping SSE MCP 서버 연동)
+  3. **제미나이 핵심 스킬 82종 패키징 및 배포**:
+     - dmin-control-tower-craft, spec-consistency-checker, document-delta-reviewer, rchitecture-impact-analyzer, nti-ai-frontend-craftsmanship 등
+  4. **커스텀 스킬 27종 패키징 및 배포**:
+     - intech-decimal-ledger-guard, universal-cloud-free-backup, modern-frontend-craftsmanship 등
+  5. **심볼릭 링크 통합**:
+     - ~/.gemini/skills/ 및 ~/.agents/skills/에 총 **137개 스킬** 활성화 완료
