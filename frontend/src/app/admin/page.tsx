@@ -135,6 +135,16 @@ function getAreaIcon(href: string) {
   }
 }
 
+/** Plain names of the metrics that did not answer, so an operator knows which to check. */
+function unverifiedLabels(e: ReturnType<typeof getCockpitEvidence>): string[] {
+  const names: string[] = [];
+  if (e.members.state !== 'verified') names.push('회원');
+  if (e.ledger.state !== 'verified') names.push('원장');
+  if (e.controls.state !== 'verified') names.push('기능 스위치');
+  if (e.stocks.state !== 'verified') names.push('시장');
+  return names.length ? names : ['일부'];
+}
+
 export default async function AdminPage({
   searchParams,
 }: {
@@ -165,7 +175,7 @@ export default async function AdminPage({
 
   return (
     <div className="w-full max-w-full min-w-0 space-y-5 pb-20">
-      {/* 1. Precision Monochrome 관제탑 헤더 */}
+      {/* 1. Overview head */}
       <div className="rounded-2xl border border-zinc-800/80 bg-zinc-950/95 p-5 sm:p-7 space-y-4 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-start sm:items-center gap-3.5 min-w-0">
@@ -190,15 +200,11 @@ export default async function AdminPage({
                       evidence.allVerified ? 'bg-emerald-400' : 'bg-amber-400'
                     }`}
                   />
-                  {evidence.allVerified ? '핵심 지표 조회 완료' : '일부 지표 확인 불가'}
-                </Badge>
-                <Badge variant="outline" className="font-mono tabular-nums text-[10px] border-zinc-700 text-zinc-400">
-                  API 전체 가동률 미측정
+                  {evidence.allVerified ? '모든 지표 정상 조회' : `${unverifiedLabels(evidence).join('·')} 지표를 불러오지 못했어요`}
                 </Badge>
               </div>
               <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
-                실제 관리자 API에서 조회한 관제 지표입니다. Precision Monochrome Bento Grid로 핵심 거버넌스 상태를 즉각 판독합니다.
-              </p>
+                실제 관리자 API에서 조회한 지표입니다. 불러오지 못한 항목은 따로 표시합니다.</p>
             </div>
           </div>
 
@@ -317,10 +323,10 @@ export default async function AdminPage({
                 {evidence.controls.state !== 'verified'
                   ? '확인 불가'
                   : evidence.controls.total === 0
-                    ? '0 ACTIVE'
+                    ? '스위치 없음'
                     : evidence.controls.held > 0
-                      ? `${evidence.controls.held} HELD`
-                      : 'ALL CLEAR'}
+                      ? `${evidence.controls.held}개 보류`
+                      : '모두 정상'}
               </div>
               <p className="text-[11px] text-zinc-400 mt-1 font-mono tabular-nums">
                 {evidence.controls.state === 'verified'
@@ -343,7 +349,7 @@ export default async function AdminPage({
             </div>
             <div>
               <div className="text-2xl font-black font-mono tabular-nums text-sky-400">
-                {evidence.stocks.state === 'verified' ? `${evidence.stocks.active} LISTED` : '확인 불가'}
+                {evidence.stocks.state === 'verified' ? `${evidence.stocks.active}종목 상장` : '확인 불가'}
               </div>
               <p className="text-[11px] text-zinc-400 mt-1 font-mono tabular-nums">
                 {evidence.stocks.state === 'verified'
@@ -371,7 +377,7 @@ export default async function AdminPage({
                   : '조회 불가'}
               </div>
               <p className="text-[11px] text-zinc-400 mt-1">
-                상위 100명 샘플 · 전체 인구 아님 · R2 승격 보호
+                잔액 상위 100명 기준 (전체 회원 수 아님)
               </p>
             </div>
           </Link>

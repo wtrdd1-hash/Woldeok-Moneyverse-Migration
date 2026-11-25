@@ -25,7 +25,8 @@ describe('Admin layout visual transition', () => {
     expect(container.querySelector('[data-admin-theme="g1-gm"]')).not.toBeNull();
     expect(screen.getByTestId('admin-sub-nav')).toBeDefined();
     expect(screen.getByText('Protected original content')).toBeDefined();
-    expect(screen.getByText('GM 콘솔')).toBeDefined();
+    // DESIGN180 has no console banner (owner QA 2026-11-25).
+    expect(screen.queryByText('GM 콘솔')).toBeNull();
   });
 
   it('has a visible non-fabricated status disclaimer rather than pretending backend is healthy', () => {
