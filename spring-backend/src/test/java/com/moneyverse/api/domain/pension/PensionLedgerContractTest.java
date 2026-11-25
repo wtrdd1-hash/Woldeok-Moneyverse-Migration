@@ -78,6 +78,11 @@ class PensionLedgerContractTest {
         verify(ledger).payouts(ACTOR);
     }
 
+    @Test void historyLimitStaysWithinTheDatabaseBound() {
+        // pension_owner_contributions / pension_owner_payout_logs raise 22023 above 50 rows.
+        assertTrue(PensionLedgerService.HISTORY_LIMIT >= 1 && PensionLedgerService.HISTORY_LIMIT <= 50);
+    }
+
     @Test void databaseRefusalIsABadRequestAndOutageIsUnavailableNeverASuccess() {
         JdbcClient jdbc = mock(JdbcClient.class);
         var service = new PensionLedgerService(jdbc);

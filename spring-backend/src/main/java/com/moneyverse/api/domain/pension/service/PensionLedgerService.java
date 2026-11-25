@@ -19,7 +19,8 @@ import java.util.UUID;
  */
 @Service
 public class PensionLedgerService {
-    private static final int HISTORY_LIMIT = 100;
+    /** The DB functions refuse more than 50 rows (22023). */
+    public static final int HISTORY_LIMIT = 50;
     private static final String ISO = "to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS.MS\"Z\"')";
     /** Invalid parameter, insufficient privilege, raised rule: the ledger refused the request. */
     private static final Set<String> REFUSALS = Set.of("22023", "42501", "P0001", "23514");
