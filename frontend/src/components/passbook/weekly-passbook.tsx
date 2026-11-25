@@ -80,12 +80,12 @@ export function WeeklyPassbook() {
   const last = addDays(clock.weekKey, clock.gameDaysPerWeek - 1);
 
   return (
-    <section aria-labelledby="weekly-passbook-title" className="mv-page overflow-hidden">
+    <section aria-labelledby="weekly-passbook-title" className="mv-leaf overflow-hidden">
       <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-[var(--mv-page-rule-strong)] px-4 py-3 sm:px-5">
         <h2 id="weekly-passbook-title" className="text-[15px] font-bold">
-          이번 주 통장 <span className="mv-page-muted font-semibold">· {week.toLocaleString('ko-KR')}주차</span>
+          이번 주 통장 <span className="mv-leaf-muted font-semibold">· {week.toLocaleString('ko-KR')}주차</span>
         </h2>
-        <p className="mv-print mv-page-muted text-[12px]">
+        <p className="mv-print mv-leaf-muted text-[12px]">
           {passbookDate(clock.weekKey)} – {passbookDate(last)}
         </p>
       </div>
@@ -103,7 +103,7 @@ export function WeeklyPassbook() {
                 future ? 'opacity-45' : '',
               ].join(' ')}
             >
-              <span className="text-[11px] font-semibold mv-page-muted">{c.day}일째</span>
+              <span className="text-[11px] font-semibold mv-leaf-muted">{c.day}일째</span>
               <span className={`mv-print text-[13px] ${today ? 'font-bold text-[var(--mv-seal)]' : 'font-medium'}`}>{passbookDate(c.dayKey).slice(3)}</span>
               {c.rewarded ? (
                 <span className="mv-seal mt-1 size-9 text-[11px]" aria-label="보상 받음">받음</span>
@@ -114,17 +114,17 @@ export function WeeklyPassbook() {
                 <span className="mv-print mt-auto text-[11px] leading-tight">
                   {c.incoming > 0n && <span className="block text-[var(--mv-rise-on-page)]">+{groupDigits(c.incoming.toString())}</span>}
                   {c.outgoing > 0n && <span className="block text-[var(--mv-fall-on-page)]">-{groupDigits(c.outgoing.toString())}</span>}
-                  {c.incoming === 0n && c.outgoing === 0n && <span className="block mv-page-muted">{c.entries}건</span>}
+                  {c.incoming === 0n && c.outgoing === 0n && <span className="block mv-leaf-muted">{c.entries}건</span>}
                 </span>
               ) : (
-                <span className="mt-auto text-[11px] mv-page-muted">{future ? '' : '—'}</span>
+                <span className="mt-auto text-[11px] mv-leaf-muted">{future ? '' : '—'}</span>
               )}
             </li>
           );
         })}
       </ol>
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--mv-page-rule-strong)] px-4 py-2.5 text-[12px] sm:px-5">
-        <span className="mv-page-muted">현실 10분이 게임 하루예요. 칸마다 그날 원장에 찍힌 금액이에요.</span>
+        <span className="mv-leaf-muted">현실 10분이 게임 하루예요. 칸마다 그날 원장에 찍힌 금액이에요.</span>
         <Link href="/wallet/activity" prefetch={false} className="font-semibold text-[var(--mv-fall-on-page)] underline-offset-4 hover:underline">
           통장 전체 보기
         </Link>

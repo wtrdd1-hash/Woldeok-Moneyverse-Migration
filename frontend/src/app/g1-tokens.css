@@ -303,8 +303,8 @@ html:root .g2-balance { font-family: var(--g1-font-num); }
 html:root ::selection { background: var(--g1-gold); color: var(--g1-gold-ink); }
 html:root { caret-color: var(--g1-gold); scrollbar-color: var(--g1-line) var(--g1-night); }
 
-/* A passbook inside page: cream paper with the printed ruling of a bankbook. */
-html:root .mv-page {
+/* A passbook leaf (inside page; not .mv-page, which page wrappers already use): cream paper with the printed ruling of a bankbook. */
+html:root .mv-leaf {
   background-color: var(--mv-page);
   background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 35px, var(--mv-page-rule) 35px, var(--mv-page-rule) 36px);
   color: var(--mv-page-ink);
@@ -312,7 +312,7 @@ html:root .mv-page {
   border-radius: 6px;
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04), 0 10px 24px -14px rgba(0, 0, 0, 0.7);
 }
-html:root .mv-page .mv-page-muted { color: var(--mv-page-muted); }
+html:root .mv-leaf .mv-leaf-muted { color: var(--mv-page-muted); }
 /* Passbook-printer numerals and dates: data, not decoration. */
 html:root .mv-print { font-family: var(--mv-print); font-variant-numeric: tabular-nums; letter-spacing: 0; }
 
