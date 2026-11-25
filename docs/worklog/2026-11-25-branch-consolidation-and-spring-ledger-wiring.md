@@ -187,7 +187,11 @@ NestJS 원본이 없는 11개(연금 일부, board/stock-posts 쿼리, bonds rol
 - [해결 352] 원장 없는 금전 함수 실행 권한 회수: marketplace_buy/create/bid/cancel, bank_transfer_pocket 2종, bank_archive_pocket 2종(근거 없는 포켓 잔액 현금화 가능).
   Spring 호출 경로 없음 확인, Test·운영 적용, API·화면 전수 중 권한 오류 0. 함수는 남겨 두어 원장판으로 재사용 가능.
 - 업그레이드 후 운영 30분 감시: ERROR 0(19:08 경고는 점검용 GET→POST 전용 경로 405).
-- 오프호스트 백업(P0, PR #3448) 미완료 — 백업 대상 위치(외부 저장소) 소유자 결정 필요.
+- [확인] 백업(소유자 지정: 서버의 다른 디스크): 기존 moneyverse-backup.timer 가 6시간마다 운영 DB+사진을 AES-256 암호화해
+  /var/backups/moneyverse(sdb)에 저장, 운영 DB 데이터는 sda(/srv/moneyverse-data/db-rebuild-v1202/pgdata) — 스크립트가 같은 디스크면 실패하도록 강제. 7일 보관(약 6.1G, sdb 여유 18G).
+  복구 훈련(2026-11-25 19:38): 최신 18:28 백업 복호화 → Test DB 컨테이너 임시 DB 에 pg_restore 오류 0 → 계좌 46·잔액 46·원장 거래 950·기록 1,964·로컬 자격 7·광장 2·감사 32,244
+  모두 운영과 일치, 불균형 원장 거래 0. 임시 DB·파일 삭제.
+  한계: 두 디스크 모두 같은 가상 호스트의 가상 디스크(호스트 장애 시 함께 손실), 암호화 키 /etc/moneyverse/backup.key 도 같은 서버 → 키 사본을 서버 밖에 보관 필요(소유자).
 - 로그인 회원 실사용 E2E 검증 경로 없음(테스트 계정 필요). 2026-11-14 내부 조폐 충전 6건 소유자 확인 필요.
 
 ## PR #3448(전체 기획 재검토) 반영
