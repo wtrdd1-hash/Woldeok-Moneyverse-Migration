@@ -2,8 +2,8 @@
 export function isEligiblePublicAdPath(pathname: string | null): boolean {
   if (!pathname) return false;
   const path = pathname.replace(/\/$/, '') || '/';
-  if (path === '/' || /^\/(en|ja|zh)$/.test(path)) return true;
-  const localized = path.replace(/^\/(en|ja|zh)(?=\/)/, '');
+  if (path === '/' || /^\/(en|ko|ja|zh|vi)$/.test(path)) return true;
+  const localized = path.replace(/^\/(en|ko|ja|zh|vi)(?=\/)/, '');
   return /^\/(tools|calculators|guide|blog)(\/|$)/.test(localized)
     || /^\/(gallery|announcements|roadmap)$/.test(localized);
 }
@@ -20,4 +20,20 @@ export function getBlogAdPlan(blockCount: number): {
     inlineAfter: count >= 22 ? [6, 15] : count >= 12 ? [6] : [],
     showBottom: count >= 3,
   };
+}
+
+
+/** Real ad disclosure, never a synthetic filled creative or gameplay CTA. */
+export function publicAdDisclosure(pathname: string | null, selectedLocale?: string): string {
+  // A path prefix wins; an unprefixed path follows the viewer's selected
+  // language (Korean by default), so the Korean home no longer says "Advertisement".
+  const locale = pathname?.match(/^\/(en|ko|ja|zh|vi)(?:\/|$)/)?.[1] || selectedLocale || 'en';
+  const labels: Record<string, string> = {
+    en: 'Advertisement',
+    ko: '광고',
+    ja: '広告',
+    zh: '广告',
+    vi: 'Quảng cáo',
+  };
+  return labels[locale] ?? 'Advertisement';
 }

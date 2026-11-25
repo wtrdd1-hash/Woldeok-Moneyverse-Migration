@@ -3,25 +3,13 @@
  * Does not override permission widgets, amounts, API states or application data.
  */
 .moneyverse-admin-console {
-  background:
-    radial-gradient(ellipse at 11% -9%, rgba(130, 94, 249, 0.17), transparent 45%),
-    radial-gradient(ellipse at 100% 13%, rgba(77, 147, 255, 0.08), transparent 38%),
-    #0d1427;
+  /* G1 GM console: flat night surface, ember accent (decorative glows removed). */
+  background: transparent;
   isolation: isolate;
-  --admin-accent: #ab91ff;
+  --admin-accent: var(--g1-ember);
 }
 
-.moneyverse-admin-console .moneyverse-admin-header::after {
-  content: "";
-  position: absolute;
-  right: -4rem;
-  top: -5.5rem;
-  width: 12rem;
-  height: 12rem;
-  border: 1px solid rgba(193, 164, 255, .18);
-  border-radius: 50%;
-  pointer-events: none;
-}
+.moneyverse-admin-console .moneyverse-admin-header::after { content: none; }
 
 .moneyverse-admin-console [data-admin-layout] {
   min-width: 0;

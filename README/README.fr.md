@@ -1,5 +1,8 @@
 # 🌙 Woldeok Moneyverse — Guide Français Complet
 
+> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](../docs/DOCUMENT_AUTHORITY.md) / [한국어](../docs/DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+
+
 [← README principal](../README.md) · [Changelog](../docs/changelog/CHANGELOG.fr.md) · [Index des documents](../docs/INDEX.md) · [Production](https://easy-scraping.com) · [Test](https://test.easy-scraping.com)
 
 > Woldeok Moneyverse est une plateforme d’économie virtuelle communautaire réunissant métiers, quêtes, progression, portefeuille WLD, boutique, actions/entreprises virtuelles, banque et mini-jeux de casino virtuel.

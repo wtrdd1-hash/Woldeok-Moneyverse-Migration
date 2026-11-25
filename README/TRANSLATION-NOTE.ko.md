@@ -1,5 +1,8 @@
 # 한국어 README 번역 정책
 
+> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](../docs/DOCUMENT_AUTHORITY.md) / [한국어](../docs/DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+
+
 `README/README.auto.ko.md`는 루트 `README.md`를 기준으로 만든 한국어 번역본입니다.
 
 ## 이미지 번역 범위

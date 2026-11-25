@@ -14,7 +14,7 @@ describe('SEO submission BFF', () => {
     try {
       const request = new NextRequest('http://localhost/api/seo/submit', {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers: { origin: 'http://localhost',  'content-type': 'application/json' },
         body: JSON.stringify({}),
       });
       const response = await POST(request);

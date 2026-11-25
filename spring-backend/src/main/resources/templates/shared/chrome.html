@@ -1,57 +1,115 @@
-<!doctype html><html xmlns:th="http://www.thymeleaf.org"><head><th:block th:fragment="commonHead"><link rel="icon" type="image/x-icon" href="/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5"><link rel="stylesheet" href="/assets/mv43/chrome.css?v=d8525be5fcded40f8c4039b426ebc1835cbf6ee01196ec70023d920189643837"><script src="/assets/mv43/chrome.js?v=d9f8a8987e748f00460eebfd7cab3ed5e07ddd75090569f9dcde64f0bb857a55" defer></script></th:block></head><body>
+<!doctype html><html xmlns:th="http://www.thymeleaf.org"><head><th:block th:fragment="commonHead"><link rel="icon" type="image/x-icon" href="/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5"><link rel="stylesheet" href="/assets/mv43/chrome.css?v=460fe6ee77b8f955fdeb47ae1b74d3871d811af799b26ab969a9af186e38c3f3"><link rel="stylesheet" href="/assets/mv43/game-world.css?v=7126a07f2dccc9c42177f659d6d26d11d0f204684c39ede9b9a5ca09724e6bed"><link rel="stylesheet" href="/assets/mv43/game-ui-v10.css?v=80074a39dba0eafed22e22eb2161cc181329c1d8e16193eaf2e20a830be7b65c"><script src="/socket.io.min.js" defer></script><script src="/assets/mv43/chrome.js?v=d9f8a8987e748f00460eebfd7cab3ed5e07ddd75090569f9dcde64f0bb857a55" defer></script></th:block></head><body>
   <aside th:fragment="sidebar" class="sidebar" aria-label="Main navigation" data-i18n-aria="navigationMain" th:attr="aria-label=${uiCopy['navigationMain']}">
-    <a href="/" class="brand"><img class="brand-mark" src="/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5" alt="" width="32" height="32"><span>W Moneyverse</span></a>
-    <nav class="side-links" aria-label="Primary navigation" data-i18n-aria="navigationMain" th:attr="aria-label=${uiCopy['navigationMain']}">
-      <a class="nav-link" href="/" th:attr="aria-current=${uiPageKey == 'home' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">⌂</span><span data-i18n="home" th:text="${uiCopy['home']}">My assets</span></a>
-<a class="nav-link" href="/wallet" th:attr="aria-current=${uiPageKey == 'wallet' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">▣</span><span data-i18n="wallet" th:text="${uiCopy['wallet']}">Wallet</span></a>
-<a class="nav-link" href="/stocks" th:attr="aria-current=${uiPageKey == 'stocks' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">↗</span><span data-i18n="stocks" th:text="${uiCopy['stocks']}">Invest</span></a>
-<a class="nav-link" href="/quests" th:attr="aria-current=${uiPageKey == 'quests' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">✧</span><span data-i18n="quests" th:text="${uiCopy['quests']}">Quests</span></a>
-<a class="nav-link" href="/shop" th:attr="aria-current=${uiPageKey == 'shop' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">◈</span><span data-i18n="shop" th:text="${uiCopy['shop']}">Shop</span></a>
-<a class="nav-link" href="/board" th:attr="aria-current=${uiPageKey == 'board' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">☷</span><span data-i18n="board" th:text="${uiCopy['board']}">Community</span></a>
-<a class="nav-link" href="/support" th:attr="aria-current=${(uiPageKey == 'support' or uiPageKey == 'msgSupport' or uiPageKey == 'chat' or uiPageKey == 'msgChat') ? 'page' : null}"><span class="nav-icon" aria-hidden="true">◉</span><span data-i18n="support" th:text="${uiCopy['support']}">Help & support</span></a>
-<a class="nav-link" href="/account" th:attr="aria-current=${uiPageKey == 'account' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">♙</span><span data-i18n="account" th:text="${uiCopy['account']}">Account</span></a>
+    <a href="/" class="brand">
+      <div class="brand-logo-wrap">
+        <img src="/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5" alt="" class="brand-mark" width="32" height="32">
+      </div>
+      <span class="brand-title">W Moneyverse</span>
+    </a>
+    <nav class="side-links" aria-label="Primary navigation" data-i18n-aria="navigationMain">
+      <a class="nav-link" href="/" th:attr="aria-current=${(uiPageKey == 'home' or uiPageKey == null) ? 'page' : null}">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>
+        <span data-i18n="home" th:text="${uiCopy['home'] != null ? uiCopy['home'] : '홈'}">홈</span>
+      </a>
+      <a class="nav-link" href="/wallet" th:attr="aria-current=${uiPageKey == 'wallet' ? 'page' : null}">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="16" cy="12" r="2"/></svg>
+        <span data-i18n="wallet" th:text="${uiCopy['wallet'] != null ? uiCopy['wallet'] : '지갑'}">지갑</span>
+      </a>
+      <a class="nav-link" href="/bank" th:attr="aria-current=${uiPageKey == 'bank' ? 'page' : null}">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10v7h3v-7H4zm6 0v7h3v-7h-3zM2 22h19v-3H2v3zm14-12v7h3v-7h-3zm-4.5-9L2 6v2h19V6l-9.5-5z"/></svg>
+        <span data-i18n="bank" th:text="${uiCopy['bank'] != null ? uiCopy['bank'] : '은행'}">은행</span>
+      </a>
+      <a class="nav-link" href="/stocks" th:attr="aria-current=${uiPageKey == 'stocks' ? 'page' : null}">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+        <span data-i18n="stocks" th:text="${uiCopy['stocks'] != null ? uiCopy['stocks'] : '투자'}">투자</span>
+      </a>
+      <a class="nav-link" href="/quests" th:attr="aria-current=${uiPageKey == 'quests' ? 'page' : null}">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>
+        <span data-i18n="quests" th:text="${uiCopy['quests'] != null ? uiCopy['quests'] : '퀘스트'}">퀘스트</span>
+      </a>
+      <a class="nav-link" href="/shop" th:attr="aria-current=${uiPageKey == 'shop' ? 'page' : null}">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span data-i18n="shop" th:text="${uiCopy['shop'] != null ? uiCopy['shop'] : '상점'}">상점</span>
+      </a>
+      <a class="nav-link" href="/board" th:attr="aria-current=${uiPageKey == 'board' ? 'page' : null}">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+        <span data-i18n="board" th:text="${uiCopy['board'] != null ? uiCopy['board'] : '커뮤니티'}">커뮤니티</span>
+      </a>
+      <a class="nav-link" href="/support" th:attr="aria-current=${(uiPageKey == 'support' or uiPageKey == 'msgSupport' or uiPageKey == 'chat' or uiPageKey == 'msgChat') ? 'page' : null}">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <span data-i18n="support" th:text="${uiCopy['support'] != null ? uiCopy['support'] : '문의·채팅'}">문의·채팅</span>
+      </a>
+      <a class="nav-link nav-account" href="/account" th:attr="aria-current=${(uiPageKey == 'account' or uiPageKey == 'login' or uiPageKey == 'auth') ? 'page' : null}">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/></svg>
+        <span data-i18n="account" th:text="${uiCopy['account'] != null ? uiCopy['account'] : '내 계정'}">내 계정</span>
+      </a>
+      <a th:if="${isAdmin}" class="nav-link" href="/admin" th:attr="aria-current=${uiPageKey == 'admin' ? 'page' : null}">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span data-i18n="admin" th:text="${uiCopy['admin'] != null ? uiCopy['admin'] : '관리자'}">관리자</span>
+      </a>
     </nav>
-    <div class="side-bottom"><span class="side-helper" data-i18n="allRights" th:text="${uiCopy['allRights']}">Virtual WLD is not legal tender.</span></div>
+    <div class="side-bottom">
+      <span class="side-helper">게임 세계 · 금융과 경험</span>
+    </div>
   </aside>
-      <header th:fragment="pageHeader" class="topbar">
-        <button id="mobile-menu-toggle" class="menu-toggle" type="button" aria-label="Open menu" data-i18n-aria="menu" th:attr="aria-label=${uiCopy['menu']}" aria-controls="mobile-menu" aria-expanded="false">☰</button>
-        <h1 th:attr="data-i18n=${uiPageKey != null ? uiPageKey : 'home'}" th:text="${uiCopy[uiPageKey != null ? uiPageKey : 'home']}">My assets</h1>
-        <div class="top-spacer"></div>
-        <label class="lang-control" for="language-selector"><span aria-hidden="true">◎</span><span class="sr-only" data-i18n="selectLanguage" th:text="${uiCopy['selectLanguage']}">Choose language</span>
-          <select id="language-selector" aria-label="Choose language" data-i18n-aria="selectLanguage" th:attr="aria-label=${uiCopy['selectLanguage']}">
-            <option value="auto" data-i18n="auto" th:text="${uiCopy['auto']}">Auto (browser)</option>
-            <option value="en">English</option>
-            <option value="ko">한국어</option>
-            <option value="ja">日本語</option>
-            <option value="zh">简体中文</option>
-            <option value="vi">Tiếng Việt</option>
-          </select>
-        </label>
-        <div class="auth-actions" id="auth-actions"><a href="/login" class="auth-link" data-i18n="login" th:text="${uiCopy['login']}">Log in</a></div>
-      </header>
-      <footer th:fragment="footer" class="footer"><span data-i18n="allRights" th:text="${uiCopy['allRights']}">Virtual WLD is not legal tender.</span>
-        <span class="foot-links"><a href="/terms" data-i18n="authTermsLink" th:text="${uiCopy['authTermsLink']}">Terms</a><a href="/privacy" data-i18n="authPrivacyLink" th:text="${uiCopy['authPrivacyLink']}">Privacy</a><a href="/support" data-i18n="support" th:text="${uiCopy['support']}">Support</a></span></footer>
+  <header th:fragment="pageHeader" class="topbar">
+    <button id="mobile-menu-toggle" class="menu-toggle" type="button" aria-label="Open menu" data-i18n-aria="menu" th:attr="aria-label=${uiCopy['menu']}" aria-controls="mobile-menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="22" height="22"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg></button>
+    <h1 class="topbar-page-title" th:attr="data-i18n=${uiPageKey != null ? uiPageKey : 'home'}" th:text="${uiCopy[uiPageKey != null ? uiPageKey : 'home'] != null ? uiCopy[uiPageKey != null ? uiPageKey : 'home'] : (uiPageKey == 'bank' ? '은행' : (uiPageKey == 'stocks' ? '투자' : (uiPageKey == 'wallet' ? '지갑' : (uiPageKey == 'login' ? '로그인' : '홈 대시보드'))))}">홈 대시보드</h1>
+    <div class="search-box"><input type="search" placeholder="메뉴 · 페이지 검색" aria-label="메뉴 검색"></div>
+    <div class="top-spacer"></div>
+    <label class="lang-control" for="language-selector">
+      <select id="language-selector" aria-label="Choose language" data-i18n-aria="selectLanguage" th:attr="aria-label=${uiCopy['selectLanguage']}">
+        <option value="auto">한국어 🌐</option>
+        <option value="ko">한국어</option>
+        <option value="en">English</option>
+        <option value="ja">日本語</option>
+        <option value="zh">简体中文</option>
+        <option value="vi">Tiếng Việt</option>
+      </select>
+    </label>
+    <div class="auth-actions" id="auth-actions">
+      <a th:if="${uiPageKey != 'login' && uiPageKey != 'auth'}" href="/login" class="auth-link" data-i18n="login">내 계정</a>
+      <a th:if="${uiPageKey == 'login' || uiPageKey == 'auth'}" href="/account" class="auth-link">내 계정</a>
+    </div>
+  <th:block th:replace="~{shared/chrome :: supportLauncher}"></th:block></header>
+  <footer th:fragment="footer" class="footer">
+    <div class="footer-concept-bar">DESIGN CONCEPT · v2026.11.23.10 · ORIGINAL FAVICON PIXELS · <span th:text="${uiPageKey != null ? '/' + uiPageKey : '/'}">/</span></div>
+    <div class="footer-links-bar">
+      <span data-i18n="allRights" th:text="${uiCopy['allRights']}">Virtual WLD is not legal tender.</span>
+      <span class="foot-links"><a href="/terms" data-i18n="authTermsLink" th:text="${uiCopy['authTermsLink']}">Terms</a><a href="/privacy" data-i18n="authPrivacyLink" th:text="${uiCopy['authPrivacyLink']}">Privacy</a><a href="/support" data-i18n="support" th:text="${uiCopy['support']}">Support</a></span>
+    </div>
+  </footer>
 <th:block th:fragment="mobileNavigation">
 <div id="drawer-backdrop" class="drawer-backdrop" hidden></div>
-<aside id="mobile-menu" class="drawer" hidden aria-label="Mobile navigation" data-i18n-aria="navigationMobile" th:attr="aria-label=${uiCopy['navigationMobile']}">
-  <div class="drawer-header"><a href="/" class="brand"><img class="brand-mark" src="/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5" alt="" width="32" height="32"><span>W Moneyverse</span></a>
-    <button type="button" id="mobile-menu-close" class="drawer-close" aria-label="Close menu" data-i18n-aria="close" th:attr="aria-label=${uiCopy['close']}">×</button></div>
-  <nav class="side-links" aria-label="Mobile primary navigation" data-i18n-aria="navigationMobile" th:attr="aria-label=${uiCopy['navigationMobile']}"><a class="nav-link" href="/" th:attr="aria-current=${uiPageKey == 'home' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">⌂</span><span data-i18n="home" th:text="${uiCopy['home']}">My assets</span></a>
-<a class="nav-link" href="/wallet" th:attr="aria-current=${uiPageKey == 'wallet' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">▣</span><span data-i18n="wallet" th:text="${uiCopy['wallet']}">Wallet</span></a>
-<a class="nav-link" href="/stocks" th:attr="aria-current=${uiPageKey == 'stocks' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">↗</span><span data-i18n="stocks" th:text="${uiCopy['stocks']}">Invest</span></a>
-<a class="nav-link" href="/quests" th:attr="aria-current=${uiPageKey == 'quests' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">✧</span><span data-i18n="quests" th:text="${uiCopy['quests']}">Quests</span></a>
-<a class="nav-link" href="/shop" th:attr="aria-current=${uiPageKey == 'shop' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">◈</span><span data-i18n="shop" th:text="${uiCopy['shop']}">Shop</span></a>
-<a class="nav-link" href="/board" th:attr="aria-current=${uiPageKey == 'board' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">☷</span><span data-i18n="board" th:text="${uiCopy['board']}">Community</span></a>
-<a class="nav-link" href="/support" th:attr="aria-current=${(uiPageKey == 'support' or uiPageKey == 'msgSupport' or uiPageKey == 'chat' or uiPageKey == 'msgChat') ? 'page' : null}"><span class="nav-icon" aria-hidden="true">◉</span><span data-i18n="support" th:text="${uiCopy['support']}">Help & support</span></a>
-<a class="nav-link" href="/account" th:attr="aria-current=${uiPageKey == 'account' ? 'page' : null}"><span class="nav-icon" aria-hidden="true">♙</span><span data-i18n="account" th:text="${uiCopy['account']}">Account</span></a></nav>
+<aside id="mobile-menu" class="drawer mobile-drawer" aria-label="Mobile navigation" data-i18n-aria="navigationMobile" th:attr="aria-label=${uiCopy['navigationMobile']}" aria-hidden="true" hidden>
+  <div class="drawer-header"><a href="/" class="brand"><img src="/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5" alt="" class="brand-mark" width="32" height="32"><span class="brand-title">W Moneyverse</span></a>
+    <button type="button" id="mobile-menu-close" class="drawer-close" aria-label="Close menu" data-i18n-aria="close" th:attr="aria-label=${uiCopy['close']}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="22" height="22"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="18" y2="6"/></svg></button></div>
+  <nav class="side-links" aria-label="Mobile primary navigation" data-i18n-aria="navigationMobile" th:attr="aria-label=${uiCopy['navigationMobile']}">
+    <a class="nav-link" href="/" th:attr="aria-current=${(uiPageKey == 'home' or uiPageKey == null) ? 'page' : null}"><span>홈</span></a>
+    <a class="nav-link" href="/wallet" th:attr="aria-current=${uiPageKey == 'wallet' ? 'page' : null}"><span>지갑</span></a>
+    <a class="nav-link" href="/bank" th:attr="aria-current=${uiPageKey == 'bank' ? 'page' : null}"><span>은행</span></a>
+    <a class="nav-link" href="/stocks" th:attr="aria-current=${uiPageKey == 'stocks' ? 'page' : null}"><span>투자</span></a>
+    <a class="nav-link" href="/quests" th:attr="aria-current=${uiPageKey == 'quests' ? 'page' : null}"><span>퀘스트</span></a>
+    <a class="nav-link" href="/shop" th:attr="aria-current=${uiPageKey == 'shop' ? 'page' : null}"><span>상점</span></a>
+    <a class="nav-link" href="/board" th:attr="aria-current=${uiPageKey == 'board' ? 'page' : null}"><span>커뮤니티</span></a>
+    <a class="nav-link" href="/support" th:attr="aria-current=${(uiPageKey == 'support' or uiPageKey == 'msgSupport' or uiPageKey == 'chat' or uiPageKey == 'msgChat') ? 'page' : null}"><span>문의·채팅</span></a>
+    <a class="nav-link" href="/account" th:attr="aria-current=${uiPageKey == 'account' ? 'page' : null}"><span>내 계정</span></a>
+  </nav>
 </aside>
-<nav class="bottom-tabs" id="mobile-tabs" aria-label="Mobile bottom navigation" data-i18n-aria="navigationMobile" th:attr="aria-label=${uiCopy['navigationMobile']}"><a class="bottom-tab" href="/" th:attr="aria-current=${uiPageKey == 'home' ? 'page' : null}"><span aria-hidden="true">⌂</span><span data-i18n="home" th:text="${uiCopy['home']}">My assets</span></a><a class="bottom-tab" href="/wallet" th:attr="aria-current=${uiPageKey == 'wallet' ? 'page' : null}"><span aria-hidden="true">▣</span><span data-i18n="wallet" th:text="${uiCopy['wallet']}">Wallet</span></a><a class="bottom-tab" href="/stocks" th:attr="aria-current=${uiPageKey == 'stocks' ? 'page' : null}"><span aria-hidden="true">↗</span><span data-i18n="stocks" th:text="${uiCopy['stocks']}">Invest</span></a><a class="bottom-tab" href="/quests" th:attr="aria-current=${uiPageKey == 'quests' ? 'page' : null}"><span aria-hidden="true">✧</span><span data-i18n="quests" th:text="${uiCopy['quests']}">Quests</span></a><a class="bottom-tab" href="/board" th:attr="aria-current=${uiPageKey == 'board' ? 'page' : null}"><span aria-hidden="true">☷</span><span data-i18n="board" th:text="${uiCopy['board']}">Community</span></a></nav>
+<nav class="bottom-tabs" id="mobile-tabs" aria-label="Mobile bottom navigation" data-i18n-aria="navigationMobile" th:attr="aria-label=${uiCopy['navigationMobile']}">
+  <a class="bottom-tab" href="/" th:attr="aria-current=${(uiPageKey == 'home' or uiPageKey == null) ? 'page' : null}"><span>홈</span></a>
+  <a class="bottom-tab" href="/wallet" th:attr="aria-current=${uiPageKey == 'wallet' ? 'page' : null}"><span>지갑</span></a>
+  <a class="bottom-tab" href="/bank" th:attr="aria-current=${uiPageKey == 'bank' ? 'page' : null}"><span>은행</span></a>
+  <a class="bottom-tab" href="/stocks" th:attr="aria-current=${uiPageKey == 'stocks' ? 'page' : null}"><span>투자</span></a>
+  <a class="bottom-tab" href="/account" th:attr="aria-current=${(uiPageKey == 'account' or uiPageKey == 'login') ? 'page' : null}"><span>계정</span></a>
+</nav>
 </th:block>
+<button th:fragment="supportLauncher" type="button" id="mv-support-launcher" class="support-fab" aria-haspopup="dialog" aria-controls="mv-support-panel" aria-label="Help & chat" th:attr="aria-label=${uiCopy['support']}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="24" height="24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
 <th:block th:fragment="support">
-<button type="button" id="mv-support-launcher" class="support-fab" aria-haspopup="dialog" aria-controls="mv-support-panel" aria-label="Help & chat" th:attr="aria-label=${uiCopy['support']}"><span aria-hidden="true">☏</span></button>
+
 <dialog id="mv-support-panel" class="mv-support-panel" aria-labelledby="mv-support-heading">
   <header class="mv-support-heading"><h2 id="mv-support-heading" data-i18n="supportHero" th:text="${uiCopy['supportHero']}">Contact support</h2>
-    <button type="button" id="mv-support-close" class="mv-support-close" aria-label="Close" th:attr="aria-label=${uiCopy['close']}">×</button></header>
+    <button type="button" id="mv-support-close" class="mv-support-close" aria-label="Close" th:attr="aria-label=${uiCopy['close']}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="18" y2="6"/></svg></button></header>
   <p data-i18n="supportLead" th:text="${uiCopy['supportLead']}">Open help resources or contact the support team.</p>
   <nav class="mv-support-options" aria-label="Support channels" data-i18n-aria="supportChannels" th:attr="aria-label=${uiCopy['supportChannels']}">
     <a href="/support" data-i18n="supportHero" th:text="${uiCopy['supportHero']}">Contact support</a>
@@ -61,3 +119,4 @@
   <p class="mv-support-notice" data-i18n="supportUnavailable" th:text="${uiCopy['supportUnavailable']}">Private support messages require a verified member service.</p>
 </dialog>
 </th:block></body></html>
+</body></html>

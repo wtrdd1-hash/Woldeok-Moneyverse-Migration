@@ -6,7 +6,7 @@ import { MembershipTierCard } from '@/components/membership-tier-card';
 import { subscribePlusMembership, cancelPlusMembership } from './actions';
 
 interface ShopMembershipSectionProps {
-  readonly userBalance: string;
+  readonly userBalance: string | null;
   readonly isPlusMember: boolean;
 }
 

@@ -1,0 +1,494 @@
+/* Toss-Bank Style Virtual Banking CSS for Moneyverse */
+.bank-page-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.toss-hero-card {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+}
+
+.toss-hero-sub {
+  font-size: 0.85rem;
+  color: #94A3B8;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.toss-hero-main-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.toss-hero-amount {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  letter-spacing: -0.02em;
+}
+
+.credit-grade-badge {
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(129, 140, 248, 0.4);
+  color: #C7D2FE;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  letter-spacing: 0.02em;
+}
+
+.toss-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.toss-metric-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.toss-metric-label {
+  font-size: 0.8rem;
+  color: #94A3B8;
+}
+
+.toss-metric-val {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #E2E8F0;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+.toss-metric-val.highlighted {
+  color: #818CF8;
+}
+
+.toss-interest-banner {
+  background: linear-gradient(90deg, rgba(79, 70, 229, 0.18) 0%, rgba(147, 51, 234, 0.18) 100%);
+  border: 1px solid rgba(129, 140, 248, 0.3);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.toss-interest-badge {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #A5B4FC;
+}
+
+.toss-interest-live {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-top: 0.2rem;
+}
+
+.interest-number {
+  color: #38BDF8;
+  font-family: ui-monospace, monospace;
+}
+
+.btn-claim-action {
+  background: #4F46E5;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.btn-claim-action:hover {
+  background: #4338CA;
+  transform: translateY(-1px);
+}
+
+.bank-tabs-nav {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.bank-tab-btn {
+  background: transparent;
+  border: none;
+  color: #94A3B8;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.bank-tab-btn:hover {
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.bank-tab-btn.active {
+  color: #FFFFFF;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.bank-tab-pane {
+  display: none;
+}
+
+.bank-tab-pane.active {
+  display: block;
+}
+
+.bank-dual-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+
+.bank-form-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-heading h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+.tag-pill {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #CBD5E1;
+}
+
+.tag-pill.positive {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34D399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.tag-pill.highlight {
+  background: rgba(245, 158, 11, 0.15);
+  color: #FBBF24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.form-desc {
+  font-size: 0.85rem;
+  color: #94A3B8;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.bank-inline-msg {
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  min-height: 1.2rem;
+}
+
+.bank-inline-msg.positive {
+  color: #34D399;
+}
+
+.bank-inline-msg.negative {
+  color: #F87171;
+}
+
+.pockets-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.section-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+.section-sub {
+  font-size: 0.85rem;
+  color: #94A3B8;
+  margin: 0.2rem 0 0;
+}
+
+.btn-create-pocket {
+  background: #4F46E5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pockets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.pocket-card {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pocket-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pocket-card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.pocket-card-amounts {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.pocket-bal {
+  font-size: 1.3rem;
+  font-weight: 800;
+  font-family: ui-monospace, monospace;
+  color: #818CF8;
+}
+
+.pocket-target {
+  font-size: 0.8rem;
+  color: #94A3B8;
+}
+
+.pocket-progress-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.pocket-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #6366F1, #A855F7);
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+.pocket-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.btn-pocket-action {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+  border-radius: 6px;
+  padding: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-pocket-action:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.loan-facts-box {
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.loan-fact-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #94A3B8;
+}
+
+.loan-fact-row strong {
+  color: #E2E8F0;
+  font-family: ui-monospace, monospace;
+}
+
+.bonds-products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.bond-product-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.bond-term {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.bond-rate {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #34D399;
+  font-family: ui-monospace, monospace;
+}
+
+.bond-min {
+  font-size: 0.8rem;
+  color: #94A3B8;
+}
+
+.bond-sub {
+  font-size: 0.8rem;
+  color: #64748B;
+  margin-top: 0.25rem;
+  line-height: 1.3;
+}
+
+.bank-modal {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: auto;
+}
+
+.bank-modal::backdrop {
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+}
+
+.bank-modal-content {
+  background: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 1.5rem;
+  width: 90vw;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+}
+
+.bank-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bank-modal-header h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+.modal-actions-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.pocket-modal-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.pocket-mode-btn {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94A3B8;
+  padding: 0.4rem;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.pocket-mode-btn.active {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: #6366F1;
+  color: #FFFFFF;
+}
+
+
+.eyebrow-icon {
+  width: 14px;
+  height: 14px;
+  vertical-align: -2px;
+  margin-right: 4px;
+}

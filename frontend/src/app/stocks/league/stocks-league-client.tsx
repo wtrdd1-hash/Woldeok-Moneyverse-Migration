@@ -57,86 +57,10 @@ export function StocksLeagueClient() {
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // 내 구독 목록
-  const [mySubscriptions, setMySubscriptions] = useState<MySubscription[]>([
-    {
-      whaleId: 'whale-01',
-      whaleName: '여의도_헤지펀드_마스터',
-      allocatedBudget: 10000,
-      copyRatio: 1.0,
-      profitAmount: 2480,
-      profitRate: 24.8,
-      copiedTradesCount: 14,
-      subscribedAt: '2026-10-12',
-    },
-  ]);
+  // QA 2026-11-25: no invented subscription; filled only from the API.
+  const [mySubscriptions, setMySubscriptions] = useState<MySubscription[]>([]);
 
-  const defaultWhales: WhaleTrader[] = [
-    {
-      id: 'whale-01',
-      rank: 1,
-      nickname: '여의도_헤지펀드_마스터',
-      badge: '👑 챔피언 고래',
-      returnRate: 184.2,
-      winRate: 85.7,
-      aum: 2850000,
-      followersCount: 142,
-      mainSymbol: 'WDG (월덕전자)',
-      recentTrade: 'WDG 500주 분할 매수 체결 (+4.2%)',
-      tradesCount: 312,
-    },
-    {
-      id: 'whale-02',
-      rank: 2,
-      nickname: '판교_알고리즘_봇',
-      badge: '⚡ 초단타 퀀트',
-      returnRate: 142.8,
-      winRate: 81.3,
-      aum: 1940000,
-      followersCount: 98,
-      mainSymbol: 'TECH (머니테크)',
-      recentTrade: 'TECH 320주 익절 매도 완료 (+6.1%)',
-      tradesCount: 654,
-    },
-    {
-      id: 'whale-03',
-      rank: 3,
-      nickname: '강남_스윙_슈퍼개미',
-      badge: '💎 다이아몬드 핸드',
-      returnRate: 119.5,
-      winRate: 76.5,
-      aum: 1620000,
-      followersCount: 77,
-      mainSymbol: 'BIO (머니바이오)',
-      recentTrade: 'BIO 1,000주 돌파 매수 진입',
-      tradesCount: 189,
-    },
-    {
-      id: 'whale-04',
-      rank: 4,
-      nickname: '성수동_모멘텀_헌터',
-      badge: '🔥 트렌드 팔로워',
-      returnRate: 98.4,
-      winRate: 74.2,
-      aum: 1150000,
-      followersCount: 53,
-      mainSymbol: 'AUTO (월덕모빌리티)',
-      recentTrade: 'AUTO 400주 지지선 반등 매수',
-      tradesCount: 245,
-    },
-    {
-      id: 'whale-05',
-      rank: 5,
-      nickname: '마포_배당_복리마스터',
-      badge: '🛡️ 저변동 안정형',
-      returnRate: 64.1,
-      winRate: 89.2,
-      aum: 3400000,
-      followersCount: 64,
-      mainSymbol: 'KTB (대한민국국채)',
-      recentTrade: 'KTB 10Y 국채 리밸런싱 완료',
-      tradesCount: 92,
-    },
-  ];
+  const [unavailable, setUnavailable] = useState(false);
 
   const fetchLeague = async () => {
     try {
@@ -145,10 +69,10 @@ export function StocksLeagueClient() {
       if (data && data.whales && Array.isArray(data.whales)) {
         setWhales(data.whales);
       } else {
-        setWhales(defaultWhales);
+        setUnavailable(true);
       }
     } catch {
-      setWhales(defaultWhales);
+      setUnavailable(true);
     } finally {
       setLoading(false);
     }
@@ -324,6 +248,10 @@ export function StocksLeagueClient() {
         <TabsContent value="leaderboard" className="space-y-4 pt-2">
           {loading ? (
             <div className="p-8 text-center text-muted-foreground text-sm">고래 랭킹 데이터를 집계하는 중...</div>
+          ) : unavailable || whales.length === 0 ? (
+            <div role="status" className="rounded-lg border border-[var(--g1-line)] p-8 text-center text-sm text-[var(--g1-muted)]">
+              {unavailable ? '리그 순위를 불러올 수 없어요. 순위를 추측해서 보여 주지 않습니다.' : '아직 집계된 리그 순위가 없어요.'}
+            </div>
           ) : (
             <div className="space-y-3">
               {whales.map((whale) => (

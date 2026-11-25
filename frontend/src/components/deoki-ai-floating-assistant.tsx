@@ -167,7 +167,7 @@ export function DeokiAiFloatingAssistant() {
   return (
     <>
       {/* 화면 우측 하단 플로팅 버튼 및 말풍선 (고객지원 버튼 좌측에 나란히 정렬) */}
-      <div className="fixed bottom-20 right-17 sm:bottom-6 sm:right-22 z-40 flex flex-col items-end pointer-events-auto">
+      <div className="fixed bottom-20 right-17 lg:bottom-6 sm:right-22 z-40 flex flex-col items-end pointer-events-auto">
         {tooltipVisible && !isOpen && (
           <div className="mb-2 p-2.5 rounded-xl bg-zinc-900/90 border border-amber-500/30 shadow-xl backdrop-blur-md text-xs text-amber-200 flex items-center gap-2 max-w-[210px] animate-bounce duration-1000">
             <span className="text-base">🦆</span>

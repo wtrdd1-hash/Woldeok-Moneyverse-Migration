@@ -4,10 +4,10 @@ import { createElement } from 'react';
 
 const mocks = vi.hoisted(() => ({
   publicApi: vi.fn(),
-  api: vi.fn(),
+  apiOrNull: vi.fn(),
   isLoggedInMember: vi.fn(),
 }));
-vi.mock('@/lib/api', () => ({ publicApi: mocks.publicApi, api: mocks.api }));
+vi.mock('@/lib/api', () => ({ publicApi: mocks.publicApi, apiOrNull: mocks.apiOrNull }));
 vi.mock('@/lib/session', () => ({ isLoggedInMember: mocks.isLoggedInMember }));
 vi.mock('./funded-treasury-pension-panel', () => ({
   FundedTreasuryPensionPanel: () =>
@@ -22,7 +22,7 @@ import PublicPensionPage from './page';
 describe('v1742 NPS recovered funded financial entry point', () => {
   beforeEach(() => {
     mocks.publicApi.mockReset().mockResolvedValue(null);
-    mocks.api.mockReset().mockRejectedValue(new Error('unavailable'));
+    mocks.apiOrNull.mockReset().mockResolvedValue(null);
     mocks.isLoggedInMember.mockReset();
   });
 

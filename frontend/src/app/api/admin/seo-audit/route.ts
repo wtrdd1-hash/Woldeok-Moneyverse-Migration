@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { ApiError, api } from '@/lib/api';
 import { getAllPublicUrlsForIndexNow, submitToIndexNow } from '@/lib/indexnow';
 import { parseIndexNowReceipt, parseSeoTelemetry } from '@/lib/admin-seo-audit-evidence';
+import { isSameOriginFinanceMutation } from '@/lib/finance-mutation-origin';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,9 +37,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const origin = request.headers.get('origin');
-  const site = request.headers.get('sec-fetch-site');
-  if (!origin || origin !== new URL(request.url).origin || (site && site !== 'same-origin')) {
+  // Shared same-origin guard (QA 2026-11-25): the hand-rolled check here either
+  // failed open without an Origin or refused every proxied browser request.
+  if (!isSameOriginFinanceMutation(request)) {
     return reply({ ok: false, error: 'cross_origin_forbidden' }, 403);
   }
   const denied = await authorize();

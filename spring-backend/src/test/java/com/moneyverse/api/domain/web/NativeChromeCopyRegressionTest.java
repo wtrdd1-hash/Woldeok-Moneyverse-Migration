@@ -22,7 +22,7 @@ class NativeChromeCopyRegressionTest {
         mvc.perform(get("/login").header("Accept-Language",language))
             .andExpect(status().isOk())
             .andExpect(content().string(containsString("<title>"+title+" · W Moneyverse</title>")))
-            .andExpect(content().string(containsString("<h1 data-i18n=\"login\">"+title+"</h1>")));
+            .andExpect(content().string(org.hamcrest.Matchers.matchesPattern("(?s).*<h1\\b[^>]*data-i18n=\"login\"[^>]*>"+java.util.regex.Pattern.quote(title)+"</h1>.*")));
     }
     @ParameterizedTest @org.junit.jupiter.params.provider.ValueSource(strings={"/","/login","/register"})
     void headerFragmentDoesNotDuplicateTheHiddenSupportHeading(String path) throws Exception {

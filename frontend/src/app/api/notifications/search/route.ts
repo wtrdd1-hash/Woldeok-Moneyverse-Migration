@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { ApiError } from '@/lib/api';
 import { mutate } from '@/lib/mutate';
 import { viewerOrUnknown } from '@/lib/viewer';
+import { isSameOriginFinanceMutation } from '@/lib/finance-mutation-origin';
 
 export const dynamic = 'force-dynamic';
 const privateHeaders = { 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex' };
@@ -12,6 +13,10 @@ const categories = new Set([
 ]);
 
 export async function POST(req: Request): Promise<NextResponse> {
+  // Shared same-origin guard (independent review 2026-11-25).
+  if (!isSameOriginFinanceMutation(req)) {
+    return NextResponse.json({ error: 'Forbidden request' }, { status: 403, headers: { 'cache-control': 'private, no-store' } });
+  }
   const viewer = await viewerOrUnknown().catch(() => null);
   if (!viewer) return NextResponse.json({ error: 'Authentication unavailable' }, { status: 503, headers: privateHeaders });
   if (!viewer.signedIn) return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: privateHeaders });

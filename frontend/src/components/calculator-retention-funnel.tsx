@@ -243,7 +243,7 @@ export function CalculatorRetentionFunnel({
           </p>
           <div className="pt-1">
             <Link
-              href="/career-guide"
+              href="/guide/career-mastery"
               className="text-xs text-blue-400 hover:text-blue-300 font-medium inline-flex items-center gap-1"
             >
               8대 직업별 급여 가이드 둘러보기 <ArrowRight className="w-3 h-3" />

@@ -15,7 +15,8 @@ import {
 } from 'lucide-react';
 
 interface MembershipTierCardProps {
-  userBalance?: number | string;
+  /** null = the balance could not be read; never treated as 0. */
+  userBalance?: number | string | null;
   isPlusMember?: boolean;
   onSubscribe?: () => Promise<boolean | void> | void;
   onCancel?: () => Promise<boolean | void> | void;
@@ -35,7 +36,8 @@ export function MembershipTierCard({
     setActiveTier(Boolean(isPlusMember));
   }, [isPlusMember]);
 
-  const numericBalance = typeof userBalance === 'string' ? parseInt(userBalance, 10) || 0 : userBalance;
+  const balanceKnown = userBalance !== null;
+  const numericBalance = typeof userBalance === 'string' ? parseInt(userBalance, 10) || 0 : (userBalance ?? 0);
   const PLUS_PRICE = 10000; // 10,000 WLD / month
 
   const handleToggleSubscribe = async () => {
@@ -57,6 +59,10 @@ export function MembershipTierCard({
         setFeedback('Moneyverse Plus 구독 취소 접수 완료. (만료일까지 모든 VIP 혜택 유지)');
       } else {
         // Subscribe
+        if (!balanceKnown) {
+          setFeedback('지금은 잔액을 확인할 수 없어요. 잠시 후 다시 시도해 주세요.');
+          return;
+        }
         if (numericBalance < PLUS_PRICE) {
           setFeedback(`잔액이 부족합니다. (필요: ${PLUS_PRICE.toLocaleString()} WLD / 보유: ${numericBalance.toLocaleString()} WLD)`);
           setIsProcessing(false);

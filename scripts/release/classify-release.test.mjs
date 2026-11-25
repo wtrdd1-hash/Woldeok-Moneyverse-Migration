@@ -265,3 +265,50 @@ test('NUL-delimited Git diff preserves hostile filenames rather than splitting t
     assert.equal(evidence.classification, 'UNKNOWN');
   });
 });
+
+test('reviewed design notes, upstream license and immutable QA reports are closed documentation paths', () => {
+  for (const path of [
+    '.agents/skills/stitch-extract-design-md/LICENSE.upstream',
+    '.stitch/DESIGN.md', '.stitch/DESIGN.ko.md',
+    'docs/qa/evidence/2026-11-24-native-scoped-test/browser-60-external.json',
+    'docs/qa/evidence/2026-11-24-native-scoped-test/test-release-manifest.json',
+    'docs/design/asset-resources-v2026.11.23.12/source-catalog.json',
+  ]) assert.equal(classifyPaths([path]), 'DOCS_ONLY', path);
+  for (const path of [
+    '.agents/skills/stitch-extract-design-md/LICENSE.upstream.js',
+    '.stitch/DESIGN.json', '.stitch/other.md',
+    'docs/design/asset-resources-v2026.11.23.12/other.json',
+    'docs/qa/evidence/2026-11-24-native-scoped-test/other.json',
+    'docs/qa/evidence/other/test-release-manifest.json',
+  ]) assert.equal(classifyPaths([path]), 'UNKNOWN', path);
+});
+
+test('the exact current design authority manifest enters the control-plane lane', () => {
+  assert.equal(classifyPaths(['docs/design/CURRENT_UI_DESIGN_MANIFEST.json']), 'CONTROL_PLANE_ONLY');
+  assert.equal(classifyPaths(['docs/design/CURRENT_UI_DESIGN_MANIFEST.json', 'frontend/src/app/page.tsx']), 'MIXED');
+  assert.equal(classifyPaths(['docs/design/OTHER.json']), 'UNKNOWN');
+});
+
+test('design authority identity follows the exact manifest and refuses executable mode', () => {
+  withDocumentFixture(({ repo, commit, base }) => {
+    mkdirSync(join(repo, 'docs', 'design'), { recursive: true });
+    const path = join(repo, 'docs', 'design', 'CURRENT_UI_DESIGN_MANIFEST.json');
+    writeFileSync(path, '{"schema_version":1}\n');
+    const head = commit('add current design authority');
+    const input = buildReleaseInput({ repo, base, head });
+    assert.equal(input.classification, 'CONTROL_PLANE_ONLY');
+    assert.equal(input.controlPlaneSha, head);
+    chmodSync(path, 0o755);
+    const executable = commit('reject executable design metadata');
+    assert.equal(buildReleaseInput({ repo, base: head, head: executable }).classification, 'UNKNOWN');
+  });
+});
+
+test('bounded peer-review executables are control-plane inputs, never documentation', () => {
+  for (const path of [
+    '.agents/skills/codex-gemini-pingpong/scripts/pingpong.py',
+    '.agents/skills/codex-gemini-pingpong/scripts/tests/test_pingpong.py',
+    '.agents/skills/codex-gemini-pingpong/.gitignore',
+  ]) assert.equal(classifyPaths([path]), 'CONTROL_PLANE_ONLY', path);
+  assert.equal(classifyPaths(['.agents/skills/codex-gemini-pingpong/scripts/other.py']), 'UNKNOWN');
+});

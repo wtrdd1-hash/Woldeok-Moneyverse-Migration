@@ -7,6 +7,7 @@ import { PublicAdvertisement } from '@/components/public-advertisement';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
+import { readBoardPosts } from '@/lib/board-posts';
 import { formatDay, formatMoment } from '@/lib/money';
 import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { jsonLd } from '@/lib/json-ld';
@@ -66,13 +67,14 @@ export default async function BoardPage({
   const params = await searchParams;
   const stock = selectedStock(params.stock);
   const search = parseBoardTitleQuery(params.q);
-  const query = new URLSearchParams();
-  if (stock) query.set('stock', stock);
-  if (search.query) query.set('q', search.query);
-  const suffix = query.size ? `?${query.toString()}` : '';
-  const data = search.invalid
+  // DB-backed list (public.member_board_public_list_with_stock). The former
+  // /board/public/stock-posts endpoint is a Spring placeholder (2026-11-25).
+  const suffix = stock ? `?stockSymbol=${encodeURIComponent(stock)}` : '';
+  const rows = search.invalid
     ? null
-    : await publicApi<{ posts: PostSummary[] }>(`/api/v1/board/public/stock-posts${suffix}`, 60);
+    : readBoardPosts(await publicApi<unknown>(`/api/v1/board/stock-posts${suffix}`, 60));
+  const needle = search.query?.toLowerCase();
+  const data = rows === null ? null : { posts: needle ? rows.filter((p) => p.title.toLowerCase().includes(needle)) : rows };
 
   const boardBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },

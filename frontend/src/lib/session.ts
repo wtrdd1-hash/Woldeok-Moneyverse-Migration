@@ -28,7 +28,15 @@ export async function requireMember(): Promise<void> {
   try {
     // Any authenticated route would do. This one is the cheapest, and its
     // three failures are exactly the three a member can be in.
-    await api<{ csrfToken: string }>('/api/v1/auth/session');
+    const session = await api<{ csrfToken?: string; signedIn?: boolean; authenticated?: boolean }>(
+      '/api/v1/auth/session',
+    );
+    // The Nest gateway answered 401 for a stranger; the Spring API answers
+    // 200 with signedIn/authenticated false. Treating that 200 as a member let
+    // anonymous visitors through to private reads that then failed with 500.
+    if (session && (session.signedIn === false || session.authenticated === false)) {
+      redirect('/login?error=login_required');
+    }
   } catch (error) {
     if (error instanceof ApiError) {
       // 401 means sign in, 428 means the current policy has not been

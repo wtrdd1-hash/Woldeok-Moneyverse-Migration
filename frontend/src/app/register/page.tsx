@@ -25,6 +25,7 @@ const ERROR_MESSAGES: Readonly<Record<string, string>> = {
   policy_or_password_violation: '비밀번호 규칙을 만족하지 않거나 정책 확인이 필요합니다.',
   bad_request: '입력하신 정보가 올바르지 않습니다. 다시 확인해 주세요.',
   registration_failed: '회원가입을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+  local_registration_unavailable: '이메일 회원가입은 아직 열리지 않았습니다. 디스코드 또는 구글 계정으로 시작해 주세요.',
 };
 
 export default async function RegisterPage({

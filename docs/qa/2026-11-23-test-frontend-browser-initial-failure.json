@@ -1,0 +1,45 @@
+{
+  "source": "5e0ede9ff8bddd187e8f14ac1ee89270f659acd0",
+  "origin": "http://test.easy-scraping.com",
+  "freshProfile": true,
+  "cases": 1,
+  "failed": 1,
+  "interactionsPassed": false,
+  "results": [
+    {
+      "path": "/",
+      "width": 320,
+      "lang": "en",
+      "metrics": {
+        "translatedElements": 13,
+        "translationErrors": [],
+        "lang": "en",
+        "uiLanguage": "en",
+        "bodyColor": "rgb(12, 16, 32)",
+        "textColor": "rgb(233, 241, 255)",
+        "palette": {
+          "background": "#0c1020",
+          "accent": "#9c83ff"
+        },
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "badImages": [],
+        "overlaps": [],
+        "springPage": "home",
+        "heading": "My assets dashboard",
+        "favicon": "/assets/mv39/favicon.ico?v=7c17c9be67fb26d74879b5392423e736ed7079a3c00e5a203adcecddf35fa3d5",
+        "logoCount": 2
+      }
+    },
+    {
+      "path": "/",
+      "width": 320,
+      "lang": "ko",
+      "error": "Incorrect document language {\"expected\":\"ko\",\"lang\":\"en\",\"ui\":\"en\"}"
+    }
+  ],
+  "screenshots": [
+    "/home/debian/mv-test-frontend-real-backend-evidence-20261123/public-browser/failure-1.png"
+  ],
+  "failure": "Incorrect document language {\"expected\":\"ko\",\"lang\":\"en\",\"ui\":\"en\"}"
+}

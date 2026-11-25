@@ -1,3 +1,12 @@
+## v2026.11.24.0818 — Google Stitch Skills 소스 전용 적용 시험 (브랜치만)
+11월 18일 공식 디자인의 한영 DESIGN.md·로컬 추출 스킬·CSS 11개 토큰 계약 검증 PASS. Stitch MCP 연결·화면 생성·Test/운영 배포는 하지 않음. [상세](development/GOOGLE_STITCH_SKILLS_PILOT_v2026.11.24.0818.ko.md).
+
+## v2026.11.22.2041.1 — 인스타그램 UI 100개 용어 참고 영상 기록 (문서 전용)
+- 공식 게시물 메타데이터와 22초 본편 확인, 원본 주소·게시자·영상에서 읽힌 UI 용어·미확인 범위·11월 18일 Spring UI 적용 지침 기록. [한글](research/2026-11-22-instagram-uxwoodytips-ui-100-v2041.ko.md) / [영문](research/2026-11-22-instagram-uxwoodytips-ui-100-v2041.md); [작업기록](worklog/2026-11-22-instagram-ui-glossary-v2041.ko.md). 전체 사전 100개 미확인; 앱/Test/운영 변경 없음.
+
+## v2026.11.23.12 — 릴스 27개 웹디자인 사이트 통합 기획 (PLANNING / 문서만)
+Instagram 공식 oEmbed 게시글 설명으로 9분야·27개 확인. 영/한 Spring 기반 리소스·사용권·성능·UI/실기능 QA 기획 및 JSON 목록을 추가하고 프로젝트 기획·통합 마스터에 반영. 기존 11/18 보라 테마/5언어/실제 원장/광고식별 보존. 자산 다운로드·코드·DB·Test·운영 변경 없음. [한국어 기획](planning/REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.ko.md) / [EN](planning/REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.md).
+
 ## v2026.11.10.1948 — 조폐국 UI/정책 제한형 DB 함수 v1947 실제 운영 승격
 
 ## v2026.11.21.2234 — AgentMemory 영상·원본 링크 저장 및 AI 공동 작업기억 규칙 (문서만)

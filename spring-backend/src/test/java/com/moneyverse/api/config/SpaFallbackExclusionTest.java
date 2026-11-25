@@ -30,6 +30,15 @@ class SpaFallbackExclusionTest {
     }
 
     @Test
+    void isolatedExactShaTestCanServeOnlyItsPackagedClasspathResources() {
+        assertArrayEquals(new String[]{"classpath:/static/"}, SpaWebMvcConfig.resourceLocations("", true));
+        assertArrayEquals(SpaWebMvcConfig.resourceLocations(""), SpaWebMvcConfig.resourceLocations("", false));
+        String immutable="/srv/moneyverse-data/releases/frontend-vtest/frontend-static";
+        assertThrows(IllegalArgumentException.class, () -> SpaWebMvcConfig.resourceLocations(immutable, true),
+            "Never combine a release bundle with a separate source-only renderer");
+    }
+
+    @Test
     void unconfiguredServiceKeepsCurrentAssetsAndUnknownChunksNeverBecome200Html() {
         assertEquals(2,SpaWebMvcConfig.resourceLocations("").length);
         assertTrue(SpaWebMvcConfig.isStaticFile("_next/static/chunks/missing.js"));

@@ -1,5 +1,7 @@
 # 50만+ 디자인 스케일 프론트엔드 UI 깨짐·겹침 원천 방지 마스터 가이드라인 (Frontend UI Anti-Clash Master Specification)
 
+**Current single visual baseline v2026.11.24.1:** Only [Nov23 v10](design/game-ui-v2026.11.23.10/README.md) is an active image reference. [Authority](design/CURRENT_UI_DESIGN.md); never use archived v8/Nov18 assets for implementation.
+
 > **문서 상태**: 공식 프로덕션 아키텍처 규격 (Production Master Standard)  
 > **적용 레퍼런스**: Linear, Stripe, Toss, Apple Human Interface Guidelines, Vercel Geist, Robinhood
 

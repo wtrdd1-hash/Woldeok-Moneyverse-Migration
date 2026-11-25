@@ -41,11 +41,13 @@ import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -346,7 +348,8 @@ class NativeSessionCsrfRegressionTest {
         when(database.queryForObject(anyString(), eq(Integer.class), any(UUID.class))).thenReturn(1);
         when(database.queryForMap(startsWith("SELECT user_id, session_id, is_new"), any(Object[].class)))
                 .thenReturn(Map.of("user_id", OWNER, "session_id", SESSION_ID, "is_new", false));
-        var service = new UserAuthService(database);
+        var service = spy(new UserAuthService(database));
+        doReturn(Optional.of(prelogin(SESSION_ID))).when(service).resolveSession(any());
         var controller = new OAuthController(service, json);
         var client = mock(HttpClient.class);
         HttpResponse<String> exchange = mock(HttpResponse.class);
@@ -374,6 +377,28 @@ class NativeSessionCsrfRegressionTest {
         verify(database).queryForMap(startsWith("SELECT user_id, session_id, is_new"),
                 eq(SESSION_ID), eq("discord"), eq("ci_subject"), anyString(), eq("ci_member"), anyString(),
                 eq(UserAuthService.sha256(raw)));
+    }
+
+    private static UserAuthService.SessionInfo prelogin(UUID id) {
+        var info = new UserAuthService.SessionInfo();
+        info.setSessionId(id);
+        return info;
+    }
+
+    @Test void oauthCallbackRefusesStateThatIsNotTheBrowsersSession() throws Exception {
+        var service = spy(new UserAuthService(mock(JdbcTemplate.class)));
+        doReturn(Optional.of(prelogin(UUID.fromString("00000000-0000-4000-8000-000000000999"))))
+                .when(service).resolveSession(any());
+        var controller = new OAuthController(service, json);
+        var client = mock(HttpClient.class);
+        ReflectionTestUtils.setField(controller, "httpClient", client);
+        var mvc = MockMvcBuilders.standaloneSetup(controller).build();
+        mvc.perform(get("/auth/discord/callback").param("code", "ci_code").param("state", SESSION_ID.toString()))
+                .andExpect(status().isFound())
+                .andExpect(header().string("Location", "/login?error=oauth_session"));
+        mvc.perform(get("/auth/discord/callback").param("code", "ci_code").param("state", "not-a-uuid").param("format", "json"))
+                .andExpect(status().isBadRequest());
+        verify(client, never()).send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class));
     }
 
     @ParameterizedTest @ValueSource(booleans = {true, false})

@@ -1,4 +1,47 @@
+## v2026.11.24.0818 — Stitch Skills 공식 디자인 계약 시범 (배포 없음)
+
+> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](../DOCUMENT_AUTHORITY.md) / [한국어](../DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+
+Google의 소스 전용 추출 스킬을 프로젝트 내부에 설치하고 11월 18일 승인 디자인을 한영 `.stitch/DESIGN.md` 규격으로 작성. CSS 11개 토큰 정적 검사 PASS. Spring/Thymeleaf·실데이터·독립 Test 원칙 불변; Stitch MCP·클라우드 화면 생성·운영 배포 없음. [상세](../development/GOOGLE_STITCH_SKILLS_PILOT_v2026.11.24.0818.ko.md).
+
 # 월덕 머니버스 — 통합 기획 마스터
+
+> **v2026.11.24.1 현행 UI 이미지 최상위 기준:** 11월23일 **v10만** 180개 경로 구현의 시각 자료: [단일 기준](../design/CURRENT_UI_DESIGN.ko.md), [매니페스트](../design/CURRENT_UI_DESIGN_MANIFEST.json), [최신 갤러리](../design/game-ui-v2026.11.23.10/README.ko.md). v8·11월18일 이미지는 보관본이며 새 구현 참조 금지. 시각 승인·Test/E2E는 미완료.
+
+
+> **v2026.11.23.10 UI visual/feature audit** [180 revised PNGs](../design/game-ui-v2026.11.23.10/README.ko.md) · [audit](../qa/2026-11-23-game-ui-180-image-feature-audit.ko.md). Image file QA only; full runtime acceptance unverified.
+
+> v2026.11.23.8 신규 이미지: [새 이미지 180개](../design/game-ui-v2026.11.23.8/README.ko.md) — 생성 완료/시안 검수 필요, 실제 서비스 적용 아님.
+
+> **UI 통합 문서 (v2026.11.23.5, 문서 전용):** [UI/UX 통합 문제·디자인·수용 조건](../UI_UX_SINGLE_REFERENCE.ko.md). **현재 파비콘이 로고**이며 생성형 W/왕관 이미지는 대체 불가. 관리자 메뉴는 로그인한 **인가된 관리자만 표시**, 일반 회원·비회원 화면·검색에는 숨김. Test/운영 검증 미실시.
+
+> **Historical rebuild frontdoor — captured 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
+
+## v2026.11.22.2041.1 — 인스타그램 UI 명칭 100개 참고자료 영구 기록 (PLANNING / 문서만)
+
+사용자 제공 [인스타그램 릴스](https://www.instagram.com/reel/DgB83_Fh4NP/)는 @uxwoodytips의 2026-11-21 게시물로 AI에 정확한 UI 용어를 지정하는 방법을 설명한다. 공개 메타데이터와 22초 영상의 화면을 실제 확인하여 토글/체크박스/라디오, 벤토·카드 그리드, 모달·바텀시트·드로어, 기간 선택, 페이지네이션, 플로팅·하단 고정 등을 기록했다. **전체 100개 사전은 확보하지 못했으며 전수 검증으로 표시하지 않는다.** [한국어 상세 참고](../research/2026-11-22-instagram-uxwoodytips-ui-100-v2041.ko.md) / [영문 정본](../research/2026-11-22-instagram-uxwoodytips-ui-100-v2041.md)에 출처 및 머니버스 적용 기준을 보존한다. 11월 18일 Spring 웹 디자인·5개 언어·전역 채팅/문의·구글/디스코드 로그인·실제 금융 근거는 변경하지 않는다. 코드·Test·운영·DB·인증 수정 없음.
+
+## v2026.11.23.12 — 릴스 디자인 리소스 27곳의 기획/적용 통합 원칙 (PLANNING / 문서만)
+
+사용자 [27곳 릴스](https://www.instagram.com/reel/DgB15siSolR/)를 **디자인 참고자료**로 통합함. 공식 oEmbed 게시글 설명에 9분야·27곳 확인, 영상 본편 재생은 미검증. [한국어 상세](REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.ko.md) / [English](REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.md): 11/18 승인 보라/네이비·파비콘, 단일 Spring MVC/Thymeleaf, 실제 DB/API, EN→KO→JA→ZH→VI, 광고표기, 개별 이용허락 검토, G0-G6 브라우저/실기능/독립 Test/복원 검증 필수. 별도 게임 UI 브랜치 180 새 PNG는 아직 미승인 시안이므로 실제 웹 완료로 간주하지 않음. [발견용 카탈로그](../design/asset-resources-v2026.11.23.12/source-catalog.json) / [작업기록](../worklog/2026-11-23-reel-27-design-resources-v12.ko.md). **코드/실제 에셋/DB/Test/운영 변경 없음**. 착수/중간 main SHA `9876c09888ec84034eec183cf1309c85df3d7447`.
+
+### Historical Test-governance proposal — captured 2026-11-23
+
+> **v2026.11.23.1 테스트 서버 강화 규정 (검토 제안 / 문서 전용):** [초엄격 테스트 서버 운영 규정](../operations/STRICT_TEST_SERVER_GOVERNANCE_v2026.11.23.1.ko.md). 4550은 과거 Spring API 포트이며 테스트 전용으로 확인되지 않음. 실제 미니PC 오프라인으로 활성 포트/방화벽 실측 미완료. 분리·권한·QA·정확한 SHA·무중단 승격 게이트 미통과 시 운영 승격 차단.
+
+> v2026.11.23.11 public advertisement disclosure / 공개 광고 표시: [Ad display and policy QA](../qa/2026-11-23-public-ad-display-audit-v2026.11.23.11.ko.md) — source change candidate only, native Spring Test and Production not verified. Protected routes remain ad-free.
+
+## v2026.11.24.1319 — Claudex Loop 개발 스킬 설치 (운영 미변경)
+[설치·검증 기록](../development/CLAUDEX_LOOP_INSTALL_v2026.11.24.1319.ko.md). 기존 Gemini 협업 유지, 실제 모델 교차 검토 미실행, 공식 Test 및 승격 규정 유지.
+
+## v2026.11.24.1321 — Multi-skill development installation / 개발 스킬 설치
+[Inventory and verification](../development/MULTI_SKILL_INSTALL_v2026.11.24.1321.ko.md). Existing Superpowers and release gates retained; no deployment or automatic schedule change.
+
+## v2026.11.24.1340 — Token-tool reference / Graphify development engine
+[Verification](../development/TOKEN_TOOL_REEL_REVIEW_v2026.11.24.1340.ko.md). Exact reel tools unverified; existing workflow and release gates unchanged.
+
+## v2026.11.24.1345 — OmniRoute isolated gateway / 개발 게이트웨이
+[Installation and verification](../development/OMNIROUTE_INSTALL_v2026.11.24.1345.ko.md). Local only; no client routing or application release changes.
 
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 

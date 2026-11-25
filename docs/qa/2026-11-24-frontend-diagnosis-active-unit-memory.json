@@ -1,0 +1,146 @@
+[
+  {
+    "unit": "actions.runner.wtrdd1-hash-Woldeok-Moneyverse-Migration.debian13-moneyverse.service",
+    "memoryMiB": 28.9
+  },
+  {
+    "unit": "moneyverse-economy-ai.service",
+    "memoryMiB": 14.0
+  },
+  {
+    "unit": "moneyverse-mcp.service",
+    "memoryMiB": 1349.3
+  },
+  {
+    "unit": "moneyverse-nov18-catalog-read-qa-v20261122.service",
+    "memoryMiB": 5.5
+  },
+  {
+    "unit": "moneyverse-nov18-rebuild-qa-v20261121.service",
+    "memoryMiB": 8.0
+  },
+  {
+    "unit": "moneyverse-nov18-test-backend-v20261122.service",
+    "memoryMiB": 188.1
+  },
+  {
+    "unit": "moneyverse-spring-backend.service",
+    "memoryMiB": 408.8
+  },
+  {
+    "unit": "moneyverse-spring-contact-prod-v20261118.service",
+    "memoryMiB": 45.2
+  },
+  {
+    "unit": "moneyverse-spring-contact-test-v20261118.service",
+    "memoryMiB": 40.2
+  },
+  {
+    "unit": "moneyverse-spring-prod-v25-readonly.service",
+    "memoryMiB": 34.3
+  },
+  {
+    "unit": "moneyverse-spring-prod-v27-readonly.service",
+    "memoryMiB": 24.6
+  },
+  {
+    "unit": "moneyverse-spring-prod-v28-readonly.service",
+    "memoryMiB": 21.8
+  },
+  {
+    "unit": "moneyverse-spring-prod-v29.service",
+    "memoryMiB": 23.8
+  },
+  {
+    "unit": "moneyverse-spring-prod-v30.service",
+    "memoryMiB": 22.5
+  },
+  {
+    "unit": "moneyverse-spring-public-prod-v20261118.service",
+    "memoryMiB": 40.2
+  },
+  {
+    "unit": "moneyverse-spring-public-test-v20261118.service",
+    "memoryMiB": 70.1
+  },
+  {
+    "unit": "moneyverse-spring-test-v20.service",
+    "memoryMiB": 21.5
+  },
+  {
+    "unit": "moneyverse-spring-test-v21.service",
+    "memoryMiB": 27.4
+  },
+  {
+    "unit": "moneyverse-spring-test-v22.service",
+    "memoryMiB": 29.9
+  },
+  {
+    "unit": "moneyverse-spring-test-v24.service",
+    "memoryMiB": 22.1
+  },
+  {
+    "unit": "moneyverse-spring-test-v24b.service",
+    "memoryMiB": 25.6
+  },
+  {
+    "unit": "moneyverse-spring-test-v25c.service",
+    "memoryMiB": 30.4
+  },
+  {
+    "unit": "moneyverse-spring-test-v27b.service",
+    "memoryMiB": 20.4
+  },
+  {
+    "unit": "moneyverse-spring-test-v28.service",
+    "memoryMiB": 20.7
+  },
+  {
+    "unit": "moneyverse-spring-test-v29.service",
+    "memoryMiB": 35.4
+  },
+  {
+    "unit": "moneyverse-spring-test-v30.service",
+    "memoryMiB": 20.6
+  },
+  {
+    "unit": "moneyverse-spring-web-preview-prod-v20261118.service",
+    "memoryMiB": 39.8
+  },
+  {
+    "unit": "moneyverse-spring-web-preview-test-v20261118.service",
+    "memoryMiB": 47.7
+  },
+  {
+    "unit": "moneyverse-spring-web-v21-readonly-prod.service",
+    "memoryMiB": 22.5
+  },
+  {
+    "unit": "moneyverse-spring-web-v22-readonly-prod.service",
+    "memoryMiB": 41.3
+  },
+  {
+    "unit": "moneyverse-spring-web-v24-readonly-prod.service",
+    "memoryMiB": 23.4
+  },
+  {
+    "unit": "moneyverse-test-frontend-real-backend-v20261123.service",
+    "memoryMiB": 250.8
+  },
+  {
+    "unit": "moneyverse-test-frontend-scoped-v20261124.service",
+    "memoryMiB": 133.0
+  },
+  {
+    "unit": "moneyverse-test-spring-adminlogs-canary-v20261117.service",
+    "memoryMiB": 29.1
+  },
+  {
+    "unit": "moneyverse-ui-v38-r6-test.service",
+    "memoryMiB": 20.8
+  },
+  {
+    "unit": "mv-gpt-web-v21c-test.service",
+    "memoryMiB": 21.4
+  }
+]

@@ -57,8 +57,8 @@ class NativeMessagingWebTest {
         signedIn();
         for(String family:new String[]{"support","chat"}) {
             for(String suffix:new String[]{"","/",".html","/index.html"}) {
-                String html=mvc.perform(get("/"+family+suffix).cookie(new Cookie("wdmv_locale",code))
-                    .header("Accept-Language","en").param("lang","vi"))
+                String html=mvc.perform(get("/"+family+suffix).cookie(new Cookie("wdmv_locale",code.equals("en")?"ko":"en"))
+                    .header("Accept-Language","en").param("lang",code))
                     .andExpect(status().isOk()).andExpect(view().name("mv43/"+family))
                     .andExpect(header().string("Content-Language",code))
                     .andExpect(header().string("Cache-Control",containsString("no-store")))

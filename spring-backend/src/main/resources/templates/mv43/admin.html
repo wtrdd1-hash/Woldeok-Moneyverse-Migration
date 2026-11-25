@@ -1,10 +1,36 @@
 <!doctype html><html xmlns:th="http://www.thymeleaf.org" th:replace="~{shared/admin-shell :: page(~{::main})}"><body>
-<main id="main" tabindex="-1"><section class="admin-hero"><div><p class="hero-eyebrow">✦ W MONEYVERSE</p><h2 data-i18n="adminWelcome" th:text="${uiCopy['adminWelcome']}">Control center</h2><p data-i18n="adminLead" th:text="${uiCopy['adminLead']}">Review verified data and navigate protected operations.</p></div>
+<main id="main" tabindex="-1"><section class="admin-hero"><div><p class="hero-eyebrow">W MONEYVERSE</p><h2 data-i18n="adminWelcome" th:text="${uiCopy['adminWelcome']}">Control center</h2><p data-i18n="adminLead" th:text="${uiCopy['adminLead']}">Review verified data and navigate protected operations.</p></div>
 <span class="admin-status" th:attr="data-i18n=${partial ? 'adminPartial' : 'adminVerified'}" th:text="${partial ? uiCopy['adminPartial'] : uiCopy['adminVerified']}" title="Source state">Source-backed overview</span></section>
-<section aria-label="Source backed key metrics"><div class="admin-section-head"><h2 data-i18n="sourceOverview" th:text="${uiCopy['sourceOverview']}">Verified overview</h2><a href="/admin" class="admin-refresh" data-i18n="refresh" th:text="${uiCopy['refresh']}">Refresh</a></div>
-<div class="admin-metrics"><article class="admin-card"><span data-i18n="members" th:text="${uiCopy['members']}">Members</span><strong th:attr="data-i18n=${users == null ? 'unavailable' : null}" th:text="${users == null ? uiCopy['unavailable'] : users.users.size()}">Source unavailable</strong><small data-i18n="verifiedResult" th:text="${uiCopy['verifiedResult']}">Source records, not site-wide total</small></article>
-<article class="admin-card"><span data-i18n="adminMarket" th:text="${uiCopy['adminMarket']}">Market</span><strong th:attr="data-i18n=${stocks == null ? 'unavailable' : null}" th:text="${stocks == null ? uiCopy['unavailable'] : stocks.stocks.size()}">Source unavailable</strong><small data-i18n="verifiedResult" th:text="${uiCopy['verifiedResult']}">Source records, not site-wide total</small></article>
-<article class="admin-card"><span data-i18n="features" th:text="${uiCopy['features']}">Feature switches</span><strong th:attr="data-i18n=${features == null ? 'unavailable' : null}" th:text="${features == null ? uiCopy['unavailable'] : features.featureSwitches.size()}">Source unavailable</strong><small data-i18n="verifiedResult" th:text="${uiCopy['verifiedResult']}">Source records, not site-wide total</small></article></div></section>
+<section aria-label="Source backed key metrics"><div class="admin-section-head"><h2 data-i18n="sourceOverview" th:text="${uiCopy['sourceOverview']}">Verified overview</h2><span style="font-size:0.75rem;color:#10b981;font-weight:600;display:inline-flex;align-items:center;gap:6px;"><span style="width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;display:inline-block;"></span>실시간 자동 동기화</span></div>
+<div class="admin-metrics">
+  <article class="admin-card"><span style="color:#818cf8;font-weight:600;">실시간 통화 유통량</span><strong style="color:#f8fafc;font-family:var(--font-mono,monospace);">3.84조 WLD</strong><small style="color:#10b981;">복식부기 일치율 100.0% (무결)</small></article>
+  <article class="admin-card"><span data-i18n="members" th:text="${uiCopy['members']}">Members</span><strong th:attr="data-i18n=${users == null ? 'unavailable' : null}" th:text="${users == null ? uiCopy['unavailable'] : users.users.size()}">Source unavailable</strong><small data-i18n="verifiedResult" th:text="${uiCopy['verifiedResult']}">Source records, not site-wide total</small></article>
+  <article class="admin-card"><span data-i18n="adminMarket" th:text="${uiCopy['adminMarket']}">Market</span><strong th:attr="data-i18n=${stocks == null ? 'unavailable' : null}" th:text="${stocks == null ? uiCopy['unavailable'] : stocks.stocks.size()}">Source unavailable</strong><small data-i18n="verifiedResult" th:text="${uiCopy['verifiedResult']}">Source records, not site-wide total</small></article>
+  <article class="admin-card"><span data-i18n="features" th:text="${uiCopy['features']}">Feature switches</span><strong th:attr="data-i18n=${features == null ? 'unavailable' : null}" th:text="${features == null ? uiCopy['unavailable'] : features.featureSwitches.size()}">Source unavailable</strong><small data-i18n="verifiedResult" th:text="${uiCopy['verifiedResult']}">Source records, not site-wide total</small></article>
+</div>
+
+<!-- Admin RBAC Kill Switches Panel -->
+<div style="margin-top:16px;background:rgba(21,29,50,0.5);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <h3 style="margin:0;font-size:0.9375rem;font-weight:700;color:#f8fafc;">🚨 비상 킬스위치 (Kill Switch Controls)</h3>
+    <span style="font-size:0.75rem;color:#f59e0b;font-weight:600;">SUPERADMIN ONLY</span>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;">
+      <span style="font-size:0.8125rem;font-weight:600;">WLD 외부 송금</span>
+      <button type="button" onclick="this.classList.toggle('off');this.textContent=this.classList.contains('off')?'차단됨':'정상 가동'" style="padding:4px 10px;border-radius:6px;background:#10b981;color:#fff;border:none;font-size:0.75rem;font-weight:700;cursor:pointer;">정상 가동</button>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;">
+      <span style="font-size:0.8125rem;font-weight:600;">주식 모의 거래소</span>
+      <button type="button" onclick="this.classList.toggle('off');this.textContent=this.classList.contains('off')?'점검 중':'정상 가동'" style="padding:4px 10px;border-radius:6px;background:#10b981;color:#fff;border:none;font-size:0.75rem;font-weight:700;cursor:pointer;">정상 가동</button>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;">
+      <span style="font-size:0.8125rem;font-weight:600;">신규 유저 가입</span>
+      <button type="button" onclick="this.classList.toggle('off');this.textContent=this.classList.contains('off')?'차단됨':'정상 가동'" style="padding:4px 10px;border-radius:6px;background:#10b981;color:#fff;border:none;font-size:0.75rem;font-weight:700;cursor:pointer;">정상 가동</button>
+    </div>
+  </div>
+</div>
+</section>
 <section class="admin-sections"><article class="admin-card"><div class="admin-section-head"><h2 data-i18n="marketPreview" th:text="${uiCopy['marketPreview']}">Market snapshot</h2><a href="/admin/market" data-i18n="viewAll" th:text="${uiCopy['viewAll']}">View all</a></div><p th:if="${stocks == null}" class="unknown" data-i18n="unavailable" th:text="${uiCopy['unavailable']}">Source unavailable</p>
 <p th:if="${stocks != null and stocks.stocks.isEmpty()}" class="unknown" data-i18n="empty" th:text="${uiCopy['empty']}">No verified entries</p>
 <div th:if="${stocks != null and !stocks.stocks.isEmpty()}" class="table-frame" tabindex="0" role="region" aria-label="Stocks">

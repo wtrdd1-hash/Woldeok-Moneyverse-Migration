@@ -23,6 +23,8 @@ public final class NativeUiPreview {
             "--spring.sql.init.mode=always","--spring.sql.init.schema-locations=classpath:schema-test.sql",
             "--spring.jpa.hibernate.ddl-auto=create-drop",
             "--server.address=127.0.0.1","--server.port=49979",
+            // On the exact-SHA H2 Test server, never resolve HTML/CSS from the unrelated live external folder.
+            "--moneyverse.frontend.classpath-only=true",
             "--moneyverse.socket.host=127.0.0.1","--moneyverse.socket.port=0",
             "--moneyverse.discord.bot-token=",
             "--moneyverse.app-base-url=http://localhost:49979",

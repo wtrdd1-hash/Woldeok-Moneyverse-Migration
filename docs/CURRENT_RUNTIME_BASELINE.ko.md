@@ -42,7 +42,7 @@ Admin dashboard/system-log HTML now uses main98b5dec0283f via moneyverse-native-
   - GitHub PR #2915: CI 100% Green 검증 통과 및 `main` 브랜치 완전 머지 완료.
 - **디스크 및 저장소 정밀 정리 (v291)**: 과거 릴리스 12개 버전 및 완료된 과거 태스크 폴더의 `node_modules`/.next 캐시를 일괄 정리하여 41GB+ 디스크를 즉시 회수함. `/srv/moneyverse-data` 가용 공간 101GB(사용률 47%) 확보.
 - **Git 워크트리 및 브랜치 통합 (v291)**: 126개 고아 워크트리 일괄 해제(`git worktree prune`) 및 머지된 로컬 브랜치 31개 정리 완료.
-- [운영 승격 및 브랜치 통합 기록](worklog/2026-11-08-branch-merge-and-v1770-promotion.ko.md). 아래 v1622/v1550/v701 등은 과거 시점 기록이며 현행 운영 기준선은 v1770임.
+- 운영 승격 및 브랜치 통합 기록 (historical source unavailable; original target: worklog/2026-11-08-branch-merge-and-v1770-promotion.ko.md; [link audit](qa/2026-11-24-document-link-reconciliation.json)). 아래 v1622/v1550/v701 등은 과거 시점 기록이며 현행 운영 기준선은 v1770임.
 
 ## 2026-11-02 v1622 — 최신 운영 실측
 - **현재 공개 운영** `https://easy-scraping.com`: backend `moneyverse-release-v1622-backend.service` `127.0.0.1:4194`, frontend `moneyverse-release-v1622-frontend.service` `127.0.0.1:4195`. 불변 릴리스 `/srv/moneyverse-data/releases/prod-v2026.11.02.1622-6fe94aeeebbd`, 실제 앱 SHA `6fe94aeeebbd30c996f7a9f8ddeb02f8c538505e`. Nginx 운영 라우트만 무중단 교체, 구 v1619 서비스 4184/4185 가동 유지하여 롤백 가능.

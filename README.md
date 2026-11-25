@@ -1,10 +1,13 @@
 # 🌙 Woldeok Moneyverse
 
+> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](docs/DOCUMENT_AUTHORITY.md) / [한국어](docs/DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+
+
 [한국어](README/README.ko.md) | [English](README/README.en.md) | [简体中文](README/README.zh-CN.md) | [繁體中文](README/README.zh-TW.md) | [日本語](README/README.ja.md) | [Español](README/README.es.md) | [Français](README/README.fr.md) | [Русский](README/README.ru.md) | [العربية](README/README.ar.md) | [हिन्दी](README/README.hi.md) · 📚 **[Master Docs Hub](docs/DOCS_INDEX.md)** · 📜 [Changelog](docs/changelog/CHANGELOG.md) · 🚀 [Releases](docs/releases/v2026.09.07.2.md)
 
 ---
 
-> **Woldeok Moneyverse** is a community virtual-economy platform built with **Next.js, Java Spring Boot 3.3.5 Enterprise and PostgreSQL 16** (100.00% Full Transition: 89/89 Controllers). It combines jobs, quests, progression, a ledger-backed wallet, shop, stocks, businesses, banking and virtual casino minigames in one responsive web experience.
+> **Woldeok Moneyverse** is a community virtual-economy platform built with **Next.js, Spring Boot and PostgreSQL**, with legacy migration paths still requiring exact-source and functional acceptance. It combines jobs, quests, progression, a ledger-backed wallet, shop, stocks, businesses, banking and virtual casino minigames in one responsive web experience.
 >
 > **Production:** <https://easy-scraping.com> · **Test:** <https://test.easy-scraping.com>
 
@@ -246,7 +249,8 @@ See [Banking](docs/features/banking.md).
 | Path | Purpose |
 | --- | --- |
 | `frontend/` | Next.js App Router frontend and same-origin server actions |
-| `backend/` | Spring Boot 3.3.5 internal API |
+| `backend/` | Legacy NestJS API/gateway; remaining contracts must be mapped before retirement |
+| `spring-backend/` | Spring Boot API and transitional native presentation |
 | `packages/database/` | PostgreSQL init files, ordered migrations and DB policy |
 | `packages/contract/` | Shared contracts and route map |
 | `bot/` | Discord Music & Voice Stay Bot daemon, SponsorBlock FFmpeg slicing engine |
@@ -286,7 +290,7 @@ flowchart LR
     R --> S[Smoke test + health validation]
 ```
 
-Production is intentionally **not auto-deployed on every push**. The release workflow builds commit-tagged images and rolls a selected environment only when explicitly dispatched.
+Source-bound image preparation may run automatically after required checks. Actual Production cutover requires separate owner approval, independent Test evidence and the documented rollback gates. A push or image-ready signal is not a server cutover.
 
 See [Production Deployment](docs/operations/production-deployment.md) and [Backup & Recovery](docs/operations/backup-and-recovery.md).
 

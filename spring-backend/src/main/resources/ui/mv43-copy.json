@@ -1,4 +1,53 @@
 {
+  "navBank": [
+    "Bank",
+    "은행",
+    "銀行",
+    "银行",
+    "Ngân hàng"
+  ],
+  "bank": [
+    "Bank",
+    "은행",
+    "銀行",
+    "银行",
+    "Ngân hàng"
+  ],
+  "bankHero": [
+    "Virtual Banking",
+    "가상 은행 & 복리 예금",
+    "仮想銀行",
+    "虚拟银行",
+    "Ngân hàng ảo"
+  ],
+  "bankLead": [
+    "Compound deposit interest, savings pockets and smart loans",
+    "매일 실시간 복리 이자가 붙는 월덕뱅크. 예적금, 저축 팟, 가상 신용 대출",
+    "複利預金とスマートローン",
+    "复利存款与智能贷款",
+    "Lãi suất tiền gửi và khoản vay"
+  ],
+  "bankDeposit": [
+    "Deposit",
+    "예금 입금",
+    "預金",
+    "存款",
+    "Gửi tiền"
+  ],
+  "bankWithdraw": [
+    "Withdraw",
+    "예금 출금",
+    "出金",
+    "取款",
+    "Rút tiền"
+  ],
+  "bankInterestClaim": [
+    "Claim interest now",
+    "지금 이자 받기",
+    "今すぐ利息を受け取る",
+    "立即领取利息",
+    "Nhận lãi ngay"
+  ],
   "publicationAnnouncements": [
     "Announcements",
     "운영 소식",
@@ -763,11 +812,11 @@
     "Ví"
   ],
   "stocks": [
-    "Invest",
-    "투자",
-    "投資",
-    "投资",
-    "Đầu tư"
+    "Stocks",
+    "주식",
+    "株式",
+    "股票",
+    "Cổ phiếu"
   ],
   "quests": [
     "Quests",
@@ -4065,5 +4114,47 @@
     "順序",
     "序号",
     "Thứ tự"
+  ],
+  "gameClockTitle": [
+    "Server game time rules",
+    "서버 게임 시간 안내",
+    "ゲームサーバー時間の案内",
+    "游戏服务器时间说明",
+    "Quy tắc thời gian máy chủ"
+  ],
+  "gameClockNote": [
+    "Planned rule; live calendar unverified. Not a finance or safety timer.",
+    "기획 기준 · 서버의 현재 날짜와 실제 적용 정책은 별도 검증 필요 · 금융 이자/보안 제한과 혼동 금지",
+    "計画基準・現在の時刻は未検証・金融/安全の期間とは別",
+    "规划规则·当前服务器时间尚未验证·不等同于金融或安全时限",
+    "Theo kế hoạch · Chưa xác minh giờ máy chủ · Không áp dụng cho mọi giới hạn"
+  ],
+  "gameClockRealMinutes": [
+    "10 real min",
+    "현실 10분",
+    "現実10分",
+    "现实10分钟",
+    "10 phút thực"
+  ],
+  "gameClockServerDay": [
+    "1 server day",
+    "서버 1일",
+    "ゲーム1日",
+    "服务器1天",
+    "1 ngày máy chủ"
+  ],
+  "gameClockServerWeek": [
+    "7 server days = 1 week",
+    "서버 7일 = 1주",
+    "ゲーム7日 = 1週",
+    "服务器7天 = 1周",
+    "7 ngày = 1 tuần"
+  ],
+  "gameClockConversion": [
+    "Game time conversion rule",
+    "게임 시간 환산 기준",
+    "ゲーム時間の換算基準",
+    "游戏时间换算规则",
+    "Quy tắc quy đổi thời gian"
   ]
 }

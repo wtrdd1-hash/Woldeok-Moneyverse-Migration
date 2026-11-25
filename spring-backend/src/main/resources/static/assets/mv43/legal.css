@@ -1,0 +1,24 @@
+/* Native legal documents — reused 11/23 navy/violet tokens and existing approved policy text. */
+.legal-main{width:min(100%,960px);margin:0 auto;padding:1.25rem 1rem 5.5rem;color:#e9f1ff}
+.legal-main .hero{margin-bottom:1.4rem}
+.legal-main .hero h1{font-size:clamp(1.5rem,3.5vw,2.35rem);line-height:1.2;margin:.35rem 0 0}
+.legal-main .policy-document{display:grid;grid-template-columns:minmax(0,1fr);min-width:0;max-width:100%;gap:1.15rem;overflow-wrap:anywhere;font-size:clamp(.91rem,1.7vw,1rem);line-height:1.75}
+.legal-main .policy-document>section,.legal-main .policy-document>aside,.legal-main .policy-document>nav,.legal-main .policy-document>dl{background:#151d32;border:1px solid #374466;border-radius:14px;padding:clamp(.9rem,2.4vw,1.5rem)}
+.legal-main .policy-document h2{color:#e9f1ff;font-size:clamp(1.1rem,2.2vw,1.4rem);line-height:1.4;margin:0 0 .8rem}
+.legal-main .policy-document p{margin:.3rem 0 .75rem}
+.legal-main .policy-document ul,.legal-main .policy-document ol{padding-left:1.4rem;list-style:revert}
+.legal-main .policy-document li{margin:.35rem 0}
+.legal-main .policy-document a{color:#c6b6ff;text-decoration:underline;text-underline-offset:3px}
+.legal-main .policy-document a:focus-visible{outline:3px solid #9c83ff;outline-offset:3px}
+.legal-main .policy-document table{display:block;overflow-x:auto;width:100%;border-collapse:collapse;max-width:100%;font-size:.89rem}
+.legal-main .policy-document th,.legal-main .policy-document td{padding:.55rem .75rem;border:1px solid #475576;text-align:left;min-width:7.5rem}
+.legal-main .policy-document>dl{display:flex;flex-wrap:wrap;gap:1.25rem}
+.legal-main .policy-document>dl>div{flex:1 1 8rem}
+.legal-main .policy-document dt{color:#a8b9d5;font-size:.83rem}
+.legal-main .policy-document dd{margin:0;font-weight:600}
+.legal-main .policy-document>p:first-child{color:#9c83ff;font-weight:700;letter-spacing:.07em}
+.legal-main .legal-fallback{border-left:3px solid #9c83ff;padding:.7rem 1rem;background:#151d32;color:#e9f1ff}
+@media(max-width:430px){.legal-main{padding:1rem .8rem 6.5rem}.legal-main .policy-document>section,.legal-main .policy-document>aside,.legal-main .policy-document>nav,.legal-main .policy-document>dl{padding:.85rem}.legal-main .policy-document th,.legal-main .policy-document td{min-width:6rem}}
+
+.legal-main .policy-document>*{min-width:0;max-width:100%}
+.legal-main .policy-document .overflow-x-auto{width:100%;max-width:100%;min-width:0;overflow-x:auto}

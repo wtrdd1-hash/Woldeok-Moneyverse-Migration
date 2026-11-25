@@ -1,5 +1,16 @@
 # AGENTS.md
 
+## Current owner-confirmed authority — v2026.11.24.DOCSYNC.1
+Read [DOCUMENT_AUTHORITY.md](docs/DOCUMENT_AUTHORITY.md) and its [Korean counterpart](docs/DOCUMENT_AUTHORITY.ko.md). New frontend target is Next.js/React/TypeScript/Tailwind with same-origin server-only BFF to the authoritative Spring API. Existing Spring/Thymeleaf and legacy gateways remain transitional until verified replacement. Use the G1 reference (owner-approved 2026-11-24) and actual favicon. Documentation and repository version claims are not live runtime acceptance.
+Automatic image preparation is permitted; actual Production cutover needs separate owner approval after independent Test. Task requests include task-branch commits/pushes; main integration requires separate instruction (explicitly authorized for the current consolidation). No generated-source UI/commit markings; factual technical references and work provenance are allowed. If other instructions conflict and latest owner direction does not resolve them, ask before replacing them.
+
+
+**Current UI image authority (v2026.11.24.G1, owner-approved 2026-11-24):** Before UI/frontend work, read [design policy](docs/design/CURRENT_UI_DESIGN.md), the [180-route manifest](docs/design/CURRENT_UI_DESIGN_MANIFEST.json) and the [G1 gallery](docs/design/game-ui-v2026.11.24.G2/README.md). Nov23 v10, v8 and Nov18 images are archived and are **not** implementation inputs or fallbacks. Respect latest owner instruction, integrated planning, verified APIs and separate release gates; v10 images are not proof of live functionality.
+
+## Optional cross-agent peer review (v2026.11.22.1)
+
+When an owner requests Codex/GPT ↔ Gemini ping-pong reviews, use the repository skill [codex-gemini-pingpong](.agents/skills/codex-gemini-pingpong/SKILL.md) and [versioned operating guide](docs/development/CODEX_GEMINI_PINGPONG_SKILL_v2026.11.22.1.md). This is bounded, read-only advisory review, not permission for concurrent writes, automatic merges or Production deployment. Skill presence does **not** prove live Gemini authentication.
+
 ## Persistent agent task handoff (v2026.11.21.2234)
 
 On every task, **recall the latest approved plan and relevant versioned worklogs before making changes**, then record sanitized start/checkpoint/finish decisions for the next contributor. Use the established GitHub worklog fallback now; do **not** assume the external AgentMemory service is installed. No credentials or member/financial records may enter agent memory. Read [shared memory protocol](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.md) and its [Korean counterpart](docs/development/AGENTMEMORY_SHARED_AGENT_MEMORY_v2026.11.21.2234.ko.md). Worktree ownership, current main and CI always outrank recalled history.
@@ -35,7 +46,7 @@ The Superpowers workflow is a release requirement, not advisory guidance. A chan
 
 ## 1. Orientation, and the one rule
 
-Woldeok Moneyverse (월덕 머니버스) is a Korean community's virtual economy: a double-entry ledger, a wallet, a shop, a stock market, a bank, businesses, a casino, a member board, and a Minecraft server status feed. This repository is that application rebuilt on Next.js, NestJS and PostgreSQL.
+Woldeok Moneyverse (월덕 머니버스) is a Korean community's virtual economy: a double-entry ledger, a wallet, a shop, a stock market, a bank, businesses, a casino, a member board, and a Minecraft server status feed. The repository contains Next.js, a legacy NestJS gateway, Spring Boot APIs and PostgreSQL. The approved target is Next.js presentation/BFF plus Spring Boot API; migration presence is not full runtime acceptance.
 
 The original was not Express. It was a single Node 20 ESM application with no framework at all — raw `node:http`, sequential `if` routing, 18 EJS views, browser TypeScript compiled to global scripts, a socket.io lobby, `pg` and `jose` (`docs/superpowers/specs/2026-08-27-nextjs-nestjs-rebuild-design.md:10`). That framing governs the scope of everything you do here. The rebuild replaced the HTTP, session and view layers. It did not move the economy, because the economy was never in Node.
 
@@ -81,7 +92,8 @@ One caution before you read a `42501` as a missing grant: it usually is not. Fif
 | Path | What it is |
 | --- | --- |
 | `frontend/` | Next.js App Router with shadcn/ui. Everything the browser loads except `/socket.io/`. |
-| `backend/` | NestJS API. Reachable from the compose network, plus the two edge exceptions below. |
+| `backend/` | Legacy NestJS API/gateway; verify remaining endpoint dependencies before retirement. |
+| `spring-backend/` | Spring Boot identity/business/API authority and transitional native presentation. |
 | `packages/contract/` | Types shared by both applications, and `src/route-map.ts`. Built before anything type-checks against it — its `dist` is what the dependents see. |
 | `packages/database/` | `init/`, the numbered `migrations/`, `migrate.sh`, `production-checksums.json`, `verify/`, `test/migration-parity.test.ts`. The schema is owned here; Prisma introspects it and never migrates it. |
 | `deploy/` | Data and recovery scripts left over from the retired Docker host; **not the release path**. See `deploy/README.md` and `docs/INFRASTRUCTURE.md`. |
@@ -130,16 +142,14 @@ pnpm build
 `pnpm typecheck` and `pnpm test` build `@moneyverse/contract` first on purpose:
 its `dist` is what the dependents type against.
 
-**The development machine has no PostgreSQL and no Docker.** That single fact
-governs how you report results:
+**The local Windows workspace is not the MiniPC runtime.** Discover available isolated services on the approved working host before reporting results:
 
 - Database-backed tests run only when `DATABASE_URL` is set. `databaseUrl()` in
   `backend/src/testing/database.ts` falls back to reading
   `packages/database/.env`, which points at an SSH tunnel to a scratch host. If
   that tunnel is down the tests **error with `ECONNRESET` rather than skip** —
   that is not a code failure, and it is not a pass either.
-- **CI is the only place SQL is ever executed.** A migration you wrote has not
-  been parsed by a server until CI runs it.
+- **Schema/migration verification requires isolated disposable CI.** Read-only diagnostics on an explicitly verified Test database are separate from applying migrations or writing Production data.
 - A skipped test is never reported as a passing one. Say which ones skipped.
 - "Tests pass" means a run in this session printed zero failures, and you read
   the output.
@@ -365,54 +375,15 @@ distribution trial of at least 1,000,000 draws is on record.
 
 ---
 
-## 7. Deploying: Kubernetes, and this repository does not do it
+## 7. Deployment authority and gates
 
-**`docs/INFRASTRUCTURE.md` is the description of record.** Read it before
-changing anything under `deploy/`, `.github/workflows/`, or any release
-document. What follows is the short form.
+Read [docs/INFRASTRUCTURE.md](docs/INFRASTRUCTURE.md), [docs/RELEASING.md](docs/RELEASING.md) and [document authority](docs/DOCUMENT_AUTHORITY.md) before changing release paths.
 
-Production is a single-node Kubernetes cluster on NixOS, reconciled by Flux from
-`wtrdd1-hash/kuber-infrastructure`. **There is no Docker on the host.** This
-repository builds images and pushes them to GHCR; it has no deploy job and no
-SSH. A release is a commit in the other repository that changes an image tag.
+Current measured public authority is the MiniPC Debian/systemd/Nginx stack with Docker-hosted PostgreSQL; NixOS/Kubernetes/Flux descriptions are recovery/target history. Discover the active unit, PID, listener, upstream, source and artifact each run; old service names or repository HEAD are not runtime identity.
 
-| | production |
-| --- | --- |
-| address | `https://easy-scraping.com` |
-| namespace | `wdmvp` |
-| image tag | `<sha>-production` |
-| manifests | `kuber-infrastructure` → `apps/wdmvp/` |
+CI may automatically prepare source-bound images after required checks. Actual Production cutover requires separate owner approval, independent real Test/API/DB/role/locale/viewport evidence and usable rollback artifacts. A documentation-only change must not switch a runtime. Current frontend work remains Test-only.
 
-There is one stack. The `wdmv-test` namespace was removed on 2026-09-09.
-
-The public origin is baked into the frontend image at **build** time, which is
-why the environment is in the image tag rather than being a hidden difference
-between two images with the same name.
-
-**Nothing deploys on a push.** A human dispatches the build, and it runs only
-from `main` -- the `ref` job refuses any other ref:
-
-```bash
-gh workflow run deploy.yml
-```
-
-`docs/RELEASING.md` is the procedure, `docs/RELEASING.ko.md` its translation.
-
-Three things this arrangement does not do for you, each of which has already
-cost a release:
-
-- **The rollout does not run migrations.** Compose did, through the `migrate`
-  service; nothing in the Kubernetes manifests replaces it. Check
-  `public.schema_migrations` against the image you are promoting.
-- **A stuck rollout still reports `Available=True`,** because the previous pod
-  keeps serving. `Progressing=False ProgressDeadlineExceeded` is the only place
-  it says otherwise.
-- **Old image tags disappear from GHCR.** Do not assume a rollback target
-  exists; verify the manifest resolves before you rely on it.
-
-Deploying before review still freezes a migration's checksum: `migrate.sh`
-refuses a file whose sha256 has changed since it was applied, so only a new
-numbered migration can correct one that has landed.
+Schema migrations remain immutable and are not implied by application rollout. Verify applied checksums before promotion. Do not edit applied migrations, widen application table grants, patch a running immutable JAR, or rely on a version label whose bytes changed. Preserve shared files and other workers' ownership; compare expected state before a switch and before inverse.
 
 ## 8. Conventions
 
@@ -457,7 +428,7 @@ exception is `docs/`, which may be Korean.
 **Comments say why, not what** — including the alternative that was rejected. The
 codebase is written that way throughout. Match it.
 
-**Commits are made only when asked**, and carry no `Co-Authored-By: Claude`
+**A task request includes commits and pushes to its task branch; main integration requires a separate owner instruction**, and carry no `Co-Authored-By: Claude`
 trailer, no `Claude-Session:` trailer, and no "Generated with Claude Code" line.
 The repository's author is its owner. Verify before you push:
 
@@ -551,3 +522,13 @@ reason and the test fails without one.
 - Inspect rendered UI before claiming completion.
 - Run only the design skills relevant to the task.
 - Do not generate multiple design alternatives unless requested.
+
+## Owner Test-first directive — 2026-11-23
+Always implement and verify frontend/backend candidates on an independently identified Test runtime with a real backend before any Production promotion. A Test hostname proxying the Production frontend is not independent acceptance. Bind evidence to exact source/artifact, actual API/DB, role/locale/viewport checks and inverse receipts. Failed/unreachable Test blocks promotion. Latest task scope is Test-only: do not promote this candidate to Production without a later owner instruction.
+
+
+## Owner directive — mandatory Test before Production (2026-11-22)
+
+Every frontend and backend change must run as its exact source/artifact in the isolated Test environment before Production promotion. Verify the changed routes, real backend contracts, authorization failures, relevant database behavior, desktop/mobile layouts and required checks. Resolve observed failures before promotion; skipped or unreachable required checks are blockers, never passes. Promote the same tested artifact, preserve sessions and rollback, and record the Test and Production evidence in the task log.
+
+Keep the Test website reachable for its accepted public frontend routes. Public Test access does not authorize exposing administrator data, bypassing authentication, enabling Production financial writes, or replacing a Test backend with invented data. Unaccepted/private routes retain their explicit admission boundaries.

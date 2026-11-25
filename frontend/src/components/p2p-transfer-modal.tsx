@@ -172,7 +172,7 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
   return (
     <Dialog open={open} onOpenChange={(val) => { setOpen(val); if (!val) handleReset(); }}>
       <DialogTrigger asChild>
-        <Button className="w-full min-h-[48px] sm:min-h-[44px] px-4 font-bold rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md shadow-blue-500/10">
+        <Button className="w-full min-h-[48px] sm:min-h-[44px] px-4 font-bold rounded-md border border-[var(--g1-line)] bg-[var(--g1-plum-2)] text-[var(--g1-ink)] hover:bg-[var(--g1-plum-3)] hover:border-[var(--g1-gold)]">
           <Send className="h-4 w-4 mr-2" />
           {triggerText || defaultTrigger}
         </Button>
@@ -380,7 +380,7 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
             <Button
               onClick={handleTransfer}
               disabled={isSubmitting || !selectedRecipient || !isPositiveWldInput(amount)}
-              className="w-full h-11 rounded-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white mt-2 shadow-lg shadow-blue-500/20"
+              className="w-full h-11 rounded-md font-bold bg-[var(--g1-violet-ink)] hover:bg-[var(--g1-violet)] text-[var(--g1-ink)] mt-2"
             >
               {isSubmitting
                 ? localeLabel(locale, '안심 송금 처리 중...', 'Processing transfer...', '送金処理中...', '转账处理中...', 'Đang xử lý chuyển tiền...')

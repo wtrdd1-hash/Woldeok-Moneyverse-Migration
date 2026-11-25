@@ -1,0 +1,9 @@
+# Automation setup worklog — vAUTO.FE.TEST.2026.11.23.3
+
+START: 2026-11-23 KST user requested stronger recurring FE auto-development and deployment to isolated Test based on Nov23 corrected design. Read five active automations, integrated planning/AGENTS/Nov18 authority, v10 design, 147-route FEQA evidence, both repos and miniPC live Test services. Main verified 9876c09888ec84034eec183cf1309c85df3d7447.
+
+MIDDLE: FE A/B/C prompts enhanced for real Spring UI/actual API/DB and v10 180 previews, scope ownership and independent PR evidence. QA1 reinforced Test-only DB/API/finance evidence, QA2 enhanced real-browser screenshot/E2E. Sixth Test deploy task creation failed with plan 5-task limit. Changed QA2 to sole Test deploy owner at :55 while preserving FE A :05 / QA1 :15 / FE B :25 / FE C :45. QA2 Test-only staged deployment and rollback permitted after checks; Production prohibited.
+
+DESIGN SOURCE CHECK: PR #3400 closed and unmerged. Latest revised 180 PNG and UI master confirmed at immutable commit 39888c7d26bdf688737a77b93a7da29e230b4168. Appended source pin to all five saved prompts, avoiding assumptions that v10 exists on protected main. All five update calls returned success and is_enabled=true.
+
+FINISH: At setup, miniPC Test presentation 55440 and backend 55438 responded HTTP200; Test /terms, /privacy and /socket.io.min.js still returned 403; observed Test SHA 7b676e602bc984ab74572d4081655fdb297d176a. Not claimed fixed. Wrote EN/KO runbook and internal/public notes in independent docs branch; no code, Test deployment, Nginx, DB, protected main or Production modification. Next scheduler invocation may publish Test only with exact-SHA and independent browser/API gates.

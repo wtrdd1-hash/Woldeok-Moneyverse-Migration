@@ -40,7 +40,13 @@
     event.preventDefault();
     if(page!=='login'){message='authRegistrationUnavailable';render();return;}
     const requestEpoch=epoch;
-    const fields={email:field('email').value,password:field('password').value,terms:field('terms').checked,privacy:field('privacy').checked,age:field('age').checked};
+    const fields={
+      email:field('email')?field('email').value:'',
+      password:field('password')?field('password').value:'',
+      terms:field('terms')?field('terms').checked:true,
+      privacy:field('privacy')?field('privacy').checked:true,
+      age:field('age')?field('age').checked:true
+    };
     const pending=client.submit('login',fields);render();
     try{
       await pending;

@@ -54,6 +54,16 @@ public final class AdminSourceClient {
         return name+"="+value;
     }
     public void verifyAdmin(String cookie) {verifyAdmin(cookie,null);}
+    public boolean checkAdmin(String cookie) {
+        if(cookie==null)return false;
+        try {
+            JsonNode proof=read("/api/v1/admin/me",cookie);
+            JsonNode roles=proof.path("roles");
+            return roles.isArray() && !roles.isEmpty();
+        }catch(Exception e){
+            return false;
+        }
+    }
     public void verifyAdmin(String cookie,String requiredRole) {
         JsonNode proof=read("/api/v1/admin/me",cookie);
         JsonNode roles=proof.path("roles");

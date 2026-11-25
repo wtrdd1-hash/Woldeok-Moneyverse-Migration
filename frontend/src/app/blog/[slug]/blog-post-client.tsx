@@ -137,7 +137,7 @@ export function BlogPostClient({ post, locale }: Props) {
             {post.categoryLabel}
           </Badge>
           <span className="text-xs text-muted-foreground font-mono flex items-center gap-1">
-            <Calendar className="size-3" /> {new Date(post.publishedAt).toLocaleDateString(({ko:'ko-KR',en:'en-US',ja:'ja-JP',zh:'zh-CN'})[locale])}
+            <Calendar className="size-3" /> {new Date(post.publishedAt).toLocaleDateString(({ko:'ko-KR',en:'en-US',ja:'ja-JP',zh:'zh-CN'})[locale],{timeZone:'Asia/Seoul'})}
           </span>
           <span className="text-xs text-muted-foreground font-mono">·</span>
           <span className="text-xs text-muted-foreground font-mono flex items-center gap-1">
@@ -146,7 +146,7 @@ export function BlogPostClient({ post, locale }: Props) {
           {shouldShowReadership(post) && <>
             <span className="text-xs text-muted-foreground font-mono">·</span>
             <span className="text-xs text-muted-foreground font-mono flex items-center gap-1">
-              <Eye className="size-3" /> {labels.views} {post.views.toLocaleString()} {labels.viewUnit}
+              <Eye className="size-3" /> {labels.views} {post.views.toLocaleString('en-US')} {labels.viewUnit}
             </span>
           </>}
         </div>

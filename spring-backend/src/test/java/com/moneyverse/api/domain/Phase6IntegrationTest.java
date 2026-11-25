@@ -45,16 +45,15 @@ class Phase6IntegrationTest {
     @Test
     @DisplayName("조폐국 주조 배치 및 시뇨리지 대시보드 조회 테스트")
     void testMintEndpoints() throws Exception {
+        // QA 2026-11-25: these answers were hard-coded; until a database source
+        // exists they must be 503, never fabricated 200s.
         mockMvc.perform(get("/api/mint"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
+                .andExpect(status().isServiceUnavailable());
 
         mockMvc.perform(get("/api/mint/batches"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
+                .andExpect(status().isServiceUnavailable());
 
         mockMvc.perform(get("/api/mint/seigniorage"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
+                .andExpect(status().isServiceUnavailable());
     }
 }

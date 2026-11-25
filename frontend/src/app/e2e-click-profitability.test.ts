@@ -7,22 +7,25 @@ const headerSource = readFileSync('src/components/site-header.tsx', 'utf8');
 const toolsSource = readFileSync('src/app/tools/page.tsx', 'utf8');
 const workSource = readFileSync('src/app/work/page.tsx', 'utf8');
 
+/** The home page links to `path`, whether written as JSX `href="…"` or a link-table `href: '…'`. */
+const linksTo = (path: string) => new RegExp(`href(="|: ')${path.replace(/[/]/g, '\\/')}["']`);
+
 describe('E2E Real-Click Profitability and Full-Stack Flow QA', () => {
   it('verifies the 2026 accessible fintech card and authenticated wallet glance', () => {
-    expect(homeSource).toContain('border-slate-800/80');
-    expect(homeSource).toContain('dark:bg-[#0d121c]');
+    // DESIGN180 (approved 2026-11-24): the balance is the first StatRow cell.
+    expect(homeSource).toContain('<StatRow');
     expect(homeSource).toContain('WalletGlance');
-    expect(homeSource).toContain('href="/tools/compound-calculator"');
-    expect(homeSource).toContain('href="/tools/stock-calculator"');
+    expect(homeSource).toMatch(linksTo('/tools/compound-calculator'));
+    expect(homeSource).toMatch(linksTo('/tools/stock-calculator'));
   });
 
   it('verifies three major quick actions with 44px+ touch targets and P2P transfer', () => {
     expect(homeSource).toContain('P2PTransferModal');
-    expect(homeSource).toContain('href="/work"');
-    expect(homeSource).toContain('href="/stocks"');
-    expect(homeSource).toContain('href="/bank"');
-    expect(homeSource).toContain('grid grid-cols-3 gap-2 sm:gap-3');
-    expect(homeSource).toContain('min-h-[88px]');
+    expect(homeSource).toMatch(linksTo('/work'));
+    expect(homeSource).toMatch(linksTo('/stocks'));
+    expect(homeSource).toMatch(linksTo('/bank'));
+    // Quick actions keep 44px touch targets in the G1 list layout.
+    expect(homeSource).toContain('min-h-11');
   });
 
   it('verifies Real Member Profile Integration and Security Score', () => {

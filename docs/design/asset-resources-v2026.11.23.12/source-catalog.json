@@ -1,0 +1,299 @@
+{
+  "schemaVersion": "2026-11-23.12",
+  "status": "DISCOVERY_ONLY_NOT_APPROVED",
+  "description": "Official Instagram reel oEmbed caption source list; no files, libraries, license approval or website code were imported",
+  "source": {
+    "url": "https://www.instagram.com/reel/DgB15siSolR/",
+    "author": "jungtudio",
+    "captureMethod": "Instagram official oEmbed caption metadata",
+    "videoFramesAndAudioReviewed": false,
+    "capturedDateKST": "2026-11-23"
+  },
+  "architecture": "Spring MVC + Thymeleaf single website; approved Nov 18 navy/violet baseline",
+  "localePriority": [
+    "en",
+    "ko",
+    "ja",
+    "zh-CN",
+    "vi"
+  ],
+  "approvalStates": [
+    "REFERENCE",
+    "CANDIDATE",
+    "HOLD"
+  ],
+  "itemLicensePolicy": "No source grants site-wide blanket approval; verify each specific asset/component license and rights before copying, downloading, committing, or rendering",
+  "sources": [
+    {
+      "id": "01",
+      "category": "illustrations",
+      "name": "unDraw",
+      "url": "https://undraw.co/",
+      "adoption": "CANDIDATE",
+      "policyReference": "https://undraw.co/license",
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "02",
+      "category": "illustrations",
+      "name": "Storyset",
+      "url": "https://storyset.com/",
+      "adoption": "CANDIDATE",
+      "policyReference": "https://storyset.com/terms",
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "03",
+      "category": "illustrations",
+      "name": "DrawKit",
+      "url": "https://www.drawkit.com/",
+      "adoption": "CANDIDATE",
+      "policyReference": "https://www.drawkit.com/license",
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "04",
+      "category": "typography",
+      "name": "Fontshare",
+      "url": "https://www.fontshare.com/",
+      "adoption": "CANDIDATE",
+      "policyReference": "https://www.fontshare.com/about",
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "05",
+      "category": "typography",
+      "name": "Fonts In Use",
+      "url": "https://fontsinuse.com/",
+      "adoption": "REFERENCE",
+      "policyReference": null,
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "06",
+      "category": "typography",
+      "name": "TypePair",
+      "url": "https://www.typepair.co/",
+      "adoption": "REFERENCE",
+      "policyReference": null,
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "07",
+      "category": "icons",
+      "name": "Iconify",
+      "url": "https://iconify.design/",
+      "adoption": "CANDIDATE",
+      "policyReference": "https://iconify.design/getting-started/",
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "08",
+      "category": "icons",
+      "name": "Lordicon",
+      "url": "https://lordicon.com/",
+      "adoption": "CANDIDATE",
+      "policyReference": null,
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "09",
+      "category": "icons",
+      "name": "Icons8",
+      "url": "https://icons8.com/",
+      "adoption": "CANDIDATE",
+      "policyReference": null,
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "10",
+      "category": "ui",
+      "name": "21st.dev",
+      "url": "https://21st.dev/",
+      "adoption": "REFERENCE",
+      "policyReference": "https://21st.dev/terms",
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "11",
+      "category": "ui",
+      "name": "Magic UI",
+      "url": "https://magicui.design/",
+      "adoption": "REFERENCE",
+      "policyReference": "https://github.com/magicuidesign/magicui/blob/main/LICENSE.md",
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "12",
+      "category": "ui",
+      "name": "React Bits",
+      "url": "https://reactbits.dev/",
+      "adoption": "REFERENCE",
+      "policyReference": "https://github.com/DavidHDev/react-bits/blob/main/LICENSE.md",
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "13",
+      "category": "motion",
+      "name": "Design Spells",
+      "url": "https://designspells.com/",
+      "adoption": "REFERENCE",
+      "policyReference": null,
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "14",
+      "category": "motion",
+      "name": "GSAP",
+      "url": "https://gsap.com/",
+      "adoption": "HOLD",
+      "policyReference": "https://gsap.com/standard-license",
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "15",
+      "category": "motion",
+      "name": "Framer",
+      "url": "https://www.framer.com/",
+      "adoption": "REFERENCE",
+      "policyReference": "https://www.framer.com/pricing",
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "16",
+      "category": "3d",
+      "name": "ThreeUI",
+      "url": "https://threeui.com/",
+      "adoption": "HOLD",
+      "policyReference": null,
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "17",
+      "category": "3d",
+      "name": "GetLayers",
+      "url": "https://www.getlayers.ai/",
+      "adoption": "HOLD",
+      "policyReference": "https://www.getlayers.ai/terms-of-use",
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "18",
+      "category": "3d",
+      "name": "Spline",
+      "url": "https://spline.design/",
+      "adoption": "HOLD",
+      "policyReference": "https://spline.design/terms",
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "19",
+      "category": "media",
+      "name": "Unsplash",
+      "url": "https://unsplash.com/",
+      "adoption": "CANDIDATE",
+      "policyReference": "https://unsplash.com/license",
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "20",
+      "category": "media",
+      "name": "Pexels",
+      "url": "https://www.pexels.com/",
+      "adoption": "CANDIDATE",
+      "policyReference": "https://www.pexels.com/license/",
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "21",
+      "category": "media",
+      "name": "Lummi",
+      "url": "https://www.lummi.ai/",
+      "adoption": "CANDIDATE",
+      "policyReference": "https://www.lummi.ai/license",
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "22",
+      "category": "palettes",
+      "name": "Coolors",
+      "url": "https://coolors.co/",
+      "adoption": "REFERENCE",
+      "policyReference": null,
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "23",
+      "category": "palettes",
+      "name": "Color Hunt",
+      "url": "https://colorhunt.co/",
+      "adoption": "REFERENCE",
+      "policyReference": null,
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "24",
+      "category": "palettes",
+      "name": "Realtime Colors",
+      "url": "https://www.realtimecolors.com/",
+      "adoption": "REFERENCE",
+      "policyReference": null,
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "25",
+      "category": "mockups",
+      "name": "Shots",
+      "url": "https://shots.so/",
+      "adoption": "REFERENCE",
+      "policyReference": null,
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "26",
+      "category": "mockups",
+      "name": "Mockuuups",
+      "url": "https://mockuuups.studio/",
+      "adoption": "REFERENCE",
+      "policyReference": null,
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    },
+    {
+      "id": "27",
+      "category": "mockups",
+      "name": "Previewed",
+      "url": "https://previewed.app/",
+      "adoption": "REFERENCE",
+      "policyReference": null,
+      "approvedAssets": 0,
+      "licenseClearance": "PENDING_PER_ASSET"
+    }
+  ],
+  "count": 27
+}

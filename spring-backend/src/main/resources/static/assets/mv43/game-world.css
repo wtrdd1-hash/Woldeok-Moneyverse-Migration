@@ -1,0 +1,31 @@
+/* v2026.11.23.6 — Shared game-economy presentation. Existing server data/actions unchanged. */
+/* Approved 2026-11-18 navy/violet tokens, with no fabricated levels, credits or badges. */
+:root{--mv-game-bg:#0c1020;--mv-game-panel:#151d32;--mv-game-violet:#9c83ff;--mv-game-edge:rgba(168,142,255,.29);--mv-game-text:#e9f1ff}
+.app-shell{background:radial-gradient(ellipse 900px 700px at 90% -15%,rgba(129,88,218,.1),transparent 74%),var(--mv-game-bg)}
+.sidebar{background:linear-gradient(174deg,#0a0d1b,#12152b 70%,#14122b);border-right:1px solid rgba(156,131,255,.19)}
+.brand-mark{object-fit:contain;background:transparent!important;border-radius:11px;box-shadow:0 5px 18px rgba(119,83,218,.18)}
+.side-links .nav-link{border:1px solid transparent;min-height:46px;transition:color .17s,border-color .17s,background .17s}
+.side-links .nav-link:hover,.side-links .nav-link[aria-current="page"]{background:linear-gradient(95deg,rgba(156,131,255,.22),rgba(156,131,255,.035));border-color:rgba(156,131,255,.45);color:#f5f0ff}
+.topbar{border-bottom:1px solid rgba(156,131,255,.19)}
+.topbar h1{font-weight:850;letter-spacing:-.035em}
+#language-selector{border-color:rgba(156,131,255,.35);background:#20253f;color:#f1edff}
+.hero{isolation:isolate;position:relative;overflow:hidden;border-color:var(--mv-game-edge);border-radius:24px;padding:clamp(24px,3.5vw,44px);background:radial-gradient(circle at 88% 5%,rgba(138,95,224,.24),transparent 32%),radial-gradient(circle at 60% 110%,rgba(83,52,156,.19),transparent 50%),linear-gradient(118deg,#242643,#161c33);box-shadow:0 18px 55px rgba(0,0,0,.2)}
+.hero h2{font-size:clamp(28px,3.2vw,45px);line-height:1.17;letter-spacing:-.04em}
+.hero p{max-width:65ch;font-size:clamp(13px,1.05vw,16px);line-height:1.65}
+.hero .eyebrow{color:#cbb9ff}
+.hero-decoration{border-radius:50%;width:clamp(100px,12vw,164px);height:clamp(100px,12vw,164px);flex:0 0 auto;border:1px solid rgba(156,131,255,.55);background:radial-gradient(circle,rgba(136,101,243,.18),transparent 65%);box-shadow:0 0 0 18px rgba(156,131,255,.05),0 0 0 36px rgba(156,131,255,.025)}
+.realm-orbit,.realm-core{display:grid;place-items:center;width:100%;height:100%}.realm-core img{display:block;max-width:78%;max-height:78%;object-fit:contain;filter:drop-shadow(0 8px 18px rgba(0,0,0,.35))}
+.card{border:1px solid rgba(156,131,255,.22);border-radius:19px;background:linear-gradient(145deg,#1d243d,#151c31);box-shadow:inset 0 1px rgba(255,255,255,.035),0 11px 25px rgba(0,0,0,.12)}
+.kpi-grid .card:first-child{background:linear-gradient(145deg,#29274a,#1a2039);border-color:rgba(156,131,255,.44)}
+.metric-value{color:#f5efff;letter-spacing:-.04em}
+.section-heading{display:flex;align-items:center;gap:10px;font-size:18px}
+.section-heading:before{content:"";width:4px;height:20px;border-radius:8px;background:var(--mv-game-violet)}
+.action-card{min-height:56px;background:linear-gradient(120deg,#262c4c,#1c2440);border-color:rgba(156,131,255,.28);border-radius:14px;padding:14px 16px}
+.action-card:hover{background:#303459;border-color:#a88dff}
+.game-clock-guide{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;margin:0 0 25px;padding:18px 22px;background:linear-gradient(105deg,#232743,#171d35);border:1px solid rgba(156,131,255,.38);border-radius:18px}
+.game-clock-guide__title{margin:0 0 5px;font-weight:800;color:#f4eefe;font-size:15px}.game-clock-guide__note{color:#a8bcd8;margin:0;max-width:62ch;font-size:12px;line-height:1.6}
+.game-clock-guide__ratios{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.game-clock-guide__ratios span{padding:9px 12px;background:#0f152a;border:1px solid #54507d;border-radius:10px;color:#dccfff;font-size:12px;font-weight:800}
+.game-clock-guide__ratios b{color:#c3b0ff}
+.support-fab{background:linear-gradient(135deg,#ad8cff,#7352da)}
+@media(max-width:640px){.hero{padding:23px 18px}.hero-decoration{width:70px;height:70px}.game-clock-guide{padding:16px}.game-clock-guide__ratios{width:100%}.game-clock-guide__ratios span{flex:1;text-align:center}}
+@media(prefers-reduced-motion:reduce){.side-links .nav-link{transition:none}}

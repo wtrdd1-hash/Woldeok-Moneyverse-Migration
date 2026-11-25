@@ -31,6 +31,7 @@ import {
   Unlock,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { D180_ADMIN_NAV, isAdminItemActive } from '@/components/v10-nav';
 import { AdminQuickJumperModal } from './admin-quick-jumper-modal';
 import { AdminStepupOtpModal } from './admin/admin-stepup-otp-modal';
 
@@ -42,16 +43,6 @@ interface AdminTabItem {
   readonly icon: React.ElementType;
   readonly group?: Exclude<AdminNavGroup, 'all'>;
 }
-
-const ADMIN_GROUP_LABELS: readonly { key: AdminNavGroup; label: string }[] = [
-  { key: 'all', label: '전체 (29)' },
-  { key: 'macro', label: '거시·금융' },
-  { key: 'treasury', label: '국고·세정' },
-  { key: 'market', label: '시장·기업' },
-  { key: 'security', label: '보안·감사' },
-  { key: 'content', label: '유저·콘텐츠' },
-  { key: 'system', label: '시스템·관제' },
-];
 
 export const ADMIN_TABS: readonly AdminTabItem[] = [
   { href: '/admin', label: '대시보드', icon: LayoutDashboard, group: 'system' },
@@ -98,6 +89,17 @@ export function activeAdminTab(pathname: string): string | null {
   return winner;
 }
 
+/**
+ * The console pages that share the current DESIGN180 sidebar group. The
+ * sidebar lists the eight groups; this strip lists only the pages inside the
+ * one you are in (owner QA 2026-11-25: 29 links in one grid).
+ */
+export function adminGroupTabs(pathname: string): readonly AdminTabItem[] {
+  const group = D180_ADMIN_NAV.find((item) => isAdminItemActive(item, pathname));
+  if (!group) return [];
+  return ADMIN_TABS.filter((tab) => isAdminItemActive(group, tab.href));
+}
+
 export function AdminSubNav() {
   const pathname = usePathname();
   const navRef = useRef<HTMLElement>(null);
@@ -105,8 +107,6 @@ export function AdminSubNav() {
   const isAdminPath = pathname.startsWith('/admin');
   const active = isAdminPath ? activeAdminTab(pathname) : null;
 
-  // 6대 도메인 그룹 필터 상태
-  const [selectedGroup, setSelectedGroup] = useState<AdminNavGroup>('all');
 
   // 2FA Elevation State
   const [elevated, setElevated] = useState(false);
@@ -114,10 +114,7 @@ export function AdminSubNav() {
   const [modalOpen, setModalOpen] = useState(false);
   const [revoking, setRevoking] = useState(false);
 
-  const visibleTabs = useMemo(() => {
-    if (selectedGroup === 'all') return ADMIN_TABS;
-    return ADMIN_TABS.filter((tab) => tab.group === selectedGroup || tab.href === active);
-  }, [selectedGroup, active]);
+  const visibleTabs = useMemo(() => adminGroupTabs(pathname), [pathname]);
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -191,28 +188,9 @@ export function AdminSubNav() {
   return (
     <>
       <div className="w-full max-w-full min-w-0 space-y-2 mb-4">
-        {/* 상단: 6대 도메인 그룹 퀵 필터 + Cmd+K + 2FA 보안 승격 배지 */}
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-zinc-800/80 bg-zinc-950/90 px-3 py-2 shadow-sm">
-          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none touch-pan-x max-w-full min-w-0">
-            {ADMIN_GROUP_LABELS.map((grp) => {
-              const isGroupActive = selectedGroup === grp.key;
-              return (
-                <button
-                  key={grp.key}
-                  type="button"
-                  onClick={() => setSelectedGroup(grp.key)}
-                  className={cn(
-                    'shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-bold transition-all min-h-[32px]',
-                    isGroupActive
-                      ? 'bg-zinc-800 text-zinc-100 border border-zinc-700 shadow-xs'
-                      : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 border border-transparent',
-                  )}
-                >
-                  {grp.label}
-                </button>
-              );
-            })}
-          </div>
+        {/* Quick jumper and 2FA elevation; groups live in the DESIGN180 sidebar. */}
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-[var(--g1-line)] bg-[var(--g1-plum)] px-3 py-2">
+          <p className="min-w-0 text-xs text-[var(--g1-muted)]">고위험 작업 전에는 2단계 인증으로 세션을 승격하세요.</p>
 
           <div className="flex items-center gap-2 shrink-0">
             <AdminQuickJumperModal />
@@ -244,11 +222,11 @@ export function AdminSubNav() {
           </div>
         </div>
 
-        {/* 하단: Precision Monochrome 세부 라우트 네비게이션 */}
+        {/* Pages inside the current sidebar group only. */}
         <nav
           ref={navRef}
           aria-label="관리자 세부 내비게이션"
-          className="w-full max-w-full min-w-0 mb-4 overflow-x-auto rounded-xl sm:rounded-2xl border border-zinc-800/80 bg-zinc-950/85 backdrop-blur-2xl p-1.5 shadow-sm scrollbar-none touch-pan-x overscroll-x-contain select-none [&::-webkit-scrollbar]:hidden"
+          className="w-full max-w-full min-w-0 mb-4 overflow-x-auto rounded-md border border-[var(--g1-line)] bg-[var(--g1-plum)] p-1.5 scrollbar-none touch-pan-x overscroll-x-contain select-none [&::-webkit-scrollbar]:hidden"
         >
           <ul className="flex w-max items-center gap-1 px-2 sm:w-auto sm:flex-wrap sm:px-0">
             {visibleTabs.map((tab) => {
@@ -262,16 +240,16 @@ export function AdminSubNav() {
                     prefetch={false}
                     aria-current={isActive ? 'page' : undefined}
                     className={cn(
-                      'group flex min-h-[44px] sm:min-h-9 shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all active:scale-[0.98] outline-none',
+                      'group flex min-h-[44px] sm:min-h-9 shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-[background-color,color,transform] duration-150 active:scale-[0.98] outline-none',
                       isActive
-                        ? 'bg-emerald-500/15 text-emerald-400 font-bold ring-1 ring-emerald-500/40 shadow-xs'
-                        : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100',
+                        ? 'bg-[var(--g1-plum-3)] text-[var(--g1-ink)] font-semibold'
+                        : 'text-[var(--g1-muted)] hover:bg-[var(--g1-plum-2)] hover:text-[var(--g1-ink)]',
                     )}
                   >
                     <Icon
                       className={cn(
                         'size-3.5 shrink-0 transition-colors',
-                        isActive ? 'text-emerald-400' : 'text-zinc-500 group-hover:text-zinc-200',
+                        isActive ? 'text-[var(--g1-violet)]' : 'text-[var(--g1-muted)] group-hover:text-[var(--g1-ink)]',
                       )}
                     />
                     <span>{tab.label}</span>

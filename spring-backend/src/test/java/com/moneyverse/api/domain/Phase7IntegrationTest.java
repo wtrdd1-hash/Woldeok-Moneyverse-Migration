@@ -70,16 +70,15 @@ class Phase7IntegrationTest {
     @Test
     @DisplayName("거시 경제 펄스 및 소각 이벤트 조회 테스트")
     void testMacroPulseEndpoints() throws Exception {
+        // QA 2026-11-25: these answers were hard-coded; until a database source
+        // exists they must be 503, never fabricated 200s.
         mockMvc.perform(get("/api/economy/macro-pulse"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
+                .andExpect(status().isServiceUnavailable());
 
         mockMvc.perform(get("/api/economy/burn-events"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
+                .andExpect(status().isServiceUnavailable());
 
         mockMvc.perform(get("/api/economy/hot-time"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
+                .andExpect(status().isServiceUnavailable());
     }
 }

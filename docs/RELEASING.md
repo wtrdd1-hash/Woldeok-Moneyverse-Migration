@@ -1,6 +1,9 @@
 # Release Guide
 
-> **Current maintenance frontdoor — 2026-11-21:** Owner-approved document-only maintenance is live; the previously accepted presentation pair below is stopped. No rebuilt application has replaced maintenance. A protected administrator-only preview is not independent full Test/financial acceptance. [Current receipt](releases/2026-11-21-frontend-rebuild-maintenance.ko.md).
+> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](DOCUMENT_AUTHORITY.md) / [한국어](DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+
+
+> **Historical maintenance frontdoor — captured 2026-11-21:** Owner-approved document-only maintenance is live; the previously accepted presentation pair below is stopped. No rebuilt application has replaced maintenance. A protected administrator-only preview is not independent full Test/financial acceptance. [Current receipt](releases/2026-11-21-frontend-rebuild-maintenance.ko.md).
 
 > **2026-11-21 combined presentation receipt:** The accepted native public/admin read lane is now composed with owner-verified member HTML and the existing pure authentication screens in `frontend-presentation`, without DB/session/job authority. The current slice is26 canonical screens, not all functionality. [Exact-source Test/Production, compatibility archive, retirement and rollback evidence](releases/2026-11-21-frontend-consolidation-production.ko.md) records the actual release. Existing full-backend/financial gates and blocked mutations remain in force.
 
@@ -213,3 +216,13 @@ This is eight read screens, not all-site or full-backend certification. Whole-si
 
 ### 2026-11-21 — delivery read-page follow-up
 The ninth shared-shell admin read route is `/admin/logs/delivery`, sourced from two exact cookie-authorized GETs on a separate loopback gateway. The prior eight routes keep their accepted generation. Bind release checks to the full active Nginx include inventory, stable MainPID/cwd/manifest/open-JAR/listener identity and packaged plus served asset hashes. Legacy null delivery outcomes remain Unknown; timestamps never become delivery acknowledgements. Retain source-bound protected Test and Test-stop Production independence. This is no financial, full-backend, all-admin-action or whole-site waiver. [Observed acceptance](releases/2026-11-21-nov18-admin-delivery-production.ko.md).
+
+## Owner Test-first directive — 2026-11-23
+Always implement and verify frontend/backend candidates on an independently identified Test runtime with a real backend before any Production promotion. A Test hostname proxying the Production frontend is not independent acceptance. Bind evidence to exact source/artifact, actual API/DB, role/locale/viewport checks and inverse receipts. Failed/unreachable Test blocks promotion. Latest task scope is Test-only: do not promote this candidate to Production without a later owner instruction.
+
+
+## Owner directive — mandatory Test before Production (2026-11-22)
+
+Every frontend and backend change must run as its exact source/artifact in the isolated Test environment before Production promotion. Verify the changed routes, real backend contracts, authorization failures, relevant database behavior, desktop/mobile layouts and required checks. Resolve observed failures before promotion; skipped or unreachable required checks are blockers, never passes. Promote the same tested artifact, preserve sessions and rollback, and record the Test and Production evidence in the task log.
+
+Keep the Test website reachable for its accepted public frontend routes. Public Test access does not authorize exposing administrator data, bypassing authentication, enabling Production financial writes, or replacing a Test backend with invented data. Unaccepted/private routes retain their explicit admission boundaries.

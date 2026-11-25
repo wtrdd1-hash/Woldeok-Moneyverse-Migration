@@ -23,7 +23,7 @@ describe('admin treasury grant hardening / v629', () => {
 
   it('rejects member without an admin role and does not read applications', async () => {
     api.mockRejectedValue(new ApiError(403));
-    const response = await POST(new Request('http://localhost/api/admin/treasury/grants', { method: 'POST' }));
+    const response = await POST(new Request('http://localhost/api/admin/treasury/grants', { method: 'POST', headers: { origin: 'http://localhost' } }));
     expect(response.status).toBe(403);
     expect(loadGrants).not.toHaveBeenCalled();
   });
@@ -50,10 +50,18 @@ describe('admin treasury grant hardening / v629', () => {
       .mockResolvedValueOnce({ ok: true, message: '심사가 완료되었습니다.', result: {} });
     const response = await POST(new Request('http://localhost/api/admin/treasury/grants', {
       method: 'POST',
+      headers: { origin: 'http://localhost' },
       body: JSON.stringify({ action: 'APPROVE', applicationId: 'example', approvedAmountWld: 500000 }),
     }));
     expect(response.status).toBe(200);
     expect((await response.json()).ok).toBe(true);
     expect(loadGrants).not.toHaveBeenCalled();
+  });
+
+  it('refuses a cross-site write (QA 2026-11-25)', async () => {
+    const response = await POST(new Request('http://localhost/api/admin/treasury/grants', {
+      method: 'POST', headers: { origin: 'https://evil.example' }, body: '{}',
+    }));
+    expect(response.status).toBe(403);
   });
 });

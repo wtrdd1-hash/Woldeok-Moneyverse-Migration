@@ -1,4 +1,30 @@
+## v2026.11.24.0818 — Stitch Skills 로컬 적용 시험
+
+> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](../DOCUMENT_AUTHORITY.md) / [한국어](../DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+
+소스 전용 디자인 추출 스킬과 11월 18일 승인 디자인 규격·정적 검사를 추가. Stitch 클라우드 디자인은 별도 MCP 연결·승인 필요; Test/운영 무변경. [상세](../development/GOOGLE_STITCH_SKILLS_PILOT_v2026.11.24.0818.ko.md).
+
 # 월덕 머니버스 — Living Project Plan
+
+> **v2026.11.23.10 UI visual/feature audit** [180 revised PNGs](../design/game-ui-v2026.11.23.10/README.ko.md) · [audit](../qa/2026-11-23-game-ui-180-image-feature-audit.ko.md). Image file QA only; full runtime acceptance unverified.
+
+> v2026.11.23.8 신규 이미지: [실제 신규 180개 시안](../design/game-ui-v2026.11.23.8/README.ko.md) — 생성 완료/시안 검수 필요, 실제 서비스 적용 아님.
+
+> **UI/UX 단일 통합 기준 (v2026.11.23.5, 문서 전용):** [UI 디자인·문제·지침 통합 원장](../UI_UX_SINGLE_REFERENCE.ko.md). 사용자 정정: **현재 사이트 파비콘 자체가 공식 로고**이며 생성 W/왕관 로고로 대체 금지. 관리자 메뉴는 **권한 있는 관리자에게만** 표시. 본 문서 추가는 UI 구현/운영승격 증거가 아니다.
+
+> **Historical rebuild frontdoor — captured 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
+
+## v2026.11.22.2041.1 — 인스타그램 UI 명칭 100개 참고자료 영구 기록 (PLANNING / 문서만)
+
+사용자 제공 [인스타그램 릴스](https://www.instagram.com/reel/DgB83_Fh4NP/)는 @uxwoodytips의 2026-11-21 게시물로 AI에 정확한 UI 용어를 지정하는 방법을 설명한다. 공개 메타데이터와 22초 영상의 화면을 실제 확인하여 토글/체크박스/라디오, 벤토·카드 그리드, 모달·바텀시트·드로어, 기간 선택, 페이지네이션, 플로팅·하단 고정 등을 기록했다. **전체 100개 사전은 확보하지 못했으며 전수 검증으로 표시하지 않는다.** [한국어 상세 참고](../research/2026-11-22-instagram-uxwoodytips-ui-100-v2041.ko.md) / [영문 정본](../research/2026-11-22-instagram-uxwoodytips-ui-100-v2041.md)에 출처 및 머니버스 적용 기준을 보존한다. 11월 18일 Spring 웹 디자인·5개 언어·전역 채팅/문의·구글/디스코드 로그인·실제 금융 근거는 변경하지 않는다. 코드·Test·운영·DB·인증 수정 없음.
+
+## v2026.11.23.12 — 릴스 웹디자인 리소스 27곳의 Spring 웹 적용 상세 기획 통합 (PLANNING / 문서만)
+
+사용자 [원본 릴스](https://www.instagram.com/reel/DgB15siSolR/) 게시글 설명에서 9분야·27곳 출처 확인. [한국어 상세 구축기획](REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.ko.md) / [영문 정본](REEL_27_DESIGN_RESOURCES_INTEGRATION_v2026.11.23.12.md)에 **참고·후보·보류**로 도입하며 전체 설치는 금지. 11월 18일 네이비/보라 승인 디자인·현재 파비콘·Spring MVC/Thymeleaf 단일 웹·5개 언어·실제 백엔드/원장·광고 식별을 보존한다. 개별 에셋 사용권·이미지/코드 실제 수용·실계정 Test·복원·운영무중단 검증은 후속 G0-G6 단계. [27곳 발견 카탈로그](../design/asset-resources-v2026.11.23.12/source-catalog.json) / [작업기록](../worklog/2026-11-23-reel-27-design-resources-v12.ko.md). 공식 oEmbed 원문 설명 확인, 영상 프레임·음성은 미검증. **파일 설치/실제 코드·Test·운영 변경 없음.** 착수/중간 main: `9876c09888ec84034eec183cf1309c85df3d7447`.
+
+> **v2026.11.24.FEARCH.1 사용자 프론트엔드 기술 선택 (문서 제안 / 운영 미적용):** 새 11/23 디자인 구현 목표는 **Next.js/React 독립 프론트엔드 + Spring Boot API/인증·금융 백엔드**로 정리한다. 구형 'Spring MVC+Thymeleaf만 사용' 문구는 역사적 기술 지시이며, 새 화면 기술 선택에만 이 결정이 우선한다. 11/23 v10 원본 180 PNG(미병합 SHA 39888c7...)·11/18/v8 보존, 로그인·회원정보·토큰·실거래는 Spring 권위, QA·Test/운영 승격 규정 유지. 전체 단일 결정 [한국어](FRONTEND_ARCHITECTURE_NOV23_NEXT_SPRING_v2026.11.24.FEARCH.1.ko.md) / [EN](FRONTEND_ARCHITECTURE_NOV23_NEXT_SPRING_v2026.11.24.FEARCH.1.md). **이 문단과 연결 문서는 Draft PR의 제안이며 main 병합/서비스 변경 전에는 실행 변경이 아니다.**
+
+> v2026.11.23.11 public advertisement disclosure / 공개 광고 표시: [Ad display and policy QA](../qa/2026-11-23-public-ad-display-audit-v2026.11.23.11.ko.md) — source change candidate only, native Spring Test and Production not verified. Protected routes remain ad-free.
 
 > **Current rebuild frontdoor — 2026-11-21:** Public/member/admin documents are under owner-approved emergency maintenance (503), deployed from main93a31e3e44. Dedicated DB-free frontend Test/Production units are inactive; shared API/auth/database remain. Earlier native26/home/admin acceptance notes below are historical. New catalog source PR3347 is merged but not deployed. Whole native frontend rebuild, independent full Test and Production replacement remain OPEN. [Maintenance receipt](../releases/2026-11-21-frontend-rebuild-maintenance.ko.md) · [Current task](../worklog/2026-11-21-nov18-visual-unification.md).
 

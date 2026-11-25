@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Tag(name = "Season", description = "시즌 랭킹 및 시즌 티어 보상 수령 API")
 @RestController
-@RequestMapping("/api/seasons")
+@RequestMapping({"/api/seasons", "/api/v1/seasons"})
 public class SeasonController {
 
     private final SeasonService seasonService;

@@ -1,0 +1,5 @@
+# FE-B blog public article guard — v2026.11.24.FE-B.1 (EN)
+START: main 9876c09888ec84034eec183cf1309c85df3d7447; separate worktree; Next/Spring architecture Draft #3423 reviewed. No Test or Production change.
+MID: RED Vitest missing module (1 failed); GREEN 3/3 targeted; blog route restoration 1/1; contract build and frontend TypeScript typecheck PASS. Public SSR and metadata now refuse non-discoverable draft/withdrawn article bodies by guessed slug, instead of displaying a warning and private content.
+FINISH: This is a narrowly scoped public article visibility fix. No member/financial API, shared shell/security or language edits. Existing guest /bank,/stocks 302 must be preserved by QA2. Full Next suite, real backend, authenticated finance, Playwright, 180 visual and exact-SHA Test deployment are not accepted here; RELEASE HOLD.
+P0 shared-file handoff: main frontend/src/lib/api.ts has a hardcoded INTERNAL_API_TOKEN fallback. FE-A/security owner must remove fallback, assess exposure and rotate if applicable; FE-B did not modify shared file.

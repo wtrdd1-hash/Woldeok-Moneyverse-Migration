@@ -1,5 +1,8 @@
 # 🌙 Woldeok Moneyverse — पूर्ण हिन्दी गाइड
 
+> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](../docs/DOCUMENT_AUTHORITY.md) / [한국어](../docs/DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+
+
 [← मुख्य README](../README.md) · [परिवर्तन लॉग](../docs/changelog/CHANGELOG.hi.md) · [दस्तावेज़ सूची](../docs/INDEX.md) · [Production](https://easy-scraping.com) · [Test](https://test.easy-scraping.com)
 
 > Woldeok Moneyverse एक community virtual-economy platform है जिसमें careers, quests, progression, WLD wallet, shop, virtual stocks/businesses, banking और virtual casino minigames एक ही responsive web service में जुड़े हैं।

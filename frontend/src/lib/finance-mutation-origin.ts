@@ -6,7 +6,8 @@
  * This is one defense in depth boundary; Nest still authenticates, binds the
  * actor to the session and verifies one-use CSRF and canonical settlement.
  */
-const canonicalHosts = new Set(['easy-scraping.com', 'test.easy-scraping.com']);
+// www is served without a redirect (nginx server_name), so it is a real origin.
+const canonicalHosts = new Set(['easy-scraping.com', 'www.easy-scraping.com', 'test.easy-scraping.com']);
 const localNames = new Set(['127.0.0.1', 'localhost', '[::1]']);
 
 export function isSameOriginFinanceMutation(request: Request): boolean {

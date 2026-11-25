@@ -17,7 +17,7 @@ import java.util.Map;
 
 @Tag(name = "National Pension", description = "국민연금 공적 기금 및 개인 계좌 관리 API")
 @RestController
-@RequestMapping("/api/pension")
+@RequestMapping({"/api/pension", "/api/v1/pension"})
 public class PensionController {
 
     private final PensionService pensionService;

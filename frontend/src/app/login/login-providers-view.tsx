@@ -1,15 +1,10 @@
 import Link from 'next/link';
-import { ArrowRight, ShieldCheck } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { apiOrNull } from '@/lib/api';
+import { submitLocalLogin } from './actions';
+import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { apiOrNull } from '@/lib/api';
-import { getServerLocale } from '@/lib/locale-server';
-import { localeLabel } from '@/lib/locale';
-import { submitLocalLogin } from './actions';
 
 export async function LoginProvidersView({
   error,
@@ -18,7 +13,6 @@ export async function LoginProvidersView({
   readonly error?: string | undefined;
   readonly notice?: string | undefined;
 }) {
-  const locale = await getServerLocale();
   const data = await apiOrNull<{ providers: { id: string; enabled: boolean }[] }>(
     '/api/v1/auth/providers',
   );
@@ -27,161 +21,109 @@ export async function LoginProvidersView({
     { id: 'discord', enabled: true },
   ];
   const enabled = new Set(rawProviders.filter((p) => p.enabled).map((p) => p.id));
-  const availableProviders = (['google', 'discord'] as const).filter((id) => enabled.has(id));
 
   return (
-    <div className="mx-auto w-full max-w-[420px] py-4 sm:py-8">
-      {/* Brand & Heading */}
-      <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-          <ShieldCheck className="size-6" />
-        </div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-          {localeLabel(
-            locale,
-            '반가워요!',
-            'Welcome Back!',
-            'おかえりなさい！',
-            '欢迎回来！',
-            'Chào mừng bạn!'
-          )}
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {localeLabel(
-            locale,
-            '월덕 머니버스에서 경제와 자산을 시작해보세요.',
-            'Start your virtual economy journey and build financial assets.',
-            'ウォルドク・マネーバースで仮想経済と資産運用を始めましょう。',
-            '在月德虚拟金融平台开启您的数字资产之旅。',
-            'Bắt đầu hành trình kinh tế và xây dựng tài sản ảo của bạn.'
-          )}
-        </p>
-      </div>
+    <div className="flex flex-col gap-4">
+      <PageHeader title="로그인">디스코드, 구글 또는 자체 계정으로 들어옵니다.</PageHeader>
 
       {notice && (
-        <Alert className="mb-5 border-primary/30 bg-primary/5 text-foreground">
-          <AlertDescription className="text-xs font-medium leading-relaxed">{notice}</AlertDescription>
-        </Alert>
+        <p role="status" className="g1-panel text-sm text-[var(--g1-ink)]">
+          {notice}
+        </p>
       )}
-
       {error && (
-        <Alert variant="destructive" className="mb-5">
-          <AlertDescription className="text-xs font-medium leading-relaxed">{error}</AlertDescription>
-        </Alert>
+        <p role="alert" className="g1-panel border-[var(--g1-ember)] text-sm text-[var(--g1-ink)]">
+          {error}
+        </p>
       )}
 
-      {/* Main FinTech Card */}
-      <Card className="border-border/80 bg-card/95 shadow-sm backdrop-blur-sm">
-        <CardContent className="p-6 sm:p-7">
-          {/* Local Email Login Form */}
-          <form action={submitLocalLogin} className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="local-email" className="text-xs font-semibold text-muted-foreground">
-                {localeLabel(locale, '이메일 주소', 'Email Address', 'メールアドレス', '邮箱地址', 'Địa chỉ Email')}
-              </Label>
+      <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+        <section aria-labelledby="local-login-heading" className="g1-panel flex flex-col gap-4">
+          <h2 id="local-login-heading" className="text-lg text-[var(--g1-ink)]">자체 계정</h2>
+          <form action={submitLocalLogin} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="auth-email">이메일 주소</Label>
               <Input
-                id="local-email"
+                id="auth-email"
                 name="email"
                 type="email"
                 autoComplete="email"
                 inputMode="email"
                 maxLength={254}
-                required
                 placeholder="name@example.com"
+                required
                 className="min-h-11"
               />
             </div>
-
-            <div className="grid gap-2">
+            <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="local-password" className="text-xs font-semibold text-muted-foreground">
-                  {localeLabel(locale, '비밀번호', 'Password', 'パスワード', '密码', 'Mật khẩu')}
-                </Label>
-                <Link
-                  href="/forgot-password"
-                  className="text-xs text-primary transition-colors hover:underline"
-                >
-                  {localeLabel(locale, '비밀번호 찾기', 'Forgot Password?', 'パスワードをお忘れですか？', '找回密码', 'Quên mật khẩu?')}
+                <Label htmlFor="auth-password">비밀번호</Label>
+                <Link href="/forgot-password" prefetch={false} className="text-xs text-[var(--g1-gold)] hover:underline">
+                  비밀번호 찾기
                 </Link>
               </div>
               <Input
-                id="local-password"
+                id="auth-password"
                 name="password"
                 type="password"
                 autoComplete="current-password"
                 maxLength={128}
+                placeholder="비밀번호 입력"
                 required
-                placeholder={localeLabel(locale, '비밀번호 입력', 'Enter password', 'パスワードを入力', '输入密码', 'Nhập mật khẩu')}
                 className="min-h-11"
               />
             </div>
-
-            <Button
-              type="submit"
-              className="min-h-11 w-full sm:w-fit font-bold"
-            >
-              {localeLabel(locale, '자체 계정으로 로그인', 'Sign In with Email', 'メールでログイン', '邮箱登录', 'Đăng nhập với Email')}
-              <ArrowRight className="ml-1 size-4" />
+            <Button type="submit" className="min-h-11 w-full sm:w-fit">
+              자체 계정으로 로그인
             </Button>
           </form>
-
-          {/* Social Sign-in Divider */}
-          {availableProviders.length > 0 && (
-            <>
-              <div className="relative my-6 text-center">
-                <Separator className="absolute inset-x-0 top-1/2" />
-                <span className="relative bg-card px-3 text-xs font-medium text-muted-foreground">
-                  {localeLabel(locale, '또는 간편 로그인', 'Or continue with', 'または外部連携でログイン', '或者使用第三方登录', 'Hoặc tiếp tục với')}
-                </span>
-              </div>
-
-              <div className="grid gap-2.5">
-                {availableProviders.map((id) => (
-                  <Button
-                    key={id}
-                    variant="outline"
-                    size="lg"
-                    asChild
-                    className="w-full justify-center rounded-xl border-border/80 text-sm font-medium transition-colors"
-                  >
-                    <a href={'/auth/' + id + '/authorize'}>
-                      {id === 'google' ? 'Google' : 'Discord'}{' '}
-                      {localeLabel(locale, '계정으로 계속하기', 'Account', 'で続ける', '账号登录', 'Tài khoản')}
-                    </a>
-                  </Button>
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* Registration Notice */}
-          <div className="mt-6 border-t border-border/60 pt-5 text-center text-xs text-muted-foreground">
-            {localeLabel(
-              locale,
-              '아직 회원이 아니신가요?',
-              "Don't have an account?",
-              'まだアカウントをお持ちでないですか？',
-              '还没有账号？',
-              'Chưa có tài khoản?'
-            )}{' '}
-            <Link href="/login" className="font-semibold text-primary hover:underline">
-              {localeLabel(locale, '계정 만들기', 'Create Account', 'アカウント作成', '立即注册', 'Tạo tài khoản')}
+          <p className="text-sm text-[var(--g1-muted)]">
+            처음이신가요?{' '}
+            <Link href="/register" prefetch={false} className="inline-flex min-h-11 items-center font-semibold text-[var(--g1-violet)] underline underline-offset-4">
+              회원가입
             </Link>
-          </div>
-        </CardContent>
-      </Card>
+          </p>
+        </section>
 
-      {/* Footer Legal Links */}
-      <p className="mt-6 text-center text-[11px] leading-relaxed text-muted-foreground/80">
-        {localeLabel(
-          locale,
-          '로그인 시 이용약관 및 개인정보처리방침에 동의하게 됩니다.',
-          'By signing in, you agree to our Terms of Service and Privacy Policy.',
-          'ログインすると利用規約およびプライバシーポリシーに同意したものとみなされます。',
-          '登录即表示您同意我们的服务条款与隐私政策。',
-          'Bằng việc đăng nhập, bạn đồng ý với Điều khoản và Chính sách quyền riêng tư.'
-        )}
-      </p>
+        <section aria-labelledby="social-login-heading" className="g1-panel flex flex-col gap-4">
+          <h2 id="social-login-heading" className="text-lg text-[var(--g1-ink)]">간편 로그인</h2>
+          <div className="flex flex-col gap-2">
+            {enabled.has('discord') && (
+              <a
+                href="/auth/discord/authorize"
+                className="flex min-h-11 items-center justify-center gap-2 rounded-md bg-[var(--g1-discord)] px-4 text-sm font-semibold text-[var(--g1-ink)] transition-transform duration-150 active:scale-[0.97]"
+              >
+                <svg className="size-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+                </svg>
+                디스코드로 계속하기
+              </a>
+            )}
+            {enabled.has('google') && (
+              <a
+                href="/auth/google/authorize"
+                className="flex min-h-11 items-center justify-center gap-2 rounded-md border border-[var(--g1-line)] bg-[var(--g1-night)] px-4 text-sm font-semibold text-[var(--g1-ink)] transition-transform duration-150 hover:border-[var(--g1-gold)] active:scale-[0.97]"
+              >
+                구글로 계속하기
+              </a>
+            )}
+            {!enabled.has('discord') && !enabled.has('google') && (
+              <p className="text-sm text-[var(--g1-muted)]">지금은 간편 로그인을 사용할 수 없습니다. 자체 계정으로 로그인해 주세요.</p>
+            )}
+          </div>
+          <p className="text-xs leading-relaxed text-[var(--g1-muted)]">
+            계정 진입 시{' '}
+            <Link href="/terms" prefetch={false} className="text-[var(--g1-gold)] underline">
+              이용약관
+            </Link>{' '}
+            및{' '}
+            <Link href="/privacy" prefetch={false} className="text-[var(--g1-gold)] underline">
+              개인정보처리방침
+            </Link>
+            에 동의한 것으로 처리됩니다.
+          </p>
+        </section>
+      </div>
     </div>
   );
 }

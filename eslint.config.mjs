@@ -2,8 +2,9 @@ import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import nextVitals from 'eslint-config-next/core-web-vitals';
 
+// Gradle copies the already-excluded browser exports into build output; lint the original application sources, not those generated copies.
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/.next/**', '**/node_modules/**', '**/generated/**', '.claude/**', '.worktrees/**', 'capture_*.js', 'bot/scripts/**', 'scripts/**', 'skills/**', 'spring-backend/src/main/resources/static/**'] },
+  { ignores: ['**/dist/**', '**/.next/**', '**/node_modules/**', '**/generated/**', 'spring-backend/build/**', '.claude/**', '.worktrees/**', 'capture_*.js', 'bot/scripts/**', 'scripts/**', 'skills/**', 'spring-backend/src/main/resources/static/**'] },
   js.configs.recommended,
   ...nextVitals,
   ...tseslint.configs.recommended,

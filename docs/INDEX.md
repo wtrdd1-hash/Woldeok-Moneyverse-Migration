@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse Official Master Documentation Index
 
+> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](DOCUMENT_AUTHORITY.md) / [한국어](DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+
+
 **DOC-2026.11.11.1500 — [Current evidence/authority navigation](CURRENT_DOCUMENTATION_STATUS.md) / [한국어](CURRENT_DOCUMENTATION_STATUS.ko.md).** This index contains historical descriptions; follow the living project plan and exact runtime evidence rather than treating old release labels as current. Documentation-only; Test version API was HTTP 502 at the recorded time.
 
 

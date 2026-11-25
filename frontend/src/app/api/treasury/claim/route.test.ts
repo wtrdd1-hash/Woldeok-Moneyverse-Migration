@@ -9,7 +9,7 @@ describe('Treasury claim route contract', () => {
   it('rejects missing programId with 400 Bad Request', async () => {
     const request = new Request('http://localhost/api/treasury/claim', {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: { origin: 'http://localhost',  'content-type': 'application/json' },
       body: JSON.stringify({}),
     });
     const response = await claimRoute.POST(request);
@@ -22,7 +22,7 @@ describe('Treasury claim route contract', () => {
   it('successfully handles citizen dividend claim with 200 OK', async () => {
     const request = new Request('http://localhost/api/treasury/claim', {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: { origin: 'http://localhost',  'content-type': 'application/json' },
       body: JSON.stringify({ programId: 'CITIZEN_DIVIDEND' }),
     });
     const response = await claimRoute.POST(request);
@@ -36,7 +36,7 @@ describe('Treasury claim route contract', () => {
   it('successfully handles emergency relief claim with 200 OK', async () => {
     const request = new Request('http://localhost/api/treasury/claim', {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: { origin: 'http://localhost',  'content-type': 'application/json' },
       body: JSON.stringify({ programId: 'EMERGENCY_RELIEF' }),
     });
     const response = await claimRoute.POST(request);

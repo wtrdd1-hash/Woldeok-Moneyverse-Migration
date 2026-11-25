@@ -25,7 +25,7 @@ vi.mock('./api', async (importOriginal) => {
 });
 
 const { ApiError } = await import('./api');
-const { adminConsole } = await import('./session');
+const { adminConsole, requireMember } = await import('./session');
 
 const SESSION = '/api/v1/auth/session';
 const SECURITY = '/api/v1/admin/security';
@@ -69,5 +69,27 @@ describe('adminConsole', () => {
   it('answers with the console when the API does', async () => {
     answers({ [SESSION]: {}, [SECURITY]: { consoleSession: { state: 'open' } } });
     await expect(adminConsole()).resolves.toMatchObject({ consoleSession: { state: 'open' } });
+  });
+});
+
+describe('requireMember against the Spring session contract', () => {
+  beforeEach(() => {
+    redirected.mockClear();
+    called.mockReset();
+  });
+
+  it('sends a visitor to login when the API answers 200 with signedIn false', async () => {
+    called.mockResolvedValue({ success: true, authenticated: false, signedIn: false, csrfToken: '', user: null });
+    await expect(requireMember()).rejects.toThrow('REDIRECT /login?error=login_required');
+  });
+
+  it('still honours a 401 from the legacy gateway', async () => {
+    called.mockRejectedValue(new ApiError(401));
+    await expect(requireMember()).rejects.toThrow('REDIRECT /login?error=login_required');
+  });
+
+  it('lets a signed-in member through', async () => {
+    called.mockResolvedValue({ authenticated: true, signedIn: true, csrfToken: 'x' });
+    await expect(requireMember()).resolves.toBeUndefined();
   });
 });

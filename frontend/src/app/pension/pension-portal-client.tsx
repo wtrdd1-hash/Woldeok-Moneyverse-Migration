@@ -80,9 +80,11 @@ export interface PayoutLog {
 interface PensionPortalClientProps {
   overview: NationalPensionOverview | null;
   myAccount: MyPensionAccount | null;
-  contributions: ContributionLog[];
-  payouts: PayoutLog[];
-  userCashBalance: string;
+  /** null = the history could not be read (shown as unavailable, never as empty). */
+  contributions: ContributionLog[] | null;
+  payouts: PayoutLog[] | null;
+  /** null = the wallet could not be read (never treated as 0). */
+  userCashBalance: string | null;
   isLoggedIn: boolean;
 }
 
@@ -95,9 +97,9 @@ export function PensionPortalClient({
   isLoggedIn,
 }: PensionPortalClientProps) {
   const [account, setAccount] = useState<MyPensionAccount | null>(initialAccount);
-  const [contributions, setContributions] = useState<ContributionLog[]>(initialContributions);
-  const [payouts, setPayouts] = useState<PayoutLog[]>(initialPayouts);
-  const [cashBalance, setCashBalance] = useState<string>(initialCashBalance);
+  const [contributions, setContributions] = useState<ContributionLog[] | null>(initialContributions);
+  const [payouts] = useState<PayoutLog[] | null>(initialPayouts);
+  const [cashBalance, setCashBalance] = useState<string | null>(initialCashBalance);
 
   // 기여금 납입 폼
   const [contributeAmount, setContributeAmount] = useState<string>('10000');
@@ -135,6 +137,10 @@ export function PensionPortalClient({
       toast.error('최소 1,000 WLD 이상부터 납입할 수 있습니다.');
       return;
     }
+    if (cashBalance === null) {
+      toast.error('지금은 지갑 잔액을 확인할 수 없어요. 잠시 후 다시 시도해 주세요.');
+      return;
+    }
     if (BigInt(amount) > BigInt(cashBalance)) {
       toast.error(`지갑 잔액이 부족합니다. (현재: ${groupDigits(cashBalance)} WLD)`);
       return;
@@ -154,8 +160,8 @@ export function PensionPortalClient({
         `국민연금 기여금 ${groupDigits(amount)} WLD 납입이 완료되어 국고로 편입되었습니다!`,
       );
       setAccount(data.account);
-      setCashBalance((prev) => (BigInt(prev) - BigInt(amount)).toString());
-      setContributions((prev) => [
+      setCashBalance((prev) => (prev === null ? null : (BigInt(prev) - BigInt(amount)).toString()));
+      setContributions((prev) => prev && [
         {
           id: Math.random().toString(),
           amount_wld: amount,
@@ -223,7 +229,7 @@ export function PensionPortalClient({
       if (refundAmount === null || refundAmount.startsWith('-')) throw new Error('서버가 올바른 환급 금액을 반환하지 않았습니다.');
       toast.success(`중도 해지 완료: ${groupDigits(refundAmount)} WLD가 지갑으로 환급되었습니다.`);
       setAccount(data.account);
-      setCashBalance((prev) => (BigInt(prev) + BigInt(refundAmount)).toString());
+      setCashBalance((prev) => (prev === null ? null : (BigInt(prev) + BigInt(refundAmount)).toString()));
     } catch (err: any) {
       toast.error(err.message || '해지 처리 중 오류가 발생했습니다.');
     } finally {
@@ -475,7 +481,7 @@ export function PensionPortalClient({
               <div className="text-xs text-muted-foreground flex justify-between">
                 <span>내 지갑 가용 잔액:</span>
                 <span className="font-mono font-semibold text-foreground">
-                  {groupDigits(cashBalance)} WLD
+                  {cashBalance === null ? '확인 불가' : `${groupDigits(cashBalance)} WLD`}
                 </span>
               </div>
 
@@ -542,7 +548,8 @@ export function PensionPortalClient({
                     size="sm"
                     className="text-xs min-h-[44px] sm:min-h-[36px] font-semibold"
                     onClick={() => {
-                      const val = cashBalance.toString();
+                      if (cashBalance === null) return;
+                      const val = cashBalance;
                       setContributeAmount(val);
                       syncToFundedInput(val);
                     }}
@@ -590,11 +597,11 @@ export function PensionPortalClient({
           </TabsTrigger>
           <TabsTrigger value="contributions" className="min-h-[40px] gap-1.5 truncate">
             <History className="h-4 w-4" />
-            내 기여금 납입 이력 ({contributions.length})
+            내 기여금 납입 이력{contributions ? ` (${contributions.length})` : ''}
           </TabsTrigger>
           <TabsTrigger value="payouts" className="min-h-[40px] gap-1.5 truncate">
             <Clock className="h-4 w-4" />
-            기초연금 수령 내역 ({payouts.length})
+            기초연금 수령 내역{payouts ? ` (${payouts.length})` : ''}
           </TabsTrigger>
         </TabsList>
 
@@ -673,7 +680,11 @@ export function PensionPortalClient({
         <TabsContent value="contributions">
           <Card className="border-border/60 bg-card/60">
             <CardContent className="pt-6">
-              {contributions.length === 0 ? (
+              {contributions === null ? (
+                <div className="text-center py-8 text-sm text-muted-foreground">
+                  납입 이력을 불러올 수 없어요. 원장 이력 조회가 아직 제공되지 않습니다.
+                </div>
+              ) : contributions.length === 0 ? (
                 <div className="text-center py-8 text-sm text-muted-foreground">
                   아직 기여금 납입 내역이 없습니다.
                 </div>
@@ -711,7 +722,11 @@ export function PensionPortalClient({
         <TabsContent value="payouts">
           <Card className="border-border/60 bg-card/60">
             <CardContent className="pt-6">
-              {payouts.length === 0 ? (
+              {payouts === null ? (
+                <div className="text-center py-8 text-sm text-muted-foreground">
+                  수령 내역을 불러올 수 없어요. 원장 이력 조회가 아직 제공되지 않습니다.
+                </div>
+              ) : payouts.length === 0 ? (
                 <div className="text-center py-8 text-sm text-muted-foreground">
                   아직 기초연금 수령 내역이 없습니다.
                 </div>

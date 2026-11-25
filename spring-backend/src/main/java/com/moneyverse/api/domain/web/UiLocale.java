@@ -30,6 +30,11 @@ public class UiLocale implements LocaleResolver {
     }
 
     public String resolve(HttpServletRequest request) {
+        // A direct language choice belongs to this request, ahead of an older saved preference.
+        String[] selections=request.getParameterValues("lang");
+        String explicit=selections!=null&&selections.length==1?selections[0]:null;
+        if(explicit!=null&&SUPPORTED.contains(explicit.toLowerCase(Locale.ROOT)))
+            return explicit.toLowerCase(Locale.ROOT);
         if (request.getCookies() != null) {
             for (var cookie : request.getCookies()) {
                 if ("wdmv_locale".equals(cookie.getName()) && SUPPORTED.contains(cookie.getValue())) return cookie.getValue();
@@ -50,23 +55,23 @@ public class UiLocale implements LocaleResolver {
     }
 
     public String resolvePublic(HttpServletRequest request) {
-        if(request.getCookies()!=null) {
-            for(var cookie:request.getCookies()) {
-                if("wdmv_locale".equals(cookie.getName())&&SUPPORTED.contains(cookie.getValue())) return cookie.getValue();
-            }
-        }
-        String explicit=request.getParameter("lang");
-        if(explicit!=null&&SUPPORTED.contains(explicit.toLowerCase(Locale.ROOT))) return explicit.toLowerCase(Locale.ROOT);
         return resolve(request);
     }
 
     @Override
     public Locale resolveLocale(HttpServletRequest request) {
         String path = request.getRequestURI();
-        if (List.of("/", "/index.html", "/wallet", "/wallet/", "/wallet.html", "/wallet/index.html").contains(path) || path.matches("^/(login|register|forgot-password|reset-password|verify-email|verify-email-change|account-deletion)(/|\\.html|/index\\.html)?$") || path.matches("^/login/providers(/|\\.html|/index\\.html)?$")) return Locale.forLanguageTag(resolve(request));
+        if (List.of("/", "/index.html", "/wallet", "/wallet/", "/wallet.html", "/wallet/index.html", "/bank", "/bank/", "/bank.html", "/bank/index.html").contains(path) || path.matches("^/(login|register|forgot-password|reset-password|verify-email|verify-email-change|account-deletion)(/|\\.html|/index\\.html)?$") || path.matches("^/login/providers(/|\\.html|/index\\.html)?$")) return Locale.forLanguageTag(resolve(request));
         if (List.of("/tools","/calculators","/tools/compound-calculator","/tools/stock-calculator","/status").contains(path))
             return Locale.forLanguageTag(resolvePublic(request));
-        if(path.matches("^/(support|chat)(/|\\.html|/index\\.html)?$")) return Locale.forLanguageTag(resolve(request));
+        if(path.matches("^/(support|chat)(/|[.]html|/index[.]html)?$")) {
+            String[] choices = request.getParameterValues("lang");
+            if (choices != null && choices.length == 1) {
+                String choice = choices[0].toLowerCase(Locale.ROOT);
+                if (SUPPORTED.contains(choice)) return Locale.forLanguageTag(choice);
+            }
+            return Locale.forLanguageTag(resolve(request));
+        }
         // Existing route families retain their locale behavior until their native migration.
         return new AcceptHeaderLocaleResolver().resolveLocale(request);
     }

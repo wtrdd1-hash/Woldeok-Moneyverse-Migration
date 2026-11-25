@@ -37,9 +37,16 @@ import '@fontsource/nanum-myeongjo/800.css';
 import '@fontsource-variable/noto-sans-kr/wght.css';
 import '@fontsource/ibm-plex-mono/400.css';
 import '@fontsource/ibm-plex-mono/500.css';
+// G1 display and figure faces, locked locally like the others (no Google CSS at build).
+import '@fontsource/black-han-sans/400.css';
+// 400.css carries only Latin; Korean glyphs live in their own subset file.
+import '@fontsource/black-han-sans/korean-400.css';
+import '@fontsource/orbitron/600.css';
+import '@fontsource/orbitron/800.css';
 import './globals.css';
 import './cosmetics.css';
 import './redesign.css';
+import './g1-tokens.css';
 
 const indexingEnabled = process.env.SEO_INDEXING_ENABLED !== 'false';
 const siteUrl = (process.env.APP_BASE_URL ?? 'https://easy-scraping.com').replace(/\/$/, '');
@@ -299,7 +306,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       // difference it will find.
       suppressHydrationWarning
     >
-      <body className="bg-[#090A0F] text-[#F9FAFB] min-h-screen antialiased selection:bg-[#00F59B]/20 selection:text-[#00F59B]">
+      <body className="min-h-screen bg-[var(--g1-night)] text-[var(--g1-text)] antialiased selection:bg-[var(--g1-plum-3)] selection:text-[var(--g1-ink)]">
         <AdProviderBootstrap />
         <ConsentGuard
           signedIn={viewer.signedIn}
@@ -346,7 +353,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <ThemeProvider>
               <ViewportScrollGuardian />
               <SiteShell>{children}</SiteShell>
-              <Toaster />
+              {/* Top-center so toasts never stack on the support launcher or dock (QA 2026-11-25). */}
+              <Toaster position="top-center" />
               <StaleTabNotice />
               <RouteAwareFloatingUtilities />
               <SessionKeepAlive />

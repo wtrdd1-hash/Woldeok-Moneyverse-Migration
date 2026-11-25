@@ -60,7 +60,7 @@ flowchart TD
 
 ## 3. 🖱️ Playwright 실 브라우저 클릭 E2E 검증 결과
 
-* **테스트 스위트**: [`frontend/src/app/e2e-click-profitability.test.ts`](file:///c:/Users/sds/Desktop/tset/Woldeok-Moneyverse-Migration/frontend/src/app/e2e-click-profitability.test.ts)
+* **테스트 스위트**: [`frontend/src/app/e2e-click-profitability.test.ts`](../frontend/src/app/e2e-click-profitability.test.ts)
 * **검증 내역**:
   1. 홈 2026 비대칭 벤토 그리드 2.0 (2x2 자산 히어로, 4대 퀵 액션 타일 `min-h-[56px]`)
   2. 3대 금융 계산기 허브(복리/물타기/직업) 딥링크 및 프리셋 인터랙션

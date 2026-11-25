@@ -1,4 +1,4 @@
-/* Shared UI behavior for independently rendered site pages. */
+﻿/* Shared UI behavior for independently rendered site pages. */
 (function () {
   'use strict';
   const locale = window.MV39Locale;
@@ -191,9 +191,7 @@
   function renderHome() {
     const head=elt('div','dashboard-section-header');
     head.appendChild(sectionTitle(t('myOverview')));
-    const refresh=elt('button','refresh-button',t('refresh'));
-    refresh.type='button';refresh.addEventListener('click',()=>readSession());
-    head.appendChild(refresh);root.appendChild(head);
+    root.appendChild(head);
     root.appendChild(personalSummary());
     root.appendChild(sectionTitle(t('quickActions')));
     root.appendChild(withChildren(elt('div','tools-grid'),[
@@ -279,11 +277,14 @@
     });
     document.title=t(page)+' · W Moneyverse';
     const select=document.getElementById('language-selector');
-    select.value=locale.preference();
-    select.setAttribute('aria-label',t('selectLanguage'));
-    const auto=select.querySelector('option[value="auto"]');
-    auto.textContent=t('auto');
-    document.querySelector('.support-fab').setAttribute('aria-label',t('support'));
+    if (select) {
+      select.value=locale.preference();
+      select.setAttribute('aria-label',t('selectLanguage'));
+      const auto=select.querySelector('option[value="auto"]');
+      if (auto) auto.textContent=t('auto');
+    }
+    const fab=document.querySelector('.support-fab');
+    if (fab) fab.setAttribute('aria-label',t('support'));
   }
   function renderAuthControls() {
     const container=document.getElementById('auth-actions');container.replaceChildren();
@@ -354,8 +355,80 @@
     document.querySelectorAll('a[data-admin="true"]').forEach(a=>a.remove());
     renderAuthControls();renderPage();
   }
+
+  let wdmvSocket = null;
+  function updateMarketTickElements(ticks) {
+    if (!Array.isArray(ticks)) return;
+    ticks.forEach(st => {
+      if (!st || !st.symbol) return;
+      const priceText = wld(st.current_price);
+      const changeText = pct(st.current_price, st.day_open_price);
+      document.querySelectorAll('.data-table tbody tr').forEach(tr => {
+        const symCell = tr.cells && tr.cells[0];
+        if (symCell && symCell.textContent.trim() === st.symbol) {
+          if (tr.cells[3]) tr.cells[3].textContent = priceText || '—';
+          if (tr.cells[4]) {
+            tr.cells[4].textContent = changeText || '—';
+            tr.cells[4].className = (changeText && changeText.startsWith('+')) ? 'num mono positive' : 'num mono negative';
+          }
+        }
+      });
+      document.querySelectorAll('.market-mobile-row').forEach(row => {
+        const symEl = row.querySelector('.market-mobile-symbol');
+        if (symEl && symEl.textContent.trim() === st.symbol) {
+          const priceEl = row.querySelector('.market-mobile-price');
+          const statusEl = row.querySelector('.market-mobile-status');
+          if (priceEl) priceEl.textContent = priceText || '—';
+          if (statusEl) statusEl.textContent = changeText || (st.halt_status === 'ACTIVE' ? t('tradable') : t('halted'));
+        }
+      });
+    });
+  }
+
+  function initRealtimeSocket() {
+    function connect() {
+      if (typeof io === 'undefined') {
+        setTimeout(connect, 300);
+        return;
+      }
+      if (wdmvSocket && wdmvSocket.connected) return;
+      try {
+        wdmvSocket = io(window.location.origin, {
+          path: '/socket.io',
+          transports: ['websocket', 'polling'],
+          reconnection: true,
+          reconnectionDelay: 1000,
+          reconnectionDelayMax: 5000,
+          reconnectionAttempts: Infinity
+        });
+        window.WDMVSocket = wdmvSocket;
+        wdmvSocket.on('connect', () => {
+          console.log('[SocketIO] Connected to Netty-SocketIO real-time server');
+          wdmvSocket.emit('market:subscribe');
+          if (isSignedIn()) readSession();
+        });
+        wdmvSocket.on('market:ticks', (ticks) => {
+          updateMarketTickElements(ticks);
+        });
+        wdmvSocket.on('disconnect', () => {
+          console.log('[SocketIO] Disconnected, auto-reconnecting...');
+        });
+      } catch (e) {
+        console.warn('[SocketIO] Init exception:', e);
+      }
+    }
+    connect();
+    setInterval(() => {
+      if (isSignedIn() && document.visibilityState === 'visible') {
+        readSession();
+      }
+    }, 10000);
+    window.addEventListener('focus', () => {
+      if (isSignedIn()) readSession();
+    });
+  }
   function start() {
-    localizeStatic();bindNavigation();renderPage();readSession();
+    localizeStatic();bindNavigation();renderPage();readSession();initRealtimeSocket();
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)readSession();});
     window.addEventListener('pageshow',event=>{if(event.persisted)readSession();});
   }
