@@ -35,8 +35,8 @@ import { canonicalIntegerString, groupDigits, isPositiveWldInput } from '@/lib/m
 import { calculatePensionForecast } from '@/lib/pension-money';
 
 // Must match the unconditional backend P0 settlement hold. Reading existing receipts remains available.
-export const PENSION_LEDGER_SETTLEMENT_PAUSED = false;
-const PENSION_HOLD_NOTICE = '국민연금 원장 정산 검증이 완료되어 정상 운영 중입니다. 국고 복식부기 및 에스크로 연동이 승인되었습니다.';
+export const PENSION_LEDGER_SETTLEMENT_PAUSED = true;
+const PENSION_HOLD_NOTICE = '구형 연금 계좌의 납입·수령 전환·중도 해지는 원장 증빙이 없어 중단돼 있어요. 위의 정식 원장 납입·환급을 이용해 주세요.';
 
 export interface NationalPensionOverview {
   totalAumWld: string;
@@ -293,7 +293,7 @@ export function PensionPortalClient({
       <div role="alert" className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 p-4 text-sm text-foreground">
         <strong>국민연금 원장 정산 및 국고 연동 운영 안내</strong>
         <p className="mt-1">{PENSION_HOLD_NOTICE}</p>
-        <p className="mt-1 text-muted-foreground">국민연금 원장 정산 검증이 완료되어 정상 운영 중이며, 신규 국고 에스크로 및 복식부기 연동으로 안전하게 거래됩니다.</p>
+        <p className="mt-1 text-muted-foreground">구형 연금 계좌는 기록 조회만 가능합니다. 새 납입과 환급은 위의 정식 원장 납입·환급에서 원장 영수증과 함께 처리됩니다.</p>
       </div>
 
       {!overview && (
@@ -427,7 +427,7 @@ export function PensionPortalClient({
                 <div className="flex flex-wrap items-center gap-2.5">
                   <Button
                     onClick={handleToggleRetirement}
-                    disabled={actionLoading || BigInt(accumulated) < 1000n}
+                    disabled={PENSION_LEDGER_SETTLEMENT_PAUSED || actionLoading || BigInt(accumulated) < 1000n}
                     className={`flex-1 min-h-[44px] font-semibold ${
                       account?.status === 'RETIRED_RECEIVING'
                         ? 'bg-amber-600 hover:bg-amber-700 text-white'
@@ -452,7 +452,7 @@ export function PensionPortalClient({
                       variant="outline"
                       size="sm"
                       onClick={handleLiquidate}
-                      disabled={actionLoading}
+                      disabled={PENSION_LEDGER_SETTLEMENT_PAUSED || actionLoading}
                       className="min-h-[44px] text-xs text-destructive hover:bg-destructive/10 border-destructive/30"
                     >
                       <LogOut className="h-3.5 w-3.5 mr-1" />
@@ -474,7 +474,7 @@ export function PensionPortalClient({
                 국민연금 기여금 납입하기
               </CardTitle>
               <CardDescription>
-                국민연금 원장 정산 검증이 완료되어 신규 국고 에스크로 및 정식 복식분개 납입·환급이 실시간 가동됩니다.
+                구형 계좌 납입은 중단돼 있어요. 새 납입은 위의 정식 원장 납입·환급을 이용해 주세요.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -572,7 +572,7 @@ export function PensionPortalClient({
 
               <Button
                 onClick={handleContribute}
-                disabled={contributing || !isLoggedIn}
+                disabled={PENSION_LEDGER_SETTLEMENT_PAUSED || contributing || !isLoggedIn}
                 variant="outline"
                 className="w-full min-h-[44px] text-xs text-muted-foreground"
               >

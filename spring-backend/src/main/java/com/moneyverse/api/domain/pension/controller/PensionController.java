@@ -76,11 +76,5 @@ public class PensionController {
         return sourceUnavailable();
     }
 
-    @GetMapping("/funded/position")
-    public ResponseEntity<?> getFundedPosition(HttpServletRequest request) {
-        if (verifiedMember(request).isEmpty()) return unauthenticated();
-        // A decorative projection cannot be represented as an actual funded ledger balance.
-        return sourceUnavailable();
-    }
 
 }

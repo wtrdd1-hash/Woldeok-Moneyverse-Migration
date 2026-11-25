@@ -49,10 +49,4 @@ class PensionReadSafetyTest {
         verifyNoInteractions(pension);
     }
 
-    @Test
-    void fundedPositionMustNotClaimFakeZeroLedgerBalances() {
-        when(auth.resolveSession(any(HttpServletRequest.class))).thenReturn(Optional.empty());
-        assertEquals(HttpStatus.UNAUTHORIZED, new PensionController(pension, auth).getFundedPosition(request).getStatusCode());
-        verifyNoInteractions(pension);
-    }
 }
