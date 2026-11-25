@@ -77,6 +77,59 @@ public class CasinoLedgerService {
                 .query().listOfRows().stream().findFirst().orElseThrow(() -> unavailable("CASINO_CLOCK_MISSING")));
     }
 
+    // ---- terms and fairness (NestJS CasinoController: each asks the switch first) ----
+
+    private static final String TERMS_COLUMNS = "terms.enabled, terms.min_stake::text AS min_stake, terms.max_stake::text AS max_stake, "
+            + "terms.daily_stake_limit::text AS daily_stake_limit, terms.daily_loss_limit::text AS daily_loss_limit, "
+            + "terms.daily_stake_used::text AS daily_stake_used, terms.daily_loss_used::text AS daily_loss_used, "
+            + "terms.remaining_stake::text AS remaining_stake, terms.remaining_loss::text AS remaining_loss, "
+            + "terms.win_probability_ppm, terms.payout_multiplier_ppm, terms.house_edge_ppm, "
+            + "terms.worst_case_loss::text AS worst_case_loss, terms.net_win_at_max::text AS net_win_at_max";
+
+    /** Closed, paused or unreadable switch: the NestJS refusal, before any terms are read. */
+    public void requireOpen() {
+        String state = switchState();
+        if ("open".equals(state)) return;
+        if ("unknown".equals(state)) throw unavailable("CASINO_SOURCE_UNAVAILABLE");
+        throw closed(state);
+    }
+
+    public Map<String, Object> coinTerms(UUID actor) {
+        requireOpen();
+        return read(() -> shape(jdbc.sql("SELECT " + TERMS_COLUMNS + " FROM public.casino_coin_terms(?::uuid) AS terms")
+                .param(actor).query().listOfRows()).stream().findFirst().orElseThrow(() -> unavailable("CASINO_TERMS_MISSING")));
+    }
+
+    public Map<String, Object> coinFairness() {
+        requireOpen();
+        return read(() -> shape(jdbc.sql("SELECT disclosure.win_probability_ppm, trial.trial_id::text AS trial_id, trial.trials::text AS trials, "
+                        + "trial.heads::text AS heads, trial.expected_win_probability_ppm, trial.observed_win_probability_ppm, "
+                        + "trial.z_score::text AS z_score, trial.tolerance_sigma::text AS tolerance_sigma, trial.created_at "
+                        + "FROM (SELECT public.casino_coin_win_probability_ppm() AS win_probability_ppm) AS disclosure "
+                        + "LEFT JOIN LATERAL public.casino_latest_qualifying_distribution_trial() AS trial ON true")
+                .query().listOfRows()).stream().findFirst().orElseThrow(() -> unavailable("CASINO_FAIRNESS_MISSING")));
+    }
+
+    public List<Map<String, Object>> gameTerms(UUID actor) {
+        requireOpen();
+        return read(() -> shape(jdbc.sql("SELECT terms.game, " + TERMS_COLUMNS + " FROM public.casino_game_terms(?::uuid) AS terms")
+                .param(actor).query().listOfRows()));
+    }
+
+    public List<Map<String, Object>> diceFairness() {
+        requireOpen();
+        return read(() -> shape(jdbc.sql("SELECT fairness.game, fairness.win_probability_ppm, fairness.trial_id::text AS trial_id, "
+                        + "fairness.trials::text AS trials, fairness.wins::text AS wins, fairness.expected_win_probability_ppm, "
+                        + "fairness.observed_win_probability_ppm, fairness.z_score::text AS z_score, fairness.chi_square::text AS chi_square, "
+                        + "fairness.tolerance_chi_square::text AS tolerance_chi_square, fairness.created_at "
+                        + "FROM public.casino_dice_fairness() AS fairness")
+                .query().listOfRows()));
+    }
+
+    private static List<Map<String, Object>> shape(List<Map<String, Object>> rows) {
+        return rows.stream().map(com.moneyverse.api.domain.earlygame.controller.EarlyGameReadsController::nodeShape).toList();
+    }
+
     // ---- internals ----
 
     private Map<String, Object> play(String sql, Object... params) {

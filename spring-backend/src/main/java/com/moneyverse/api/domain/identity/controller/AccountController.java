@@ -111,7 +111,7 @@ public class AccountController {
                     String plain = encryptionService.decrypt(name);
                     iden.put("displayName", plain == null ? "" : plain);
                     java.sql.Timestamp linked = rs.getTimestamp("linked_at");
-                    iden.put("linkedAt", linked == null ? null : linked.toInstant().toString());
+                    iden.put("linkedAt", linked == null ? null : com.moneyverse.api.common.time.JsTime.iso(linked.toInstant()));
                     return iden;
                 },
                 userId.get()

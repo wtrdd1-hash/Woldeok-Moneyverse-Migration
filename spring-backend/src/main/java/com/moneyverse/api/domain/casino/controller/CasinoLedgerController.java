@@ -81,6 +81,30 @@ public class CasinoLedgerController {
         return privateOk(casino.playTheme(key, actor, game, choice, stake));
     }
 
+    @GetMapping("/coin/terms")
+    @Operation(summary = "Coin game odds, stake limits and today's use (refused while the casino is closed)")
+    public ResponseEntity<?> coinTerms(HttpServletRequest request) {
+        return privateOk(casino.coinTerms(guard.actor(request)));
+    }
+
+    @GetMapping("/coin/fairness")
+    @Operation(summary = "Disclosed coin win probability and the trial evidencing it")
+    public ResponseEntity<?> coinFairness() {
+        return privateOk(casino.coinFairness());
+    }
+
+    @GetMapping("/games/terms")
+    @Operation(summary = "Every game's odds, payout and remaining exposure for today")
+    public ResponseEntity<?> gameTerms(HttpServletRequest request) {
+        return privateOk(casino.gameTerms(guard.actor(request)));
+    }
+
+    @GetMapping("/dice/fairness")
+    @Operation(summary = "Each dice game's disclosed odds and the trial evidencing them")
+    public ResponseEntity<?> diceFairness() {
+        return privateOk(casino.diceFairness());
+    }
+
     @GetMapping("/history")
     @Operation(summary = "The member's recent plays")
     public ResponseEntity<?> history(HttpServletRequest request) {
