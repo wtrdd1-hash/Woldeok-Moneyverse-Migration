@@ -101,7 +101,8 @@ public class CasinoLedgerService {
             ResponseStatusException mapped = translate(e);
             if (mapped.getStatusCode() == HttpStatus.CONFLICT) {
                 String state = switchState();
-                if (!"open".equals(state)) throw closed(state);
+                // An unreadable state proves nothing about closure: keep the rule refusal (Gemini review, round 3).
+                if (!"open".equals(state) && !"unknown".equals(state)) throw closed(state);
             }
             throw mapped;
         }

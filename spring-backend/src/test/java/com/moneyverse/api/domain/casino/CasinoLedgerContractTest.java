@@ -78,6 +78,17 @@ class CasinoLedgerContractTest {
         verifyNoInteractions(casino);
     }
 
+    /** Gemini round 3: an unreadable switch state must not turn a limit refusal (409) into 'casino disabled'. */
+    @Test void ruleRefusalStaysAConflictWhenTheSwitchStateCannotBeRead() {
+        org.springframework.jdbc.core.simple.JdbcClient jdbc = mock(org.springframework.jdbc.core.simple.JdbcClient.class);
+        when(jdbc.sql(anyString())).thenThrow(new org.springframework.dao.DataIntegrityViolationException("limit",
+                new java.sql.SQLException("daily stake limit reached", "P0001")));
+        var service = new CasinoLedgerService(jdbc);
+        var e = assertThrows(ResponseStatusException.class, () -> service.playCoin(UUID.fromString(KEY), ACTOR, "heads", 1));
+        assertEquals(HttpStatus.CONFLICT, e.getStatusCode());
+        assertEquals("casino_daily_stake_limit_reached", e.getReason());
+    }
+
     @Test void legacyRoutesNoLongerReadAMemberIdFromAHeader() {
         for (Method m : CasinoController.class.getDeclaredMethods()) {
             for (Parameter p : m.getParameters()) {
