@@ -81,8 +81,18 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String p = request.getRequestURI();
+        if (isPublicGalleryRead(request.getMethod(), p)) return true;
         return !isMemberPrivatePath(p) && !isAdminDiagnosticsPath(p)
                 && !(isWrite(request) && isSessionOnlyWritePath(p));
+    }
+
+    /**
+     * The published gallery list is a guest page (NestJS GET /photos had no session guard;
+     * 2026-11-25). Only GET/HEAD of the exact list path; submit, withdraw, mine and uploads
+     * stay member-only.
+     */
+    static boolean isPublicGalleryRead(String method, String p) {
+        return ("GET".equals(method) || "HEAD".equals(method)) && p.matches("^/(app-)?api/(v1/)?photos/?$");
     }
 
     /**
