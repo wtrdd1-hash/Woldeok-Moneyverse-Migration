@@ -56,7 +56,7 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
                    && !normalized.matches("^/api/(v1/)?(space|spaces)/real-estate/districts/?$")
                 || normalized.matches("^/api/(v1/)?progression(/.*)?$")
                 // Owner-scoped reads added 2026-11-25: a forged actor header is refused, not ignored.
-                || normalized.matches("^/api/(v1/)?(engagement|early-game|business-types|business-equity|rewards/availability)(/.*)?$")
+                || normalized.matches("^/api/(v1/)?(engagement|early-game|business-types|business-equity|rewards)(/.*)?$")
                 || normalized.matches("^/api/(v1/)?wallet/activity(/.*)?$")
                 // Security 2026-11-26: BankController writes (deposit, withdraw, movements, claim-interest,
                 // borrow, repay) checked the session but never the CSRF token.
