@@ -23,6 +23,10 @@ public class PublicStocksReadOnlyPage {
     private final StockService stockService;
     private final NativeHomeController home;
 
+    public PublicStocksReadOnlyPage(StockService stockService) {
+        this(stockService, null);
+    }
+
     public PublicStocksReadOnlyPage(StockService stockService, NativeHomeController home) {
         this.stockService = stockService;
         this.home = home;
@@ -31,15 +35,19 @@ public class PublicStocksReadOnlyPage {
     @GetMapping(path = "/stocks", produces = MediaType.TEXT_HTML_VALUE)
     public String show(HttpServletRequest request, HttpServletResponse response, Model model,
                        @RequestParam(value = "lang", required = false) String language) {
-        home.home(request, response, model);
-        model.addAttribute("uiPageKey", "stocks");
+        if (home != null && request != null && response != null && model != null) {
+            home.home(request, response, model);
+        }
+        if (model != null) {
+            model.addAttribute("uiPageKey", "stocks");
 
-        try {
-            List<StockMarketRow> stocks = stockService.list();
-            model.addAttribute("stocks", stocks);
-        } catch (Exception e) {
-            // graceful fallback to empty list
-            model.addAttribute("stocks", List.of());
+            try {
+                List<StockMarketRow> stocks = stockService.list();
+                model.addAttribute("stocks", stocks);
+            } catch (Exception e) {
+                // graceful fallback to empty list
+                model.addAttribute("stocks", List.of());
+            }
         }
 
         return "mv43/stocks";

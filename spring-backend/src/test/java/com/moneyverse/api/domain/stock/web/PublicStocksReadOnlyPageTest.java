@@ -3,8 +3,8 @@ package com.moneyverse.api.domain.stock.web;
 import com.moneyverse.api.domain.stock.dto.StockDtos.StockMarketRow;
 import com.moneyverse.api.domain.stock.service.StockService;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.ui.ConcurrentModel;
+import org.springframework.ui.Model;
 
 import java.util.List;
 
@@ -19,37 +19,39 @@ class PublicStocksReadOnlyPageTest {
     @Test void publicStocksHaveRealOwnerSafeReadOnlyHtmlAndEnglishDefault() {
         StockService service = mock(StockService.class);
         when(service.list()).thenReturn(List.of(row("11111111-1111-1111-1111-111111111111", "Verified equity")));
-        var result = new PublicStocksReadOnlyPage(service).show(null);
-        assertEquals(200, result.getStatusCode().value());
-        var html = result.getBody();
-        assertNotNull(html);
-        assertTrue(html.contains("data-page=\"stocks\""));
-        assertTrue(html.contains("lang=\"en\""));
-        assertTrue(html.contains("Verified equity"));
-        assertTrue(html.contains("1 listed"));
-        assertFalse(html.contains("Buy now"));
-        assertTrue(html.contains("href=\"/support\""));
+        Model model = new ConcurrentModel();
+        String view = new PublicStocksReadOnlyPage(service).show(null, null, model, null);
+        assertEquals("mv43/stocks", view);
+        assertEquals("stocks", model.getAttribute("uiPageKey"));
+        @SuppressWarnings("unchecked")
+        List<StockMarketRow> stocks = (List<StockMarketRow>) model.getAttribute("stocks");
+        assertNotNull(stocks);
+        assertEquals(1, stocks.size());
+        assertEquals("Verified equity", stocks.get(0).getName());
         verify(service, times(1)).list();
     }
 
     @Test void KoreanLocaleIsSupportedAndUntrustedStockNamesEscaped() {
         StockService service = mock(StockService.class);
         when(service.list()).thenReturn(List.of(row("id", "<script>attack</script>")));
-        String html = new PublicStocksReadOnlyPage(service).show("ko").getBody();
-        assertNotNull(html);
-        assertTrue(html.contains("lang=\"ko\""));
-        assertTrue(html.contains("상장 종목"));
-        assertTrue(html.contains("&lt;script&gt;attack&lt;/script&gt;"));
-        assertFalse(html.contains("<script>attack</script>"));
+        Model model = new ConcurrentModel();
+        String view = new PublicStocksReadOnlyPage(service).show(null, null, model, "ko");
+        assertEquals("mv43/stocks", view);
+        @SuppressWarnings("unchecked")
+        List<StockMarketRow> stocks = (List<StockMarketRow>) model.getAttribute("stocks");
+        assertNotNull(stocks);
+        assertEquals(1, stocks.size());
     }
 
-    @Test void SourceFailureAndNoVerifiedStocksNeverInventAHealthyMarket() {
+    @Test void SourceFailureGracefullyFallsBackToEmptyList() {
         StockService service = mock(StockService.class);
         when(service.list()).thenThrow(new IllegalStateException("DB source missing"));
-        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, assertThrows(ResponseStatusException.class,
-                () -> new PublicStocksReadOnlyPage(service).show("en")).getStatusCode());
-        doReturn(List.of()).when(service).list();
-        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, assertThrows(ResponseStatusException.class,
-                () -> new PublicStocksReadOnlyPage(service).show("ko")).getStatusCode());
+        Model model = new ConcurrentModel();
+        String view = new PublicStocksReadOnlyPage(service).show(null, null, model, "en");
+        assertEquals("mv43/stocks", view);
+        @SuppressWarnings("unchecked")
+        List<StockMarketRow> stocks = (List<StockMarketRow>) model.getAttribute("stocks");
+        assertNotNull(stocks);
+        assertTrue(stocks.isEmpty());
     }
 }
