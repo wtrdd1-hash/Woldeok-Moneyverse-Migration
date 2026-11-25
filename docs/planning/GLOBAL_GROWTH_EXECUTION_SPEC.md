@@ -1,5 +1,7 @@
 # Woldeok Moneyverse — Global Growth, International SEO & Overseas Service Execution Specification
 
+> **2026-11-25 owner-confirmed branch candidate:** English default and /en·/ko·/ja·/zh·/vi page URL prefixes. The [new decision](deltas/v2026.11.25.PLANREVIEW.1.md#planrev-dec-02--all-published-language-pages-use-a-prefix) supersedes conflicting older Korean-default/unprefixed-canonical/ko-alias clauses below. No live URL or runtime change.
+
 > Version: v2026.10.03.510
 > Status: PLANNING / implementation-ready detailed design
 > Date: 2026-10-03

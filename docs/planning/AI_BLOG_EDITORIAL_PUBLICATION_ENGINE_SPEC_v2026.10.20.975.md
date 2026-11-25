@@ -1,5 +1,7 @@
 # AI Blog Editorial, Verified Publication & Search-Growth Engine — v2026.10.20.975
 
+> **2026-11-25 owner-confirmed branch candidate:** English default and /en·/ko·/ja·/zh·/vi page URL prefixes. The [new decision](deltas/v2026.11.25.PLANREVIEW.1.md#planrev-dec-02--all-published-language-pages-use-a-prefix) supersedes conflicting older Korean-default/unprefixed-canonical/ko-alias clauses below. No live URL or runtime change.
+
 ## Authority addendum — v2026.10.22.1107 (superseding publication mode for GREEN only)
 - The newer [country-original/instant-publication design](AI_BLOG_COUNTRY_AUTO_PUBLISH_SPEC_v2026.10.22.1107.md) / [한국어](AI_BLOG_COUNTRY_AUTO_PUBLISH_SPEC_v2026.10.22.1107.ko.md) is explicitly adopted by the authoritative living Project Plan and Integrated Master. For **deterministically source-verified low-risk GREEN original educational articles only**, replace the v975 blanket *human prepublication approval* requirement with a safe atomic **immediate auto-publish → human review within 24h → automatic withdrawal when overdue** workflow. AMBER finance/tax/pension/current-rate/eligibility claims still need human prepublication approval; RED is blocked. v975's source receipts, role-separated publisher/DB ACL, idempotency, legacy route 403/503, correction and full platform/Test gate still apply. This is a planning clarification, not a release or blanket publisher unlock.
 

@@ -1,5 +1,7 @@
 # 긴급 전체 UI 재점검 및 개선 명세 — v2026.10.05.530
 
+> **2026-11-25 사용자 확정·브랜치 후보:** 영어 기본과 /en·/ko·/ja·/zh·/vi 화면 URL 접두사를 사용합니다. 아래의 과거 한국어 기본·무접두사 canonical·/ko 별칭 조항은 [새 결정](deltas/v2026.11.25.PLANREVIEW.1.ko.md#planrev-dec-02--모든-게시-언어의-화면-url-접두사)이 우선합니다. 실제 URL·운영은 변경하지 않았습니다.
+
 [English canonical](EMERGENCY_FULL_UI_REAUDIT_SPEC.md) | **한국어**
 
 > 버전: v2026.10.05.530
