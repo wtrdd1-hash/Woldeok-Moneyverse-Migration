@@ -30,9 +30,9 @@
 - [x] 문서 브랜치 15개 통합
 - [x] CI classify / policy 수정
 - [x] #3426 필수 검사 classify·policy·runtime-check·spring-web-check 전부 통과
-- [ ] #3426 main 병합 — **소유자 승인 리뷰 1건 필요**(main 보호 규칙, 작성 계정 자기 승인 불가; 관리자 우회는 하지 않음)
-- [ ] 포함 검증 후 브랜치 삭제·PR 닫기
-- [ ] 디자인 후보 3개 archive 태그 후 삭제
+- [x] #3426 main 병합(3fcf446f05): 작성·소유 계정이 같아 리뷰 불가 → 소유자 승인으로 enforce_admins 를 이 병합에만 끄고 관리자 병합, 즉시 재활성(enforce_admins=true 확인).
+- [x] 포함 검증 후 브랜치 삭제 35개(부록 A). 원격 브랜치 49→6, 열린 PR 42→5.
+- [x] 디자인 후보 3개 archive 태그 후 삭제(부록 A).
 
 ## 2. 미구현 항목 전수 조사(근거)
 
@@ -163,4 +163,47 @@ NestJS 원본이 없는 11개(연금 일부, board/stock-posts 쿼리, bonds rol
 
 ## 부록 A. 삭제한 브랜치와 마지막 SHA
 
-(삭제 실행 시 기록)
+- `fe-c/support-chat-locale-route-20261124-0745` PR#3413 — `e6206a46df28c2da0c503f9b19cfe9f98e3be29e`
+- `fe-a-guest-finance-20261124-0905` PR#3421 — `d98214fe11925462719d1c97c1fbdace430e3575`
+- `fe-b-blog-unpublished-20261124-0925` PR#3424 — `04666e69128f6b7de8db6ec01f6ca0f4fd139fd3`
+- `docs/claudex-loop-install-20261124-1319` PR#3431 — `7894fec2efefd3af17ff622216a3c531da4af6e7`
+- `docs/multi-skill-install-20261124-1321` PR#3432 — `3e1cb37bf7b0b3508d912e1e5b6ffc050dfa227e`
+- `docs/token-tools-20261124-1340` PR#3433 — `414bd7c10f44c5d4eca4376cc50155fd8d6dfc09`
+- `docs/omniroute-feasibility-20261124` PR#3434 — `82dfeb55343e3b74b51a720712275f1dd1d17e66`
+- `docs/omniroute-install-20261124-1345` PR#3435 — `638c3c8690d488c6501b24f4d6cf9077f019906a`
+- `docs/guarded-four-agent-skills-20261124-1431` PR#3436 — `9311a1cb34d7a47f274b07830d18c4f38aa72718`
+- `fix/public-ads-clear-disclosure-20261123` PR#3401 — `673a77b2f26e63f7d80d5be61112749e9018df80`
+- `docs/agent-tools-observer-mem-20261124-1657` PR#3439 — `488c173aeeb4ae6dbb8c5b9f8d70101d80ac5a1f`
+- `docs/reel-ten-skills-20261124-1800` PR#3440 — `97b575ff0da9f38d51a300d9dda722ddba25191a`
+- `feat/stitch-design-skill-v2026.11.24.0818` PR#3415 — `098d487a00cc220af5dad2fdc23a2596c8f21394`
+- `audit/fe-automation-verification-20261124-0758` PR#3414 — `68a1271be7e77e3bcb375be687ea9310238294d5`
+- `fix/fe-c-chat-locale-contract-v2026.11.24.0826` PR#3416 — `b902a7f9cede8d1fbab0b98b588c16a01f25db79`
+- `audit/security-review-20261125` PR#3445 — `8e6a967969127348a25a00a6fc52f73875dbadec`
+- `docs/guild-home-qa-20261124-1646` PR#3437 — `0d6bdc94e2d5bb1593f2e50b08f3d08636c5ea77`
+- `docs/additional-agent-tools-20261124-1807` PR#3441 — `936a2ce2d4b3c92fe6c4b3ca18e11f943de347ca`
+- `docs/design-skills-v2026.11.24.1225` PR#3429 — `dc031340ac1b0e497d5a58fbdd2f44b46e3010d1`
+- `design/ui-ux-180-pages-20261124` PR#3443 — `b0e7c14e1440a9608815cc91007c594db0a62f31`
+- `fix/test-ingress-seo-semantic-20261124` PR#3412 — `987be01b215dcd372165ab54c04a1caacf594dbd`
+- `docs/reel-27-resource-architecture-v20261123-12` PR#3408 — `9133b27e93c4f188d5cba31d5af7b49d2588df14`
+- `audit/v2026.11.24.2-design-instruction-violations` PR#3419 — `434eb14368ef3099cfbfde736511126d0104c318`
+- `docs/nov23-next-spring-architecture-v2026-11-24-1` PR#3423 — `bdec6e9f6164b79e58cc2287d3cad927f6441799`
+- `docs/strict-test-server-governance-v2026.11.23.1` PR#3403 — `dfef8ef3953afe4ed4e81015d5e8ccf5c6c0826a`
+- `docs/cross-repo-conflict-audit-v2026.11.25.001` PR#3444 — `ace1e222fa548471d7410df7d9cd84ac9c7795aa`
+- `docs/auto-fe-v10-test-deploy-20261123` PR#3410 — `c29fd24056d5e7b153463a10599e0c15ae6c1fc1`
+- `audit/frontend-readiness-20261123-2300` PR#3409 — `4df4ed047403c6c8456d7b42c91734151840289d`
+- `fix/test-legal-scoped-responsive-20261124` PR#3411 — `38ccb1f0c6e547758da405c2a8f63f632849947e`
+- `fix/test-frontend-real-backend-20261123` PR#3407 — `a61f6d8b9df05bb9f3daee9f8acff067b15abb21`
+- `docs/v2026.11.24.1-single-design-reference` PR#3417 — `184455833c76eb873be40ee46eff5c7dd132ab4d`
+- `docs/test-frontend-acceptance-evidence-20261123` PR#3420 — `12419eb7781c94ffb0896cde3228253e3f1cfca8`
+- `integrate/all-branches-to-main-v20261124`  — `bc0ad8078540d9f5e70991d8e85c277a8e037323`
+- `integrate/branches-docs-unification-20261124` PR#3426 — `d3591e8b6f942dafc5bc9c4edf5cea71f9f7c916`
+- `fe/next-spring-test-connect-20261124` PR#3430 — `c154bfc27a2627bd303dbde3e080fe36a087b677`
+
+보존 태그:
+- 2fdb2a07980f822848a3b72955656542d7b43244 fe/v12-shell-core10-20261124 -> tag archive/fe-v12-shell-core10-20261124
+- 6ec268e667a6fb668e636d259df402171f3a3b61 design/v2026.11.24.12-rebuild -> tag archive/design-v2026.11.24.12-rebuild
+- b587d2790e7a06d84707d9c81fd68488e5b9e888 fix/v2026.11.24-visual-repair -> tag archive/fix-v2026.11.24-visual-repair
+
+남은 원격 브랜치: `audit/all-planning-review-20261125`, `audit/spring-backend-architecture-20261125`, `docs/guild-home-remedy-v2026.11.24.1650`, `feat/spring-ledger-wiring-20261125`, `feat/total-game-ui-revamp-v2026.11.24.11`, `main`
+
+복구: `git push origin <sha>:refs/heads/<branch>`
