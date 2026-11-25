@@ -31,13 +31,15 @@ public class BankController {
 
     private String resolveUserId(HttpServletRequest request, String headerUserId) {
         var session = auth.resolveSession(request);
-        if (session.isPresent() && session.get().isSignedIn() && session.get().getUserId() != null) {
-            return session.get().getUserId().toString();
+        // Critical (security review 2026-11-25): never fall back to a caller-supplied header.
+        if (session.isEmpty() || !session.get().isSignedIn() || session.get().getUserId() == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요한 금융 서비스입니다.");
         }
-        if (headerUserId != null && !headerUserId.isBlank()) {
-            return headerUserId.trim();
+        String actor = session.get().getUserId().toString();
+        if (headerUserId != null && !headerUserId.isBlank() && !headerUserId.trim().equalsIgnoreCase(actor)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "forged_actor_header");
         }
-        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요한 금융 서비스입니다.");
+        return actor;
     }
 
     @GetMapping(path = {"/standing", "/loans", ""})

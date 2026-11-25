@@ -50,7 +50,9 @@ public class StockLeagueController {
         List<StockLeagueParticipantDto> whales = leagueService.getWhales(10);
 
         // Public read: a visitor without identity simply has no participation (no fixed fallback member).
-        UUID currentUserId = (headerUserId == null || headerUserId.isBlank()) ? null : resolveUserId(request, headerUserId);
+        // A caller-supplied header is not an identity (security review 2026-11-25): the public
+        // league view shows no personal participation until it reads the verified session.
+        UUID currentUserId = null;
         StockLeagueParticipantDto myParticipation = currentUserId == null ? null : leagueService.getMyParticipation(currentSeason.getId(), currentUserId);
         List<CopyTradingSubscriptionDto> mySubscriptions = currentUserId == null ? List.of() : leagueService.getMySubscriptions(currentUserId);
 
