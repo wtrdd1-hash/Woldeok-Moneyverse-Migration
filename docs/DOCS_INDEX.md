@@ -15,6 +15,9 @@
 ## v2026.11.24.1340 — Token-tool reel review / Graphify engine
 - [English](development/TOKEN_TOOL_REEL_REVIEW_v2026.11.24.1340.md) / [한국어](development/TOKEN_TOOL_REEL_REVIEW_v2026.11.24.1340.ko.md). Exact four tool names unverified; Graphify isolated engine installed. No deployment.
 
+## v2026.11.24.1345 — OmniRoute isolated development gateway
+- [English](development/OMNIROUTE_INSTALL_v2026.11.24.1345.md) / [한국어](development/OMNIROUTE_INSTALL_v2026.11.24.1345.ko.md). Local health and auth rejection verified; provider integration pending. No app deployment.
+
 ## v2026.11.20.1 — 18 November UI baseline + five-language/global support authority (docs only)
 [Official EN plan](planning/NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.md) / [한국어](planning/NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.ko.md): 18 Nov PC/mobile navy-violet design binding for all eventual Spring MVC+Thymeleaf website screens, manual+auto EN/KO/JA/ZH/VI and one safe admin support/member chat launcher everywhere. Old mockup-only scope and Next runtime plans do not override latest owner directive. Current runtime and Production **not** certified by this documentation-only update.
 
