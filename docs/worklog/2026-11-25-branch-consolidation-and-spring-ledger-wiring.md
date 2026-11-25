@@ -176,7 +176,13 @@ NestJS 원본이 없는 11개(연금 일부, board/stock-posts 쿼리, bonds rol
   E2E 재실행 중 기존 결함 발견: /api/v1/banking/pockets 처리기 중복(로그인 회원 500) + 중복 이체가 원장 없는 함수 호출·DB 오류 노출 → PocketController 단일화.
   Test: API 전수·로그인 E2E·화면 전부 정상, 오류 0. 운영 배포(백업 …before-cd46b21fde), 화면 12개 200, 30분 오류 감시.
 - 저장소 규칙 위반 정정: AGENTS.md 는 커밋에 Co-Authored-By: Claude 금지. 이번 세션 이전 커밋들에 포함됨(일부 main 병합) — 이력 재작성은 하지 않고 이후 커밋부터 제외.
-- 오프호스트 백업(P0, PR #3448) 미완료.
+- [해결 90d4b3e015] 인증 없는 공개 쓰기 점검: 활동 수집(헤더 신원 → 세션만, 한 요청 50건 상한; BFF 는 쿠키만 보내 기존엔 회원이 익명 기록),
+  Discord interactions(Ed25519 서명 검증, 키 미설정 시 전부 401; 운영 접근 로그상 호출 0건), 배너 클릭(저장 없이 recordedAt → 202 recorded=false).
+  도움말 신고·신문 투표는 저장도 주장도 하지 않아 유지. Test 실측 후 운영 배포(백업 …before-90d4b3e015).
+- [해결 352] 원장 없는 금전 함수 실행 권한 회수: marketplace_buy/create/bid/cancel, bank_transfer_pocket 2종, bank_archive_pocket 2종(근거 없는 포켓 잔액 현금화 가능).
+  Spring 호출 경로 없음 확인, Test·운영 적용, API·화면 전수 중 권한 오류 0. 함수는 남겨 두어 원장판으로 재사용 가능.
+- 업그레이드 후 운영 30분 감시: ERROR 0(19:08 경고는 점검용 GET→POST 전용 경로 405).
+- 오프호스트 백업(P0, PR #3448) 미완료 — 백업 대상 위치(외부 저장소) 소유자 결정 필요.
 - 로그인 회원 실사용 E2E 검증 경로 없음(테스트 계정 필요). 2026-11-14 내부 조폐 충전 6건 소유자 확인 필요.
 
 ## PR #3448(전체 기획 재검토) 반영
