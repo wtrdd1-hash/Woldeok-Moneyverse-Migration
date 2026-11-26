@@ -8,9 +8,10 @@ import {
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES, detectLocale, parseAcceptLanguage } from './locale';
 
 describe('SEO & i18n SSOT Route Integrity', () => {
-  it('enforces Korean product fallback and supports 5 languages', () => {
-    expect(DEFAULT_LOCALE).toBe('ko');
-    expect(SUPPORTED_LOCALES).toEqual(['ko', 'en', 'ja', 'zh', 'vi']);
+  // I18N-02 (owner directive 2026-11-26): English default and first, Korean second, then JA/ZH/VI.
+  it('defaults to English and lists English first among 5 languages', () => {
+    expect(DEFAULT_LOCALE).toBe('en');
+    expect(SUPPORTED_LOCALES).toEqual(['en', 'ko', 'ja', 'zh', 'vi']);
   });
 
   it('correctly maps hybrid GeoIP and Accept-Language headers', () => {
@@ -29,9 +30,10 @@ describe('SEO & i18n SSOT Route Integrity', () => {
     expect(parseAcceptLanguage('zh-CN,zh;q=0.9,en;q=0.8')).toBe('zh');
     expect(parseAcceptLanguage('fr-FR,fr;q=0.9')).toBeNull();
 
-    // Global default fallback
-    expect(detectLocale(null, null)).toBe('ko');
-    expect(detectLocale('XX', 'fr-FR')).toBe('ko');
+    // Global default fallback (I18N-02: English when no country or browser signal is usable;
+    // a Korean GeoIP country or Korean browser preference still selects Korean above).
+    expect(detectLocale(null, null)).toBe('en');
+    expect(detectLocale('XX', 'fr-FR')).toBe('en');
   });
 
   it('ensures all public sitemap routes are strictly public and indexable', () => {

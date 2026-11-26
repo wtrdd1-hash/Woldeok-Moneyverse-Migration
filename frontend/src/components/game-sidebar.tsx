@@ -25,11 +25,14 @@ import {
   D180_MEMBER_NAV,
   V10_ACCOUNT_ITEM,
   isAdminItemActive,
+  navLabel,
   isNavItemActive,
   type D180AdminIcon,
   type V10Icon,
 } from '@/components/v10-nav';
 import { useMountedViewer } from '@/components/use-mounted-viewer';
+import { useLocale } from '@/components/locale-provider';
+import { t } from '@/lib/translations';
 import { isAdministrator } from '@/lib/viewer-state';
 
 export const V10_ICONS: Record<V10Icon, LucideIcon> = {
@@ -84,59 +87,67 @@ function Row({ href, label, Icon, active }: { href: string; label: string; Icon:
  * /admin route sees the separate administrator navigation. The /admin layout
  * still gates every request on the server.
  */
-export function GameSidebar() {
+/**
+ * `embedded` renders the same role-filtered menu inside the mobile full-menu sheet (NAV-01), so
+ * desktop and mobile share one navigation model.
+ */
+export function GameSidebar({ embedded = false, onNavigate }: { readonly embedded?: boolean; readonly onNavigate?: () => void } = {}) {
   const pathname = usePathname() ?? '/';
   const viewer = useMountedViewer();
   const admin = viewer ? isAdministrator(viewer) : false;
   const adminView = admin && (pathname === '/admin' || pathname.startsWith('/admin/'));
+  const { locale } = useLocale();
 
   return (
     <aside
-      className="sticky top-0 flex h-screen w-[224px] min-w-[224px] flex-col border-r border-[var(--g1-line)] bg-[var(--g1-night-2)] px-3.5 pb-4 pt-6"
-      aria-label="월덕 머니버스"
+      className={embedded
+        ? 'flex h-full w-full flex-col bg-[var(--g1-night-2)] px-3.5 pb-4 pt-6'
+        : 'sticky top-0 flex h-screen w-[224px] min-w-[224px] flex-col border-r border-[var(--g1-line)] bg-[var(--g1-night-2)] px-3.5 pb-4 pt-6'}
+      aria-label={t('shell.brand', locale)}
+      onClick={(event) => { if (onNavigate && (event.target as HTMLElement).closest('a')) onNavigate(); }}
     >
-      <Link href="/" prefetch={false} className="mb-6 flex items-center gap-2.5 px-2" aria-label="월덕 머니버스 홈">
+      <Link href="/" prefetch={false} className="mb-6 flex items-center gap-2.5 px-2" aria-label={t('shell.brandHome', locale)}>
         {/* The real favicon is the only brand mark. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/favicon.ico" alt="" width={34} height={34} className="size-[34px] rounded-[9px]" />
         <span className="flex flex-col leading-tight">
-          <span className="text-base font-bold tracking-[-0.03em] text-[var(--g1-ink)]">월덕 머니버스</span>
-          <span className="text-[10px] text-[var(--g1-muted)]">월덕 커뮤니티</span>
+          <span className="text-base font-bold tracking-[-0.03em] text-[var(--g1-ink)]">{t('shell.brand', locale)}</span>
+          <span className="text-[10px] text-[var(--g1-muted)]">{t('shell.community', locale)}</span>
         </span>
       </Link>
 
       {adminView ? (
-        <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto" aria-label="관리자 메뉴">
-          <p className="px-3 pb-1.5 text-[11px] text-[var(--g1-faint)]">관리자</p>
+        <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto" aria-label={t('shell.adminMenu', locale)}>
+          <p className="px-3 pb-1.5 text-[11px] text-[var(--g1-faint)]">{t('shell.administrator', locale)}</p>
           {D180_ADMIN_NAV.map((item) => (
-            <Row key={item.href} href={item.href} label={item.label} Icon={ADMIN_ICONS[item.icon]} active={isAdminItemActive(item, pathname)} />
+            <Row key={item.href} href={item.href} label={navLabel(item, locale)} Icon={ADMIN_ICONS[item.icon]} active={isAdminItemActive(item, pathname)} />
           ))}
           <div className="mt-4 border-t border-[var(--g1-line)] pt-3">
-            <Row href="/" label="회원 화면으로" Icon={Home} active={false} />
+            <Row href="/" label={t('shell.backToMember', locale)} Icon={Home} active={false} />
           </div>
         </nav>
       ) : (
-        <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto" aria-label="메인 메뉴">
-          <p className="px-3 pb-1.5 text-[11px] text-[var(--g1-faint)]">내 머니버스</p>
+        <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto" aria-label={t('shell.mainMenu', locale)}>
+          <p className="px-3 pb-1.5 text-[11px] text-[var(--g1-faint)]">{t('shell.myMoneyverse', locale)}</p>
           {D180_MEMBER_NAV.map((item) => (
-            <Row key={item.href} href={item.href} label={item.label} Icon={V10_ICONS[item.icon]} active={isNavItemActive(item, pathname)} />
+            <Row key={item.href} href={item.href} label={navLabel(item, locale)} Icon={V10_ICONS[item.icon]} active={isNavItemActive(item, pathname)} />
           ))}
           <Row
             href={viewer?.signedIn ? '/account' : '/login'}
-            label={V10_ACCOUNT_ITEM.label}
+            label={navLabel(V10_ACCOUNT_ITEM, locale)}
             Icon={V10_ICONS.account}
             active={isNavItemActive(V10_ACCOUNT_ITEM, pathname)}
           />
           {admin && (
             <div className="mt-4 border-t border-[var(--g1-line)] pt-3">
-              <Row href="/admin" label="관리자 콘솔" Icon={ShieldCheck} active={false} />
+              <Row href="/admin" label={t('shell.adminConsole', locale)} Icon={ShieldCheck} active={false} />
             </div>
           )}
         </nav>
       )}
 
       <p className="border-t border-[var(--g1-line)] px-2.5 pt-3.5 text-[11px] leading-relaxed text-[var(--g1-faint)]">
-        {adminView ? '권한이 확인된 운영자 전용' : '함께 만드는 가상 경제'}
+        {adminView ? t('shell.verifiedOnly', locale) : t('shell.tagline', locale)}
       </p>
     </aside>
   );

@@ -3,17 +3,20 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { V10_ICONS } from '@/components/game-sidebar';
-import { V10_MOBILE_DOCK, isNavItemActive } from '@/components/v10-nav';
+import { V10_MOBILE_DOCK, isNavItemActive, navLabel } from '@/components/v10-nav';
+import { useLocale } from '@/components/locale-provider';
+import { t } from '@/lib/translations';
 import { useMountedViewer } from '@/components/use-mounted-viewer';
 
-/** DESIGN180 five-tab dock: 홈 퀘스트 거래소 지갑 계정, active tab in brand violet. */
+/** DESIGN180 five-tab dock (Home, Quests, Exchange, Wallet, Account) in the reader's language. */
 export function GameMobileDock() {
   const pathname = usePathname() ?? '/';
   const viewer = useMountedViewer();
+  const { locale } = useLocale();
 
   return (
     <nav
-      aria-label="하단 메뉴"
+      aria-label={t('shell.bottomNav', locale)}
       className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--g1-line)] bg-[var(--g1-night-2)]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
     >
       <ul className="mx-auto grid max-w-lg grid-cols-5">
@@ -32,7 +35,7 @@ export function GameMobileDock() {
                 }`}
               >
                 <Icon className={`size-5 ${active ? 'text-[var(--g1-violet)]' : ''}`} aria-hidden />
-                <span>{item.label}</span>
+                <span>{navLabel(item, locale)}</span>
               </Link>
             </li>
           );

@@ -1,13 +1,14 @@
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { screen, fireEvent, cleanup } from '@testing-library/react';
 import { describe, it, expect, afterEach } from 'vitest';
 import CompoundCalculatorPage from './page';
+import { renderKo } from '@/testing/render-ko';
 
 describe('CompoundCalculatorPage', () => {
   afterEach(() => {
     cleanup();
   });
   it('renders title and calculation controls properly', () => {
-    render(<CompoundCalculatorPage />);
+    renderKo(<CompoundCalculatorPage />);
 
     expect(screen.getByText(/복리·CAGR 계산기/)).toBeDefined();
     expect(screen.getByText('예상 만기 최종 수령액')).toBeDefined();
@@ -15,7 +16,7 @@ describe('CompoundCalculatorPage', () => {
   });
 
   it('updates calculation when principal is changed', () => {
-    render(<CompoundCalculatorPage />);
+    renderKo(<CompoundCalculatorPage />);
 
     const inputs = screen.getAllByRole('spinbutton');
     const principalInput = inputs[0]!;

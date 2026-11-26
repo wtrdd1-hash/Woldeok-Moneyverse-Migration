@@ -1,7 +1,8 @@
 export type Locale = 'ko' | 'en' | 'ja' | 'zh' | 'vi';
 
-export const DEFAULT_LOCALE: Locale = 'ko';
-export const SUPPORTED_LOCALES: readonly Locale[] = ['ko', 'en', 'ja', 'zh', 'vi'] as const;
+// I18N-02 (owner directive 2026-11-26): English is the default and first option, Korean second.
+export const DEFAULT_LOCALE: Locale = 'en';
+export const SUPPORTED_LOCALES: readonly Locale[] = ['en', 'ko', 'ja', 'zh', 'vi'] as const;
 export const LOCALE_COOKIE = 'wdmv_locale';
 export const DETECTED_LOCALE_COOKIE = 'wdmv_detected_locale';
 
@@ -63,7 +64,7 @@ export function parseAcceptLanguage(header: string | null | undefined): Locale |
  * Precise hybrid locale detection:
  * 1. GeoIP country code (Cloudflare `cf-ipcountry` / Vercel `x-vercel-ip-country` / `x-country-code`)
  * 2. Accept-Language header quality-weighted preferences
- * 3. Korean fallback when country and browser preferences are unavailable.
+ * 3. English fallback when country and browser preferences are unavailable.
  */
 export function detectLocale(country: string | null | undefined, acceptLanguage: string | null | undefined): Locale {
   const normalisedCountry = country?.trim().toUpperCase();

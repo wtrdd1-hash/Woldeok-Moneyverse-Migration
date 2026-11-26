@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { TRANSLATIONS } from '@/lib/translations';
 
 /**
  * DESIGN180 home (plan task 5): page head with actions, a three-cell StatRow
@@ -12,15 +13,20 @@ const source = readFileSync(join(__dirname, 'page.tsx'), 'utf8');
 describe('DESIGN180 home', () => {
   it('opens with the DESIGN180 page head and its actions', () => {
     expect(source).toContain("import { PageHeader } from '@/components/page-header'");
-    expect(source).toMatch(/<PageHeader[\s\S]*title="길드 홀"/);
+    // Localised through the catalog since I18N-01 (2026-11-26); Korean copy unchanged.
+    expect(source).toMatch(/<PageHeader[\s\S]*title=\{t\('title\.guildHall', locale\)\}/);
+    expect(TRANSLATIONS['title.guildHall']?.ko).toBe('길드 홀');
     expect(source).toContain('href="/quests"');
   });
 
   it('summarises balance, market breadth and listed stocks in one StatRow from live sources', () => {
     expect(source).toContain("import { StatRow } from '@/components/d180/primitives'");
-    expect(source).toContain("label: '사용 가능 잔액'");
-    expect(source).toContain("label: '오늘 시장'");
-    expect(source).toContain("label: '상장 종목'");
+    expect(source).toContain("label: t('home.available', locale)");
+    expect(source).toContain("label: t('home.todayMarket', locale)");
+    expect(source).toContain("label: t('home.listed', locale)");
+    expect(TRANSLATIONS['home.available']?.ko).toBe('사용 가능 잔액');
+    expect(TRANSLATIONS['home.todayMarket']?.ko).toBe('오늘 시장');
+    expect(TRANSLATIONS['home.listed']?.ko).toBe('상장 종목');
   });
 
   it('never shows the Spring macro-pulse figures, which are hard-coded (3.25% etc.)', () => {

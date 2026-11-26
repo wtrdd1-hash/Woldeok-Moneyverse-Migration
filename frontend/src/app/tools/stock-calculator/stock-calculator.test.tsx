@@ -1,13 +1,14 @@
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { screen, fireEvent, cleanup } from '@testing-library/react';
 import { describe, it, expect, afterEach } from 'vitest';
 import StockCalculatorPage from './page';
+import { renderKo } from '@/testing/render-ko';
 
 describe('StockCalculatorPage', () => {
   afterEach(() => {
     cleanup();
   });
   it('renders title and calculation cards', () => {
-    render(<StockCalculatorPage />);
+    renderKo(<StockCalculatorPage />);
 
     expect(screen.getByText('주식 물타기·평단가 & 수익률 계산기')).toBeDefined();
     expect(screen.getAllByText('물타기 후 최종 평단가').length).toBeGreaterThanOrEqual(1);
@@ -15,7 +16,7 @@ describe('StockCalculatorPage', () => {
   });
 
   it('allows clicking stock presets', () => {
-    render(<StockCalculatorPage />);
+    renderKo(<StockCalculatorPage />);
 
     const chipButtons = screen.getAllByText(/침팬지 반도체/);
     const chipButton = chipButtons[0]!;

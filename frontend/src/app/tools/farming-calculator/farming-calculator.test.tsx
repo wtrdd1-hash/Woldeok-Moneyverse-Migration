@@ -1,13 +1,14 @@
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { screen, fireEvent, cleanup } from '@testing-library/react';
 import { describe, it, expect, afterEach } from 'vitest';
 import FarmingCalculatorPage from './page';
+import { renderKo } from '@/testing/render-ko';
 
 describe('FarmingCalculatorPage', () => {
   afterEach(() => {
     cleanup();
   });
   it('renders farming calculator controls properly', () => {
-    render(<FarmingCalculatorPage />);
+    renderKo(<FarmingCalculatorPage />);
 
     expect(screen.getByText('직업별 일일 파밍 수익 최적화 계산기')).toBeDefined();
     expect(screen.getByText('일일 총 파밍 수입')).toBeDefined();
@@ -15,7 +16,7 @@ describe('FarmingCalculatorPage', () => {
   });
 
   it('allows changing profession', () => {
-    render(<FarmingCalculatorPage />);
+    renderKo(<FarmingCalculatorPage />);
 
     const traderButtons = screen.getAllByText(/트레이더/);
     const traderButton = traderButtons[0]!;

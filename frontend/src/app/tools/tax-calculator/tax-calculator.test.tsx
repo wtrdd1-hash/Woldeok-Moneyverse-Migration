@@ -1,6 +1,7 @@
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { screen, fireEvent, cleanup } from '@testing-library/react';
 import { describe, it, expect, afterEach } from 'vitest';
 import TaxCalculatorPage from './page';
+import { renderKo } from '@/testing/render-ko';
 
 describe('TaxCalculatorPage', () => {
   afterEach(() => {
@@ -8,7 +9,7 @@ describe('TaxCalculatorPage', () => {
   });
 
   it('renders title, category tabs, and tax calculation results', () => {
-    render(<TaxCalculatorPage />);
+    renderKo(<TaxCalculatorPage />);
 
     expect(screen.getByText('가상자산·금융투자 세금 계산기')).toBeDefined();
     expect(screen.getByText('가상자산 (코인/WLD)')).toBeDefined();
@@ -19,7 +20,7 @@ describe('TaxCalculatorPage', () => {
   });
 
   it('calculates 22% tax on crypto gains properly', () => {
-    render(<TaxCalculatorPage />);
+    renderKo(<TaxCalculatorPage />);
 
     // 기본 프리셋: 매도 5,000만, 매수 2,000만 -> 차익 3,000만, 공제 250만 -> 과표 2,750만
     // 세금: 2,750만 * 22% = 6,050,000 원
@@ -27,7 +28,7 @@ describe('TaxCalculatorPage', () => {
   });
 
   it('shows comprehensive tax warning when dividend exceeds 20,000,000 KRW', () => {
-    render(<TaxCalculatorPage />);
+    renderKo(<TaxCalculatorPage />);
 
     const dividendTab = screen.getByText('배당·이자소득');
     fireEvent.click(dividendTab);
