@@ -24,7 +24,12 @@ public class AdminApiBoundaryFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI();
+        String path;
+        try {
+            path = BoundaryPaths.of(request);
+        } catch (IllegalArgumentException malformed) {
+            return false; // cannot tell which route this is: keep the boundary (fail closed)
+        }
         // (2026-11-25) The blog notifier is admin-only; the former unauthenticated
         // exemption let anyone send Telegram/Discord messages with arbitrary links.
         // Older admin REST controllers also use /admin/** (without /api). Protect

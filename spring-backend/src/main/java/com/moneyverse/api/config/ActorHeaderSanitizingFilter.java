@@ -38,20 +38,22 @@ public class ActorHeaderSanitizingFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        if (request.getAttribute(SensitiveApiBoundaryFilter.VERIFIED_ACTOR_ATTRIBUTE) != null) {
-            chain.doFilter(request, response);
-            return;
-        }
+        // The member boundary substitutes the verified actor for X-User-Id / x-actor-user-id; nothing
+        // substitutes X-Admin-Id, so it is hidden on verified member paths as well.
+        boolean verified = request.getAttribute(SensitiveApiBoundaryFilter.VERIFIED_ACTOR_ATTRIBUTE) != null;
+        java.util.function.Predicate<String> hidden = verified
+                ? name -> name != null && "x-admin-id".equalsIgnoreCase(name)
+                : ActorHeaderSanitizingFilter::isActorHeader;
         chain.doFilter(new HttpServletRequestWrapper(request) {
             @Override public String getHeader(String name) {
-                return isActorHeader(name) ? null : super.getHeader(name);
+                return hidden.test(name) ? null : super.getHeader(name);
             }
             @Override public Enumeration<String> getHeaders(String name) {
-                return isActorHeader(name) ? Collections.emptyEnumeration() : super.getHeaders(name);
+                return hidden.test(name) ? Collections.emptyEnumeration() : super.getHeaders(name);
             }
             @Override public Enumeration<String> getHeaderNames() {
                 return Collections.enumeration(Collections.list(super.getHeaderNames()).stream()
-                        .filter(n -> !isActorHeader(n)).toList());
+                        .filter(n -> !hidden.test(n)).toList());
             }
         }, response);
     }

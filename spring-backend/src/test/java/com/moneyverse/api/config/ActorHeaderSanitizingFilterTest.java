@@ -54,10 +54,16 @@ class ActorHeaderSanitizingFilterTest {
     @Test void verifiedActorSubstitutedByTheBoundaryIsKept() throws Exception {
         var request = new MockHttpServletRequest("GET", "/api/v1/account/settings");
         request.addHeader("X-User-Id", FORGED);
+        request.addHeader("X-Admin-Id", FORGED);
         request.setAttribute(SensitiveApiBoundaryFilter.VERIFIED_ACTOR_ATTRIBUTE, Boolean.TRUE);
         var chain = new MockFilterChain();
         new ActorHeaderSanitizingFilter().doFilter(request, new MockHttpServletResponse(), chain);
-        assertSame(request, chain.getRequest());
+        var seen = (jakarta.servlet.http.HttpServletRequest) chain.getRequest();
+        // The boundary substitutes X-User-Id / x-actor-user-id; nothing ever substitutes X-Admin-Id,
+        // so it stays hidden on verified member paths too (review finding 2026-11-26).
+        assertEquals(FORGED, seen.getHeader("X-User-Id"));
+        assertNull(seen.getHeader("X-Admin-Id"));
+        assertFalse(seen.getHeaders("x-admin-id").hasMoreElements());
     }
 
     @Test void mintWriteNoLongerTakesItsActorFromAHeader() throws Exception {
