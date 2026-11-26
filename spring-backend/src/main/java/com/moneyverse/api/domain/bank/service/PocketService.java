@@ -25,33 +25,33 @@ public class PocketService {
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Rows from bank_owner_pockets (361), shaped as the web's SavingPocket (snake_case, money as
+     * canonical integer strings). An unreadable source is a 503: an empty list would read as
+     * "you have no pockets".
+     */
     public List<Map<String, Object>> listPockets(String userIdStr) {
         UUID userId = UUID.fromString(userIdStr);
-        String sql = """
-            SELECT id, name, balance, target_amount, target_date, theme_color, icon_code, is_archived, created_at
-            FROM bank_saving_pockets
-            WHERE user_id = ? AND is_archived = false
-            ORDER BY created_at ASC
-            """;
         try {
-            return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            return jdbcTemplate.query("SELECT * FROM public.bank_owner_pockets(?::uuid)", (rs, rowNum) -> {
                 Map<String, Object> pocket = new LinkedHashMap<>();
-                pocket.put("id", rs.getString("id"));
-                pocket.put("name", rs.getString("name"));
-                pocket.put("balance", rs.getLong("balance"));
-                pocket.put("targetAmount", rs.getObject("target_amount"));
+                pocket.put("pocket_id", rs.getString("pocket_id"));
+                pocket.put("name", rs.getString("pocket_name"));
+                pocket.put("balance", rs.getString("balance"));
+                pocket.put("target_amount", rs.getString("target_amount"));
                 Date td = rs.getDate("target_date");
-                pocket.put("targetDate", td != null ? td.toString() : null);
-                pocket.put("themeColor", rs.getString("theme_color"));
-                pocket.put("iconCode", rs.getString("icon_code"));
-                pocket.put("isArchived", rs.getBoolean("is_archived"));
-                Timestamp cat = rs.getTimestamp("created_at");
-                pocket.put("createdAt", cat != null ? cat.toInstant().toString() : null);
+                pocket.put("target_date", td != null ? td.toString() : null);
+                pocket.put("theme_color", rs.getString("theme_color"));
+                pocket.put("icon_code", rs.getString("icon_code"));
+                pocket.put("is_archived", rs.getBoolean("is_archived"));
+                pocket.put("created_at", rs.getTimestamp("created_at").toInstant().toString());
+                pocket.put("updated_at", rs.getTimestamp("updated_at").toInstant().toString());
                 return pocket;
             }, userId);
-        } catch (Exception e) {
-            log.error("[PocketService] listPockets error: {}", e.getMessage());
-            return List.of();
+        } catch (org.springframework.dao.DataAccessException e) {
+            log.warn("[PocketService] pocket list unavailable: {}", e.getClass().getSimpleName());
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "POCKETS_UNAVAILABLE");
         }
     }
 

@@ -10,8 +10,6 @@ src/main/java/com/moneyverse/api/domain/admin/parity/AdminParityReadsController.
 src/main/java/com/moneyverse/api/domain/admin/parity/AdminParityReadsController.java state_enterprises
 src/main/java/com/moneyverse/api/domain/admin/parity/AdminParityReadsController.java v_daily_economy_stats
 src/main/java/com/moneyverse/api/domain/admin/parity/AdminParityReadsController.java v_economy_summary
-src/main/java/com/moneyverse/api/domain/bank/service/BankService.java bank_saving_pockets
-src/main/java/com/moneyverse/api/domain/bank/service/PocketService.java bank_saving_pockets
 src/main/java/com/moneyverse/api/domain/bond/controller/AdminBondController.java treasury_bond_coupon_logs
 src/main/java/com/moneyverse/api/domain/bond/controller/AdminBondController.java treasury_bonds
 src/main/java/com/moneyverse/api/domain/bond/service/BondService.java treasury_bond_holdings
@@ -22,7 +20,6 @@ src/main/java/com/moneyverse/api/domain/kdic/service/KdicService.java deposit_in
 src/main/java/com/moneyverse/api/domain/kdic/service/KdicService.java deposit_insurance_premiums
 src/main/java/com/moneyverse/api/domain/kdic/service/KdicService.java insured_institutions
 src/main/java/com/moneyverse/api/domain/kdic/service/KdicService.java users
-src/main/java/com/moneyverse/api/domain/marketplace/service/MarketplaceService.java marketplace_listings
 src/main/java/com/moneyverse/api/domain/seo/controller/SeoController.java seo_crawler_logs
 src/main/java/com/moneyverse/api/domain/status/StatusTruthService.java content_status_snapshots
 src/main/java/com/moneyverse/api/domain/status/StatusTruthService.java content_status_sources

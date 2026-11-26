@@ -44,7 +44,10 @@ public class PocketController {
         if (userId.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("detail", "login required"));
         }
-        return ResponseEntity.ok(ApiResponse.ok(pocketService.listPockets(userId.get())));
+        var pockets = pocketService.listPockets(userId.get());
+        // The web reads /api/v1 as a bare array; the legacy alias keeps its envelope.
+        String uri = request.getRequestURI();
+        return ResponseEntity.ok(uri != null && uri.startsWith("/api/v1/") ? pockets : ApiResponse.ok(pockets));
     }
 
     @PostMapping(path = {
