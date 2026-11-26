@@ -16,6 +16,67 @@ export interface GameClock {
   readonly dayKey: string;
   /** Synthetic calendar date the week started on. */
   readonly weekKey: string;
+  /** GAMEYEAR: the server year, or null when the API did not certify one (shown as unavailable). */
+  readonly year: GameYear | null;
+}
+
+/** The server game year (SERVER_GAME_CLOCK_SPEC section 6): 365 game days, from the API only. */
+export interface GameYear {
+  readonly gameYear: number;
+  readonly dayOfYear: number;
+  readonly gameDaysPerYear: number;
+  readonly yearStartedAt: string;
+  readonly yearEndsAt: string;
+  readonly observedAt: string;
+  readonly calendarVersion: string;
+}
+
+function parseYear(v: Record<string, unknown>): GameYear | null {
+  const gameYear = Number(v.gameYear);
+  const dayOfYear = Number(v.dayOfYear);
+  const gameDaysPerYear = Number(v.gameDaysPerYear);
+  if (!Number.isSafeInteger(gameYear) || gameYear < 1) return null;
+  if (!Number.isSafeInteger(gameDaysPerYear) || gameDaysPerYear < 1) return null;
+  if (!Number.isSafeInteger(dayOfYear) || dayOfYear < 1 || dayOfYear > gameDaysPerYear) return null;
+  if (!iso(v.yearStartedAt) || !iso(v.yearEndsAt) || !iso(v.observedAt)) return null;
+  if (Date.parse(v.yearEndsAt) <= Date.parse(v.yearStartedAt)) return null;
+  if (typeof v.calendarVersion !== 'string' || v.calendarVersion.length === 0 || v.calendarVersion.length > 64) return null;
+  return { gameYear, dayOfYear, gameDaysPerYear, yearStartedAt: v.yearStartedAt, yearEndsAt: v.yearEndsAt,
+    observedAt: v.observedAt, calendarVersion: v.calendarVersion };
+}
+
+type YearLocale = 'ko' | 'en' | 'ja' | 'zh' | 'vi';
+
+/**
+ * "Moneyverse Year 28 · Day 1" in the reader's language (EN is the fallback, KO the default UI
+ * locale). Real timestamps are never formatted with this; it names the game calendar only.
+ */
+export function gameYearLabel(locale: string, year: GameYear, compact = false): string {
+  const y = year.gameYear.toLocaleString(locale === 'ko' ? 'ko-KR' : locale === 'ja' ? 'ja-JP' : locale === 'zh' ? 'zh-CN' : locale === 'vi' ? 'vi-VN' : 'en-US');
+  const d = year.dayOfYear;
+  const l = (['ko', 'en', 'ja', 'zh', 'vi'] as const).includes(locale as YearLocale) ? (locale as YearLocale) : 'en';
+  if (compact) {
+    return { en: `Y${y} · D${d}`, ko: `${y}년 · ${d}일차`, ja: `${y}年 · ${d}日目`, zh: `${y}年 · 第${d}天`, vi: `Năm ${y} · Ngày ${d}` }[l];
+  }
+  return {
+    en: `Moneyverse Year ${y} · Day ${d}`,
+    ko: `머니버스 ${y}년 · ${d}일차`,
+    ja: `マネーバース${y}年 · ${d}日目`,
+    zh: `Moneyverse 第${y}年 · 第${d}天`,
+    vi: `Năm Moneyverse ${y} · Ngày ${d}`,
+  }[l];
+}
+
+/** "Week 1,489 · day 4 of 7" in the reader's language. */
+export function gameWeekLabel(locale: string, week: number, dayOfWeek: number): string {
+  const w = week.toLocaleString(locale === 'ko' ? 'ko-KR' : 'en-US');
+  return ({
+    en: `Week ${w} · Day ${dayOfWeek}/7`,
+    ko: `${w}주차 · ${dayOfWeek}일째`,
+    ja: `第${w}週 · ${dayOfWeek}日目`,
+    zh: `第${w}周 · 第${dayOfWeek}天`,
+    vi: `Tuần ${w} · Ngày ${dayOfWeek}/7`,
+  } as Record<string, string>)[locale] ?? `Week ${w} · Day ${dayOfWeek}/7`;
 }
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
@@ -41,6 +102,7 @@ export function parseGameClock(value: unknown): GameClock | null {
     dayIndex, weekIndex, dayOfWeek, realSecondsPerDay, gameDaysPerWeek,
     dayStartedAt: v.dayStartedAt, dayEndsAt: v.dayEndsAt, weekStartedAt: v.weekStartedAt,
     dayKey: v.dayKey, weekKey: v.weekKey,
+    year: parseYear(v),
   };
 }
 
