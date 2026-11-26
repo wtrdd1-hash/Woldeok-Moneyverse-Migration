@@ -35,7 +35,7 @@ public class EncryptionService {
                 (internalToken != null && !internalToken.isBlank()) ? internalToken :
                         (appSecret != null && !appSecret.isBlank()) ? appSecret : null;
         if (rawKey == null) {
-            log.warn("[EncryptionService] no key material configured; stored ciphertext stays unreadable");
+            log.error("[EncryptionService] no key material configured; stored ciphertext stays unreadable (configure MONEYVERSE_SECURITY_ENCRYPTION_KEY)");
             this.secretKey = null;
             return;
         }
