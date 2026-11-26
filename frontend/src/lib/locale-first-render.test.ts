@@ -109,7 +109,8 @@ describe('GeoIP locale first-request propagation', () => {
     const response = proxy(new NextRequest('https://easy-scraping.com/', {
       headers: { 'cf-ipcountry': 'JP', 'user-agent': 'Googlebot/2.1' },
     }));
-    expect(response.headers.get('x-middleware-request-x-moneyverse-locale')).toBe('ko');
+    // Crawlers get the default locale regardless of IP; the default is English since I18N-02.
+    expect(response.headers.get('x-middleware-request-x-moneyverse-locale')).toBe('en');
     expect(response.cookies.get('wdmv_detected_locale')).toBeUndefined();
   });
 

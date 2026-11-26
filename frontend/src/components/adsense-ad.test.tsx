@@ -1,8 +1,9 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { AdSenseAd } from './adsense-ad';
 import * as viewerHook from '@/lib/use-viewer';
+import { renderKo } from '@/testing/render-ko';
 
 const route = vi.hoisted(() => ({pathname: '/tools'}));
 vi.mock('next/navigation', () => ({ usePathname: () => route.pathname }));
@@ -13,7 +14,7 @@ describe('AdSenseAd', () => {
       signedIn: true, consentCurrent: true, adminRoles: [],
     });
     route.pathname = '/tools';
-    const { container } = render(<AdSenseAd publisherId="ca-pub-5220225531544323" slot="2118692561" />);
+    const { container } = renderKo(<AdSenseAd publisherId="ca-pub-5220225531544323" slot="2118692561" />);
     // An unprefixed path follows the selected language, Korean by default.
     expect(screen.getByText(/광고.*Sponsored advertisement/)).toBeDefined();
     expect(container.querySelector('ins.adsbygoogle')).not.toBeNull();
@@ -24,7 +25,7 @@ describe('AdSenseAd', () => {
       signedIn: false, consentCurrent: true, adminRoles: [],
     });
     route.pathname = '/ko/blog/educational-post';
-    const { container } = render(<AdSenseAd publisherId="ca-pub-5220225531544323" slot="6000051656" />);
+    const { container } = renderKo(<AdSenseAd publisherId="ca-pub-5220225531544323" slot="6000051656" />);
     expect(screen.getByText(/광고.*Sponsored advertisement/)).toBeDefined();
     expect(container.querySelector('section[data-testid="sponsored-ad-container"]')).not.toBeNull();
     expect(container.querySelector('ins.adsbygoogle')).not.toBeNull();
@@ -33,7 +34,7 @@ describe('AdSenseAd', () => {
   it('fails closed before viewer identity is resolved', () => {
     vi.spyOn(viewerHook, 'useViewer').mockReturnValue(null);
     route.pathname = '/blog/long-article';
-    const { container } = render(<AdSenseAd publisherId="ca-pub-5220225531544323" slot="2118692561" />);
+    const { container } = renderKo(<AdSenseAd publisherId="ca-pub-5220225531544323" slot="2118692561" />);
     expect(container.querySelector('ins.adsbygoogle')).toBeNull();
   });
 
@@ -42,7 +43,7 @@ describe('AdSenseAd', () => {
       signedIn: true, consentCurrent: true, adminRoles: [],
     });
     route.pathname = '/stocks/CHIPS';
-    const { container } = render(<AdSenseAd publisherId="ca-pub-5220225531544323" slot="2118692561" />);
+    const { container } = renderKo(<AdSenseAd publisherId="ca-pub-5220225531544323" slot="2118692561" />);
     expect(container.querySelector('ins.adsbygoogle')).toBeNull();
   });
 
@@ -51,7 +52,7 @@ describe('AdSenseAd', () => {
       signedIn: true, consentCurrent: true, adminRoles: ['superadmin'],
     });
     route.pathname = '/tools';
-    const { container } = render(<AdSenseAd publisherId="ca-pub-5220225531544323" slot="2118692561" />);
+    const { container } = renderKo(<AdSenseAd publisherId="ca-pub-5220225531544323" slot="2118692561" />);
     expect(screen.queryByText(/Sponsored advertisement/)).toBeNull();
     expect(container.querySelector('ins.adsbygoogle')).toBeNull();
   });

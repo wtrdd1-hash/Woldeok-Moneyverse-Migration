@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { TRANSLATIONS } from '@/lib/translations';
 
 const app = (p: string) => readFileSync(join(__dirname, p), 'utf8');
 
@@ -26,7 +27,9 @@ describe('v921 first qualified experience before signup', () => {
   it('never invents live stock movers when public backend data is unavailable', () => {
     expect(source).not.toContain("symbol: 'CHIMU', name: '치무테크', cur: 3140");
     expect(source).toContain('movers.length === 0');
-    expect(source).toContain('시세 자료를 불러오지 못했습니다');
+    // Localised through the catalog since I18N-01; Korean copy unchanged.
+    expect(source).toContain("t('home.quotesFailed', locale)");
+    expect(TRANSLATIONS['home.quotesFailed']?.ko).toContain('시세 자료를 불러오지 못했습니다');
   });
 
   it('does not promise unverified WLD signup rewards in the sticky conversion bar', () => {
