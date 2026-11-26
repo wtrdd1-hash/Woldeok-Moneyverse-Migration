@@ -132,15 +132,10 @@ public class AdminAuthService {
             );
             roles.addAll(r);
         } catch (Exception e) {
-            log.warn("[AdminAuth] admin_current_roles error, falling back to user_roles: {}", e.getMessage());
-            try {
-                List<String> ur = jdbcTemplate.query(
-                    "SELECT role FROM user_roles WHERE user_id = ? AND role IN ('superadmin', 'operator', 'approver', 'server_operator', 'admin')",
-                    (rs, rowNum) -> rs.getString("role"),
-                    userId
-                );
-                roles.addAll(ur);
-            } catch (Exception ignored) {}
+            // Fail closed. The former fallback read user_roles (not granted by the migration
+            // chain) and so granted roles exactly when the authoritative function failed.
+            log.warn("[AdminAuth] admin_current_roles unavailable (fail closed)");
+            return List.of();
         }
         return roles;
     }

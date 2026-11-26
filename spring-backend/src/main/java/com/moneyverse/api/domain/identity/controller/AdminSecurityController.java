@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -39,10 +40,12 @@ public class AdminSecurityController {
         }
 
         Optional<UUID> uidOpt = adminAuthService.resolveAdminUserId(request);
-        List<String> roles = uidOpt.map(adminAuthService::getAdminRolesForUser)
-                .orElse(List.of("superadmin", "operator", "approver", "server_operator"));
+        // Only the roles admin_current_roles reports; never a default list (it used to answer every
+        // role, superadmin included, whenever the real ones could not be read).
+        List<String> roles = uidOpt.map(adminAuthService::getAdminRolesForUser).orElse(List.of());
         if (roles.isEmpty()) {
-            roles = List.of("superadmin", "operator", "approver", "server_operator");
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).header("Cache-Control", "no-store")
+                    .body(Map.of("ok", false, "code", "ADMIN_ROLES_UNAVAILABLE"));
         }
 
         Instant now = Instant.now();
@@ -79,10 +82,12 @@ public class AdminSecurityController {
         }
 
         Optional<UUID> uidOpt = adminAuthService.resolveAdminUserId(request);
-        List<String> roles = uidOpt.map(adminAuthService::getAdminRolesForUser)
-                .orElse(List.of("superadmin", "operator", "approver", "server_operator"));
+        // Only the roles admin_current_roles reports; never a default list (it used to answer every
+        // role, superadmin included, whenever the real ones could not be read).
+        List<String> roles = uidOpt.map(adminAuthService::getAdminRolesForUser).orElse(List.of());
         if (roles.isEmpty()) {
-            roles = List.of("superadmin", "operator", "approver", "server_operator");
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).header("Cache-Control", "no-store")
+                    .body(Map.of("ok", false, "code", "ADMIN_ROLES_UNAVAILABLE"));
         }
 
         Map<String, Object> res = new LinkedHashMap<>();
