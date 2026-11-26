@@ -1,28 +1,40 @@
 package com.moneyverse.api.domain.pension.service;
 
-import com.moneyverse.api.domain.pension.dto.PensionDtos.PensionOverview;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.web.server.ResponseStatusException;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.UUID;
 
-@SpringBootTest
-@ActiveProfiles("test")
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+/**
+ * Pension reads go through actor-bound or aggregate functions (308, 360). The former overview
+ * substituted a hard-coded vault balance and "certified" a payout rate that no source holds, and
+ * answered zeros when the database failed.
+ */
 class PensionServiceTest {
+    @Test void overviewReadsTheAggregateFunctionAndCertifiesNothingItCannotSource() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        new PensionService(jdbc).getOverview();
+        verify(jdbc).queryForObject(contains("public.pension_public_overview()"), any(RowMapper.class));
+    }
 
-    @Autowired
-    private PensionService pensionService;
+    @Test void anUnreadableOverviewIsUnavailableNotZero() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        when(jdbc.queryForObject(anyString(), any(RowMapper.class))).thenThrow(new DataAccessResourceFailureException("down"));
+        var e = assertThrows(ResponseStatusException.class, () -> new PensionService(jdbc).getOverview());
+        assertEquals(503, e.getStatusCode().value());
+    }
 
-    @Test
-    @DisplayName("국민연금 개요 통계 조회 시 기본 지표가 정상 반환되어야 한다")
-    void getOverviewTest() {
-        PensionOverview overview = pensionService.getOverview();
-        assertThat(overview).isNotNull();
-        assertThat(overview.getTotalAumWld()).isNotNull();
-        assertThat(overview.getBenchmarkAnnualPayoutRate()).isEqualTo("5.20%");
-        assertThat(overview.isAnnualPayoutRateCertified()).isTrue();
+    @Test void memberAccountReadIsActorBound() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        String actor = UUID.randomUUID().toString();
+        new PensionService(jdbc).readExistingAccount(actor);
+        verify(jdbc).queryForObject(contains("public.pension_owner_account(?::uuid)"), any(RowMapper.class), eq(actor));
     }
 }
