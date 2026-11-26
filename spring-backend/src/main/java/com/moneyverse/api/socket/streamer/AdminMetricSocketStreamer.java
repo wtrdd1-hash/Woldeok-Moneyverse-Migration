@@ -1,6 +1,7 @@
 package com.moneyverse.api.socket.streamer;
 
 import com.corundumstudio.socketio.SocketIOServer;
+import com.moneyverse.api.socket.interceptor.SocketSecurityInterceptor;
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.HikariPoolMXBean;
 import org.slf4j.Logger;
@@ -19,12 +20,20 @@ public class AdminMetricSocketStreamer {
 
     private static final Logger log = LoggerFactory.getLogger(AdminMetricSocketStreamer.class);
 
+    // Room members are re-verified on this interval rather than every 1 s tick: each check is a
+    // session + role lookup per administrator, and 15 s bounds how long a revoked session can
+    // keep receiving metrics.
+    static final long ADMIN_RECHECK_MILLIS = 15_000L;
+
     private final DataSource dataSource;
+    private final SocketSecurityInterceptor securityInterceptor;
     private SocketIOServer server;
     private final AtomicInteger activeSocketCount = new AtomicInteger(0);
+    private volatile long lastAdminRecheck = 0L;
 
-    public AdminMetricSocketStreamer(DataSource dataSource) {
+    public AdminMetricSocketStreamer(DataSource dataSource, SocketSecurityInterceptor securityInterceptor) {
         this.dataSource = dataSource;
+        this.securityInterceptor = securityInterceptor;
     }
 
     public void setServer(SocketIOServer server) {
@@ -90,8 +99,14 @@ public class AdminMetricSocketStreamer {
             );
             metrics.put("hikari", hikari);
 
+            long now = System.currentTimeMillis();
+            if (now - lastAdminRecheck >= ADMIN_RECHECK_MILLIS) {
+                lastAdminRecheck = now;
+                securityInterceptor.evictUnverifiedAdmins(
+                        server.getRoomOperations(SocketSecurityInterceptor.ADMIN_ROOM).getClients());
+            }
             // 관리자 룸으로만 스트리밍하여 일반 트래픽 부하 방지
-            server.getRoomOperations("admin:control-tower").sendEvent("admin:metrics", metrics);
+            server.getRoomOperations(SocketSecurityInterceptor.ADMIN_ROOM).sendEvent("admin:metrics", metrics);
         } catch (Exception e) {
             log.debug("[MetricStreamer] Exception collecting metrics: {}", e.getMessage());
         }
