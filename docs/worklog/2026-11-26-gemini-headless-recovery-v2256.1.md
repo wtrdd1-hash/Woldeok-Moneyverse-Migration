@@ -1,0 +1,6 @@
+# Gemini headless recovery — v2026.11.26.2256.1
+[한국어](2026-11-26-gemini-headless-recovery-v2256.1.ko.md)
+
+Status: local synthetic response verified; independent security review and release gates remain HOLD. Gemini CLI 0.71.1 was installed and Google endpoint connectivity worked. Existing headless synthetic request timed out after 25 seconds. The upstream encrypted-file credential-storage option produced the expected synthetic reply in 24 seconds. A bounded read-only review wrapper was installed; an initial scratch-directory trust error (exit 55) was corrected by using a fresh directory within the existing trusted home scope, without changing trust or authentication settings. The wrapper returned the expected reply in 37 seconds, exit 0. Root cause is not conclusively isolated. No new credentials, provider routing, or repository/production data were sent. Existing credential values were not printed.
+
+Use the local wrapper with an approved, sanitized UTF-8 brief (24 KiB maximum), plan mode, JSON output, 90-second timeout, no automatic retry. The live agent's current work is preserved. Keep exact-SHA independent review, official Test and release gates. A synthetic reply is not an audit pass. Rollback removes the wrapper and handoff references; original CLI and global settings remain unchanged. Internal logs stay on MiniPC.
