@@ -19,3 +19,8 @@ Branch `perf/backend-capacity-20261126`, stacked on the game-year branch (carrie
 - Candidates: systemd drop-ins for the Production API (G1, Xmx512m, MemoryHigh 1 GiB / Max 1.25 GiB) and local inference (1 loaded model, 3 GiB cap); DB timeout restore SQL; host budget and RAM recommendation (16 GiB if inference and agent tooling stay on host). Details: `ops/capacity-v20261126/README.md`.
 - Verification: Spring 849 tests / 0 failures / 0 skipped on this branch; migration parity 6/6; sandbox apply of 001–354 clean.
 - Not done: authenticated write/ledger load, socket fan-out load, 5-minute stages, server maximum throughput (generator-bound ~3k RPS). Official Test publication HOLD (no designated publisher/common lease). Production apply needs owner approval.
+
+## Checkpoint v2026.11.26.1340.1 (owner order v1313.1)
+- Root disk had risen to 87 %: own regenerable artifacts (worktree package install ~1 GB, sandbox DB volume 1.4 GB, build output) removed; sandbox DB recreated on the data disk. Root back to 84 %. Other agents' files, logs and backups untouched.
+- Authenticated transfer load with 100 synthetic members: found a connection-pool deadlock caused by open-in-view (20 VUs: 9.8 rps, 10 % timeouts). Fixed with `spring.jpa.open-in-view: false` (test-first). After: 359–362 rps from 20 to 100 VUs, 0 errors, p99 783 ms at 100 VUs, 0 leak detections. Same-key races (20/50) produce one transaction; ledger invariants 0/0/0 after 120,588 transactions. Spring 850 / 0 / 0.
+- Found the realtime quote streamer reading a table the clean migration chain does not grant (works in Production only because of broader grants there) — security/backend follow-up recorded internally.

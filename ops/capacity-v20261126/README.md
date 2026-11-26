@@ -13,6 +13,22 @@ Status: **CODE_READY / candidates verified in an isolated synthetic sandbox. Not
 | `MusicManager`: Lavaplayer remote sources only when a Discord bot token is configured | Sandbox outbound twitch.tv connection gone; unit tests |
 | `loadgen.py`: staged loopback-only read-load generator (stdlib) | refuses non-loopback targets |
 
+## Authenticated financial writes (v1313.1)
+Synthetic members (sandbox seed mirrors `auth_complete_local_registration`, funded from MINT through `economy_post_transaction`) sign in through the real local sign-in API; `ledger_load.py` drives `POST /api/v1/wallet/transfers` (session + CSRF + idempotency key) and same-key races. Sandbox app role mirrors Production's broader SELECT grants (see security note) so behaviour matches Production.
+
+| Transfers, 60 s/stage | OSIV on (Boot default) | OSIV off (this branch) |
+|---|---|---|
+| 5 VUs | 453 rps, p99 39 ms, 0 errors | 438 rps, p99 43 ms, 0 errors |
+| 20 VUs | **9.8 rps**, p95 15 s, 10 % timeouts | 359 rps, p99 104 ms, 0 errors |
+| 50 VUs | **3.8 rps**, 87 % timeouts | 360 rps, p99 376 ms, 0 errors |
+| 100 VUs | not run | 362 rps, p99 783 ms, 0 errors |
+| Same key, 20/50 concurrent racers | 1 transaction | 1 transaction |
+| Ledger invariants after run | 0 / 0 / 0 (28,038 tx) | 0 / 0 / 0 (120,588 tx) |
+
+Root cause (Hikari leak detection + thread dump): open-in-view kept the JPA connection opened by a read-only `@Transactional` call for the whole request, and the following `JdbcTemplate` call borrowed a second connection; at ~pool-size concurrency every connection was held by a request waiting for another until the 20 s acquisition timeout. Fix: `spring.jpa.open-in-view: false` (one entity, no lazy associations). After the fix: 0 leak detections, plateau ~360 rps with 9/10 connections active and occasional row-lock waits — the database (2 CPU / 512 MiB sandbox cap) is the limit, not the pool size. Do not raise the pool to hide this.
+
+Invariant SQL: `ledger-invariants.sql` (unbalanced transactions, balance≠ledger, negative disallowed balances).
+
 ## JVM / memory candidate (`systemd/moneyverse-spring-backend.service.d/`)
 Measured Production today: G1, max heap 2.0 GiB (default), committed 460 MiB, used 144 MiB, metaspace 131 MiB, 112 threads, RSS 330 MiB + swap 557 MiB, no cgroup limit.
 
@@ -43,7 +59,6 @@ Decision: **B**. Do not raise the pool (10) or heap: pool saturation produced no
 
 ## Not done / limits (honest)
 - 60 s per stage, not 5 min. Read mix only; the Python generator plateaus near 3k RPS, so server maximum is not established.
-- No authenticated write/ledger load yet (needs synthetic member sessions in the sandbox); ledger invariants therefore not exercised under load.
 - No socket fan-out load. No Production or official Test change.
 - DB timeouts: Production lost migration 266's database settings (see `sql/restore-db-timeouts-candidate.sql`); restoring needs owner approval and Test job verification.
 
