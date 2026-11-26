@@ -10,3 +10,10 @@ Detailed findings and reproduction evidence are kept in the internal MiniPC reco
 - Owner decisions required (BLOCKED here): credential rotation; encryption key rotation with re-encryption; network bind/firewall policy.
 - Verification: Spring 851 tests / 0 failures; frontend 621 files / 3,238 tests, typecheck clean; new regression tests added.
 - Not yet: SAST/SCA rerun on the exact SHA, official Test publication by the automated QA deployer (G8), independent review (G7).
+
+## Resume v2026.11.26.1225.1 (after owner-ordered capacity cleanup)
+- Start 12:15 KST; main 1df1150e97 unchanged; PR #3456 head 12c4b9669d re-verified, base #3447 (8a48975a00). The one failing CI check (`runtime-check`, a content-publication DB integration test) fails identically on the base branch, so it predates this candidate; it belongs to the backend stabilisation step.
+- In progress: edge allowlist review. The main API chain is still permit-all with authorization in filters/controllers (deny-by-default chain remains open work, needs a route inventory). Two defence-in-depth fixes made now: the API description/Swagger UI is off unless explicitly enabled, and Production credentialed CORS no longer includes developer origins.
+- Network restriction (approved action 4): host firewall already drops the Spring and socket ports on non-loopback interfaces and the database port on the LAN interface; binding to loopback stays an optional extra.
+- Verification: new tests red first, then green; Spring 853 tests / 0 failures / 0 skipped. DB integration task not run locally (CI only).
+- Not yet: G7 re-review of the new SHA, SAST/SCA rerun, G8 publication (no designated publisher/common lease verified), Production (separate owner approval).
