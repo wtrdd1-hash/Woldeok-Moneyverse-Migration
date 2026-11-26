@@ -1,5 +1,8 @@
 # 📚 Document Catalog
 
+> **Mandatory all-agent Test gate — v2026.11.26.TESTGATE.1:** All GPT/Codex, Gemini, Claude and scheduled tasks must apply G0–G9 in [EN](operations/ALL_AGENT_TEST_GATE_v2026.11.26.1.md) / [KO](operations/ALL_AGENT_TEST_GATE_v2026.11.26.1.ko.md). Code is not done until eligible exact-SHA independent Test publication and QA; no direct Production changes or main integration without separate authorization.
+
+
 > **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](DOCUMENT_AUTHORITY.md) / [한국어](DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
 
 

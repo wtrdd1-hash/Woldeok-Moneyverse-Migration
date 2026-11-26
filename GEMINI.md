@@ -1,5 +1,8 @@
 # 코딩 에이전트 규칙 및 설정 가이드라인 (GEMINI.md)
 
+> **Mandatory all-agent Test gate — v2026.11.26.TESTGATE.1:** All GPT/Codex, Gemini, Claude and scheduled tasks must apply G0–G9 in [EN](docs/operations/ALL_AGENT_TEST_GATE_v2026.11.26.1.md) / [KO](docs/operations/ALL_AGENT_TEST_GATE_v2026.11.26.1.ko.md). Code is not done until eligible exact-SHA independent Test publication and QA; no direct Production changes or main integration without separate authorization.
+
+
 **현행 디자인 단일 기준 (v2026.11.24.1):** UI 작업 전 [현행 이미지 기준](docs/design/CURRENT_UI_DESIGN.ko.md), [180경로 매니페스트](docs/design/CURRENT_UI_DESIGN_MANIFEST.json), [11월23일 v10 갤러리](docs/design/game-ui-v2026.11.23.10/README.ko.md) 확인. **v8·11월18일 보관 이미지 사용 및 임의 대체 금지.** 실제 기능·API·승인·승격은 별도 검증한다.
 
 ## Optional Codex ↔ Gemini review handoff (v2026.11.22.1)
