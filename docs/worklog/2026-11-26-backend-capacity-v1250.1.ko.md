@@ -34,3 +34,8 @@
 - 체크포인트 v2026.11.26.2235.1 (소유자 지시 v2218.1, 읽은 스킬: spring-security-admin-auth, spring-postgres-finance-ledger, test-driven-development): `/admin/security`가 콘솔 진입 화면 계약을 DB에서 응답 — 콘솔 상태/만료/유휴는 `admin_session_touch`, 재인증은 현재 세션 행(5분 신선), `admin_login_policy`는 superadmin만(운영자는 정책 목록 없이 상태 수신), `available`, 실제 역할, 2단계 인증은 미등록(246에서 TOTP 폐지). 하나라도 읽지 못하면 503 `ADMIN_CONSOLE_STATUS_UNAVAILABLE`. RED 후 GREEN(테스트 3개), 샌드박스 SQL 점검으로 함수 형태와 superadmin 요구 확인. Spring 869/0/0.
 - 체크포인트 v2026.11.26.2300.1 (클럽 조회): ClubReadService가 체인이 부여하지 않은 테이블을 읽지 않음. users 조인은 중복(RESTRICT 외래 키)이라 제거, 회원 아바타는 신규 `member_profile_image_for`(`member_profile_view` 래핑 — 공개 설정 적용, 비활성 회원은 목록 중단 대신 NULL), 캔버스는 신규 `club_canvas_read`(마이그레이션 359). 가드 테스트 확장(RED 우선). 샌드박스(체인 권한): 활성·제한 회원이 섞인 합성 클럽 2행 조회, 앱 역할은 여전히 member_profiles/club_canvases 직접 조회 불가. Spring 869/0/0, parity 6/6.
 - G7(독립 검토) 22:40 KST: Gemini 연결은 되지만 상위 서비스가 재시도마다 503 "high demand", 두 묶음 모두 300초 시간 초과(HOLD). Codex는 2026-11-27 13:57 KST까지 한도 HOLD. 보조(같은 계열) 읽기 전용 보안 서브에이전트: APPROVE, 치명/높음 없음, 낮음 4건 재현 중.
+
+## 체크포인트 v2026.11.27.0811.1 — 회수 마이그레이션 반영 순서와 롤백
+- 격리 합성 샌드박스에서 배포 DB와 비슷한 권한으로 확인: 이전 애플리케이션 빌드는 로그인·세션·송금이 정상이고, 357 적용 후에는 로그인할 수 없음. 후보 애플리케이션은 357 전후 모두 정상.
+- 롤백: 회수 전 권한 스냅샷을 추가 방식으로 재적용하면 실효 권한 지문이 정확히 복원됨(357 전 `dae793a9…|917`, 후 `0e84f431…|758`, 재적용 후 `dae793a9…|917`, 1초 미만). 이후 샌드박스를 깨끗한 체인 권한(`2392cec2…|519`, 시작 시와 동일)으로 되돌림.
+- 반영 순서와 도구: `ops/privilege-alignment-v20261127/README.md`. 추가형 354/355/356/359 → 코드 → 그다음에만 357/358. 배포 DB 적용은 소유자 승인 필요, 상세는 내부 기록.
