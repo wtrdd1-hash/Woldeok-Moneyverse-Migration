@@ -52,9 +52,14 @@ public class MusicManager {
     private VoiceConnection voiceConnection;
     private final AtomicBoolean isConnecting = new AtomicBoolean(false);
 
-    public MusicManager() {
+    public MusicManager(@Value("${moneyverse.discord.bot-token:}") String botToken) {
         this.playerManager = new DefaultAudioPlayerManager();
-        AudioSourceManagers.registerRemoteSources(playerManager);
+        // Remote sources contact twitch.tv during construction. Without a bot token nothing can
+        // play audio, so a Test or sandbox runtime skips them instead of opening an outbound
+        // connection and keeping its threads.
+        if (botToken != null && !botToken.isBlank()) {
+            AudioSourceManagers.registerRemoteSources(playerManager);
+        }
         AudioSourceManagers.registerLocalSource(playerManager);
 
         this.player = playerManager.createPlayer();
@@ -63,6 +68,10 @@ public class MusicManager {
         this.provider = new LavaPlayerAudioProvider(player);
         this.player.setVolume(50); // 기본 볼륨 50%
         log.info("[MusicManager] Lavaplayer 2.2.3 audio engine initialized successfully.");
+    }
+
+    AudioPlayerManager playerManager() {
+        return playerManager;
     }
 
     public void setGatewayClient(GatewayDiscordClient client) {
