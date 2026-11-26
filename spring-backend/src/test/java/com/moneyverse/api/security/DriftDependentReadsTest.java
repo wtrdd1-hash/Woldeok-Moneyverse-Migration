@@ -24,7 +24,11 @@ class DriftDependentReadsTest {
             // Admin roles come only from admin_current_roles; a user_roles fallback would grant
             // roles from a table the chain does not grant when the authoritative function fails.
             "src/main/java/com/moneyverse/api/domain/admin/service/AdminAuthService.java",
-            "(?i)\\b(FROM|JOIN)\\s+(public\\.)?user_roles\\b");
+            "(?i)\\b(FROM|JOIN)\\s+(public\\.)?user_roles\\b",
+            // Club reads: users joins were redundant (RESTRICT foreign keys), avatars must respect
+            // profile visibility (member_profile_image_for), canvas via club_canvas_read (359).
+            "src/main/java/com/moneyverse/api/domain/club/service/ClubReadService.java",
+            "(?i)\\b(FROM|JOIN)\\s+(public\\.)?(users|member_profiles|club_canvases)\\b");
 
     @Test void signInSessionAndQuoteStreamReadThroughFunctions() throws Exception {
         for (var e : FORBIDDEN.entrySet()) {
