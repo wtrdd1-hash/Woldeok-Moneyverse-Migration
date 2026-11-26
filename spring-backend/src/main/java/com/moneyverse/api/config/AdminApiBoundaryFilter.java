@@ -25,9 +25,8 @@ public class AdminApiBoundaryFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        if (path.startsWith("/api/v1/blog/notify") || path.startsWith("/api/blog/notify")) {
-            return true;
-        }
+        // (2026-11-25) The blog notifier is admin-only; the former unauthenticated
+        // exemption let anyone send Telegram/Discord messages with arbitrary links.
         // Older admin REST controllers also use /admin/** (without /api). Protect
         // those JSON endpoints at the Spring entrypoint, including direct port access.
         // Actual SSR/static admin HTML is separately protected by the earlier

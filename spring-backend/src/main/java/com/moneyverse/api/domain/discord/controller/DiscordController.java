@@ -12,6 +12,18 @@ import java.util.*;
         "/integrations/discord"
 })
 public class DiscordController {
+    private static final com.fasterxml.jackson.databind.ObjectMapper JSON = new com.fasterxml.jackson.databind.ObjectMapper();
+    private final DiscordInteractionVerifier verifier;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public DiscordController() {
+        this(new DiscordInteractionVerifier(System.getenv("DISCORD_PUBLIC_KEY")));
+    }
+
+    public DiscordController(DiscordInteractionVerifier verifier) {
+        this.verifier = verifier;
+    }
+
 
     @GetMapping("/guilds/status")
     public ResponseEntity<Map<String, Object>> getGuildStatus() {
@@ -28,12 +40,25 @@ public class DiscordController {
     }
 
     @PostMapping("/interactions")
-    public ResponseEntity<Map<String, Object>> handleInteraction(@RequestBody(required = false) Map<String, Object> payload) {
+    public ResponseEntity<Map<String, Object>> handleInteraction(
+            @RequestBody(required = false) String rawBody,
+            @RequestHeader(value = "X-Signature-Ed25519", required = false) String signature,
+            @RequestHeader(value = "X-Signature-Timestamp", required = false) String timestamp) {
+        // AGENTS.md: verify the Ed25519 signature over timestamp + exact bytes before parsing
+        // anything (security review 2026-11-25: nothing was verified). No key = refuse all.
+        if (!verifier.verify(signature, timestamp, rawBody)) {
+            return ResponseEntity.status(401).body(Map.of("error", "invalid request signature"));
+        }
+        Map<String, Object> payload;
+        try {
+            payload = JSON.readValue(rawBody, new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "invalid interaction body"));
+        }
         // Discord Interaction PING (type: 1) -> PONG (type: 1)
-        if (payload != null && Objects.equals(payload.get("type"), 1)) {
+        if (Objects.equals(payload.get("type"), 1)) {
             return ResponseEntity.ok(Map.of("type", 1));
         }
-
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("type", 4); // ChannelMessageWithSource
         response.put("data", Map.of("content", "월덕 머니버스 서비스가 정상 응답했습니다."));
@@ -42,10 +67,9 @@ public class DiscordController {
 
     @PostMapping("/announcements")
     public ResponseEntity<Map<String, Object>> dispatchAnnouncement(@RequestBody(required = false) Map<String, Object> body) {
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("dispatchedAt", new Date().toInstant().toString());
-        res.put("targetChannelId", body != null ? body.get("channelId") : "1023470382965080084");
-        return ResponseEntity.ok(res);
+        // Security review 2026-11-25: this answered success with a dispatch time while sending
+        // nothing, to anyone. No announcement is sent from this route; say so.
+        return ResponseEntity.status(503).body(Map.of("success", false, "code", "DISCORD_ANNOUNCEMENT_NOT_AVAILABLE",
+                "message", "Announcements are not sent from this endpoint"));
     }
 }

@@ -27,21 +27,15 @@ public class CasinoController {
         return ApiResponse.ok(casinoService.getStats());
     }
 
-    @PostMapping("/play")
-    @Operation(summary = "슬롯/룰렛/하이로우 미니게임 베팅 집행")
-    public ApiResponse<Map<String, Object>> play(
-            @RequestHeader(value = "X-User-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId,
-            @Valid @RequestBody CasinoPlayRequest request) {
-        Map<String, Object> result = casinoService.play(userId, request);
-        return ApiResponse.ok(result, (String) result.get("message"));
-    }
-
-    @PostMapping("/dice/play")
-    @Operation(summary = "주사위 확률 베팅 집행")
-    public ApiResponse<Map<String, Object>> playDice(
-            @RequestHeader(value = "X-User-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId,
-            @Valid @RequestBody CasinoPlayRequest request) {
-        Map<String, Object> result = casinoService.play(userId, request);
-        return ApiResponse.ok(result, (String) result.get("message"));
+    /**
+     * Retired (QA 2026-11-25, audit P0): these took the member id from an
+     * X-User-Id header with a fixed default member. Plays now go through
+     * /coin/plays, /dice/plays and /theme/plays with the verified session owner.
+     */
+    @PostMapping({"/play", "/dice/play"})
+    @Operation(summary = "Retired: use /coin/plays, /dice/plays or /theme/plays")
+    public org.springframework.http.ResponseEntity<Map<String, Object>> retiredPlay() {
+        return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.GONE)
+                .body(Map.of("code", "CASINO_ROUTE_RETIRED", "use", "/api/v1/casino/coin/plays"));
     }
 }

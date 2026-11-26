@@ -16,6 +16,7 @@ import java.util.*;
         "/api/early-game",
         "/early-game"
 })
+/** Reads moved to EarlyGameReadsController (2026-11-25); the claim stays refused until it is ported with its ledger receipt. */
 public class EarlyGameController {
 
     private final UserAuthService userAuthService;
@@ -31,22 +32,6 @@ public class EarlyGameController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
         return sessionOpt.get().getUserId().toString();
-    }
-
-    @GetMapping("/today")
-    public ResponseEntity<Map<String, Object>> today(HttpServletRequest request) {
-        getUserIdOrThrow(request);
-        // Source-truth gate (QA 2026-11-25): hard-coded steps/events and a
-        // claim that reported 50,000 WLD without any ledger posting.
-        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "EARLYGAME_CANONICAL_SOURCE_UNAVAILABLE");
-    }
-
-    @GetMapping("/first-day")
-    public ResponseEntity<Map<String, Object>> firstDay(HttpServletRequest request) {
-        getUserIdOrThrow(request);
-        // Source-truth gate (QA 2026-11-25): hard-coded steps/events and a
-        // claim that reported 50,000 WLD without any ledger posting.
-        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "EARLYGAME_CANONICAL_SOURCE_UNAVAILABLE");
     }
 
     @PostMapping("/claims")

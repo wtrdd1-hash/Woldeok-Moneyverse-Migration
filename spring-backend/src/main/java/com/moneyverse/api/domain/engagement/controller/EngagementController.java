@@ -36,7 +36,7 @@ public class EngagementController {
         return session.get().getUserId();
     }
 
-    @GetMapping({"", "/", "/status", "/streak"})
+    @GetMapping({"/status", "/streak"})
     @Operation(summary = "연속 출석 체크 및 스트릭 현황 조회")
     public ResponseEntity<StreakStatusResponse> getStreakStatus(HttpServletRequest request) {
         return ResponseEntity.ok(engagementService.getStreakStatus(requireActor(request)));

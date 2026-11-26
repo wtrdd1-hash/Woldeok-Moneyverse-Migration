@@ -1,7 +1,8 @@
 /*
  * DESIGN180 (PR #3443 route structures; owner-approved spec
  * docs/superpowers/specs/2026-11-24-design180-next-implementation.md).
- * Navy canvas, violet brand, Korean rise red / fall blue, radii <= 8px.
+ * Passbook: navy cover, gold-foil brand, seal vermilion stamps, cream ledger pages;
+ * Korean rise red / fall blue, radii <= 8px. (Redesign 2026-11-26, see PRODUCT.md.)
  * Variable names keep the historical --g1-* prefix so every component and the
  * legacy remap below resolve to DESIGN180 without editing each page.
  * Imported last with html:root specificity.
@@ -13,34 +14,64 @@ html:root[data-point],
 html:root[data-locale][data-point] {
   color-scheme: dark;
 
-  --g1-void: #080b16;
-  --g1-night: #0c1020;
-  --g1-night-2: #0f1425;
-  --g1-plum: #141b2e;
-  --g1-plum-2: #1b2440;
-  --g1-plum-3: #302748;
-  --g1-track: #29334b;
-  --g1-line: #2d3753;
-  --g1-violet: #a98aff;
-  --g1-violet-ink: #6a4cdb;
-  --g1-gold: #f6cf87;
-  --g1-gold-hi: #ffe0a8;
-  --g1-gold-deep: #7a6232;
-  --g1-gold-ink: #2a1e05;
-  --g1-moon: #f3f5fc;
-  --g1-mint: #67d8b2;
-  --g1-ember: #ff5d73;
+  /* Passbook cover (owner direction 2026-11-26: bank passbook + server game calendar).
+     Navy cover is the ground, gold foil carries brand and primary actions, seal vermilion
+     is reserved for stamps, cream page paper only where the ledger is read. */
+  --g1-void: #060c1a;
+  --g1-night: #0a1428;
+  --g1-night-2: #0c1830;
+  --g1-plum: #11203c;
+  --g1-plum-2: #172a4b;
+  --g1-plum-3: #22385f;
+  --g1-track: #1e3253;
+  --g1-line: #283d63;
+  --g1-violet: #dcb873;
+  --g1-violet-ink: #8f6a2c;
+  --g1-gold: #f0d08a;
+  --g1-gold-hi: #ffe6b0;
+  --g1-gold-deep: #7a5f2a;
+  --g1-gold-ink: #1c1405;
+  --g1-moon: #f3f5fa;
+  --g1-mint: #6fd3ae;
+  --g1-ember: #ff5d6c;
   --g1-ember-ink: #2b0007;
-  --g1-ember-wash: #3b1d2a;
+  --g1-ember-wash: #3a1a26;
   --g1-discord: #4752c4;
   --g1-rare-common: #9ca3af;
-  --g1-rare-rare: #4ba3ff;
-  --g1-rare-epic: #cbb7ff;
-  --g1-ink: #f3f5fc;
-  --g1-text: #f3f5fc;
-  --g1-body: #d5dcea;
-  --g1-muted: #b9c3d9;
-  --g1-faint: #98a7c3;
+  --g1-rare-rare: #5aa9ff;
+  --g1-rare-epic: #e8cf9a;
+  --g1-ink: #f3f5fa;
+  --g1-text: #f3f5fa;
+  --g1-body: #d4dbe7;
+  --g1-muted: #b0bbcd;
+  --g1-faint: #93a1b8;
+
+  /* Passbook page and seal (cream inside pages, vermilion stamp). */
+  --mv-page: #f5efdf;
+  --mv-page-2: #ece4cf;
+  --mv-page-ink: #1b2232;
+  --mv-page-muted: #5a6070;
+  --mv-page-rule: #d6cbb0;
+  --mv-page-rule-strong: #b9aa86;
+  --mv-seal: #d9472e;
+  --mv-seal-wash: rgba(217, 71, 46, 0.12);
+  --mv-rise-on-page: #c8283a;
+  --mv-fall-on-page: #1f5fc4;
+  --mv-print: 'IBM Plex Mono', ui-monospace, monospace;
+
+  /* Tailwind's violet/purple/indigo utilities (733 hard-coded uses) re-hued to gold foil. */
+  --color-violet-50: #fbf6ea; --color-violet-100: #f5ead0; --color-violet-200: #ecd7a6;
+  --color-violet-300: #e4c587; --color-violet-400: #dcb873; --color-violet-500: #b48a40;
+  --color-violet-600: #8f6a2c; --color-violet-700: #74561f; --color-violet-800: #5a431a;
+  --color-violet-900: #3f2f13; --color-violet-950: #261c0b;
+  --color-purple-50: #fbf6ea; --color-purple-100: #f5ead0; --color-purple-200: #ecd7a6;
+  --color-purple-300: #e4c587; --color-purple-400: #dcb873; --color-purple-500: #b48a40;
+  --color-purple-600: #8f6a2c; --color-purple-700: #74561f; --color-purple-800: #5a431a;
+  --color-purple-900: #3f2f13; --color-purple-950: #261c0b;
+  --color-indigo-50: #f0f4fb; --color-indigo-100: #dde6f5; --color-indigo-200: #bccbe8;
+  --color-indigo-300: #96acd8; --color-indigo-400: #7290c8; --color-indigo-500: #5374b3;
+  --color-indigo-600: #3e5b96; --color-indigo-700: #304878; --color-indigo-800: #22355b;
+  --color-indigo-900: #17253f; --color-indigo-950: #0e1729;
   --g1-font-display: 'Noto Sans KR Variable', 'Noto Sans KR', sans-serif;
   --g1-font-num: 'Noto Sans KR Variable', 'Noto Sans KR', sans-serif;
   /* QA GH-02: lighter chamfer (was 12px). */
@@ -81,7 +112,7 @@ html:root[data-locale][data-point] {
   --popover: var(--g1-plum);
   --popover-foreground: var(--g1-text);
   --primary: var(--g1-violet);
-  --primary-foreground: var(--g1-night);
+  --primary-foreground: var(--g1-gold-ink);
   --secondary: var(--g1-plum-2);
   --secondary-foreground: var(--g1-text);
   --muted: var(--g1-plum-2);
@@ -105,7 +136,7 @@ html:root[data-locale][data-point] {
   --sidebar: var(--g1-night-2);
   --sidebar-foreground: var(--g1-muted);
   --sidebar-primary: var(--g1-violet);
-  --sidebar-primary-foreground: var(--g1-night);
+  --sidebar-primary-foreground: var(--g1-gold-ink);
   --sidebar-accent: var(--g1-plum-3);
   --sidebar-accent-foreground: var(--g1-ink);
   --sidebar-border: var(--g1-line);
@@ -267,3 +298,45 @@ html:root .g2-balance { font-family: var(--g1-font-num); }
    zinc-500 and dark:amber-700 text fell under 4.5:1 on #0c1020 panels. */
 .mv-shell main .text-zinc-500, .mv-shell main .text-zinc-600, .mv-shell main .text-slate-500 { color: var(--g1-muted); }
 .mv-shell main .dark\:text-amber-700, .mv-shell main .text-amber-700 { color: var(--g1-gold); }
+
+/* ---- Passbook primitives (redesign 2026-11-26) ---- */
+html:root ::selection { background: var(--g1-gold); color: var(--g1-gold-ink); }
+html:root { caret-color: var(--g1-gold); scrollbar-color: var(--g1-line) var(--g1-night); }
+
+/* A passbook leaf (inside page; not .mv-page, which page wrappers already use): cream paper with the printed ruling of a bankbook. */
+html:root .mv-leaf {
+  background-color: var(--mv-page);
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 35px, var(--mv-page-rule) 35px, var(--mv-page-rule) 36px);
+  color: var(--mv-page-ink);
+  border: 1px solid var(--mv-page-rule-strong);
+  border-radius: 6px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04), 0 10px 24px -14px rgba(0, 0, 0, 0.7);
+}
+html:root .mv-leaf .mv-leaf-muted { color: var(--mv-page-muted); }
+/* Passbook-printer numerals and dates: data, not decoration. */
+html:root .mv-print { font-family: var(--mv-print); font-variant-numeric: tabular-nums; letter-spacing: 0; }
+
+/* The seal: a vermilion stamp for receipts the ledger has confirmed. */
+html:root .mv-seal {
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1.5px solid var(--mv-seal); color: var(--mv-seal);
+  border-radius: 999px; font-weight: 800; line-height: 1;
+  transform: rotate(-8deg);
+  background: var(--mv-seal-wash);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:root .mv-seal[data-fresh="true"] { animation: mv-stamp 420ms cubic-bezier(0.23, 1, 0.32, 1) both; }
+}
+@keyframes mv-stamp {
+  from { transform: rotate(-8deg) scale(1.6); opacity: 0; filter: blur(2px); }
+  to { transform: rotate(-8deg) scale(1); opacity: 1; filter: blur(0); }
+}
+
+/* Gold-foil primary action. */
+html:root .g1-cta {
+  background: linear-gradient(180deg, var(--g1-gold-hi), var(--g1-violet));
+  color: var(--g1-gold-ink);
+  border: 1px solid var(--g1-gold-deep);
+}
+html:root .g1-cta:hover { background: var(--g1-gold-hi); color: var(--g1-gold-ink); }
+html:root .g1-cta:focus-visible { outline: 2px solid var(--g1-gold-hi); outline-offset: 2px; }

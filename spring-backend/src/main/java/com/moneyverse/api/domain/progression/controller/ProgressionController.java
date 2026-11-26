@@ -23,15 +23,17 @@ public class ProgressionController {
     private UUID resolveUserUuid(String xUserId, String xActorUserId) {
         String raw = (xUserId != null && !xUserId.isBlank()) ? xUserId.trim()
                 : (xActorUserId != null && !xActorUserId.isBlank()) ? xActorUserId.trim()
-                : "5f7b8b44-e4aa-40b8-b93a-800ec0151d20";
+                : null;
+        // No fixed fallback member (security review 2026-11-25): the session filter supplies the actor.
+        if (raw == null) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED, "SESSION_REQUIRED");
         try {
             return UUID.fromString(raw);
         } catch (IllegalArgumentException e) {
-            return UUID.fromString("5f7b8b44-e4aa-40b8-b93a-800ec0151d20");
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED, "SESSION_REQUIRED");
         }
     }
 
-    @GetMapping({"", "/", "/status"})
+    @GetMapping("/status")
     @Operation(summary = "유저 성장 단계 및 업적 요약 조회")
     public ResponseEntity<ProgressionStatusResponse> status(
             @RequestHeader(value = "X-User-Id", required = false) String xUserId,
@@ -61,13 +63,4 @@ public class ProgressionController {
         return ResponseEntity.ok(progressionService.creditStatus(userId));
     }
 
-    @GetMapping("/early-game")
-    @Operation(summary = "초심자 온보딩 가이드 및 퀘스트 상태 조회")
-    public ResponseEntity<EarlyGameStatusResponse> earlyGame(
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId,
-            @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId
-    ) {
-        UUID userId = resolveUserUuid(xUserId, xActorUserId);
-        return ResponseEntity.ok(progressionService.earlyGameStatus(userId));
-    }
 }

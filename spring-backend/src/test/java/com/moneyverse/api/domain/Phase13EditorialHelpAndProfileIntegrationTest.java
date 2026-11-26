@@ -33,14 +33,15 @@ public class Phase13EditorialHelpAndProfileIntegrationTest {
     }
 
     @Test
-    @DisplayName("2. 긴급 콘텐츠 삭제 접수 201 Created 반환")
+    @DisplayName("2. 형식이 잘못된 긴급 삭제 접수는 400 (가짜 접수 번호 없음)")
     void testSafetyEmergencyTakedown() throws Exception {
         mockMvc.perform(post("/safety/takedown")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"contentUrl\":\"https://example.com/test\",\"reason\":\"harassment\"}"))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.caseId").isString());
+                // Audit P0 (2026-11-25): a malformed report is refused; it used to get a fake case id.
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.caseId").doesNotExist());
     }
 
     @Test

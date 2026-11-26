@@ -443,6 +443,36 @@ public class UserAuthService {
      * Re-authenticates the current user's password.
      */
     @Transactional
+    /** Password check for one session; on success only that session is marked (security 2026-11-26). */
+    public boolean reauthenticateSession(UUID sessionId, UUID userId, String password) {
+        String credSql = "SELECT password_verifier FROM auth_local_credentials WHERE user_id = ? AND disabled_at IS NULL";
+        try {
+            String verifier = jdbcTemplate.queryForObject(credSql, String.class, userId);
+            if (verifier == null || !passwordEncoder.matches(password, verifier)) return false;
+            return jdbcTemplate.update("UPDATE auth_sessions SET reauthenticated_at = NOW() WHERE id = ? AND user_id = ? AND revoked_at IS NULL AND expires_at > NOW()",
+                    sessionId, userId) == 1;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /** NestJS ReauthGuard: this session confirmed the password within the window. */
+    public boolean hasRecentReauthentication(UUID sessionId, UUID userId, int windowSeconds) {
+        Integer n = jdbcTemplate.queryForObject("SELECT count(*)::int FROM auth_sessions WHERE id = ? AND user_id = ? AND revoked_at IS NULL "
+                + "AND expires_at > NOW() AND reauthenticated_at > NOW() - make_interval(secs => ?)", Integer.class, sessionId, userId, windowSeconds);
+        return n != null && n == 1;
+    }
+
+    /** Replaces the local password and signs out every other session of the member. False when no local credential exists. */
+    @Transactional
+    public boolean changePasswordForSession(UUID sessionId, UUID userId, String newPassword) {
+        int changed = jdbcTemplate.update("UPDATE auth_local_credentials SET password_verifier = ?, changed_at = ? WHERE user_id = ? AND disabled_at IS NULL",
+                passwordEncoder.encode(newPassword), Timestamp.from(Instant.now()), userId);
+        if (changed != 1) return false;
+        jdbcTemplate.update("UPDATE auth_sessions SET revoked_at = NOW() WHERE user_id = ? AND id <> ? AND revoked_at IS NULL", userId, sessionId);
+        return true;
+    }
+
     public boolean reauthenticate(UUID userId, String password) {
         String credSql = "SELECT password_verifier FROM auth_local_credentials WHERE user_id = ? AND disabled_at IS NULL";
         try {
@@ -462,6 +492,11 @@ public class UserAuthService {
      * Changes password.
      */
     @Transactional
+    /** The same Argon2id parameters every stored verifier uses. */
+    public String encodePassword(String raw) {
+        return passwordEncoder.encode(raw);
+    }
+
     public void changePassword(UUID userId, String newPassword) {
         String encoded = passwordEncoder.encode(newPassword);
         Instant now = Instant.now();
@@ -473,12 +508,10 @@ public class UserAuthService {
 
     public void setSessionCookie(HttpServletResponse response, String rawToken) {
         if (response == null) return;
-        Cookie cookie = new Cookie("mv_session", rawToken);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(30 * 24 * 60 * 60); // 30 days
-        response.addCookie(cookie);
+        // SameSite=Lax on the legacy cookie too (security review 2026-11-25): resolveSession
+        // falls back to it, so without SameSite a cross-site POST could ride on it.
+        response.addHeader("Set-Cookie",
+            "mv_session=" + rawToken + "; Path=/; Max-Age=" + (30 * 24 * 60 * 60) + "; HttpOnly; Secure; SameSite=Lax");
 
         response.addHeader("Set-Cookie",
             "__Host-mv_session=" + rawToken + "; Path=/; Max-Age=" + (30 * 24 * 60 * 60) + "; HttpOnly; Secure; SameSite=Lax");

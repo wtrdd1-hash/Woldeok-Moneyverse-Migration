@@ -84,52 +84,11 @@ public class PocketService {
 
     @Transactional
     public Map<String, Object> transferPocket(String userIdStr, String pocketIdStr, String direction, Long amount) {
-        UUID userId = UUID.fromString(userIdStr);
-        UUID pocketId = UUID.fromString(pocketIdStr);
-
-        if (amount == null || amount <= 0) {
-            throw new IllegalArgumentException("amount must be positive");
-        }
-
-        // Check pocket ownership
-        Long currentPocketBalance = jdbcTemplate.queryForObject(
-            "SELECT balance FROM bank_saving_pockets WHERE id = ? AND user_id = ? AND is_archived = false",
-            Long.class, pocketId, userId
-        );
-        if (currentPocketBalance == null) {
-            throw new NoSuchElementException("saving pocket not found");
-        }
-
-        Instant now = Instant.now();
-        if ("IN".equalsIgnoreCase(direction) || "DEPOSIT".equalsIgnoreCase(direction)) {
-            // Transfer from cash wallet into pocket
-            // For now update pocket balance
-            jdbcTemplate.update(
-                "UPDATE bank_saving_pockets SET balance = balance + ?, updated_at = ? WHERE id = ?",
-                amount, Timestamp.from(now), pocketId
-            );
-        } else {
-            // Transfer from pocket back to wallet
-            if (currentPocketBalance < amount) {
-                throw new IllegalStateException("insufficient pocket balance");
-            }
-            jdbcTemplate.update(
-                "UPDATE bank_saving_pockets SET balance = balance - ?, updated_at = ? WHERE id = ?",
-                amount, Timestamp.from(now), pocketId
-            );
-        }
-
-        Long updatedBalance = jdbcTemplate.queryForObject(
-            "SELECT balance FROM bank_saving_pockets WHERE id = ?",
-            Long.class, pocketId
-        );
-
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("pocketId", pocketId.toString());
-        res.put("direction", direction);
-        res.put("transferredAmount", amount);
-        res.put("pocketBalance", updatedBalance);
-        return res;
+        // Security review 2026-11-25: the previous body moved pocket balances without
+        // debiting or crediting cash (and zeroed balances on archive). No double-entry
+        // pocket path exists, so nothing is moved or acknowledged.
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "POCKET_LEDGER_NOT_JOURNALED");
     }
 
     @Transactional
@@ -147,19 +106,10 @@ public class PocketService {
 
     @Transactional
     public Map<String, Object> archivePocket(String userIdStr, String pocketIdStr) {
-        UUID userId = UUID.fromString(userIdStr);
-        UUID pocketId = UUID.fromString(pocketIdStr);
-
-        Long balance = jdbcTemplate.queryForObject(
-            "SELECT balance FROM bank_saving_pockets WHERE id = ? AND user_id = ?",
-            Long.class, pocketId, userId
-        );
-
-        jdbcTemplate.update(
-            "UPDATE bank_saving_pockets SET is_archived = true, balance = 0, updated_at = NOW() WHERE id = ? AND user_id = ?",
-            pocketId, userId
-        );
-
-        return Map.of("success", true, "pocketId", pocketId.toString(), "recoveredBalance", balance != null ? balance : 0L);
+        // Security review 2026-11-25: the previous body moved pocket balances without
+        // debiting or crediting cash (and zeroed balances on archive). No double-entry
+        // pocket path exists, so nothing is moved or acknowledged.
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "POCKET_LEDGER_NOT_JOURNALED");
     }
 }

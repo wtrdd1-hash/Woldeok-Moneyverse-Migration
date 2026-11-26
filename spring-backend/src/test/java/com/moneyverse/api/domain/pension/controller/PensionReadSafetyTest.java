@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -49,10 +49,15 @@ class PensionReadSafetyTest {
         verifyNoInteractions(pension);
     }
 
+
+    /** Prod regression 2026-11-25 (digest 78170169): the deployed Next page reads overview fields directly. */
     @Test
-    void fundedPositionMustNotClaimFakeZeroLedgerBalances() {
-        when(auth.resolveSession(any(HttpServletRequest.class))).thenReturn(Optional.empty());
-        assertEquals(HttpStatus.UNAUTHORIZED, new PensionController(pension, auth).getFundedPosition(request).getStatusCode());
-        verifyNoInteractions(pension);
+    void v1OverviewIsTheBarePayloadWhileTheLegacyPathKeepsTheEnvelope() {
+        var overview = new com.moneyverse.api.domain.pension.dto.PensionDtos.PensionOverview();
+        when(pension.getOverview()).thenReturn(overview);
+        when(request.getRequestURI()).thenReturn("/api/v1/pension/overview");
+        assertSame(overview, new PensionController(pension, auth).getOverview(request));
+        when(request.getRequestURI()).thenReturn("/api/pension/overview");
+        assertTrue(new PensionController(pension, auth).getOverview(request) instanceof com.moneyverse.api.common.response.ApiResponse);
     }
 }

@@ -34,13 +34,11 @@ public class AdminPensionController {
 
     @PostMapping("/distribute-payouts")
     @Operation(summary = "은퇴 연금 수령 대상자 대상 기초연금 일괄 수동 집행")
-    public ApiResponse<Map<String, Object>> distributePayouts(
-            @RequestHeader(value = "X-Admin-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String adminId) {
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("success", true);
-        result.put("pensionersCount", 0);
-        result.put("totalPayoutAmount", "0");
-        result.put("message", "은퇴 연금 대상자 정기 지급이 정상 완결되었습니다.");
-        return ApiResponse.ok(result, "연금 일괄 지급 완료");
+    public org.springframework.http.ResponseEntity<Map<String, Object>> distributePayouts() {
+        // Security review 2026-11-25: this named a fixed admin from a header default and
+        // answered "payouts completed" while paying nobody. Refuse honestly instead.
+        return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Map.of("code", "PENSION_MANUAL_PAYOUT_UNAVAILABLE",
+                        "message", "Manual pension payout has no journaled run; nothing was paid"));
     }
 }

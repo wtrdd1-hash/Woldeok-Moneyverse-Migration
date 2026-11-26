@@ -23,8 +23,7 @@ public class BlogNotificationController {
     private static final String DISCORD_SCRIPT = "/usr/local/lib/moneyverse-discord/discord_dm_sender.py";
 
     @PostMapping(path = {
-            "/api/v1/admin/blog/notify/test",
-            "/api/v1/blog/notify/test"
+            "/api/v1/admin/blog/notify/test"
     })
     @Operation(summary = "블로그 알림 즉시 테스트 발송 (텔레그램 채널 브로드캐스트 + 디스코드 DM)")
     public ResponseEntity<Map<String, Object>> testNotification(@RequestBody(required = false) Map<String, String> body) {
@@ -52,8 +51,7 @@ public class BlogNotificationController {
     }
 
     @PostMapping(path = {
-            "/api/v1/admin/blog/notify",
-            "/api/v1/blog/notify"
+            "/api/v1/admin/blog/notify"
     })
     @Operation(summary = "신규 블로그 발행 시 자동 알림 발송 (비동기)")
     public ResponseEntity<Map<String, Object>> notifyPublish(@RequestBody Map<String, String> body) {
