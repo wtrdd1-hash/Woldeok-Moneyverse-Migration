@@ -29,6 +29,21 @@ Root cause (Hikari leak detection + thread dump): open-in-view kept the JPA conn
 
 Invariant SQL: `ledger-invariants.sql` (unbalanced transactions, balance≠ledger, negative disallowed balances).
 
+## Realtime fan-out (v1313.1)
+`socket_fanout.py` (stdlib Engine.IO v4 websocket client) opens N anonymous sockets, subscribes to `market`, counts events for 30 s, then checks reconnection.
+
+| Connections | Before: ticks / 30 s (expected 15) | After | KiB per client per min (before → after) | Errors |
+|---|---|---|---|---|
+| 50 | 30 | 15 | 155.3 → 105.5 | 0 |
+| 200 | 30 | 15 | 155.2 → 105.6 | 0 |
+| 500 | 30–32 | 15–16 | 163.7 → 111.7 | 0 |
+| reconnect (10) | ok | ok | | 0 |
+
+Every `market:ticks` went out twice: a broadcast to all sockets plus the `market` room. All known clients subscribe first (web `site-socket.ts`, `use-market-prices.tsx`, legacy `live-init.js`, Android `RealtimeMarketClient` — read via code search, no clone), so the room send is kept and the global broadcast removed (test-first). Server RSS ~600 MiB and 49 threads at 500 sockets. 1,000 sockets were not reached: the generator hit its own thread limit (not a server limit). `market:quote-update` (10 per tick) has no web consumer but is kept for Android compatibility (APPHOLD).
+
+## 10-minute soak (reads + writes + sockets together)
+50 read VUs: 1,416 rps, p99 128 ms, 0 errors (849,778 requests). 20 transfer VUs: 156 rps, p99 301 ms, 0 errors (93,853). 200 sockets: 300/300 ticks each, 0 errors. JVM RSS 622 → 636 MiB, heap after GC 72 → 74 MiB (no growth), 0 full GCs, max pause 24.3 ms, 0 connection-leak detections. Ledger invariants 0/0/0 after 214,443 transactions; 50-way same-key races at start and end each produced one transaction. `evidence/soak-10min.jsonl`.
+
 ## JVM / memory candidate (`systemd/moneyverse-spring-backend.service.d/`)
 Measured Production today: G1, max heap 2.0 GiB (default), committed 460 MiB, used 144 MiB, metaspace 131 MiB, 112 threads, RSS 330 MiB + swap 557 MiB, no cgroup limit.
 
@@ -58,8 +73,8 @@ Decision: **B**. Do not raise the pool (10) or heap: pool saturation produced no
 **RAM recommendation:** the host carries ~14.7 GiB of swap. Production+Test alone fit 8 GiB once capped (~4 GiB), but local inference plus agent tooling do not fit beside them. Recommend **16 GiB** if inference and agent tooling stay on this host; 8 GiB is adequate only if inference moves off-host or is capped as above and the legacy read-only JVMs are retired.
 
 ## Not done / limits (honest)
-- 60 s per stage, not 5 min. Read mix only; the Python generator plateaus near 3k RPS, so server maximum is not established.
-- No socket fan-out load. No Production or official Test change.
+- Stages are 60 s (plus one 10-minute soak). The Python generators plateau (~3k read rps, ~1k sockets by thread limit), so server maximums are not established.
+- No Production or official Test change.
 - DB timeouts: Production lost migration 266's database settings (see `sql/restore-db-timeouts-candidate.sql`); restoring needs owner approval and Test job verification.
 
 ## Rollback

@@ -57,8 +57,9 @@ public class StockMarketSocketStreamer {
             SocketIOServer server = socketIoService.getServer();
             if (server == null) return;
 
-            // 1. 전역 market:ticks 브로드캐스트 (전체 종목 틱 요약)
-            server.getBroadcastOperations().sendEvent("market:ticks", stocks);
+            // 1. market:ticks to the market room only. Every client subscribes first (web, legacy
+            // pages, Android), so the former extra broadcast to all sockets delivered each tick
+            // twice to subscribers and once to sockets that never asked for prices.
             server.getRoomOperations("market").sendEvent("market:ticks", stocks);
 
             // 2. 종목별 개별 시세 브로드캐스트
