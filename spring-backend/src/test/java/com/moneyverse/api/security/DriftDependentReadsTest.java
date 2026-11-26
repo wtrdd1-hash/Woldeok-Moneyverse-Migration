@@ -20,7 +20,11 @@ class DriftDependentReadsTest {
             "src/main/java/com/moneyverse/api/domain/identity/service/UserAuthService.java",
             "(?i)\\b(FROM|JOIN)\\s+(public\\.)?(auth_local_credentials|member_profiles|user_roles|admin_role_designations)\\b",
             "src/main/java/com/moneyverse/api/socket/streamer/StockMarketSocketStreamer.java",
-            "(?i)\\b(FROM|JOIN)\\s+(public\\.)?virtual_stocks\\b");
+            "(?i)\\b(FROM|JOIN)\\s+(public\\.)?virtual_stocks\\b",
+            // Admin roles come only from admin_current_roles; a user_roles fallback would grant
+            // roles from a table the chain does not grant when the authoritative function fails.
+            "src/main/java/com/moneyverse/api/domain/admin/service/AdminAuthService.java",
+            "(?i)\\b(FROM|JOIN)\\s+(public\\.)?user_roles\\b");
 
     @Test void signInSessionAndQuoteStreamReadThroughFunctions() throws Exception {
         for (var e : FORBIDDEN.entrySet()) {

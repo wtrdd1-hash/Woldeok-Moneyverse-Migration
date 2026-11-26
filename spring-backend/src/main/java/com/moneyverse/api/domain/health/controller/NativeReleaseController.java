@@ -26,7 +26,8 @@ public final class NativeReleaseController {
         var data=Map.<String,Object>of(
             "version","native-"+sha.substring(0,12),
             "applicationSourceSha",sha,
-            "framework","Spring Boot 3.3.5",
+            // Read from the running jar; the former literal said 3.3.5 on a 3.5 runtime.
+            "framework","Spring Boot "+org.springframework.boot.SpringBootVersion.getVersion(),
             "release","nov18-native-frontend",
             "activeEngine","Java Spring Boot");
         return ResponseEntity.ok().header("Cache-Control","private, no-store")
