@@ -18,7 +18,7 @@ class EncodedPathBoundaryTest {
             new SensitiveApiBoundaryFilter(mock(UserAuthService.class), mock(AdminAuthService.class));
 
     @ParameterizedTest
-    @ValueSource(strings = {"/api/v1/%70rofile", "/api/v1/%70hotos/uploads", "/api/v1//profile", "/api/v1/./profile",
+    @ValueSource(strings = {"/api/v1/%61ccount", "/api/v1/wallet/%74ransfer", "/api/v1//account", "/api/v1/./wallet/transfer",
             "/api/v1/account/%73ettings"})
     void encodedOrUnnormalisedPathsStillPassThroughTheBoundary(String uri) {
         var request = new MockHttpServletRequest("PUT", uri);
