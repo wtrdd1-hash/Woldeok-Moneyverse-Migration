@@ -32,6 +32,7 @@ import {
 } from '@/components/v10-nav';
 import { useMountedViewer } from '@/components/use-mounted-viewer';
 import { useLocale } from '@/components/locale-provider';
+import { ServerClockPill } from '@/components/server-clock-pill';
 import { t } from '@/lib/translations';
 import { isAdministrator } from '@/lib/viewer-state';
 
@@ -116,6 +117,9 @@ export function GameSidebar({ embedded = false, onNavigate }: { readonly embedde
         </span>
       </Link>
 
+      {/* GAMEYEAR.4 on mobile: the compact top-bar stamp has room for the day only, so the full
+          server year and week sit at the top of the full-menu sheet. */}
+      {embedded && <ServerClockPill className="mb-4 w-full justify-center" />}
       {adminView ? (
         <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto" aria-label={t('shell.adminMenu', locale)}>
           <p className="px-3 pb-1.5 text-[11px] text-[var(--g1-faint)]">{t('shell.administrator', locale)}</p>
