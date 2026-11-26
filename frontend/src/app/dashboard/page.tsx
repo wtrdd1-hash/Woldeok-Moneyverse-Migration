@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
+import { ServerClockPill } from '@/components/server-clock-pill';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -81,6 +82,9 @@ export default async function DashboardPage() {
           ? 'Your ledger balance, virtual-stock activity and next actions in one member-only view.'
           : '원장 잔액, 가상 주식 활동과 다음 할 일을 회원 전용 화면에서 한 번에 확인합니다.'}
       </PageHeader>
+
+      {/* GAMEYEAR.4: the API's server year and day-of-year, same component as the header. */}
+      <ServerClockPill className="w-fit" />
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label={isEn ? 'Account summary' : '계정 요약'}>
         <SummaryCard title={isEn ? 'WLD balance' : 'WLD 보유'} value={wallet ? <><Amount value={wallet.balances.totalAvailableAmount} /> {wallet.balances.currency}</> : '—'} />
