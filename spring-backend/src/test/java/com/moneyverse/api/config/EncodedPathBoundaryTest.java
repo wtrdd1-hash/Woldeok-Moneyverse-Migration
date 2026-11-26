@@ -30,13 +30,11 @@ class EncodedPathBoundaryTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"/api/v1/%61dmin/users", "/api/%61dmin/treasury/mint-topup", "/api/v1/admin/%75sers",
-            "/api/v1//admin/users", "/api/v1/./admin/users", "/api/v1/%2561dmin/users"})
+            "/api/v1//admin/users", "/api/v1/./admin/users", "/api/v1/%2561dmin/users",
+            "/api/v1/%252561dmin/users"})
     void encodedAdminPathsStillPassThroughTheAdminBoundary(String uri) {
         var request = new MockHttpServletRequest("GET", uri);
         request.setRequestURI(uri);
-        if (uri.contains("%25")) {
-            return;
-        }
         assertFalse(admin.shouldNotFilter(request), uri + " must be filtered");
     }
 

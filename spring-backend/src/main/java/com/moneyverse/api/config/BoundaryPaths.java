@@ -21,6 +21,10 @@ final class BoundaryPaths {
         int semicolon = raw.indexOf(';');
         if (semicolon >= 0) raw = raw.substring(0, semicolon);
         String decoded = UriUtils.decode(raw, StandardCharsets.UTF_8);
+        // A '%' left after one decode means a multiply-encoded path. Nothing legitimate routes
+        // like that, and judging it would depend on how many times a later layer decodes:
+        // treat it as undecodable so each caller applies its fail-closed rule.
+        if (decoded.indexOf('%') >= 0) throw new IllegalArgumentException("multiply-encoded path");
         String cleaned = StringUtils.cleanPath(decoded).replaceAll("/{2,}", "/");
         return cleaned.startsWith("/") ? cleaned : "/" + cleaned;
     }
