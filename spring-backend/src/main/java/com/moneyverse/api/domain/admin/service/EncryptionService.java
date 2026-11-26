@@ -22,13 +22,23 @@ public class EncryptionService {
 
     public EncryptionService(
             @Value("${moneyverse.security.encryption-key:}") String dataEncryptionKey,
-            @Value("${moneyverse.security.internal-token:8e5f2a1b9c3d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f}") String internalToken,
+            @Value("${moneyverse.security.internal-token:}") String internalToken,
             @Value("${moneyverse.security.app-secret:}") String appSecret
     ) {
+        // Security 2026-11-26: the defaults here were committed literals (an internal-token value and
+        // a fixed passphrase), so the key protecting stored identity data was derivable from this
+        // public repository. Key material now comes from configuration only; with none, decryption
+        // is disabled (values stay unreadable) instead of using a known key. The derivation order is
+        // unchanged so configured environments keep decrypting existing data until the approved
+        // key rotation and re-encryption (separate approval) replaces it.
         String rawKey = (dataEncryptionKey != null && !dataEncryptionKey.isBlank()) ? dataEncryptionKey :
                 (internalToken != null && !internalToken.isBlank()) ? internalToken :
-                        (appSecret != null && !appSecret.isBlank()) ? appSecret :
-                                "moneyverse-default-vault-secure-encryption-key-32b";
+                        (appSecret != null && !appSecret.isBlank()) ? appSecret : null;
+        if (rawKey == null) {
+            log.warn("[EncryptionService] no key material configured; stored ciphertext stays unreadable");
+            this.secretKey = null;
+            return;
+        }
         try {
             MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
             byte[] keyBytes = sha256.digest(rawKey.getBytes(StandardCharsets.UTF_8));
@@ -42,6 +52,7 @@ public class EncryptionService {
         if (ciphertext == null || ciphertext.isBlank() || !ciphertext.startsWith("enc:v1:")) {
             return ciphertext;
         }
+        if (secretKey == null) return ciphertext;
 
         try {
             String[] parts = ciphertext.split(":");

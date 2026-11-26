@@ -105,6 +105,23 @@ public class AdminAuthService {
         }
     }
 
+    /** Same rule as resolveVerifiedAdminActor for a raw session token (Socket.IO handshake cookie). */
+    public Optional<UUID> resolveVerifiedAdminActorByToken(String rawToken) {
+        if (rawToken == null || rawToken.isBlank()) return Optional.empty();
+        try {
+            List<String> ids = jdbcTemplate.query(
+                "SELECT user_id::text FROM auth_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > NOW() AND user_id IS NOT NULL",
+                (rs, rowNum) -> rs.getString(1), sha256(rawToken));
+            if (ids.size() != 1) return Optional.empty();
+            UUID actor = UUID.fromString(ids.get(0));
+            List<String> roles = jdbcTemplate.query("SELECT role::text FROM public.admin_current_roles(?::uuid)", (rs, rowNum) -> rs.getString(1), actor);
+            return roles.isEmpty() ? Optional.empty() : Optional.of(actor);
+        } catch (Exception e) {
+            log.warn("[AdminAuth] socket admin lookup failed (fail closed)");
+            return Optional.empty();
+        }
+    }
+
     public Optional<UUID> resolveAdminUserId(HttpServletRequest request) {
         if (request == null) return Optional.empty();
         String sessionToken = extractSessionToken(request);
