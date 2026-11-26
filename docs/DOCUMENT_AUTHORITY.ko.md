@@ -1,5 +1,8 @@
 # 현재 문서 적용 기준
 
+> **Mandatory all-agent Test gate — v2026.11.26.TESTGATE.1:** All GPT/Codex, Gemini, Claude and scheduled tasks must apply G0–G9 in [EN](operations/ALL_AGENT_TEST_GATE_v2026.11.26.1.md) / [KO](operations/ALL_AGENT_TEST_GATE_v2026.11.26.1.ko.md). Code is not done until eligible exact-SHA independent Test publication and QA; no direct Production changes or main integration without separate authorization.
+
+
 **버전:** v2026.11.24.DOCSYNC.1 · **사용자 확인 규칙 / 통합 후보 / 운영 정상 인증 아님**. [English](DOCUMENT_AUTHORITY.md).
 
 ## 읽는 순서

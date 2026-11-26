@@ -1,5 +1,8 @@
 # AGENTS.md
 
+> **Mandatory all-agent Test gate — v2026.11.26.TESTGATE.1:** All GPT/Codex, Gemini, Claude and scheduled tasks must apply G0–G9 in [EN](docs/operations/ALL_AGENT_TEST_GATE_v2026.11.26.1.md) / [KO](docs/operations/ALL_AGENT_TEST_GATE_v2026.11.26.1.ko.md). Code is not done until eligible exact-SHA independent Test publication and QA; no direct Production changes or main integration without separate authorization.
+
+
 ## Current owner-confirmed authority — v2026.11.24.DOCSYNC.1
 Read [DOCUMENT_AUTHORITY.md](docs/DOCUMENT_AUTHORITY.md) and its [Korean counterpart](docs/DOCUMENT_AUTHORITY.ko.md). New frontend target is Next.js/React/TypeScript/Tailwind with same-origin server-only BFF to the authoritative Spring API. Existing Spring/Thymeleaf and legacy gateways remain transitional until verified replacement. Use the G1 reference (owner-approved 2026-11-24) and actual favicon. Documentation and repository version claims are not live runtime acceptance.
 Automatic image preparation is permitted; actual Production cutover needs separate owner approval after independent Test. Task requests include task-branch commits/pushes; main integration requires separate instruction (explicitly authorized for the current consolidation). No generated-source UI/commit markings; factual technical references and work provenance are allowed. If other instructions conflict and latest owner direction does not resolve them, ask before replacing them.

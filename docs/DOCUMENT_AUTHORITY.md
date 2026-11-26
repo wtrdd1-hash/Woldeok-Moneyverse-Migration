@@ -1,5 +1,8 @@
 # Current Document Authority
 
+> **Mandatory all-agent Test gate — v2026.11.26.TESTGATE.1:** All GPT/Codex, Gemini, Claude and scheduled tasks must apply G0–G9 in [EN](operations/ALL_AGENT_TEST_GATE_v2026.11.26.1.md) / [KO](operations/ALL_AGENT_TEST_GATE_v2026.11.26.1.ko.md). Code is not done until eligible exact-SHA independent Test publication and QA; no direct Production changes or main integration without separate authorization.
+
+
 **Version:** v2026.11.24.DOCSYNC.1 · **Owner-confirmed rules; integration candidate, not runtime acceptance.** [한국어](DOCUMENT_AUTHORITY.ko.md).
 
 ## Read order
