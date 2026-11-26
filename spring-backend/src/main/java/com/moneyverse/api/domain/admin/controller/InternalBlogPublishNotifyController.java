@@ -26,8 +26,9 @@ import java.util.Set;
  */
 @RestController
 public class InternalBlogPublishNotifyController {
-    // Committed to a public repository as a default; never accept it as a credential.
-    private static final String COMMITTED_DEFAULT = "8e5f2a1b9c3d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f";
+    // SHA-256 of the token default once committed to this public repository; never accept it.
+    // Stored as a digest so the literal does not reappear in source.
+    private static final String COMMITTED_DEFAULT_SHA256 = "1eb829e05776a61428a25bc398e69127f67c89e87af0d2176209bc387ed7a9cd";
     private static final Set<String> LOOPBACK = Set.of("127.0.0.1", "::1", "0:0:0:0:0:0:0:1");
 
     private final JdbcTemplate jdbcTemplate;
@@ -41,11 +42,19 @@ public class InternalBlogPublishNotifyController {
         this.internalToken = internalToken;
     }
 
+    private static String sha256(String value) {
+        try {
+            return java.util.HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8)));
+        } catch (java.security.NoSuchAlgorithmException impossible) {
+            throw new IllegalStateException(impossible);
+        }
+    }
+
     @PostMapping("/internal/blog/published-notify")
     public ResponseEntity<Map<String, Object>> notifyPublished(HttpServletRequest request,
             @RequestBody(required = false) Map<String, String> body) {
         if (!LOOPBACK.contains(request.getRemoteAddr())) return ResponseEntity.status(404).build();
-        if (internalToken == null || internalToken.length() < 32 || COMMITTED_DEFAULT.equals(internalToken)) {
+        if (internalToken == null || internalToken.length() < 32 || COMMITTED_DEFAULT_SHA256.equals(sha256(internalToken))) {
             return ResponseEntity.status(503).body(Map.of("code", "INTERNAL_TOKEN_NOT_CONFIGURED"));
         }
         String supplied = request.getHeader("x-internal-token");

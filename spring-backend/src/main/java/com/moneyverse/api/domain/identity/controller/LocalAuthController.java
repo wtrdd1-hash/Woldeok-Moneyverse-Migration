@@ -142,6 +142,10 @@ public class LocalAuthController {
             err.put("title", "Internal Server Error");
             err.put("status", 500);
             err.put("detail", "sign-in is temporarily unavailable"); // never echo internal exception text
+            // Logged by class only: an unexplained 500 on sign-in hid a missing database function
+            // during 2026-11-26 work.
+            org.slf4j.LoggerFactory.getLogger(LocalAuthController.class)
+                    .warn("[LocalAuth] sign-in failed: {}", e.getClass().getName());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(err);
         }
     }

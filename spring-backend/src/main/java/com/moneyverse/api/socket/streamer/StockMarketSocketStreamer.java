@@ -31,10 +31,11 @@ public class StockMarketSocketStreamer {
         if (!socketIoService.isRunning()) return;
 
         try {
+            // virtual_stocks is not granted to the application role (023/047); the overview function
+            // is. initial_price was dropped: no web, legacy or Android client reads it.
             String sql = """
-                SELECT symbol, name, current_price, day_open_price, initial_price, halt_status
-                FROM virtual_stocks
-                WHERE active = true
+                SELECT symbol, name, current_price, day_open_price, halt_status
+                FROM public.stock_market_overview()
                 ORDER BY symbol ASC
                 LIMIT 18
                 """;
