@@ -1,6 +1,6 @@
 # 코딩 에이전트 규칙 및 설정 가이드라인 (GEMINI.md)
 
-**현행 디자인 단일 기준 (v2026.11.24.1):** UI 작업 전 [현행 이미지 기준](docs/design/CURRENT_UI_DESIGN.ko.md), [180경로 매니페스트](docs/design/CURRENT_UI_DESIGN_MANIFEST.json), [11월23일 v10 갤러리](docs/design/game-ui-v2026.11.23.10/README.ko.md) 확인. **v8·11월18일 보관 이미지 사용 및 임의 대체 금지.** 실제 기능·API·승인·승격은 별도 검증한다.
+**현행 프론트엔드 기준 (v2026.11.27.PLAN-AUDIT.2):** [G2 기준](docs/design/CURRENT_UI_DESIGN.ko.md) · [180경로 매니페스트](docs/design/CURRENT_UI_DESIGN_MANIFEST.json). G1/v11/v10/v8/11월18일 보관 전용. 신규 Next/BFF + Spring API, 기존 Spring 화면 과도기 유지. 비로그인·일반회원 관리자 페이지·API·데이터·행위 차단, 서버 RBAC 필수. 공개 안전 경로만 게스트 허용. 실제 Test·운영 승격 별도.
 
 ## Optional Codex ↔ Gemini review handoff (v2026.11.22.1)
 

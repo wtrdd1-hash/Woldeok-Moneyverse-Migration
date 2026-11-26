@@ -1,3 +1,5 @@
+> **v2026.11.27.PLAN-AUDIT.2:** [Current G2 frontend authority](../design/CURRENT_UI_DESIGN.md). Prior Spring-only frontend, previous visual baselines and unrestricted guest browsing are superseded. Preserve valid functional/security requirements. Administrator access is denied to guests and non-admins at server boundaries; old runtime/automation records are not current instructions.
+
 # Frontend automation and isolated Test deployment — vAUTO.FE.TEST.2026.11.23.3
 
 Status: five existing scheduled automations UPDATED and enabled, with QA2 expanded into Test deployment; configuration only. No new application build or deployment was executed in this turn. Production is strictly out of scope.

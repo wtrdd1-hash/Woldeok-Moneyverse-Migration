@@ -1,6 +1,6 @@
 # What this deployment actually is
 
-> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](DOCUMENT_AUTHORITY.md) / [한국어](DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+> **Current rules — v2026.11.27.PLAN-AUDIT.2:** [EN authority](DOCUMENT_AUTHORITY.md) / [한국어](DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; G2 design per CURRENT_UI_DESIGN and actual favicon; administrator access denied to guests and non-admins. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
 
 
 > **2026-11-21 현재 운영: 프론트엔드 재구축 점검 중.** 사용자 명시 승인으로 main93a31e3e44의 Nginx 문서 전용503 안내를 운영 적용하고, DB-free frontend-presentation 운영/Test 두 unit을 중지·비활성화했다. 공유 API/DB/session은 유지한다. 아래 native26 활성화 기록은 이전 시점이다. 새 전체 프론트엔드는 아직 승격하지 않았다. [적용·검증·복원 기록](releases/2026-11-21-frontend-rebuild-maintenance.ko.md).

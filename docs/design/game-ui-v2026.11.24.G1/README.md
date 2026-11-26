@@ -1,3 +1,5 @@
+> **ARCHIVED / 보관본 — v2026.11.27.PLAN-AUDIT.2:** historical evidence only, not implementation input or guest-access authority. [Current G2 policy](../CURRENT_UI_DESIGN.md). All historical claims below refer to their original date.
+
 # G1 "Guild Ledger" game-feel redesign — CANDIDATE (180 routes)
 
 **Status: ACTIVE — approved by the owner on 2026-11-24.** (Previously a candidate: — [CURRENT_UI_DESIGN.md](../CURRENT_UI_DESIGN.md) (v10) stays binding until the owner approves G1, at which point that file, the manifest and the galleries are updated together. Frontend implementation of G1 starts only after that approval.

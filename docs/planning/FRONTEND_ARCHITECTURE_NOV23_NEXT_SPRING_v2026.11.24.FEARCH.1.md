@@ -1,3 +1,5 @@
+> **v2026.11.27.PLAN-AUDIT.2:** [Current G2 frontend authority](../design/CURRENT_UI_DESIGN.md). Prior Spring-only frontend, previous visual baselines and unrestricted guest browsing are superseded. Preserve valid functional/security requirements. Administrator access is denied to guests and non-admins at server boundaries; old runtime/automation records are not current instructions.
+
 # Frontend Architecture Decision — v2026.11.24.FEARCH.1 (English canonical)
 
 > Status: OWNER-APPROVED ARCHITECTURE DIRECTION / DOCUMENTATION ONLY / NO CUTOVER. Updated 2026-11-24 KST. [한국어](FRONTEND_ARCHITECTURE_NOV23_NEXT_SPRING_v2026.11.24.FEARCH.1.ko.md). Tracking: [#3422](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/3422).

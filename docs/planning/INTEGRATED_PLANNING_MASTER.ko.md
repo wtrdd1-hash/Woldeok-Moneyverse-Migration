@@ -1,15 +1,17 @@
+> **v2026.11.27.PLAN-AUDIT.2 — 현행 적용:** 신규 Next.js/React/BFF + Spring API, G2 디자인, 실제 파비콘, 관리자 접근 서버 차단. 기존 Spring 화면은 검증된 교체까지 유지. 아래 날짜별 Spring 단독·v10/v11/G1·전 경로 게스트 개방 지시는 과거 기록이다. [현행 상세](../design/CURRENT_UI_DESIGN.ko.md). 문서 정리이며 운영 변경 아님.
+
 ## v2026.11.24.0818 — Stitch Skills 공식 디자인 계약 시범 (배포 없음)
 
-> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](../DOCUMENT_AUTHORITY.md) / [한국어](../DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+> **Current rules — v2026.11.27.PLAN-AUDIT.2:** [EN authority](../DOCUMENT_AUTHORITY.md) / [한국어](../DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; G2 design per CURRENT_UI_DESIGN and actual favicon; administrator access denied to guests and non-admins. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
 
 Google의 소스 전용 추출 스킬을 프로젝트 내부에 설치하고 11월 18일 승인 디자인을 한영 `.stitch/DESIGN.md` 규격으로 작성. CSS 11개 토큰 정적 검사 PASS. Spring/Thymeleaf·실데이터·독립 Test 원칙 불변; Stitch MCP·클라우드 화면 생성·운영 배포 없음. [상세](../development/GOOGLE_STITCH_SKILLS_PILOT_v2026.11.24.0818.ko.md).
 
 # 월덕 머니버스 — 통합 기획 마스터
 
-> **v2026.11.24.1 현행 UI 이미지 최상위 기준:** 11월23일 **v10만** 180개 경로 구현의 시각 자료: [단일 기준](../design/CURRENT_UI_DESIGN.ko.md), [매니페스트](../design/CURRENT_UI_DESIGN_MANIFEST.json), [최신 갤러리](../design/game-ui-v2026.11.23.10/README.ko.md). v8·11월18일 이미지는 보관본이며 새 구현 참조 금지. 시각 승인·Test/E2E는 미완료.
+> **현행 프론트엔드 기준:** [G2](../design/CURRENT_UI_DESIGN.ko.md) 및 [180경로 매니페스트](../design/CURRENT_UI_DESIGN_MANIFEST.json). 비관리자 관리자 접근 차단.
 
 
-> **v2026.11.23.10 UI visual/feature audit** [180 revised PNGs](../design/game-ui-v2026.11.23.10/README.ko.md) · [audit](../qa/2026-11-23-game-ui-180-image-feature-audit.ko.md). Image file QA only; full runtime acceptance unverified.
+> **Historical v2026.11.23.10 UI visual/feature audit** [180 revised PNGs](../design/game-ui-v2026.11.23.10/README.ko.md) · [audit](../qa/2026-11-23-game-ui-180-image-feature-audit.ko.md). Image file QA only; full runtime acceptance unverified.
 
 > v2026.11.23.8 신규 이미지: [새 이미지 180개](../design/game-ui-v2026.11.23.8/README.ko.md) — 생성 완료/시안 검수 필요, 실제 서비스 적용 아님.
 

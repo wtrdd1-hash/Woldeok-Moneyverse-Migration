@@ -1,6 +1,8 @@
+> **v2026.11.27.PLAN-AUDIT.2:** [Current G2 frontend authority](design/CURRENT_UI_DESIGN.md). Prior Spring-only frontend, previous visual baselines and unrestricted guest browsing are superseded. Preserve valid functional/security requirements. Administrator access is denied to guests and non-admins at server boundaries; old runtime/automation records are not current instructions.
+
 # 프론트엔드 및 UI 공식 통합 마스터 지침서 (v2026.11.19 기준)
 
-**Visual authority override v2026.11.24.1:** For every implementation, use the [Nov23 v10-only gallery](design/game-ui-v2026.11.23.10/README.md) via [single active policy](design/CURRENT_UI_DESIGN.md). All older PNG references below are historical, NOT valid visual implementation inputs. Preserve underlying functional/security rules.
+**Supersession v2026.11.27.PLAN-AUDIT.2:** [Current G2 policy](design/CURRENT_UI_DESIGN.md); previous image sets historical only.
 
 > **기준일자:** 2026-11-18 ~ 2026-11-19 KST  
 > **적용범위:** Moneyverse 단일 런타임 전 웹 페이지 (`index.html`, `/stocks`, `/admin-preview`, `/wallet`, `/board` 등)  

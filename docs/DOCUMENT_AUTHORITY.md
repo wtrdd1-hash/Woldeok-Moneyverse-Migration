@@ -1,6 +1,6 @@
 # Current Document Authority
 
-**Version:** v2026.11.24.DOCSYNC.1 · **Owner-confirmed rules; integration candidate, not runtime acceptance.** [한국어](DOCUMENT_AUTHORITY.ko.md).
+**Version:** v2026.11.27.PLAN-AUDIT.2 · **Owner-confirmed rules; integration candidate, not runtime acceptance.** [한국어](DOCUMENT_AUTHORITY.ko.md).
 
 ## Read order
 
@@ -20,15 +20,16 @@ A document in an unmerged branch is a candidate unless the owner has explicitly 
 | Backend | Spring Boot owns identity/session/roles, profiles, APIs and business contracts; PostgreSQL restricted functions retain ledger authority |
 | Existing presentation | Spring MVC/Thymeleaf and legacy Next/static screens are transitional implementations; preserve verified behavior until gated replacement |
 | Legacy Nest | Existing code/gateway dependencies require endpoint mapping before retirement; their presence does not select Nest as the new backend |
-| Design | Nov23 revised v10, immutable39888c7d26bdf688737a77b93a7da29e230b4168; preserve Nov18/v8/v10 assets and per-screen approval status |
+| Design | [G2 sole visual reference](design/CURRENT_UI_DESIGN.md) and 180-route manifest; G1/v11/v10/v8/Nov18 historical only |
 | Logo | Actual existing favicon bytes, never a replacement letter W or generated imitation |
+| Administrator access | Deny guests and ordinary members protected admin HTML, APIs, data and actions; server authorization required; public-safe guest routes only |
 | Money and data | Canonical integer strings for balances, exact decimal arithmetic where required, real actor-bound APIs/receipts; no Number(balance), mock success or fake fallback prices |
 | Identity UX | Spring-verified identity/profile/roles, no-store user responses, honest loading/empty/error/session-expired states and no cross-user leakage |
 | Languages | EN default, KO second, JA/ZH/VI; explicit supported user selection and deterministic saved/browser fallbacks |
 | Runtime authority | Measured MiniPC Debian/systemd/Nginx with isolated real Test data; discover active PID/upstream/artifact each run. Kubernetes/Flux is a recovery/target record |
 | Release | Image preparation may be automatic after required checks. Actual Production cutover needs separate owner approval and exact independent Test/rollback evidence |
-| Current task | Branch integration/document consistency; no runtime/DB cutover. Existing frontend implementation remains Test-only |
-| Work persistence | A task request includes task-branch commits/pushes and checkpoints. Main integration needs a separate instruction; the current request explicitly authorizes branch integration |
+| Current task | Authority reconciliation only; no runtime, DB, Test or Production change |
+| Work persistence | A task request includes task-branch commits/pushes and checkpoints. Main integration needs a separate instruction; historical task-specific approval does not authorize later main integration |
 | Attribution | No generated-source badges/watermarks in product UI or commits. Factual tool references and work provenance are allowed in technical records; no automatic author trailers |
 
 ## Confirmed command conflicts

@@ -1,3 +1,5 @@
+> **SUPERSEDED / 과거 기록 — v2026.11.27.PLAN-AUDIT.2:** 신규 웹 화면은 Next.js/React/BFF + Spring API. 이 문서의 Spring 단독 프론트엔드 기술·과거 운영 상태는 현행 지시가 아니다. 업무·보안 제약은 유지. [Current authority](../design/CURRENT_UI_DESIGN.md).
+
 # 사용자 최신 지시 — 웹 프론트엔드 전체 Spring Boot 구현 (v2026.11.18.28)
 
 **2026-11-18 KST · [영문 정본](SPRING_ONLY_FRONTEND_OWNER_DIRECTIVE_v2026.11.18.28.md). 상태: 아키텍처 목표 승인, 전체 전환 진행 중(완료 아님).**

@@ -1,7 +1,9 @@
-﻿# [Moneyverse] ?ㅺ뎅?는룹뿰援ъ옄猷?湲곕컲 AI 釉붾줈洹??붿쭊 諛?愿由ъ옄 ?쒖뼱 ?듯빀 援ы쁽 怨꾪쉷??(v1)
+﻿> **v2026.11.27.PLAN-AUDIT.2:** [Current G2 frontend authority](docs/design/CURRENT_UI_DESIGN.md). Prior Spring-only frontend, previous visual baselines and unrestricted guest browsing are superseded. Existing records are historical, not current instructions. Non-admin administrator access is denied at server boundaries.
+
+# [Moneyverse] ?ㅺ뎅?는룹뿰援ъ옄猷?湲곕컲 AI 釉붾줈洹??붿쭊 諛?愿由ъ옄 ?쒖뼱 ?듯빀 援ы쁽 怨꾪쉷??(v1)
 
 ## Current UI image precedence ??v2026.11.24.1
-**All new PC/mobile web screen visuals must follow Nov23 v10 only:** [authority](docs/design/CURRENT_UI_DESIGN.md) / [?쒓뎅??(docs/design/CURRENT_UI_DESIGN.ko.md) 쨌 [180-route manifest](docs/design/CURRENT_UI_DESIGN_MANIFEST.json). Earlier v8/Nov18 PNGs are preserved as historical references and must not be used to implement or patch UI; functional planning is still governed by the integrated master. This change does not imply full E2E acceptance or Production promotion.
+**Current visual policy:** [G2 only](docs/design/CURRENT_UI_DESIGN.md); this root execution plan is historical, not product authority.
 
 
 ## ?뱶 ?꾩쟻 踰꾩쟾 ?덉뒪?좊━ (Version Changelog & Diffs)

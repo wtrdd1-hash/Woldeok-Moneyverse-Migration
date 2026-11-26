@@ -2,7 +2,7 @@
 
 Per-route previews (180): [routes/README.md](routes/README.md)
 
-**Status: owner-approved 2026-11-24, the active visual authority.** Implemented on Test. No Production change.
+**Status: owner-approved 2026-11-24, the active visual authority.** Historical Test implementation claim (2026-11-24); not current exact-artifact acceptance. No Production change in that record.
 
 Refines G1 after owner feedback and guild-home QA v2026.11.24.1646: a ledger status strip on every page as the single signature; hairline 6px panels without chamfers; one violet action colour, gold only on the player's own balance, Korean market rise red / fall blue; tabular body figures in tables (Orbitron only for the main balance); 12-column grid, 44px table rows; grouped navigation with GM console for administrators only. Hallmark sloplint: 13/13 clean. Figures are illustrative and stamped. External models (Codex usage limit, Gemini invalid key) returned no response, so none is claimed. [한국어](README.ko.md)
 

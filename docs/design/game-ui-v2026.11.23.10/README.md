@@ -1,3 +1,5 @@
+> **ARCHIVED / 보관본 — v2026.11.27.PLAN-AUDIT.2:** historical evidence only, not implementation input or guest-access authority. [Current G2 policy](../CURRENT_UI_DESIGN.md). All historical claims below refer to their original date.
+
 # ACTIVE ONLY: Nov 23 v10 game-economy UI images (180 routes)
 
 v2026.11.23.10 / 180 real PNG assets generated and integrity-tested / individual design approval and live functional verification OPEN.

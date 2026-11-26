@@ -1,9 +1,9 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
-> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](DOCUMENT_AUTHORITY.md) / [한국어](DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+> **Current rules — v2026.11.27.PLAN-AUDIT.2:** [EN authority](DOCUMENT_AUTHORITY.md) / [한국어](DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; G2 design per CURRENT_UI_DESIGN and actual favicon; administrator access denied to guests and non-admins. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
 
 
-**현행 디자인 v2026.11.24.1:** [11월23일 v10만](design/CURRENT_UI_DESIGN.ko.md) · [180경로 매니페스트](design/CURRENT_UI_DESIGN_MANIFEST.json). 이전 이미지 구현 사용 금지. 전체 기능 Test는 미완료.
+**현행 시각 기준 v2026.11.27.PLAN-AUDIT.2:** [G2 단일 기준](design/CURRENT_UI_DESIGN.ko.md) · [매니페스트](design/CURRENT_UI_DESIGN_MANIFEST.json); 이전 시안 이력 전용, 기능 QA 미완료.
 
 > **v2026.11.23.10 UI visual/feature audit** [180 revised PNGs](design/game-ui-v2026.11.23.10/README.ko.md) · [audit](qa/2026-11-23-game-ui-180-image-feature-audit.ko.md). Image file QA only; full runtime acceptance unverified.
 

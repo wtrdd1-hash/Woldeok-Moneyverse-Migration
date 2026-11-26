@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the sole active Nov23 v10 design set without touching runtime services."""
+"""Verify G2 visual authority, not functional or security acceptance."""
 import hashlib
 import json
 import re
@@ -9,78 +9,66 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DESIGN = ROOT / "docs/design"
-V10 = DESIGN / "game-ui-v2026.11.23.10"
-MANIFEST = DESIGN / "CURRENT_UI_DESIGN_MANIFEST.json"
-OLD_IMAGE_RE = re.compile(r"(?:game-ui-v2026\.11\.23\.8|all-pages-v2026\.11\.18\.12)/previews/")
-V10_ENTRY_RE = re.compile(r"^\| (/.*?) \| \[v10\]\(previews/([^()]+\.png)\) \|", re.M)
-UI_ENTRY_RE = re.compile(
-    r"^\| (/.*?) \| [^\n]*?\[NEW PNG\]\(design/game-ui-v2026\.11\.23\.10/previews/([^()]+\.png)\) \|",
-    re.M,
+GALLERY = DESIGN / "game-ui-v2026.11.24.G2/routes"
+VERSION = "v2026.11.27.PLAN-AUDIT.2"
+PREFIX = "docs/design/game-ui-v2026.11.24.G2/routes/"
+ROW = re.compile(r"^\| \x60([^\x60]+)\x60 \| [^|]+ \| \[[^\]]+\]\(([^)]+)\) \|", re.M)
+UI_ROW = re.compile(
+    r"^\| (/.*?) \| [^\n]*?\[G2 PNG\]\((design/game-ui-v2026\.11\.24\.G2/routes/[^)]+)\) \| REFERENCE_ONLY_QA_OPEN \|$", re.M
 )
 
 
-def require(test: bool, message: str) -> None:
-    if not test:
+def require(condition, message):
+    if not condition:
         raise AssertionError(message)
 
 
-def check() -> None:
-    doc = json.loads(MANIFEST.read_text(encoding="utf-8"))
-    require(doc["design_version"] == "v2026.11.23.10", "Wrong active design version")
-    require(doc["selection"] == "ACTIVE_SOLE_VISUAL_REFERENCE", "Wrong authority selection")
-    require(doc["design_review"] == "VISUAL_REVIEW_OPEN", "Artistic QA wrongly marked completed")
-    require(doc["runtime_e2e"] == "NOT_VERIFIED", "Runtime QA wrongly marked completed")
+def check():
+    doc = json.loads((DESIGN / "CURRENT_UI_DESIGN_MANIFEST.json").read_text(encoding="utf-8"))
+    require(doc["authority_version"] == VERSION, "Wrong authority version")
+    require(doc["design_version"] == "v2026.11.24.G2", "Wrong active design")
+    require(doc["selection"] == "ACTIVE_SOLE_VISUAL_REFERENCE", "Wrong selection")
+    require(doc["design_review"] == "VISUAL_REVIEW_OPEN" and doc["runtime_e2e"] == "NOT_VERIFIED",
+            "Image files cannot certify visual or runtime acceptance")
     entries = doc["routes"]
-    require(doc["total_routes"] == doc["total_images"] == len(entries) == 180, "Wrong route/image count")
-    route_to_image = {}
+    require(doc["total_routes"] == doc["total_images"] == len(entries) == 180, "Wrong count")
+    require(doc["image_dimensions_px"] == [1680, 1000], "Unexpected design dimensions")
+    mapping = {}
     hashes = set()
-    for entry in entries:
-        route = entry["route"]
-        path = entry["file"]
-        require(route.startswith("/") and route not in route_to_image, f"Duplicate/bad route: {route}")
-        require(path.startswith("docs/design/game-ui-v2026.11.23.10/previews/"), f"Unapproved path: {path}")
+    for item in entries:
+        route, path = item["route"], item["file"]
+        require(route.startswith("/") and route not in mapping, f"Bad route: {route}")
+        require(path.startswith(PREFIX) and "/" not in path[len(PREFIX):], f"Bad path: {path}")
         asset = ROOT / path
-        require(asset.is_file(), f"Missing PNG: {asset}")
-        with asset.open("rb") as reader:
-            head = reader.read(24)
-        require(head[:8] == b"\x89PNG\r\n\x1a\n", f"Not PNG: {asset}")
-        require(struct.unpack(">II", head[16:24]) == (1660, 990), f"Wrong image size: {asset}")
-        digest = hashlib.sha256(asset.read_bytes()).hexdigest()
-        require(entry["sha256"] == digest, f"Image changed without manifest update: {asset}")
-        require(digest not in hashes, f"Duplicate visual asset hash: {asset}")
+        data = asset.read_bytes()
+        require(data[:8] == b"\x89PNG\r\n\x1a\n", f"Bad PNG: {path}")
+        require(struct.unpack(">II", data[16:24]) == (1680, 1000), f"Bad dimensions: {path}")
+        digest = hashlib.sha256(data).hexdigest()
+        require(digest == item["sha256"] and digest not in hashes, f"Changed/duplicate PNG: {path}")
         hashes.add(digest)
-        route_to_image[route] = asset.name
-    actual = {p.name for p in (V10 / "previews").glob("*.png")}
-    require(actual == set(route_to_image.values()), "v10 files and manifest entries do not match")
-    for lang in ("README.md", "README.ko.md"):
-        text = (V10 / lang).read_text(encoding="utf-8")
-        rows = V10_ENTRY_RE.findall(text)
-        require(len(rows) == 180, f"{lang}: active gallery does not list 180 routes")
-        require(dict(rows) == route_to_image, f"{lang}: gallery/manifest route mismatch")
-        require(not OLD_IMAGE_RE.search(text), f"{lang}: archived image link in active gallery")
-    for lang in ("UI_UX_SINGLE_REFERENCE.md", "UI_UX_SINGLE_REFERENCE.ko.md"):
-        text = (ROOT / "docs" / lang).read_text(encoding="utf-8")
-        rows = UI_ENTRY_RE.findall(text)
-        require(len(rows) == 180, f"{lang}: reference index does not list 180 v10 routes")
-        require(dict(rows) == route_to_image, f"{lang}: reference/manifest mismatch")
-        require(not OLD_IMAGE_RE.search(text), f"{lang}: archived PNG link mixed into active UI master")
-    for old in (DESIGN / "game-ui-v2026.11.23.8/README.md",
-                DESIGN / "game-ui-v2026.11.23.8/README.ko.md",
-                DESIGN / "all-pages-v2026.11.18.12/README.md"):
-        first = old.read_text(encoding="utf-8").splitlines()[0]
-        require("ARCHIVED" in first or "보관본" in first, f"Archive tag missing: {old}")
-    for path in ("AGENTS.md", "GEMINI.md",
-                 "docs/planning/INTEGRATED_PLANNING_MASTER.md",
-                 "docs/planning/INTEGRATED_PLANNING_MASTER.ko.md",
-                 "DOCS_INDEX.md", "implementation_plan.md"):
-        text = (ROOT / path).read_text(encoding="utf-8")
-        require("v2026.11.24.1" in text[:1500], f"Agent or master reference not updated: {path}")
-    for path in (DESIGN / "CURRENT_UI_DESIGN.md", DESIGN / "CURRENT_UI_DESIGN.ko.md"):
-        require(path.is_file(), f"Authority policy missing: {path}")
-        text = path.read_text(encoding="utf-8")
-        require("v2026.11.23.10" in text and "v2026.11.23.8" in text, f"Version policy unclear: {path}")
-    print("PASS: v10 sole design authority / 180 routes / 180 valid PNGs / SHA256 / galleries EN+KO / UI masters EN+KO / archive markers / agent frontdoors")
-    print("NOTE: No browser, functional API, Test server or Production release was evaluated.")
+        mapping[route] = asset.name
+    gallery_rows = ROW.findall((GALLERY / "README.md").read_text(encoding="utf-8"))
+    require(len(gallery_rows) == 180 and dict(gallery_rows) == mapping, "Gallery mismatch")
+    require({p.name for p in GALLERY.glob("*.png")} == set(mapping.values()), "PNG inventory mismatch")
+    for name in ("UI_UX_SINGLE_REFERENCE.md", "UI_UX_SINGLE_REFERENCE.ko.md"):
+        rows = UI_ROW.findall((ROOT / "docs" / name).read_text(encoding="utf-8"))
+        require(len(rows) == 180 and {r: Path(p).name for r, p in rows} == mapping, f"UI master mismatch: {name}")
+    for path in ("AGENTS.md", "GEMINI.md", "docs/DOCUMENT_AUTHORITY.md", "docs/DOCUMENT_AUTHORITY.ko.md",
+                 "docs/planning/PROJECT_PLAN.md", "docs/planning/PROJECT_PLAN.ko.md",
+                 "docs/planning/INTEGRATED_PLANNING_MASTER.md", "docs/planning/INTEGRATED_PLANNING_MASTER.ko.md",
+                 "docs/design/CURRENT_UI_DESIGN.md", "docs/design/CURRENT_UI_DESIGN.ko.md"):
+        text = (ROOT / path).read_text(encoding="utf-8-sig")
+        require(VERSION in text[:2000] and "G2" in text[:3500], f"Stale entrypoint: {path}")
+    for version in ("game-ui-v2026.11.24.G1", "game-ui-v2026.11.24.11", "game-ui-v2026.11.23.10"):
+        for lang in ("README.md", "README.ko.md"):
+            text = (DESIGN / version / lang).read_text(encoding="utf-8")
+            require("ARCHIVED" in text.splitlines()[0], f"Missing archive label: {version}/{lang}")
+    en = (DESIGN / "CURRENT_UI_DESIGN.md").read_text(encoding="utf-8")
+    ko = (DESIGN / "CURRENT_UI_DESIGN.ko.md").read_text(encoding="utf-8")
+    require("Administrator access: deny by default" in en and "관리자 접근 기본 차단" in ko,
+            "Missing owner access rule")
+    print("PASS: G2, 180 distinct routes/assets, SHA256, 1680x1000, gallery, EN/KO masters, archive labels and frontdoors.")
+    print("NOTE: structural design checks only; administrator RBAC/runtime, browser and Test/Production were not tested.")
 
 
 if __name__ == "__main__":
