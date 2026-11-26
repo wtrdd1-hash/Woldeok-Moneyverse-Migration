@@ -107,6 +107,16 @@ public class WalletService {
     }
 
     @Transactional
+    /** NestJS activeRecipientById: only an active member's UUID resolves; no profile lookup. */
+    public boolean isActiveRecipient(UUID recipient) {
+        try {
+            String id = jdbcTemplate.queryForObject("SELECT public.wallet_active_recipient_by_id(?::uuid)::text", String.class, recipient);
+            return recipient.toString().equals(id);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public Map<String, Object> transferCanonicalWithIdempotencyKey(
             String fromUserId, String toUserId, String amountWld, String memo, UUID idempotencyKey) {
         if (idempotencyKey == null) {

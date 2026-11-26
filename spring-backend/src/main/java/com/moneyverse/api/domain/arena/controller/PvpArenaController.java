@@ -1,5 +1,9 @@
 package com.moneyverse.api.domain.arena.controller;
 
+import com.moneyverse.api.domain.identity.service.MemberApiGuard;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import com.moneyverse.api.common.response.ApiResponse;
 import com.moneyverse.api.domain.arena.dto.PvpDtos.*;
 import com.moneyverse.api.domain.arena.service.PvpArenaService;
@@ -15,10 +19,12 @@ import java.util.Map;
 @Tag(name = "PvP Wager Arena", description = "1:1 내기 대결장 및 실시간 베팅 정산 API")
 public class PvpArenaController {
 
+    private final MemberApiGuard guard;
     private final PvpArenaService pvpArenaService;
 
-    public PvpArenaController(PvpArenaService pvpArenaService) {
+    public PvpArenaController(PvpArenaService pvpArenaService, MemberApiGuard guard) {
         this.pvpArenaService = pvpArenaService;
+        this.guard = guard;
     }
 
     @Operation(summary = "활성 및 최근 대결방 목록 조회")
@@ -35,12 +41,9 @@ public class PvpArenaController {
             "/api/arena/rooms",
             "/api/v1/arena/rooms"
     })
-    public ApiResponse<PvpRoomDto> createRoom(
-            @Valid @RequestBody CreateRoomRequest request,
-            @RequestHeader(value = "x-user-id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId,
-            @RequestHeader(value = "x-user-name", defaultValue = "도전자") String userName
-    ) {
-        return ApiResponse.ok(pvpArenaService.createRoom(request, userId, userName), "대결방이 생성되었습니다.");
+    public ResponseEntity<?> createRoom(HttpServletRequest request) {
+        guard.verifiedMutationActor(request);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(Map.of("code", "ARENA_SETTLEMENT_NOT_JOURNALED", "message", "Arena stakes are unavailable pending journaled escrow and settlement"));
     }
 
     @Operation(summary = "대결방 참가 및 승패 정산 집행")
@@ -48,13 +51,9 @@ public class PvpArenaController {
             "/api/arena/rooms/{roomId}/join",
             "/api/v1/arena/rooms/{roomId}/join"
     })
-    public ApiResponse<Map<String, Object>> joinRoom(
-            @PathVariable String roomId,
-            @RequestBody JoinRoomRequest request,
-            @RequestHeader(value = "x-user-id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId,
-            @RequestHeader(value = "x-user-name", defaultValue = "응전자") String userName
-    ) {
-        return ApiResponse.ok(pvpArenaService.joinRoom(roomId, request, userId, userName), "대결이 완료되었습니다.");
+    public ResponseEntity<?> joinRoom(HttpServletRequest request, @PathVariable String roomId) {
+        guard.verifiedMutationActor(request);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(Map.of("code", "ARENA_SETTLEMENT_NOT_JOURNALED", "message", "Arena stakes are unavailable pending journaled escrow and settlement"));
     }
 
     @Operation(summary = "대결방 취소 및 판돈 환불")
@@ -62,10 +61,8 @@ public class PvpArenaController {
             "/api/arena/rooms/{roomId}/cancel",
             "/api/v1/arena/rooms/{roomId}/cancel"
     })
-    public ApiResponse<Map<String, Object>> cancelRoom(
-            @PathVariable String roomId,
-            @RequestHeader(value = "x-user-id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId
-    ) {
-        return ApiResponse.ok(pvpArenaService.cancelRoom(roomId, userId), "대결방이 취소되었습니다.");
+    public ResponseEntity<?> cancelRoom(HttpServletRequest request, @PathVariable String roomId) {
+        guard.verifiedMutationActor(request);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(Map.of("code", "ARENA_SETTLEMENT_NOT_JOURNALED", "message", "Arena stakes are unavailable pending journaled escrow and settlement"));
     }
 }

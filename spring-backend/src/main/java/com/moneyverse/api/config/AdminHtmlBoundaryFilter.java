@@ -30,8 +30,10 @@ public class AdminHtmlBoundaryFilter extends OncePerRequestFilter {
         if(!("GET".equals(request.getMethod()) || "HEAD".equals(request.getMethod()))) return true;
         String raw=request.getRequestURI();
         if(isSensitiveAdminPath(raw))return false;
-        try { return !isSensitiveAdminPath(java.net.URLDecoder.decode(raw,StandardCharsets.UTF_8)); }
-        catch(IllegalArgumentException badEncoding) { return true; }
+        // Judge the same normalised path that AdminApiBoundaryFilter uses when it defers
+        // server-rendered GETs here, so both filters agree on the route. Undecodable paths keep it.
+        try { return !isSensitiveAdminPath(BoundaryPaths.of(request)); }
+        catch(IllegalArgumentException badEncoding) { return raw==null || !raw.toLowerCase(java.util.Locale.ROOT).startsWith("/admin"); }
     }
 
     private static final java.util.Set<String> SERVER_RENDERED_ADMIN_ROUTES=java.util.Set.of(

@@ -36,7 +36,7 @@ public class TreasuryVault {
     }
 
     public TreasuryVault(UUID id, String code, String name, String balanceWld, String description, Instant createdAt, Instant updatedAt) {
-        this.id = id != null ? id : UUID.randomUUID();
+        this.id = id; // @GeneratedValue owns the id; pre-filling it made Hibernate 6.6 treat new rows as stale merges
         this.code = code;
         this.name = name;
         this.balanceWld = balanceWld != null ? balanceWld : "0";

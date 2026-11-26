@@ -31,13 +31,15 @@ public class BankController {
 
     private String resolveUserId(HttpServletRequest request, String headerUserId) {
         var session = auth.resolveSession(request);
-        if (session.isPresent() && session.get().isSignedIn() && session.get().getUserId() != null) {
-            return session.get().getUserId().toString();
+        // Critical (security review 2026-11-25): never fall back to a caller-supplied header.
+        if (session.isEmpty() || !session.get().isSignedIn() || session.get().getUserId() == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요한 금융 서비스입니다.");
         }
-        if (headerUserId != null && !headerUserId.isBlank()) {
-            return headerUserId.trim();
+        String actor = session.get().getUserId().toString();
+        if (headerUserId != null && !headerUserId.isBlank() && !headerUserId.trim().equalsIgnoreCase(actor)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "forged_actor_header");
         }
-        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요한 금융 서비스입니다.");
+        return actor;
     }
 
     @GetMapping(path = {"/standing", "/loans", ""})
@@ -100,37 +102,9 @@ public class BankController {
         return ApiResponse.ok(result, (String) result.get("message"));
     }
 
-    @GetMapping("/pockets")
-    @Operation(summary = "사용자 비상금 저금통(목표 적금 팟) 목록 조회")
-    public ApiResponse<List<Map<String, Object>>> getPockets(
-            HttpServletRequest request,
-            @RequestHeader(value = "X-User-Id", required = false) String userId) {
-        String uid = resolveUserId(request, userId);
-        return ApiResponse.ok(bankService.listPockets(uid));
-    }
-
-    @PostMapping("/pockets")
-    @Operation(summary = "새 비상금 저금통 생성")
-    public ApiResponse<Map<String, Object>> createPocket(
-            HttpServletRequest request,
-            @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @Valid @RequestBody PocketCreateRequest pocketRequest) {
-        String uid = resolveUserId(request, userId);
-        Map<String, Object> result = bankService.createPocket(uid, pocketRequest);
-        return ApiResponse.ok(result, (String) result.get("message"));
-    }
-
-    @PostMapping("/pockets/{id}/transfer")
-    @Operation(summary = "은행 예금과 저금통 간 잔액 이동")
-    public ApiResponse<Map<String, Object>> transferPocket(
-            HttpServletRequest request,
-            @PathVariable("id") UUID pocketId,
-            @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @Valid @RequestBody PocketTransferRequest transferRequest) {
-        String uid = resolveUserId(request, userId);
-        Map<String, Object> result = bankService.transferPocket(uid, pocketId, transferRequest.getDirection(), transferRequest.getAmountWld(), transferRequest.getIdempotencyKey());
-        return ApiResponse.ok(result, (String) result.get("message"));
-    }
+    // Pocket routes live in PocketController (security review 2026-11-25): the duplicates here made
+    // GET /pockets ambiguous (500 for every member) and the transfer called the unjournaled
+    // bank_transfer_pocket and echoed the database error.
 
     @PostMapping("/borrow")
     @Operation(summary = "가상 신용 대출 실행")

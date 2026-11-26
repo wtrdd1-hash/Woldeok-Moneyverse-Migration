@@ -1,5 +1,9 @@
 package com.moneyverse.api.domain.marketplace.controller;
 
+import com.moneyverse.api.domain.identity.service.MemberApiGuard;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import com.moneyverse.api.common.response.ApiResponse;
 import com.moneyverse.api.domain.marketplace.dto.MarketplaceDtos.*;
 import com.moneyverse.api.domain.marketplace.service.MarketplaceService;
@@ -17,9 +21,11 @@ import java.util.Map;
 public class MarketplaceController {
 
     private final MarketplaceService marketplaceService;
+    private final MemberApiGuard guard;
 
-    public MarketplaceController(MarketplaceService marketplaceService) {
+    public MarketplaceController(MarketplaceService marketplaceService, MemberApiGuard guard) {
         this.marketplaceService = marketplaceService;
+        this.guard = guard;
     }
 
     @GetMapping("/listings")
@@ -28,21 +34,23 @@ public class MarketplaceController {
         return ApiResponse.ok(marketplaceService.listListings());
     }
 
+    /*
+     * QA 2026-11-25 (critical): both took the member from an X-User-Id header
+     * (fixed default member) outside the session filter. marketplace_buy_listing
+     * also moves account_balances without ledger postings, so no write is
+     * acknowledged until a double-entry path exists.
+     */
     @PostMapping("/listings")
-    @Operation(summary = "마켓플레이스에 신규 아이템 매물 등록")
-    public ApiResponse<Map<String, Object>> createListing(
-            @RequestHeader(value = "X-User-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId,
-            @Valid @RequestBody CreateListingRequest request) {
-        Map<String, Object> result = marketplaceService.createListing(userId, request);
-        return ApiResponse.ok(result, (String) result.get("message"));
+    @Operation(summary = "Create listing: refused until double-entry settlement exists")
+    public ResponseEntity<?> createListing(HttpServletRequest request) {
+        guard.verifiedMutationActor(request);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(java.util.Map.of("code", "MARKETPLACE_LEDGER_NOT_JOURNALED", "message", "Marketplace settlement is unavailable pending double-entry postings"));
     }
 
     @PostMapping("/listings/{id}/buy")
-    @Operation(summary = "등록된 매물 즉시 구매 및 결제")
-    public ApiResponse<Map<String, Object>> buyListing(
-            @RequestHeader(value = "X-User-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId,
-            @PathVariable("id") String listingId) {
-        Map<String, Object> result = marketplaceService.buyListing(userId, listingId);
-        return ApiResponse.ok(result, (String) result.get("message"));
+    @Operation(summary = "Buy listing: refused until double-entry settlement exists")
+    public ResponseEntity<?> buyListing(HttpServletRequest request, @PathVariable("id") String listingId) {
+        guard.verifiedMutationActor(request);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(java.util.Map.of("code", "MARKETPLACE_LEDGER_NOT_JOURNALED", "message", "Marketplace settlement is unavailable pending double-entry postings"));
     }
 }

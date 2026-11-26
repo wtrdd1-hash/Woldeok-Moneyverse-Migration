@@ -20,6 +20,17 @@ public class StockService {
 
     private static final Logger log = LoggerFactory.getLogger(StockService.class);
 
+    /** Rule refusals from the trade function (NestJS EXPECTED_COMMAND_FAILURE) are 409; anything else 503. */
+    static ResponseStatusException tradeRefusal(Exception e) {
+        Throwable c = org.springframework.core.NestedExceptionUtils.getMostSpecificCause(e);
+        String state = c instanceof java.sql.SQLException sql ? sql.getSQLState() : null;
+        log.warn("Stock trade refused: {} sqlstate={} {}", c.getClass().getSimpleName(), state, String.valueOf(c.getMessage()).replaceAll("\\s+", " "));
+        if (state != null && java.util.Set.of("22023", "23505", "55000", "P0001").contains(state)) {
+            return new ResponseStatusException(HttpStatus.CONFLICT, "STOCK_ORDER_REFUSED");
+        }
+        return new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "STOCK_SOURCE_UNAVAILABLE");
+    }
+
     private static ResponseStatusException unavailable(String origin) {
         log.warn("Stock canonical source unavailable: {}", origin);
         return new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "STOCK_SOURCE_UNAVAILABLE");
@@ -368,8 +379,12 @@ public class StockService {
                 throw unavailable("trade_receipt_missing");
             }
             return receipt;
+        } catch (ResponseStatusException e) {
+            throw e;
         } catch (Exception e) {
-            throw unavailable("trade_receipt");
+            // Real-flow test 2026-11-26: selling without holdings or buying past the cash
+            // balance answered 503 ("service down"); the ledger refused the order by rule.
+            throw tradeRefusal(e);
         }
     }
 

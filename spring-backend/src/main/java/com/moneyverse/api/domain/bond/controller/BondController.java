@@ -1,5 +1,9 @@
 package com.moneyverse.api.domain.bond.controller;
 
+import com.moneyverse.api.domain.identity.service.MemberApiGuard;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import com.moneyverse.api.common.response.ApiResponse;
 import com.moneyverse.api.domain.bond.dto.BondDtos.*;
 import com.moneyverse.api.domain.bond.service.BondService;
@@ -17,9 +21,11 @@ import java.util.*;
 public class BondController {
 
     private final BondService bondService;
+    private final MemberApiGuard guard;
 
-    public BondController(BondService bondService) {
+    public BondController(BondService bondService, MemberApiGuard guard) {
         this.bondService = bondService;
+        this.guard = guard;
     }
 
     @GetMapping({"", "/", "/markets"})
@@ -33,45 +39,39 @@ public class BondController {
         return ApiResponse.ok(data);
     }
 
+    /*
+     * QA 2026-11-25 (critical): these took the member from an X-User-Id header
+     * (fixed default member); subscribe/borrow/repay wrote bond tables directly.
+     * Reads use the verified session owner; writes are refused until they go
+     * through journaled DB functions (bank_purchase_bond / bank_redeem_bond).
+     */
     @GetMapping("/my-holdings")
-    @Operation(summary = "??蹂댁쑀 援?콈 怨꾩쥖 ?꾪솴 議고쉶")
-    public ApiResponse<List<Map<String, Object>>> getMyHoldings(
-            @RequestHeader(value = "X-User-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId) {
-        return ApiResponse.ok(bondService.listUserHoldings(userId));
-    }
-
-    @PostMapping("/subscribe")
-    @Operation(summary = "?쒕? 媛??援?콈 怨듬え 泥?빟 諛?留ㅼ닔")
-    public ApiResponse<Map<String, Object>> subscribeBond(
-            @RequestHeader(value = "X-User-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId,
-            @Valid @RequestBody BondSubscribeRequest request) {
-        Map<String, Object> result = bondService.subscribeBond(userId, request.getBondId(), request.getUnits());
-        return ApiResponse.ok(result, (String) result.get("message"));
+    public ApiResponse<?> myHoldings(HttpServletRequest request) {
+        return ApiResponse.ok(bondService.listUserHoldings(guard.actor(request).toString()));
     }
 
     @GetMapping("/my-repo-loans")
-    @Operation(summary = "??援?콈 ?대낫 ?덊룷 ?異??댁뿭 議고쉶")
-    public ApiResponse<List<Map<String, Object>>> getMyRepoLoans(
-            @RequestHeader(value = "X-User-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId) {
-        return ApiResponse.ok(Collections.emptyList());
+    public ResponseEntity<?> myRepoLoans(HttpServletRequest request) {
+        guard.actor(request);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(java.util.Map.of("code", "BOND_REPO_SOURCE_UNAVAILABLE", "message", "Repo loan history has no journaled source"));
+    }
+
+    @PostMapping("/subscribe")
+    public ResponseEntity<?> subscribe(HttpServletRequest request) {
+        guard.verifiedMutationActor(request);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(java.util.Map.of("code", "BOND_LEDGER_NOT_JOURNALED", "message", "Use the journaled bank bond purchase"));
     }
 
     @PostMapping("/repo-loans/borrow")
-    @Operation(summary = "援?콈 ?대낫 ?덊룷 ?異??ㅽ뻾")
-    public ApiResponse<Map<String, Object>> borrowRepoLoan(
-            @RequestHeader(value = "X-User-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId,
-            @Valid @RequestBody RepoBorrowRequest request) {
-        Map<String, Object> result = bondService.createRepoLoan(userId, request.getHoldingId());
-        return ApiResponse.ok(result, (String) result.get("message"));
+    public ResponseEntity<?> borrowRepo(HttpServletRequest request) {
+        guard.verifiedMutationActor(request);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(java.util.Map.of("code", "BOND_LEDGER_NOT_JOURNALED", "message", "Repo lending is unavailable pending journaled settlement"));
     }
 
     @PostMapping("/repo-loans/repay")
-    @Operation(summary = "援?콈 ?대낫 ?덊룷 ?異??먮━湲??곹솚")
-    public ApiResponse<Map<String, Object>> repayRepoLoan(
-            @RequestHeader(value = "X-User-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId,
-            @Valid @RequestBody RepoRepayRequest request) {
-        Map<String, Object> result = bondService.repayRepoLoan(userId, request.getLoanId());
-        return ApiResponse.ok(result, (String) result.get("message"));
+    public ResponseEntity<?> repayRepo(HttpServletRequest request) {
+        guard.verifiedMutationActor(request);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(java.util.Map.of("code", "BOND_LEDGER_NOT_JOURNALED", "message", "Repo lending is unavailable pending journaled settlement"));
     }
 }
 

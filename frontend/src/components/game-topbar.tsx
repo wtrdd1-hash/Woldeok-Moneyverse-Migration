@@ -8,6 +8,7 @@ import { LanguageSwitcher } from '@/components/language-switcher';
 import { PlayerHud } from '@/components/g1/player-hud';
 import { v10PageTitle } from '@/components/v10-nav';
 import { useMountedViewer } from '@/components/use-mounted-viewer';
+import { GameDateStamp } from '@/components/passbook/game-date-stamp';
 
 export function GameTopbar() {
   const pathname = usePathname() ?? '/';
@@ -32,6 +33,7 @@ export function GameTopbar() {
           {/* Not an h1: each page owns its single h1. */}
           <span className="truncate text-[15px] font-bold text-[var(--g1-ink)]">{title}</span>
         </Link>
+        <GameDateStamp compact />
         <Link
           href="/search"
           prefetch={false}
@@ -47,7 +49,10 @@ export function GameTopbar() {
       {/* Desktop frame. */}
       {/* DESIGN180 desktop bar: location on the left, tools on the right. */}
       <div className="hidden h-[68px] items-center justify-between gap-6 px-9 lg:flex">
-        <p className="min-w-0 truncate text-[13px] text-[var(--g1-muted)]">{title}</p>
+        <div className="flex min-w-0 items-center gap-4">
+          <GameDateStamp />
+          <p className="min-w-0 truncate text-[13px] text-[var(--g1-muted)]">{title}</p>
+        </div>
         <div className="flex items-center gap-3">
         <form role="search" onSubmit={submit} className="relative">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--g1-faint)]" aria-hidden />

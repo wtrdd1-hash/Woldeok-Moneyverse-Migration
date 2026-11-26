@@ -12,6 +12,7 @@ import { verifiedWalletPageSummary } from '@/lib/wallet-page-summary';
 import { requireMember } from '@/lib/session';
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
 import { sides } from '../sides';
+import { dayKeyOf, parseGameClock, passbookDate } from '@/lib/game-calendar';
 import type { WalletHistoryPage } from './types';
 import { activityPeriod, activityPeriodUrl, activityCursorUrl, activityDirection, activityCalendarRange } from './period';
 
@@ -54,6 +55,8 @@ export default async function WalletActivityPage({
     `/api/v1/wallet/activity?period=${period}&direction=${direction}${range ? `&from=${range.from}&to=${range.to}` : ''}${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`,
   );
   const history = range && !verifiedWalletCalendarPage(unverifiedHistory, range, direction) ? null : unverifiedHistory;
+  // Passbook date column (redesign 2026-11-26): each line's game date from the server calendar.
+  const gameClock = history ? parseGameClock(await apiOrNull<unknown>('/api/v1/game-clock')) : null;
   const pageSummary = history ? verifiedWalletPageSummary(history) : null;
 
 
@@ -139,7 +142,15 @@ export default async function WalletActivityPage({
             history.transactions.map((entry) => {
               const { debit, credit } = sides(entry);
               return (
-                <div key={entry.transactionId} className="grid gap-1">
+                <div key={entry.transactionId} className="grid gap-1 border-b border-[var(--g1-line)] py-1 last:border-b-0 sm:grid-cols-[5.5rem_1fr] sm:items-center sm:gap-3">
+                {(() => {
+                  const key = gameClock ? dayKeyOf(gameClock, entry.occurredAt) : null;
+                  return key ? (
+                    <time dateTime={entry.occurredAt} className="mv-print text-[12px] text-[var(--g1-gold)]" title="게임 날짜(현실 10분 = 게임 1일)">
+                      {passbookDate(key)}
+                    </time>
+                  ) : <span aria-hidden />;
+                })()}
                 <PostingStrip
                   debit={debit}
                   credit={credit}

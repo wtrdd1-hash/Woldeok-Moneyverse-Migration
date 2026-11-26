@@ -72,7 +72,8 @@ describe('ultra-narrow responsive guards', () => {
     const shell = source('../components/site-shell.tsx');
     const bottomNav = source('../components/mobile-bottom-nav.tsx');
 
-    expect(shell).toContain('pb-[calc(env(safe-area-inset-bottom)+6.25rem)]');
+    // 10rem = bottom dock (6.25rem) + the floating onboarding/support launchers, so the last row is never hidden (2026-11-25).
+    expect(shell).toContain('pb-[calc(env(safe-area-inset-bottom)+10rem)]');
     expect(bottomNav).toContain('min-h-[44px]');
     expect(bottomNav).toContain('pb-[env(safe-area-inset-bottom)]');
   });

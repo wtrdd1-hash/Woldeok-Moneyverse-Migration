@@ -17,6 +17,9 @@ public class GameClockDtos {
             OffsetDateTime dayStartedAt,
             OffsetDateTime dayEndsAt,
             OffsetDateTime weekStartedAt,
-            OffsetDateTime weekEndsAt
+            OffsetDateTime weekEndsAt,
+            /** Synthetic calendar date of this game day / week start (server_game_day_key / _week_key). */
+            String dayKey,
+            String weekKey
     ) {}
 }

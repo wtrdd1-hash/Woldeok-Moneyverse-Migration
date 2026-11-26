@@ -40,10 +40,9 @@ public class ContentController {
 
     @PostMapping("/banners/{id}/click")
     public ResponseEntity<Map<String, Object>> recordBannerClick(@PathVariable("id") String id) {
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("bannerId", id);
-        res.put("recordedAt", new Date().toInstant().toString());
-        return ResponseEntity.ok(res);
+        // Nothing is stored for banner clicks; say so instead of claiming a recordedAt
+        // (security review 2026-11-25). No frontend caller depends on this route.
+        return ResponseEntity.status(org.springframework.http.HttpStatus.ACCEPTED)
+                .body(Map.of("success", false, "recorded", false, "bannerId", id));
     }
 }

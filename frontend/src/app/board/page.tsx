@@ -135,7 +135,7 @@ export default async function BoardPage({
             </label>
             <button
               type="submit"
-              className="min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground"
+              className="min-h-11 shrink-0 whitespace-nowrap rounded-md bg-primary px-4 font-semibold text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               검색
             </button>
