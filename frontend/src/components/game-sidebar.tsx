@@ -107,8 +107,9 @@ export function GameSidebar({ embedded = false, onNavigate }: { readonly embedde
       aria-label={t('shell.brand', locale)}
       onClick={(event) => { if (onNavigate && (event.target as HTMLElement).closest('a')) onNavigate(); }}
     >
-      <Link href="/" prefetch={false} className="mb-6 flex items-center gap-2.5 px-2" aria-label={t('shell.brandHome', locale)}>
-        {/* The real favicon is the only brand mark. */}
+      <Link href="/" prefetch={false} className={embedded ? 'mb-6 flex items-center gap-2.5 pl-2 pr-10' : 'mb-6 flex items-center gap-2.5 px-2'} aria-label={t('shell.brandHome', locale)}>
+        {/* The real favicon is the only brand mark. In the mobile sheet the right padding keeps the
+            name clear of the sheet's close button (browser QA, 320 px). */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/favicon.ico" alt="" width={34} height={34} className="size-[34px] rounded-[9px]" />
         <span className="flex flex-col leading-tight">
