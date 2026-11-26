@@ -1,0 +1,12 @@
+# Capacity and legacy runtime cleanup — v2026.11.26.1055.1
+- Start: inspected host, master references, live services, Nginx routes, dependencies and agent handoffs; protected active worktrees, database volumes, logs and rollback artifacts.
+- Checkpoint: stopped and disabled legacy Test v20/v21/v22 only, after no direct runtime references were found in inspected configuration. Cleaned npm and APT caches; pip purge was not confirmed.
+- Verification: Java 35 → 32, root disk 86% → 85%, available RAM 1.6 → 1.8 GiB (point-in-time readings, not causal attribution). Backend ports 4550 and 55438 stayed HTTP 200; frontend ports 55474, 55478, 55472 stayed HTTP 308. All three units inactive/disabled. No production cutover or database writes. Restore with systemctl enable --now for the named units if needed.
+- Handoff: capacity review queued in Claude resume prompt after security P0. Acknowledgement pending; resume preflight HOLD because the previous conversation changed. Do not bypass gate. Remaining old services and disk artifacts need ownership/dependency verification. No measured load capacity claim.
+
+## Phase 2 — Claude resume session (v2026.11.26.1204.1)
+- Start: re-read handoff, TESTGATE.1 and APPHOLD.1; main 1df1150e97. Security PR #3456 preserved and paused.
+- In progress: compared the loaded Nginx configuration, keep-service unit/environment references, live connections, timers and agent handoffs. 17 legacy Spring/Test JVM services had no route, dependency, connection or ownership claim.
+- Finished: those 17 were stopped and disabled; unit definitions kept (two transient units recorded for recreation). npm/pip caches cleaned. Java 32 → 15, swap used 22.7 → 15.3 GiB, available RAM 0.5 → 3.4 GiB (point-in-time; includes local inference idle unload), application DB connections 20 → 14. Production and Test smoke identical before and after; previously failing checks unchanged. No database write, volume, backup, log, worktree or release-artifact deletion; no swapoff; no production change.
+- HOLD (reason recorded internally): local inference service (in use; memory ceiling is a capacity risk), production/Test rollback frontends, idle build daemon, CI database image, package stores on the data disk, release/rollback artifacts, backups, journals, worktrees, third-party tool containers, and pre-existing failed units owned by other tasks.
+- Next: DB/backend performance analysis and isolated Test load-test plan, then resume security.
