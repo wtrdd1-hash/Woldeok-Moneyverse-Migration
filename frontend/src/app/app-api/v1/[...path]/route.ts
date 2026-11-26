@@ -80,9 +80,18 @@ function looksLikeOfficialAndroid(request: NextRequest): boolean {
   return client === 'android' && /^WoldeokMoneyverse-Android\/[0-9]+\.[0-9]+\.[0-9]+(?:\s|$)/.test(userAgent);
 }
 
+/**
+ * Security 2026-11-26 (PR #3454 P1): the fallback was a fixed literal committed to this public
+ * repository, and production was configured with that same value. Missing configuration now
+ * fails closed in production; development uses a local placeholder that no environment shares.
+ */
 function internalToken(): string {
-  const token = process.env.INTERNAL_API_TOKEN ?? '8e5f2a1b9c3d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f';
-  return token;
+  const token = process.env.INTERNAL_API_TOKEN;
+  if (token) return token;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('INTERNAL_API_TOKEN is not configured');
+  }
+  return 'dev-internal-token-local';
 }
 
 function contractJson(payload: unknown, init: ResponseInit = {}): NextResponse {

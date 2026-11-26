@@ -86,7 +86,9 @@ public class MemberPhotoController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+            // Internal exception text (paths, storage detail) is logged by class only, never returned.
+            log.warn("[MemberPhoto] upload failed: {}", e.getClass().getSimpleName());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "PHOTO_UPLOAD_FAILED"));
         }
     }
 

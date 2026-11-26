@@ -112,9 +112,16 @@ public class Phase11MediaAndUploadIntegrationTest {
                 "file", "test.png", "image/png", VALID_PNG
         );
 
-        MvcResult uploadResult = mockMvc.perform(multipart("/api/v1/photos/uploads")
+        // Since 2026-11-26 upload writes require the session's CSRF proof, as every caller sends.
+        mockMvc.perform(multipart("/api/v1/photos/uploads")
                         .file(file)
                         .cookie(new Cookie("mv_session", login.token())))
+                .andExpect(status().isForbidden());
+
+        MvcResult uploadResult = mockMvc.perform(multipart("/api/v1/photos/uploads")
+                        .file(file)
+                        .cookie(new Cookie("mv_session", login.token()))
+                        .header("X-CSRF-Token", login.csrfToken()))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success", is(true)))
                 .andExpect(jsonPath("$.storageKey", endsWith(".png")))

@@ -34,8 +34,7 @@ public class UserAuthService {
     private final JdbcTemplate jdbcTemplate;
     private final Argon2PasswordEncoder passwordEncoder;
 
-    @org.springframework.beans.factory.annotation.Value("${moneyverse.internal-api-token:${INTERNAL_API_TOKEN:8e5f2a1b9c3d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f}}")
-    private String internalToken = "8e5f2a1b9c3d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f";
+    // Security 2026-11-26: an unused field carried a hard-coded internal token literal; removed.
 
     @Autowired
     public UserAuthService(JdbcTemplate jdbcTemplate) {

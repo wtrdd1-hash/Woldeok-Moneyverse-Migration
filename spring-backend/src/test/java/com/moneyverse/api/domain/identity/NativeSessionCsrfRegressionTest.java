@@ -210,9 +210,20 @@ class NativeSessionCsrfRegressionTest {
         }
     }
 
-    @ParameterizedTest @ValueSource(strings = {"https://www.easy-scraping.com", "http://localhost:3000"})
+    @ParameterizedTest @ValueSource(strings = {"https://www.easy-scraping.com"})
     void CorsAllowedCrossOriginCannotReadRawProof(String origin) throws Exception {
         assertBootstrapDenied(bootstrap().header("Origin", origin).cookie(new Cookie(HOST_PROOF, PROOF)));
+    }
+
+    // Developer origins are no longer CORS-allowed in Production, so the CORS layer refuses them
+    // before the bootstrap handler runs. The proof must still never appear in the response.
+    @ParameterizedTest @ValueSource(strings = {"http://localhost:3000", "http://127.0.0.1:4550"})
+    void DeveloperOriginIsRefusedBeforeBootstrap(String origin) throws Exception {
+        var result = mvc.perform(bootstrap().header("Origin", origin).cookie(new Cookie(HOST_PROOF, PROOF)))
+                .andExpect(status().isForbidden()).andReturn();
+        assertFalse(result.getResponse().getContentAsString().contains(PROOF), "Refused origin must not see the proof");
+        assertNull(result.getResponse().getHeader("Access-Control-Allow-Origin"), "Refused origin must not be granted CORS");
+        authenticatedWithoutProof(perform(bootstrap()));
     }
 
     @ParameterizedTest @ValueSource(strings = {"same-site", "cross-site", "none", "ci_invalid"})

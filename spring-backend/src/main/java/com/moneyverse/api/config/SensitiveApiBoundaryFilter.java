@@ -30,6 +30,8 @@ import java.util.UUID;
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 11)
 public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
+    /** Set once this filter has substituted the verified actor; ActorHeaderSanitizingFilter keeps it. */
+    public static final String VERIFIED_ACTOR_ATTRIBUTE = SensitiveApiBoundaryFilter.class.getName() + ".verifiedActor";
     private final UserAuthService userAuthService;
     private final AdminAuthService adminAuthService;
 
@@ -88,7 +90,12 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String p = request.getRequestURI();
+        String p;
+        try {
+            p = BoundaryPaths.of(request);
+        } catch (IllegalArgumentException malformed) {
+            return false; // fail closed: an undecodable path gets the member boundary
+        }
         if (isPublicGalleryRead(request.getMethod(), p)) return true;
         return !isMemberPrivatePath(p) && !isAdminDiagnosticsPath(p)
                 && !(isWrite(request) && isSessionOnlyWritePath(p));
@@ -109,7 +116,14 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
      */
     static boolean isSessionOnlyWritePath(String p) {
         String n = p.startsWith("/app-api/") ? p.replaceFirst("^/app-api", "/api") : p;
-        return n.matches("^/api/(v1/)?(profile/image|collections/[^/]+|stocks/alerts(/[^/]+)?|privacy/requests|board/stock-posts)/?$");
+        if (n.matches("^/api/(v1/)?(profile/image|collections/[^/]+|stocks/alerts(/[^/]+)?|privacy/requests|board/stock-posts)/?$")) return true;
+        // 2026-11-26 caller verification: these callers already send the proof (profile via
+        // lib/mutate, uploads via apiBytes and the chat widgets, burn-draw via its BFF); the
+        // dopamine aliases have no caller.
+        if (n.matches("^/api/(v1/)?(profile|board/images/uploads|photos/uploads|content/chat/upload"
+                + "|economy/events/burn-draw/participate|dopamine/(claim-streak|streak/claim|bull-bear|dopamine/bull-bear))/?$")) return true;
+        // The same handlers are also mapped without /api; those spellings must not skip the check.
+        return n.matches("^/(profile/image|stocks/alerts(/[^/]+)?|board/stock-posts|collections/[^/]+)/?$");
     }
 
     @Override
@@ -124,7 +138,8 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (isAdminDiagnosticsPath(request.getRequestURI())) {
+        String path = boundaryPath(request);
+        if (isAdminDiagnosticsPath(path)) {
             if (adminAuthService.resolveVerifiedAdminActor(request).isEmpty()) {
                 fail(response, 401, "admin_session_required");
                 return;
@@ -157,18 +172,19 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
 
         // User-facing finance, property tax and progression writes require canonical
         // owner-scoped posting receipts, not a successful JSON response alone.
-        if (isWrite(request) && request.getRequestURI().matches("^/api/(v1/)?(space|spaces|progression|advisor)(/.*)?$")) {
+        if (isWrite(request) && path.matches("^/api/(v1/)?(space|spaces|progression|advisor)(/.*)?$")) {
             fail(response, 503, "source_receipt_not_verified");
             return;
         }
         // Legacy wallet-transfer clients supply no stable idempotency key. Block only
         // that unsafe alias. The /api/v1/wallet/transfer controller demands a
         // caller-stable UUID and a verified session + CSRF before any ledger SQL.
-        if (isWrite(request) && request.getRequestURI().equals("/api/wallet/transfer")) {
+        if (isWrite(request) && path.equals("/api/wallet/transfer")) {
             fail(response, 503, "legacy_wallet_transfer_idempotency_not_verified");
             return;
         }
 
+        request.setAttribute(VERIFIED_ACTOR_ATTRIBUTE, Boolean.TRUE);
         final String actorHeader = actor.toString();
         HttpServletRequest wrapped = new HttpServletRequestWrapper(request) {
             private boolean isActorHeader(String name) {
@@ -192,6 +208,14 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
             }
         };
         chain.doFilter(wrapped, response);
+    }
+
+    private static String boundaryPath(HttpServletRequest request) {
+        try {
+            return BoundaryPaths.of(request);
+        } catch (IllegalArgumentException malformed) {
+            return request.getRequestURI();
+        }
     }
 
     private static boolean matchesActor(String supplied, UUID actor) {

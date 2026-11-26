@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { api } from '@/lib/api';
+import { mutate } from '@/lib/mutate';
 import { viewerOrUnknown } from '@/lib/viewer';
 import { isSameOriginFinanceMutation } from '@/lib/finance-mutation-origin';
 
@@ -18,8 +19,8 @@ export async function GET(): Promise<NextResponse> {
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
-  // Same-origin only (QA 2026-11-25): the BFF spends its own CSRF token, so
-  // the Origin check is the only cross-site defence for this write.
+  // Same-origin only (QA 2026-11-25). Since 2026-11-26 the API also requires the
+  // session's CSRF proof for this write; mutate() fetches and spends it.
   if (!isSameOriginFinanceMutation(request)) {
     return NextResponse.json({ error: '요청 출처가 허용되지 않았습니다.' }, { status: 403, headers: { 'cache-control': 'private, no-store' } });
   }
@@ -30,7 +31,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   try {
     const body = await request.json().catch(() => ({}));
-    const data = await api('/api/v1/economy/events/burn-draw/participate', {
+    const data = await mutate('/api/v1/economy/events/burn-draw/participate', {
       method: 'POST',
       body,
     });

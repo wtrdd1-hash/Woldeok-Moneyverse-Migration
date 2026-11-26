@@ -74,28 +74,16 @@ class Phase8SocketAndBotIntegrationTest {
         AuthorizationResult result = securityInterceptor.getAuthorizationResult(normalHandshake);
         assertTrue(result.isAuthorized(), "일반 클라이언트 핸드셰이크는 통과되어야 합니다.");
 
-        // 2. 내부 시크릿 토큰 인증 통과 테스트
+        // 2-4. Security 2026-11-26: a shared token or client-sent role/twoFactorVerified query
+        // parameters are not identities. Without a verified admin session cookie the admin room is
+        // refused, whatever the handshake claims (the previous assertions expected the bypass).
         Map<String, List<String>> tokenParams = Map.of("token", List.of("test-internal-token"));
         HandshakeData tokenHandshake = new HandshakeData(headers, tokenParams, address, "https://easy-scraping.com", false);
-        AuthorizationResult tokenResult = securityInterceptor.getAuthorizationResult(tokenHandshake);
-        assertTrue(tokenResult.isAuthorized());
-        assertTrue(securityInterceptor.verifyAdminRoomAccess(tokenHandshake), "내부 토큰 보유 클라이언트는 관리자 룸 접근이 허용되어야 합니다.");
-
-        // 3. 관리자 2FA 검증 분기 테스트 (2FA 미완료 시 거부)
-        Map<String, List<String>> unverifiedAdminParams = Map.of(
-                "role", List.of("admin"),
-                "twoFactorVerified", List.of("false")
-        );
-        HandshakeData unverifiedAdminHandshake = new HandshakeData(headers, unverifiedAdminParams, address, "https://easy-scraping.com", false);
-        assertFalse(securityInterceptor.verifyAdminRoomAccess(unverifiedAdminHandshake), "2FA가 완료되지 않은 관리자는 관리자 룸 접근이 거절되어야 합니다.");
-
-        // 4. 관리자 2FA 완료 시 승인
-        Map<String, List<String>> verifiedAdminParams = Map.of(
-                "role", List.of("admin"),
-                "twoFactorVerified", List.of("true")
-        );
-        HandshakeData verifiedAdminHandshake = new HandshakeData(headers, verifiedAdminParams, address, "https://easy-scraping.com", false);
-        assertTrue(securityInterceptor.verifyAdminRoomAccess(verifiedAdminHandshake), "2FA가 완료된 관리자는 관리자 룸 접근이 승인되어야 합니다.");
+        assertTrue(securityInterceptor.getAuthorizationResult(tokenHandshake).isAuthorized(), "public connection still allowed");
+        assertFalse(securityInterceptor.verifyAdminRoomAccess(tokenHandshake), "a shared token must not open the admin room");
+        Map<String, List<String>> forgedAdminParams = Map.of("role", List.of("admin"), "twoFactorVerified", List.of("true"));
+        HandshakeData forged = new HandshakeData(headers, forgedAdminParams, address, "https://easy-scraping.com", false);
+        assertFalse(securityInterceptor.verifyAdminRoomAccess(forged), "forged role/2FA parameters must not open the admin room");
     }
 
     @Test
