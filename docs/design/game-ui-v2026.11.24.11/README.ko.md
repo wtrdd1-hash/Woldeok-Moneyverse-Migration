@@ -1,3 +1,5 @@
+> **ARCHIVED / 보관본 — v2026.11.27.PLAN-AUDIT.2:** historical evidence only, not implementation input or guest-access authority. [Current G2 policy](../CURRENT_UI_DESIGN.md). All historical claims below refer to their original date.
+
 # 월덕 머니버스 전용 게임 UI v2026.11.24.11 공식 갤러리 (180개 전체 라우트)
 
 **버전**: `v2026.11.24.11`  

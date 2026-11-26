@@ -1,3 +1,5 @@
+> **SUPERSEDED / 과거 기록 — v2026.11.27.PLAN-AUDIT.2:** 신규 웹 화면은 Next.js/React/BFF + Spring API. 이 문서의 Spring 단독 프론트엔드 기술·과거 운영 상태는 현행 지시가 아니다. 업무·보안 제약은 유지. [Current authority](../design/CURRENT_UI_DESIGN.md).
+
 # Owner superseding directive — Spring Boot frontend for ALL website pages (v2026.11.18.28)
 
 **2026-11-18 KST · English canonical · [Korean companion](SPRING_ONLY_FRONTEND_OWNER_DIRECTIVE_v2026.11.18.28.ko.md). Status: OWNER-APPROVED ARCHITECTURE TARGET; migration is IN PROGRESS, not accepted.**

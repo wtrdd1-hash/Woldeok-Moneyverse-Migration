@@ -1,12 +1,14 @@
+> **v2026.11.27.PLAN-AUDIT.2 — 현행 적용:** 신규 Next.js/React/BFF + Spring API, G2 디자인, 실제 파비콘, 관리자 접근 서버 차단. 기존 Spring 화면은 검증된 교체까지 유지. 아래 날짜별 Spring 단독·v10/v11/G1·전 경로 게스트 개방 지시는 과거 기록이다. [현행 상세](../design/CURRENT_UI_DESIGN.ko.md). 문서 정리이며 운영 변경 아님.
+
 ## v2026.11.24.0818 — Stitch Skills 로컬 적용 시험
 
-> **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](../DOCUMENT_AUTHORITY.md) / [한국어](../DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
+> **Current rules — v2026.11.27.PLAN-AUDIT.2:** [EN authority](../DOCUMENT_AUTHORITY.md) / [한국어](../DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; G2 design per CURRENT_UI_DESIGN and actual favicon; administrator access denied to guests and non-admins. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
 
 소스 전용 디자인 추출 스킬과 11월 18일 승인 디자인 규격·정적 검사를 추가. Stitch 클라우드 디자인은 별도 MCP 연결·승인 필요; Test/운영 무변경. [상세](../development/GOOGLE_STITCH_SKILLS_PILOT_v2026.11.24.0818.ko.md).
 
 # 월덕 머니버스 — Living Project Plan
 
-> **v2026.11.23.10 UI visual/feature audit** [180 revised PNGs](../design/game-ui-v2026.11.23.10/README.ko.md) · [audit](../qa/2026-11-23-game-ui-180-image-feature-audit.ko.md). Image file QA only; full runtime acceptance unverified.
+> **Historical v2026.11.23.10 UI visual/feature audit** [180 revised PNGs](../design/game-ui-v2026.11.23.10/README.ko.md) · [audit](../qa/2026-11-23-game-ui-180-image-feature-audit.ko.md). Image file QA only; full runtime acceptance unverified.
 
 > v2026.11.23.8 신규 이미지: [실제 신규 180개 시안](../design/game-ui-v2026.11.23.8/README.ko.md) — 생성 완료/시안 검수 필요, 실제 서비스 적용 아님.
 
@@ -44,7 +46,7 @@
 
 
 ## v2026.11.20.1 — 사용자 확정: 11월 18일 UI/UX·5개 언어·전 페이지 관리자 문의/회원 채팅 (문서 기획만)
-11월 18일 네이비/보라 PC·모바일 180개 시안 및 관리자 문의 디자인을 사이트 전체 Spring MVC+Thymeleaf 구현의 시각 기준으로 확정한다. 과거 '시안 전용'은 역사적 범위이며 이후 실제 구현 지시가 우선한다. 기본 영어와 한국어·일본어·중국어·베트남어 자동 감지 및 항상 수동 선택 가능; 비회원·회원·관리자 전 화면에 단일 원형 문의/채팅 버튼과 안전한 권한 분리. [상세 한국어 정본 대응](NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.ko.md) / [English](NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.md). Spring 문의의 신원 헤더 위조·고정 UUID·허위 성공 P0 해결 전 실제 전송 금지. 화면·API·권한·무중단 승격 증빙 필요. **문서만 갱신, 코드/Test/운영 변경 없음**. 착수 main `245489a1452a1f187af831f483c18ab2501a65c5`.
+**과거 기록 — 현행 프론트엔드 기술·시각 기준은 PLAN-AUDIT.2로 대체됨:** 11월 18일 네이비/보라 PC·모바일 180개 시안 및 관리자 문의 디자인을 사이트 전체 Spring MVC+Thymeleaf 구현의 시각 기준으로 확정한다. 과거 '시안 전용'은 역사적 범위이며 이후 실제 구현 지시가 우선한다. 기본 영어와 한국어·일본어·중국어·베트남어 자동 감지 및 항상 수동 선택 가능; 비회원·회원·관리자 전 화면에 단일 원형 문의/채팅 버튼과 안전한 권한 분리. [상세 한국어 정본 대응](NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.ko.md) / [English](NOV18_DESIGN_GLOBAL_I18N_CHAT_AUTHORITY_v2026.11.20.1.md). Spring 문의의 신원 헤더 위조·고정 UUID·허위 성공 P0 해결 전 실제 전송 금지. 화면·API·권한·무중단 승격 증빙 필요. **문서만 갱신, 코드/Test/운영 변경 없음**. 착수 main `245489a1452a1f187af831f483c18ab2501a65c5`.
 
 
 ## v2026.11.18.17 — Spring 프론트엔드 관리자 디자인·전역 채팅 코드 전환 (소스 검증 / 운영 HOLD)

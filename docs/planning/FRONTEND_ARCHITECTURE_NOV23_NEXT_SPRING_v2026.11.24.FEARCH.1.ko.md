@@ -1,3 +1,5 @@
+> **v2026.11.27.PLAN-AUDIT.2:** [Current G2 frontend authority](../design/CURRENT_UI_DESIGN.md). Prior Spring-only frontend, previous visual baselines and unrestricted guest browsing are superseded. Preserve valid functional/security requirements. Administrator access is denied to guests and non-admins at server boundaries; old runtime/automation records are not current instructions.
+
 # 11월 23일 프론트엔드 아키텍처 단일 결정 — v2026.11.24.FEARCH.1
 
 > 상태: **사용자 승인 기술 방향 / 문서 제안 / 실제 서버 전환 전**. [영어 정본](FRONTEND_ARCHITECTURE_NOV23_NEXT_SPRING_v2026.11.24.FEARCH.1.md) · [추적 #3422](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/3422). 현재 적용 순위와 원문 PR 이력은 [문서 기준](../DOCUMENT_AUTHORITY.ko.md)을 따른다. 실제 서버 전환 증거는 별도로 요구한다.

@@ -1,3 +1,5 @@
+> **ARCHIVED / 보관본 — v2026.11.27.PLAN-AUDIT.2:** historical evidence only, not implementation input or guest-access authority. [Current G2 policy](../CURRENT_UI_DESIGN.md). All historical claims below refer to their original date.
+
 # 현행 단일 기준: 11월 23일 v10 게임형 UI 이미지 180개
 
 v2026.11.23.10 / 180개 새 PNG 생성·파일 검사 통과 / 개별 디자인 승인 및 실서버 기능 검증 미완료.

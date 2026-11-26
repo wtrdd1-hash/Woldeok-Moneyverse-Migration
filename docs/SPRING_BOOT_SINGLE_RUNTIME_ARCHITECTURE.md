@@ -1,3 +1,5 @@
+> **SUPERSEDED / 과거 기록 — v2026.11.27.PLAN-AUDIT.2:** 신규 웹 화면은 Next.js/React/BFF + Spring API. 이 문서의 Spring 단독 프론트엔드 기술·과거 운영 상태는 현행 지시가 아니다. 업무·보안 제약은 유지. [Current authority](design/CURRENT_UI_DESIGN.md).
+
 # 🏛️ Woldeok Moneyverse — Spring Boot 3.3.5 Single Runtime Architecture (Node.js 100% Deprecated)
 
 **최종 확정 일자:** 2026-11-19  

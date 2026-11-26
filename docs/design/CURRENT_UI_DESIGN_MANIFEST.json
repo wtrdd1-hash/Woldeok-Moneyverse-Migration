@@ -1,922 +1,924 @@
-﻿{
-    "schema_version":  1,
-    "authority_version":  "v2026.11.24.2",
-    "design_version":  "v2026.11.24.11",
-    "selection":  "ACTIVE_SOLE_VISUAL_REFERENCE",
-    "design_review":  "VISUAL_REVIEW_OPEN",
-    "runtime_e2e":  "VERIFIED_TYPECHECK_AND_GUEST_FALLBACK",
-    "total_routes":  180,
-    "total_images":  180,
-    "image_dimensions_px":  [
-                                1660,
-                                990
-                            ],
-    "primary_reference":  "docs/design/CURRENT_UI_DESIGN.md",
-    "historical_only":  [
-                            "docs/design/game-ui-v2026.11.23.10",
-                            "docs/design/game-ui-v2026.11.23.8",
-                            "docs/design/all-pages-v2026.11.18.12"
-                        ],
-    "routes":  [
-                   {
-                       "route":  "/",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/home.png",
-                       "sha256":  "5c1095d848de8da9b8f5021a919e09b79bf919125c805e1c62e46e490ba54e5a"
-                   },
-                   {
-                       "route":  "/[locale]/blog",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/-locale--blog.png",
-                       "sha256":  "f60212477312123114aa5dd5f153c0e6a87cf634ae18c7536bb983566ef8e252"
-                   },
-                   {
-                       "route":  "/[locale]/blog/[slug]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/-locale--blog--slug-.png",
-                       "sha256":  "7c73359b6be35e81d71adbb1b0cc42f3311b1c6ca217f7e3c8f4d9fc8c6409da"
-                   },
-                   {
-                       "route":  "/[locale]/guide/glossary",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/-locale--guide-glossary.png",
-                       "sha256":  "05154f1aba5322bb5006776c1be0b86ff7cdfabdf4f26ee3cf888bddce4f53f4"
-                   },
-                   {
-                       "route":  "/[locale]/guide/glossary/[term]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/-locale--guide-glossary--term-.png",
-                       "sha256":  "a972e8c394918c66bd7ea728a3c6142d5a74ddf387fa1ca75561da1b17ffc396"
-                   },
-                   {
-                       "route":  "/[locale]/tools/compound-interest-calculator",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/-locale--tools-compound-interest-calculator.png",
-                       "sha256":  "3898bbe2b7ad966144d0304489c54fac63225f47e45cd2bec8248565c4ec6bd2"
-                   },
-                   {
-                       "route":  "/[locale]/tools/compound-interest-calculator/[preset]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/-locale--tools-compound-interest-calculator--preset-.png",
-                       "sha256":  "c482d7cf0fb6d209e3e0d63b4696d63edc9b91243ef5d3429ab6e1402c38a99c"
-                   },
-                   {
-                       "route":  "/account",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/account.png",
-                       "sha256":  "57a34269de08a77c42db9a42007b94441993799ec1267164f5db09ec36d0063d"
-                   },
-                   {
-                       "route":  "/account-deletion",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/account-deletion.png",
-                       "sha256":  "e20cd66e274ac1ecf2b6cc304ed39142076eca7f098e7fb408de9af0c35153bb"
-                   },
-                   {
-                       "route":  "/account/notifications",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/account-notifications.png",
-                       "sha256":  "b6df715b3ac64f2935e6cbf2858f362ca8b313d31fbb6608f0c00ccebb318347"
-                   },
-                   {
-                       "route":  "/account/privacy",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/account-privacy.png",
-                       "sha256":  "3d887b7695afe7a6b0c8a764100c1f3918150429eec83c565b9760ecb655c217"
-                   },
-                   {
-                       "route":  "/account/security",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/account-security.png",
-                       "sha256":  "b937b43c11acb9cbe6a60bf4d248e4db2e141142b769d84fb89504a12faaa318"
-                   },
-                   {
-                       "route":  "/admin",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin.png",
-                       "sha256":  "219b7feb2bd4c2f6bd22345c5820adacd139dfc952259ed0cd245d2a1192048b"
-                   },
-                   {
-                       "route":  "/admin/analytics",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-analytics.png",
-                       "sha256":  "d3ecf988668536af82d5221a266ce0ce6c54bb051910104c0f14ae13e49554a5"
-                   },
-                   {
-                       "route":  "/admin/api-health",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-api-health.png",
-                       "sha256":  "87400ec62392a6daff564939f3879ebd3afaff59925393a81e941b769ad376a9"
-                   },
-                   {
-                       "route":  "/admin/bank",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-bank.png",
-                       "sha256":  "24406d75f655f6d6064942dba0a4a7cf51819d6c7c06719afc1cbabddf9ae019"
-                   },
-                   {
-                       "route":  "/admin/blog",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-blog.png",
-                       "sha256":  "935bfcf8441d82acb280be70636512a7713b7c8f7e111e68d5243048ade62610"
-                   },
-                   {
-                       "route":  "/admin/bonds",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-bonds.png",
-                       "sha256":  "f846fb1c7aa8c4cc55d0f6003002b4b38962cd3870bd07c1733f846924e4c928"
-                   },
-                   {
-                       "route":  "/admin/catalog",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-catalog.png",
-                       "sha256":  "426c82fc6615cd64f4af9c224fe7291c1ac54749343028c954ab4f7b8cdfc080"
-                   },
-                   {
-                       "route":  "/admin/central-bank",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-central-bank.png",
-                       "sha256":  "7d5a0ad09b76ee745d9f7539dbf26fde3fccdb0855a7152fbe15232a77de729f"
-                   },
-                   {
-                       "route":  "/admin/content",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-content.png",
-                       "sha256":  "dece713f1d5a44badb963e4ee2e6ff6fb0409da3790b3ccf945c08a26baa9238"
-                   },
-                   {
-                       "route":  "/admin/controls",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-controls.png",
-                       "sha256":  "1d01334487ecc041892c71c70ce05ea242da1a8f63dc006978efd0daaeb79f5a"
-                   },
-                   {
-                       "route":  "/admin/discord",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-discord.png",
-                       "sha256":  "8b844c5e99d6a8abd8476ecd841b743e165cdc85c4836e5eeb9608675f12c626"
-                   },
-                   {
-                       "route":  "/admin/economy",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-economy.png",
-                       "sha256":  "c139aa63111e6f59dd9567e874c6416dd7300d29e21fd02f1a6874d91c7fdf7a"
-                   },
-                   {
-                       "route":  "/admin/economy/scenario-lab",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-economy-scenario-lab.png",
-                       "sha256":  "2afe3c8b37b2f4dcd2e89cdce2cd089b9d89aeab0dd0d0a61fa10a2cabaf2693"
-                   },
-                   {
-                       "route":  "/admin/enterprises",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-enterprises.png",
-                       "sha256":  "4d7d6e11d91a853a2f918c98a557705411b80cf9c253a63bb4ae08b98fa5a34b"
-                   },
-                   {
-                       "route":  "/admin/fx",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-fx.png",
-                       "sha256":  "205577f59093af89f7cf3a5ae9597a9f9e69a7cb5920cb0355de0da8ba0accec"
-                   },
-                   {
-                       "route":  "/admin/help",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-help.png",
-                       "sha256":  "a28f23a1a0d221e18c0def89b6090adf021159ef48b5a571d344ba7c5fc05fe2"
-                   },
-                   {
-                       "route":  "/admin/kdic",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-kdic.png",
-                       "sha256":  "cdc21b216b951f3af0e000c756dfed03bd4fb327db31ceaf28341b9f8fa21b4c"
-                   },
-                   {
-                       "route":  "/admin/logs",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-logs.png",
-                       "sha256":  "df4150e1992a9e1cc23b0b3bdbca34a15c3bb71661620902a16e4794d281456d"
-                   },
-                   {
-                       "route":  "/admin/logs/activity",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-logs-activity.png",
-                       "sha256":  "c239dbd28db8562506f9044339d71aa5b67fbffd36154262b6449e72da2d54a5"
-                   },
-                   {
-                       "route":  "/admin/logs/delivery",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-logs-delivery.png",
-                       "sha256":  "f2cda02f552565c52faeccc914ce21d695d009cd1d8fc789c178a3db08ac2a08"
-                   },
-                   {
-                       "route":  "/admin/logs/errors",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-logs-errors.png",
-                       "sha256":  "88fd8a7ebae5a81313aa5907d0df3295ce08abf58aa854170072a79616d8f688"
-                   },
-                   {
-                       "route":  "/admin/logs/integrity",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-logs-integrity.png",
-                       "sha256":  "54a9a6b3b8e60bd2f236c3b769624b3664240337ab8051ef3857bc0e566e0708"
-                   },
-                   {
-                       "route":  "/admin/logs/system",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-logs-system.png",
-                       "sha256":  "07fc92add5c661d71630eea98b8323d42350bf81e628f8cb62844951f932cba6"
-                   },
-                   {
-                       "route":  "/admin/market",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-market.png",
-                       "sha256":  "fd292dc8258bf8f62d6ae42df3bc0f88bc37b180bae54bc8441560100a67d870"
-                   },
-                   {
-                       "route":  "/admin/market/ai-news",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-market-ai-news.png",
-                       "sha256":  "66213cc9b7e725e9bda331ce5ab310a25ae7826f0bb8feb7ab920ed9f00569d9"
-                   },
-                   {
-                       "route":  "/admin/mint",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-mint.png",
-                       "sha256":  "fa0b0dc292d48320a5d21b68c1c7e51bc5c8487632525dc4708a241fdd915036"
-                   },
-                   {
-                       "route":  "/admin/money-flow",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-money-flow.png",
-                       "sha256":  "6eeabf0463e3601fe7655983032f3c805b1ca871561c035099b338ea4054f16d"
-                   },
-                   {
-                       "route":  "/admin/operations/storage",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-operations-storage.png",
-                       "sha256":  "bf4046e2b5f113b629009dde5ddc135275e879e98832215bb4f24356f1f82532"
-                   },
-                   {
-                       "route":  "/admin/pension",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-pension.png",
-                       "sha256":  "f10605abf39d2f8536dd544376f278dc8fd7868c5f131003e414f0cf46413ad0"
-                   },
-                   {
-                       "route":  "/admin/safety",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-safety.png",
-                       "sha256":  "de79ee44d1f1979ef2eb2d4ac4fe8440aba87b7ba62cb7ad36becdd5e0b3aa0f"
-                   },
-                   {
-                       "route":  "/admin/security",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-security.png",
-                       "sha256":  "7d67824474598c0548cf3bd7fee04ce2425c42693cad639a5d5a591f5ca2990e"
-                   },
-                   {
-                       "route":  "/admin/seo",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-seo.png",
-                       "sha256":  "3b2225b4f84abaaf2e7e501521005ff3162611186b83ef206090e31eec1f8036"
-                   },
-                   {
-                       "route":  "/admin/seo-audit",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-seo-audit.png",
-                       "sha256":  "fce312d57c19ca45f3bca9d170614c30cccda903d0e500ed70a786637231cff7"
-                   },
-                   {
-                       "route":  "/admin/shop",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-shop.png",
-                       "sha256":  "c21db7470f9f862d40ee4274b668103955f00b7d0aab1a9caeaeddfe0a6e0b02"
-                   },
-                   {
-                       "route":  "/admin/support",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-support.png",
-                       "sha256":  "81d6c4448d57cf562b612af8317de67a4eb436dca4fa78379c41a29aa3ad11bf"
-                   },
-                   {
-                       "route":  "/admin/treasury",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-treasury.png",
-                       "sha256":  "79cf78601cde66c67df2ad8db793c62085170502e36ffedada6e65b67022b5a1"
-                   },
-                   {
-                       "route":  "/admin/treasury/grants",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-treasury-grants.png",
-                       "sha256":  "dd838e01865b13f6c2bec792a629d73050efb6cc28fb5969d9f594c080b08822"
-                   },
-                   {
-                       "route":  "/admin/users",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-users.png",
-                       "sha256":  "c85639177c057edcc14e636c6a0d9789c9e54b490b6c54814fb87305b6d616d8"
-                   },
-                   {
-                       "route":  "/admin/users/[id]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-users--id-.png",
-                       "sha256":  "b0aaada7c5bdaf1dbb7c8c02c47cdedb334271ab259bcf93f05333f74c4da218"
-                   },
-                   {
-                       "route":  "/admin/work",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/admin-work.png",
-                       "sha256":  "d5de56734456f180c80c81ee2955cd85425b59810f21b1a7587a327fddf2bff5"
-                   },
-                   {
-                       "route":  "/advisor",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/advisor.png",
-                       "sha256":  "8ff7a6cffd0443a5e5f717f3f09f3f0c8f5a377ebef9da093a999a0ec72e93d1"
-                   },
-                   {
-                       "route":  "/announcements",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/announcements.png",
-                       "sha256":  "b3bbb63e5759694f9f5a1e69ed7bc3730fbf2ff9da85610d8ca3472bfe6942d0"
-                   },
-                   {
-                       "route":  "/announcements/[announcementId]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/announcements--announcementId-.png",
-                       "sha256":  "9583a8254921c267bb41d4f8d57a7eabd4c288d652c15ed8a20428bbe7503105"
-                   },
-                   {
-                       "route":  "/arcade",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/arcade.png",
-                       "sha256":  "d2c9b85d296d7d12d0547116e7fdcf3af4854b9e3c463460b9e21aace8712511"
-                   },
-                   {
-                       "route":  "/bank",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/bank.png",
-                       "sha256":  "e2293a34da5b77c4f6fb67e1eeb67efd1a02c28a1cee2df400dd1db4c5d1733c"
-                   },
-                   {
-                       "route":  "/bank/savings-pot",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/bank-savings-pot.png",
-                       "sha256":  "f5df571d4661f6397d2418b5c9af5800e23d9bccb84caa93545b5f61b52e15d0"
-                   },
-                   {
-                       "route":  "/blog",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/blog.png",
-                       "sha256":  "471bce73dde9d097d156ef478cc01e7c4d105257cc7e3e48c14e700879ba9b85"
-                   },
-                   {
-                       "route":  "/blog/[slug]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/blog--slug-.png",
-                       "sha256":  "f24c41cd00aa454c6d1959eb125b97f91634339412777ed3e3eb8985f6165239"
-                   },
-                   {
-                       "route":  "/board",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/board.png",
-                       "sha256":  "f7f9ded44822368f9cf0f2c18e5f8378a278f68085f6fe76386d40153e8619a1"
-                   },
-                   {
-                       "route":  "/board/[postId]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/board--postId-.png",
-                       "sha256":  "d9442433ee3f3472a9661c456b401c34792a0cd602413270830c20d44c8b8502"
-                   },
-                   {
-                       "route":  "/bonds",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/bonds.png",
-                       "sha256":  "7887df3743b943ca33f170149574aecef3d9213f29a09b2bd0249b6ed6c8a7fb"
-                   },
-                   {
-                       "route":  "/businesses",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/businesses.png",
-                       "sha256":  "767a7281f7776beba32062887601c20b88c22aeaf7c1c42cfbd6b0b1ec7c531f"
-                   },
-                   {
-                       "route":  "/businesses/ventures",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/businesses-ventures.png",
-                       "sha256":  "86f92470fc18db4c06d482955ece354c49dd90f03df1eed8be3f3f184f1fc0e8"
-                   },
-                   {
-                       "route":  "/calculators",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/calculators.png",
-                       "sha256":  "240e2c1824141594c4eeef6f4f80d2f170f126b38944688d847254b22516b631"
-                   },
-                   {
-                       "route":  "/calendar",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/calendar.png",
-                       "sha256":  "23c0b70dcdc10cd7cb298ff0ee33f65e061c7a2929d277a74e94087e1a6a1339"
-                   },
-                   {
-                       "route":  "/casino",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/casino.png",
-                       "sha256":  "01692379a7b0543fcdc326baae62d63d153a4a19d86f2b855b4d62cf3d48d100"
-                   },
-                   {
-                       "route":  "/central-bank",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/central-bank.png",
-                       "sha256":  "7958014c4d15f8493fe2687ee67d663dd3a887b49f9f14ce8e68c245e03cc336"
-                   },
-                   {
-                       "route":  "/chat",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/chat.png",
-                       "sha256":  "eedca13a3394df57a309daf9d108c68eed404b7ac4da1036df700f1b6e9bced8"
-                   },
-                   {
-                       "route":  "/clubs",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/clubs.png",
-                       "sha256":  "68866047f825c9c10c3c3590c453ed7bf3567228e34151aa0f1c425022c1c9ad"
-                   },
-                   {
-                       "route":  "/clubs/[clubId]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/clubs--clubId-.png",
-                       "sha256":  "714a2d47c05e9beb66f4fce78b1bb30e1fd7fa874e136003325f67402776c80e"
-                   },
-                   {
-                       "route":  "/clubs/[clubId]/members",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/clubs--clubId--members.png",
-                       "sha256":  "783d898fbfe4788553898781f237fdf1ad8c8d54a533250520e8cc6fb215c50e"
-                   },
-                   {
-                       "route":  "/clubs/new",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/clubs-new.png",
-                       "sha256":  "a1589847e73ae7e2f2f97e98f6b9c02ed0163140015667abb841e49bfb2548ac"
-                   },
-                   {
-                       "route":  "/clubs/warfare",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/clubs-warfare.png",
-                       "sha256":  "de18b3804cd97d5071c82f563d20400fa16bb51f9cb33588d8102204b88cc9aa"
-                   },
-                   {
-                       "route":  "/collections",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/collections.png",
-                       "sha256":  "d08b23d6442dc893a4a83c3ca6c69556075652886b1835236ddbe2ceafc8b60c"
-                   },
-                   {
-                       "route":  "/dashboard",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/dashboard.png",
-                       "sha256":  "50891b6307fed6fcfcc5894d3739a73c0d2a67f0eb092b6b94e99733f0323e40"
-                   },
-                   {
-                       "route":  "/data-deletion",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/data-deletion.png",
-                       "sha256":  "636556b0beec17734b59f93a69ed9ee4adc5034671147492539a8e32e0ef1d1b"
-                   },
-                   {
-                       "route":  "/design-preview",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/design-preview.png",
-                       "sha256":  "11dbb10194bc841b55c6b15fe41c03ffb0146c3a1f8e69e27805b23c88526e41"
-                   },
-                   {
-                       "route":  "/developer",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/developer.png",
-                       "sha256":  "753f642e6c6a7a43b62d3942e146f897d0463bebabcd9959d7695fe8ddd28e79"
-                   },
-                   {
-                       "route":  "/enterprises",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/enterprises.png",
-                       "sha256":  "cf411b13a99a0cb5576abd71e8c56062dc34240732b549358fb27ff6a8af4115"
-                   },
-                   {
-                       "route":  "/features",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/features.png",
-                       "sha256":  "4db8027ef96b0a1450105e49f7f5b3cc37226eddcb101ff69fc78f415bb23f68"
-                   },
-                   {
-                       "route":  "/forgot-password",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/forgot-password.png",
-                       "sha256":  "2d1bd68d7ea9e0eb36f001c9ceb0edc35f231c9e461db4fcc9645860871c89ca"
-                   },
-                   {
-                       "route":  "/fx",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/fx.png",
-                       "sha256":  "b3b390d3d8a7f7dcf9b44fe71a12402088063fcf1f2a2b5f9dad9dadf13f2e0a"
-                   },
-                   {
-                       "route":  "/gallery",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/gallery.png",
-                       "sha256":  "0fd50c0572ea55d7aa526cd4424e02156a8e50647a3125470545fd3b2cd86088"
-                   },
-                   {
-                       "route":  "/gallery/[photoId]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/gallery--photoId-.png",
-                       "sha256":  "ab191a41e5c654676c28d007a3a0595651741d09131438b03537b26af73fd431"
-                   },
-                   {
-                       "route":  "/gallery/submit",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/gallery-submit.png",
-                       "sha256":  "aa834c14a903db167e4ba771c77b3393d0c8ae5db14f388327895cbae2928bc7"
-                   },
-                   {
-                       "route":  "/guide",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/guide.png",
-                       "sha256":  "3198ff69049252a17b52c615cd9de03531087d5e9b833dbedc48a03dd9d5d469"
-                   },
-                   {
-                       "route":  "/guide/career-mastery",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/guide-career-mastery.png",
-                       "sha256":  "4d2e2f6330036c313421d7081cc93e75623db296911be42f43b82f816e9904a5"
-                   },
-                   {
-                       "route":  "/guide/dopamine-system",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/guide-dopamine-system.png",
-                       "sha256":  "d0f72d8ab8b64e2883f0a2b0ab0396083b9fe84cf3e64aa450d2d009cb23a90a"
-                   },
-                   {
-                       "route":  "/guide/glossary",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/guide-glossary.png",
-                       "sha256":  "4503777033f1c857a5a475a4cc2572ecbc77ce4bfe868d8399625a9b1b440e8c"
-                   },
-                   {
-                       "route":  "/guide/glossary/[term]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/guide-glossary--term-.png",
-                       "sha256":  "0da3b7163a01b8aa648002cb7a5f2f52f63b1ffa32ea7bf9708b32bf2d357281"
-                   },
-                   {
-                       "route":  "/guide/stock-trading",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/guide-stock-trading.png",
-                       "sha256":  "e38ad8c639f3b6ed66626c32f38191b0f1a0667db14419cb1e9f441ee5203490"
-                   },
-                   {
-                       "route":  "/guide/virtual-banking",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/guide-virtual-banking.png",
-                       "sha256":  "f9aaf62d35865d4bb4b8b0e38fdb0545166801b1ca7f8d8fa29d40b42c8d73b4"
-                   },
-                   {
-                       "route":  "/help",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/help.png",
-                       "sha256":  "9d11dea7d2ffb8c001a0ce3e1fd2ca636492b8517e484b6b122c7d7dbec65cd6"
-                   },
-                   {
-                       "route":  "/help/[slug]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/help--slug-.png",
-                       "sha256":  "919a370add9632cb7a42a7b8a041729e67236b5e5e2f5a5fbed5f1f6e9d1005a"
-                   },
-                   {
-                       "route":  "/inventory",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/inventory.png",
-                       "sha256":  "a6a0d7be35578c5dc93a8c53bdfe81d71e2d3431766c84fdf48dec976211b968"
-                   },
-                   {
-                       "route":  "/invite/[code]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/invite--code-.png",
-                       "sha256":  "9bafb5b7342fcd318d5750ac2eaffe596bda46038cfafe43ae89da1d245ad173"
-                   },
-                   {
-                       "route":  "/kdic",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/kdic.png",
-                       "sha256":  "8afcc85665b0b78034a3e11cb6ddc07edd7d050b587d15b82b90c23e61c538f5"
-                   },
-                   {
-                       "route":  "/lobby",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/lobby.png",
-                       "sha256":  "b7ef61baf13a266ff3f22cf7fcdea9a8a0a47d88887edb99ee57b4f968026d3d"
-                   },
-                   {
-                       "route":  "/login",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/login.png",
-                       "sha256":  "7992d971da4dca2bee5a151f40f938da512de2b39818c1c618cf49bc64fb2dfe"
-                   },
-                   {
-                       "route":  "/login/providers",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/login-providers.png",
-                       "sha256":  "0860dbc8ce768aa00395fccc01a10a61c4589b7efec416d90e1f4ff39bd8b568"
-                   },
-                   {
-                       "route":  "/marketplace",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/marketplace.png",
-                       "sha256":  "417ce81dae29d600e12230b12941ef91f2b07e3e1bb9313ac44f4853c530c602"
-                   },
-                   {
-                       "route":  "/marketplace/auction",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/marketplace-auction.png",
-                       "sha256":  "d9147a69223e03b485049fd8ecce1633fb64f2d0f4617495e2dcf28f63d0d605"
-                   },
-                   {
-                       "route":  "/mint",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/mint.png",
-                       "sha256":  "d1cb702672aab42101502ce7a014c244a6c723113bbb8bb7d76aca241a51422c"
-                   },
-                   {
-                       "route":  "/newspaper",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/newspaper.png",
-                       "sha256":  "88e9cb3bf0d1a91f33040ec864e4a000ecf7d9d2d8ce5756b4ac779a84bb7fd5"
-                   },
-                   {
-                       "route":  "/pension",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/pension.png",
-                       "sha256":  "e06871988d53c7344479b08f07608fb061f8271412071fafe22f71c3add45be2"
-                   },
-                   {
-                       "route":  "/prediction",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/prediction.png",
-                       "sha256":  "c83f16d8c00b9972495d78b8070df70a8d6250d66c85ac672e65018ff1c4815b"
-                   },
-                   {
-                       "route":  "/privacy",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/privacy.png",
-                       "sha256":  "539c1bac0ec29281aa9c528dd40e589c649bd6c37ab50db1c08676a088ab2d9c"
-                   },
-                   {
-                       "route":  "/profile",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/profile.png",
-                       "sha256":  "534d2a8fb1621c6f8114c625720c05ebead773e058ca41502f32ab4fb37bc873"
-                   },
-                   {
-                       "route":  "/profile/[userId]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/profile--userId-.png",
-                       "sha256":  "067aa78425f20935c6fe8d57b1bc603a2970e1d250972a6ec29d09949dd83f87"
-                   },
-                   {
-                       "route":  "/profile/settings",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/profile-settings.png",
-                       "sha256":  "27341b41533476ecd2fbd396b40949b35a7dea52d8142db5221caf5ab574fd27"
-                   },
-                   {
-                       "route":  "/progression",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/progression.png",
-                       "sha256":  "2458af92e37f751394871c63af44442ea061587532f7672f16dc1ae7fc3a5903"
-                   },
-                   {
-                       "route":  "/progression/prestige",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/progression-prestige.png",
-                       "sha256":  "08bee6205fae82f12f8900b28aebf20d4a3a681642f91273c5d805d4cf3e8cbf"
-                   },
-                   {
-                       "route":  "/quests",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/quests.png",
-                       "sha256":  "98ef582ea5a73b47cb2211b4a3c1de8252b5970e87905a1bac327ce9a5530498"
-                   },
-                   {
-                       "route":  "/register",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/register.png",
-                       "sha256":  "e98d6c267880084cf62b87260d4aa3f6e70668496cbdfb2a032a4a06c65ac626"
-                   },
-                   {
-                       "route":  "/reset-password",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/reset-password.png",
-                       "sha256":  "65ab2765b95ddab7f2aaa72f9f08621994e2e1756710776c3341a42045fce9fc"
-                   },
-                   {
-                       "route":  "/roadmap",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/roadmap.png",
-                       "sha256":  "ca6ee97af35066288dafc867510aac2b219eedf488faed32fcab658ef7878fdc"
-                   },
-                   {
-                       "route":  "/safety",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/safety.png",
-                       "sha256":  "5f95aac35f11e25cf6376993d26a82f86b5e3977c215bd7993423a3f47c38453"
-                   },
-                   {
-                       "route":  "/safety/takedown",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/safety-takedown.png",
-                       "sha256":  "e37899cb94bc1a32320bbaca2e7273ad6c4ea36cd052af977aa635d1974ee8a3"
-                   },
-                   {
-                       "route":  "/search",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/search.png",
-                       "sha256":  "985ff00340096e776e109288f7a25bb45e4fd72ca937f93e2981a205e873b416"
-                   },
-                   {
-                       "route":  "/seasons",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/seasons.png",
-                       "sha256":  "85216538fb5fbb6e6c9842b69e8a5caf4388e7331728e6bcd80c17f47a18f022"
-                   },
-                   {
-                       "route":  "/shop",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/shop.png",
-                       "sha256":  "d0ec429b9e704c767de7e211c596134e922ca3facd8cbb9492852d82bed6e8c7"
-                   },
-                   {
-                       "route":  "/shop/catalog",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/shop-catalog.png",
-                       "sha256":  "2c945e0c3fab25e1b7766ffc7284d881b338b86368e12a05e6f26df13e7cba68"
-                   },
-                   {
-                       "route":  "/spaces",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/spaces.png",
-                       "sha256":  "b13d42ac6290bc7b293a0767177ca8969190bfca2e4df045b84530cfd814da3e"
-                   },
-                   {
-                       "route":  "/spaces/real-estate",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/spaces-real-estate.png",
-                       "sha256":  "343a0703446741a79d4192dec4b4d88053bc59b60a18c646c11c103a59d902b0"
-                   },
-                   {
-                       "route":  "/status",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/status.png",
-                       "sha256":  "6b51bb47def61a51f115bbfe990dc892c05b10fd5f7ae17c332fc97eb27959a8"
-                   },
-                   {
-                       "route":  "/stocks",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/stocks.png",
-                       "sha256":  "d5fae39864eb9d61fc11247c6e37ad12dee89117fc0d6bc2e42e0e7526f6c321"
-                   },
-                   {
-                       "route":  "/stocks/[symbol]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/stocks--symbol-.png",
-                       "sha256":  "ecf702b6872b2a88c762b1631d1eb0e0b896066d97c45230301dcfc7abcea879"
-                   },
-                   {
-                       "route":  "/stocks/alerts",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/stocks-alerts.png",
-                       "sha256":  "b10f0233c0a8b00cad28f922abc8424f85108151b4cb80716d7e8e5b79f0585d"
-                   },
-                   {
-                       "route":  "/stocks/community",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/stocks-community.png",
-                       "sha256":  "d9a260376c2450e75e8de7c6e040e15d57b1d621150b4dcfa8466d5b88437ad8"
-                   },
-                   {
-                       "route":  "/stocks/compare",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/stocks-compare.png",
-                       "sha256":  "c3ab7928487185ef0f16da2716405dd3ab92d063cc7e555493b456a01dbb83c3"
-                   },
-                   {
-                       "route":  "/stocks/derivatives",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/stocks-derivatives.png",
-                       "sha256":  "ea38c504595fe95faef3f7827fbddd540224bbd0a9263fb18c5585ab74a4b950"
-                   },
-                   {
-                       "route":  "/stocks/history",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/stocks-history.png",
-                       "sha256":  "b050a838908b9b6bb65ca2d5f5ce5b62c4f297eace1a7d54302bcab00009b855"
-                   },
-                   {
-                       "route":  "/stocks/league",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/stocks-league.png",
-                       "sha256":  "0da40ed371da474d09673115d33f06a16dfb916e02c3f3f968c4eac407fcd5c0"
-                   },
-                   {
-                       "route":  "/stocks/portfolio",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/stocks-portfolio.png",
-                       "sha256":  "5b4c673d4be11387627b11072e9556d5eb9c55ae7808442da10b66d05c3b4abe"
-                   },
-                   {
-                       "route":  "/stocks/watchlist",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/stocks-watchlist.png",
-                       "sha256":  "f1a94684cb9f8e5055b32a4f85a7bd3fa904a557b493d922f44024fabde5f490"
-                   },
-                   {
-                       "route":  "/support",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/support.png",
-                       "sha256":  "706caa6b8828518cccc0bcfaf199ca49446738715a58c2b5372db19b76e24551"
-                   },
-                   {
-                       "route":  "/terms",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/terms.png",
-                       "sha256":  "83943ab02abfd2c517406b13d47b98de946bcdb052f25a28f6573e8e5f07fba0"
-                   },
-                   {
-                       "route":  "/tools",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools.png",
-                       "sha256":  "08969735fcae696a52a93aeeec5912c2bfe3f9a445defec785cc068288f77969"
-                   },
-                   {
-                       "route":  "/tools/capital-gains-tax-calculator",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-capital-gains-tax-calculator.png",
-                       "sha256":  "25449e1627a7d71c7df7ab40dbcb90d3f3c54043bec0175c42a7938d619db4d0"
-                   },
-                   {
-                       "route":  "/tools/capital-gains-tax-calculator/[preset]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-capital-gains-tax-calculator--preset-.png",
-                       "sha256":  "219204531dff16845033d8d0d96bf985a4a3a6a8e4662d8179504bd20aadd774"
-                   },
-                   {
-                       "route":  "/tools/compound-calculator",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-compound-calculator.png",
-                       "sha256":  "721458e3a3d42ed844e758f70804f7ad38c3f67ad4291934bcce96a649d7d707"
-                   },
-                   {
-                       "route":  "/tools/compound-calculator/[preset]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-compound-calculator--preset-.png",
-                       "sha256":  "bce17beb851eb683f853cb394c92eb817d9b74a8e1595bf3da92541bd25500d1"
-                   },
-                   {
-                       "route":  "/tools/crypto-apy-calculator",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-crypto-apy-calculator.png",
-                       "sha256":  "902a56836a3b97711d78ea225f10f2566e3e8cebfd4df2802cebbc81c1678c4b"
-                   },
-                   {
-                       "route":  "/tools/dividend-tax-calculator",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-dividend-tax-calculator.png",
-                       "sha256":  "b8c6ade4f41b36059dd5823434fa1686a1115750419ff55660430c3350f3b07a"
-                   },
-                   {
-                       "route":  "/tools/dividend-tax-calculator/[ticker]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-dividend-tax-calculator--ticker-.png",
-                       "sha256":  "bab546ff68bfb2f210e4ac83416dd263fde686fa3a20de412f8d827d4004ee47"
-                   },
-                   {
-                       "route":  "/tools/farming-calculator",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-farming-calculator.png",
-                       "sha256":  "5fe1818b0f6b0a5c01eea9f0bfd1876e9800718f05498793046b9e81ec5be10d"
-                   },
-                   {
-                       "route":  "/tools/farming-calculator/[preset]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-farming-calculator--preset-.png",
-                       "sha256":  "ce5144ea46e1c8117b9a6290ea33f1fa6c5e20b736187db7da627d39cb6f382b"
-                   },
-                   {
-                       "route":  "/tools/fire-calculator",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-fire-calculator.png",
-                       "sha256":  "9ef74c264023de098ce0c494a77a112329eb7ada597adc037c0fa80575ebcc4e"
-                   },
-                   {
-                       "route":  "/tools/gift-tax-calculator",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-gift-tax-calculator.png",
-                       "sha256":  "055375a1b0c3dfbe6011b80c6fc156572b24fc69c70c0d6f021d789fbf7b6c63"
-                   },
-                   {
-                       "route":  "/tools/gift-tax-calculator/[preset]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-gift-tax-calculator--preset-.png",
-                       "sha256":  "af49b18fc1b7339cc49841878747eafc147bd33045b7259d2d7fdc26a2c21c5f"
-                   },
-                   {
-                       "route":  "/tools/goal-wealth-calculator",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-goal-wealth-calculator.png",
-                       "sha256":  "6682a610583b3b6d9dea5f2e0e6c7cf393b4ad6cb687af46e314bdea180b0268"
-                   },
-                   {
-                       "route":  "/tools/isa-calculator",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-isa-calculator.png",
-                       "sha256":  "65ae8c9a0d82e56e7f1edc2828552ce7d40ea1f305fcde1eb84592583387b7ef"
-                   },
-                   {
-                       "route":  "/tools/isa-calculator/[slug]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-isa-calculator--slug-.png",
-                       "sha256":  "6b7491e81e39ff47c3022ae91b45b108a5788f561f5ff65be812c12b8550f92f"
-                   },
-                   {
-                       "route":  "/tools/kimchi-premium-calculator",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-kimchi-premium-calculator.png",
-                       "sha256":  "09c17be57dea2e691cbc60915e1038b3af8ac68484832d24e400740eb9729008"
-                   },
-                   {
-                       "route":  "/tools/kimchi-premium-calculator/[preset]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-kimchi-premium-calculator--preset-.png",
-                       "sha256":  "d534f156d1200f5785aad731c40a99de35b654846eafa885c0b7fb8997c5f9e4"
-                   },
-                   {
-                       "route":  "/tools/loan-interest-calculator",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-loan-interest-calculator.png",
-                       "sha256":  "d76da481a3a1338ea484dcd6d97b2c21c4f6e90038980c41abeeb59605523502"
-                   },
-                   {
-                       "route":  "/tools/loan-interest-calculator/[preset]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-loan-interest-calculator--preset-.png",
-                       "sha256":  "60313d6e6e0642056ed43f6a23b35d23145a058b64445238e11581f5b185d5ea"
-                   },
-                   {
-                       "route":  "/tools/pension-tax-calculator",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-pension-tax-calculator.png",
-                       "sha256":  "de16c29ae310ddce152620af00dccb1d43eab6a6d6b38a16f2c5caee5c1efa27"
-                   },
-                   {
-                       "route":  "/tools/pension-tax-calculator/[slug]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-pension-tax-calculator--slug-.png",
-                       "sha256":  "5bfa5bdc0e8bba0d336caec82f415d4551609b920397a6b31a6fb4892886a242"
-                   },
-                   {
-                       "route":  "/tools/quant-studio",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-quant-studio.png",
-                       "sha256":  "8d45e3e5e92527e52689cf6058885706e57faa4e52e9749c85d66a2b6e28f455"
-                   },
-                   {
-                       "route":  "/tools/real-estate-calculator",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-real-estate-calculator.png",
-                       "sha256":  "28c68cc2163d00b23511b9dc589f3768e474ba19ffc7fdd462d812b57859d475"
-                   },
-                   {
-                       "route":  "/tools/real-estate-calculator/[preset]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-real-estate-calculator--preset-.png",
-                       "sha256":  "6e7065f39fbc6705faf53614ef8e744e9c254c90bc1c3b5d39bb578f4a4e3126"
-                   },
-                   {
-                       "route":  "/tools/retirement-calculator",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-retirement-calculator.png",
-                       "sha256":  "53833243416a8e7fea7c1287c9b5396cb9a00f09c55a40e80a00b56c3c02e403"
-                   },
-                   {
-                       "route":  "/tools/retirement-calculator/[slug]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-retirement-calculator--slug-.png",
-                       "sha256":  "103359f32a88b783662dd61ad7f2a9806f813c6446fac5517dab8c93aee4938b"
-                   },
-                   {
-                       "route":  "/tools/salary-calculator",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-salary-calculator.png",
-                       "sha256":  "244216f98c85d21f2360202a092e08661354b44bd18523142c790b4a54b1d02c"
-                   },
-                   {
-                       "route":  "/tools/salary-calculator/[preset]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-salary-calculator--preset-.png",
-                       "sha256":  "1433ca7008c7d3913dd88e2832e54a8949a53c58c7cc60a8ba5a4ccbb7a7168f"
-                   },
-                   {
-                       "route":  "/tools/stock-calculator",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-stock-calculator.png",
-                       "sha256":  "fc12d6ed7ce4bbfe8778f061fd6a1bbd745898905d533f36c3fe7d0dbe7a7f85"
-                   },
-                   {
-                       "route":  "/tools/stock-calculator/[preset]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-stock-calculator--preset-.png",
-                       "sha256":  "48316b39e14c64652096db224689f6eee6f605964494ff7982ad4dafc5cc67bb"
-                   },
-                   {
-                       "route":  "/tools/tax-calculator",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-tax-calculator.png",
-                       "sha256":  "6f5ec5b24a7f46b91382d3cac9545307e610643571935de53604dcd8c803127f"
-                   },
-                   {
-                       "route":  "/tools/youth-leap-calculator",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-youth-leap-calculator.png",
-                       "sha256":  "4893c620317cf71dcb76765011c1d0144ceeb660b3907600e85fbcaf7bd3f4c1"
-                   },
-                   {
-                       "route":  "/tools/youth-leap-calculator/[preset]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/tools-youth-leap-calculator--preset-.png",
-                       "sha256":  "d8ae867fd3b8b819ced5827d52561379a132c9a4fbeb327710e717751d0f44c4"
-                   },
-                   {
-                       "route":  "/treasury",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/treasury.png",
-                       "sha256":  "168b0b8d7efd044b99876b5e2c681187f8c9a24804b7498e4d661ba0d289bd2e"
-                   },
-                   {
-                       "route":  "/verify-email",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/verify-email.png",
-                       "sha256":  "967bb9b332d26e8d8c12719acc0baef0a6b99f77ffb2a147c0bd2e5efcf1c0bc"
-                   },
-                   {
-                       "route":  "/verify-email-change",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/verify-email-change.png",
-                       "sha256":  "4300660564ed57aca8747571769ffefd8cb73da445cdda4e14b373670e7cb552"
-                   },
-                   {
-                       "route":  "/wallet",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/wallet.png",
-                       "sha256":  "cd136cd7aec64dd265978b18a342cb67cf18c949a5cc62e5abc88d0a12d69646"
-                   },
-                   {
-                       "route":  "/wallet/activity",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/wallet-activity.png",
-                       "sha256":  "916cac731553e56077b333bab9c197fa9b8074a47da59df5e417587a329936f7"
-                   },
-                   {
-                       "route":  "/wallet/activity/transactions/[transactionId]",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/wallet-activity-transactions--transactionId-.png",
-                       "sha256":  "05737ebe53ccda49a8a709392ce7095fbca5af38bd7ee560695761b79d53fe57"
-                   },
-                   {
-                       "route":  "/work",
-                       "file":  "docs/design/game-ui-v2026.11.24.11/previews/work.png",
-                       "sha256":  "e187c09f849e186416511d3a5e9e79d018514f698903a3cda7e456c1dab26f1f"
-                   }
-               ]
+{
+  "schema_version": 1,
+  "authority_version": "v2026.11.27.PLAN-AUDIT.2",
+  "design_version": "v2026.11.24.G2",
+  "selection": "ACTIVE_SOLE_VISUAL_REFERENCE",
+  "design_review": "VISUAL_REVIEW_OPEN",
+  "runtime_e2e": "NOT_VERIFIED",
+  "total_routes": 180,
+  "total_images": 180,
+  "image_dimensions_px": [
+    1680,
+    1000
+  ],
+  "primary_reference": "docs/design/CURRENT_UI_DESIGN.md",
+  "historical_only": [
+    "docs/design/game-ui-v2026.11.24.G1",
+    "docs/design/game-ui-v2026.11.24.11",
+    "docs/design/game-ui-v2026.11.23.10",
+    "docs/design/game-ui-v2026.11.23.8",
+    "docs/design/all-pages-v2026.11.18.12"
+  ],
+  "routes": [
+    {
+      "route": "/",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/home.png",
+      "sha256": "5065c8f049a461da236ae606dc4d1bef0f009876dc1529e8d454166535c8bd23"
+    },
+    {
+      "route": "/[locale]/blog",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/-locale--blog.png",
+      "sha256": "7eec22f6ad45645e8581ae54d5a04b144b7ca2c974532eee0224a87ec45aa847"
+    },
+    {
+      "route": "/[locale]/blog/[slug]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/-locale--blog--slug-.png",
+      "sha256": "3e6b4aa1fdcf6d3690a8fe4062c923f6821f25a5acecd0ed0f65bc13bbbb2491"
+    },
+    {
+      "route": "/[locale]/guide/glossary",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/-locale--guide-glossary.png",
+      "sha256": "ff3429233cf88789af2d2d77dff38f69f2d4bd6af3a346f6dfbbcaba3a96cc04"
+    },
+    {
+      "route": "/[locale]/guide/glossary/[term]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/-locale--guide-glossary--term-.png",
+      "sha256": "d73acadc25c816795c899ce45f6ba96a69495857d3b3afd162b2c34777245c70"
+    },
+    {
+      "route": "/[locale]/tools/compound-interest-calculator",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/-locale--tools-compound-interest-calculator.png",
+      "sha256": "218bfc08cce11f23ac0842172bc8a20e70d6ba8e3e92a40a541b7348be547ae6"
+    },
+    {
+      "route": "/[locale]/tools/compound-interest-calculator/[preset]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/-locale--tools-compound-interest-calculator--preset-.png",
+      "sha256": "1df997bf63aacc7807311c80666f176e49d2bf6e5fca6fbc914d256eb6b9ea33"
+    },
+    {
+      "route": "/account",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/account.png",
+      "sha256": "4528bdb9af8cf5135cb27d49de6734796a7468268d67fab332b24a65bb345ba0"
+    },
+    {
+      "route": "/account-deletion",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/account-deletion.png",
+      "sha256": "b87dee88989f13e0ac2fdfb32516dacd22af6d34eb24ad3259edc0c32c4cdfc2"
+    },
+    {
+      "route": "/account/notifications",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/account-notifications.png",
+      "sha256": "e59177ab630ff83d1a9c3cc2aceaafb5fbee7d306afbb3267fda123fb9899ff4"
+    },
+    {
+      "route": "/account/privacy",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/account-privacy.png",
+      "sha256": "2292a869c474ebaeb59bfe886bbbd5ef3d1415775fb1d9f8ac6d280ffb10171d"
+    },
+    {
+      "route": "/account/security",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/account-security.png",
+      "sha256": "d5d7aef524c8fc04c1fe0218a353d1219aba6296fef8f252088b74fb0969351d"
+    },
+    {
+      "route": "/admin",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin.png",
+      "sha256": "871276088d18b17e8e68cef1b46d28ffcad2aaa2b9fcfc01c2a82a0acfce8a01"
+    },
+    {
+      "route": "/admin/analytics",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-analytics.png",
+      "sha256": "1485272b51a34a987983d9757d5002ca2446a519169308f95d5cb2b428d0fc79"
+    },
+    {
+      "route": "/admin/api-health",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-api-health.png",
+      "sha256": "2559443d76a1e631589dbe980ee676e75147e8cdff54de5139660f50b8985350"
+    },
+    {
+      "route": "/admin/bank",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-bank.png",
+      "sha256": "b732baa578af86892c1af3547c7397c64231703017fdc75197a9ce445b0c25e8"
+    },
+    {
+      "route": "/admin/blog",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-blog.png",
+      "sha256": "7001221d9575b27a3c474d8cf7ae3911fad030ae80c51dbfa0fc67ce255740a0"
+    },
+    {
+      "route": "/admin/bonds",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-bonds.png",
+      "sha256": "af57c3a17f79b4e34adfcd786ec4e3afff50758ef2d4d8b5a6bd5a83ad2da728"
+    },
+    {
+      "route": "/admin/catalog",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-catalog.png",
+      "sha256": "470b564a0efa11acb3d6af4286889a7b61a903eb8bffaeb44f3a6b4f475b8917"
+    },
+    {
+      "route": "/admin/central-bank",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-central-bank.png",
+      "sha256": "86319b1188df34e9c65020873abbbbca5eade2ef657c5419ef42841e44a0afdf"
+    },
+    {
+      "route": "/admin/content",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-content.png",
+      "sha256": "96ad5c5feb7f3bd631cca18b80cef9101f816ad86bc0b7f705d883b0e5764172"
+    },
+    {
+      "route": "/admin/controls",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-controls.png",
+      "sha256": "7ccc759cab9542a410e3cb01bbb40b7f4c081f0870370a918b9ed59dfae866d7"
+    },
+    {
+      "route": "/admin/discord",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-discord.png",
+      "sha256": "08247bfc23a167086369616e8f00b7c5cbf779181e1c3c70222a445679a89f14"
+    },
+    {
+      "route": "/admin/economy",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-economy.png",
+      "sha256": "b418cd2f2b72940c1ef2483c8b5be123a39769f8fca6f0afe00266fcdc2bd1c0"
+    },
+    {
+      "route": "/admin/economy/scenario-lab",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-economy-scenario-lab.png",
+      "sha256": "03ebb2507e85ed4654967d76ad457e47131365e163b00ab272b83780550ef7d3"
+    },
+    {
+      "route": "/admin/enterprises",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-enterprises.png",
+      "sha256": "fe8d4b76f4b4b85d2531338743869a8b47da0a21eced4791e005cc4c6b0fc86f"
+    },
+    {
+      "route": "/admin/fx",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-fx.png",
+      "sha256": "0ec205cd1f74834648143392fddf48f6cf1fada2ba266eabccb23092a2aaefd8"
+    },
+    {
+      "route": "/admin/help",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-help.png",
+      "sha256": "71ccba5a4992d39e881fda3dadcb7ae7503eb1ec18dba9f1fdb839a3081f7767"
+    },
+    {
+      "route": "/admin/kdic",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-kdic.png",
+      "sha256": "9b3ec442294830da89fbbb194ae1c1ef4a9a4f03473067841d49a5afe720d865"
+    },
+    {
+      "route": "/admin/logs",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-logs.png",
+      "sha256": "70ba7faf970aa4927118d7f5fe4247b27f0d93dc84d7a1922c5a29bc61f96adf"
+    },
+    {
+      "route": "/admin/logs/activity",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-logs-activity.png",
+      "sha256": "683b7201c290215871d38cf755ac819f9f70a4c5eeefe6db0f2a85c33a4c9ed1"
+    },
+    {
+      "route": "/admin/logs/delivery",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-logs-delivery.png",
+      "sha256": "bfaba5671115fa30d8ffb8b8ab5ce4e978a3af10288ec2650df319db7980d6f9"
+    },
+    {
+      "route": "/admin/logs/errors",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-logs-errors.png",
+      "sha256": "0107c0c7feaa834044e306108f8c632f792d873ecb977249b021d38778c8b09c"
+    },
+    {
+      "route": "/admin/logs/integrity",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-logs-integrity.png",
+      "sha256": "3f0366ba29fd62c7c8556545a68390f7e796ab8dd2c68bd934f87f8c9b2f3431"
+    },
+    {
+      "route": "/admin/logs/system",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-logs-system.png",
+      "sha256": "26b5845887cc7cf6ed8f486626d88ee16a1ddf74ed8b1b344a108e3703d5f2d8"
+    },
+    {
+      "route": "/admin/market",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-market.png",
+      "sha256": "9690ecd2183653444cbdb0a5f857f739b56170f152f9c337cb73ef0aec823110"
+    },
+    {
+      "route": "/admin/market/ai-news",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-market-ai-news.png",
+      "sha256": "e3e32725b73258500f884052c4e167fa7e26a577374420cb83d533395872a89c"
+    },
+    {
+      "route": "/admin/mint",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-mint.png",
+      "sha256": "c9a58bb9e6b0e1ec0f02d95559c3363f980e841b431521c3348abe2b6746bb47"
+    },
+    {
+      "route": "/admin/money-flow",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-money-flow.png",
+      "sha256": "e14e70782e2f0545e9ba32f7378d16a167b7903519c8b23b915c9c3d369f503a"
+    },
+    {
+      "route": "/admin/operations/storage",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-operations-storage.png",
+      "sha256": "ba09367ce57eecfc63fe332ce239f7b4dfd0c20a7c586abca5106dcfa75b9e5d"
+    },
+    {
+      "route": "/admin/pension",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-pension.png",
+      "sha256": "7cac30038fd2e03a48b3ec6182460ca4b2bc9d28ee0912a8afa80e56d94a4de7"
+    },
+    {
+      "route": "/admin/safety",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-safety.png",
+      "sha256": "d50b2999efc18cbad7dccdfaf071f3964c126a4c9ad19496ea936f31573533f9"
+    },
+    {
+      "route": "/admin/security",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-security.png",
+      "sha256": "c5a710d4866fe3779ff788f5e452291045a80a2050c0bbda6362704e92eca332"
+    },
+    {
+      "route": "/admin/seo",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-seo.png",
+      "sha256": "d8d68b11158ae2dbe30d01fdf8ded0a0571b40f1459547a6ab3f59a1680d9ad7"
+    },
+    {
+      "route": "/admin/seo-audit",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-seo-audit.png",
+      "sha256": "fba4fecb8384776ad62a9e417ca1423b220cb9c573c0df43a14cc9339dc2b418"
+    },
+    {
+      "route": "/admin/shop",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-shop.png",
+      "sha256": "671aef6e43224d7aaf584269bc23dffe602203f2f5038b1ed6769c32a06aac0f"
+    },
+    {
+      "route": "/admin/support",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-support.png",
+      "sha256": "195649576867770e51012810106460a510d8ef868dd6ab4b04f0b1bc7ba21218"
+    },
+    {
+      "route": "/admin/treasury",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-treasury.png",
+      "sha256": "23dc282950fcb79938b957457a89bec63b3fb96bf2347afed1dbafa5c92e78f7"
+    },
+    {
+      "route": "/admin/treasury/grants",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-treasury-grants.png",
+      "sha256": "24dcf5a4f233d712cb777ebcf6cbf11a74da5ebbe029b35c599e8804e36b3302"
+    },
+    {
+      "route": "/admin/users",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-users.png",
+      "sha256": "dde6f5c8fbb3584567000656dae7fbba7c0c13009567cd936d643fbc6f5ce3aa"
+    },
+    {
+      "route": "/admin/users/[id]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-users--id-.png",
+      "sha256": "7057c3d3a38a938d9f2d8f4443f5e8f9081f9046ef34511441cf31ca43a5da95"
+    },
+    {
+      "route": "/admin/work",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/admin-work.png",
+      "sha256": "5f299287e2e6ce0a88ee3240edacbd219b4ca9047bca67f85fc9fc4edc2a092e"
+    },
+    {
+      "route": "/advisor",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/advisor.png",
+      "sha256": "54a3a62bcf95e0b038aa778fc1b042be4b331c8c97807446a241b666f2b640cb"
+    },
+    {
+      "route": "/announcements",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/announcements.png",
+      "sha256": "77232ed865224817dc2c29fd429ec3692f6f371046ae76e007e7011d9d48c8ff"
+    },
+    {
+      "route": "/announcements/[announcementId]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/announcements--announcementId-.png",
+      "sha256": "02b9d175f8f4859d31d08378479bbfb0369fe06787896eef524802626ee145af"
+    },
+    {
+      "route": "/arcade",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/arcade.png",
+      "sha256": "6b271ceb68012cbd37f9621b0675f7472838ac1f6f7c9d47285c3904fe1d381a"
+    },
+    {
+      "route": "/bank",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/bank.png",
+      "sha256": "3517c3dabf6da0617779eeecf301376c0fcb63425e3be9fc3fe3ce0ae4d5e9a2"
+    },
+    {
+      "route": "/bank/savings-pot",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/bank-savings-pot.png",
+      "sha256": "9cef72533a482b29fa72e96ccf87cc9bc0a5907f81ed0081bab6dca6abdbc63b"
+    },
+    {
+      "route": "/blog",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/blog.png",
+      "sha256": "dbcb2ba7fe771cbe082bfabd9fa644e5ac7ff6aa3cbfec508b94905ef34a2e09"
+    },
+    {
+      "route": "/blog/[slug]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/blog--slug-.png",
+      "sha256": "168715f9170c306102fd5ad32ba2f5fd529e408dee6a4a4745319b75d14c8d99"
+    },
+    {
+      "route": "/board",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/board.png",
+      "sha256": "42435ca2d975fc3b76c0f3ac97aa96688444d65eb64d2d91f672fad27d216d46"
+    },
+    {
+      "route": "/board/[postId]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/board--postId-.png",
+      "sha256": "37a5b6a22ed3bc2a997226af12745cc5702d26f0f9b8585a6095a7c910df2d31"
+    },
+    {
+      "route": "/bonds",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/bonds.png",
+      "sha256": "56c9c0079d0e853f9226c83979ab319b66a4925d41e55366e9094aa38c60500c"
+    },
+    {
+      "route": "/businesses",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/businesses.png",
+      "sha256": "99c94943c169bccf4c3f4fc7cf5948793c3af9c925f3d92e8b1d1ff4e14edad5"
+    },
+    {
+      "route": "/businesses/ventures",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/businesses-ventures.png",
+      "sha256": "a1342e66e5effad185715e48670ab6f3718efcb4531455746f5324b37f19517f"
+    },
+    {
+      "route": "/calculators",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/calculators.png",
+      "sha256": "6ecf14f3325d30b4fcf40c90e806cd320144043a996886a5518131e5619deb18"
+    },
+    {
+      "route": "/calendar",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/calendar.png",
+      "sha256": "4b8f9391c894b08423d226936d54d31b9841bfb3c5b6b043a7b47ebcb432e5a3"
+    },
+    {
+      "route": "/casino",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/casino.png",
+      "sha256": "96d54bb2dbd8d5b17aa75c1f166a74787702a9911ce173148056be2d275bbee5"
+    },
+    {
+      "route": "/central-bank",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/central-bank.png",
+      "sha256": "b51089d0788cd66d063e0aa34041b1d5645de5d166e556b91aa6afd86aade8ee"
+    },
+    {
+      "route": "/chat",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/chat.png",
+      "sha256": "37bb509a80c75a2109c7e942c7a58c4d3d3160147d108c71affad3e39e0b5fbe"
+    },
+    {
+      "route": "/clubs",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/clubs.png",
+      "sha256": "06d6afb72e25c70fd9be67be50badc2fac2401bf7977ddf78806c2b3df757431"
+    },
+    {
+      "route": "/clubs/[clubId]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/clubs--clubId-.png",
+      "sha256": "409cbbc207066aa094a038c867f5dc7b178a1bdc27c7e1c110a78b8a9bc2c3c4"
+    },
+    {
+      "route": "/clubs/[clubId]/members",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/clubs--clubId--members.png",
+      "sha256": "d5d0611cd6f48af89c8f505e0b1c9bd0fc1789e22de80d5c0a74fc811bb3e4af"
+    },
+    {
+      "route": "/clubs/new",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/clubs-new.png",
+      "sha256": "f9499f31e1a3fd93122663bd9a0fcd872239d92a4eb36cc8d38c6e607f6253c2"
+    },
+    {
+      "route": "/clubs/warfare",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/clubs-warfare.png",
+      "sha256": "3844b1d56cb17edfe776a7207a3dacffabe73bd71452acd7b8bfcb1620e28e62"
+    },
+    {
+      "route": "/collections",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/collections.png",
+      "sha256": "bf5d2adf6c9170b70fa603330aaa70e94505260b8ef173c76c4eafd3dd7c1517"
+    },
+    {
+      "route": "/dashboard",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/dashboard.png",
+      "sha256": "835a152dfd955a68065335be308bffb271a70bdb5cd4998619051a2e72d059f1"
+    },
+    {
+      "route": "/data-deletion",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/data-deletion.png",
+      "sha256": "301208ba8dcd6b719490725c2d053a3f136d3511ec6f73c1370edf43066f2573"
+    },
+    {
+      "route": "/design-preview",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/design-preview.png",
+      "sha256": "b6bfdf24462af0552c73cf5f4dd9584855f286ea28489a055c2d334163423260"
+    },
+    {
+      "route": "/developer",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/developer.png",
+      "sha256": "b186bcab702a8fc99e3761be887cd78a580b0fb46f7e92b520b86008d01d489e"
+    },
+    {
+      "route": "/enterprises",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/enterprises.png",
+      "sha256": "91ee66ce25135a4d32067a23a3912287690e08d3efc9b84237689fea441d6314"
+    },
+    {
+      "route": "/features",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/features.png",
+      "sha256": "3770995480d2445fa0298b8970dd8974fb6dead62a4accb8682a1be6cbcec828"
+    },
+    {
+      "route": "/forgot-password",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/forgot-password.png",
+      "sha256": "f2caa980bce1ba0c2935899da213027a1e9fb0ce9020038f236295f76027b1e6"
+    },
+    {
+      "route": "/fx",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/fx.png",
+      "sha256": "4849bdfc3c051c75b9c99bbfe71929c08ff77e7b58b974c6a7b33bc58fee6638"
+    },
+    {
+      "route": "/gallery",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/gallery.png",
+      "sha256": "a9cdca7d1b953582a0377e66602d1c806d3c6d89a2013c89b94a52f0f8689701"
+    },
+    {
+      "route": "/gallery/[photoId]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/gallery--photoId-.png",
+      "sha256": "2808856439081cd4fe6074779ca37d8b4d1e0d5b4648c93d22ad33415f4ff03d"
+    },
+    {
+      "route": "/gallery/submit",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/gallery-submit.png",
+      "sha256": "a20e82574605a05847dc1e224bbc735d3362ea2ed7ba45fe1ced40880b682bd7"
+    },
+    {
+      "route": "/guide",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/guide.png",
+      "sha256": "0f68bf14df45dde200b053c51c0b85976381afc9f9bb5f361c7b514bb57271cf"
+    },
+    {
+      "route": "/guide/career-mastery",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/guide-career-mastery.png",
+      "sha256": "1499bacb691abcd6bfa6c5a63f112ea20a6f99497e4121bdf8a7fe5f71d2cf55"
+    },
+    {
+      "route": "/guide/dopamine-system",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/guide-dopamine-system.png",
+      "sha256": "bc7d8550da88c8879391b6343a26ca9dfe3c23da1ff14e8938bcbbf311e9dd47"
+    },
+    {
+      "route": "/guide/glossary",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/guide-glossary.png",
+      "sha256": "ddb1210a250dcc8aae51e7b9aba884618000761045e709a585eb95f1f9dc34f8"
+    },
+    {
+      "route": "/guide/glossary/[term]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/guide-glossary--term-.png",
+      "sha256": "35562dea3795e81e78c91bc214db17be8b9291a27a5082ecc751aa1ea22e0506"
+    },
+    {
+      "route": "/guide/stock-trading",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/guide-stock-trading.png",
+      "sha256": "b33f53ebcd3d0f56225e07ecf53c693d79f256b10b12d04a3247390744b44c81"
+    },
+    {
+      "route": "/guide/virtual-banking",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/guide-virtual-banking.png",
+      "sha256": "84a44eb54e941d3a70307b8ee84fa0d6ee23a45e58fe65bb58b8aaa1160a7454"
+    },
+    {
+      "route": "/help",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/help.png",
+      "sha256": "17fb5a3513c90df07383d5267197f4cc1c7446bfd14c27a199c3294f7ca6c20e"
+    },
+    {
+      "route": "/help/[slug]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/help--slug-.png",
+      "sha256": "43e659e48ba17cc01c0d03e30e7f33b32502e46f7f6ed4b8336737b28a30584c"
+    },
+    {
+      "route": "/inventory",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/inventory.png",
+      "sha256": "ac843a6289a542e744c748d2c2ecb87d48c48938dfefb587809bf2d3fa6380bf"
+    },
+    {
+      "route": "/invite/[code]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/invite--code-.png",
+      "sha256": "bcb150b2321e577286e461481ba56c8612be633473e2179caae6db4be3b73fa0"
+    },
+    {
+      "route": "/kdic",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/kdic.png",
+      "sha256": "c7a95a7a12462cfb69d6be4f09b23acfd7d39d9c0713f2635565ec56ae9fe9bb"
+    },
+    {
+      "route": "/lobby",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/lobby.png",
+      "sha256": "f6bdc23a7c249cfe5aa1edd9086485eeff47a7289d994c8c478630ab0093c0a0"
+    },
+    {
+      "route": "/login",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/login.png",
+      "sha256": "a6c14394b82b922a17b983518a316a52eea6a1da77e9c97a0910aa17e7ea01f6"
+    },
+    {
+      "route": "/login/providers",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/login-providers.png",
+      "sha256": "114a97eb0008f82f11e54a87b0ea730b9fb478e153b853febe445c9312850f0c"
+    },
+    {
+      "route": "/marketplace",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/marketplace.png",
+      "sha256": "678645feb4ea018ef3c4fa674fe2a7bdd1703df76bb050f289cc2d51669665a9"
+    },
+    {
+      "route": "/marketplace/auction",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/marketplace-auction.png",
+      "sha256": "3cff3c96c2b93468d6b0e3497a753bd830b6e9b25634f3abffcb5a7f42609bf5"
+    },
+    {
+      "route": "/mint",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/mint.png",
+      "sha256": "c836d1567cb629168729df9427164745b98ef13db4d45a32e4a57ada11be5878"
+    },
+    {
+      "route": "/newspaper",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/newspaper.png",
+      "sha256": "065a8468a07c25b41a35e38e9ca6c4888d5d4693c6fea00399033a9f2a204565"
+    },
+    {
+      "route": "/pension",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/pension.png",
+      "sha256": "ae5dafbb8d645e4fa9e4c5011b3282914da56258416816d149118a5cc06fdeb7"
+    },
+    {
+      "route": "/prediction",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/prediction.png",
+      "sha256": "ff65523c76bde2e76017d4880973053a93886e57289cc4ff6585db837c3d15b2"
+    },
+    {
+      "route": "/privacy",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/privacy.png",
+      "sha256": "23ff404a94b8bb42d8c9194bb2bd6b780ebde9a48886c58eab1188546d168fba"
+    },
+    {
+      "route": "/profile",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/profile.png",
+      "sha256": "1189fd1706dceb521acaaaebc451b0cbaec0b94caa4ee5b44615f64d4630a0e3"
+    },
+    {
+      "route": "/profile/[userId]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/profile--userId-.png",
+      "sha256": "3559f69f96ac9b95a100b2fa8404eefb856d53267fc7f5f71bc742497dfb69c1"
+    },
+    {
+      "route": "/profile/settings",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/profile-settings.png",
+      "sha256": "0036059e10664cb2874df126fc1a8158c97ad7c69292d06e20cfbf1e0839d0db"
+    },
+    {
+      "route": "/progression",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/progression.png",
+      "sha256": "5e10522b908cb2112e0282fec62c5cca53332cb3700648aa7eb6249c45506069"
+    },
+    {
+      "route": "/progression/prestige",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/progression-prestige.png",
+      "sha256": "885f87600f38c26ef59d10f698e96197c1fcf49c2990d312e3a6ecc835b27e18"
+    },
+    {
+      "route": "/quests",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/quests.png",
+      "sha256": "ef9458aaf04f7fcc595ffb3bff1fd01cdc9b82d7675725e7fb0046fb0cabd46b"
+    },
+    {
+      "route": "/register",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/register.png",
+      "sha256": "d2565ee3a6390c5102e364e9d7474d8d054dc6721fc4df842a450339514b5fae"
+    },
+    {
+      "route": "/reset-password",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/reset-password.png",
+      "sha256": "b879c41ceca3d0b18733a7080be844a5b5d4f71a776a6ee2e458fe499fd52284"
+    },
+    {
+      "route": "/roadmap",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/roadmap.png",
+      "sha256": "326363b39bfa16dcf2388769a6775d50339f74bd25f9d5c7f3b6d55ee12af199"
+    },
+    {
+      "route": "/safety",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/safety.png",
+      "sha256": "abc7f503b7ec5ebca2e6d807a014d517ca41c13c9d5652e3f978888509020609"
+    },
+    {
+      "route": "/safety/takedown",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/safety-takedown.png",
+      "sha256": "00097384b3186af1ff3674c7d8d7c59246bbefb1d60cf6f97be2378c665e07cf"
+    },
+    {
+      "route": "/search",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/search.png",
+      "sha256": "3959c77e341775a5133c265ad44f57293d3744092887552b9e2c500c634bb714"
+    },
+    {
+      "route": "/seasons",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/seasons.png",
+      "sha256": "3204977ce1ee440be6f799574b5bf15f874a64f47c7a2a6b957301f7a178027b"
+    },
+    {
+      "route": "/shop",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/shop.png",
+      "sha256": "5b5e538d1c7510121a132d643312e4e0dd680a0526bd06d6319320fbd8335b8b"
+    },
+    {
+      "route": "/shop/catalog",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/shop-catalog.png",
+      "sha256": "64622a4d9b17f614bf1e1eb3c3007fecf92aab87ddf2952464f3cff63d3a252d"
+    },
+    {
+      "route": "/spaces",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/spaces.png",
+      "sha256": "a33a803f8f46c7124dca2254f66875e70956c6ef62728c682dbe48c11d6d6a8f"
+    },
+    {
+      "route": "/spaces/real-estate",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/spaces-real-estate.png",
+      "sha256": "004c92e66b703d8aec8c37b4155675c21ac6d693eeda91f4b96f8bbde425ad12"
+    },
+    {
+      "route": "/status",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/status.png",
+      "sha256": "67ddcc649d619544ba6ab080e298cd5f0f807ea41e2a914e0430f704de5441a4"
+    },
+    {
+      "route": "/stocks",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/stocks.png",
+      "sha256": "8a0b6f8868096d011ad4dfae35444340c83b039a515fd96ac97736b8314afd3f"
+    },
+    {
+      "route": "/stocks/[symbol]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/stocks--symbol-.png",
+      "sha256": "bec7434edf18f3bc584a6834f649d6338b5a5cf308702fcd17d635876d2f6c84"
+    },
+    {
+      "route": "/stocks/alerts",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/stocks-alerts.png",
+      "sha256": "8a89d313cb19803410f0465f87770356e4267eded09f3002c9851e330a933705"
+    },
+    {
+      "route": "/stocks/community",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/stocks-community.png",
+      "sha256": "c355c43e76599ff3dfb632258c0001f7f229973a3872b882090bbdc102dfe8d6"
+    },
+    {
+      "route": "/stocks/compare",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/stocks-compare.png",
+      "sha256": "1f4fa57349075e357a2424d6e89e7b46be139b473c9be51f6161afed1a2ac71d"
+    },
+    {
+      "route": "/stocks/derivatives",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/stocks-derivatives.png",
+      "sha256": "6e45f7733abdf5607b7b7e776e495f92a2d4396db27defb41f0f6f4e7794740f"
+    },
+    {
+      "route": "/stocks/history",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/stocks-history.png",
+      "sha256": "6c659808eeb0378a74cec890bc650c3803c1159cf284440e664e277a3de19502"
+    },
+    {
+      "route": "/stocks/league",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/stocks-league.png",
+      "sha256": "5e8707b6bfcbc6674e5203eca2422ac51f340f88249943fbb4c37f76f23cfb7c"
+    },
+    {
+      "route": "/stocks/portfolio",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/stocks-portfolio.png",
+      "sha256": "50eb6dc5167b3ec183cf705151eeb6817d9928fd2fb900f0bc8abce182595a9a"
+    },
+    {
+      "route": "/stocks/watchlist",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/stocks-watchlist.png",
+      "sha256": "67a1dc76d22698937da7c5ca1344809d09259b943423a88903e13e19e69923cb"
+    },
+    {
+      "route": "/support",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/support.png",
+      "sha256": "3f2c666d609f15b8df243e4a74321d076292fe1df69084ea5302495bd060f7b0"
+    },
+    {
+      "route": "/terms",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/terms.png",
+      "sha256": "909d8e2791e081ba969e6579da9c9e9ec587fe7845e9b54eafa4858133fe5340"
+    },
+    {
+      "route": "/tools",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools.png",
+      "sha256": "ac1f4efee5a7a7d1ef11df352530a90e13679e87edd69d7276d9889e47176c35"
+    },
+    {
+      "route": "/tools/capital-gains-tax-calculator",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-capital-gains-tax-calculator.png",
+      "sha256": "552bac164e56e398a8881c0696a408a6402fdc591bbed73623649242f9873d5c"
+    },
+    {
+      "route": "/tools/capital-gains-tax-calculator/[preset]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-capital-gains-tax-calculator--preset-.png",
+      "sha256": "6c4a3fc872d7d7d836b45eb849fb99cab7eb7ff63e39acd128991dc07931b941"
+    },
+    {
+      "route": "/tools/compound-calculator",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-compound-calculator.png",
+      "sha256": "2f439e22de04db3e2e8b2701cd5168c0ecf3556c2e9e89bc8eb8350e831b6467"
+    },
+    {
+      "route": "/tools/compound-calculator/[preset]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-compound-calculator--preset-.png",
+      "sha256": "0d4658b795b879d517e37f2be8a0ce5ab7ad167b5af89b85c3e1b4f17c2dade2"
+    },
+    {
+      "route": "/tools/crypto-apy-calculator",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-crypto-apy-calculator.png",
+      "sha256": "ad5d73b402ee2650b5fe5763b3fc45697bd1dd61568a623655aa1f1482108620"
+    },
+    {
+      "route": "/tools/dividend-tax-calculator",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-dividend-tax-calculator.png",
+      "sha256": "f07d36b72ecdae62c34ceff8dcf2443a4e04272b8923a6e0ef8ea86297745286"
+    },
+    {
+      "route": "/tools/dividend-tax-calculator/[ticker]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-dividend-tax-calculator--ticker-.png",
+      "sha256": "cba5eecd16425620467d73d83512edfff82666d5bf5f203a34759b9be9e000d4"
+    },
+    {
+      "route": "/tools/farming-calculator",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-farming-calculator.png",
+      "sha256": "ef4f6e89f0d5b505f31fbdf253fe4264d6c0b3612c6c35739c58510a2236845d"
+    },
+    {
+      "route": "/tools/farming-calculator/[preset]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-farming-calculator--preset-.png",
+      "sha256": "4c1e4c5386e30e3a6017d5fa31630a81ac3f5c94acd0c62fbb34118e7e444056"
+    },
+    {
+      "route": "/tools/fire-calculator",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-fire-calculator.png",
+      "sha256": "9e3a13f5327ff1a02213db3ce0cc599a75bd0e32e8f8db831a68f912cc7cf8ea"
+    },
+    {
+      "route": "/tools/gift-tax-calculator",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-gift-tax-calculator.png",
+      "sha256": "71739a1ddef464be651891442b3cfe8b649e11e25ee80bfa8510afc50b0d34b5"
+    },
+    {
+      "route": "/tools/gift-tax-calculator/[preset]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-gift-tax-calculator--preset-.png",
+      "sha256": "d3f72c46d74b10cdc7c76b3573b5e9f36948374ea6fc2f77e3a99a2cbe170498"
+    },
+    {
+      "route": "/tools/goal-wealth-calculator",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-goal-wealth-calculator.png",
+      "sha256": "1786297fd0716e4dd0f997dbe1af5998196b34a4e6bdb20db6c996e53459fc5f"
+    },
+    {
+      "route": "/tools/isa-calculator",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-isa-calculator.png",
+      "sha256": "67c5b749e9ae5db269195b36557aee3f1e80c52bba0f8806becd9c372ff1a15d"
+    },
+    {
+      "route": "/tools/isa-calculator/[slug]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-isa-calculator--slug-.png",
+      "sha256": "8f4fa9acf7493a5637e5fdf937ed4072a3e3b649165c2f4e369b82dee1fe2664"
+    },
+    {
+      "route": "/tools/kimchi-premium-calculator",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-kimchi-premium-calculator.png",
+      "sha256": "3098268b8c36157b55c5eb11d0114d94fb403428c71c9558911808d8e5028972"
+    },
+    {
+      "route": "/tools/kimchi-premium-calculator/[preset]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-kimchi-premium-calculator--preset-.png",
+      "sha256": "e48bb6e92b035b724a4ac3fe68d28c02cf282009dc91effdf7c86cd84ac29f10"
+    },
+    {
+      "route": "/tools/loan-interest-calculator",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-loan-interest-calculator.png",
+      "sha256": "56606ff15545fade12994409b1f2a82dd86d8511120500e8a320c9e13ed1fb1c"
+    },
+    {
+      "route": "/tools/loan-interest-calculator/[preset]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-loan-interest-calculator--preset-.png",
+      "sha256": "79ab34de24fb62a99bc92ec6e0634e318a107d080b9a059f016ebff418378eef"
+    },
+    {
+      "route": "/tools/pension-tax-calculator",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-pension-tax-calculator.png",
+      "sha256": "afba40011bf90d2d781ed5c975584d2f7552bfab5d7940410b21c67147d9c56d"
+    },
+    {
+      "route": "/tools/pension-tax-calculator/[slug]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-pension-tax-calculator--slug-.png",
+      "sha256": "bb52193a5dc7b91739eb525ec5de042ba1a97b8e3eec408124a5a49cf3f79a8e"
+    },
+    {
+      "route": "/tools/quant-studio",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-quant-studio.png",
+      "sha256": "22a414760ccde47a07140c26311d0dbd0a1f13cf8e2d442dc4386755fc2c71cb"
+    },
+    {
+      "route": "/tools/real-estate-calculator",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-real-estate-calculator.png",
+      "sha256": "2c9032c38d97958f2891a6e7e5bcabf013ed276746df653111476ea029a5b2e7"
+    },
+    {
+      "route": "/tools/real-estate-calculator/[preset]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-real-estate-calculator--preset-.png",
+      "sha256": "1dbeb62e63923414e030b7c9047c96175659a3e1fa45dfd6cfee9750d5a1b449"
+    },
+    {
+      "route": "/tools/retirement-calculator",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-retirement-calculator.png",
+      "sha256": "780d31558db27f8b22883b291c1453f3c156a2e61467d583eba86c16ff3658f0"
+    },
+    {
+      "route": "/tools/retirement-calculator/[slug]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-retirement-calculator--slug-.png",
+      "sha256": "7f92df87fefaa3296301729d9d92c4025724fd7766f541e10c50bbfc6c6941b4"
+    },
+    {
+      "route": "/tools/salary-calculator",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-salary-calculator.png",
+      "sha256": "7a1408831a1e60c57259e3fd5a1686250206de1663601c54d4d610a4a63ca67d"
+    },
+    {
+      "route": "/tools/salary-calculator/[preset]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-salary-calculator--preset-.png",
+      "sha256": "eea094a4882ab7d3f7bff3131cf7f2fb637334628e2307ec8504c4c3cc5c6989"
+    },
+    {
+      "route": "/tools/stock-calculator",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-stock-calculator.png",
+      "sha256": "93226058d4879f91b6d28fe554bb0354342e23d69ce0cf1b3f0c608970ea8ea2"
+    },
+    {
+      "route": "/tools/stock-calculator/[preset]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-stock-calculator--preset-.png",
+      "sha256": "2836a805c985823b63b74e35356c0c41e06640735768b197aa08393e95fe8bb1"
+    },
+    {
+      "route": "/tools/tax-calculator",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-tax-calculator.png",
+      "sha256": "04f0cf009b7f582f9dc3cfd9fbb58226d2d4a1336734dd17a6cc2ad547c1317a"
+    },
+    {
+      "route": "/tools/youth-leap-calculator",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-youth-leap-calculator.png",
+      "sha256": "1623372a3daf6622dda6405b14a45cc066d6cdfe2d5b33125995356c3954f0bd"
+    },
+    {
+      "route": "/tools/youth-leap-calculator/[preset]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/tools-youth-leap-calculator--preset-.png",
+      "sha256": "c66b7ce59d5baf68886a9d60bf9ac80588701819474f0247a8412d8088093674"
+    },
+    {
+      "route": "/treasury",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/treasury.png",
+      "sha256": "425d836f117edb0f5a280bd7dae8e35bd228dec169e3568368763b34a1dc15df"
+    },
+    {
+      "route": "/verify-email",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/verify-email.png",
+      "sha256": "cc6f0b40c4638cf68e37af1bcd100b8fb20e4a1514de008ef93861155d507822"
+    },
+    {
+      "route": "/verify-email-change",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/verify-email-change.png",
+      "sha256": "76e4edd457b1d3f9d16cb89faa672baf357c1615ff74289ec0c8747bca3b0a3e"
+    },
+    {
+      "route": "/wallet",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/wallet.png",
+      "sha256": "5f35e6104ba847d2de539a98798f20e24f7579a4b428173048d4a437fa2892ae"
+    },
+    {
+      "route": "/wallet/activity",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/wallet-activity.png",
+      "sha256": "230024284f727292cf4d5a7cbd12b604ff01256cc16ce43140767ffefa3eec05"
+    },
+    {
+      "route": "/wallet/activity/transactions/[transactionId]",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/wallet-activity-transactions--transactionId-.png",
+      "sha256": "47e55d416c28187a46b03c6aafdfaaeca5e840384c1f76f3980f972768c58c3e"
+    },
+    {
+      "route": "/work",
+      "file": "docs/design/game-ui-v2026.11.24.G2/routes/work.png",
+      "sha256": "e2f3750a3e3559ff766ae6c68d8e9e8c3a40331466d965587c57a4fdff28cf0c"
+    }
+  ]
 }

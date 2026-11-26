@@ -1,3 +1,5 @@
+> **ARCHIVED / 보관본 — v2026.11.27.PLAN-AUDIT.2:** historical evidence only, not implementation input or guest-access authority. [Current G2 policy](../CURRENT_UI_DESIGN.md). All historical claims below refer to their original date.
+
 # G1 "길드 원장" 게임풍 리디자인 — 후보안 (180개 경로)
 
 **상태: 현재 공식 기준 — 2026-11-24 소유자 승인.** (이전 후보안 안내: 승인 전까지는 [CURRENT_UI_DESIGN.md](../CURRENT_UI_DESIGN.md)(v10)가 그대로 유효합니다. 승인되면 기준 문서·manifest·갤러리를 함께 갱신하고, 그때부터 프론트엔드 구현을 시작합니다.

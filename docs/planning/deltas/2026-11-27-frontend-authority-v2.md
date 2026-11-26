@@ -1,0 +1,11 @@
+# Frontend authority reconciliation — v2026.11.27.PLAN-AUDIT.2
+
+[한국어](2026-11-27-frontend-authority-v2.ko.md) · Status: owner-confirmed admin denial, existing G2 approval reconciled, PR candidate; not runtime acceptance.
+
+- Owner explicitly confirmed on 2026-11-27 that administrator access must be blocked for non-administrators and authorized the cleanup of old frontend instructions. Public-safe guest pages only. Server-side role checks for protected HTML, APIs, data, actions and socket/cache responses; no unauthorized menu, search, or protected payload. Login is not administrator authorization.
+- Existing approved new-web target remains Next.js/React/TypeScript/Tailwind with same-origin server-only BFF + Spring API. Legacy Spring presentation remains transitional; no cutover. G2 (recorded owner approval 2026-11-24) is the only active visual baseline; G1/v11/v10/v8/Nov18 are archived, not implementation fallbacks. Do not delete historical design assets or adopted functional/security requirements.
+- Rebuilt the active manifest against the existing 180 G2 route PNGs; 180 distinct routes, assets and SHA-256 hashes; 1680×1000; exact same route set as prior manifest. Archetype examples, not route-specific functional or artistic acceptance. EN/KO route tables and verifier aligned. No new images generated.
+- Updated project/master, authority, agent entrypoints, maintained indexes, architecture and historical instruction supersession markers. Historical receipts preserved. Previous task-specific merge authorization cannot be reused. Existing PR3455 and other open branches need reconciliation against this delta; no overlapping branch overwritten.
+- Retain EN default, KO second, JA/ZH/VI, actual favicon, real API data, independent Test, security/DB gates, separately authorized zero-downtime Production. Native app hold unchanged. No runtime code, DB, server, CI workflow or deployment changed. Verification control-plane script updated, not a runtime change.
+
+Evidence: [current policy](../../design/CURRENT_UI_DESIGN.md), [manifest](../../design/CURRENT_UI_DESIGN_MANIFEST.json), [worklog](../../worklog/2026-11-27-frontend-authority-v2.md). Baseline `1df1150e979106ec03d682a10f1f1348bff0a44c`.
