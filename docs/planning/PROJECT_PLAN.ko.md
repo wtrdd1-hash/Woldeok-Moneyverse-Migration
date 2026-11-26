@@ -1,3 +1,5 @@
+> **사용자 승인 v2026.11.26.APPHOLD.1:** 네이티브 앱 구현/미니PC 앱 개발 중단. 별도 재개 승인 전까지 모바일 웹만 계속. [정책 및 정리 기록](../worklog/2026-11-26-native-app-hold.ko.md).
+
 ## v2026.11.24.0818 — Stitch Skills 로컬 적용 시험
 
 > **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](../DOCUMENT_AUTHORITY.md) / [한국어](../DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.

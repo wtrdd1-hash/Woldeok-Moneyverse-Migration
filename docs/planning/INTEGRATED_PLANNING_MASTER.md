@@ -1,3 +1,5 @@
+> **Owner-approved v2026.11.26.APPHOLD.1:** Native app implementation and MiniPC app work paused until explicit resumption; responsive mobile web continues. [Policy and cleanup record](../worklog/2026-11-26-native-app-hold.md).
+
 ## v2026.11.24.0818 — Stitch Skills design-contract pilot (not deployed)
 
 > **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](../DOCUMENT_AUTHORITY.md) / [한국어](../DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.
