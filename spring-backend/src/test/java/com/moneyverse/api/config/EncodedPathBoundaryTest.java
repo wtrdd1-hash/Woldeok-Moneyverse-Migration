@@ -30,13 +30,31 @@ class EncodedPathBoundaryTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"/api/v1/%61dmin/users", "/api/%61dmin/treasury/mint-topup", "/api/v1/admin/%75sers",
-            "/api/v1//admin/users", "/api/v1/./admin/users", "/api/v1/%2561dmin/users"})
+            "/api/v1//admin/users", "/api/v1/./admin/users", "/api/v1/%2561dmin/users",
+            "/api/v1/%252561dmin/users"})
     void encodedAdminPathsStillPassThroughTheAdminBoundary(String uri) {
         var request = new MockHttpServletRequest("GET", uri);
         request.setRequestURI(uri);
-        if (uri.contains("%25")) {
-            return;
-        }
         assertFalse(admin.shouldNotFilter(request), uri + " must be filtered");
+    }
+
+    private final AdminHtmlBoundaryFilter html = new AdminHtmlBoundaryFilter(mock(AdminAuthService.class));
+
+    // Both admin boundaries must agree on the normalised path.
+    @ParameterizedTest
+    @ValueSource(strings = {"/admin/users;x=1", "/admin//users", "/admin/./users", "/admin;x=1", "/%61dmin/users",
+            "/admin/%75sers", "/admin/users/"})
+    void unnormalisedServerRenderedAdminPagesStillPassThroughTheHtmlBoundary(String uri) {
+        var request = new MockHttpServletRequest("GET", uri);
+        request.setRequestURI(uri);
+        assertFalse(html.shouldNotFilter(request), uri + " must be filtered");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/admin/%E0%A4%A", "/admin/%zz"})
+    void malformedAdminPageEncodingKeepsTheHtmlBoundary(String uri) {
+        var request = new MockHttpServletRequest("GET", uri);
+        request.setRequestURI(uri);
+        assertFalse(html.shouldNotFilter(request), uri + " must be filtered (fail closed)");
     }
 }
