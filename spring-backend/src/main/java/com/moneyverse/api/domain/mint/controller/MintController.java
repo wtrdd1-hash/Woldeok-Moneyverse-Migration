@@ -24,7 +24,9 @@ public class MintController {
         String raw = (xUserId != null && !xUserId.isBlank()) ? xUserId.trim()
                 : (xActorUserId != null && !xActorUserId.isBlank()) ? xActorUserId.trim()
                 : null;
-        // No fixed fallback member (security review 2026-11-25): the session filter supplies the actor.
+        // No fixed fallback member (security review 2026-11-25). This path is outside the member
+        // boundary, so ActorHeaderSanitizingFilter hides these headers and the call is refused;
+        // re-enabling mint must move it behind a verified admin session first.
         if (raw == null) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED, "SESSION_REQUIRED");
         try {
             return UUID.fromString(raw);

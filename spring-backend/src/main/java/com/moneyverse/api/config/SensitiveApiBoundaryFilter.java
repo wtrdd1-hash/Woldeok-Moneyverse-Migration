@@ -30,6 +30,8 @@ import java.util.UUID;
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 11)
 public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
+    /** Set once this filter has substituted the verified actor; ActorHeaderSanitizingFilter keeps it. */
+    public static final String VERIFIED_ACTOR_ATTRIBUTE = SensitiveApiBoundaryFilter.class.getName() + ".verifiedActor";
     private final UserAuthService userAuthService;
     private final AdminAuthService adminAuthService;
 
@@ -169,6 +171,7 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
             return;
         }
 
+        request.setAttribute(VERIFIED_ACTOR_ATTRIBUTE, Boolean.TRUE);
         final String actorHeader = actor.toString();
         HttpServletRequest wrapped = new HttpServletRequestWrapper(request) {
             private boolean isActorHeader(String name) {
