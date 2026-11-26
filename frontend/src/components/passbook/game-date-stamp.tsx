@@ -96,14 +96,16 @@ export function GameDateStamp({ compact = false, className }: { readonly compact
     );
   }
 
+  // shrink-0: with the longer localised year line the stamp must not be squeezed by the page
+  // title next to it (browser QA 1280 px); the title truncates instead.
   return (
     <div
-      className={cn('flex h-11 items-stretch overflow-hidden rounded-md border border-[var(--g1-gold-deep)] text-[var(--g1-ink)]', className)}
+      className={cn('flex h-11 shrink-0 items-stretch overflow-hidden rounded-md border border-[var(--g1-gold-deep)] text-[var(--g1-ink)]', className)}
       aria-label={text.aria}
       title={text.title}
     >
       <span className="flex items-center bg-[var(--g1-gold)] px-2.5 text-[var(--g1-gold-ink)]">
-        <span className="mv-print text-[13px] font-medium">{passbookDate(clock.dayKey)}</span>
+        <span className="mv-print whitespace-nowrap text-[13px] font-medium">{passbookDate(clock.dayKey)}</span>
       </span>
       <span className="flex flex-col justify-center gap-1 px-3">
         <span className="whitespace-nowrap text-[11px] font-semibold leading-none">
