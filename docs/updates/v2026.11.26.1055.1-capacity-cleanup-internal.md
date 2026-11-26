@@ -1,0 +1,5 @@
+# Capacity and legacy runtime cleanup — v2026.11.26.1055.1
+- Start: inspected host, master references, live services, Nginx routes, dependencies and agent handoffs; protected active worktrees, database volumes, logs and rollback artifacts.
+- Checkpoint: stopped and disabled legacy Test v20/v21/v22 only, after no direct runtime references were found in inspected configuration. Cleaned npm and APT caches; pip purge was not confirmed.
+- Verification: Java 35 → 32, root disk 86% → 85%, available RAM 1.6 → 1.8 GiB (point-in-time readings, not causal attribution). Backend ports 4550 and 55438 stayed HTTP 200; frontend ports 55474, 55478, 55472 stayed HTTP 308. All three units inactive/disabled. No production cutover or database writes. Restore with systemctl enable --now for the named units if needed.
+- Handoff: capacity review queued in Claude resume prompt after security P0. Acknowledgement pending; resume preflight HOLD because the previous conversation changed. Do not bypass gate. Remaining old services and disk artifacts need ownership/dependency verification. No measured load capacity claim.
