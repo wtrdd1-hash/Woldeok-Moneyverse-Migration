@@ -111,7 +111,14 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
      */
     static boolean isSessionOnlyWritePath(String p) {
         String n = p.startsWith("/app-api/") ? p.replaceFirst("^/app-api", "/api") : p;
-        return n.matches("^/api/(v1/)?(profile/image|collections/[^/]+|stocks/alerts(/[^/]+)?|privacy/requests|board/stock-posts)/?$");
+        if (n.matches("^/api/(v1/)?(profile/image|collections/[^/]+|stocks/alerts(/[^/]+)?|privacy/requests|board/stock-posts)/?$")) return true;
+        // 2026-11-26 caller verification: these callers already send the proof (profile via
+        // lib/mutate, uploads via apiBytes and the chat widgets, burn-draw via its BFF); the
+        // dopamine aliases have no caller.
+        if (n.matches("^/api/(v1/)?(profile|board/images/uploads|photos/uploads|content/chat/upload"
+                + "|economy/events/burn-draw/participate|dopamine/(claim-streak|streak/claim|bull-bear|dopamine/bull-bear))/?$")) return true;
+        // The same handlers are also mapped without /api; those spellings must not skip the check.
+        return n.matches("^/(profile/image|stocks/alerts(/[^/]+)?|board/stock-posts|collections/[^/]+)/?$");
     }
 
     @Override

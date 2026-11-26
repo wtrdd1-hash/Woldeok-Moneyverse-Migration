@@ -5,8 +5,6 @@ DELETE /api/board/posts/{id}
 DELETE /api/board/posts/{id}/comments/{commentId}
 DELETE /api/v1/board/posts/{id}
 DELETE /api/v1/board/posts/{id}/comments/{commentId}
-DELETE /profile/image
-DELETE /stocks/alerts/{id}
 POST /api/activity/events
 POST /api/arena/rooms
 POST /api/arena/rooms/{roomId}/cancel
@@ -25,7 +23,6 @@ POST /api/auth/logout
 POST /api/auth/prelogin-session
 POST /api/board
 POST /api/board/
-POST /api/board/images/uploads
 POST /api/board/posts
 POST /api/board/posts/{id}/comments
 POST /api/bonds/repo-loans/borrow
@@ -47,12 +44,6 @@ POST /api/clubs/{id}/projects/{projectId}/contributions
 POST /api/clubs/warfare/battles/result
 POST /api/clubs/warfare/declare-war
 POST /api/content/banners/{id}/click
-POST /api/content/chat/upload
-POST /api/dopamine/bull-bear
-POST /api/dopamine/claim-streak
-POST /api/dopamine/dopamine/bull-bear
-POST /api/dopamine/streak/claim
-POST /api/economy/events/burn-draw/participate
 POST /api/economy/hot-time/admin/trigger
 POST /api/help/articles/{locale}/{slug}/report
 POST /api/help/search
@@ -72,7 +63,6 @@ POST /api/pension/contribute
 POST /api/pension/funded/contribute
 POST /api/pension/funded/withdraw
 POST /api/pension/toggle-retirement
-POST /api/photos/uploads
 POST /api/quant/backtest
 POST /api/quant/strategies
 POST /api/quant/strategies/{id}/toggle
@@ -103,7 +93,6 @@ POST /api/v1/auth/logout
 POST /api/v1/auth/prelogin-session
 POST /api/v1/board
 POST /api/v1/board/
-POST /api/v1/board/images/uploads
 POST /api/v1/board/posts
 POST /api/v1/board/posts/{id}/comments
 POST /api/v1/bonds/repo-loans/borrow
@@ -125,12 +114,6 @@ POST /api/v1/clubs/{id}/projects/{projectId}/contributions
 POST /api/v1/clubs/warfare/battles/result
 POST /api/v1/clubs/warfare/declare-war
 POST /api/v1/content/banners/{id}/click
-POST /api/v1/content/chat/upload
-POST /api/v1/dopamine/bull-bear
-POST /api/v1/dopamine/claim-streak
-POST /api/v1/dopamine/dopamine/bull-bear
-POST /api/v1/dopamine/streak/claim
-POST /api/v1/economy/events/burn-draw/participate
 POST /api/v1/economy/hot-time/admin/trigger
 POST /api/v1/help/articles/{locale}/{slug}/report
 POST /api/v1/help/search
@@ -150,7 +133,6 @@ POST /api/v1/pension/contribute
 POST /api/v1/pension/funded/contribute
 POST /api/v1/pension/funded/withdraw
 POST /api/v1/pension/toggle-retirement
-POST /api/v1/photos/uploads
 POST /api/v1/quant/backtest
 POST /api/v1/quant/strategies
 POST /api/v1/quant/strategies/{id}/toggle
@@ -170,7 +152,6 @@ POST /app-api/v1/notifications/{id}/read
 POST /app-api/v1/notifications/read-all
 POST /app-api/v1/notifications/read-all-receipt
 POST /auth/bootstrap/superadmin
-POST /board/stock-posts
 POST /businesses/ventures/apply-founder
 POST /businesses/ventures/claim-dividend
 POST /businesses/ventures/invest
@@ -188,7 +169,6 @@ POST /integrations/discord/announcements
 POST /integrations/discord/interactions
 POST /login
 POST /privacy/requests
-POST /profile/image
 POST /quant/backtest
 POST /quant/strategies
 POST /quant/strategies/{id}/toggle
@@ -197,20 +177,14 @@ POST /safety/takedown/status
 POST /seo/crawl-audit
 POST /seo/log
 POST /seo/submit
-POST /stocks/alerts
 POST /stocks/league/copy-trade/subscribe
 PUT /api/auth/consent
 PUT /api/board/posts/{id}
 PUT /api/casino/self-limit
 PUT /api/central-bank/base-rate
 PUT /api/central-bank/reserve-requirement
-PUT /api/profile
-PUT /api/profile/
 PUT /api/v1/auth/consent
 PUT /api/v1/board/posts/{id}
 PUT /api/v1/casino/self-limit
 PUT /api/v1/central-bank/base-rate
 PUT /api/v1/central-bank/reserve-requirement
-PUT /api/v1/profile
-PUT /api/v1/profile/
-PUT /collections/{id}
