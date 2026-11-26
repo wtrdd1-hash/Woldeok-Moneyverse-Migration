@@ -1,4 +1,8 @@
+'use client';
+
 import { Skeleton } from '@/components/ui/skeleton';
+import { useLocale } from '@/components/locale-provider';
+import { t } from '@/lib/translations';
 
 /**
  * What a member page looks like while its data is on the way.
@@ -24,9 +28,11 @@ export function PageSkeleton({
   readonly cards?: number;
   readonly columns?: 1 | 2;
 }) {
+  // The screen-reader announcement follows the selected language (I18N-01, 2026-11-26).
+  const { locale } = useLocale();
   return (
     <div className="grid gap-6" aria-busy aria-live="polite">
-      <span className="sr-only">불러오는 중</span>
+      <span className="sr-only">{t('shell.loading', locale)}</span>
       <div className="grid gap-2">
         <Skeleton className="h-3 w-28" />
         <Skeleton className="h-9 w-64" />
