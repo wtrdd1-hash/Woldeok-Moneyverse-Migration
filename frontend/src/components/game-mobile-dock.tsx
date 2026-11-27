@@ -30,12 +30,12 @@ export function GameMobileDock() {
                 href={href}
                 prefetch={false}
                 aria-current={active ? 'page' : undefined}
-                className={`flex min-h-[60px] flex-col items-center justify-center gap-1 text-xs transition-transform duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--g1-violet)] ${
+                className={`flex min-h-[60px] min-w-0 flex-col items-center justify-center gap-1 px-1 text-xs transition-transform duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--g1-violet)] ${
                   active ? 'font-semibold text-[var(--g1-ink)]' : 'text-[var(--g1-muted)]'
                 }`}
               >
                 <Icon className={`size-5 ${active ? 'text-[var(--g1-violet)]' : ''}`} aria-hidden />
-                <span>{navLabel(item, locale)}</span>
+                <span className="block max-w-full truncate">{navLabel(item, locale)}</span>
               </Link>
             </li>
           );

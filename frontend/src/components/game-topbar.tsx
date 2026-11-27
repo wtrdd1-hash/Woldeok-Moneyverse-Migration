@@ -35,9 +35,10 @@ export function GameTopbar() {
       <div className="flex items-center gap-2 px-3 py-2 lg:hidden">
         <Link href="/" prefetch={false} className="flex min-w-0 flex-1 items-center gap-2" aria-label={t('shell.brandHome', locale)}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/favicon.ico" alt="" width={32} height={32} className="size-8 rounded-lg" />
-          {/* Not an h1: each page owns its single h1. */}
-          <span className="truncate text-[15px] font-bold text-[var(--g1-ink)]">{title}</span>
+          <img src="/favicon.ico" alt="" width={32} height={32} className="size-8 shrink-0 rounded-lg" />
+          {/* Not an h1: each page owns its single h1. Below 420 px the tools fill the row, so the
+              page name is left to that h1 rather than cut to a fragment (W03 browser QA). */}
+          <span className="hidden min-w-0 truncate text-[15px] font-bold text-[var(--g1-ink)] min-[420px]:block">{title}</span>
         </Link>
         <GameDateStamp compact />
         {/* NAV-01: a persistent full-menu entry on every mobile page; it opens the same

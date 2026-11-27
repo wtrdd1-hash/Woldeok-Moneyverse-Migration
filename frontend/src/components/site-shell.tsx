@@ -17,12 +17,6 @@ export function SiteShell({ children }: { readonly children: React.ReactNode }) 
   const { locale } = useLocale();
   return (
     <div className="mv-shell flex min-h-screen w-full bg-[var(--g1-night)] font-sans text-[var(--g1-text)] antialiased">
-      <a
-        href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-lg focus:bg-[var(--g1-gold)] focus:px-3 focus:py-2 focus:text-[var(--g1-gold-ink)]"
-      >
-        {t('shell.skipToContent', locale)}
-      </a>
       <ClientErrorReporter />
       <FieldLabelLinker />
       <div className="hidden shrink-0 lg:block">

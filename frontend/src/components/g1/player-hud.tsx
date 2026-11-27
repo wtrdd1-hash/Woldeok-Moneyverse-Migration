@@ -66,9 +66,9 @@ export function PlayerHud({ compact = false }: { readonly compact?: boolean }) {
       className="flex min-h-10 items-center gap-2 rounded-md border border-[var(--g1-line)] bg-[var(--g1-plum)] py-1 pl-1.5 pr-3 transition-transform duration-150 active:scale-[0.97]"
     >
       {medal}
-      {!compact && <span className="text-sm font-semibold text-[var(--g1-ink)]">{t('shell.myCharacter', locale)}</span>}
+      {!compact && <span className="min-w-0 truncate whitespace-nowrap text-sm font-semibold text-[var(--g1-ink)]">{t('shell.myCharacter', locale)}</span>}
       <span className="flex items-center gap-2" aria-live="polite">
-        <span className="text-sm font-bold tabular-nums text-[var(--g1-gold)]">{amount ?? (summary ? t('home.unavailable', locale) : '…')}</span>
+        <span className="whitespace-nowrap text-sm font-bold tabular-nums text-[var(--g1-gold)]">{amount ?? (summary ? t('home.unavailable', locale) : '…')}</span>
         {!compact && <span className="text-xs text-[var(--g1-muted)]">WLD</span>}
       </span>
     </Link>
