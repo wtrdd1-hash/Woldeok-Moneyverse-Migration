@@ -7,6 +7,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { pick } from '@/lib/copy';
+import type { Locale } from '@/lib/locale';
+import { COPY } from './copy';
 import { goalTitle, progressLabel, stageLabel, unlockLines } from './quests';
 import type { EngagementGoal, EngagementNextUnlock, Npc } from './quests';
 
@@ -16,11 +19,13 @@ import type { EngagementGoal, EngagementNextUnlock, Npc } from './quests';
  * None of them is a client component: they hold no state and take no event,
  * so they render on the server with the page. They live here rather than
  * inside `page.tsx` because a page cannot be rendered in a test -- that needs
- * a live API and a database -- while these can, and the Korean a goal is read
- * in is exactly the thing this feature is most likely to get wrong.
+ * a live API and a database -- while these can, and the words a goal is read
+ * in are exactly the thing this feature is most likely to get wrong.
  *
  * Each takes the control that acts on it as `children`, so the server half
  * and the client half meet in the page rather than here.
+ *
+ * `locale` defaults to Korean, the carried-over copy; the page passes the request locale.
  */
 
 /**
@@ -35,9 +40,11 @@ import type { EngagementGoal, EngagementNextUnlock, Npc } from './quests';
 export function GoalCard({
   goal,
   children,
+  locale = 'ko',
 }: {
   readonly goal: EngagementGoal;
   readonly children?: React.ReactNode;
+  readonly locale?: Locale;
 }) {
   return (
     <Card className="justify-between gap-4">
@@ -45,12 +52,12 @@ export function GoalCard({
         <Badge variant="secondary" className="w-fit font-mono">
           {goal.code}
         </Badge>
-        <CardTitle className="text-base">{goalTitle(goal)}</CardTitle>
+        <CardTitle className="text-base">{goalTitle(goal, locale)}</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-1 text-sm">
         <div className="flex items-baseline justify-between gap-3">
-          <span className="text-muted-foreground">기록된 진행</span>
-          <span className="tabular">{progressLabel(goal.progress)}</span>
+          <span className="text-muted-foreground">{pick(locale, COPY.recordedProgress)}</span>
+          <span className="tabular">{progressLabel(goal.progress, locale)}</span>
         </div>
       </CardContent>
       {children && <CardFooter>{children}</CardFooter>}
@@ -96,25 +103,30 @@ export function NpcCard({
  * the flattering one and sending a member who has never been assessed away
  * believing they have finished.
  */
-export function NextUnlock({ unlock }: { readonly unlock: EngagementNextUnlock | null }) {
+export function NextUnlock({
+  unlock,
+  locale = 'ko',
+}: {
+  readonly unlock: EngagementNextUnlock | null;
+  readonly locale?: Locale;
+}) {
   if (unlock === null) {
     return (
       <p className="text-sm text-muted-foreground">
-        다음으로 해금할 단계를 아직 알 수 없어요. 성장 단계를 한 번도 계산하지 않았거나, 이미
-        마지막 단계일 수 있어요.
+        {pick(locale, COPY.unlockUnknown)}
       </p>
     );
   }
 
-  const lines = unlockLines(unlock.requirements);
+  const lines = unlockLines(unlock.requirements, locale);
 
   return (
     <div className="grid gap-2">
       <p className="text-sm">
-        다음 단계 <b className="font-medium">{stageLabel(unlock.stage)}</b> 조건
+        {pick(locale, COPY.nextStageBefore)}<b className="font-medium">{stageLabel(unlock.stage, locale)}</b>{pick(locale, COPY.nextStageAfter)}
       </p>
       {lines.length === 0 ? (
-        <p className="text-sm text-muted-foreground">다음 단계에 필요한 조건이 따로 없어요.</p>
+        <p className="text-sm text-muted-foreground">{pick(locale, COPY.noRequirements)}</p>
       ) : (
         <dl className="grid gap-1 text-sm">
           {lines.map((line) => (

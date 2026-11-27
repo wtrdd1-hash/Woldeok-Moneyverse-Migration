@@ -16,6 +16,8 @@ vi.mock('@/lib/api', () => ({
   },
 }));
 vi.mock('@/lib/session', () => ({ requireMember: async () => ({ signedIn: true }) }));
+// Korean copy is asserted, so the request locale is Korean.
+vi.mock('@/lib/locale-server', () => ({ getServerLocale: async () => 'ko' }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }), usePathname: () => '/wallet', useSearchParams: () => new URLSearchParams() }));
 
 const { default: WalletPage } = await import('./page');

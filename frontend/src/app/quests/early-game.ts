@@ -1,4 +1,7 @@
+import { pick } from '@/lib/copy';
+import type { Locale } from '@/lib/locale';
 import { groupDigits } from '@/lib/money';
+import { COPY, fill } from './copy';
 
 /**
  * 16.1's weekly goals and collection books, as the quests screen reads them.
@@ -99,9 +102,9 @@ export function goalFigure(goal: EarlyWeeklyGoal): string {
  * `npc_relationships` records an affinity and not when it moved -- and a
  * standing total shown among three weekly ones would read as this week's work.
  */
-export function goalWindowLabel(window: string): string {
-  if (window === 'week') return '이번 주';
-  if (window === 'lifetime') return '지금까지';
+export function goalWindowLabel(window: string, locale: Locale = 'ko'): string {
+  if (window === 'week') return pick(locale, COPY.windowWeek);
+  if (window === 'lifetime') return pick(locale, COPY.windowLifetime);
   return window;
 }
 
@@ -110,10 +113,8 @@ export function goalWindowLabel(window: string): string {
  * button. Null for the three that are computed, so nothing is said where
  * there is nothing to warn about.
  */
-export function goalCaveat(goal: EarlyWeeklyGoal): string | null {
-  return goal.goal_self_reported
-    ? '이 목표만 직접 받은 NPC 주문 기록으로 올라가요. 나머지 목표는 실제 작업·구매 기록으로 계산돼요.'
-    : null;
+export function goalCaveat(goal: EarlyWeeklyGoal, locale: Locale = 'ko'): string | null {
+  return goal.goal_self_reported ? pick(locale, COPY.goalSelfReportedCaveat) : null;
 }
 
 /** A percentage for a collection, clamped to 0..100. Both figures are counts. */
@@ -123,10 +124,11 @@ export function collectionPercent(unlocked: number, total: number): number {
 }
 
 /** "3 / 10장" -- pages, which is what a 도감 is counted in. */
-export function collectionFigure(collection: EarlyCollection): string {
-  return `${groupDigits(String(collection.entry_unlocked))} / ${groupDigits(
-    String(collection.entry_total),
-  )}장`;
+export function collectionFigure(collection: EarlyCollection, locale: Locale = 'ko'): string {
+  return fill(pick(locale, COPY.pagesFigure), {
+    a: groupDigits(String(collection.entry_unlocked)),
+    b: groupDigits(String(collection.entry_total)),
+  });
 }
 
 /**
@@ -137,10 +139,11 @@ export function collectionFigure(collection: EarlyCollection): string {
  * than a wait -- and the sentence says which of the two a member is looking at
  * instead of quietly reading the same either way.
  */
-export function collectionRewardNote(collection: EarlyCollection): string {
-  if (collection.reward_held) return `${collection.reward_note} · 받았어요`;
+export function collectionRewardNote(collection: EarlyCollection, locale: Locale = 'ko'): string {
+  const note = { note: collection.reward_note };
+  if (collection.reward_held) return fill(pick(locale, COPY.rewardHeld), note);
   if (collection.entry_unlocked >= collection.entry_total && collection.entry_total > 0) {
-    return `${collection.reward_note} · 아직 표시되지 않았어요`;
+    return fill(pick(locale, COPY.rewardNotShown), note);
   }
-  return `${collection.reward_note} · 모두 모으면 받아요`;
+  return fill(pick(locale, COPY.rewardOnComplete), note);
 }

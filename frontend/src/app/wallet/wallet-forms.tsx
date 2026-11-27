@@ -12,11 +12,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
-import { TranslatedText as T } from '@/components/translated-text';
+import { useLocale } from '@/components/locale-provider';
+import { pick } from '@/lib/copy';
+import type { Locale } from '@/lib/locale';
 import { IDLE } from '@/lib/action-state';
 import type { ActionState } from '@/lib/action-state';
 import { formatDay } from '@/lib/money';
 import { borrow, claimDaily, moveBank, repay, transfer } from './actions';
+import { COPY, INTL_LOCALE, fill } from './copy';
+
+/** The picker every component here uses: one locale, read once per render. */
+function useCopy() {
+  const { locale } = useLocale();
+  return { locale, t: (copy: (typeof COPY)[keyof typeof COPY]) => pick(locale, copy) };
+}
 
 export interface RewardAvailability {
   readonly dailyAvailable: boolean;
@@ -25,17 +34,20 @@ export interface RewardAvailability {
   readonly workNextEligibleAt: string | null;
 }
 
-function unavailableHint(nextEligibleAt: string | null): string {
-  if (!nextEligibleAt) return '지금은 보상을 받을 수 없어요.';
+function unavailableHint(nextEligibleAt: string | null, locale: Locale): string {
+  if (!nextEligibleAt) return pick(locale, COPY.rewardUnavailable);
   const value = new Date(nextEligibleAt);
-  if (Number.isNaN(value.valueOf())) return '지금은 보상을 받을 수 없어요.';
-  return `다음 수령 가능: ${new Intl.DateTimeFormat('ko-KR', {
-    timeZone: 'Asia/Seoul', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit',
-  }).format(value)}`;
+  if (Number.isNaN(value.valueOf())) return pick(locale, COPY.rewardUnavailable);
+  return fill(pick(locale, COPY.nextEligible), {
+    at: new Intl.DateTimeFormat(INTL_LOCALE[locale], {
+      timeZone: 'Asia/Seoul', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit',
+    }).format(value),
+  });
 }
 
 export function RewardButtons({ availability }: { readonly availability: RewardAvailability | null }) {
   const [dailyState, daily] = useActionState(claimDaily, IDLE);
+  const { locale, t } = useCopy();
   const dailyClaimed = dailyState.status === 'ok' || availability?.dailyAvailable === false;
 
   return (
@@ -43,25 +55,22 @@ export function RewardButtons({ availability }: { readonly availability: RewardA
       <div className="flex flex-wrap gap-2">
         <form action={daily}>
           <SubmitButton disabled={dailyClaimed}>
-            <Sparkles className="size-4 text-amber-500 mr-1.5" /> <T korean="오늘의 보상 받기" english="Claim Daily Reward" />
+            <Sparkles className="size-4 text-amber-500 mr-1.5" /> {t(COPY.claimDaily)}
           </SubmitButton>
         </form>
         <Button asChild variant="outline">
           <Link href="/work">
-            ◈ <T korean="직업 업무 수행하기" english="Do Career Work" />
+            ◈ {t(COPY.doWork)}
           </Link>
         </Button>
       </div>
       {availability?.dailyAvailable === false && (
         <p className="text-xs text-muted-foreground">
-          <T korean="오늘의 보상" english="Daily Reward" /> · {unavailableHint(availability.dailyNextEligibleAt)}
+          {t(COPY.dailyReward)} · {unavailableHint(availability.dailyNextEligibleAt, locale)}
         </p>
       )}
       <p className="text-xs text-muted-foreground">
-        <T
-          korean="작업 보상은 이제 직업별 업무를 완료하는 즉시 WLD와 숙련도 EXP로 지급됩니다."
-          english="Work rewards are now paid immediately as WLD and proficiency EXP when you complete career tasks."
-        />
+        {t(COPY.workRewardNote)}
       </p>
       <ActionAlert state={dailyState} />
     </div>
@@ -83,6 +92,7 @@ function validTransferAttempt(value: unknown): value is TransferAttempt {
 export function TransferForm({ currency, userId }: { readonly currency: string; readonly userId: string }) {
   const storageKey = `${PENDING_TRANSFER_STORAGE}:${userId}`;
   const [state, action] = useActionState(transfer, IDLE);
+  const { t } = useCopy();
   const [recipientUserId, setRecipientUserId] = useState('');
   const [amount, setAmount] = useState('');
   const [requestKey, setRequestKey] = useState('');
@@ -165,10 +175,10 @@ export function TransferForm({ currency, userId }: { readonly currency: string; 
     <Card>
       <CardHeader>
         <CardTitle>
-          <T korean="WLD 보내기" english="Transfer WLD" />
+          {t(COPY.transferTitle)}
         </CardTitle>
         <CardDescription>
-          <T korean="활동 지갑에서만 전송됩니다." english="Transferred exclusively from your active cash balance." />
+          {t(COPY.transferDescription)}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -177,7 +187,7 @@ export function TransferForm({ currency, userId }: { readonly currency: string; 
           <FieldGroup className="gap-4 sm:grid-cols-2">
             <Field>
               <FieldLabel htmlFor="recipientUserId">
-                <T korean="받는 사람의 머니버스 ID" english="Recipient's Moneyverse ID" />
+                {t(COPY.recipientLabel)}
               </FieldLabel>
               <Input
                 id="recipientUserId"
@@ -200,16 +210,13 @@ export function TransferForm({ currency, userId }: { readonly currency: string; 
                 className="min-h-11"
               />
               <FieldDescription>
-                <T
-                  korean="이름·이메일·Discord ID로는 찾을 수 없어요. 상대가 공유한 정확한 ID를 입력해 주세요."
-                  english="Cannot search by name or Discord tag. Please enter the recipient's exact 36-char ID."
-                />
+                {t(COPY.recipientHint)}
               </FieldDescription>
             </Field>
 
             <Field>
               <FieldLabel htmlFor="transfer-amount">
-                <T korean="보낼" english="Amount in" /> {currency}
+                {fill(t(COPY.amountLabel), { currency })}
               </FieldLabel>
               <InputGroup>
                 <InputGroupInput
@@ -250,32 +257,29 @@ export function TransferForm({ currency, userId }: { readonly currency: string; 
                 ))}
               </div>
               <FieldDescription>
-                <T
-                  korean="송금 즉시 지갑에서 전송돼요. 받는 사람과 보낼 금액을 한 번 더 확인해 주세요."
-                  english="Recorded directly to the ledger upon sending. Double check the recipient and amount."
-                />
+                {t(COPY.amountHint)}
               </FieldDescription>
             </Field>
           </FieldGroup>
 
           {pendingAttempt && (
             <div role="status" aria-live="polite" className="rounded-md border border-amber-500/60 bg-amber-500/10 p-3 text-sm">
-              <p className="font-semibold">송금 처리 여부 확인 중 — 동일한 요청만 다시 보낼 수 있습니다.</p>
-              <p className="mt-1">이전 요청이 아직 처리되지 않았다면 같은 키로 다시 보내는 동작이 실제 송금을 실행할 수 있습니다. 새 송금을 시작하지 말고 <Link className="underline" href="/wallet/activity">원장 내역</Link>을 확인하세요.</p>
+              <p className="font-semibold">{t(COPY.pendingTitle)}</p>
+              <p className="mt-1">{t(COPY.pendingBodyBefore)}<Link className="underline" href="/wallet/activity">{t(COPY.pendingBodyLink)}</Link>{t(COPY.pendingBodyAfter)}</p>
             </div>
           )}
           {storageError && (
-            <p role="alert" className="text-sm text-destructive">브라우저가 송금 요청을 안전하게 보관할 수 없어 송금이 차단되었습니다. 저장 기능을 확인한 뒤 다시 열어 주세요.</p>
+            <p role="alert" className="text-sm text-destructive">{t(COPY.storageError)}</p>
           )}
           {validationError && (
-            <p role="alert" className="text-sm text-destructive">정확한 머니버스 ID와 1 이상의 정수 금액을 입력해 주세요.</p>
+            <p role="alert" className="text-sm text-destructive">{t(COPY.validationError)}</p>
           )}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs text-muted-foreground">
-              <T korean={`1 ${currency} 이상 정수만 보낼 수 있어요.`} english={`Only whole integers of 1 ${currency} or more can be sent.`} />
+              {fill(t(COPY.wholeOnly), { currency })}
             </p>
             <SubmitButton disabled={storageError || !requestKey} className="min-h-11 font-bold">
-              {pendingAttempt ? '동일 요청 다시 보내기' : <T korean="돈 보내기" english="Send WLD" />}
+              {pendingAttempt ? t(COPY.resendSame) : t(COPY.sendWld)}
             </SubmitButton>
           </div>
           <ActionAlert state={state} />
@@ -288,34 +292,32 @@ export function TransferForm({ currency, userId }: { readonly currency: string; 
 export function BankPanel() {
   const [moveState, moveAction] = useActionState(moveBank, IDLE);
   const [borrowState, borrowAction] = useActionState(borrow, IDLE);
+  const { t } = useCopy();
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>
-          <T korean="보관과 대출" english="Vault Savings & Loans" />
+          {t(COPY.bankTitle)}
         </CardTitle>
         <CardDescription>
-          <T
-            korean="가상 경제 안에서 유연하게 활용할 수 있어요. (고정 연이율 5%)"
-            english="Loans are used strictly inside the in-game economy with 5% fixed interest."
-          />
+          {t(COPY.bankDescription)}
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6 sm:grid-cols-2">
         <form action={moveAction} className="grid gap-3">
           <Field>
             <FieldLabel htmlFor="bank-move-amount">
-              <T korean="입출금 WLD" english="Vault Deposit / Withdraw" />
+              {t(COPY.bankMoveLabel)}
             </FieldLabel>
             <AmountInput id="bank-move-amount" name="amount" placeholder="0" required />
           </Field>
           <div className="flex flex-wrap gap-2">
             <SubmitButton name="direction" value="deposit">
-              <T korean="은행에 넣기" english="Deposit to Bank" />
+              {t(COPY.deposit)}
             </SubmitButton>
             <SubmitButton name="direction" value="withdraw" variant="outline">
-              <T korean="은행에서 꺼내기" english="Withdraw from Bank" />
+              {t(COPY.withdraw)}
             </SubmitButton>
           </div>
           <ActionAlert state={moveState} />
@@ -324,15 +326,15 @@ export function BankPanel() {
         <form action={borrowAction} className="grid gap-3">
           <Field>
             <FieldLabel htmlFor="loan-principal">
-              <T korean="대출 WLD (100~500,000)" english="Borrow WLD (100–500,000)" />
+              {t(COPY.loanLabel)}
             </FieldLabel>
             <AmountInput id="loan-principal" name="principalAmount" placeholder="0" required />
             <FieldDescription>
-              <T korean="대출 원금에 5% 이자가 더해집니다." english="5% fixed interest is added to the principal amount." />
+              {t(COPY.loanHint)}
             </FieldDescription>
           </Field>
           <SubmitButton className="w-fit">
-            <T korean="대출금 받기" english="Apply for Loan" />
+            {t(COPY.applyLoan)}
           </SubmitButton>
           <ActionAlert state={borrowState} />
         </form>
@@ -353,6 +355,7 @@ export interface LoanView {
 
 export function LoanList({ loans }: { readonly loans: readonly LoanView[] }) {
   const [state, action] = useActionState(repay, IDLE);
+  const { t } = useCopy();
 
   return (
     <div className="grid gap-3">
@@ -361,17 +364,17 @@ export function LoanList({ loans }: { readonly loans: readonly LoanView[] }) {
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <div className="grid gap-0.5">
               <p className="text-sm">
-                <T korean="남은 상환액" english="Outstanding Balance" /> <Amount value={loan.outstandingAmount} className="font-medium" currency />
+                {t(COPY.outstanding)} <Amount value={loan.outstandingAmount} className="font-medium" currency />
               </p>
               <p className="text-xs text-muted-foreground">
-                <T korean="원금" english="Principal" /> <Amount value={loan.principalAmount} /> · <T korean="이자" english="Interest" />{' '}
+                {t(COPY.principal)} <Amount value={loan.principalAmount} /> · {t(COPY.interest)}{' '}
                 <Amount value={loan.interestAmount} /> · {formatDay(loan.issuedAt)}
               </p>
             </div>
             <Badge variant={loan.status === 'overdue' ? 'destructive' : loan.status === 'repaid' ? 'outline' : 'secondary'}>
-              {loan.status === 'active' && <T korean="상환 중" english="Active" />}
-              {loan.status === 'overdue' && <T korean="연체" english="Overdue" />}
-              {loan.status === 'repaid' && <T korean="상환 완료" english="Repaid" />}
+              {loan.status === 'active' && t(COPY.statusActive)}
+              {loan.status === 'overdue' && t(COPY.statusOverdue)}
+              {loan.status === 'repaid' && t(COPY.statusRepaid)}
             </Badge>
           </div>
 
@@ -382,11 +385,11 @@ export function LoanList({ loans }: { readonly loans: readonly LoanView[] }) {
                 name="amount"
                 className="w-40"
                 placeholder="0"
-                ariaLabel="상환할 WLD"
+                ariaLabel={t(COPY.repayAria)}
                 required
               />
               <SubmitButton variant="outline">
-                <T korean="상환" english="Repay" />
+                {t(COPY.repay)}
               </SubmitButton>
             </form>
           )}
@@ -399,6 +402,7 @@ export function LoanList({ loans }: { readonly loans: readonly LoanView[] }) {
 
 export function MoneyverseId({ userId }: { readonly userId: string }) {
   const [copied, setCopied] = useState(false);
+  const { t } = useCopy();
 
   return (
     <div className="grid gap-2">
@@ -417,10 +421,10 @@ export function MoneyverseId({ userId }: { readonly userId: string }) {
         }}
       >
         {copied ? <Check /> : <Copy />}
-        {copied ? <T korean="복사했어요" english="Copied!" /> : <T korean="ID 복사" english="Copy ID" />}
+        {copied ? t(COPY.copied) : t(COPY.copyId)}
       </Button>
       <p aria-live="polite" className="sr-only">
-        {copied ? '머니버스 ID를 복사했습니다.' : ''}
+        {copied ? t(COPY.copiedAnnouncement) : ''}
       </p>
     </div>
   );

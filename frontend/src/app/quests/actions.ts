@@ -2,7 +2,10 @@
 
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
+import { pick } from '@/lib/copy';
+import { getServerLocale } from '@/lib/locale-server';
 import { failure, idempotencyKey, mutate } from '@/lib/mutate';
+import { COPY } from './copy';
 import { claimMessage } from './early-events';
 import type { EventReceipt } from './early-events';
 import { npcOrderMessage, preferenceMessage } from './quests';
@@ -35,8 +38,9 @@ export async function orderFromNpc(
   _previous: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  const locale = await getServerLocale();
   const code = String(formData.get('npcCode') ?? '');
-  if (!CODE.test(code)) return { status: 'error', message: '주문을 받을 NPC를 확인할 수 없어요.' };
+  if (!CODE.test(code)) return { status: 'error', message: pick(locale, COPY.npcInvalid) };
 
   try {
     const receipt = await mutate<NpcOrderReceipt>(
@@ -44,12 +48,9 @@ export async function orderFromNpc(
       { body: { idempotencyKey: idempotencyKey() } },
     );
     revalidatePath('/quests');
-    return { status: 'ok', message: npcOrderMessage(receipt) };
+    return { status: 'ok', message: npcOrderMessage(receipt, locale) };
   } catch (error) {
-    return failure(
-      error,
-      '지금은 주문을 받을 수 없어요. 오늘은 이 NPC의 주문이 닫혀 있을 수 있어요.',
-    );
+    return failure(error, pick(locale, COPY.npcClosed));
   }
 }
 
@@ -65,12 +66,13 @@ export async function setNotifications(
   _previous: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  const locale = await getServerLocale();
   const choice = String(formData.get('notificationsEnabled') ?? '');
   // Read strictly rather than as "anything but the empty string is on": an
   // unchecked box submits nothing at all, and treating an absent field as
   // false would turn a broken form into a silent opt-out.
   if (choice !== 'true' && choice !== 'false') {
-    return { status: 'error', message: '알림 설정을 다시 선택해 주세요.' };
+    return { status: 'error', message: pick(locale, COPY.notifInvalid) };
   }
 
   try {
@@ -79,9 +81,9 @@ export async function setNotifications(
       { method: 'PUT', body: { notificationsEnabled: choice === 'true' } },
     );
     revalidatePath('/quests');
-    return { status: 'ok', message: preferenceMessage(saved.notifications_enabled) };
+    return { status: 'ok', message: preferenceMessage(saved.notifications_enabled, locale) };
   } catch (error) {
-    return failure(error, '알림 설정을 바꾸지 못했어요. 잠시 후 다시 시도해 주세요.');
+    return failure(error, pick(locale, COPY.notifFailed));
   }
 }
 
@@ -110,9 +112,10 @@ export async function claimTodayEvent(
   _previous: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  const locale = await getServerLocale();
   const eventDate = String(formData.get('eventDate') ?? '');
   if (!DAY.test(eventDate)) {
-    return { status: 'error', message: '오늘의 사건을 확인할 수 없어요. 새로고침해 주세요.' };
+    return { status: 'error', message: pick(locale, COPY.eventInvalid) };
   }
 
   try {
@@ -121,14 +124,11 @@ export async function claimTodayEvent(
     });
     revalidatePath('/quests');
     revalidatePath('/wallet');
-    return { status: 'ok', message: claimMessage(receipt) };
+    return { status: 'ok', message: claimMessage(receipt, locale) };
   } catch (error) {
     // 103 answers a second claim with 23505 and a not-yet-claimable event with
     // 22023, and both arrive as a conflict. Already taken is much the likelier
     // of the two, so it is the sentence a conflict gets.
-    return failure(
-      error,
-      '오늘 사건은 이미 받았거나, 아직 받을 수 없어요. 화면을 새로고침해 확인해 주세요.',
-    );
+    return failure(error, pick(locale, COPY.eventClaimFailed));
   }
 }

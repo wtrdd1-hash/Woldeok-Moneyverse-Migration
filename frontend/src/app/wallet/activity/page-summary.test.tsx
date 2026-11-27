@@ -6,6 +6,8 @@ const { apiOrNull, requireMember } = vi.hoisted(() => ({
 }));
 vi.mock('@/lib/api', () => ({ apiOrNull }));
 vi.mock('@/lib/session', () => ({ requireMember }));
+// Korean copy is asserted, so the request locale is Korean.
+vi.mock('@/lib/locale-server', () => ({ getServerLocale: async () => 'ko' }));
 import WalletActivityPage from './page';
 const item = {
   transactionId: '11111111-1111-4111-8111-111111111111',
