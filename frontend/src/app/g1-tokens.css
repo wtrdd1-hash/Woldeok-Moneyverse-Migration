@@ -15,8 +15,10 @@ html:root[data-locale][data-point] {
   color-scheme: dark;
 
   /* Passbook cover (owner direction 2026-11-26: bank passbook + server game calendar).
-     Navy cover is the ground, gold foil carries brand and primary actions, seal vermilion
-     is reserved for stamps, cream page paper only where the ledger is read. */
+     Navy cover is the ground, seal vermilion is reserved for stamps, cream page paper only
+     where the ledger is read. Decision v2026.11.27.1101.1: G2 stays the common baseline, so
+     common actions are violet again; gold foil is decorative (the foil token, for the date stamp and own
+     balance) and never marks an action. */
   --g1-void: #060c1a;
   --g1-night: #0a1428;
   --g1-night-2: #0c1830;
@@ -25,8 +27,8 @@ html:root[data-locale][data-point] {
   --g1-plum-3: #22385f;
   --g1-track: #1e3253;
   --g1-line: #283d63;
-  --g1-violet: #dcb873;
-  --g1-violet-ink: #8f6a2c;
+  --g1-violet: #a98aff;
+  --g1-violet-ink: #6a4cdb;
   --g1-gold: #f0d08a;
   --g1-gold-hi: #ffe6b0;
   --g1-gold-deep: #7a5f2a;
@@ -57,17 +59,12 @@ html:root[data-locale][data-point] {
   --mv-seal-wash: rgba(217, 71, 46, 0.12);
   --mv-rise-on-page: #c8283a;
   --mv-fall-on-page: #1f5fc4;
+  --mv-foil: var(--g1-gold);
+  --mv-foil-ink: var(--g1-gold-ink);
   --mv-print: 'IBM Plex Mono', ui-monospace, monospace;
 
-  /* Tailwind's violet/purple/indigo utilities (733 hard-coded uses) re-hued to gold foil. */
-  --color-violet-50: #fbf6ea; --color-violet-100: #f5ead0; --color-violet-200: #ecd7a6;
-  --color-violet-300: #e4c587; --color-violet-400: #dcb873; --color-violet-500: #b48a40;
-  --color-violet-600: #8f6a2c; --color-violet-700: #74561f; --color-violet-800: #5a431a;
-  --color-violet-900: #3f2f13; --color-violet-950: #261c0b;
-  --color-purple-50: #fbf6ea; --color-purple-100: #f5ead0; --color-purple-200: #ecd7a6;
-  --color-purple-300: #e4c587; --color-purple-400: #dcb873; --color-purple-500: #b48a40;
-  --color-purple-600: #8f6a2c; --color-purple-700: #74561f; --color-purple-800: #5a431a;
-  --color-purple-900: #3f2f13; --color-purple-950: #261c0b;
+  /* Tailwind's indigo utilities follow the navy cover. Violet/purple keep Tailwind's own
+     violet ramp: they are action colours under G2 (re-hued to gold 2026-11-26, restored 2026-11-27). */
   --color-indigo-50: #f0f4fb; --color-indigo-100: #dde6f5; --color-indigo-200: #bccbe8;
   --color-indigo-300: #96acd8; --color-indigo-400: #7290c8; --color-indigo-500: #5374b3;
   --color-indigo-600: #3e5b96; --color-indigo-700: #304878; --color-indigo-800: #22355b;
@@ -112,7 +109,7 @@ html:root[data-locale][data-point] {
   --popover: var(--g1-plum);
   --popover-foreground: var(--g1-text);
   --primary: var(--g1-violet);
-  --primary-foreground: var(--g1-gold-ink);
+  --primary-foreground: var(--g1-night);
   --secondary: var(--g1-plum-2);
   --secondary-foreground: var(--g1-text);
   --muted: var(--g1-plum-2);
@@ -136,7 +133,7 @@ html:root[data-locale][data-point] {
   --sidebar: var(--g1-night-2);
   --sidebar-foreground: var(--g1-muted);
   --sidebar-primary: var(--g1-violet);
-  --sidebar-primary-foreground: var(--g1-gold-ink);
+  --sidebar-primary-foreground: var(--g1-night);
   --sidebar-accent: var(--g1-plum-3);
   --sidebar-accent-foreground: var(--g1-ink);
   --sidebar-border: var(--g1-line);
@@ -332,11 +329,6 @@ html:root .mv-seal {
   to { transform: rotate(-8deg) scale(1); opacity: 1; filter: blur(0); }
 }
 
-/* Gold-foil primary action. */
-html:root .g1-cta {
-  background: linear-gradient(180deg, var(--g1-gold-hi), var(--g1-violet));
-  color: var(--g1-gold-ink);
-  border: 1px solid var(--g1-gold-deep);
-}
-html:root .g1-cta:hover { background: var(--g1-gold-hi); color: var(--g1-gold-ink); }
-html:root .g1-cta:focus-visible { outline: 2px solid var(--g1-gold-hi); outline-offset: 2px; }
+/* Primary action: one violet (G2). The gold-foil gradient of 2026-11-26 made every action
+   look like the member's balance, which G2 reserves gold for. */
+html:root .g1-cta:focus-visible { outline: 2px solid var(--g1-violet); outline-offset: 2px; }
