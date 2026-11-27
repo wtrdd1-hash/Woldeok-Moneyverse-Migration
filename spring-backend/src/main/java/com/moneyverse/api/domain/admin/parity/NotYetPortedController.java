@@ -41,7 +41,6 @@ public class NotYetPortedController {
             "/api/v1/admin/pension/overview",
             "/api/v1/admin/pension/recent-payouts",
             "/api/v1/admin/photos/submissions",
-            "/api/v1/admin/support/threads/{p1}/status",
             "/api/v1/admin/treasury/grants",
             "/api/v1/admin/work",
             "/api/v1/admin/ai-news/auto-generate",
