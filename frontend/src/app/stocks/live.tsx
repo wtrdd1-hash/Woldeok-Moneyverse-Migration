@@ -8,6 +8,8 @@ import type { SparkPoint } from '@/components/sparkline';
 import { cn } from '@/lib/cn';
 import { changeAmount, changePercent, groupDigits, priceDirection } from '@/lib/money';
 import { useMarketConnected, useQuote } from '@/lib/use-market-prices';
+import { pick } from '@/lib/copy';
+import { COPY } from './copy';
 
 /**
  * The parts of the market screen that move.
@@ -50,20 +52,19 @@ export function LiveQuote({
  */
 function TodayMove({ current, open }: { readonly current: string; readonly open: string }) {
   const { locale } = useLocale();
-  const isEn = locale === 'en';
   const direction = priceDirection(current, open);
   const amount = changeAmount(current, open);
   const percent = changePercent(current, open);
 
   if (direction === null) {
-    return <p className="tabular text-xs text-muted-foreground">{isEn ? 'No change today' : '오늘 변동 없음'}</p>;
+    return <p className="tabular text-xs text-muted-foreground">{pick(locale, COPY.noChangeToday)}</p>;
   }
 
   return (
     <p className={cn('tabular text-xs font-bold', direction === 'rise' ? 'text-rise' : 'text-fall')}>
       {/* groupDigits renders a leading minus as U+2212, so the sign is the
           amount's own and is not prefixed twice. */}
-      {isEn ? 'Today ' : '오늘 '}
+      {pick(locale, COPY.todayPrefix)}
       {direction === 'rise' ? '+' : ''}
       {groupDigits(amount)}
       {percent && <span className="ml-1 font-normal">({percent}%)</span>}
@@ -100,14 +101,13 @@ export function LiveHoldingValue({
 /** Says the figures are live, once one has actually arrived. */
 export function LiveBadge() {
   const { locale } = useLocale();
-  const isEn = locale === 'en';
   const connected = useMarketConnected();
   if (!connected) return null;
 
   return (
     <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground">
       <span aria-hidden className="size-1.5 animate-pulse rounded-full bg-rise" />
-      {isEn ? 'Live' : '실시간'}
+      {pick(locale, COPY.live)}
     </span>
   );
 }

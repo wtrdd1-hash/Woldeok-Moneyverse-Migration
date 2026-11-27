@@ -6,6 +6,10 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { IDLE } from '@/lib/action-state';
 import { groupDigits } from '@/lib/money';
 import { buyCatalogItem, consumeHeldItem, settleItemUpkeep } from './actions';
+import { useLocale } from '@/components/locale-provider';
+import { pick } from '@/lib/copy';
+import { fill } from '@/lib/copy-format';
+import { COPY } from './copy';
 
 /**
  * The catalogue's write surface.
@@ -37,6 +41,7 @@ export function BuyForm({
   readonly catalogId: string;
   readonly max: number;
 }) {
+  const { locale } = useLocale();
   const [state, action] = useActionState(buyCatalogItem, IDLE);
 
   return (
@@ -53,12 +58,12 @@ export function BuyForm({
               max={max}
               step={1}
               defaultValue={1}
-              aria-label="구매 수량"
+              aria-label={pick(locale, COPY.quantityLabel)}
             />
-            <InputGroupAddon align="inline-end">개</InputGroupAddon>
+            <InputGroupAddon align="inline-end">{pick(locale, COPY.quantityUnit)}</InputGroupAddon>
           </InputGroup>
         )}
-        <SubmitButton>구입하기</SubmitButton>
+        <SubmitButton>{pick(locale, COPY.buy)}</SubmitButton>
       </form>
       <ActionAlert state={state} />
     </div>
@@ -67,13 +72,14 @@ export function BuyForm({
 
 /** Spend one of an item the member holds. */
 export function UseItemButton({ catalogId }: { readonly catalogId: string }) {
+  const { locale } = useLocale();
   const [state, action] = useActionState(consumeHeldItem, IDLE);
 
   return (
     <div className="grid w-full gap-2">
       <form action={action}>
         <input type="hidden" name="catalogId" value={catalogId} />
-        <SubmitButton variant="outline">1개 사용하기</SubmitButton>
+        <SubmitButton variant="outline">{pick(locale, COPY.useOne)}</SubmitButton>
       </form>
       <ActionAlert state={state} />
     </div>
@@ -96,13 +102,14 @@ export function SettleUpkeepButton({
   readonly catalogId: string;
   readonly amount: string;
 }) {
+  const { locale } = useLocale();
   const [state, action] = useActionState(settleItemUpkeep, IDLE);
 
   return (
     <div className="grid w-full gap-2">
       <form action={action}>
         <input type="hidden" name="catalogId" value={catalogId} />
-        <SubmitButton>밀린 관리비 {groupDigits(amount)} WLD 내기</SubmitButton>
+        <SubmitButton>{pick(locale, fill(COPY.settleUpkeep, { amount: groupDigits(amount) }))}</SubmitButton>
       </form>
       <ActionAlert state={state} />
     </div>

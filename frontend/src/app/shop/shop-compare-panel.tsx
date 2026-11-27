@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { groupDigits } from '@/lib/money';
+import { useLocale } from '@/components/locale-provider';
+import { pick } from '@/lib/copy';
+import { fill } from '@/lib/copy-format';
+import { COPY } from './copy';
 
 type ComparisonItem = {
   catalog_id: string;
@@ -44,6 +48,7 @@ function validComparison(value: unknown, ids: readonly string[]): value is Compa
 
 /** Fail-closed server comparison; a client never calculates or invents a price. */
 export function ShopComparePanel({ selectedIds }: { readonly selectedIds: readonly string[] }) {
+  const { locale } = useLocale();
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
   const first = selectedIds[0];
   const second = selectedIds[1];
@@ -69,33 +74,33 @@ export function ShopComparePanel({ selectedIds }: { readonly selectedIds: readon
   }, [first, second]);
 
   if (!first || !second || first === second) {
-    return <p className="rounded-xl border border-border p-3 text-sm text-muted-foreground">비교할 2개 상품을 선택하세요. 가격은 서버에서 확인합니다.</p>;
+    return <p className="rounded-xl border border-border p-3 text-sm text-muted-foreground">{pick(locale, COPY.compareChooseTwo)}</p>;
   }
   if (status.kind === 'idle' || status.kind === 'loading' || status.idsKey !== `${first},${second}`) {
-    return <p role="status" className="rounded-xl border border-border p-3 text-sm">상품 가격을 확인하는 중입니다.</p>;
+    return <p role="status" className="rounded-xl border border-border p-3 text-sm">{pick(locale, COPY.compareLoading)}</p>;
   }
   if (status.kind === 'error') {
-    return <p role="alert" className="rounded-xl border border-destructive/50 p-3 text-sm">비교 정보를 확인할 수 없습니다. 잠시 후 다시 시도하세요.</p>;
+    return <p role="alert" className="rounded-xl border border-destructive/50 p-3 text-sm">{pick(locale, COPY.compareError)}</p>;
   }
   const { comparison } = status;
   return (
-    <section aria-label="서버 검증 상품 비용 비교" className="rounded-xl border border-border bg-card p-4 space-y-3">
-      <h3 className="font-bold">상품 비용 비교 · 서버 확인</h3>
+    <section aria-label={pick(locale, COPY.compareSectionLabel)} className="rounded-xl border border-border bg-card p-4 space-y-3">
+      <h3 className="font-bold">{pick(locale, COPY.compareTitle)}</h3>
       <div className="grid gap-3 sm:grid-cols-2">
         {comparison.items.map((item) => (
           <div key={item.catalog_id} className="rounded-lg border border-border p-3 space-y-1">
             <h4 className="font-semibold">{item.name}</h4>
-            <p>구매 가격: {groupDigits(item.price)} WLD</p>
-            <p>주간 유지비: {groupDigits(item.maintenance_cost)} WLD</p>
-            {item.quantity === 0 ? <p>현재 재고 없음</p> : null}
+            <p>{pick(locale, fill(COPY.comparePrice, { amount: groupDigits(item.price) }))}</p>
+            <p>{pick(locale, fill(COPY.compareUpkeep, { amount: groupDigits(item.maintenance_cost) }))}</p>
+            {item.quantity === 0 ? <p>{pick(locale, COPY.compareOutOfStock)}</p> : null}
           </div>
         ))}
       </div>
-      <p>가격 차이: {groupDigits(comparison.priceDifference)} WLD · 주간 유지비 차이: {groupDigits(comparison.weeklyUpkeepDifference)} WLD</p>
+      <p>{pick(locale, fill(COPY.compareDifference, { price: groupDigits(comparison.priceDifference), upkeep: groupDigits(comparison.weeklyUpkeepDifference) }))}</p>
       <p className="font-medium">{comparison.cheaperCatalogId === null
-        ? '두 상품의 구매 가격이 같습니다.'
-        : `더 저렴한 상품: ${comparison.items.find((item) => item.catalog_id === comparison.cheaperCatalogId)?.name ?? '확인 불가'}`}</p>
-      <p className="text-xs text-muted-foreground">현재 조회된 회원별 상점 가격 기준입니다. 구매 가능 여부와 최종 결제 금액은 구매 시 서버에서 다시 확인됩니다.</p>
+        ? pick(locale, COPY.compareSamePrice)
+        : pick(locale, fill(COPY.compareCheaper, { name: comparison.items.find((item) => item.catalog_id === comparison.cheaperCatalogId)?.name ?? pick(locale, COPY.unknown) }))}</p>
+      <p className="text-xs text-muted-foreground">{pick(locale, COPY.compareFootnote)}</p>
     </section>
   );
 }
