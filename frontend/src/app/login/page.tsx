@@ -8,61 +8,52 @@ import { apiOrNull } from '@/lib/api';
 import { currentViewer } from '@/lib/viewer';
 import { ConsentForm } from './consent-form';
 import { LoginProvidersView } from './login-providers-view';
+import type { Copy } from '@/lib/copy';
+import { pick } from '@/lib/copy';
+import { getServerLocale } from '@/lib/locale-server';
+import { COPY, ERROR_COPY } from './copy';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: '로그인',
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: pick(await getServerLocale(), COPY.title), robots: { index: false, follow: false } };
+}
 
-const ERRORS: Readonly<Record<string, string>> = {
-  login_required: '로그인이 필요한 화면이에요. 먼저 로그인해 주세요.',
-  consent_required: '서비스 이용 전에 최신 약관과 개인정보처리방침에 동의해 주세요.',
-  oauth_session: '로그인 세션이 만료되었습니다. 다시 시도해 주세요.',
-  oauth_state: '로그인 요청을 확인할 수 없습니다. 다시 시도해 주세요.',
-  oauth_cancelled: '로그인이 취소되었습니다.',
-  oauth_response: '로그인 제공자의 응답을 확인할 수 없습니다.',
-  oauth_verification: '로그인 정보를 확인하지 못했습니다. 다시 시도해 주세요.',
-  oauth_login: '로그인을 완료하지 못했습니다. 다시 시도해 주세요.',
-  provider_unavailable: '로그인 제공자가 아직 연결되지 않았어요.',
-  local_fields: '이메일과 비밀번호를 모두 입력해 주세요.',
-  local_credentials: '이메일 또는 비밀번호를 확인해 주세요.',
-  local_unavailable: '자체 로그인 서비스를 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.',
-  local_login: '자체 로그인을 완료하지 못했습니다. 잠시 후 다시 시도해 주세요.',
-};
+const ERRORS: Readonly<Record<string, Copy>> = ERROR_COPY;
 
 export default async function LoginPage({
   searchParams,
 }: {
   readonly searchParams: Promise<{ readonly error?: string; readonly password_reset?: string }>;
 }) {
-  const [{ error, password_reset }, viewer, policy] = await Promise.all([
+  const [{ error, password_reset }, viewer, policy, locale] = await Promise.all([
     searchParams,
     currentViewer(),
     apiOrNull<{ termsVersion: string; privacyVersion: string }>('/api/v1/auth/policy'),
+    getServerLocale(),
   ]);
 
   if (viewer.signedIn && viewer.consentCurrent) {
     redirect('/');
   }
 
-  const errorMessage = error && ERRORS[error] ? ERRORS[error] : undefined;
+  const errorCopy = error ? ERRORS[error] : undefined;
+  const errorMessage = errorCopy ? pick(locale, errorCopy) : undefined;
 
   if (!viewer.signedIn) {
-    return <LoginProvidersView {...(errorMessage ? { error: errorMessage } : {})} {...(password_reset === '1' ? { notice: '비밀번호가 변경되었습니다. 새 비밀번호로 로그인해 주세요.' } : {})} />;
+    return <LoginProvidersView {...(errorMessage ? { error: errorMessage } : {})} {...(password_reset === '1' ? { notice: pick(locale, COPY.passwordReset) } : {})} />;
   }
 
   return (
     <div data-page="login" className="mv-page mv-page--utility grid gap-6">
-      <PageHeader title="필수 이용 동의">
-        서비스 화폐·보상은 게임 내 가상 데이터이며 현금 환전이나 실제 투자 수익을 제공하지 않습니다.
+      <PageHeader title={pick(locale, COPY.consentTitle)}>
+        {pick(locale, COPY.consentLead)}
       </PageHeader>
 
       {policy === null ? (
         <Alert variant="destructive">
           <AlertDescription>
-            지금은 게시된 정책을 불러올 수 없어요. 잠시 후 다시 시도해 주세요.
+            {pick(locale, COPY.policyUnavailable)}
           </AlertDescription>
         </Alert>
       ) : (
