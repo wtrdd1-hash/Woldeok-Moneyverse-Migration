@@ -1,4 +1,13 @@
+import { pick } from '@/lib/copy';
+import type { Locale } from '@/lib/locale';
 import { groupDigits } from '@/lib/money';
+import { COPY, fill } from './copy';
+
+/*
+ * Every helper here takes the member's locale last and defaults it to Korean, the
+ * carried-over product copy the tests read; the page and the actions always pass
+ * the request locale.
+ */
 
 /**
  * The engagement loop's pure vocabulary.
@@ -66,7 +75,7 @@ export interface NpcOrderReceipt {
 }
 
 /**
- * The goals, and the Korean they are read in.
+ * The goals, and the words they are read in.
  *
  * The dashboard sends a title with every goal, but the titles live in
  * `engagement_catalog` and they are English -- 'First wage', 'Weekly variety'
@@ -75,17 +84,17 @@ export interface NpcOrderReceipt {
  * member is being asked to finish must be legible even when this file is a
  * migration behind.
  */
-const GOAL_TITLES: Readonly<Record<string, string>> = Object.freeze({
-  first_wage: '첫 급여',
-  wise_spending: '알뜰한 소비',
-  neighbour_help: '이웃 돕기',
-  weekly_variety: '이번 주 다양하게',
-  return_day_1: '다시 만난 첫날',
+const GOAL_TITLES: Readonly<Record<string, (typeof COPY)[keyof typeof COPY]>> = Object.freeze({
+  first_wage: COPY.goalFirstWage,
+  wise_spending: COPY.goalWiseSpending,
+  neighbour_help: COPY.goalNeighbourHelp,
+  weekly_variety: COPY.goalWeeklyVariety,
+  return_day_1: COPY.goalReturnDay1,
 });
 
-export function goalTitle(goal: EngagementGoal): string {
+export function goalTitle(goal: EngagementGoal, locale: Locale = 'ko'): string {
   const known = GOAL_TITLES[goal.code];
-  if (known !== undefined) return known;
+  if (known !== undefined) return pick(locale, known);
   return goal.title.trim() === '' ? goal.code : goal.title;
 }
 
@@ -109,22 +118,21 @@ export interface Npc {
   readonly errand: string;
 }
 
-export const NPCS: readonly Npc[] = Object.freeze([
-  {
-    code: 'market_keeper',
-    name: '시장 상인',
-    errand: '가게에 들일 물건을 하루치씩 부탁해요.',
-  },
-  {
-    code: 'courier',
-    name: '배달원',
-    errand: '이웃에게 갈 짐을 옮겨 달라고 해요.',
-  },
+const NPC_COPY = Object.freeze([
+  { code: 'market_keeper', name: COPY.npcMarketKeeperName, errand: COPY.npcMarketKeeperErrand },
+  { code: 'courier', name: COPY.npcCourierName, errand: COPY.npcCourierErrand },
 ]);
 
-/** The NPC's Korean name, or the code itself for one this build has not been taught. */
-export function npcName(code: string): string {
-  return NPCS.find((npc) => npc.code === code)?.name ?? code;
+/** The NPCs, in the member's language. */
+export function npcs(locale: Locale = 'ko'): readonly Npc[] {
+  return NPC_COPY.map((npc) => ({ code: npc.code, name: pick(locale, npc.name), errand: pick(locale, npc.errand) }));
+}
+
+export const NPCS: readonly Npc[] = Object.freeze(npcs('ko'));
+
+/** The NPC's name, or the code itself for one this build has not been taught. */
+export function npcName(code: string, locale: Locale = 'ko'): string {
+  return npcs(locale).find((npc) => npc.code === code)?.name ?? code;
 }
 
 /**
@@ -135,9 +143,9 @@ export function npcName(code: string): string {
  * Anything that is not a whole count is refused rather than rendered: a
  * missing figure printed as `NaN회` claims the member did NaN of something.
  */
-export function progressLabel(progress: number): string {
+export function progressLabel(progress: number, locale: Locale = 'ko'): string {
   if (!Number.isInteger(progress) || progress < 0) return '—';
-  return `${groupDigits(String(progress))}회`;
+  return fill(pick(locale, COPY.countTimes), { n: groupDigits(String(progress)) });
 }
 
 /**
@@ -148,13 +156,13 @@ export function progressLabel(progress: number): string {
  * sound of the preceding word: "친밀도가 2가" and "친밀도가 3이" would have to
  * be chosen per digit, while "2점이" and "3점이" never change.
  */
-export function affinityLabel(affinity: number): string {
+export function affinityLabel(affinity: number, locale: Locale = 'ko'): string {
   if (!Number.isInteger(affinity) || affinity < 0) return '—';
-  return `${groupDigits(String(affinity))}점`;
+  return fill(pick(locale, COPY.affinityPoints), { n: groupDigits(String(affinity)) });
 }
 
 /**
- * The growth stages, in Korean.
+ * The growth stages, in the member's language.
  *
  * Deliberately the same four words /progression writes, and deliberately
  * copied rather than imported: no page in this application reaches into
@@ -162,15 +170,16 @@ export function affinityLabel(affinity: number): string {
  * have to live in a module neither of them owns. Seven short lines duplicated
  * is the cheaper of the two.
  */
-const STAGE_NAMES: Readonly<Record<string, string>> = Object.freeze({
-  starter: '첫걸음',
-  early: '성장 초기',
-  middle: '성장 중기',
-  advanced: '성장 후기',
+const STAGE_NAMES: Readonly<Record<string, (typeof COPY)[keyof typeof COPY]>> = Object.freeze({
+  starter: COPY.stageStarter,
+  early: COPY.stageEarly,
+  middle: COPY.stageMiddle,
+  advanced: COPY.stageAdvanced,
 });
 
-export function stageLabel(code: string): string {
-  return STAGE_NAMES[code] ?? code;
+export function stageLabel(code: string, locale: Locale = 'ko'): string {
+  const known = STAGE_NAMES[code];
+  return known === undefined ? code : pick(locale, known);
 }
 
 /** One line of "what the next stage asks for", ready to render. */
@@ -181,14 +190,15 @@ export interface RequirementLine {
 }
 
 interface RequirementWords {
-  readonly label: string;
-  readonly unit: string;
+  readonly label: (typeof COPY)[keyof typeof COPY];
+  /** The figure with its unit, as a `{n}` template: units sit on different sides per language. */
+  readonly value: (typeof COPY)[keyof typeof COPY];
 }
 
 const REQUIREMENT_LABELS: Readonly<Record<string, RequirementWords>> = Object.freeze({
-  workCompletions: { label: '완료한 작업', unit: '회' },
-  jobLevel: { label: '직업 레벨', unit: '레벨' },
-  businesses: { label: '보유한 사업', unit: '개' },
+  workCompletions: { label: COPY.reqWorkCompletions, value: COPY.reqWorkCompletionsValue },
+  jobLevel: { label: COPY.reqJobLevel, value: COPY.reqJobLevelValue },
+  businesses: { label: COPY.reqBusinesses, value: COPY.reqBusinessesValue },
 });
 
 /**
@@ -202,6 +212,7 @@ const REQUIREMENT_LABELS: Readonly<Record<string, RequirementWords>> = Object.fr
  */
 export function unlockLines(
   requirements: Readonly<Record<string, number>> | null,
+  locale: Locale = 'ko',
 ): readonly RequirementLine[] {
   if (!requirements) return [];
 
@@ -212,7 +223,7 @@ export function unlockLines(
       const figure = groupDigits(String(value));
       return known === undefined
         ? { key, label: key, value: figure }
-        : { key, label: known.label, value: `${figure}${known.unit}` };
+        : { key, label: pick(locale, known.label), value: fill(pick(locale, known.value), { n: figure }) };
     });
 }
 
@@ -224,33 +235,25 @@ export function unlockLines(
  * behind. `completed` is reported even on a replay, because a member pressing
  * the button again is most often asking whether the goal is finished.
  */
-export function progressMessage(receipt: ProgressReceipt): string {
-  const count = progressLabel(receipt.progress);
-  if (receipt.replayed) {
-    return receipt.completed
-      ? `이미 기록된 진행이에요. 이 목표는 달성했고, 지금까지 ${count} 기록되어 있어요.`
-      : `이미 기록된 진행이에요. 지금까지 ${count} 기록되어 있어요.`;
-  }
-  return receipt.completed
-    ? `목표를 달성했어요. 지금까지 ${count} 기록했어요.`
-    : `진행을 기록했어요. 지금까지 ${count} 기록했어요.`;
+export function progressMessage(receipt: ProgressReceipt, locale: Locale = 'ko'): string {
+  const count = progressLabel(receipt.progress, locale);
+  const template = receipt.replayed
+    ? (receipt.completed ? COPY.progressReplayedCompleted : COPY.progressReplayed)
+    : (receipt.completed ? COPY.progressCompleted : COPY.progressRecorded);
+  return fill(pick(locale, template), { count });
 }
 
 /** What one order taken from an NPC is reported as. */
-export function npcOrderMessage(receipt: NpcOrderReceipt): string {
-  const name = npcName(receipt.npc_code);
+export function npcOrderMessage(receipt: NpcOrderReceipt, locale: Locale = 'ko'): string {
+  const name = npcName(receipt.npc_code, locale);
   if (receipt.affinity === null) {
-    return `이미 처리된 요청이에요. ${name}에게 쌓은 친밀도는 지금 확인할 수 없어요.`;
+    return fill(pick(locale, COPY.orderAffinityUnknown), { name });
   }
-  const affinity = affinityLabel(receipt.affinity);
-  return receipt.replayed
-    ? `이미 받아 둔 주문이에요. ${name}에게 쌓은 친밀도는 ${affinity}이에요.`
-    : `${name}에게서 주문을 받았어요. 친밀도가 ${affinity}이 되었어요.`;
+  const affinity = affinityLabel(receipt.affinity, locale);
+  return fill(pick(locale, receipt.replayed ? COPY.orderReplayed : COPY.orderTaken), { name, affinity });
 }
 
 /** What the saved notification preference is reported as, read back from the answer. */
-export function preferenceMessage(notificationsEnabled: boolean): string {
-  return notificationsEnabled
-    ? '목표와 주문 알림을 받도록 저장했어요.'
-    : '목표와 주문 알림을 받지 않도록 저장했어요.';
+export function preferenceMessage(notificationsEnabled: boolean, locale: Locale = 'ko'): string {
+  return pick(locale, notificationsEnabled ? COPY.preferenceOn : COPY.preferenceOff);
 }

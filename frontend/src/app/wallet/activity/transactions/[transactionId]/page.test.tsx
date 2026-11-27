@@ -6,7 +6,9 @@ const { api, requireMember } = vi.hoisted(() => ({
 }));
 vi.mock('@/lib/api', () => ({ api }));
 vi.mock('@/lib/session', () => ({ requireMember }));
-import WalletTransactionDetailPage, { metadata } from './page';
+// Korean copy is asserted, so the request locale is Korean.
+vi.mock('@/lib/locale-server', () => ({ getServerLocale: async () => 'ko' }));
+import WalletTransactionDetailPage, { generateMetadata } from './page';
 const TX = '55555555-5555-4555-8555-555555555555';
 const good = {
   transactionId: TX,
@@ -35,7 +37,7 @@ describe('owner-private wallet transaction detail page', () => {
     expect(html.replaceAll(',', '')).toContain('900719925474099312345');
     expect(html).toContain('정산 검증서 아님');
     expect(html).toContain('aria-label=');
-    expect(metadata.robots).toEqual({ index: false, follow: false });
+    expect((await generateMetadata()).robots).toEqual({ index: false, follow: false });
   });
   it('does not show fake zero or stale content on malformed 200', async () => {
     api.mockResolvedValueOnce({ ...good, netDelta: '5' });
