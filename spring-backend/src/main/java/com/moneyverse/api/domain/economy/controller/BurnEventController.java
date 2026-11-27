@@ -51,18 +51,10 @@ public class BurnEventController {
     public ResponseEntity<Map<String, Object>> participateBurn(
             HttpServletRequest request,
             @RequestBody(required = false) Map<String, Object> body) {
-        String userId = getUserIdOrThrow(request);
-        if (body == null || !body.containsKey("burnAmountWld")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "burnAmountWld is required");
-        }
-
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("userId", userId);
-        res.put("burnedAmountWld", body.get("burnAmountWld"));
-        res.put("ticketCount", 10);
-        res.put("burnedAt", new Date().toInstant().toString());
-        return ResponseEntity.ok(res);
+        getUserIdOrThrow(request);
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "BURN_DRAW_SOURCE_UNAVAILABLE");
     }
 
     @GetMapping("/stats")

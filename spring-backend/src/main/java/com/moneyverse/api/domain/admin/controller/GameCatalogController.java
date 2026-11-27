@@ -53,17 +53,9 @@ public class GameCatalogController {
             HttpServletRequest request,
             @RequestBody(required = false) Map<String, Object> body) {
         verifyAdmin(request);
-        if (body == null || !body.containsKey("name") || !body.containsKey("category")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "name and category are required");
-        }
-
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("id", "game-" + UUID.randomUUID());
-        res.put("name", body.get("name"));
-        res.put("status", "INACTIVE");
-        res.put("registeredAt", new Date().toInstant().toString());
-        return ResponseEntity.status(HttpStatus.CREATED).body(res);
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "GAME_CATALOG_SOURCE_UNAVAILABLE");
     }
 
     @PatchMapping("/{id}")
@@ -72,11 +64,9 @@ public class GameCatalogController {
             @PathVariable("id") String id,
             @RequestBody(required = false) Map<String, Object> body) {
         verifyAdmin(request);
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("id", id);
-        res.put("updatedAt", new Date().toInstant().toString());
-        return ResponseEntity.ok(res);
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "GAME_CATALOG_SOURCE_UNAVAILABLE");
     }
 
     @PostMapping("/{id}/toggle")
@@ -84,11 +74,8 @@ public class GameCatalogController {
             HttpServletRequest request,
             @PathVariable("id") String id) {
         verifyAdmin(request);
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("id", id);
-        res.put("status", "ACTIVE");
-        res.put("toggledAt", new Date().toInstant().toString());
-        return ResponseEntity.ok(res);
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "GAME_CATALOG_SOURCE_UNAVAILABLE");
     }
 }

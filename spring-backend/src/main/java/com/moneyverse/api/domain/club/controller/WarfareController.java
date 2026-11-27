@@ -62,19 +62,10 @@ public class WarfareController {
     public ResponseEntity<Map<String, Object>> declareWar(
             HttpServletRequest request,
             @RequestBody(required = false) Map<String, Object> body) {
-        String userId = getUserIdOrThrow(request);
-        if (body == null || !body.containsKey("targetTerritoryId")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "targetTerritoryId is required");
-        }
-
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("warId", "war-" + UUID.randomUUID());
-        res.put("attackerUserId", userId);
-        res.put("targetTerritoryId", body.get("targetTerritoryId"));
-        res.put("status", "WAR_DECLARED");
-        res.put("battleScheduledAt", new Date(System.currentTimeMillis() + 3600000L).toInstant().toString());
-        return ResponseEntity.ok(res);
+        getUserIdOrThrow(request);
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "WARFARE_SOURCE_UNAVAILABLE");
     }
 
     @PostMapping("/battles/result")
@@ -82,10 +73,8 @@ public class WarfareController {
             HttpServletRequest request,
             @RequestBody(required = false) Map<String, Object> body) {
         getUserIdOrThrow(request);
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("status", "RECORDED");
-        res.put("timestamp", new Date().toInstant().toString());
-        return ResponseEntity.ok(res);
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "WARFARE_SOURCE_UNAVAILABLE");
     }
 }

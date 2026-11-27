@@ -1,8 +1,10 @@
 package com.moneyverse.api.domain.editorial.controller;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -23,26 +25,16 @@ public class AiNewsController {
 
     @GetMapping("/settings")
     public ResponseEntity<Map<String, Object>> getSettings() {
-        return ResponseEntity.ok()
-                .headers(securityHeaders())
-                .body(Map.of(
-                        "success", true,
-                        "apiBaseUrl", "https://api.openai.com/v1",
-                        "model", "gpt-4o-mini",
-                        "hasApiKey", true,
-                        "generationIntervalMinutes", 60,
-                        "autoPublish", true
-                ));
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI_NEWS_SOURCE_UNAVAILABLE");
     }
 
     @PutMapping("/settings")
     public ResponseEntity<Map<String, Object>> updateSettings(@RequestBody(required = false) Map<String, Object> body) {
-        return ResponseEntity.ok()
-                .headers(securityHeaders())
-                .body(Map.of(
-                        "success", true,
-                        "updated", true
-                ));
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI_NEWS_SOURCE_UNAVAILABLE");
     }
 
     @GetMapping("/templates")
@@ -59,24 +51,15 @@ public class AiNewsController {
 
     @PostMapping("/generate")
     public ResponseEntity<Map<String, Object>> generateArticle(@RequestBody(required = false) Map<String, Object> body) {
-        return ResponseEntity.ok()
-                .headers(securityHeaders())
-                .body(Map.of(
-                        "success", true,
-                        "generatedTitle", "[AI 속보] 중앙은행 기준금리 동결 전망과 외환 유동성 분석",
-                        "generatedBody", "AI 기반 실시간 시장 데이터 분석 결과 외환 보유액 안정성과 거시경제 지표가 견고한 흐름을 유지하고 있습니다.",
-                        "generatedAt", new Date().toInstant().toString()
-                ));
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI_NEWS_SOURCE_UNAVAILABLE");
     }
 
     @PostMapping("/publish")
     public ResponseEntity<Map<String, Object>> publishArticle(@RequestBody(required = false) Map<String, Object> body) {
-        return ResponseEntity.ok()
-                .headers(securityHeaders())
-                .body(Map.of(
-                        "success", true,
-                        "articleId", "news-" + UUID.randomUUID(),
-                        "published", true
-                ));
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI_NEWS_SOURCE_UNAVAILABLE");
     }
 }

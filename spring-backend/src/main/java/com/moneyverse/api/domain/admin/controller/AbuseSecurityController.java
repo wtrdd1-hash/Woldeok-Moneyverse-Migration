@@ -42,17 +42,9 @@ public class AbuseSecurityController {
             HttpServletRequest request,
             @RequestBody(required = false) Map<String, Object> body) {
         verifyAdmin(request);
-        if (body == null || !body.containsKey("targetUserId") || !body.containsKey("reason")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "targetUserId and reason are required");
-        }
-
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("targetUserId", body.get("targetUserId"));
-        res.put("action", "PERMANENT_SUSPENDED");
-        res.put("reason", body.get("reason"));
-        res.put("processedAt", new Date().toInstant().toString());
-        return ResponseEntity.ok(res);
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "ABUSE_ENFORCEMENT_SOURCE_UNAVAILABLE");
     }
 
     @PostMapping("/block-address")
@@ -60,16 +52,9 @@ public class AbuseSecurityController {
             HttpServletRequest request,
             @RequestBody(required = false) Map<String, Object> body) {
         verifyAdmin(request);
-        if (body == null || !body.containsKey("ipOrAddress")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ipOrAddress is required");
-        }
-
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("blockedAddress", body.get("ipOrAddress"));
-        res.put("blockId", "block-" + UUID.randomUUID());
-        res.put("createdAt", new Date().toInstant().toString());
-        return ResponseEntity.status(HttpStatus.CREATED).body(res);
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "ABUSE_ENFORCEMENT_SOURCE_UNAVAILABLE");
     }
 
     @DeleteMapping("/unblock/{blockId}")
@@ -77,11 +62,9 @@ public class AbuseSecurityController {
             HttpServletRequest request,
             @PathVariable("blockId") String blockId) {
         verifyAdmin(request);
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("unblockedId", blockId);
-        res.put("unblockedAt", new Date().toInstant().toString());
-        return ResponseEntity.ok(res);
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "ABUSE_ENFORCEMENT_SOURCE_UNAVAILABLE");
     }
 
     @GetMapping("/rules")

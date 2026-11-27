@@ -61,10 +61,8 @@ public class HotTimeController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Forbidden: Admin access required");
         }
 
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("buffName", body != null ? body.get("name") : "관리자 수동 핫타임");
-        res.put("startedAt", new Date().toInstant().toString());
-        return ResponseEntity.ok(res);
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "HOT_TIME_SOURCE_UNAVAILABLE");
     }
 }
