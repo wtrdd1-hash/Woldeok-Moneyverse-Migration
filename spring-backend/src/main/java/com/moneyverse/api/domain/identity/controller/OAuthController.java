@@ -206,7 +206,7 @@ public class OAuthController {
 
                 HttpResponse<String> tokenResponse = httpClient.send(tokenRequest, HttpResponse.BodyHandlers.ofString());
                 if (tokenResponse.statusCode() < 200 || tokenResponse.statusCode() >= 300) {
-                    log.error("[OAuth] Discord token exchange failed: status={}, body={}", tokenResponse.statusCode(), tokenResponse.body());
+                    log.error("[OAuth] Discord token exchange failed: status={}, error={}", tokenResponse.statusCode(), providerError(tokenResponse.body()));
                     if (!wantsJson) {
                         return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_verification")).build();
                     }
@@ -216,7 +216,7 @@ public class OAuthController {
                 JsonNode tokenJson = objectMapper.readTree(tokenResponse.body());
                 String accessToken = tokenJson.path("access_token").asText(null);
                 if (accessToken == null || accessToken.isBlank()) {
-                    log.error("[OAuth] Invalid Discord access token in response: {}", tokenResponse.body());
+                    log.error("[OAuth] Discord token response carried no access token: error={}", providerError(tokenResponse.body()));
                     if (!wantsJson) {
                         return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_verification")).build();
                     }
@@ -267,7 +267,7 @@ public class OAuthController {
 
                 HttpResponse<String> tokenResponse = httpClient.send(tokenRequest, HttpResponse.BodyHandlers.ofString());
                 if (tokenResponse.statusCode() < 200 || tokenResponse.statusCode() >= 300) {
-                    log.error("[OAuth] Google token exchange failed: status={}, body={}", tokenResponse.statusCode(), tokenResponse.body());
+                    log.error("[OAuth] Google token exchange failed: status={}, error={}", tokenResponse.statusCode(), providerError(tokenResponse.body()));
                     if (!wantsJson) {
                         return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_verification")).build();
                     }
@@ -277,7 +277,7 @@ public class OAuthController {
                 JsonNode tokenJson = objectMapper.readTree(tokenResponse.body());
                 String accessToken = tokenJson.path("access_token").asText(null);
                 if (accessToken == null || accessToken.isBlank()) {
-                    log.error("[OAuth] Invalid Google access token in response: {}", tokenResponse.body());
+                    log.error("[OAuth] Google token response carried no access token: error={}", providerError(tokenResponse.body()));
                     if (!wantsJson) {
                         return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_verification")).build();
                     }
@@ -360,6 +360,19 @@ public class OAuthController {
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("outcome", "error", "error", "oauth_login", "message", e.getMessage()));
+        }
+    }
+
+    /**
+     * The provider's error code only. A token response body can carry tokens issued for the member,
+     * so it is never logged whole (S04 defensive review).
+     */
+    private String providerError(String body) {
+        try {
+            String code = objectMapper.readTree(body == null ? "" : body).path("error").asText("");
+            return code.matches("[A-Za-z0-9_.-]{1,64}") ? code : "unparsed";
+        } catch (Exception e) {
+            return "unparsed";
         }
     }
 }
