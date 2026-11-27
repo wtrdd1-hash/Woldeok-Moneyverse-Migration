@@ -16,6 +16,8 @@ Skills: security-review method (ordinary defensive review, not CVP-labelled), su
 - [x] GREEN: each handler keeps its existing session/role check and then answers 503 with a stable `*_SOURCE_UNAVAILABLE` code, matching the 2026-11-25 source-truth gate for services. No route, contract shape or migration change.
 - [x] Callers: Next help report (flag-gated, treats a failure as uncertain), burn-draw BFF (shows the error), backup-inventory gateway (already maps failure to 503), AI-news admin page (`apiOrNull` → unavailable). No frontend change needed.
 
+- [x] Independent review (Codex, read-only): REQUEST_CHANGES with one Medium — profile image DELETE answered deleted=true without deleting. Fixed test-first (RED 1 → GREEN); the profile action already reads the owner settings back.
+
 ## Validation
 - Spring full suite: 940 tests / 0 failures / 0 errors / 0 skipped (local, this branch).
 - Database-backed integration and browser QA not rerun for this change (no SQL or UI change); official Test (G8) and Production (G9) HOLD. Independent review pending.

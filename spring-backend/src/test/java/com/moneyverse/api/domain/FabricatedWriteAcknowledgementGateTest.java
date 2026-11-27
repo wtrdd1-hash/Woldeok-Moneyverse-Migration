@@ -13,6 +13,8 @@ import com.moneyverse.api.domain.editorial.controller.BlogVerifiedAdminControlle
 import com.moneyverse.api.domain.help.controller.AdminHelpController;
 import com.moneyverse.api.domain.help.controller.HelpReportController;
 import com.moneyverse.api.domain.identity.service.UserAuthService;
+import com.moneyverse.api.domain.media.service.ImageStorageService;
+import com.moneyverse.api.domain.profile.controller.ProfileImageController;
 import com.moneyverse.api.domain.safety.controller.SafetyController;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -142,5 +144,11 @@ class FabricatedWriteAcknowledgementGateTest {
         SafetyController c = new SafetyController(mock(JdbcClient.class), mock(AdminAuthService.class));
         unavailable(() -> c.adminGetChatReport("r1"));
         unavailable(() -> c.adminActionChatReport("r1", Map.of("action", "WARNED")));
+    }
+
+    @Test void memberProfileImageDeleteDoesNotClaimDeletion() {
+        signedInAs();
+        ProfileImageController c = new ProfileImageController(auth, mock(ImageStorageService.class));
+        unavailable(() -> c.deleteProfileImage(request));
     }
 }
