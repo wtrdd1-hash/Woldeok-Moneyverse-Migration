@@ -87,7 +87,7 @@ tasks.withType<Test> {
 }
 
 tasks.named<Test>("test") {
-    useJUnitPlatform { excludeTags("postgres-messaging", "postgres-shop") }
+    useJUnitPlatform { excludeTags("postgres-messaging", "postgres-shop", "postgres-totp") }
 }
 
 tasks.register<Test>("postgresMessagingTest") {
@@ -96,7 +96,7 @@ tasks.register<Test>("postgresMessagingTest") {
     testClassesDirs = sourceSets["test"].output.classesDirs
     classpath = sourceSets["test"].runtimeClasspath
     // Keep the established CI entry point while certifying both canonical native services.
-    useJUnitPlatform { includeTags("postgres-messaging", "postgres-shop") }
+    useJUnitPlatform { includeTags("postgres-messaging", "postgres-shop", "postgres-totp") }
     testLogging {
         events("failed")
         exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
@@ -124,6 +124,13 @@ tasks.register<Test>("postgresMessagingTest") {
             commandLine("python3", "scripts/release/verify-native-pg-results.py", "--class",
                 "com.moneyverse.api.domain.content.ContentPublicationPostgresIntegrationTest", "--minimum", "6",
                 layout.buildDirectory.file("test-results/postgresMessagingTest/TEST-com.moneyverse.api.domain.content.ContentPublicationPostgresIntegrationTest.xml").get().asFile.absolutePath)
+        }.result.get().assertNormalExitValue()
+        // Administrator TOTP candidate (migration 366): real functions as moneyverse_app.
+        providers.exec {
+            workingDir(rootDir.parentFile)
+            commandLine("python3", "scripts/release/verify-native-pg-results.py", "--class",
+                "com.moneyverse.api.domain.admin.totp.AdminTotpPostgresIntegrationTest", "--minimum", "4",
+                layout.buildDirectory.file("test-results/postgresMessagingTest/TEST-com.moneyverse.api.domain.admin.totp.AdminTotpPostgresIntegrationTest.xml").get().asFile.absolutePath)
         }.result.get().assertNormalExitValue()
     }
 }
