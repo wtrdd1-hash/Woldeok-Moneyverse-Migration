@@ -8,6 +8,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { IDLE } from '@/lib/action-state';
 import { submitConsent } from './actions';
+import { useLocale } from '@/components/locale-provider';
+import { pick } from '@/lib/copy';
+import { CONSENT_COPY } from './copy';
 
 /**
  * The gate a visitor passes before any provider button appears.
@@ -37,6 +40,8 @@ export function ConsentForm({
   readonly privacy: React.ReactNode;
   readonly error?: string | undefined;
 }) {
+  const { locale } = useLocale();
+  const t = (key: keyof typeof CONSENT_COPY) => pick(locale, CONSENT_COPY[key]);
   const [state, action] = useActionState(submitConsent, IDLE);
   const [termsRead, setTermsRead] = useState(false);
   const [privacyRead, setPrivacyRead] = useState(false);
@@ -48,7 +53,7 @@ export function ConsentForm({
 
     const handlePopState = () => {
       window.history.pushState({ page: 'consent-guard' }, '', window.location.href);
-      alert('서비스 이용을 위해 이용약관 및 개인정보처리방침 동의를 먼저 완료해 주세요.');
+      alert(t('backBlocked'));
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -69,7 +74,7 @@ export function ConsentForm({
       )}
 
       <Document
-        title="이용약관"
+        title={t('termsTitle')}
         version={termsVersion}
         href="/terms"
         onRead={() => setTermsRead(true)}
@@ -81,12 +86,12 @@ export function ConsentForm({
         disabled={!termsRead}
         checked={accepted.terms}
         onChange={(value) => setAccepted((current) => ({ ...current, terms: value }))}
-        label="이용약관을 끝까지 읽고 동의합니다."
-        hint="전문을 끝까지 확인하면 활성화됩니다."
+        label={t('termsAgree')}
+        hint={t('readHint')}
       />
 
       <Document
-        title="개인정보처리방침"
+        title={t('privacyTitle')}
         version={privacyVersion}
         href="/privacy"
         onRead={() => setPrivacyRead(true)}
@@ -98,21 +103,21 @@ export function ConsentForm({
         disabled={!privacyRead}
         checked={accepted.privacy}
         onChange={(value) => setAccepted((current) => ({ ...current, privacy: value }))}
-        label="개인정보처리방침을 끝까지 읽고 동의합니다."
-        hint="전문을 끝까지 확인하면 활성화됩니다."
+        label={t('privacyAgree')}
+        hint={t('readHint')}
       />
 
       <Acknowledgement
         name="age"
         checked={accepted.age}
         onChange={(value) => setAccepted((current) => ({ ...current, age: value }))}
-        label="만 14세 이상임을 확인합니다."
+        label={t('age')}
       />
 
       <ActionAlert state={state} />
 
       <SubmitButton disabled={!ready} className="w-full sm:w-fit">
-        동의하고 로그인 선택으로 계속
+        {t('submit')}
       </SubmitButton>
     </form>
   );
@@ -131,6 +136,7 @@ function Document({
   readonly onRead: () => void;
   readonly children: React.ReactNode;
 }) {
+  const { locale } = useLocale();
   // A few pixels of slack: sub-pixel layout and browser zoom mean the
   // arithmetic rarely lands exactly on zero.
   function checkReachedEnd(element: HTMLElement) {
@@ -144,9 +150,9 @@ function Document({
           {title} <span className="text-xs font-normal text-muted-foreground">v{version}</span>
         </CardTitle>
         <p className="text-xs text-muted-foreground">
-          아래 전문을 끝까지 확인하면 동의 항목이 활성화됩니다.{' '}
+          {pick(locale, CONSENT_COPY.docHint)}{' '}
           <Link href={href} target="_blank" rel="noopener" className="text-primary">
-            새 창으로 열기
+            {pick(locale, CONSENT_COPY.openNew)}
           </Link>
         </p>
       </CardHeader>
@@ -161,7 +167,7 @@ function Document({
           }}
           tabIndex={0}
           role="region"
-          aria-label={`${title} 전문`}
+          aria-label={pick(locale, CONSENT_COPY.fullText).replace('{title}', title)}
           onScroll={(event) => checkReachedEnd(event.currentTarget)}
           className="h-72 overflow-y-auto rounded-md border p-4"
         >

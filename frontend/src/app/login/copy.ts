@@ -75,3 +75,24 @@ export const ERROR_COPY = {
   local_unavailable: { ko: '자체 로그인 서비스를 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.', en: 'Account sign-in is unavailable. Please try again shortly.', ja: '独自ログインサービスを利用できません。しばらくしてからもう一度お試しください。', zh: '本站账号登录服务暂不可用，请稍后再试。', vi: 'Dịch vụ đăng nhập tài khoản riêng hiện không khả dụng. Vui lòng thử lại sau.' },
   local_login: { ko: '자체 로그인을 완료하지 못했습니다. 잠시 후 다시 시도해 주세요.', en: 'Account sign-in could not be completed. Please try again shortly.', ja: '独自ログインを完了できませんでした。しばらくしてからもう一度お試しください。', zh: '未能完成本站账号登录，请稍后再试。', vi: 'Không thể hoàn tất đăng nhập tài khoản riêng. Vui lòng thử lại sau.' },
 } satisfies Record<string, Copy>;
+
+/** Copy for the required-consent form (client component). The policy documents themselves are not translated here. */
+export const CONSENT_COPY = {
+  backBlocked: {
+    ko: '서비스 이용을 위해 이용약관 및 개인정보처리방침 동의를 먼저 완료해 주세요.',
+    en: 'To use the service, please first agree to the Terms of Service and Privacy Policy.',
+    ja: 'サービスを利用するには、先に利用規約と個人情報処理方針への同意を完了してください。',
+    zh: '使用服务前，请先完成对服务条款和隐私政策的同意。',
+    vi: 'Để sử dụng dịch vụ, vui lòng đồng ý với điều khoản dịch vụ và chính sách quyền riêng tư trước.',
+  },
+  termsTitle: { ko: '이용약관', en: 'Terms of Service', ja: '利用規約', zh: '服务条款', vi: 'Điều khoản dịch vụ' },
+  privacyTitle: { ko: '개인정보처리방침', en: 'Privacy Policy', ja: '個人情報処理方針', zh: '隐私政策', vi: 'Chính sách quyền riêng tư' },
+  termsAgree: { ko: '이용약관을 끝까지 읽고 동의합니다.', en: 'I have read the Terms of Service to the end and agree.', ja: '利用規約を最後まで読み、同意します。', zh: '我已读完服务条款并同意。', vi: 'Tôi đã đọc hết điều khoản dịch vụ và đồng ý.' },
+  privacyAgree: { ko: '개인정보처리방침을 끝까지 읽고 동의합니다.', en: 'I have read the Privacy Policy to the end and agree.', ja: '個人情報処理方針を最後まで読み、同意します。', zh: '我已读完隐私政策并同意。', vi: 'Tôi đã đọc hết chính sách quyền riêng tư và đồng ý.' },
+  readHint: { ko: '전문을 끝까지 확인하면 활성화됩니다.', en: 'Enabled once you reach the end of the full text.', ja: '全文を最後まで確認すると有効になります。', zh: '阅读至全文末尾后启用。', vi: 'Sẽ bật khi bạn đọc đến cuối toàn văn.' },
+  age: { ko: '만 14세 이상임을 확인합니다.', en: 'I confirm I am 14 or older.', ja: '満14歳以上であることを確認します。', zh: '我确认已年满14周岁。', vi: 'Tôi xác nhận mình từ đủ 14 tuổi trở lên.' },
+  submit: { ko: '동의하고 로그인 선택으로 계속', en: 'Agree and continue to sign-in options', ja: '同意してログイン方法の選択へ進む', zh: '同意并继续选择登录方式', vi: 'Đồng ý và tiếp tục chọn cách đăng nhập' },
+  docHint: { ko: '아래 전문을 끝까지 확인하면 동의 항목이 활성화됩니다.', en: 'The agreement boxes are enabled once you reach the end of the text below.', ja: '下の全文を最後まで確認すると、同意項目が有効になります。', zh: '阅读至下方全文末尾后，同意选项将启用。', vi: 'Các ô đồng ý sẽ bật khi bạn đọc đến cuối văn bản bên dưới.' },
+  openNew: { ko: '새 창으로 열기', en: 'Open in a new window', ja: '新しいウィンドウで開く', zh: '在新窗口中打开', vi: 'Mở trong cửa sổ mới' },
+  fullText: { ko: '{title} 전문', en: '{title} full text', ja: '{title} 全文', zh: '{title} 全文', vi: 'Toàn văn {title}' },
+} satisfies Record<string, Copy>;
