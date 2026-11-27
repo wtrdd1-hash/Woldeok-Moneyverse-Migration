@@ -14,3 +14,11 @@ describe('cancelPlusMembership', () => {
     expect(result.success).toBe(false);
   });
 });
+
+describe('subscribePlusMembership', () => {
+  it('refuses an id that is not a catalogue uuid', async () => {
+    const { subscribePlusMembership } = await import('./actions');
+    const result = await subscribePlusMembership('not-a-catalogue-id');
+    expect(result.success).toBe(false);
+  });
+});

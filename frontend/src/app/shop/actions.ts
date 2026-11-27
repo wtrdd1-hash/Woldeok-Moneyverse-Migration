@@ -3,7 +3,6 @@
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/mutate';
 import { failure, idempotencyKey, mutate } from '@/lib/mutate';
-import { VIP_PASS_CATALOG_ID } from './shop-constants';
 
 interface PurchaseReceipt {
   readonly purchaseId: string;
@@ -64,10 +63,11 @@ export async function buyCatalogItemDirect(
 }
 
 /**
- * Subscribes user to Moneyverse Plus VIP membership (burns 10,000 WLD, adds 30-day VIP pass).
+ * Buys the Moneyverse Plus pass the catalogue returned. The id comes from the catalogue because
+ * seeded catalogue ids differ between environments; a fixed id bought nothing where it was absent.
  */
-export async function subscribePlusMembership(): Promise<PurchaseActionResult> {
-  return buyCatalogItemDirect(VIP_PASS_CATALOG_ID, 1);
+export async function subscribePlusMembership(catalogId: string): Promise<PurchaseActionResult> {
+  return buyCatalogItemDirect(catalogId, 1);
 }
 
 /**

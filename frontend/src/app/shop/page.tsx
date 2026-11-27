@@ -121,7 +121,15 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
       {/* Moneyverse Plus VIP Membership Tier Card */}
       {membershipKnown ? (
-        <ShopMembershipSection userBalance={userBalance} isPlusMember={isPlusMember} />
+        <ShopMembershipSection
+          userBalance={userBalance}
+          isPlusMember={isPlusMember}
+          pass={
+            vipPassItem
+              ? { catalogId: vipPassItem.catalog_id, name: vipPassItem.name, description: vipPassItem.description, price: vipPassItem.price }
+              : null
+          }
+        />
       ) : null}
 
       {catalogueUnavailable ? (
