@@ -67,7 +67,27 @@ public class AdminApiBoundaryFilter extends OncePerRequestFilter {
             fail(response, HttpServletResponse.SC_FORBIDDEN, "csrf_required");
             return;
         }
+        // Step-up (owner decisions v2026.11.27.1457.1/1507.1): every administrator write needs this
+        // session's recent password re-verification. Step-up re-authentication, not an independent
+        // second factor. Opening and closing the console are the only
+        // exemption: they are how an administrator reaches the console at all, and rotation
+        // inherits (never mints) the re-verification time.
+        if (!("GET".equals(method) || "HEAD".equals(method) || "OPTIONS".equals(method))
+                && !isConsoleSessionPath(request)
+                && !adminAuthService.hasRecentSessionReauthentication(request, AdminAuthService.STEP_UP_WINDOW_SECONDS)) {
+            fail(response, HttpServletResponse.SC_UNAUTHORIZED, "reauthentication_required");
+            return;
+        }
         chain.doFilter(request, response);
+    }
+
+    private static boolean isConsoleSessionPath(HttpServletRequest request) {
+        try {
+            String path = BoundaryPaths.of(request);
+            return "/api/v1/admin/security/sessions".equals(path) || "/api/admin/security/sessions".equals(path);
+        } catch (IllegalArgumentException malformed) {
+            return false;
+        }
     }
 
     private void fail(HttpServletResponse response, int code, String reason) throws IOException {

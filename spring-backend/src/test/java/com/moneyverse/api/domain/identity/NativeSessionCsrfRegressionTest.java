@@ -307,7 +307,7 @@ class NativeSessionCsrfRegressionTest {
         when(admin.resolveAdminUserId(any())).thenReturn(java.util.Optional.of(OWNER));
         when(admin.resolveVerifiedAdminActor(any())).thenReturn(java.util.Optional.of(OWNER));
         when(admin.extractSessionToken(any())).thenReturn(SESSION);
-        var controller = new AdminSecurityController(admin, mock(JdbcTemplate.class));
+        var controller = new AdminSecurityController(admin, consoleJdbc());
         var response = new MockHttpServletResponse();
         var opened = controller.openConsoleSession(new MockHttpServletRequest(), response);
         var payload = (Map<?, ?>) opened.getBody();
@@ -465,8 +465,9 @@ class NativeSessionCsrfRegressionTest {
         when(admin.isAuthorizedAdmin(any())).thenReturn(true);
         when(admin.resolveAdminUserId(any())).thenReturn(java.util.Optional.of(OWNER));
         when(admin.resolveVerifiedAdminActor(any())).thenReturn(java.util.Optional.of(OWNER));
+        when(admin.extractSessionToken(any())).thenReturn(SESSION);
         var response = new MockHttpServletResponse();
-        new AdminSecurityController(admin, mock(JdbcTemplate.class)).openConsoleSession(new MockHttpServletRequest(), response);
+        new AdminSecurityController(admin, consoleJdbc()).openConsoleSession(new MockHttpServletRequest(), response);
         assertTrue(response.getHeaders("Set-Cookie").stream()
                 .anyMatch(value -> value.startsWith("mv_session=;") && value.contains("Max-Age=0")),
                 "Admin rotation must remove the stale legacy session cookie");
@@ -560,5 +561,15 @@ class NativeSessionCsrfRegressionTest {
             assertTrue(cookie.contains(flag), "Proof cookie must retain security flags and session lifetime");
         }
         assertFalse(cookie.toLowerCase().contains("domain="), "Host prefix must not permit a domain cookie");
+    }
+
+    /** Console rotation reads the current session first (inheriting its re-verification time). */
+    private static JdbcTemplate consoleJdbc() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        java.util.Map<String, Object> row = new java.util.HashMap<>();
+        row.put("id", java.util.UUID.randomUUID());
+        row.put("reauthenticated_at", null);
+        when(jdbc.queryForList(contains("reauthenticated_at"), any(String.class), any(java.util.UUID.class))).thenReturn(java.util.List.of(row));
+        return jdbc;
     }
 }
