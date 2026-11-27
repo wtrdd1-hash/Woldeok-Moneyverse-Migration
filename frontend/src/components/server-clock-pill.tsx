@@ -62,8 +62,9 @@ export function ServerClockPill({ className }: { readonly className?: string }) 
       title={TITLE[locale] ?? TITLE.en}
       data-testid="server-clock"
     >
-      <Clock3 className="size-3.5 text-primary" aria-hidden="true" />
-      <span className="whitespace-nowrap">
+      <Clock3 className="size-3.5 shrink-0 text-primary" aria-hidden="true" />
+      {/* Wraps instead of overflowing in narrow places (mobile menu sheet at 320 px, browser QA). */}
+      <span className="text-center">
         {text.year ? <>{text.year} · </> : null}
         {text.week}
       </span>
