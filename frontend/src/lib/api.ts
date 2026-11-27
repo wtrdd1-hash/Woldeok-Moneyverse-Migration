@@ -160,6 +160,16 @@ export async function api<T>(path: string, request: ApiRequest = {}): Promise<T>
   const userAgent = incoming.get('user-agent');
   if (userAgent) requestHeaders['user-agent'] = userAgent;
 
+  // The browser's own fetch context, unchanged. The API reveals a session's CSRF proof only to a
+  // same-origin browser context (Sec-Fetch-Site same-origin, or an Origin equal to APP_BASE_URL);
+  // this server-side fetch carries neither on its own, so without them mutate() always sent an
+  // empty token and every CSRF-protected write through the web answered 403. Relayed, never
+  // invented: a request whose browser sent neither still gets nothing.
+  const browserOrigin = incoming.get('origin');
+  if (browserOrigin) requestHeaders.origin = browserOrigin;
+  const fetchSite = incoming.get('sec-fetch-site');
+  if (fetchSite) requestHeaders['sec-fetch-site'] = fetchSite;
+
   const forwardedHost = incoming.get('x-forwarded-host') ?? incoming.get('host');
   if (forwardedHost) {
     const proto = incoming.get('x-forwarded-proto') ?? 'https';
