@@ -16,10 +16,13 @@ public class ActivityController {
 
     private final ActivityService activityService;
     private final com.moneyverse.api.domain.identity.service.UserAuthService auth;
+    private final com.moneyverse.api.domain.admin.service.AdminAuthService adminAuth;
     /** One page visit sends a handful of events; a larger batch is abuse (security review 2026-11-25). */
     public static final int MAX_EVENTS = 50;
 
-    public ActivityController(ActivityService activityService, com.moneyverse.api.domain.identity.service.UserAuthService auth) {
+    public ActivityController(ActivityService activityService, com.moneyverse.api.domain.identity.service.UserAuthService auth,
+                              com.moneyverse.api.domain.admin.service.AdminAuthService adminAuth) {
+        this.adminAuth = adminAuth;
         this.auth = auth;
         this.activityService = activityService;
     }
@@ -57,33 +60,37 @@ public class ActivityController {
         return ResponseEntity.ok(activityService.recordEvents(userId, req.events(), ip, userAgent));
     }
 
+    // Administrator reads: the boundary filter admits verified administrators; the functions check
+    // the role again and the actor passed is the verified one, never a header.
     @GetMapping({"/api/admin/activity/traffic", "/api/v1/admin/activity/traffic"})
-    @Operation(summary = "관리자용 트래픽 통계 조회")
-    public ResponseEntity<TrafficAnalyticsResponse> traffic(
+    @Operation(summary = "Administrator traffic statistics")
+    public ResponseEntity<Map<String, Object>> traffic(HttpServletRequest request,
             @RequestParam(value = "granularity", defaultValue = "day") String granularity,
-            @RequestParam(value = "periods", defaultValue = "30") int periods
-    ) {
-        return ResponseEntity.ok(activityService.trafficDashboard(granularity, periods));
+            @RequestParam(value = "periods", defaultValue = "30") int periods) {
+        return ResponseEntity.ok(activityService.adminTraffic(admin(request), granularity, periods));
     }
 
     @GetMapping("/api/admin/activity/logs")
-    @Operation(summary = "관리자용 활동 로그 목록 조회 (래퍼 응답)")
-    public ResponseEntity<ActivityLogsResponse> listLogs(
+    @Operation(summary = "Administrator activity log (legacy envelope)")
+    public ResponseEntity<Map<String, Object>> listLogs(HttpServletRequest request,
             @RequestParam(value = "limit", defaultValue = "50") int limit,
             @RequestParam(value = "offset", defaultValue = "0") int offset,
-            @RequestParam(value = "userId", required = false) UUID userId
-    ) {
-        return ResponseEntity.ok(activityService.getLogs(userId, limit, offset));
+            @RequestParam(value = "userId", required = false) UUID userId) {
+        var items = activityService.adminLogs(admin(request), userId, null, limit, offset);
+        return ResponseEntity.ok(Map.of("ok", true, "items", items, "count", items.size()));
     }
 
     @GetMapping("/api/v1/admin/activity/logs")
-    @Operation(summary = "관리자용 활동 로그 목록 조회 (프론트엔드 직접 배열)")
-    public ResponseEntity<List<Map<String, Object>>> listLogsV1(
+    @Operation(summary = "Administrator activity log (bare array for the web)")
+    public ResponseEntity<List<Map<String, Object>>> listLogsV1(HttpServletRequest request,
             @RequestParam(value = "limit", defaultValue = "50") int limit,
             @RequestParam(value = "offset", defaultValue = "0") int offset,
             @RequestParam(value = "userId", required = false) UUID userId,
-            @RequestParam(value = "eventType", required = false) String eventType
-    ) {
-        return ResponseEntity.ok(activityService.getDirectLogs(userId, eventType, limit, offset));
+            @RequestParam(value = "eventType", required = false) String eventType) {
+        return ResponseEntity.ok(activityService.adminLogs(admin(request), userId, eventType, limit, offset));
+    }
+
+    private UUID admin(HttpServletRequest request) {
+        return adminAuth.resolveVerifiedAdminActor(request).orElse(null);
     }
 }
