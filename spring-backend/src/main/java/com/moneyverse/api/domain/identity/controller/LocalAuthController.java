@@ -274,22 +274,5 @@ public class LocalAuthController {
         return ResponseEntity.ok(res);
     }
 
-    @GetMapping(path = {
-            "/api/v1/auth/session-token-login",
-            "/api/auth/session-token-login"
-    })
-    public ResponseEntity<?> sessionTokenLogin(
-            @RequestParam(required = false) String token,
-            @RequestParam(required = false, defaultValue = "/wallet") String next,
-            HttpServletResponse response) {
-        if (token != null && !token.isBlank()) {
-            boolean valid = authService.bindExistingSessionByToken(token, response);
-            if (valid) {
-                HttpHeaders headers = new HttpHeaders();
-                headers.setLocation(URI.create(next.startsWith("/") ? next : "/wallet"));
-                return new ResponseEntity<>(headers, HttpStatus.FOUND);
-            }
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "invalid session token"));
-    }
+
 }

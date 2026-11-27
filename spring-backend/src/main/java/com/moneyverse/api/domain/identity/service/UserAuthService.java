@@ -530,20 +530,6 @@ public class UserAuthService {
             "__Host-mv_session=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax");
     }
 
-    public boolean bindExistingSessionByToken(String rawToken, HttpServletResponse response) {
-        if (rawToken == null || rawToken.isBlank()) return false;
-        String tokenHash = sha256(rawToken);
-        String sql = "SELECT COUNT(*) FROM auth_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > NOW()";
-        try {
-            Integer count = jdbcTemplate.queryForObject(sql, Integer.class, tokenHash);
-            if (count != null && count > 0) {
-                setSessionCookie(response, rawToken);
-                return true;
-            }
-        } catch (Exception ignored) {}
-        return false;
-    }
-
     public Long getUserCashBalance(UUID userId) {
         if (userId == null) return 0L;
         String sql = """
