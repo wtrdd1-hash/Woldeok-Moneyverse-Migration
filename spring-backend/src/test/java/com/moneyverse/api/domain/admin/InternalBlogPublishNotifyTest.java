@@ -20,7 +20,8 @@ import static org.mockito.Mockito.*;
  */
 class InternalBlogPublishNotifyTest {
     private static final String TOKEN = "0123456789abcdef0123456789abcdef0123456789abcdef";
-    private static final String COMMITTED = "8e5f2a1b9c3d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f";
+    /** SHA-256 fingerprint of the compromised default (the value itself is never kept in the repository). */
+    private static final String COMPROMISED_SHA256 = "1eb829e05776a61428a25bc398e69127f67c89e87af0d2176209bc387ed7a9cd";
 
     private static MockHttpServletRequest req(String remote, String token) {
         var r = new MockHttpServletRequest("POST", "/internal/blog/published-notify");
@@ -67,8 +68,15 @@ class InternalBlogPublishNotifyTest {
         assertEquals(404, new InternalBlogPublishNotifyController(jdbc, notifier, TOKEN).notifyPublished(req("192.168.100.5", TOKEN), Map.of("slug", "a-1")).getStatusCode().value());
         assertEquals(403, new InternalBlogPublishNotifyController(jdbc, notifier, TOKEN).notifyPublished(req("127.0.0.1", "wrong"), Map.of("slug", "a-1")).getStatusCode().value());
         assertEquals(403, new InternalBlogPublishNotifyController(jdbc, notifier, TOKEN).notifyPublished(req("127.0.0.1", null), Map.of("slug", "a-1")).getStatusCode().value());
-        assertEquals(503, new InternalBlogPublishNotifyController(jdbc, notifier, COMMITTED).notifyPublished(req("127.0.0.1", COMMITTED), Map.of("slug", "a-1")).getStatusCode().value());
+        assertEquals(503, new InternalBlogPublishNotifyController(jdbc, notifier, "short").notifyPublished(req("127.0.0.1", "short"), Map.of("slug", "a-1")).getStatusCode().value());
         assertEquals(400, new InternalBlogPublishNotifyController(jdbc, notifier, TOKEN).notifyPublished(req("127.0.0.1", TOKEN), Map.of("slug", "../x")).getStatusCode().value());
         verifyNoInteractions(notifier);
+    }
+
+    /** The refused default is identified by fingerprint; it must be the compromised value's. */
+    @Test void theRefusedDefaultIsTheCompromisedFingerprint() throws Exception {
+        var field = InternalBlogPublishNotifyController.class.getDeclaredField("COMMITTED_DEFAULT_SHA256");
+        field.setAccessible(true);
+        assertEquals(COMPROMISED_SHA256, field.get(null));
     }
 }
