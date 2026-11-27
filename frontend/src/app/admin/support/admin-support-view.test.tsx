@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { renderKo } from '@/testing/render-ko';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { toast } from 'sonner';
 import { adminSupportReply } from './actions';
@@ -67,7 +68,7 @@ describe('AdminSupportView component', () => {
   });
 
   it('renders threads list and chat timeline accurately', () => {
-    render(
+    renderKo(
       <AdminSupportView
         initialThreads={mockThreads}
         initialMessages={mockMessages}
@@ -85,7 +86,7 @@ describe('AdminSupportView component', () => {
   });
 
   it('filters threads by search input query', () => {
-    render(
+    renderKo(
       <AdminSupportView
         initialThreads={mockThreads}
         initialMessages={mockMessages}
@@ -111,7 +112,7 @@ describe('AdminSupportView component', () => {
       .mockRejectedValueOnce(new Error('acknowledgement lost'))
       .mockResolvedValueOnce(undefined);
 
-    render(<AdminSupportView
+    renderKo(<AdminSupportView
       initialThreads={mockThreads}
       initialMessages={mockMessages}
       selectedId="thread-1"
@@ -132,7 +133,7 @@ describe('AdminSupportView component', () => {
   });
 
   it('exposes accessible support search, polling state and attachment controls', () => {
-    render(<AdminSupportView
+    renderKo(<AdminSupportView
       initialThreads={mockThreads}
       initialMessages={mockMessages}
       selectedId="thread-1"
@@ -144,7 +145,7 @@ describe('AdminSupportView component', () => {
   });
 
   it('inserts canned response when clicking quick preset buttons', () => {
-    render(
+    renderKo(
       <AdminSupportView
         initialThreads={mockThreads}
         initialMessages={mockMessages}

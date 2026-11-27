@@ -11,6 +11,10 @@
  * surface look smaller than it is. These are those panels, each with room to
  * be a page.
  */
+import type { Copy } from '@/lib/copy';
+import { pick } from '@/lib/copy';
+import type { Locale } from '@/lib/locale';
+
 export interface AdminArea {
   readonly href: string;
   readonly eyebrow: string;
@@ -253,6 +257,336 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     group: 'safety',
   },
 ];
+
+/**
+ * The other four locales of each area's title and summary, as [en, ja, zh, vi]. Korean is not
+ * repeated here: ADMIN_AREA_COPY takes it from ADMIN_AREAS itself, so the product copy cannot
+ * drift between the card and its translation table.
+ */
+type Others = readonly [en: string, ja: string, zh: string, vi: string];
+
+const AREA_TRANSLATIONS: Readonly<Record<string, { readonly title: Others; readonly summary: Others }>> = {
+  '/admin/analytics': {
+    title: ['Telemetry · graph analytics room', 'テレメトリ · グラフ分析室', '遥测 · 图表分析室', 'Phòng telemetry · phân tích biểu đồ'],
+    summary: [
+      'MAU/DAU member cohorts, currency mix donut, quintile wealth curve, stock market-cap ranking charts and CSV export.',
+      'MAU/DAUユーザーコホート、通貨構成比ドーナツ、5分位資産階層曲線、株式時価総額ランキングチャートとCSVエクスポート。',
+      'MAU/DAU 用户同期群、货币构成环形图、五分位资产分层曲线、股票市值排名图表及 CSV 导出。',
+      'Cohort người dùng MAU/DAU, biểu đồ vòng cơ cấu tiền tệ, đường phân tầng tài sản theo ngũ phân vị, bảng xếp hạng vốn hóa và xuất CSV.',
+    ],
+  },
+  '/admin/api-health': {
+    title: ['Live monitoring of APIs across 14 domains', '14ドメインAPIのリアルタイム監視', '14 大领域 API 实时监控', 'Giám sát thời gian thực API của 14 miền'],
+    summary: [
+      'Monitors live latency, uptime and error rate of 300+ REST APIs across every domain.',
+      '全ドメイン300以上のREST APIのリアルタイムのレイテンシ、稼働率、エラー率を監視します。',
+      '监控全领域 300+ 个 REST API 的实时延迟、可用率与错误率。',
+      'Giám sát độ trễ, thời gian hoạt động và tỷ lệ lỗi theo thời gian thực của hơn 300 REST API ở mọi miền.',
+    ],
+  },
+  '/admin/seo': {
+    title: ['SEO and search engine indexing monitor', 'SEOと検索エンジンのインデックス監視', 'SEO 与搜索引擎索引监控', 'Giám sát SEO và lập chỉ mục công cụ tìm kiếm'],
+    summary: [
+      'Monitors live crawling by Googlebot, Naver Yeti and Bingbot, and IndexNow sitemap submissions.',
+      'Googlebot、Naver Yeti、Bingbotのリアルタイムのクロール状況とIndexNowサイトマップ送信を監視します。',
+      '监控 Googlebot、Naver Yeti、Bingbot 的实时抓取情况与 IndexNow 站点地图提交。',
+      'Giám sát thu thập thời gian thực của Googlebot, Naver Yeti, Bingbot và việc gửi sitemap IndexNow.',
+    ],
+  },
+  '/admin/blog': {
+    title: ['Blog management · AI finance columns', 'ブログ管理 · AI金融コラム', '博客管理 · AI 金融专栏', 'Quản lý blog · chuyên mục tài chính AI'],
+    summary: [
+      'Manages the AI finance blog post list, manual publishing and search-engine indexing automation.',
+      'AI金融ブログの記事一覧、手動発行、検索エンジンのインデックス自動化の状態を管理します。',
+      '管理 AI 金融博客文章列表、手动发布及搜索引擎索引自动化状态。',
+      'Quản lý danh sách bài blog tài chính AI, xuất bản thủ công và trạng thái tự động lập chỉ mục.',
+    ],
+  },
+  '/admin/treasury/grants': {
+    title: ['Start-up & venture grant review tower', '創業・ベンチャー支援金の審査管制塔', '创业·风投补助审核控制塔', 'Tháp xét duyệt trợ cấp khởi nghiệp & mạo hiểm'],
+    summary: [
+      'Live application review, first-pass AI scoring, atomic payouts from the welfare vault (VAULT_WELFARE) and the 14-day mandatory start-up clawback.',
+      'リアルタイムの申請審査、一次AIスコアリング、福祉金庫（VAULT_WELFARE）からのアトミック支給、14日間の創業義務に基づく回収を管制。',
+      '实时申请审核、首轮 AI 评分、福利金库（VAULT_WELFARE）原子化发放及 14 天强制创业回收管控。',
+      'Xét duyệt đơn thời gian thực, chấm điểm AI vòng một, chi trả nguyên tử từ quỹ phúc lợi (VAULT_WELFARE) và thu hồi bắt buộc sau 14 ngày.',
+    ],
+  },
+  '/admin/controls': {
+    title: ['Feature switches · policy versions', '機能スイッチ · ポリシーバージョン', '功能开关 · 政策版本', 'Công tắc tính năng · phiên bản chính sách'],
+    summary: [
+      'Turn features on and off, and create and roll back economic policy versions.',
+      '機能をオン/オフし、経済ポリシーのバージョンを作成・復元します。',
+      '开启或关闭功能，创建并回滚经济政策版本。',
+      'Bật/tắt tính năng, tạo và khôi phục phiên bản chính sách kinh tế.',
+    ],
+  },
+  '/admin/security': {
+    title: ['Account suspension · IP blocking', 'アカウント停止 · IP遮断', '账号封停 · IP 封禁', 'Đình chỉ tài khoản · chặn IP'],
+    summary: [
+      'Manages permanent suspension of abusive accounts and IP/CIDR blocks and unblocks.',
+      '異常リクエストのアカウントの永久停止とIP/CIDRの遮断・解除を管理します。',
+      '管理异常请求账号的永久封停及 IP/CIDR 封禁与解封。',
+      'Quản lý đình chỉ vĩnh viễn tài khoản yêu cầu bất thường và chặn/bỏ chặn IP/CIDR.',
+    ],
+  },
+  '/admin/users': {
+    title: ['Member restriction management', 'ユーザー制限の管理', '用户限制管理', 'Quản lý hạn chế người dùng'],
+    summary: [
+      'Every restriction and release keeps a reason and is written to the audit log.',
+      '制限も解除もすべて理由が残り、監査記録に記録されます。',
+      '限制与解除都会保留原因，并写入审计记录。',
+      'Mọi lần hạn chế và gỡ hạn chế đều lưu lý do và được ghi vào nhật ký kiểm toán.',
+    ],
+  },
+  '/admin/support': {
+    title: ['Support chat', 'お問い合わせチャット', '咨询聊天', 'Trò chuyện hỗ trợ'],
+    summary: [
+      'Review member enquiries and leave operator replies.',
+      '会員のお問い合わせを確認し、運営者の返信を残します。',
+      '查看会员咨询并留下运营者回复。',
+      'Xem yêu cầu của thành viên và để lại phản hồi của nhà vận hành.',
+    ],
+  },
+  '/admin/market': {
+    title: ['Virtual stock listing management', '仮想株式銘柄の管理', '虚拟股票管理', 'Quản lý mã cổ phiếu ảo'],
+    summary: [
+      'Corporate actions such as listings, trading halts and stock splits.',
+      '銘柄の登録、取引停止、株式分割などの企業行為。',
+      '股票上市、停牌、拆股等公司行为。',
+      'Các hành động doanh nghiệp như niêm yết, tạm ngừng giao dịch và chia tách cổ phiếu.',
+    ],
+  },
+  '/admin/catalog': {
+    title: ['Businesses · season events', '事業 · シーズンイベント', '产业 · 赛季活动', 'Kinh doanh · sự kiện mùa'],
+    summary: [
+      'Turn purchasable businesses and seasonal spending events on and off.',
+      '購入可能な事業とシーズン消費イベントをオン/オフします。',
+      '开启或关闭可购买的产业及赛季消费活动。',
+      'Bật/tắt các doanh nghiệp có thể mua và sự kiện chi tiêu theo mùa.',
+    ],
+  },
+  '/admin/work': {
+    title: ['Work · jobs', '作業 · 職業', '工作 · 职业', 'Công việc · nghề'],
+    summary: [
+      'The work catalogue, reward caps and per-job proficiency.',
+      '作業カタログと報酬上限、職業別の熟練度。',
+      '工作目录、奖励上限及各职业熟练度。',
+      'Danh mục công việc, hạn mức thưởng và độ thành thạo theo nghề.',
+    ],
+  },
+  '/admin/bank': {
+    title: ['Bank · loans', '銀行 · ローン', '银行 · 贷款', 'Ngân hàng · khoản vay'],
+    summary: [
+      'Deposits and outstanding loans, limits and arrears by credit grade.',
+      '預金と残りのローン、信用等級別の限度額と延滞。',
+      '存款与未偿贷款、按信用等级划分的额度与逾期。',
+      'Tiền gửi và dư nợ, hạn mức và nợ quá hạn theo hạng tín dụng.',
+    ],
+  },
+  '/admin/economy': {
+    title: ['Economy operations', '経済運営', '经济运营', 'Điều hành kinh tế'],
+    summary: [
+      'Money supply and issuance, alerts, the automatic adjustment engine and bulk payouts.',
+      '通貨量と発行、通知、自動調整エンジン、一括支給。',
+      '货币量与发行、通知、自动调节引擎、批量发放。',
+      'Cung tiền và phát hành, cảnh báo, công cụ tự điều chỉnh và chi trả hàng loạt.',
+    ],
+  },
+  '/admin/mint': {
+    title: ['Korea Minting and Security Printing Corporation (KOMSCO)', '韓国造幣公社（KOMSCO）', '韩国造币公社（KOMSCO）', 'Tổng công ty Đúc tiền Hàn Quốc (KOMSCO)'],
+    summary: [
+      'Controls base money (M0) minting approvals, permanent burns, emergency issuance freezes and full money-supply invariant checks.',
+      'マネタリーベース（M0）の鋳造承認、永久焼却、発行の緊急凍結、通貨量不変条件の全件検証を管制します。',
+      '管控基础货币（M0）铸造批准、永久销毁、紧急冻结发行及货币量不变式全量校验。',
+      'Kiểm soát phê duyệt đúc tiền cơ sở (M0), hủy vĩnh viễn, đóng băng phát hành khẩn cấp và kiểm tra toàn bộ bất biến cung tiền.',
+    ],
+  },
+  '/admin/central-bank': {
+    title: ['Bank of Korea (BOK) Monetary Policy Board', '韓国銀行（BOK）金融通貨委員会', '韩国银行（BOK）货币政策委员会', 'Hội đồng Chính sách Tiền tệ Ngân hàng Hàn Quốc (BOK)'],
+    summary: [
+      'Sets the base rate, reserve requirement and inflation target, and monitors M0/M1/M2 macro money indicators.',
+      '政策金利、支払準備率、目標インフレ政策を策定し、M0/M1/M2のマクロ通貨指標を監視します。',
+      '制定基准利率、存款准备金率与通胀目标政策，并监控 M0/M1/M2 宏观货币指标。',
+      'Xây dựng lãi suất cơ bản, tỷ lệ dự trữ bắt buộc, mục tiêu lạm phát và giám sát chỉ số tiền tệ vĩ mô M0/M1/M2.',
+    ],
+  },
+  '/admin/treasury': {
+    title: ['Treasury · reserve funds', '国庫 · 備蓄資金', '国库 · 储备资金', 'Ngân khố · quỹ dự trữ'],
+    summary: [
+      'Monitors the central treasury reserve and the issuance/burn recirculation flow.',
+      '中央国庫の備蓄金と発行/焼却の再循環フローを監視します。',
+      '监控中央国库储备金及发行/销毁的再循环流向。',
+      'Giám sát quỹ dự trữ ngân khố trung ương và dòng tái tuần hoàn phát hành/hủy.',
+    ],
+  },
+  '/admin/enterprises': {
+    title: ['Public enterprises · corporate governance', '公企業 · 企業ガバナンス', '国企 · 公司治理', 'Doanh nghiệp công · quản trị doanh nghiệp'],
+    summary: [
+      'Oversees the three public enterprises under the Woldeok State Holding Corporation (WSHC), the private start-up ecosystem, dividends and corporate tax.',
+      'ウォルドク国家投資公社（WSHC）傘下の3大公企業と民間スタートアップのエコシステム、配当、法人税を総括監視します。',
+      '统筹管控月德国家投资公社（WSHC）旗下三大国企、民间初创生态、分红及企业所得税。',
+      'Giám sát tổng thể 3 doanh nghiệp công thuộc Tổng công ty Đầu tư Nhà nước Woldeok (WSHC), hệ sinh thái khởi nghiệp tư nhân, cổ tức và thuế doanh nghiệp.',
+    ],
+  },
+  '/admin/bonds': {
+    title: ['Bond exchange · fiscal bonds', '国債取引所 · 財政債券', '国债交易所 · 财政债券', 'Sàn trái phiếu · trái phiếu tài khóa'],
+    summary: [
+      'Oversees issuance of 1/3/5-year Korean Treasury Bonds (KTB), coupon rate changes, hourly bulk coupon payments and the funds raised.',
+      '企画財政国債（KTB）1/3/5年物の発行、表面金利の調整、1時間ごとのクーポン利息一括支払い、調達資金を総括監視します。',
+      '统筹管控企划财政国债（KTB）1/3/5 年期发行、票面利率调整、每小时票息批量支付及募集资金。',
+      'Giám sát phát hành trái phiếu KTB kỳ hạn 1/3/5 năm, điều chỉnh lãi suất coupon, trả lãi hàng loạt mỗi giờ và nguồn vốn huy động.',
+    ],
+  },
+  '/admin/pension': {
+    title: ['National pension · public pension fund', '国民年金 · 公的年金基金', '国民年金 · 公共年金基金', 'Lương hưu quốc gia · quỹ lương hưu công'],
+    summary: [
+      'Oversees total contributions (AUM), pension recipients, hourly bulk payment of the lifelong basic pension and fund management.',
+      '国民拠出金の積立総額（AUM）、年金受給者管理、1時間ごとの生涯基礎年金一括支給、基金運用を総括監視します。',
+      '统筹管控国民缴费累计总额（AUM）、年金领取人管理、每小时终身基础年金批量发放及基金运作。',
+      'Giám sát tổng đóng góp (AUM), quản lý người nhận lương hưu, chi trả hàng loạt lương hưu cơ bản trọn đời mỗi giờ và vận hành quỹ.',
+    ],
+  },
+  '/admin/kdic': {
+    title: ['Deposit insurance · financial stability fund', '預金保険公社 · 金融安定基金', '存款保险公司 · 金融稳定基金', 'Bảo hiểm tiền gửi · quỹ ổn định tài chính'],
+    summary: [
+      'Oversees 500,000 WLD per-member deposit protection, insured institutions’ BIS ratios and premium collection, emergency bank-run lending and subrogation.',
+      '1人あたり50万WLDの預金者保護、付保金融機関のBIS比率と預金保険料の徴収、取り付け時の緊急貸付と代位弁済を総括監視します。',
+      '统筹管控每人 50 万 WLD 存款保护、投保金融机构 BIS 比率与保费征收、挤兑紧急贷款及代位清偿。',
+      'Giám sát bảo vệ tiền gửi 500.000 WLD mỗi người, tỷ lệ BIS và thu phí bảo hiểm của tổ chức tham gia, cho vay khẩn khi rút tiền ồ ạt và trả thay.',
+    ],
+  },
+  '/admin/fx': {
+    title: ['Seoul FX market · foreign reserves', 'ソウル外国為替市場 · 外貨準備高', '首尔外汇市场 · 外汇储备', 'Thị trường ngoại hối Seoul · dự trữ ngoại hối'],
+    summary: [
+      'Oversees FX reserve management, SDR basket and gold diversification, emergency currency swap lines, CIP forwards on interest differentials and smoothing operations.',
+      '外貨準備の運用、SDRバスケット・金保有の多様化、通貨スワップの緊急ライン、内外金利差に基づくCIP先物為替、スムージングオペレーションを総括監視します。',
+      '统筹管控外汇储备运作、SDR 篮子·黄金储备多元化、货币互换应急额度、内外利差 CIP 远期外汇及平滑操作。',
+      'Giám sát quản lý dự trữ ngoại hối, đa dạng hóa rổ SDR và vàng, hạn mức hoán đổi tiền tệ khẩn cấp, kỳ hạn CIP theo chênh lệch lãi suất và nghiệp vụ làm mượt.',
+    ],
+  },
+  '/admin/shop': {
+    title: ['Shop management', 'ショップ管理', '商店管理', 'Quản lý cửa hàng'],
+    summary: [
+      'Manages shop item prices, stock and active status.',
+      'ショップ商品の価格、在庫、有効状態を管理します。',
+      '管理商店商品的价格、库存与启用状态。',
+      'Quản lý giá, tồn kho và trạng thái kích hoạt của sản phẩm cửa hàng.',
+    ],
+  },
+  '/admin/money-flow': {
+    title: ['Member money flow · ledger monitor', 'ユーザー資金フロー · 元帳監視', '用户资金流向 · 账本监控', 'Dòng tiền người dùng · giám sát sổ cái'],
+    summary: [
+      'Monitors every member money movement — deposits, withdrawals, stock trades, shop purchases, reward payouts — and the double-entry ledger in real time.',
+      '入出金、株式売買、ショップ購入、報酬支給など全ユーザーの資金移動と複式簿記元帳の記録をリアルタイムで監視します。',
+      '实时监控存取款、股票买卖、商店购买、奖励发放等全体用户的资金流动及复式记账账本记录。',
+      'Giám sát thời gian thực mọi dịch chuyển tiền của người dùng — nạp/rút, mua bán cổ phiếu, mua hàng, chi thưởng — và sổ cái kép.',
+    ],
+  },
+  '/admin/logs/errors': {
+    title: ['Error & incident log ledger', 'エラー & 障害ログ元帳', '错误 & 故障日志账本', 'Sổ nhật ký lỗi & sự cố'],
+    summary: [
+      'Analyses screen load failures, runtime crashes and system incidents by hour, date and error code.',
+      '画面読み込み失敗、ランタイムクラッシュ、システム障害の記録を時間別・日付別・エラーコード別に精密分析します。',
+      '按小时、日期和错误代码精细分析页面加载失败、运行时崩溃及系统故障记录。',
+      'Phân tích chi tiết lỗi tải màn hình, sự cố runtime và sự cố hệ thống theo giờ, ngày và mã lỗi.',
+    ],
+  },
+  '/admin/logs/system': {
+    title: ['System runtime logs', 'システムランタイムログ', '系统运行日志', 'Nhật ký runtime hệ thống'],
+    summary: [
+      'Monitors live runtime logs from the Nginx web server, the core API backend and the Next.js frontend.',
+      'Nginxウェブサーバー、コアAPIバックエンド、Next.jsフロントエンドのリアルタイムランタイムログを監視します。',
+      '监控 Nginx Web 服务器、核心 API 后端及 Next.js 前端的实时运行日志。',
+      'Giám sát nhật ký runtime thời gian thực của máy chủ web Nginx, backend API lõi và frontend Next.js.',
+    ],
+  },
+  '/admin/logs': {
+    title: ['Audit log', '監査ログ', '审计日志', 'Nhật ký kiểm toán'],
+    summary: [
+      'Search who did what by condition and open the detailed record.',
+      '誰が何をしたかを条件別に検索し、詳細な記録を確認します。',
+      '按条件搜索谁做了什么，并查看详细记录。',
+      'Tìm theo điều kiện ai đã làm gì và xem bản ghi chi tiết.',
+    ],
+  },
+  '/admin/logs/activity': {
+    title: ['Member access · dwell · click log', 'ユーザーのアクセス · 滞在 · クリックログ', '用户访问 · 停留 · 点击日志', 'Nhật ký truy cập · thời gian ở lại · nhấp chuột'],
+    summary: [
+      'Shows page visits, time spent per page and button click events in real time.',
+      'ページアクセス記録、ページ別滞在時間、ボタンクリックイベントをリアルタイムで確認します。',
+      '实时查看页面访问记录、各页面停留时间及按钮点击事件。',
+      'Xem theo thời gian thực lượt truy cập trang, thời gian ở mỗi trang và sự kiện nhấp nút.',
+    ],
+  },
+  '/admin/logs/delivery': {
+    title: ['Discord delivery log', 'Discord配信ログ', 'Discord 投递日志', 'Nhật ký gửi Discord'],
+    summary: [
+      'Shows notification delivery success and retry status on a separate screen.',
+      '通知配信の成否と再試行状態を別画面で確認します。',
+      '在单独页面查看通知投递是否成功及重试状态。',
+      'Xem kết quả gửi thông báo và trạng thái thử lại trên màn hình riêng.',
+    ],
+  },
+  '/admin/logs/integrity': {
+    title: ['Integrity verification · retention policy', '完全性検証 · 保存ポリシー', '完整性校验 · 保留策略', 'Xác minh toàn vẹn · chính sách lưu giữ'],
+    summary: [
+      'Recompute the chain and record retention periods and destruction records.',
+      'チェーンを再計算し、保存期間と破棄記録を残します。',
+      '重新计算链，并记录保留期限与销毁记录。',
+      'Tính lại chuỗi và ghi lại thời hạn lưu giữ cùng hồ sơ hủy.',
+    ],
+  },
+  '/admin/discord': {
+    title: ['Discord delivery routes', 'Discord配信経路', 'Discord 投递路径', 'Tuyến gửi Discord'],
+    summary: [
+      'Which events go to which channel, and what is queued.',
+      'どのイベントがどのチャンネルに送られ、何が滞留しているか。',
+      '哪些事件发往哪个频道，以及哪些仍在排队。',
+      'Sự kiện nào được gửi tới kênh nào và những gì đang tồn đọng.',
+    ],
+  },
+  '/admin/content': {
+    title: ['Notices · photos', 'お知らせ · 写真', '公告 · 照片', 'Thông báo · ảnh'],
+    summary: [
+      'Only reviewed news and photos are published.',
+      '確認済みのお知らせと写真だけを公開します。',
+      '只公开审核完毕的消息与照片。',
+      'Chỉ công khai tin tức và ảnh đã được duyệt.',
+    ],
+  },
+  '/admin/safety': {
+    title: ['Emergency content takedown · safety centre', '緊急コンテンツ削除 · 安全センター', '紧急内容删除 · 安全中心', 'Gỡ nội dung khẩn cấp · trung tâm an toàn'],
+    summary: [
+      'Reviews non-member emergency takedown requests and minor-safety moderation.',
+      '非会員からの緊急コンテンツ削除要請と未成年者の安全モデレーションを審査します。',
+      '审核非会员紧急内容删除请求及未成年人安全审核。',
+      'Xét duyệt yêu cầu gỡ nội dung khẩn cấp từ người không phải thành viên và kiểm duyệt an toàn trẻ vị thành niên.',
+    ],
+  },
+};
+
+function areaCopy(korean: string, others: Others | undefined): Copy {
+  const [en, ja, zh, vi] = others ?? ['', '', '', ''];
+  return { ko: korean, en, ja, zh, vi };
+}
+
+/** `<href>.title` and `<href>.summary` in all five locales, Korean taken from ADMIN_AREAS. */
+export const ADMIN_AREA_COPY: Readonly<Record<string, Copy>> = Object.fromEntries(
+  ADMIN_AREAS.flatMap((area) => [
+    [`${area.href}.title`, areaCopy(area.title, AREA_TRANSLATIONS[area.href]?.title)],
+    [`${area.href}.summary`, areaCopy(area.summary, AREA_TRANSLATIONS[area.href]?.summary)],
+  ]),
+);
+
+/** An area's title in the reader's language. */
+export function areaTitle(area: AdminArea, locale: Locale): string {
+  return pick(locale, ADMIN_AREA_COPY[`${area.href}.title`] ?? areaCopy(area.title, undefined));
+}
+
+/** An area's one-line summary in the reader's language. */
+export function areaSummary(area: AdminArea, locale: Locale): string {
+  return pick(locale, ADMIN_AREA_COPY[`${area.href}.summary`] ?? areaCopy(area.summary, undefined));
+}
 
 export function adminArea(href: string): AdminArea {
   const area = ADMIN_AREAS.find((entry) => entry.href === href);

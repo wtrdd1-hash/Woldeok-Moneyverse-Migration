@@ -3,6 +3,8 @@
 import React, { useState, useId } from 'react';
 import { Target, TrendingUp, Sparkles, ChevronRight, Award, Calculator, Info } from 'lucide-react';
 import { groupDigits } from '@/lib/money';
+import type { BankCopyKey } from './copy';
+import { useBankCopy } from './use-bank-copy';
 
 interface SavingsGoalProgressRingProps {
   bankBalance?: string;
@@ -10,11 +12,11 @@ interface SavingsGoalProgressRingProps {
   bondsTotal?: string;
 }
 
-const PRESET_GOALS = [
-  { label: '종잣돈 10만', target: 100_000 },
-  { label: '중견 50만', target: 500_000 },
-  { label: '백만장자 100만', target: 1_000_000 },
-  { label: '자산가 500만', target: 5_000_000 },
+const PRESET_GOALS: readonly { readonly label: BankCopyKey; readonly target: number }[] = [
+  { label: 'ringPreset100k', target: 100_000 },
+  { label: 'ringPreset500k', target: 500_000 },
+  { label: 'ringPreset1m', target: 1_000_000 },
+  { label: 'ringPreset5m', target: 5_000_000 },
 ];
 
 export function SavingsGoalProgressRing({
@@ -32,6 +34,7 @@ export function SavingsGoalProgressRing({
   const [calcRateBps, setCalcRateBps] = useState<number>(180); // 1.8% daily base
 
   const maskId = useId();
+  const { c } = useBankCopy();
 
   const totalSavings = Number(BigInt(bankBalance) + BigInt(bondsTotal));
   const currentTarget = selectedGoal;
@@ -75,11 +78,11 @@ export function SavingsGoalProgressRing({
                 FINANCIAL GOAL & BONDS
               </span>
               <span className="rounded-full bg-sky-500/15 px-2 py-0.5 text-[10px] font-bold text-sky-600 dark:text-sky-300">
-                실시간 달성률 {progressPct}%
+                {c('ringProgressBadge', { pct: `${progressPct}` })}
               </span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-foreground mt-0.5">
-              스마트 저축 목표 & 채권 수익 시뮬레이터
+              {c('ringTitle')}
             </h2>
           </div>
         </div>
@@ -90,7 +93,7 @@ export function SavingsGoalProgressRing({
           className="inline-flex items-center justify-center gap-2 rounded-xl border border-border/80 bg-muted/30 px-3.5 py-2 text-xs font-bold text-foreground transition-all hover:bg-muted/70 hover:border-border active:scale-95"
         >
           <Calculator className="size-4 text-sky-500" />
-          <span>{isCalculatorOpen ? '계산기 접기' : '가상 채권 복리 계산기'}</span>
+          <span>{isCalculatorOpen ? c('ringCalculatorClose') : c('ringCalculatorOpen')}</span>
           <ChevronRight className={`size-3.5 transition-transform duration-200 ${isCalculatorOpen ? 'rotate-90' : ''}`} />
         </button>
       </div>
@@ -103,7 +106,7 @@ export function SavingsGoalProgressRing({
             <svg
               className="size-40 -rotate-90 transform"
               viewBox="0 0 160 160"
-              aria-label={`저축 목표 달성률 ${progressPct}%`}
+              aria-label={c('ringAria', { pct: `${progressPct}` })}
             >
               {/* 배경 원 */}
               <circle
@@ -142,14 +145,14 @@ export function SavingsGoalProgressRing({
                 {progressPct}%
               </span>
               <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                달성 완료
+                {c('ringDone')}
               </span>
             </div>
           </div>
 
           <div className="mt-3 text-center">
             <p className="text-xs font-semibold text-muted-foreground">
-              총 저축 자산: <span className="font-mono font-bold text-foreground">{groupDigits(totalSavings.toString())} WLD</span>
+              {c('ringTotal')}<span className="font-mono font-bold text-foreground">{groupDigits(totalSavings.toString())} WLD</span>
             </p>
           </div>
         </div>
@@ -158,9 +161,9 @@ export function SavingsGoalProgressRing({
         <div className="flex flex-col justify-between gap-5">
           <div className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-xs font-bold text-muted-foreground">목표 자산 선택 (프리셋)</span>
+              <span className="text-xs font-bold text-muted-foreground">{c('ringPresetLabel')}</span>
               <span className="text-xs font-mono font-bold text-sky-500">
-                목표치: {groupDigits(currentTarget.toString())} WLD
+                {c('ringTarget', { amount: groupDigits(currentTarget.toString()) })}
               </span>
             </div>
 
@@ -178,7 +181,7 @@ export function SavingsGoalProgressRing({
                         : 'border-border/60 bg-muted/20 text-muted-foreground hover:bg-muted/40 hover:text-foreground'
                     }`}
                   >
-                    <span className="text-xs font-bold">{preset.label}</span>
+                    <span className="text-xs font-bold">{c(preset.label)}</span>
                     <span className="text-[11px] font-mono mt-0.5 font-medium">
                       {groupDigits(preset.target.toString())} WLD
                     </span>
@@ -191,7 +194,7 @@ export function SavingsGoalProgressRing({
             <form onSubmit={handleCustomGoalSubmit} className="flex items-center gap-2 pt-1">
               <input
                 type="number"
-                placeholder="직접 입력 (예: 2500000)"
+                placeholder={c('ringCustomPlaceholder')}
                 value={customGoalInput}
                 onChange={(e) => setCustomGoalInput(e.target.value)}
                 className="flex-1 rounded-xl border border-border/70 bg-background/80 px-3.5 py-2 text-xs font-mono text-foreground placeholder:text-muted-foreground focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
@@ -200,7 +203,7 @@ export function SavingsGoalProgressRing({
                 type="submit"
                 className="rounded-xl border border-border/80 bg-foreground/10 px-4 py-2 text-xs font-bold text-foreground transition-all hover:bg-foreground/20 active:scale-95"
               >
-                적용
+                {c('ringApply')}
               </button>
             </form>
           </div>
@@ -212,12 +215,12 @@ export function SavingsGoalProgressRing({
                 <Award className="size-4 text-amber-500 shrink-0" />
                 <span className="font-semibold text-foreground">
                   {totalSavings >= currentTarget
-                    ? '🎉 목표 금액을 초과 달성했습니다! 명예 훈장을 수여받을 수 있습니다.'
-                    : `목표까지 앞으로 ${groupDigits((currentTarget - totalSavings).toString())} WLD 남았습니다.`}
+                    ? c('ringExceeded')
+                    : c('ringRemaining', { amount: groupDigits((currentTarget - totalSavings).toString()) })}
                 </span>
               </div>
               <span className="font-mono text-muted-foreground text-[11px]">
-                예금 {groupDigits(bankBalance)} + 채권 {groupDigits(bondsTotal)} WLD
+                {c('ringBreakdown', { bank: groupDigits(bankBalance), bonds: groupDigits(bondsTotal) })}
               </span>
             </div>
           </div>
@@ -230,9 +233,9 @@ export function SavingsGoalProgressRing({
           <div className="rounded-2xl border border-sky-500/20 bg-sky-500/5 p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-4">
               <TrendingUp className="size-4 text-sky-500" />
-              <h3 className="text-sm font-bold text-foreground">가상 채권 만기 수익률 계산기</h3>
+              <h3 className="text-sm font-bold text-foreground">{c('ringCalcTitle')}</h3>
               <span className="text-[10px] text-muted-foreground font-medium">
-                (원금 만기 자동 반환 및 복리 시뮬레이션)
+                {c('ringCalcSubtitle')}
               </span>
             </div>
 
@@ -240,7 +243,7 @@ export function SavingsGoalProgressRing({
               {/* 원금 입력 */}
               <div>
                 <label className="text-xs font-semibold text-muted-foreground block mb-1.5">
-                  투자 원금 (WLD)
+                  {c('ringPrincipal')}
                 </label>
                 <div className="relative">
                   <input
@@ -257,24 +260,24 @@ export function SavingsGoalProgressRing({
               {/* 만기 일수 */}
               <div>
                 <label className="text-xs font-semibold text-muted-foreground block mb-1.5">
-                  만기 기간 (일)
+                  {c('ringDays')}
                 </label>
                 <select
                   value={calcDays}
                   onChange={(e) => setCalcDays(Number(e.target.value))}
                   className="w-full rounded-xl border border-border/70 bg-background px-3 py-2 text-xs font-semibold text-foreground focus:border-sky-500 focus:outline-none"
                 >
-                  <option value={7}>7일 만기 단기 채권</option>
-                  <option value={14}>14일 만기 중기 채권</option>
-                  <option value={30}>30일 만기 장기 정기 채권</option>
-                  <option value={60}>60일 만기 프리미엄 채권</option>
+                  <option value={7}>{c('ringOption7')}</option>
+                  <option value={14}>{c('ringOption14')}</option>
+                  <option value={30}>{c('ringOption30')}</option>
+                  <option value={60}>{c('ringOption60')}</option>
                 </select>
               </div>
 
               {/* 일일 금리 */}
               <div>
                 <label className="text-xs font-semibold text-muted-foreground block mb-1.5">
-                  일일 금리 (기본값)
+                  {c('ringRate')}
                 </label>
                 <div className="flex items-center gap-2">
                   <input
@@ -285,7 +288,7 @@ export function SavingsGoalProgressRing({
                     className="w-full rounded-xl border border-border/70 bg-background px-3 py-2 text-xs font-mono font-bold text-foreground focus:border-sky-500 focus:outline-none"
                   />
                   <span className="text-xs font-mono font-semibold text-muted-foreground shrink-0">
-                    {(calcRateBps / 100).toFixed(2)}%/일
+                    {c('ringRatePerDay', { rate: (calcRateBps / 100).toFixed(2) })}
                   </span>
                 </div>
               </div>
@@ -294,22 +297,22 @@ export function SavingsGoalProgressRing({
             {/* 계산 결과 서머리 */}
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-sky-500/15 pt-3">
               <div className="rounded-xl bg-background/60 p-3 border border-border/50">
-                <span className="text-[11px] text-muted-foreground font-medium">예상 총 수익 이자</span>
+                <span className="text-[11px] text-muted-foreground font-medium">{c('ringExpectedInterest')}</span>
                 <p className="text-base font-black font-mono text-emerald-500 mt-0.5">
                   +{groupDigits(calculatedReturn.toString())} WLD
                 </p>
               </div>
               <div className="rounded-xl bg-background/60 p-3 border border-border/50">
-                <span className="text-[11px] text-muted-foreground font-medium">만기 총 수령액</span>
+                <span className="text-[11px] text-muted-foreground font-medium">{c('ringMaturityTotal')}</span>
                 <p className="text-base font-black font-mono text-foreground mt-0.5">
                   {groupDigits(calculatedTotal.toString())} WLD
                 </p>
               </div>
               <div className="rounded-xl bg-sky-500/10 p-3 border border-sky-500/20 flex items-center justify-between">
                 <div>
-                  <span className="text-[11px] text-sky-600 dark:text-sky-300 font-bold">수익 배수</span>
+                  <span className="text-[11px] text-sky-600 dark:text-sky-300 font-bold">{c('ringMultiple')}</span>
                   <p className="text-base font-black font-mono text-sky-600 dark:text-sky-400 mt-0.5">
-                    {((calculatedTotal / (calcPrincipal || 1)) * 100 - 100).toFixed(1)}% 순증
+                    {c('ringNetGain', { pct: ((calculatedTotal / (calcPrincipal || 1)) * 100 - 100).toFixed(1) })}
                   </p>
                 </div>
                 <Sparkles className="size-5 text-sky-500 shrink-0" />

@@ -4,6 +4,8 @@ import { renderToStaticMarkup } from 'react-dom/server';
 vi.mock('@/lib/session', () => ({ adminConsole: vi.fn().mockResolvedValue({ consoleSession: { state: 'open' } }) }));
 vi.mock('@/lib/api', () => ({ apiOrNull: vi.fn().mockResolvedValue(null) }));
 vi.mock('next/navigation', () => ({ redirect: vi.fn() }));
+// The assertions below are Korean product copy; the page reads the locale on the server.
+vi.mock('@/lib/locale-server', () => ({ getServerLocale: async () => 'ko' }));
 vi.mock('./admin-quick-search', () => ({ AdminQuickUserSearch: () => null }));
 vi.mock('./console-gate', () => ({ CloseConsole: () => null, OpenConsole: () => null }));
 vi.mock('./components/telemetry-pulse', () => ({ TelemetryPulse: () => null }));

@@ -1,4 +1,5 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { renderKo } from '@/testing/render-ko';
 import { afterEach, describe, expect, it } from 'vitest';
 import type { AdminUser } from '../types';
 import { UserDirectory } from './user-directory';
@@ -32,7 +33,7 @@ const USERS: readonly AdminUser[] = [
 
 describe('UserDirectory', () => {
   it('filters by display name and preserves the matching detail destination', () => {
-    render(<UserDirectory users={USERS} />);
+    renderKo(<UserDirectory users={USERS} />);
 
     fireEvent.change(screen.getByRole('textbox', { name: '사용자 검색' }), {
       target: { value: '월덕' },
@@ -46,7 +47,7 @@ describe('UserDirectory', () => {
   });
 
   it('shows only restricted members when the restriction filter is selected', () => {
-    render(<UserDirectory users={USERS} />);
+    renderKo(<UserDirectory users={USERS} />);
 
     fireEvent.click(screen.getByRole('button', { name: '제한됨' }));
 
@@ -56,7 +57,7 @@ describe('UserDirectory', () => {
   });
 
   it('shows full Korea-time access dates and sorts by most recent access', () => {
-    render(<UserDirectory users={USERS} />);
+    renderKo(<UserDirectory users={USERS} />);
 
     expect(screen.getByText(/2026.*09.*18.*22.*45.*00/)).toBeDefined();
 
@@ -71,7 +72,7 @@ describe('UserDirectory', () => {
 
 describe('bounded member directory truthfulness', () => {
   it('labels truncated membership as a limited snapshot and withholds population-wide analytics', () => {
-    render(<UserDirectory users={USERS} scope={{ kind: 'WEALTH_ORDERED_SNAPSHOT', limit: 50, hasMore: true }} />);
+    renderKo(<UserDirectory users={USERS} scope={{ kind: 'WEALTH_ORDERED_SNAPSHOT', limit: 50, hasMore: true }} />);
     expect(screen.getByRole('status').textContent).toMatch(/50명.*검색.*제한/);
     expect(screen.queryByTestId('population-telemetry')).toBeNull();
     expect(screen.getByText('조회된 회원').textContent).toContain('조회된 회원');
@@ -79,7 +80,7 @@ describe('bounded member directory truthfulness', () => {
     expect(screen.getByText(/조회된 목록에서는 검색 조건과 일치하는 회원이 없습니다/)).toBeDefined();
   });
   it('renders population-wide analytics only when the backend confirms a complete snapshot', () => {
-    render(<UserDirectory users={USERS} scope={{ kind: 'WEALTH_ORDERED_SNAPSHOT', limit: 50, hasMore: false }} />);
+    renderKo(<UserDirectory users={USERS} scope={{ kind: 'WEALTH_ORDERED_SNAPSHOT', limit: 50, hasMore: false }} />);
     expect(screen.getByTestId('population-telemetry')).toBeDefined();
   });
 });

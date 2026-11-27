@@ -36,6 +36,8 @@ import { AdminQuickJumperModal } from './admin-quick-jumper-modal';
 import { AdminStepupOtpModal } from './admin/admin-stepup-otp-modal';
 import { AdminStepUpStatus } from './admin/admin-step-up-status';
 import { TranslatedText } from './translated-text';
+import { ADMIN_CHROME_COPY, adminTabLabel } from '@/app/admin/admin-copy';
+import { useAdminCopy } from '@/app/admin/use-admin-copy';
 
 type AdminNavGroup = 'all' | 'macro' | 'treasury' | 'market' | 'security' | 'content' | 'system';
 
@@ -108,6 +110,7 @@ export function AdminSubNav() {
   const activeItemRef = useRef<HTMLLIElement>(null);
   const isAdminPath = pathname.startsWith('/admin');
   const active = isAdminPath ? activeAdminTab(pathname) : null;
+  const { locale, c } = useAdminCopy(ADMIN_CHROME_COPY);
 
 
   // 2FA Elevation State
@@ -211,9 +214,9 @@ export function AdminSubNav() {
                   onClick={handleRevoke}
                   disabled={revoking}
                   className="ml-1 rounded bg-rose-500/20 px-1.5 py-0.5 text-[10px] font-sans font-bold text-rose-300 hover:bg-rose-500/35 hover:text-white transition-colors"
-                  title="세션 즉시 잠금"
+                  title={c('subNavLockTitle')}
                 >
-                  잠금
+                  {c('subNavLock')}
                 </button>
               </div>
             ) : (
@@ -221,10 +224,10 @@ export function AdminSubNav() {
                 type="button"
                 onClick={() => setModalOpen(true)}
                 className="flex items-center gap-1.5 bg-amber-500/15 border border-amber-500/35 hover:bg-amber-500/25 text-amber-300 rounded-lg px-2.5 py-1 text-[11px] font-bold transition-all min-h-[32px]"
-                title="텔레그램/디스코드 2FA 세션 승격 (15분)"
+                title={c('subNavElevateTitle')}
               >
                 <Lock className="size-3.5 shrink-0" />
-                <span>2FA 승격</span>
+                <span>{c('subNavElevate')}</span>
               </button>
             )}
           </div>
@@ -233,7 +236,7 @@ export function AdminSubNav() {
         {/* Pages inside the current sidebar group only. */}
         <nav
           ref={navRef}
-          aria-label="관리자 세부 내비게이션"
+          aria-label={c('subNavAria')}
           className="w-full max-w-full min-w-0 mb-4 overflow-x-auto rounded-md border border-[var(--g1-line)] bg-[var(--g1-plum)] p-1.5 scrollbar-none touch-pan-x overscroll-x-contain select-none [&::-webkit-scrollbar]:hidden"
         >
           <ul className="flex w-max items-center gap-1 px-2 sm:w-auto sm:flex-wrap sm:px-0">
@@ -260,7 +263,7 @@ export function AdminSubNav() {
                         isActive ? 'text-[var(--g1-violet)]' : 'text-[var(--g1-muted)] group-hover:text-[var(--g1-ink)]',
                       )}
                     />
-                    <span>{tab.label}</span>
+                    <span>{adminTabLabel(tab.href, tab.label, locale)}</span>
                   </Link>
                 </li>
               );
@@ -274,7 +277,7 @@ export function AdminSubNav() {
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         mode="elevate"
-        actionName="관리자 콘솔 15분 세션 승격"
+        actionName={c('subNavActionName')}
         onSuccess={() => {
           setElevated(true);
           setRemainingSeconds(900);

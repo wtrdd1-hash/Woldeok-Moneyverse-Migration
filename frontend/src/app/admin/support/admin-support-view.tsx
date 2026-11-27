@@ -30,6 +30,11 @@ import { cn } from '@/lib/cn';
 import { toast } from 'sonner';
 import { AdminBack } from '../admin-back';
 import { adminSupportReply, adminSupportStatus } from './actions';
+import { useAdminCopy } from '../use-admin-copy';
+import { INTL_LOCALE } from '../admin-copy';
+import { ADMIN_SUPPORT_COPY, type AdminSupportCopyKey } from './copy';
+
+type CopyFn = (key: AdminSupportCopyKey, values?: Readonly<Record<string, string>>) => string;
 
 export interface AdminSupportThread {
   readonly thread_id: string;
@@ -59,49 +64,52 @@ interface AdminSupportViewProps {
 const CANNED_RESPONSES = [
   {
     label: '🔍 [확인 중]',
+    labelKey: 'cannedChecking',
     text: '안녕하세요 회원님, 제보해 주신 문의 내용을 꼼꼼히 확인하고 있습니다. 신속히 확인 후 안내해 드리겠습니다.',
   },
   {
     label: '✅ [처리 완료]',
+    labelKey: 'cannedResolved',
     text: '요청하신 사항이 정상적으로 처리 완료되었습니다. 추가로 궁금하신 점이나 도움이 필요하시면 언제든 말씀해 주세요!',
   },
   {
     label: '📸 [추가 정보]',
+    labelKey: 'cannedMoreInfo',
     text: '정확하고 신속한 확인을 위해 문제가 발생한 시각, 기기 환경, 또는 오류 화면 스크린샷 등의 추가 정보를 남겨주시면 감사하겠습니다.',
   },
 ] as const;
 
 const STATUS_CONFIG: Record<
   string,
-  { label: string; color: string; badgeVariant: 'default' | 'secondary' | 'outline' | 'destructive' }
+  { labelKey: AdminSupportCopyKey; color: string; badgeVariant: 'default' | 'secondary' | 'outline' | 'destructive' }
 > = {
   open: {
-    label: '답변 대기',
+    labelKey: 'statusOpen',
     color: 'text-amber-500 bg-amber-500/10 border-amber-500/30',
     badgeVariant: 'default',
   },
   waiting_user: {
-    label: '회원 답변 대기',
+    labelKey: 'statusWaitingUser',
     color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/30',
     badgeVariant: 'secondary',
   },
   resolved: {
-    label: '처리 완료',
+    labelKey: 'statusResolved',
     color: 'text-muted-foreground bg-muted/40 border-border',
     badgeVariant: 'outline',
   },
 };
 
-function formatTimeAgo(isoString: string): string {
+function formatTimeAgo(isoString: string, c: CopyFn): string {
   try {
     const diffMs = Date.now() - new Date(isoString).getTime();
     const diffMin = Math.floor(diffMs / 60000);
-    if (diffMin < 1) return '방금 전';
-    if (diffMin < 60) return `${diffMin}분 전`;
+    if (diffMin < 1) return c('justNow');
+    if (diffMin < 60) return c('minutesAgo', { n: String(diffMin) });
     const diffHours = Math.floor(diffMin / 60);
-    if (diffHours < 24) return `${diffHours}시간 전`;
+    if (diffHours < 24) return c('hoursAgo', { n: String(diffHours) });
     const diffDays = Math.floor(diffHours / 24);
-    return `${diffDays}일 전`;
+    return c('daysAgo', { n: String(diffDays) });
   } catch {
     return '';
   }
@@ -114,6 +122,12 @@ export function AdminSupportView({
   initialStatus,
 }: AdminSupportViewProps) {
   const router = useRouter();
+  const { locale, c } = useAdminCopy(ADMIN_SUPPORT_COPY);
+  /** A known status in the reader's language; an unknown one is shown as the server sent it. */
+  const statusLabel = (status: string) => {
+    const meta = STATUS_CONFIG[status];
+    return meta ? c(meta.labelKey) : status;
+  };
 
   const [threads, setThreads] = useState<readonly AdminSupportThread[]>(initialThreads);
   const [selectedThreadId, setSelectedThreadId] = useState<string | undefined>(
@@ -138,12 +152,12 @@ export function AdminSupportView({
   const handleUploadImageFile = async (file: File) => {
     if (!file) return;
     if (file.size > 8 * 1024 * 1024) {
-      toast.error('이미지 파일 크기는 최대 8MB까지 가능합니다.');
+      toast.error(c('imageTooLarge'));
       return;
     }
 
     setIsUploadingImage(true);
-    const toastId = toast.loading('안티바이러스 검사 및 이미지 업로드 중…');
+    const toastId = toast.loading(c('imageUploading'));
 
     try {
       const sessionRes = await fetch('/app-api/v1/auth/session');
@@ -163,14 +177,14 @@ export function AdminSupportView({
 
       const data = await res.json();
       if (res.ok && data.success) {
-        toast.success('보안 검사를 통과하여 이미지가 첨부되었습니다.', { id: toastId });
+        toast.success(c('imageAttached'), { id: toastId });
         setAttachedImg({ url: data.url, name: file.name });
       } else {
-        const errorMsg = data.detail || data.message || '업로드에 실패했습니다.';
+        const errorMsg = data.detail || data.message || c('imageUploadFailed');
         toast.error(errorMsg, { id: toastId });
       }
     } catch {
-      toast.error('이미지 업로드 중 네트워크 오류가 발생했습니다.', { id: toastId });
+      toast.error(c('imageNetworkError'), { id: toastId });
     } finally {
       setIsUploadingImage(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -239,7 +253,7 @@ export function AdminSupportView({
         const list: AdminSupportThread[] = data.threads ?? [];
         setThreads(list);
         if (showToast) {
-          toast.success('문의 목록이 최신 상태로 동기화되었습니다.');
+          toast.success(c('threadsSynced'));
         }
       }
     } catch {
@@ -247,7 +261,7 @@ export function AdminSupportView({
     } finally {
       setIsRefreshing(false);
     }
-  }, [initialStatus]);
+  }, [initialStatus, c]);
 
   // 주기적 자동 폴링 (5초)
   useEffect(() => {
@@ -295,14 +309,14 @@ export function AdminSupportView({
       await adminSupportReply(formData);
       pendingReplyRef.current = null;
       synthSound.playMessageSent();
-      toast.success('관리자 답장이 서버에 저장되었습니다.');
+      toast.success(c('replySaved'));
       setReplyText('');
       setAttachedImg(null);
       await fetchMessagesForThread(selectedThreadId);
       await fetchAllThreads(false);
       router.refresh();
     } catch (err: unknown) {
-      toast.error('서버에서 답장 저장을 확인하지 못했습니다. 다시 확인해 주세요.');
+      toast.error(c('replyUnconfirmed'));
     } finally {
       setIsSending(false);
     }
@@ -321,11 +335,11 @@ export function AdminSupportView({
 
       await adminSupportStatus(formData);
       synthSound.playClick();
-      toast.success(`문의 상태가 '${STATUS_CONFIG[currentStatusSelect]?.label ?? currentStatusSelect}'(으)로 변경되었습니다.`);
+      toast.success(c('statusChanged', { status: statusLabel(currentStatusSelect) }));
       await fetchAllThreads(false);
       router.refresh();
     } catch {
-      toast.error('문의 상태 변경 결과를 확인하지 못했습니다. 다시 조회해 주세요.');
+      toast.error(c('statusUnconfirmed'));
     } finally {
       setIsChangingStatus(false);
     }
@@ -343,7 +357,7 @@ export function AdminSupportView({
 
     navigator.clipboard.writeText(transcript);
     setCopied(true);
-    toast.success('전체 대화 내용이 클립보드에 복사되었습니다.');
+    toast.success(c('transcriptCopied'));
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -370,13 +384,13 @@ export function AdminSupportView({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-black">관리자 고객지원 관제 센터</h1>
+            <h1 className="text-2xl font-black">{c('heading')}</h1>
             <Badge variant="outline" className="font-mono text-xs">
-              {threads.length}건
+              {c('threadCount', { count: String(threads.length) })}
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground">
-            회원 1:1 문의를 실시간으로 모니터링하고 신속하게 답장 및 티켓 상태를 관리합니다.
+            {c('intro')}
           </p>
         </div>
 
@@ -391,7 +405,7 @@ export function AdminSupportView({
             className={cn('min-h-11 text-xs font-semibold rounded-xl gap-1.5', autoPoll && 'border-emerald-500/50 text-emerald-600 bg-emerald-500/10')}
           >
             <span className={cn('size-2 rounded-full', autoPoll ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground')} />
-            <span>{autoPoll ? '실시간 5초 폴링 ON' : '폴링 일시정지'}</span>
+            <span>{autoPoll ? c('pollOn') : c('pollPaused')}</span>
           </Button>
 
           {/* 수동 새로고침 버튼 */}
@@ -404,7 +418,7 @@ export function AdminSupportView({
             className="text-xs font-semibold rounded-xl gap-1.5"
           >
             <RotateCw className={cn('size-3.5', isRefreshing && 'animate-spin')} />
-            <span>새로고침</span>
+            <span>{c('refresh')}</span>
           </Button>
         </div>
       </div>
@@ -412,10 +426,10 @@ export function AdminSupportView({
       {/* 4대 상태 탭 바 */}
       <div className="flex flex-nowrap overflow-x-auto no-scrollbar gap-1.5 pb-1">
         {[
-          { href: '/admin/support', label: '전체', count: threads.length, active: initialStatus === null },
-          { href: '/admin/support?status=open', label: '답변 대기', count: openCount, active: initialStatus === 'open' },
-          { href: '/admin/support?status=waiting_user', label: '회원 대기', count: waitingCount, active: initialStatus === 'waiting_user' },
-          { href: '/admin/support?status=resolved', label: '완료', count: resolvedCount, active: initialStatus === 'resolved' },
+          { href: '/admin/support', label: c('tabAll'), count: threads.length, active: initialStatus === null },
+          { href: '/admin/support?status=open', label: c('tabOpen'), count: openCount, active: initialStatus === 'open' },
+          { href: '/admin/support?status=waiting_user', label: c('tabWaitingUser'), count: waitingCount, active: initialStatus === 'waiting_user' },
+          { href: '/admin/support?status=resolved', label: c('tabResolved'), count: resolvedCount, active: initialStatus === 'resolved' },
         ].map((tab) => (
           <Link
             key={tab.href}
@@ -451,8 +465,8 @@ export function AdminSupportView({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              aria-label="문의 검색"
-              placeholder="회원 닉네임, 문의 제목 검색..."
+              aria-label={c('searchAria')}
+              placeholder={c('searchPlaceholder')}
               className="min-h-11 w-full rounded-xl border bg-background pl-9 pr-3 py-2 text-xs placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
@@ -461,13 +475,12 @@ export function AdminSupportView({
           <div className="grid content-start gap-2 max-h-72 lg:max-h-none overflow-y-auto pr-1">
             {filteredThreads.length === 0 ? (
               <div className="rounded-xl border border-dashed p-6 text-center text-xs text-muted-foreground">
-                {searchQuery ? '검색 조건과 일치하는 문의가 없습니다.' : '접수된 문의가 없습니다.'}
+                {searchQuery ? c('noMatch') : c('noThreads')}
               </div>
             ) : (
               filteredThreads.map((t) => {
                 const isSelected = selectedThreadId === t.thread_id;
                 const statusMeta = STATUS_CONFIG[t.status] ?? {
-                  label: t.status,
                   color: 'text-muted-foreground bg-muted',
                 };
                 return (
@@ -497,12 +510,12 @@ export function AdminSupportView({
                         <span className="font-semibold text-foreground/80">{t.display_name}</span>
                       </div>
                       <span className={cn('px-2 py-0.5 rounded-md text-[10px] font-bold border', statusMeta.color)}>
-                        {statusMeta.label}
+                        {statusLabel(t.status)}
                       </span>
                     </div>
                     <div className="text-[10px] text-muted-foreground/70 flex items-center gap-1">
                       <Clock className="size-2.5" />
-                      <span>최근: {formatTimeAgo(t.last_message_at || t.created_at)}</span>
+                      <span>{c('lastActivity', { when: formatTimeAgo(t.last_message_at || t.created_at, c) })}</span>
                     </div>
                   </button>
                 );
@@ -526,11 +539,11 @@ export function AdminSupportView({
                         STATUS_CONFIG[selectedThread.status]?.color ?? 'text-muted-foreground'
                       )}
                     >
-                      {STATUS_CONFIG[selectedThread.status]?.label ?? selectedThread.status}
+                      {statusLabel(selectedThread.status)}
                     </span>
                   </div>
                   <div className="text-xs text-muted-foreground flex items-center gap-2 mt-0.5">
-                    <span>회원: <strong className="text-foreground">{selectedThread.display_name}</strong></span>
+                    <span>{c('memberLabel')} <strong className="text-foreground">{selectedThread.display_name}</strong></span>
                     {selectedThread.user_id && (
                       <span className="font-mono text-[10px] text-muted-foreground/60 truncate max-w-[140px]">
                         ({selectedThread.user_id})
@@ -549,7 +562,7 @@ export function AdminSupportView({
                     className="h-8 text-xs font-semibold rounded-lg gap-1"
                   >
                     {copied ? <Check className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
-                    <span>{copied ? '복사됨' : '대화 복사'}</span>
+                    <span>{copied ? c('copied') : c('copyTranscript')}</span>
                   </Button>
                 </div>
               </div>
@@ -569,9 +582,9 @@ export function AdminSupportView({
                       )}
                     >
                       <div className="flex items-center justify-between gap-3 text-[11px] font-bold opacity-80">
-                        <span>{isAdmin ? '🛡️ 관리자 (운영팀)' : `👤 ${selectedThread.display_name}`}</span>
+                        <span>{isAdmin ? c('adminSender') : `👤 ${selectedThread.display_name}`}</span>
                         <span className="font-mono text-[10px] opacity-70">
-                          {new Date(m.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(m.created_at).toLocaleTimeString(INTL_LOCALE[locale], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
                       <div className="text-xs sm:text-sm leading-relaxed">
@@ -587,7 +600,7 @@ export function AdminSupportView({
               <div className="mt-3.5 pt-3 border-t border-border flex flex-wrap items-center gap-1.5">
                 <span className="text-[11px] font-bold text-muted-foreground flex items-center gap-1 mr-1">
                   <Sparkles className="size-3 text-amber-500" />
-                  <span>빠른 상용구:</span>
+                  <span>{c('quickPresets')}</span>
                 </span>
                 {CANNED_RESPONSES.map((preset) => (
                   <button
@@ -596,7 +609,7 @@ export function AdminSupportView({
                     onClick={() => setReplyText((prev) => (prev ? `${prev}\n${preset.text}` : preset.text))}
                     className="px-2.5 py-1 rounded-lg bg-muted hover:bg-muted/80 text-[11px] font-semibold text-muted-foreground hover:text-foreground border border-border transition-colors"
                   >
-                    {preset.label}
+                    {c(preset.labelKey)}
                   </button>
                 ))}
               </div>
@@ -610,7 +623,7 @@ export function AdminSupportView({
                     type="button"
                     onClick={() => setAttachedImg(null)}
                     className="p-1 hover:bg-muted rounded-full transition-colors"
-                    aria-label="첨부 이미지 삭제"
+                    aria-label={c('removeAttachment')}
                   >
                     <X className="size-3 text-muted-foreground hover:text-foreground" />
                   </button>
@@ -639,7 +652,7 @@ export function AdminSupportView({
                     maxLength={2000}
                     aria-label="관리자 답장"
                     className="min-h-24 sm:min-h-16 w-full rounded-xl border bg-background p-3 pr-10 text-xs sm:text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/40"
-                    placeholder="관리자 답장을 입력하세요... (이미지 붙여넣기 Ctrl+V 또는 클립 아이콘)"
+                    placeholder={c('replyPlaceholder')}
                   />
                   <div className="absolute right-2.5 bottom-2.5">
                     <input
@@ -657,8 +670,8 @@ export function AdminSupportView({
                       disabled={isUploadingImage}
                       onClick={() => fileInputRef.current?.click()}
                       className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50"
-                      aria-label="이미지 파일 첨부"
-                      title="이미지 파일 첨부 (최대 8MB, 보안 스캔)"
+                      aria-label={c('attachImage')}
+                      title={c('attachImageTitle')}
                     >
                       <Paperclip className="size-4" />
                     </button>
@@ -670,7 +683,7 @@ export function AdminSupportView({
                   className="min-h-11 w-full rounded-xl bg-primary px-5 font-bold text-primary-foreground sm:w-auto transition-opacity disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-xs"
                 >
                   <Send className="size-4" />
-                  <span>{isSending ? '전송 중...' : '답장'}</span>
+                  <span>{isSending ? c('sending') : c('reply')}</span>
                 </button>
               </form>
 
@@ -688,24 +701,24 @@ export function AdminSupportView({
                   aria-label="문의 처리 상태"
                   className="min-h-11 w-full rounded-xl border bg-background p-2 text-xs sm:text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
                 >
-                  <option value="open">답변 대기 (open)</option>
-                  <option value="waiting_user">회원 답변 대기 (waiting_user)</option>
-                  <option value="resolved">처리 완료 (resolved)</option>
+                  <option value="open">{c('optionOpen')}</option>
+                  <option value="waiting_user">{c('optionWaitingUser')}</option>
+                  <option value="resolved">{c('optionResolved')}</option>
                 </select>
                 <button
                   type="submit"
                   disabled={isChangingStatus}
                   className="min-h-11 w-full rounded-xl border px-4 font-bold sm:w-auto hover:bg-muted transition-colors disabled:opacity-50"
                 >
-                  {isChangingStatus ? '변경 중...' : '상태 변경'}
+                  {isChangingStatus ? c('changing') : c('changeStatus')}
                 </button>
               </form>
             </>
           ) : (
             <div className="m-auto flex flex-col items-center justify-center text-center p-8 space-y-2">
               <Headphones className="size-10 text-muted-foreground/40" />
-              <p className="text-sm font-bold text-muted-foreground">문의가 없습니다.</p>
-              <p className="text-xs text-muted-foreground/70">좌측 목록에서 문의를 선택하거나 새 문의를 기다려 주세요.</p>
+              <p className="text-sm font-bold text-muted-foreground">{c('emptyTitle')}</p>
+              <p className="text-xs text-muted-foreground/70">{c('emptyHint')}</p>
             </div>
           )}
         </section>

@@ -1,7 +1,8 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 vi.mock('./actions', () => ({ customizePocketAction: vi.fn() }));
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
+import { renderKo as render } from '@/testing/render-ko';
 import { SavingPocketCustomizeDialog } from './saving-pocket-customize-dialog';
 import type { SavingPocket } from './types';
 

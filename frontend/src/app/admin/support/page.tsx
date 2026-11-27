@@ -3,13 +3,18 @@ import { apiOrNull } from '@/lib/api';
 import { EmptyState } from '@/components/empty-state';
 import { TranslatedText as T } from '@/components/translated-text';
 import { requireAdminConsole } from '@/lib/session';
+import { getServerLocale } from '@/lib/locale-server';
+import { copyText } from '../admin-copy';
+import { ADMIN_SUPPORT_COPY } from './copy';
 import { AdminSupportView, type AdminSupportThread, type AdminSupportMessage } from './admin-support-view';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = {
-  title: '문의 채팅 · 관리자 콘솔',
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: copyText(await getServerLocale(), ADMIN_SUPPORT_COPY.metaTitle),
+    robots: { index: false, follow: false },
+  };
+}
 
 export default async function Page({
   searchParams,
