@@ -34,6 +34,10 @@ spring:
 moneyverse:
   security:
     internal-token: ${INTERNAL_API_TOKEN:}
+    # Administrator TOTP sealing key (base64, exactly 32 bytes) and its id. Empty means the
+    # factor is unavailable; there is deliberately no default and no fallback.
+    admin-totp-key: ${MONEYVERSE_ADMIN_TOTP_KEY:}
+    admin-totp-key-id: ${MONEYVERSE_ADMIN_TOTP_KEY_ID:}
     admin-role: ROLE_ADMIN
   features:
     swf-operational: ${MONEYVERSE_SWF_OPERATIONAL:true}
