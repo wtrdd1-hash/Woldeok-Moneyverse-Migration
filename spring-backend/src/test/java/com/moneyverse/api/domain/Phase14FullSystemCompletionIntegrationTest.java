@@ -120,11 +120,12 @@ public class Phase14FullSystemCompletionIntegrationTest {
     }
 
     @Test
-    @DisplayName("14. ControlsController - 퍼블릭 피처 플래그 조회 (200 OK)")
+    @DisplayName("14. ControlsController - flags are not invented; canonical source is feature_switches (503)")
     void testControlsFlags() throws Exception {
+        // Security review 2026-11-28: this asserted a hard-coded flag. Feature state lives in
+        // feature_switches (fail closed); until this route reads it, it must not answer constants.
         mockMvc.perform(get("/controls/flags"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.flags.PVP_ARENA_ENABLED").value(true));
+                .andExpect(status().isServiceUnavailable());
     }
 
     @Test

@@ -148,11 +148,9 @@ public class SafetyController {
             @RequestParam(name = "status", required = false) String status,
             @RequestParam(name = "limit", required = false, defaultValue = "50") int limit,
             @RequestParam(name = "offset", required = false, defaultValue = "0") int offset) {
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "reports", Collections.emptyList(),
-                "total", 0
-        ));
+        // Security review 2026-11-28: this answered with constants an operator would act on.
+        // Unavailable until read from its canonical source; never invented evidence.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "CHAT_REPORT_SOURCE_UNAVAILABLE");
     }
 
     @GetMapping("/admin/safety/chat-reports/{id}")

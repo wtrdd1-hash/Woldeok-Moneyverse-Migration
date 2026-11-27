@@ -70,10 +70,8 @@ public class AbuseSecurityController {
     @GetMapping("/rules")
     public ResponseEntity<Map<String, Object>> getRules(HttpServletRequest request) {
         verifyAdmin(request);
-        List<Map<String, Object>> rules = List.of(
-                Map.of("id", "rule-rapid-tx", "name", "단시간 초과 거래 탐지", "enabled", true, "thresholdRps", 20),
-                Map.of("id", "rule-multi-ip", "name", "동시 다중 IP 세션 탐지", "enabled", true, "maxIpsPerUser", 3)
-        );
-        return ResponseEntity.ok(Map.of("rules", rules));
+        // Security review 2026-11-28: this answered with constants an operator would act on.
+        // Unavailable until read from its canonical source; never invented evidence.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "ABUSE_RULES_SOURCE_UNAVAILABLE");
     }
 }

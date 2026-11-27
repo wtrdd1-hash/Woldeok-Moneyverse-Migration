@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.lang.management.ManagementFactory;
 import com.sun.management.OperatingSystemMXBean;
@@ -34,93 +36,110 @@ public class AdminApiHealthController {
         long uptime = ManagementFactory.getRuntimeMXBean().getUptime() / 1000;
         Instant now = Instant.now();
 
-        // 실시간 DB 지연시간 측정
-        long start = System.currentTimeMillis();
+        // Security review 2026-11-28: the probe used to swallow a failed query and still report the
+        // database OPERATIONAL, beside invented per-domain latencies labelled ROUTE_METRICS. Only what
+        // is measured here is reported; route metrics are not collected, so they are null/UNKNOWN.
+        Long dbLatency = null;
+        String dbStatus;
+        long start = System.nanoTime();
         try {
             jdbcTemplate.queryForObject("SELECT 1", Integer.class);
-        } catch (Exception ignored) {}
-        long dbLatency = Math.max(1, System.currentTimeMillis() - start);
+            dbLatency = Math.max(1L, (System.nanoTime() - start) / 1_000_000L);
+            dbStatus = "OPERATIONAL";
+        } catch (RuntimeException e) {
+            dbStatus = "DEGRADED";
+        }
 
         OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
         Runtime runtime = Runtime.getRuntime();
-        double cpuLoad = osBean.getCpuLoad();
-        if (cpuLoad < 0) cpuLoad = 0.08;
+        // A negative value means the platform did not measure it; 0 is shown rather than a made-up load.
+        double cpuLoad = Math.max(0.0, osBean.getCpuLoad());
+        long heapUsedMb = (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024);
 
-        Map<String, Object> sysTelemetry = Map.of(
-                "cpuLoad1m", Math.round(cpuLoad * 100.0) / 100.0,
-                "cpuCores", runtime.availableProcessors(),
-                "totalMemMb", runtime.totalMemory() / (1024 * 1024),
-                "freeMemMb", runtime.freeMemory() / (1024 * 1024),
-                "heapUsedMb", (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024),
-                "rssMb", 512,
-                "activeDbConnections", 5,
-                "dbCacheHitRatio", 99.4
-        );
+        Map<String, Object> sysTelemetry = new LinkedHashMap<>();
+        sysTelemetry.put("cpuLoad1m", Math.round(cpuLoad * 100.0) / 100.0);
+        sysTelemetry.put("cpuCores", runtime.availableProcessors());
+        sysTelemetry.put("totalMemMb", runtime.totalMemory() / (1024 * 1024));
+        sysTelemetry.put("freeMemMb", runtime.freeMemory() / (1024 * 1024));
+        sysTelemetry.put("heapUsedMb", heapUsedMb);
+        sysTelemetry.put("rssMb", residentSetMb().orElse(heapUsedMb));
+        sysTelemetry.put("activeDbConnections", null);
+        sysTelemetry.put("dbCacheHitRatio", null);
 
-        List<Map<String, Object>> domains = List.of(
-                Map.of("id", "auth", "name", "인증 및 보안 세션", "nameEn", "Auth & Security", "endpointCount", 12, "status", "OPERATIONAL", "latencyMs", 8, "successRate", 99.9, "measuredAt", now.toString(), "measurementSource", "ROUTE_METRICS", "sampleEndpoints", List.of("/api/v1/auth/session", "/api/v1/auth/csrf")),
-                Map.of("id", "wallet", "name", "월렛 및 가상계좌", "nameEn", "Wallet & Ledger", "endpointCount", 10, "status", "OPERATIONAL", "latencyMs", 11, "successRate", 100.0, "measuredAt", now.toString(), "measurementSource", "ROUTE_METRICS", "sampleEndpoints", List.of("/api/v1/wallet/balance", "/api/v1/wallet/transactions")),
-                Map.of("id", "stock", "name", "가상 주식 거래소", "nameEn", "Stock Exchange", "endpointCount", 14, "status", "OPERATIONAL", "latencyMs", 12, "successRate", 99.8, "measuredAt", now.toString(), "measurementSource", "ROUTE_METRICS", "sampleEndpoints", List.of("/api/v1/stocks", "/api/v1/stocks/order")),
-                Map.of("id", "bank", "name", "복리 예금 및 뱅킹", "nameEn", "Virtual Bank", "endpointCount", 8, "status", "OPERATIONAL", "latencyMs", 9, "successRate", 100.0, "measuredAt", now.toString(), "measurementSource", "ROUTE_METRICS", "sampleEndpoints", List.of("/api/v1/bank/accounts", "/api/v1/bank/deposit")),
-                Map.of("id", "bond", "name", "기획재정 국채 (KTB)", "nameEn", "Treasury Bonds", "endpointCount", 6, "status", "OPERATIONAL", "latencyMs", 10, "successRate", 100.0, "measuredAt", now.toString(), "measurementSource", "ROUTE_METRICS", "sampleEndpoints", List.of("/api/v1/bonds/list", "/api/v1/bonds/overview")),
-                Map.of("id", "pension", "name", "국민연금 및 복지기금", "nameEn", "National Pension", "endpointCount", 6, "status", "OPERATIONAL", "latencyMs", 10, "successRate", 100.0, "measuredAt", now.toString(), "measurementSource", "ROUTE_METRICS", "sampleEndpoints", List.of("/api/v1/pension/status")),
-                Map.of("id", "kdic", "name", "예금보험공사 (KDIC)", "nameEn", "Deposit Insurance", "endpointCount", 5, "status", "OPERATIONAL", "latencyMs", 7, "successRate", 100.0, "measuredAt", now.toString(), "measurementSource", "ROUTE_METRICS", "sampleEndpoints", List.of("/api/v1/kdic/overview")),
-                Map.of("id", "treasury", "name", "국고 및 국부펀드 (SWF)", "nameEn", "Sovereign Wealth Fund", "endpointCount", 8, "status", "OPERATIONAL", "latencyMs", 14, "successRate", 99.7, "measuredAt", now.toString(), "measurementSource", "ROUTE_METRICS", "sampleEndpoints", List.of("/api/v1/treasury/status")),
-                Map.of("id", "market", "name", "거시경제 및 물가지표", "nameEn", "Macro Economy", "endpointCount", 8, "status", "OPERATIONAL", "latencyMs", 9, "successRate", 100.0, "measuredAt", now.toString(), "measurementSource", "ROUTE_METRICS", "sampleEndpoints", List.of("/api/v1/economy/macro")),
-                Map.of("id", "shop", "name", "상점 및 프리미엄 아이템", "nameEn", "Shop & Items", "endpointCount", 7, "status", "OPERATIONAL", "latencyMs", 8, "successRate", 100.0, "measuredAt", now.toString(), "measurementSource", "ROUTE_METRICS", "sampleEndpoints", List.of("/api/v1/shop/items")),
-                Map.of("id", "work", "name", "일일 노동 및 직무 파밍", "nameEn", "Daily Work & Farming", "endpointCount", 6, "status", "OPERATIONAL", "latencyMs", 10, "successRate", 100.0, "measuredAt", now.toString(), "measurementSource", "ROUTE_METRICS", "sampleEndpoints", List.of("/api/v1/work/jobs")),
-                Map.of("id", "community", "name", "커뮤니티 및 채팅/피드", "nameEn", "Community & Feed", "endpointCount", 9, "status", "OPERATIONAL", "latencyMs", 12, "successRate", 99.9, "measuredAt", now.toString(), "measurementSource", "ROUTE_METRICS", "sampleEndpoints", List.of("/api/v1/community/posts")),
-                Map.of("id", "seo", "name", "검색엔진 SEO 및 색인", "nameEn", "Search Engine & SEO", "endpointCount", 7, "status", "OPERATIONAL", "latencyMs", 15, "successRate", 100.0, "measuredAt", now.toString(), "measurementSource", "ROUTE_METRICS", "sampleEndpoints", List.of("/api/v1/seo/status/admin")),
-                Map.of("id", "admin", "name", "통합 관제 콘솔 및 보안", "nameEn", "Admin Console", "endpointCount", 12, "status", "OPERATIONAL", "latencyMs", 10, "successRate", 100.0, "measuredAt", now.toString(), "measurementSource", "ROUTE_METRICS", "sampleEndpoints", List.of("/api/v1/admin/api-health/status"))
-        );
+        String[][] catalogue = {
+                new String[]{"auth", "인증 및 보안 세션", "Auth & Security", "/api/v1/auth/session", "/api/v1/auth/csrf"},
+                new String[]{"wallet", "월렛 및 가상계좌", "Wallet & Ledger", "/api/v1/wallet/balance", "/api/v1/wallet/transactions"},
+                new String[]{"stock", "가상 주식 거래소", "Stock Exchange", "/api/v1/stocks", "/api/v1/stocks/order"},
+                new String[]{"bank", "복리 예금 및 뱅킹", "Virtual Bank", "/api/v1/bank/accounts", "/api/v1/bank/deposit"},
+                new String[]{"bond", "기획재정 국채 (KTB)", "Treasury Bonds", "/api/v1/bonds/list", "/api/v1/bonds/overview"},
+                new String[]{"pension", "국민연금 및 복지기금", "National Pension", "/api/v1/pension/status"},
+                new String[]{"kdic", "예금보험공사 (KDIC)", "Deposit Insurance", "/api/v1/kdic/overview"},
+                new String[]{"treasury", "국고 및 국부펀드 (SWF)", "Sovereign Wealth Fund", "/api/v1/treasury/status"},
+                new String[]{"market", "거시경제 및 물가지표", "Macro Economy", "/api/v1/economy/macro"},
+                new String[]{"shop", "상점 및 프리미엄 아이템", "Shop & Items", "/api/v1/shop/items"},
+                new String[]{"work", "일일 노동 및 직무 파밍", "Daily Work & Farming", "/api/v1/work/jobs"},
+                new String[]{"community", "커뮤니티 및 채팅/피드", "Community & Feed", "/api/v1/community/posts"},
+                new String[]{"seo", "검색엔진 SEO 및 색인", "Search Engine & SEO", "/api/v1/seo/status/admin"},
+                new String[]{"admin", "통합 관제 콘솔 및 보안", "Admin Console", "/api/v1/admin/api-health/status"}
+        };
+        List<Map<String, Object>> domains = new ArrayList<>();
+        int totalEndpoints = 0;
+        for (String[] d : catalogue) {
+            List<String> samples = List.of(Arrays.copyOfRange(d, 3, d.length));
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("id", d[0]);
+            row.put("name", d[1]);
+            row.put("nameEn", d[2]);
+            row.put("endpointCount", samples.size());
+            row.put("status", "UNKNOWN");
+            row.put("latencyMs", null);
+            row.put("successRate", null);
+            row.put("measuredAt", null);
+            row.put("measurementSource", "NOT_MEASURED");
+            row.put("sampleEndpoints", samples);
+            domains.add(row);
+            totalEndpoints += samples.size();
+        }
+
+        Map<String, Object> dbProbe = new LinkedHashMap<>();
+        dbProbe.put("status", dbStatus);
+        dbProbe.put("measuredAt", now.toString());
+        dbProbe.put("source", "POSTGRES_READ_PROBE");
 
         Map<String, Object> res = new LinkedHashMap<>();
-        res.put("status", "OPERATIONAL");
+        res.put("status", dbStatus);
         res.put("serverTime", now.toString());
         res.put("uptimeSeconds", uptime);
         res.put("dbLatencyMs", dbLatency);
-        res.put("dbProbe", Map.of("status", "OPERATIONAL", "measuredAt", now.toString(), "source", "POSTGRES_READ_PROBE"));
-        res.put("isLiveTelemetry", true);
+        res.put("dbProbe", dbProbe);
+        res.put("isLiveTelemetry", false);
         res.put("systemTelemetry", sysTelemetry);
-        res.put("totalDomains", 14);
-        res.put("totalEndpoints", 118);
-        res.put("averageLatencyMs", 10);
-        res.put("globalSuccessRate", 99.9);
+        res.put("totalDomains", domains.size());
+        res.put("totalEndpoints", totalEndpoints);
+        res.put("averageLatencyMs", null);
+        res.put("globalSuccessRate", null);
         res.put("domains", domains);
-
         return ResponseEntity.ok(res);
+    }
+
+    private static Optional<Long> residentSetMb() {
+        try {
+            for (String line : java.nio.file.Files.readAllLines(java.nio.file.Path.of("/proc/self/status"))) {
+                if (line.startsWith("VmRSS:")) {
+                    return Optional.of(Long.parseLong(line.replaceAll("[^0-9]", "")) / 1024L);
+                }
+            }
+        } catch (Exception ignored) {
+            // Not Linux or not readable: fall back to the measured heap figure.
+        }
+        return Optional.empty();
     }
 
     @Operation(summary = "백업 인벤토리 증빙 조회")
     @GetMapping("/backup-inventory")
     public ResponseEntity<Map<String, Object>> getBackupInventory() {
-        List<Map<String, Object>> files = List.of(
-                Map.of(
-                        "fileName", "moneyverse_prod_20261115_040000.sql.gz",
-                        "sizeBytes", 34500000L,
-                        "sizeMb", 32.9,
-                        "createdAt", "2026-11-15T04:00:00Z",
-                        "status", "VERIFIED"
-                ),
-                Map.of(
-                        "fileName", "moneyverse_prod_20261116_040000.sql.gz",
-                        "sizeBytes", 35200000L,
-                        "sizeMb", 33.5,
-                        "createdAt", "2026-11-16T04:00:00Z",
-                        "status", "VERIFIED"
-                )
-        );
-        long totalBytes = 34500000L + 35200000L;
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("backupDir", "/srv/moneyverse-data/backups/daily");
-        res.put("r2Configured", true);
-        res.put("r2Bucket", "woldeok-prod-db-backups");
-        res.put("retentionDays", 30);
-        res.put("totalBackups", files.size());
-        res.put("totalSizeBytes", totalBytes);
-        res.put("totalSizeMb", 66.4);
-        res.put("lastBackupAt", "2026-11-16T04:00:00Z");
-        res.put("files", files);
-        return ResponseEntity.ok(res);
+        // Security review 2026-11-28: this answered with constants an operator would act on.
+        // Unavailable until read from its canonical source; never invented evidence.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "BACKUP_INVENTORY_SOURCE_UNAVAILABLE");
     }
 }

@@ -40,12 +40,9 @@ public class GameCatalogController {
     @GetMapping
     public ResponseEntity<Map<String, Object>> listGames(HttpServletRequest request) {
         verifyAdmin(request);
-        List<Map<String, Object>> games = List.of(
-                Map.of("id", "game-dice", "name", "하이로우 다이스", "category", "CASINO", "status", "ACTIVE", "rtpPercent", 98.5),
-                Map.of("id", "game-slot", "name", "네오 메가 슬롯", "category", "CASINO", "status", "ACTIVE", "rtpPercent", 96.0),
-                Map.of("id", "game-pvp-arena", "name", "PVP 콜로세움 아레나", "category", "PVP", "status", "ACTIVE", "entryFeeWld", 10000)
-        );
-        return ResponseEntity.ok(Map.of("games", games, "count", games.size()));
+        // Security review 2026-11-28: this answered with constants an operator would act on.
+        // Unavailable until read from its canonical source; never invented evidence.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "GAME_CATALOG_SOURCE_UNAVAILABLE");
     }
 
     @PostMapping
