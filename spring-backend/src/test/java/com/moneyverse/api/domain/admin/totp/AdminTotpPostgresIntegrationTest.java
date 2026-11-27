@@ -66,8 +66,8 @@ class AdminTotpPostgresIntegrationTest {
 
     private byte[] enrolAndConfirm() {
         String uri = (String) service.beginEnrolment(admin, adminSession).get("otpauthUri");
-        var row = jdbc.queryForMap("SELECT secret_ciphertext, key_id FROM public.admin_totp_sealed_secret(?::uuid)", admin);
-        byte[] secret = sealer.open(admin, (String) row.get("key_id"), (String) row.get("secret_ciphertext"));
+        var row = jdbc.queryForMap("SELECT pending_ciphertext, pending_key_id FROM public.admin_totp_sealed_secret(?::uuid)", admin);
+        byte[] secret = sealer.open(admin, (String) row.get("pending_key_id"), (String) row.get("pending_ciphertext"));
         assertTrue(uri.contains("secret=" + TotpCodec.base32(secret)));
         long now = System.currentTimeMillis() / 1000;
         service.confirmEnrolment(admin, adminSession, TotpCodec.code(secret, TotpCodec.stepAt(now) - 1));
@@ -90,6 +90,19 @@ class AdminTotpPostgresIntegrationTest {
         service.verify(admin, adminSession, "economy.treasury", code);
         var replay = assertThrows(AdminTotpService.Failure.class, () -> service.verify(admin, otherSession, "backup.restore", code));
         assertEquals(409, replay.status);
+    }
+
+    @Test void aReplacementKeepsTheActiveFactorUntilConfirmed() {
+        byte[] secret = enrolAndConfirm();
+        long now = System.currentTimeMillis() / 1000;
+        service.verify(admin, adminSession, "totp.manage", TotpCodec.code(secret, TotpCodec.stepAt(now)));
+        service.beginEnrolment(admin, adminSession);
+        var requirement = jdbc.queryForMap("SELECT enrolled, enforced FROM public.admin_totp_requirement(?::uuid)", admin);
+        assertEquals(Boolean.TRUE, requirement.get("enrolled"));
+        assertEquals(Boolean.TRUE, requirement.get("enforced"));
+        // The old secret still verifies while the replacement is pending.
+        assertEquals("economy.treasury", service.verify(admin, otherSession, "economy.treasury",
+                TotpCodec.code(secret, TotpCodec.stepAt(now) + 1)).get("scope"));
     }
 
     @Test void aMemberCannotEnrol() {

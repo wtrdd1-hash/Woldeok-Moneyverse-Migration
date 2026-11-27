@@ -144,3 +144,22 @@ secrets, at the cost of an operator step.
 - Provisioning `MONEYVERSE_ADMIN_TOTP_KEY` in a real environment, real enrolment, turning on the
   `admin_totp_required` switch, and the frontend enrolment screen rollout.
 - Reconciling AGENTS §5 / integrated master text once the owner accepts the candidate.
+
+## Revision after independent review (2026-11-27, Codex REQUEST_CHANGES)
+
+- Replacement is staged in a *pending* slot; the active credential keeps verifying and enforcement
+  stays on until the pending one is confirmed, which swaps it in and ends old-factor proofs.
+- Every credential carries a version id. Confirmation and verification pass the version the
+  application matched against; the database refuses (22023 → 409 `credential_changed`) if it changed.
+- The per-session ceiling is a serialised gate (advisory lock on the session) applied to
+  confirmation, verification and failure recording, so a correct code after twenty failures is
+  refused and concurrent attempts cannot exceed it (sandbox: 30 concurrent calls → 20 recorded).
+- Cross-user revocation requires the caller's own `security.settings` proof whenever the caller is
+  enforced (enrolled or switch on), not only when enrolled.
+- `/admin/**` JSON aliases are judged as `/api/admin/**` for the scope table.
+- Known limit (owner blocker): `moneyverse_app` can mint a proof from a claimed step, so the holder
+  of the application's database credential bypasses the factor. That credential can already insert
+  `auth_sessions` rows and set `reauthenticated_at`, so the factor does not widen the exposure; the
+  fix is a separate verifier LOGIN principal, which needs owner provisioning.
+- Rollout order: migration 366 before the application, or the fail-closed requirement lookup
+  refuses scoped writes for every administrator.

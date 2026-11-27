@@ -129,7 +129,7 @@ tasks.register<Test>("postgresMessagingTest") {
         providers.exec {
             workingDir(rootDir.parentFile)
             commandLine("python3", "scripts/release/verify-native-pg-results.py", "--class",
-                "com.moneyverse.api.domain.admin.totp.AdminTotpPostgresIntegrationTest", "--minimum", "4",
+                "com.moneyverse.api.domain.admin.totp.AdminTotpPostgresIntegrationTest", "--minimum", "5",
                 layout.buildDirectory.file("test-results/postgresMessagingTest/TEST-com.moneyverse.api.domain.admin.totp.AdminTotpPostgresIntegrationTest.xml").get().asFile.absolutePath)
         }.result.get().assertNormalExitValue()
     }

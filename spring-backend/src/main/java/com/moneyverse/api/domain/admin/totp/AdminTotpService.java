@@ -85,18 +85,18 @@ public class AdminTotpService {
 
     public Map<String, Object> confirmEnrolment(UUID actor, UUID session, String code) {
         requireAvailable();
-        long step = matchOrFail(actor, session, code, false);
-        call(() -> jdbc.queryForObject("SELECT public.admin_totp_confirm_enrolment(?::uuid, ?::uuid, ?)",
-                Boolean.class, actor, session, step));
+        Matched m = matchOrFail(actor, session, code, false);
+        call(() -> jdbc.queryForObject("SELECT public.admin_totp_confirm_enrolment(?::uuid, ?::uuid, ?, ?::uuid)",
+                Boolean.class, actor, session, m.step, m.version));
         return Map.of("confirmed", true);
     }
 
     public Map<String, Object> verify(UUID actor, UUID session, String scope, String code) {
         if (scope == null || !AdminTotpScopes.SCOPES.contains(scope)) throw new Failure(400, "unknown_scope");
         requireAvailable();
-        long step = matchOrFail(actor, session, code, true);
-        Timestamp expires = call(() -> jdbc.queryForObject("SELECT public.admin_totp_verify(?::uuid, ?::uuid, ?, ?)",
-                Timestamp.class, actor, session, scope, step));
+        Matched m = matchOrFail(actor, session, code, true);
+        Timestamp expires = call(() -> jdbc.queryForObject("SELECT public.admin_totp_verify(?::uuid, ?::uuid, ?, ?, ?::uuid)",
+                Timestamp.class, actor, session, scope, m.step, m.version));
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("scope", scope);
         out.put("expiresAt", expires == null ? null : expires.toInstant().toString());
@@ -109,21 +109,31 @@ public class AdminTotpService {
         return Map.of("revoked", Boolean.TRUE.equals(revoked));
     }
 
-    /** Opens the stored secret, matches the code, and records a failure on any mismatch. */
-    private long matchOrFail(UUID actor, UUID session, String code, boolean requireConfirmed) {
+    /** The step a code matched and the credential version it was matched against. */
+    private record Matched(long step, UUID version) {}
+
+    /**
+     * Opens the active credential (verification) or the pending one (confirmation), matches the
+     * code, and records a failure on any mismatch. The version travels with the step so the
+     * database can refuse if the credential was replaced after this read.
+     */
+    private Matched matchOrFail(UUID actor, UUID session, String code, boolean active) {
         List<Map<String, Object>> rows = call(() -> jdbc.queryForList(
-                "SELECT secret_ciphertext, key_id, confirmed, locked_until FROM public.admin_totp_sealed_secret(?::uuid)", actor));
-        if (rows.isEmpty()) throw new Failure(409, requireConfirmed ? "not_enrolled" : "no_enrolment_in_progress");
+                "SELECT secret_ciphertext, key_id, credential_version, confirmed, locked_until, "
+                        + "pending_ciphertext, pending_key_id, pending_version FROM public.admin_totp_sealed_secret(?::uuid)", actor));
+        if (rows.isEmpty()) throw new Failure(409, active ? "not_enrolled" : "no_enrolment_in_progress");
         Map<String, Object> row = rows.get(0);
-        boolean confirmed = Boolean.TRUE.equals(row.get("confirmed"));
-        if (requireConfirmed && !confirmed) throw new Failure(409, "not_enrolled");
-        if (!requireConfirmed && confirmed) throw new Failure(409, "no_enrolment_in_progress");
+        String prefix = active ? "" : "pending_";
+        String sealed = (String) row.get(active ? "secret_ciphertext" : "pending_ciphertext");
+        Object versionValue = row.get(active ? "credential_version" : "pending_version");
+        if (sealed == null || versionValue == null) throw new Failure(409, active ? "not_enrolled" : "no_enrolment_in_progress");
+        UUID version = versionValue instanceof UUID u ? u : UUID.fromString(versionValue.toString());
         if (row.get("locked_until") instanceof Timestamp locked && locked.toInstant().isAfter(clock.instant())) {
             throw new Failure(423, "second_factor_locked");
         }
         byte[] secret;
         try {
-            secret = sealer.open(actor, (String) row.get("key_id"), (String) row.get("secret_ciphertext"));
+            secret = sealer.open(actor, (String) row.get(prefix + "key_id"), sealed);
         } catch (IllegalStateException unreadable) {
             // Sealed under another key (rotation) or damaged: the factor cannot be used here.
             throw new Failure(503, "totp_unavailable");
@@ -135,7 +145,7 @@ public class AdminTotpService {
                         actor, session));
                 throw new Failure(401, "invalid_code");
             }
-            return step.getAsLong();
+            return new Matched(step.getAsLong(), version);
         } finally {
             Arrays.fill(secret, (byte) 0);
         }
@@ -172,6 +182,7 @@ public class AdminTotpService {
                         return new Failure(403, "forbidden");
                     case "22023":
                         if (message.contains("out of date")) return new Failure(401, "invalid_code");
+                        if (message.contains("credential changed")) return new Failure(409, "credential_changed");
                         return new Failure(400, "invalid_request");
                     default:
                         break;

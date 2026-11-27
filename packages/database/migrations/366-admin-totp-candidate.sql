@@ -14,27 +14,50 @@
 -- sealed by the application with a key that exists only in the environment. The application
 -- decides whether a code matches; this schema decides everything the application must not decide
 -- alone -- whether the claimed step is plausibly now, whether it was already spent, how many
--- failures have accumulated, and whether a proof exists for this session and scope.
--- Computing the HMAC here with pgcrypto was rejected for the reason 058 rejected it: one dump
--- would then yield working codes.
+-- attempts have accumulated, which credential version the code was checked against, and whether
+-- a proof exists for this session and scope. Computing the HMAC here with pgcrypto was rejected
+-- for the reason 058 rejected it: one dump would then yield working codes.
+--
+-- KNOWN LIMIT (recorded, not solved here). moneyverse_app calls verify with a step it claims to
+-- have matched, so the holder of the application's database credential can mint a proof without
+-- a code. That credential can already insert auth_sessions rows and set reauthenticated_at, i.e.
+-- it can already forge an administrator session and step-up; the factor does not widen that
+-- exposure. Closing it needs a separate verifier LOGIN principal, which is an owner provisioning
+-- step outside this migration.
+--
+-- REPLACEMENT. A new secret is stored as *pending* beside the active one. The active credential
+-- keeps verifying and enforcement stays on until the pending one is confirmed, which swaps it in
+-- atomically and ends every proof made with the old factor. Each credential carries a version id;
+-- confirmation and verification name the version the application checked, so a code matched
+-- against one secret can never confirm or verify a different one that replaced it concurrently.
 --
 -- ENFORCEMENT. Seeded switch 'admin_totp_required' is 'disabled', so merging this changes nothing
 -- for an administrator who has not enrolled. An enrolled administrator is enforced regardless of
 -- the switch; turning the switch on (an owner rollout decision) enforces every administrator.
+-- Rollout order: this migration before the application that calls it, or the boundary's
+-- fail-closed lookup refuses scoped writes.
 
 BEGIN;
 
 CREATE TABLE IF NOT EXISTS public.admin_totp_credentials (
   user_id uuid PRIMARY KEY REFERENCES public.users(id),
-  -- Base64 of nonce || ciphertext || tag, sealed by the application with AAD userId|keyId.
-  secret_ciphertext text NOT NULL CHECK (pg_catalog.char_length(secret_ciphertext) BETWEEN 32 AND 512),
-  key_id text NOT NULL CHECK (key_id ~ '^[a-z0-9][a-z0-9_.:-]{0,63}$'),
-  created_at timestamptz NOT NULL DEFAULT pg_catalog.clock_timestamp(),
+  -- Active credential: base64 of nonce || ciphertext || tag, sealed with AAD userId|keyId.
+  secret_ciphertext text CHECK (secret_ciphertext IS NULL OR pg_catalog.char_length(secret_ciphertext) BETWEEN 32 AND 512),
+  key_id text CHECK (key_id IS NULL OR key_id ~ '^[a-z0-9][a-z0-9_.:-]{0,63}$'),
+  credential_version uuid,
   confirmed_at timestamptz,
-  -- Monotonic: a step at or below this one is a replay, whichever session presents it.
+  -- Pending credential awaiting its first code.
+  pending_ciphertext text CHECK (pending_ciphertext IS NULL OR pg_catalog.char_length(pending_ciphertext) BETWEEN 32 AND 512),
+  pending_key_id text CHECK (pending_key_id IS NULL OR pending_key_id ~ '^[a-z0-9][a-z0-9_.:-]{0,63}$'),
+  pending_version uuid,
+  pending_created_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT pg_catalog.clock_timestamp(),
+  -- Monotonic for the active credential: a step at or below this one is a replay.
   last_step bigint,
   failed_attempts integer NOT NULL DEFAULT 0 CHECK (failed_attempts >= 0),
-  locked_until timestamptz
+  locked_until timestamptz,
+  CHECK ((secret_ciphertext IS NULL) = (credential_version IS NULL) AND (secret_ciphertext IS NULL) = (confirmed_at IS NULL)),
+  CHECK ((pending_ciphertext IS NULL) = (pending_version IS NULL))
 );
 REVOKE ALL PRIVILEGES ON TABLE public.admin_totp_credentials FROM PUBLIC, moneyverse_app;
 
@@ -107,6 +130,30 @@ AS $$
   SELECT p_actor IS NOT NULL AND EXISTS (SELECT 1 FROM public.admin_current_roles(p_actor))
 $$;
 
+-- Serialises every attempt from one session and refuses the twenty-first in fifteen minutes. Taken
+-- before any count so two concurrent attempts cannot both observe nineteen; applied to successes
+-- as well as failures so a correct guess after the ceiling is refused too.
+CREATE OR REPLACE FUNCTION public.admin_totp_session_gate(p_session_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+VOLATILE
+SECURITY DEFINER
+SET search_path = pg_catalog, pg_temp
+AS $$
+DECLARE
+  v_recent integer;
+BEGIN
+  PERFORM pg_catalog.pg_advisory_xact_lock(
+    pg_catalog.hashtextextended('moneyverse:admin_totp_attempt:' || p_session_id::text, 0));
+  SELECT count(*) INTO v_recent FROM public.admin_totp_attempts AS a
+  WHERE a.session_id = p_session_id
+    AND a.attempted_at > pg_catalog.clock_timestamp() - pg_catalog.make_interval(mins => 15);
+  IF v_recent >= 20 THEN
+    RAISE EXCEPTION USING ERRCODE = '55000', MESSAGE = 'too many second factor attempts from this session';
+  END IF;
+END;
+$$;
+
 -- Callable surface.
 
 CREATE OR REPLACE FUNCTION public.admin_totp_proof_valid(p_actor uuid, p_session_id uuid, p_scope text)
@@ -158,7 +205,7 @@ SECURITY DEFINER
 SET search_path = pg_catalog, pg_temp
 AS $$
 DECLARE
-  v_replaced boolean := false;
+  v_replacing boolean := false;
 BEGIN
   IF p_actor IS NULL OR p_session_id IS NULL OR p_secret_ciphertext IS NULL OR p_key_id IS NULL THEN
     RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'invalid second factor enrolment';
@@ -173,34 +220,31 @@ BEGIN
     RAISE EXCEPTION USING ERRCODE = '42501', MESSAGE = 'recent reauthentication required';
   END IF;
 
-  SELECT c.confirmed_at IS NOT NULL INTO v_replaced
+  SELECT c.confirmed_at IS NOT NULL INTO v_replacing
   FROM public.admin_totp_credentials AS c WHERE c.user_id = p_actor FOR UPDATE;
-  v_replaced := coalesce(v_replaced, false);
+  v_replacing := coalesce(v_replacing, false);
 
-  -- A stolen session plus password must not be able to swap in the thief's own factor.
-  IF v_replaced AND NOT public.admin_totp_proof_valid(p_actor, p_session_id, 'totp.manage') THEN
+  -- A stolen session plus password must not be able to stage the thief's own factor.
+  IF v_replacing AND NOT public.admin_totp_proof_valid(p_actor, p_session_id, 'totp.manage') THEN
     RAISE EXCEPTION USING ERRCODE = '42501', MESSAGE = 'current second factor proof required';
   END IF;
 
-  INSERT INTO public.admin_totp_credentials AS c (user_id, secret_ciphertext, key_id)
-  VALUES (p_actor, p_secret_ciphertext, p_key_id)
+  -- Only the pending slot changes; the active credential, its proofs and enforcement stay.
+  INSERT INTO public.admin_totp_credentials AS c (user_id, pending_ciphertext, pending_key_id, pending_version, pending_created_at)
+  VALUES (p_actor, p_secret_ciphertext, p_key_id, gen_random_uuid(), pg_catalog.clock_timestamp())
   ON CONFLICT (user_id) DO UPDATE
-  SET secret_ciphertext = EXCLUDED.secret_ciphertext,
-      key_id = EXCLUDED.key_id,
-      created_at = pg_catalog.clock_timestamp(),
-      confirmed_at = NULL,
-      last_step = NULL,
-      failed_attempts = 0,
-      locked_until = NULL;
-  DELETE FROM public.admin_totp_proofs AS p WHERE p.user_id = p_actor;
+  SET pending_ciphertext = EXCLUDED.pending_ciphertext,
+      pending_key_id = EXCLUDED.pending_key_id,
+      pending_version = EXCLUDED.pending_version,
+      pending_created_at = EXCLUDED.pending_created_at;
 
   PERFORM public.admin_append_audit_event(p_actor, 'admin.second_factor.enrolment_started', p_actor, NULL,
-    pg_catalog.jsonb_build_object('keyId', p_key_id, 'replaced', v_replaced));
-  RETURN v_replaced;
+    pg_catalog.jsonb_build_object('keyId', p_key_id, 'replacing', v_replacing));
+  RETURN v_replacing;
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.admin_totp_confirm_enrolment(p_actor uuid, p_session_id uuid, p_step bigint)
+CREATE OR REPLACE FUNCTION public.admin_totp_confirm_enrolment(p_actor uuid, p_session_id uuid, p_step bigint, p_version uuid)
 RETURNS boolean
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -208,8 +252,9 @@ SET search_path = pg_catalog, pg_temp
 AS $$
 DECLARE
   v_row public.admin_totp_credentials%ROWTYPE;
+  v_replacing boolean;
 BEGIN
-  IF p_actor IS NULL OR p_session_id IS NULL OR p_step IS NULL THEN
+  IF p_actor IS NULL OR p_session_id IS NULL OR p_step IS NULL OR p_version IS NULL THEN
     RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'invalid second factor confirmation';
   END IF;
   IF NOT public.admin_totp_is_admin(p_actor) THEN
@@ -221,10 +266,14 @@ BEGIN
   IF NOT public.auth_session_has_recent_reauthentication(p_session_id, 900) THEN
     RAISE EXCEPTION USING ERRCODE = '42501', MESSAGE = 'recent reauthentication required';
   END IF;
+  PERFORM public.admin_totp_session_gate(p_session_id);
 
   SELECT c.* INTO v_row FROM public.admin_totp_credentials AS c WHERE c.user_id = p_actor FOR UPDATE;
-  IF NOT FOUND OR v_row.confirmed_at IS NOT NULL THEN
+  IF NOT FOUND OR v_row.pending_version IS NULL THEN
     RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'no second factor enrolment is in progress';
+  END IF;
+  IF v_row.pending_version <> p_version THEN
+    RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'second factor credential changed';
   END IF;
   IF v_row.locked_until IS NOT NULL AND v_row.locked_until > pg_catalog.clock_timestamp() THEN
     RAISE EXCEPTION USING ERRCODE = '55000', MESSAGE = 'second factor is locked';
@@ -232,19 +281,26 @@ BEGIN
   IF abs(p_step - public.admin_totp_current_step()) > 1 THEN
     RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'authentication code is out of date';
   END IF;
+  v_replacing := v_row.confirmed_at IS NOT NULL;
 
   UPDATE public.admin_totp_credentials AS c
-  SET confirmed_at = pg_catalog.clock_timestamp(), last_step = p_step, failed_attempts = 0, locked_until = NULL
+  SET secret_ciphertext = c.pending_ciphertext, key_id = c.pending_key_id,
+      credential_version = c.pending_version, confirmed_at = pg_catalog.clock_timestamp(),
+      pending_ciphertext = NULL, pending_key_id = NULL, pending_version = NULL, pending_created_at = NULL,
+      last_step = p_step, failed_attempts = 0, locked_until = NULL
   WHERE c.user_id = p_actor;
+  -- Proofs made with the old factor end with it.
+  DELETE FROM public.admin_totp_proofs AS p WHERE p.user_id = p_actor;
 
   PERFORM public.admin_append_audit_event(p_actor, 'admin.second_factor.confirmed', p_actor, NULL,
-    pg_catalog.jsonb_build_object('keyId', v_row.key_id));
+    pg_catalog.jsonb_build_object('keyId', v_row.pending_key_id, 'replacing', v_replacing));
   RETURN true;
 END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.admin_totp_sealed_secret(p_actor uuid)
-RETURNS TABLE(secret_ciphertext text, key_id text, confirmed boolean, locked_until timestamptz)
+RETURNS TABLE(secret_ciphertext text, key_id text, credential_version uuid, confirmed boolean, locked_until timestamptz,
+              pending_ciphertext text, pending_key_id text, pending_version uuid)
 LANGUAGE plpgsql
 STABLE
 SECURITY DEFINER
@@ -258,14 +314,16 @@ BEGIN
     RAISE EXCEPTION USING ERRCODE = '42501', MESSAGE = 'administrator role required';
   END IF;
   RETURN QUERY
-  SELECT c.secret_ciphertext, c.key_id, c.confirmed_at IS NOT NULL, c.locked_until
+  SELECT c.secret_ciphertext, c.key_id, c.credential_version, c.confirmed_at IS NOT NULL, c.locked_until,
+         c.pending_ciphertext, c.pending_key_id, c.pending_version
   FROM public.admin_totp_credentials AS c WHERE c.user_id = p_actor;
 END;
 $$;
 
--- Spending a code: 23505 for a step already used, 55000 while locked or not enrolled, 22023 for a
--- step that is not plausibly now or an unknown scope.
-CREATE OR REPLACE FUNCTION public.admin_totp_verify(p_actor uuid, p_session_id uuid, p_scope text, p_step bigint)
+-- Spending a code: 23505 for a step already used, 55000 while locked, not enrolled or over the
+-- session ceiling, 22023 for a step that is not plausibly now, an unknown scope or a credential
+-- version that is no longer the active one.
+CREATE OR REPLACE FUNCTION public.admin_totp_verify(p_actor uuid, p_session_id uuid, p_scope text, p_step bigint, p_version uuid)
 RETURNS timestamptz
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -275,7 +333,7 @@ DECLARE
   v_row public.admin_totp_credentials%ROWTYPE;
   v_expires timestamptz := pg_catalog.clock_timestamp() + pg_catalog.make_interval(secs => 300);
 BEGIN
-  IF p_actor IS NULL OR p_session_id IS NULL OR p_step IS NULL OR p_scope IS NULL
+  IF p_actor IS NULL OR p_session_id IS NULL OR p_step IS NULL OR p_version IS NULL OR p_scope IS NULL
      OR p_scope NOT IN ('totp.manage', 'role.manage', 'economy.treasury', 'member.lifecycle',
                         'security.settings', 'backup.restore') THEN
     RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'invalid second factor verification';
@@ -286,10 +344,14 @@ BEGIN
   IF NOT public.admin_totp_live_session(p_actor, p_session_id) THEN
     RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'a live session for this actor is required';
   END IF;
+  PERFORM public.admin_totp_session_gate(p_session_id);
 
   SELECT c.* INTO v_row FROM public.admin_totp_credentials AS c WHERE c.user_id = p_actor FOR UPDATE;
   IF NOT FOUND OR v_row.confirmed_at IS NULL THEN
     RAISE EXCEPTION USING ERRCODE = '55000', MESSAGE = 'no confirmed second factor is enrolled';
+  END IF;
+  IF v_row.credential_version <> p_version THEN
+    RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'second factor credential changed';
   END IF;
   IF v_row.locked_until IS NOT NULL AND v_row.locked_until > pg_catalog.clock_timestamp() THEN
     RAISE EXCEPTION USING ERRCODE = '55000', MESSAGE = 'second factor is locked';
@@ -315,8 +377,8 @@ BEGIN
 END;
 $$;
 
--- A wrong code. Five consecutive failures lock the factor for fifteen minutes; twenty failures in
--- fifteen minutes from one session refuse further attempts from that session.
+-- A wrong code. Five consecutive failures lock the factor for fifteen minutes; twenty attempts in
+-- fifteen minutes from one session refuse further attempts from that session (session gate).
 CREATE OR REPLACE FUNCTION public.admin_totp_record_failure(p_actor uuid, p_session_id uuid)
 RETURNS TABLE(failed_attempts integer, locked_until timestamptz)
 LANGUAGE plpgsql
@@ -327,7 +389,6 @@ DECLARE
   v_now timestamptz := pg_catalog.clock_timestamp();
   v_attempts integer;
   v_locked timestamptz;
-  v_recent integer;
 BEGIN
   IF p_actor IS NULL OR p_session_id IS NULL THEN
     RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'actor and session are required';
@@ -335,11 +396,7 @@ BEGIN
   IF NOT public.admin_totp_live_session(p_actor, p_session_id) THEN
     RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'a live session for this actor is required';
   END IF;
-  SELECT count(*) INTO v_recent FROM public.admin_totp_attempts AS a
-  WHERE a.session_id = p_session_id AND a.attempted_at > v_now - pg_catalog.make_interval(mins => 15);
-  IF v_recent >= 20 THEN
-    RAISE EXCEPTION USING ERRCODE = '55000', MESSAGE = 'too many second factor attempts from this session';
-  END IF;
+  PERFORM public.admin_totp_session_gate(p_session_id);
   INSERT INTO public.admin_totp_attempts (session_id, attempted_at) VALUES (p_session_id, v_now);
 
   UPDATE public.admin_totp_credentials AS c
@@ -360,7 +417,10 @@ END;
 $$;
 
 -- Removing a factor: oneself with a current totp.manage proof, or a superadmin for another
--- administrator (with recent step-up, and a security.settings proof when the caller is enrolled).
+-- administrator with recent step-up and, whenever the caller is enforced (enrolled, or every
+-- administrator once the switch is on), the caller's own security.settings proof. An enforced
+-- caller with no factor cannot revoke anyone; recovery then is another enrolled superadmin, or
+-- the owner turning the switch off, or the documented operator procedure.
 CREATE OR REPLACE FUNCTION public.admin_totp_revoke(p_actor uuid, p_session_id uuid, p_target uuid)
 RETURNS boolean
 LANGUAGE plpgsql
@@ -369,7 +429,7 @@ SET search_path = pg_catalog, pg_temp
 AS $$
 DECLARE
   v_found boolean;
-  v_caller_enrolled boolean;
+  v_caller_enforced boolean;
 BEGIN
   IF p_actor IS NULL OR p_session_id IS NULL OR p_target IS NULL THEN
     RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'invalid second factor revocation';
@@ -390,9 +450,8 @@ BEGIN
     END IF;
   ELSE
     PERFORM public.admin_require_superadmin(p_actor);
-    SELECT EXISTS (SELECT 1 FROM public.admin_totp_credentials AS c
-                   WHERE c.user_id = p_actor AND c.confirmed_at IS NOT NULL) INTO v_caller_enrolled;
-    IF v_caller_enrolled AND NOT public.admin_totp_proof_valid(p_actor, p_session_id, 'security.settings') THEN
+    SELECT r.enforced INTO v_caller_enforced FROM public.admin_totp_requirement(p_actor) AS r;
+    IF v_caller_enforced AND NOT public.admin_totp_proof_valid(p_actor, p_session_id, 'security.settings') THEN
       RAISE EXCEPTION USING ERRCODE = '42501', MESSAGE = 'current second factor proof required';
     END IF;
   END IF;
@@ -416,12 +475,13 @@ BEGIN
     'public.admin_totp_live_session(uuid, uuid)',
     'public.admin_totp_current_step()',
     'public.admin_totp_is_admin(uuid)',
+    'public.admin_totp_session_gate(uuid)',
     'public.admin_totp_proof_valid(uuid, uuid, text)',
     'public.admin_totp_requirement(uuid)',
     'public.admin_totp_begin_enrolment(uuid, uuid, text, text)',
-    'public.admin_totp_confirm_enrolment(uuid, uuid, bigint)',
+    'public.admin_totp_confirm_enrolment(uuid, uuid, bigint, uuid)',
     'public.admin_totp_sealed_secret(uuid)',
-    'public.admin_totp_verify(uuid, uuid, text, bigint)',
+    'public.admin_totp_verify(uuid, uuid, text, bigint, uuid)',
     'public.admin_totp_record_failure(uuid, uuid)',
     'public.admin_totp_revoke(uuid, uuid, uuid)'
   ] LOOP
@@ -430,13 +490,13 @@ BEGIN
   END LOOP;
 END $$;
 
--- Helpers (live_session, current_step, is_admin) stay ungranted.
+-- Helpers (live_session, current_step, is_admin, session_gate) stay ungranted.
 GRANT EXECUTE ON FUNCTION public.admin_totp_proof_valid(uuid, uuid, text) TO moneyverse_app;
 GRANT EXECUTE ON FUNCTION public.admin_totp_requirement(uuid) TO moneyverse_app;
 GRANT EXECUTE ON FUNCTION public.admin_totp_begin_enrolment(uuid, uuid, text, text) TO moneyverse_app;
-GRANT EXECUTE ON FUNCTION public.admin_totp_confirm_enrolment(uuid, uuid, bigint) TO moneyverse_app;
+GRANT EXECUTE ON FUNCTION public.admin_totp_confirm_enrolment(uuid, uuid, bigint, uuid) TO moneyverse_app;
 GRANT EXECUTE ON FUNCTION public.admin_totp_sealed_secret(uuid) TO moneyverse_app;
-GRANT EXECUTE ON FUNCTION public.admin_totp_verify(uuid, uuid, text, bigint) TO moneyverse_app;
+GRANT EXECUTE ON FUNCTION public.admin_totp_verify(uuid, uuid, text, bigint, uuid) TO moneyverse_app;
 GRANT EXECUTE ON FUNCTION public.admin_totp_record_failure(uuid, uuid) TO moneyverse_app;
 GRANT EXECUTE ON FUNCTION public.admin_totp_revoke(uuid, uuid, uuid) TO moneyverse_app;
 

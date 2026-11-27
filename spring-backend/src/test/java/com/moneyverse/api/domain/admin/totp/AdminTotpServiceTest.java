@@ -38,10 +38,20 @@ class AdminTotpServiceTest {
         service = new AdminTotpService(jdbc, sealer, Clock.fixed(Instant.ofEpochSecond(NOW), ZoneOffset.UTC), new SecureRandom());
     }
 
+    private final UUID activeVersion = UUID.fromString("00000000-0000-4000-8000-0000000000a1");
+    private final UUID pendingVersion = UUID.fromString("00000000-0000-4000-8000-0000000000b2");
+
+    /** confirmed: an active credential holding SECRET; otherwise SECRET is the pending one. */
     private void storedCredential(boolean confirmed, Instant lockedUntil) {
-        when(jdbc.queryForList(contains("admin_totp_sealed_secret"), eq(actor))).thenReturn(List.of(Map.of(
-                "secret_ciphertext", sealer.seal(actor, SECRET), "key_id", "test-k1", "confirmed", confirmed,
-                "locked_until", lockedUntil == null ? "" : Timestamp.from(lockedUntil))));
+        Map<String, Object> row = new java.util.HashMap<>();
+        row.put("confirmed", confirmed);
+        row.put("locked_until", lockedUntil == null ? null : Timestamp.from(lockedUntil));
+        if (confirmed) {
+            row.put("secret_ciphertext", sealer.seal(actor, SECRET)); row.put("key_id", "test-k1"); row.put("credential_version", activeVersion);
+        } else {
+            row.put("pending_ciphertext", sealer.seal(actor, SECRET)); row.put("pending_key_id", "test-k1"); row.put("pending_version", pendingVersion);
+        }
+        when(jdbc.queryForList(contains("admin_totp_sealed_secret"), eq(actor))).thenReturn(List.of(row));
     }
 
     private static UncategorizedSQLException sql(String state, String message) {
@@ -71,19 +81,19 @@ class AdminTotpServiceTest {
 
     @Test void confirmPassesTheMatchedStep() {
         storedCredential(false, null);
-        when(jdbc.queryForObject(contains("admin_totp_confirm_enrolment"), eq(Boolean.class), any(), any(), any())).thenReturn(true);
+        when(jdbc.queryForObject(contains("admin_totp_confirm_enrolment"), eq(Boolean.class), any(), any(), any(), any())).thenReturn(true);
         assertEquals(Map.of("confirmed", true), service.confirmEnrolment(actor, session, code(NOW - 30)));
-        verify(jdbc).queryForObject(contains("admin_totp_confirm_enrolment"), eq(Boolean.class), eq(actor), eq(session), eq(TotpCodec.stepAt(NOW) - 1));
+        verify(jdbc).queryForObject(contains("admin_totp_confirm_enrolment"), eq(Boolean.class), eq(actor), eq(session), eq(TotpCodec.stepAt(NOW) - 1), eq(pendingVersion));
     }
 
     @Test void verifyMintsAProofForTheScope() {
         storedCredential(true, null);
         Timestamp expires = Timestamp.from(Instant.ofEpochSecond(NOW + 300));
-        when(jdbc.queryForObject(contains("admin_totp_verify"), eq(Timestamp.class), any(), any(), any(), any())).thenReturn(expires);
+        when(jdbc.queryForObject(contains("admin_totp_verify"), eq(Timestamp.class), any(), any(), any(), any(), any())).thenReturn(expires);
         Map<String, Object> out = service.verify(actor, session, "economy.treasury", code(NOW));
         assertEquals("economy.treasury", out.get("scope"));
         assertEquals(expires.toInstant().toString(), out.get("expiresAt"));
-        verify(jdbc).queryForObject(contains("admin_totp_verify"), eq(Timestamp.class), eq(actor), eq(session), eq("economy.treasury"), eq(TotpCodec.stepAt(NOW)));
+        verify(jdbc).queryForObject(contains("admin_totp_verify"), eq(Timestamp.class), eq(actor), eq(session), eq("economy.treasury"), eq(TotpCodec.stepAt(NOW)), eq(activeVersion));
     }
 
     @Test void wrongCodeRecordsAFailureAndDoesNotVerify() {
@@ -94,7 +104,7 @@ class AdminTotpServiceTest {
         assertEquals(401, failure.status);
         assertEquals("invalid_code", failure.code);
         verify(jdbc).queryForList(contains("admin_totp_record_failure"), eq(actor), eq(session));
-        verify(jdbc, never()).queryForObject(contains("admin_totp_verify"), any(Class.class), any(), any(), any(), any());
+        verify(jdbc, never()).queryForObject(contains("admin_totp_verify"), any(Class.class), any(), any(), any(), any(), any());
     }
 
     @Test void sessionCeilingAnswersTooManyAttempts() {
@@ -107,11 +117,27 @@ class AdminTotpServiceTest {
 
     @Test void replayedStepAnswersConflict() {
         storedCredential(true, null);
-        when(jdbc.queryForObject(contains("admin_totp_verify"), eq(Timestamp.class), any(), any(), any(), any()))
+        when(jdbc.queryForObject(contains("admin_totp_verify"), eq(Timestamp.class), any(), any(), any(), any(), any()))
                 .thenThrow(sql("23505", "authentication code was already used"));
         var failure = assertThrows(AdminTotpService.Failure.class, () -> service.verify(actor, session, "economy.treasury", code(NOW)));
         assertEquals(409, failure.status);
         assertEquals("code_already_used", failure.code);
+    }
+
+    @Test void aReplacedCredentialAnswersConflict() {
+        storedCredential(true, null);
+        when(jdbc.queryForObject(contains("admin_totp_verify"), eq(Timestamp.class), any(), any(), any(), any(), any()))
+                .thenThrow(sql("22023", "second factor credential changed"));
+        var failure = assertThrows(AdminTotpService.Failure.class, () -> service.verify(actor, session, "economy.treasury", code(NOW)));
+        assertEquals(409, failure.status);
+        assertEquals("credential_changed", failure.code);
+    }
+
+    @Test void confirmWithoutAPendingCredentialIsAConflict() {
+        storedCredential(true, null); // active only, nothing pending
+        var failure = assertThrows(AdminTotpService.Failure.class, () -> service.confirmEnrolment(actor, session, code(NOW)));
+        assertEquals(409, failure.status);
+        assertEquals("no_enrolment_in_progress", failure.code);
     }
 
     @Test void lockedFactorIsRefusedWithoutSpendingAnAttempt() {
