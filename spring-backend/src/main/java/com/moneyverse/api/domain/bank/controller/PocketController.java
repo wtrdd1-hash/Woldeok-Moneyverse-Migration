@@ -116,10 +116,13 @@ public class PocketController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("detail", "login required"));
         }
 
-        String themeColor = (String) body.getOrDefault("themeColor", "#10B981");
-        String iconCode = (String) body.getOrDefault("iconCode", "STAR");
+        // Absent fields stay null: the database function applies its own defaults, and the old
+        // "#10B981" / "STAR" defaults were not appearances it accepts.
+        String themeColor = body.get("themeColor") instanceof String t ? t : null;
+        String iconCode = body.get("iconCode") instanceof String i ? i : null;
+        String idempotencyKey = body.get("idempotencyKey") instanceof String k ? k : null;
 
-        Map<String, Object> result = pocketService.customizePocket(userId.get(), pocketId, themeColor, iconCode);
+        Map<String, Object> result = pocketService.customizePocket(userId.get(), pocketId, themeColor, iconCode, idempotencyKey);
         return ResponseEntity.ok(ApiResponse.ok(result));
     }
 
