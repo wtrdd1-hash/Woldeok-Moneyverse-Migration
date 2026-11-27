@@ -36,9 +36,9 @@ class AdminConsoleStepUpRotationTest {
     @Test void rotationInheritsTheReauthenticationTimeInsteadOfMintingOne() {
         UUID actor = UUID.randomUUID();
         JdbcTemplate jdbc = mock(JdbcTemplate.class);
-        when(jdbc.queryForList(contains("reauthenticated_at"), eq(AdminAuthService.sha256("old-session")), eq(actor)))
+        when(jdbc.queryForList(contains("RETURNING reauthenticated_at"), eq(AdminAuthService.sha256("old-session")), eq(actor)))
                 .thenReturn(List.of(new java.util.HashMap<>(Map.of("id", UUID.randomUUID())) {{ put("reauthenticated_at", null); }}));
-        when(jdbc.update(anyString(), any(Object[].class))).thenReturn(1);
+        when(jdbc.update(contains("INSERT INTO auth_sessions"), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(1);
         var response = new MockHttpServletResponse();
         var opened = new AdminSecurityController(admin(actor), jdbc).openConsoleSession(new MockHttpServletRequest(), response);
         assertEquals(200, opened.getStatusCode().value());
@@ -51,9 +51,9 @@ class AdminConsoleStepUpRotationTest {
         UUID actor = UUID.randomUUID();
         Timestamp at = Timestamp.from(Instant.now().minusSeconds(120));
         JdbcTemplate jdbc = mock(JdbcTemplate.class);
-        when(jdbc.queryForList(contains("reauthenticated_at"), eq(AdminAuthService.sha256("old-session")), eq(actor)))
+        when(jdbc.queryForList(contains("RETURNING reauthenticated_at"), eq(AdminAuthService.sha256("old-session")), eq(actor)))
                 .thenReturn(List.of(Map.of("id", UUID.randomUUID(), "reauthenticated_at", at)));
-        when(jdbc.update(anyString(), any(Object[].class))).thenReturn(1);
+        when(jdbc.update(contains("INSERT INTO auth_sessions"), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(1);
         new AdminSecurityController(admin(actor), jdbc).openConsoleSession(new MockHttpServletRequest(), new MockHttpServletResponse());
         var captor = org.mockito.ArgumentCaptor.forClass(Object.class);
         verify(jdbc).update(contains("INSERT INTO auth_sessions"), any(), any(), any(), any(), any(), any(), any(), any(), captor.capture());
@@ -63,12 +63,36 @@ class AdminConsoleStepUpRotationTest {
     @Test void aFailedRotationIssuesNoCookie() {
         UUID actor = UUID.randomUUID();
         JdbcTemplate jdbc = mock(JdbcTemplate.class);
-        when(jdbc.queryForList(contains("reauthenticated_at"), eq(AdminAuthService.sha256("old-session")), eq(actor))).thenReturn(List.of(Map.of("id", UUID.randomUUID())));
-        when(jdbc.update(contains("INSERT INTO auth_sessions"), any(Object[].class))).thenThrow(new DataAccessResourceFailureException("down"));
+        when(jdbc.queryForList(contains("RETURNING reauthenticated_at"), eq(AdminAuthService.sha256("old-session")), eq(actor))).thenReturn(List.of(Map.of("id", UUID.randomUUID())));
+        when(jdbc.update(contains("INSERT INTO auth_sessions"), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenThrow(new DataAccessResourceFailureException("down"));
         var response = new MockHttpServletResponse();
         var opened = new AdminSecurityController(admin(actor), jdbc).openConsoleSession(new MockHttpServletRequest(), response);
         assertEquals(503, opened.getStatusCode().value());
         assertTrue(response.getHeaders("Set-Cookie").isEmpty());
-        verify(jdbc, never()).update(contains("revoked_at = NOW()"), any(Object[].class));
+    }
+
+    /** Independent review: the revoke and the read are one conditional statement; a session already
+     * revoked or rotated by a concurrent request yields no new session. */
+    @Test void aConcurrentlyRevokedSessionYieldsNoNewSession() {
+        UUID actor = UUID.randomUUID();
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        when(jdbc.queryForList(contains("RETURNING reauthenticated_at"), eq(AdminAuthService.sha256("old-session")), eq(actor))).thenReturn(List.of());
+        var response = new MockHttpServletResponse();
+        new AdminSecurityController(admin(actor), jdbc).openConsoleSession(new MockHttpServletRequest(), response);
+        assertTrue(response.getHeaders("Set-Cookie").isEmpty());
+        verify(jdbc, never()).update(contains("INSERT INTO auth_sessions"), any(), any(), any(), any(), any(), any(), any(), any(), any());
+    }
+
+    /** Re-review (low): a suppressed insert (0 rows) must not issue a cookie for a missing row. */
+    @Test void anInsertThatWritesNoRowIssuesNoCookie() {
+        UUID actor = UUID.randomUUID();
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        when(jdbc.queryForList(contains("RETURNING reauthenticated_at"), eq(AdminAuthService.sha256("old-session")), eq(actor)))
+                .thenReturn(List.of(Map.of("id", UUID.randomUUID())));
+        when(jdbc.update(contains("INSERT INTO auth_sessions"), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(0);
+        var response = new MockHttpServletResponse();
+        var opened = new AdminSecurityController(admin(actor), jdbc).openConsoleSession(new MockHttpServletRequest(), response);
+        assertEquals(503, opened.getStatusCode().value());
+        assertTrue(response.getHeaders("Set-Cookie").isEmpty());
     }
 }
