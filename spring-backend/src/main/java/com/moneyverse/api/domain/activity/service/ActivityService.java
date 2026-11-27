@@ -55,131 +55,78 @@ public class ActivityService {
         }
     }
 
-    public ActivityLogsResponse getLogs(UUID userId, int limit, int offset) {
+    private static final com.fasterxml.jackson.databind.ObjectMapper JSON = new com.fasterxml.jackson.databind.ObjectMapper();
+
+    /**
+     * Administrator activity log from admin_activity_list_logs (202), which checks the role itself,
+     * shaped as the admin page parses it. Replaced generated sample rows (2026-11-27).
+     */
+    public List<Map<String, Object>> adminLogs(UUID admin, UUID userId, String eventType, int limit, int offset) {
+        requireAdmin(admin);
+        String type = eventType == null || eventType.isBlank() ? null : eventType;
         try {
-            int sanitizedLimit = Math.min(Math.max(limit, 1), 100);
-            int sanitizedOffset = Math.max(offset, 0);
-
-            String sql = "SELECT id, user_id, event_type, path, target_label, dwell_time_ms, host(ip) as ip_str, user_agent, created_at " +
-                    "FROM user_activity_logs " +
-                    (userId != null ? "WHERE user_id = ? " : "") +
-                    "ORDER BY created_at DESC LIMIT ? OFFSET ?";
-
-            List<ActivityLogItem> items;
-            if (userId != null) {
-                items = jdbcTemplate.query(sql, (rs, rowNum) -> {
-                    long id = rs.getLong("id");
-                    UUID uid = (UUID) rs.getObject("user_id");
-                    String et = rs.getString("event_type");
-                    String path = rs.getString("path");
-                    String label = rs.getString("target_label");
-                    int dwell = rs.getInt("dwell_time_ms");
-                    String ipStr = rs.getString("ip_str");
-                    String ua = rs.getString("user_agent");
-                    Timestamp catTs = rs.getTimestamp("created_at");
-                    OffsetDateTime cat = catTs != null ? catTs.toInstant().atOffset(ZoneOffset.UTC) : OffsetDateTime.now(ZoneOffset.UTC);
-
-                    return new ActivityLogItem(id, uid, et, path, label, dwell, ipStr, ua, cat);
-                }, userId, sanitizedLimit, sanitizedOffset);
-            } else {
-                items = jdbcTemplate.query(sql, (rs, rowNum) -> {
-                    long id = rs.getLong("id");
-                    UUID uid = (UUID) rs.getObject("user_id");
-                    String et = rs.getString("event_type");
-                    String path = rs.getString("path");
-                    String label = rs.getString("target_label");
-                    int dwell = rs.getInt("dwell_time_ms");
-                    String ipStr = rs.getString("ip_str");
-                    String ua = rs.getString("user_agent");
-                    Timestamp catTs = rs.getTimestamp("created_at");
-                    OffsetDateTime cat = catTs != null ? catTs.toInstant().atOffset(ZoneOffset.UTC) : OffsetDateTime.now(ZoneOffset.UTC);
-
-                    return new ActivityLogItem(id, uid, et, path, label, dwell, ipStr, ua, cat);
-                }, sanitizedLimit, sanitizedOffset);
-            }
-
-            return new ActivityLogsResponse(true, items, items.size());
-        } catch (Exception ex) {
-            log.warn("Failed to query user_activity_logs: {}", ex.getMessage());
-            return new ActivityLogsResponse(true, List.of(), 0);
+            return jdbcTemplate.query(
+                    "SELECT id::text AS id, user_id::text AS user_id, COALESCE(username, '') AS username, session_id, event_type, "
+                            + "path, target_label, dwell_time_ms, host(ip) AS ip, user_agent, metadata::text AS metadata, created_at "
+                            + "FROM public.admin_activity_list_logs(?::uuid, ?, ?, ?, ?::uuid)",
+                    (rs, rowNum) -> {
+                        Map<String, Object> row = new java.util.LinkedHashMap<>();
+                        row.put("id", rs.getString("id"));
+                        row.put("user_id", rs.getString("user_id"));
+                        row.put("username", rs.getString("username"));
+                        row.put("session_id", rs.getString("session_id"));
+                        row.put("event_type", rs.getString("event_type"));
+                        row.put("path", rs.getString("path"));
+                        row.put("target_label", rs.getString("target_label"));
+                        row.put("dwell_time_ms", (Integer) rs.getObject("dwell_time_ms"));
+                        row.put("ip", rs.getString("ip"));
+                        row.put("user_agent", rs.getString("user_agent"));
+                        row.put("metadata", readJson(rs.getString("metadata")));
+                        row.put("created_at", rs.getTimestamp("created_at").toInstant().toString());
+                        return row;
+                    }, admin, Math.min(Math.max(limit, 1), 200), Math.max(offset, 0), type, userId);
+        } catch (org.springframework.dao.DataAccessException e) {
+            throw unavailable(e, "ACTIVITY_LOGS_UNAVAILABLE");
         }
     }
 
-    public TrafficAnalyticsResponse trafficDashboard(String granularity, int periods) {
-        String gran = granularity != null ? granularity : "day";
-        int safePeriods = periods > 0 ? periods : (gran.equals("month") ? 24 : gran.equals("year") ? 10 : 30);
-        java.time.Instant now = java.time.Instant.now();
-        java.time.Instant rangeStart = now.minus(safePeriods, gran.equals("year") ? java.time.temporal.ChronoUnit.DAYS : gran.equals("month") ? java.time.temporal.ChronoUnit.DAYS : java.time.temporal.ChronoUnit.DAYS);
-
-        Map<String, Object> summary = Map.of(
-                "pageViews", 14280,
-                "uniqueSessions", 4320,
-                "authenticatedUsers", 1850,
-                "anonymousSessions", 2470
-        );
-
-        List<Map<String, Object>> series = new java.util.ArrayList<>();
-        for (int i = safePeriods - 1; i >= 0; i--) {
-            String bucket = now.minus(i, java.time.temporal.ChronoUnit.DAYS).toString().substring(0, 10);
-            series.add(Map.of(
-                    "bucket", bucket,
-                    "pageViews", 450 + (i * 7) % 80,
-                    "uniqueSessions", 140 + (i * 3) % 25,
-                    "authenticatedUsers", 60 + (i * 2) % 15
-            ));
+    /** Traffic dashboard JSON from admin_activity_traffic_dashboard (202); replaced fixed figures. */
+    public Map<String, Object> adminTraffic(UUID admin, String granularity, int periods) {
+        requireAdmin(admin);
+        try {
+            String json = jdbcTemplate.queryForObject(
+                    "SELECT public.admin_activity_traffic_dashboard(?::uuid, ?, ?)::text", String.class,
+                    admin, granularity == null ? "day" : granularity, periods);
+            return readJson(json);
+        } catch (org.springframework.dao.DataAccessException e) {
+            throw unavailable(e, "TRAFFIC_UNAVAILABLE");
         }
-
-        List<Map<String, Object>> landingPages = List.of(
-                Map.of("path", "/", "entries", 3200, "anonymousEntries", 2100),
-                Map.of("path", "/stocks", "entries", 2400, "anonymousEntries", 900),
-                Map.of("path", "/tools", "entries", 1800, "anonymousEntries", 1200),
-                Map.of("path", "/guide/stock-trading", "entries", 1100, "anonymousEntries", 800)
-        );
-
-        List<Map<String, Object>> sources = List.of(
-                Map.of("source", "google", "entries", 4800),
-                Map.of("source", "naver", "entries", 3100),
-                Map.of("source", "direct", "entries", 2600),
-                Map.of("source", "discord", "entries", 1500)
-        );
-
-        List<Map<String, Object>> countries = List.of(
-                Map.of("country", "KR", "entries", 9800),
-                Map.of("country", "US", "entries", 2400),
-                Map.of("country", "JP", "entries", 1200)
-        );
-
-        List<Map<String, Object>> metrics = List.of(
-                Map.of("period", "2026-11-15", "views", 12540, "uniqueVisitors", 1420, "avgDwellSeconds", 145),
-                Map.of("period", "2026-11-14", "views", 11200, "uniqueVisitors", 1310, "avgDwellSeconds", 138),
-                Map.of("period", "2026-11-13", "views", 10850, "uniqueVisitors", 1280, "avgDwellSeconds", 142)
-        );
-
-        return new TrafficAnalyticsResponse(true, gran, metrics, safePeriods, rangeStart.toString(), now.toString(), summary, series, landingPages, sources, countries);
     }
 
-    public List<Map<String, Object>> getDirectLogs(UUID userId, String eventType, int limit, int offset) {
-        java.time.Instant now = java.time.Instant.now();
-        List<Map<String, Object>> list = new java.util.ArrayList<>();
-        List<String> samplePaths = List.of("/", "/stocks", "/tools", "/bonds", "/pension", "/guide/stock-trading");
-        List<String> eventTypes = List.of("page_view", "page_dwell", "button_click", "api_request", "admin_request");
+    private static void requireAdmin(UUID admin) {
+        if (admin == null) throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.UNAUTHORIZED, "ADMIN_SESSION_REQUIRED");
+    }
 
-        for (int i = 0; i < Math.min(30, limit); i++) {
-            Map<String, Object> row = new java.util.LinkedHashMap<>();
-            row.put("id", String.valueOf(1000 + i));
-            row.put("user_id", "5f7b8b44-e4aa-40b8-b93a-800ec0151d20");
-            row.put("username", "운영자 (Admin)");
-            row.put("session_id", "sess-hash-" + (100 + i));
-            row.put("event_type", eventType != null && !eventType.isBlank() ? eventType : eventTypes.get(i % eventTypes.size()));
-            row.put("path", samplePaths.get(i % samplePaths.size()));
-            row.put("target_label", "화면 진입");
-            row.put("dwell_time_ms", 15000 + i * 1200);
-            row.put("ip", "127.0.0.1");
-            row.put("user_agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
-            row.put("metadata", java.util.Collections.emptyMap());
-            row.put("created_at", now.minus(i * 3, java.time.temporal.ChronoUnit.MINUTES).toString());
-            list.add(row);
+    private static org.springframework.web.server.ResponseStatusException unavailable(
+            org.springframework.dao.DataAccessException e, String code) {
+        String state = e.getMostSpecificCause() instanceof java.sql.SQLException sql ? sql.getSQLState() : null;
+        if ("42501".equals(state)) return new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.FORBIDDEN, "ADMIN_ROLE_REQUIRED");
+        if ("22023".equals(state)) return new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.BAD_REQUEST, "INVALID_REQUEST");
+        log.warn("[ActivityService] {}: {}", code, e.getClass().getSimpleName());
+        return new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, code);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> readJson(String json) {
+        try {
+            return json == null ? Map.of() : JSON.readValue(json, Map.class);
+        } catch (com.fasterxml.jackson.core.JsonProcessingException bad) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "ACTIVITY_SOURCE_MALFORMED");
         }
-        return list;
     }
 }

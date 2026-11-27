@@ -27,44 +27,26 @@ public class HotTimeController {
 
     @GetMapping("/active")
     public ResponseEntity<Map<String, Object>> getActiveHotTime() {
-        return ResponseEntity.ok(Map.of(
-                "isActive", true,
-                "currentBuff", Map.of(
-                        "name", "주말 골든타임 노동 보상 1.5배",
-                        "multiplier", 1.5,
-                        "type", "WORK_REWARD_BOOST",
-                        "expiresAt", new Date(System.currentTimeMillis() + 7200000L).toInstant().toString()
-                )
-        ));
+        return sourceUnavailable();
     }
 
     @GetMapping("/schedule")
     public ResponseEntity<Map<String, Object>> getWeeklySchedule() {
-        List<Map<String, Object>> schedule = List.of(
-                Map.of("dayOfWeek", "SATURDAY", "startTime", "19:00", "endTime", "23:00", "buffType", "WORK_BOOST", "multiplier", 1.5),
-                Map.of("dayOfWeek", "SUNDAY", "startTime", "14:00", "endTime", "18:00", "buffType", "CASINO_EXP_BOOST", "multiplier", 2.0)
-        );
-        return ResponseEntity.ok(Map.of("schedule", schedule));
+        return sourceUnavailable();
     }
 
     @PostMapping("/admin/trigger")
     public ResponseEntity<Map<String, Object>> triggerManualBuff(
             HttpServletRequest request,
             @RequestBody(required = false) Map<String, Object> body) {
-        Optional<UserAuthService.SessionInfo> sessionOpt = userAuthService.resolveSession(request);
-        if (sessionOpt.isEmpty() || !sessionOpt.get().isSignedIn()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
-        }
-        List<String> roles = sessionOpt.get().getRoles();
-        boolean hasAdmin = roles != null && roles.stream().anyMatch(r -> "SUPERADMIN".equalsIgnoreCase(r) || "ADMIN".equalsIgnoreCase(r));
-        if (!hasAdmin) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Forbidden: Admin access required");
-        }
+        return sourceUnavailable();
+    }
 
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("buffName", body != null ? body.get("name") : "관리자 수동 핫타임");
-        res.put("startedAt", new Date().toInstant().toString());
-        return ResponseEntity.ok(res);
+    // Source-truth gate (2026-11-26): these answered a permanent 1.5x buff and a manual-trigger "success"
+    // with nothing stored. No table or function backs hot time yet; 503 until one does.
+    private static ResponseEntity<Map<String, Object>> sourceUnavailable() {
+        return ResponseEntity.status(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE)
+                .header("Cache-Control", "no-store")
+                .body(Map.of("ok", false, "code", "HOT_TIME_SOURCE_UNAVAILABLE"));
     }
 }

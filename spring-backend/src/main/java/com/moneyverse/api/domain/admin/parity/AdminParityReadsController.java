@@ -94,19 +94,15 @@ public class AdminParityReadsController {
     @GetMapping("/api/v1/admin/enterprises/soes")
     @Operation(summary = "State-owned enterprises")
     public ResponseEntity<?> soes(HttpServletRequest request) {
-        actor(request);
-        return ok(rows("SELECT id, code, name, category, ceo_name, total_assets_wld::text AS total_assets_wld, operating_revenue_hourly_wld::text AS operating_revenue_hourly_wld, "
-                + "operating_cost_hourly_wld::text AS operating_cost_hourly_wld, net_profit_hourly_wld::text AS net_profit_hourly_wld, dividend_rate_bps, eval_grade, eval_score, "
-                + "status, description, created_at::text AS created_at, updated_at::text AS updated_at FROM public.state_enterprises ORDER BY total_assets_wld DESC"));
+        UUID actor = actor(request);
+        return ok(rows("SELECT * FROM public.admin_state_enterprises_read(?::uuid)", actor));
     }
 
     @GetMapping("/api/v1/admin/enterprises/private")
     @Operation(summary = "Private enterprises")
     public ResponseEntity<?> privateEnterprises(HttpServletRequest request) {
-        actor(request);
-        return ok(rows("SELECT id, symbol, name, sector, stage, valuation_wld::text AS valuation_wld, revenue_hourly_wld::text AS revenue_hourly_wld, corporate_tax_rate_bps, "
-                + "tax_paid_total_wld::text AS tax_paid_total_wld, dividends_paid_total_wld::text AS dividends_paid_total_wld, active, created_at::text AS created_at, "
-                + "updated_at::text AS updated_at FROM public.private_enterprises ORDER BY valuation_wld DESC"));
+        UUID actor = actor(request);
+        return ok(rows("SELECT * FROM public.admin_private_enterprises_read(?::uuid)", actor));
     }
 
     @GetMapping("/api/v1/admin/enterprises/dividend-logs")
@@ -145,13 +141,11 @@ public class AdminParityReadsController {
     @GetMapping({"/api/v1/admin/economy/stats", "/api/admin/economy/stats"})
     @Operation(summary = "Faucet/sink summary and the last 30 days")
     public ResponseEntity<?> economyStats(HttpServletRequest request) {
-        actor(request);
-        List<Map<String, Object>> summary = rows("SELECT total_minted::text AS total_minted, total_burned::text AS total_burned, total_circulating::text AS total_circulating, "
-                + "today_minted::text AS today_minted, today_burned::text AS today_burned FROM public.v_economy_summary");
+        UUID actor = actor(request);
+        List<Map<String, Object>> summary = rows("SELECT * FROM public.admin_economy_summary_read(?::uuid)", actor);
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("summary", summary.isEmpty() ? Map.of() : summary.get(0));
-        out.put("daily", rows("SELECT stat_date::text AS stat_date, faucet_amount::text AS faucet_amount, sink_amount::text AS sink_amount, tax_amount::text AS tax_amount, "
-                + "net_change::text AS net_change, sink_ratio_percent::text AS sink_ratio_percent FROM public.v_daily_economy_stats ORDER BY stat_date DESC LIMIT 30"));
+        out.put("daily", rows("SELECT * FROM public.admin_daily_economy_stats_read(?::uuid, ?::integer)", actor, 30));
         return ok(out);
     }
 

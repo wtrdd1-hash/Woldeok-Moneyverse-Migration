@@ -26,19 +26,11 @@ public class StatusTruthService {
     public StatusSourceTruthPolicy.StatusResponse publicStatus(){
         Instant now=Instant.now();
         try {
+            // The tables are not granted to the application role; 365 returns the raw last
+            // observation and stale window for public, active sources only.
             List<StatusSourceTruthPolicy.StatusRow> rows=jdbc.sql("""
-                    SELECT s.source_key, s.display_name, s.stale_after_seconds,
-                           last_seen.state, last_seen.observed_at
-                    FROM public.content_status_sources AS s
-                    LEFT JOIN LATERAL (
-                        SELECT snap.state,snap.observed_at
-                        FROM public.content_status_snapshots AS snap
-                        WHERE snap.source_key=s.source_key
-                        ORDER BY snap.observed_at DESC,snap.id DESC LIMIT 1
-                    ) AS last_seen ON TRUE
-                    WHERE s.public_visible=TRUE AND s.active=TRUE
-                    ORDER BY s.sort_order,s.source_key
-                    LIMIT 200
+                    SELECT source_key, display_name, stale_after_seconds, state, observed_at
+                    FROM public.content_public_status_evidence()
                     """).query((rs,i)->{
                         Timestamp timestamp=rs.getTimestamp("observed_at");
                         return StatusSourceTruthPolicy.evaluate(

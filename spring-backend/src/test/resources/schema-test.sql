@@ -122,3 +122,8 @@ CREATE TABLE IF NOT EXISTS chat_media_registry (
     owner_user_id UUID NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- PostgreSQL credential functions (180, 356) as H2 aliases; see H2AuthFunctionAliases.
+CREATE ALIAS IF NOT EXISTS auth_local_credential_for_login FOR 'com.moneyverse.testing.H2AuthFunctionAliases.credentialForLogin';
+CREATE ALIAS IF NOT EXISTS auth_local_email_for_actor FOR 'com.moneyverse.testing.H2AuthFunctionAliases.emailForActor';
+CREATE ALIAS IF NOT EXISTS auth_local_verifier_for_actor FOR 'com.moneyverse.testing.H2AuthFunctionAliases.verifierForActor';

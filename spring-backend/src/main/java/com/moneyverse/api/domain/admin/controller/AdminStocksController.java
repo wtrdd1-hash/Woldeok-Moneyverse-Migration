@@ -66,37 +66,21 @@ public class AdminStocksController {
     ) {
         if (adminAuthService.resolveVerifiedAdminActor(request).isEmpty()) return unauthorizedResponse();
 
-        UUID sid;
         try {
-            sid = UUID.fromString(stockId);
+            UUID.fromString(stockId);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", "INVALID_STOCK_ID"));
         }
 
-        try {
-            String currentStatus = jdbcTemplate.queryForObject(
-                "SELECT COALESCE(halt_status, 'ACTIVE') FROM virtual_stocks WHERE id = ?",
-                String.class, sid
-            );
-
-            boolean shouldHalt = !"HALTED".equalsIgnoreCase(currentStatus);
-            String nextStatus = shouldHalt ? "HALTED" : "ACTIVE";
-
-            jdbcTemplate.update(
-                "UPDATE virtual_stocks SET halt_status = ?, halted_at = CASE WHEN ? = 'HALTED' THEN NOW() ELSE NULL END, updated_at = NOW() WHERE id = ?",
-                nextStatus, nextStatus, sid
-            );
-
-            Map<String, Object> res = new LinkedHashMap<>();
-            res.put("ok", true);
-            res.put("stockId", stockId);
-            res.put("haltStatus", nextStatus);
-            res.put("active", !shouldHalt);
-            return ResponseEntity.ok(res);
-        } catch (Exception e) {
-            log.error("[AdminStocksController] haltStock error: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "FAILED_TO_UPDATE_STOCK_HALT"));
-        }
+        // Migration 287 suspends halt settlement (P0 #1553) until a ledger-atomic settlement with a
+        // replay receipt exists. This toggle used to UPDATE virtual_stocks directly, which skipped
+        // that hold (holders were neither settled nor refunded) and needs table privileges the
+        // application role does not hold. Rejected alternative: calling stock_halt_and_settle, which
+        // raises 55000 by design today. Answer the truth instead.
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("ok", false);
+        res.put("code", "stock_halt_suspended");
+        res.put("detail", "stock halt is suspended until settlement is ledger-atomic");
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(res);
     }
 }

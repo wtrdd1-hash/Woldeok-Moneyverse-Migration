@@ -37,7 +37,7 @@ class PensionReadSafetyTest {
         var response = new PensionController(pension, auth).getMyAccount(request);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         verify(pension).readExistingAccount(id.toString());
-        verify(pension, never()).getOrCreateAccount(anyString());
+        verifyNoMoreInteractions(pension); // no account-creating path exists any more
     }
 
     @Test

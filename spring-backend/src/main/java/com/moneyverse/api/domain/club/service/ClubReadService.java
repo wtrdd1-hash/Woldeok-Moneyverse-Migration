@@ -24,7 +24,7 @@ public class ClubReadService {
     public ClubReadService(JdbcClient jdbc) { this.jdbc = jdbc; }
 
     public List<Map<String, Object>> list(UUID actor, String search, int limit, int offset) {
-        return run(() -> jdbc.sql("SELECT " + CLUB_COLUMNS + " FROM public.clubs c JOIN public.users u ON u.id = c.owner_id "
+        return run(() -> jdbc.sql("SELECT " + CLUB_COLUMNS + " FROM public.clubs c "
                         + "LEFT JOIN public.club_members cm_actor ON cm_actor.club_id = c.id AND cm_actor.user_id = ?::uuid "
                         + "WHERE c.status = 'active' AND (?::text IS NULL OR c.name ILIKE ('%' || ?::text || '%') OR c.tag ILIKE ('%' || ?::text || '%')) "
                         + "ORDER BY c.level DESC, c.member_count DESC, c.created_at DESC LIMIT ? OFFSET ?")
@@ -32,18 +32,18 @@ public class ClubReadService {
     }
 
     public Optional<Map<String, Object>> get(UUID club, UUID actor) {
-        return run(() -> jdbc.sql("SELECT " + CLUB_COLUMNS + ", c.charter, c.charter_fee_paid FROM public.clubs c JOIN public.users u ON u.id = c.owner_id "
+        return run(() -> jdbc.sql("SELECT " + CLUB_COLUMNS + ", c.charter, c.charter_fee_paid FROM public.clubs c "
                         + "LEFT JOIN public.club_members cm_actor ON cm_actor.club_id = c.id AND cm_actor.user_id = ?::uuid WHERE c.id = ?::uuid")
                 .param(actor).param(club).query().listOfRows().stream().findFirst());
     }
 
     public List<Map<String, Object>> members(UUID club, UUID actor, int limit, int offset) {
         return run(() -> jdbc.sql("SELECT cm.club_id::text AS club_id, cm.user_id::text AS user_id, COALESCE(public.member_board_author_name(cm.user_id), '클럽원') AS display_name, "
-                        + "p.image_url AS avatar_key, cm.role, to_char(cm.joined_at AT TIME ZONE 'UTC', " + ISO + ") AS joined_at, (cm.user_id = ?::uuid) AS is_me "
-                        + "FROM public.club_members cm JOIN public.users u ON u.id = cm.user_id LEFT JOIN public.member_profiles p ON p.user_id = u.id "
+                        + "public.member_profile_image_for(?::uuid, cm.user_id) AS avatar_key, cm.role, to_char(cm.joined_at AT TIME ZONE 'UTC', " + ISO + ") AS joined_at, (cm.user_id = ?::uuid) AS is_me "
+                        + "FROM public.club_members cm "
                         + "WHERE cm.club_id = ?::uuid ORDER BY CASE cm.role WHEN 'owner' THEN 1 WHEN 'steward' THEN 2 WHEN 'moderator' THEN 3 ELSE 4 END, cm.joined_at "
                         + "LIMIT ? OFFSET ?")
-                .param(actor).param(club).param(limit).param(offset).query().listOfRows());
+                .param(actor).param(actor).param(club).param(limit).param(offset).query().listOfRows());
     }
 
     public List<Map<String, Object>> projects(UUID club) {
@@ -58,14 +58,14 @@ public class ClubReadService {
     public List<Map<String, Object>> feed(UUID club, int limit) {
         return run(() -> jdbc.sql("SELECT f.id::text AS id, f.club_id::text AS club_id, f.author_id::text AS author_id, COALESCE(public.member_board_author_name(f.author_id), '회원') AS author_name, "
                         + "f.title, f.body, f.is_announcement, to_char(f.created_at AT TIME ZONE 'UTC', " + ISO + ") AS created_at "
-                        + "FROM public.club_feed_posts f JOIN public.users u ON u.id = f.author_id WHERE f.club_id = ?::uuid "
+                        + "FROM public.club_feed_posts f WHERE f.club_id = ?::uuid "
                         + "ORDER BY f.is_announcement DESC, f.created_at DESC LIMIT ?")
                 .param(club).param(limit).query().listOfRows());
     }
 
     public Optional<Map<String, Object>> canvas(UUID club) {
         return run(() -> jdbc.sql("SELECT grid::text AS grid, total_score AS \"totalScore\", to_char(updated_at AT TIME ZONE 'UTC', " + ISO + ") AS \"updatedAt\" "
-                        + "FROM public.club_canvases WHERE club_id = ?::uuid").param(club).query().listOfRows().stream().findFirst());
+                        + "FROM public.club_canvas_read(?::uuid)").param(club).query().listOfRows().stream().findFirst());
     }
 
     private interface Call<T> { T get(); }

@@ -1,0 +1,2 @@
+# Remaining direct reads of ungranted relations (file relation). This list may only shrink:
+# move the read behind an actor-bound SECURITY DEFINER function and delete the line.

@@ -1,5 +1,7 @@
 package com.moneyverse.api.domain.seo.controller;
 
+import com.moneyverse.api.domain.admin.service.AdminAuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,10 +51,12 @@ public class SeoController {
     );
 
     private final JdbcTemplate jdbcTemplate;
+    private final AdminAuthService adminAuthService;
 
     @Autowired
-    public SeoController(JdbcTemplate jdbcTemplate) {
+    public SeoController(JdbcTemplate jdbcTemplate, AdminAuthService adminAuthService) {
         this.jdbcTemplate = jdbcTemplate;
+        this.adminAuthService = adminAuthService;
     }
 
     @GetMapping(path = {
@@ -63,24 +67,23 @@ public class SeoController {
             "/api/seo/status",
             "/seo/status"
     })
-    public ResponseEntity<Map<String, Object>> getAdminStatus() {
-        return ResponseEntity.ok(buildSeoObservation());
+    public ResponseEntity<Map<String, Object>> getAdminStatus(HttpServletRequest request) {
+        UUID actor = adminAuthService.resolveVerifiedAdminActor(request)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "admin_session_required"));
+        return ResponseEntity.ok(buildSeoObservation(actor));
     }
 
-    private Map<String, Object> buildSeoObservation() {
+    private Map<String, Object> buildSeoObservation(UUID actor) {
         Instant now = Instant.now();
         Instant oneDayAgo = now.minus(24, ChronoUnit.HOURS);
         Instant sevenDaysAgo = now.minus(7, ChronoUnit.DAYS);
 
         List<Map<String, Object>> rawLogs = new ArrayList<>();
         try {
-            String sql = """
-                SELECT id::text, bot_name, path, status_code, duration_ms, ip_address, user_agent, created_at
-                FROM seo_crawler_logs
-                ORDER BY created_at DESC
-                LIMIT 300
-                """;
-            rawLogs = jdbcTemplate.queryForList(sql);
+            // seo_crawler_logs is not granted to the application role and carries crawler IPs;
+            // 364 reads it with the administrator checked inside the function.
+            rawLogs = jdbcTemplate.queryForList(
+                    "SELECT * FROM public.admin_seo_crawler_logs_read(?::uuid, ?::integer)", actor, 300);
         } catch (Exception e) {
             log.warn("[SeoController] crawler source unavailable (fail closed)");
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Crawler observations unavailable");
@@ -200,7 +203,7 @@ public class SeoController {
         res.put("indexNowKey", DEFAULT_INDEXNOW_KEY);
         res.put("sitemapUrl", BASE_URL + "/sitemap.xml");
         res.put("coverageSourceVerified", false);
-        res.put("observationSource", "seo_crawler_logs");
+        res.put("observationSource", "admin_seo_crawler_logs_read");
 
         return res;
     }

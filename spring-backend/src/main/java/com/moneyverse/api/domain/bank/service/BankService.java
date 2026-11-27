@@ -189,22 +189,8 @@ public class BankService {
         }
     }
 
-    @Transactional(readOnly = true)
-    public List<Map<String, Object>> listPockets(String userId) {
-        UUID uid = parseUuid(userId);
-        try {
-            return jdbcTemplate.queryForList("""
-                SELECT id::text, name, balance::text, target_amount::text,
-                       target_date::text, theme_color, icon_code, created_at::text
-                FROM public.bank_saving_pockets
-                WHERE user_id = ?::uuid AND is_archived = false
-                ORDER BY created_at DESC
-            """, uid);
-        } catch (Exception e) {
-            log.warn("[BankService] listPockets fallback: {}", e.getMessage());
-            return Collections.emptyList();
-        }
-    }
+    // listPockets removed 2026-11-27: no caller, and it read a relation the role is not granted;
+    // PocketService.listPockets (bank_owner_pockets, 361) is the served path.
 
     @Transactional
     public Map<String, Object> createPocket(String userId, PocketCreateRequest req) {

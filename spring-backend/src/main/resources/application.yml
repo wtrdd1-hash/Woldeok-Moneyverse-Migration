@@ -18,6 +18,10 @@ spring:
       connection-timeout: 20000
       max-lifetime: 1800000
   jpa:
+    # Off: with it on, a JPA transaction early in a request held its connection until the
+    # response while JdbcTemplate borrowed a second one, deadlocking the pool at ~pool-size
+    # concurrent requests (capacity sandbox 2026-11-26). No entity needs a session across views.
+    open-in-view: false
     hibernate:
       ddl-auto: none
     show-sql: false

@@ -80,11 +80,12 @@ public class Phase14FullSystemCompletionIntegrationTest {
     }
 
     @Test
-    @DisplayName("9. WarfareController - 클럽 대항전 시즌 현황 조회 (200 OK)")
+    @DisplayName("9. WarfareController - season is not fabricated without a data source (503)")
     void testWarfareCurrentSeason() throws Exception {
+        // Was a hard-coded season; no table backs club warfare (source-truth gate 2026-11-26).
         mockMvc.perform(get("/clubs/warfare/season/current"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.seasonName").value("2026 영지 쟁탈 대전"));
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.code").value("CLUB_WARFARE_SOURCE_UNAVAILABLE"));
     }
 
     @Test
@@ -105,11 +106,12 @@ public class Phase14FullSystemCompletionIntegrationTest {
     }
 
     @Test
-    @DisplayName("12. HotTimeController - 활성 핫타임 버프 현황 조회 (200 OK)")
+    @DisplayName("12. HotTimeController - active buff is not fabricated without a data source (503)")
     void testHotTimeActive() throws Exception {
+        // Was a permanent 1.5x buff; no table backs hot time (source-truth gate 2026-11-26).
         mockMvc.perform(get("/economy/hot-time/active"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.isActive").value(true));
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.code").value("HOT_TIME_SOURCE_UNAVAILABLE"));
     }
 
     @Test

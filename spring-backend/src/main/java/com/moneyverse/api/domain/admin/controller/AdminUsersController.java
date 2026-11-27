@@ -24,6 +24,29 @@ public class AdminUsersController {
     private final AdminGovernanceService governanceService;
     private final AdminAuthService adminAuthService;
     private final JdbcTemplate jdbcTemplate;
+    private static final com.fasterxml.jackson.databind.ObjectMapper MAPPER = new com.fasterxml.jackson.databind.ObjectMapper()
+            .enable(com.fasterxml.jackson.databind.DeserializationFeature.USE_BIG_INTEGER_FOR_INTS)
+            .enable(com.fasterxml.jackson.databind.DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
+
+    private static Object exactIntegers(com.fasterxml.jackson.databind.JsonNode node, String key) {
+        if (node == null || node.isNull()) return null;
+        if (node.isObject()) {
+            Map<String, Object> out = new LinkedHashMap<>();
+            node.fields().forEachRemaining(e -> out.put(e.getKey(), exactIntegers(e.getValue(), e.getKey())));
+            return out;
+        }
+        if (node.isArray()) {
+            List<Object> out = new ArrayList<>();
+            node.forEach(item -> out.add(exactIntegers(item, key)));
+            return out;
+        }
+        if (node.isIntegralNumber()) {
+            return key != null && key.endsWith("Bps") ? node.numberValue() : node.bigIntegerValue().toString();
+        }
+        if (node.isNumber()) return node.decimalValue().toPlainString();
+        if (node.isBoolean()) return node.booleanValue();
+        return node.asText();
+    }
 
     public AdminUsersController(AdminGovernanceService governanceService, AdminAuthService adminAuthService, JdbcTemplate jdbcTemplate) {
         this.governanceService = governanceService;
@@ -73,57 +96,32 @@ public class AdminUsersController {
             return ResponseEntity.badRequest().body(Map.of("error", "INVALID_USER_ID"));
         }
 
+        UUID actor = adminAuthService.resolveVerifiedAdminActor(request).orElseThrow();
+        // virtual_stocks / virtual_stock_positions are revoked from the application role (023/047);
+        // admin_get_user_portfolio checks the actor's role inside the function and returns the
+        // identity fields the member detail page validates. Amounts in it are informational; the
+        // page takes exact WLD strings from the directory.
         try {
-            // 1. 현금 잔액 조회
-            Long cashBalance = 0L;
-            try {
-                cashBalance = jdbcTemplate.queryForObject(
-                    "SELECT COALESCE(ab.balance, 0) FROM accounts a JOIN account_balances ab ON a.id = ab.account_id WHERE a.owner_user_id = ? AND a.account_type = 'USER_CASH' LIMIT 1",
-                    Long.class, uid
-                );
-                if (cashBalance == null) cashBalance = 0L;
-            } catch (Exception ignored) {}
-
-            // 2. 보유 주식 목록 조회
-            String stockSql = """
-                SELECT p.stock_id, s.symbol, s.name, p.quantity, p.average_cost, s.current_price
-                FROM virtual_stock_positions p
-                JOIN virtual_stocks s ON p.stock_id = s.id
-                WHERE p.user_id = ? AND p.quantity > 0
-                """;
-
-            List<Map<String, Object>> holdings = jdbcTemplate.query(stockSql, (rs, rowNum) -> {
-                Map<String, Object> h = new LinkedHashMap<>();
-                h.put("stockId", rs.getString("stock_id"));
-                h.put("symbol", rs.getString("symbol"));
-                h.put("name", rs.getString("name"));
-                long qty = rs.getLong("quantity");
-                long avgCost = rs.getLong("average_cost");
-                long curPrice = rs.getLong("current_price");
-                h.put("quantity", qty);
-                h.put("averageCost", avgCost);
-                h.put("currentPrice", curPrice);
-                long evalValue = qty * curPrice;
-                h.put("evalValue", evalValue);
-                double pnlPct = avgCost > 0 ? (((double)(curPrice - avgCost) / avgCost) * 100.0) : 0.0;
-                h.put("pnlPercentage", Math.round(pnlPct * 100.0) / 100.0);
-                return h;
-            }, uid);
-
-            long totalStockEval = holdings.stream().mapToLong(h -> (Long) h.get("evalValue")).sum();
-
-            Map<String, Object> portfolio = new LinkedHashMap<>();
-            portfolio.put("userId", userId);
-            portfolio.put("cashBalance", String.valueOf(cashBalance));
-            portfolio.put("stockEvaluation", String.valueOf(totalStockEval));
-            portfolio.put("totalNetWorth", String.valueOf(cashBalance + totalStockEval));
-            portfolio.put("holdings", holdings);
-
-            return ResponseEntity.ok(Map.of("ok", true, "portfolio", portfolio));
+            String json = jdbcTemplate.queryForObject(
+                    "SELECT public.admin_get_user_portfolio(?::uuid, ?::uuid)::text", String.class, actor, uid);
+            // Money in the jsonb arrives as JSON numbers; a JavaScript client rounds beyond 2^53.
+            // Every integer leaves as an exact integer string; basis-point fields stay numbers.
+            com.fasterxml.jackson.databind.JsonNode tree = MAPPER.readTree(json);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> portfolio = (Map<String, Object>) exactIntegers(tree, null);
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("ok", true);
+            body.put("portfolio", portfolio);
+            return ResponseEntity.ok(body);
+        } catch (org.springframework.dao.DataAccessException e) {
+            String state = e.getMostSpecificCause() instanceof java.sql.SQLException sql ? sql.getSQLState() : null;
+            if ("22023".equals(state)) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "USER_NOT_FOUND"));
+            if ("28000".equals(state)) return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "ADMIN_AUTHORITY_REQUIRED"));
+            log.error("[AdminUsersController] getUserPortfolio unavailable: {}", e.getClass().getSimpleName());
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(Map.of("error", "PORTFOLIO_UNAVAILABLE"));
         } catch (Exception e) {
-            log.error("[AdminUsersController] getUserPortfolio error: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "FAILED_TO_LOAD_PORTFOLIO"));
+            log.error("[AdminUsersController] getUserPortfolio unreadable: {}", e.getClass().getSimpleName());
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(Map.of("error", "PORTFOLIO_UNAVAILABLE"));
         }
     }
 }

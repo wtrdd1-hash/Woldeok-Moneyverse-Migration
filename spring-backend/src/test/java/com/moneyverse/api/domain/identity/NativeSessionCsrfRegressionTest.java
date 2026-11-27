@@ -77,6 +77,8 @@ class NativeSessionCsrfRegressionTest {
                 CREATE TABLE auth_local_credentials (
                     user_id UUID, email TEXT, email_hash TEXT, password_verifier TEXT, disabled_at TIMESTAMP)
                 """);
+        // Sign-in reads credentials through 180's function (2026-11-26); same H2 alias as schema-test.sql.
+        jdbc.execute("CREATE ALIAS auth_local_credential_for_login FOR 'com.moneyverse.testing.H2AuthFunctionAliases.credentialForLogin'");
         jdbc.update("INSERT INTO auth_sessions (id, token_hash, csrf_hash, user_id, expires_at) VALUES (?, ?, ?, ?, ?)",
                 SESSION_ID, UserAuthService.sha256(SESSION), UserAuthService.sha256(PROOF), OWNER,
                 Timestamp.from(Instant.now().plusSeconds(3600)));

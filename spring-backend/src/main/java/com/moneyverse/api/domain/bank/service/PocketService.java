@@ -25,33 +25,33 @@ public class PocketService {
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Rows from bank_owner_pockets (361), shaped as the web's SavingPocket (snake_case, money as
+     * canonical integer strings). An unreadable source is a 503: an empty list would read as
+     * "you have no pockets".
+     */
     public List<Map<String, Object>> listPockets(String userIdStr) {
         UUID userId = UUID.fromString(userIdStr);
-        String sql = """
-            SELECT id, name, balance, target_amount, target_date, theme_color, icon_code, is_archived, created_at
-            FROM bank_saving_pockets
-            WHERE user_id = ? AND is_archived = false
-            ORDER BY created_at ASC
-            """;
         try {
-            return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            return jdbcTemplate.query("SELECT * FROM public.bank_owner_pockets(?::uuid)", (rs, rowNum) -> {
                 Map<String, Object> pocket = new LinkedHashMap<>();
-                pocket.put("id", rs.getString("id"));
-                pocket.put("name", rs.getString("name"));
-                pocket.put("balance", rs.getLong("balance"));
-                pocket.put("targetAmount", rs.getObject("target_amount"));
+                pocket.put("pocket_id", rs.getString("pocket_id"));
+                pocket.put("name", rs.getString("pocket_name"));
+                pocket.put("balance", rs.getString("balance"));
+                pocket.put("target_amount", rs.getString("target_amount"));
                 Date td = rs.getDate("target_date");
-                pocket.put("targetDate", td != null ? td.toString() : null);
-                pocket.put("themeColor", rs.getString("theme_color"));
-                pocket.put("iconCode", rs.getString("icon_code"));
-                pocket.put("isArchived", rs.getBoolean("is_archived"));
-                Timestamp cat = rs.getTimestamp("created_at");
-                pocket.put("createdAt", cat != null ? cat.toInstant().toString() : null);
+                pocket.put("target_date", td != null ? td.toString() : null);
+                pocket.put("theme_color", rs.getString("theme_color"));
+                pocket.put("icon_code", rs.getString("icon_code"));
+                pocket.put("is_archived", rs.getBoolean("is_archived"));
+                pocket.put("created_at", rs.getTimestamp("created_at").toInstant().toString());
+                pocket.put("updated_at", rs.getTimestamp("updated_at").toInstant().toString());
                 return pocket;
             }, userId);
-        } catch (Exception e) {
-            log.error("[PocketService] listPockets error: {}", e.getMessage());
-            return List.of();
+        } catch (org.springframework.dao.DataAccessException e) {
+            log.warn("[PocketService] pocket list unavailable: {}", e.getClass().getSimpleName());
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "POCKETS_UNAVAILABLE");
         }
     }
 
@@ -92,16 +92,43 @@ public class PocketService {
     }
 
     @Transactional
-    public Map<String, Object> customizePocket(String userIdStr, String pocketIdStr, String themeColor, String iconCode) {
+    /**
+     * Pocket appearance. bank_saving_pockets is not writable by the application role, and the old
+     * UPDATE reported success even when it matched no row. bank_customize_pocket is journaled (it
+     * charges its fee to the sink in the same transaction), locks the idempotency key before the
+     * replay lookup and refuses another user's receipt, so the client's key is required and the
+     * receipt is the only success.
+     */
+    public Map<String, Object> customizePocket(String userIdStr, String pocketIdStr, String themeColor, String iconCode, String idempotencyKey) {
         UUID userId = UUID.fromString(userIdStr);
-        UUID pocketId = UUID.fromString(pocketIdStr);
-
-        jdbcTemplate.update(
-            "UPDATE bank_saving_pockets SET theme_color = ?, icon_code = ?, updated_at = NOW() WHERE id = ? AND user_id = ?",
-            themeColor, iconCode, pocketId, userId
-        );
-
-        return Map.of("success", true, "pocketId", pocketId.toString(), "themeColor", themeColor, "iconCode", iconCode);
+        UUID pocketId;
+        UUID key;
+        try {
+            pocketId = UUID.fromString(pocketIdStr);
+            key = UUID.fromString(idempotencyKey);
+        } catch (RuntimeException invalid) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, "pocket id and idempotency key are required");
+        }
+        try {
+            List<Map<String, Object>> receipt = jdbcTemplate.queryForList(
+                    "SELECT pocket_id::text AS pocket_id, theme_color, icon_code, cost_wld::text AS cost_wld, remaining_cash::text AS remaining_cash "
+                            + "FROM public.bank_customize_pocket(?::uuid, ?::uuid, ?::uuid, ?, ?)",
+                    key, userId, pocketId, themeColor, iconCode);
+            if (receipt.size() != 1) {
+                throw new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "POCKET_CUSTOMIZE_RECEIPT_MISSING");
+            }
+            return receipt.get(0);
+        } catch (org.springframework.dao.DataAccessException e) {
+            String state = e.getMostSpecificCause() instanceof java.sql.SQLException sql ? sql.getSQLState() : null;
+            org.springframework.http.HttpStatus status = switch (state == null ? "" : state) {
+                case "22023", "23505", "55000" -> org.springframework.http.HttpStatus.CONFLICT;
+                case "28000" -> org.springframework.http.HttpStatus.BAD_REQUEST;
+                default -> org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
+            };
+            throw new org.springframework.web.server.ResponseStatusException(status, "POCKET_CUSTOMIZE_REFUSED");
+        }
     }
 
     @Transactional

@@ -1,0 +1,10 @@
+{"signed_in": 50, "seconds": 1.8}
+{"scenario": "same_key_race", "racers": 30, "key": "5078f26b-c4da-4a59-89ca-7f388dd66bce", "codes": {"200": 30}, "distinct_transaction_ids": 1}
+{"scenario": "transfers", "vus": 5, "requests": 12786, "rps": 426.2, "p50_ms": 8.0, "p95_ms": 37.6, "p99_ms": 44.3, "codes": {"200": 12786}, "error_5xx_rate": 0.0}
+{"scenario": "transfers", "vus": 50, "requests": 10767, "rps": 358.9, "p50_ms": 111.4, "p95_ms": 286.0, "p99_ms": 384.7, "codes": {"200": 10767}, "error_5xx_rate": 0.0}
+{"scenario": "same_key_race", "racers": 30, "key": "52398cd5-01ce-4325-9185-2202900820d5", "codes": {"200": 30}, "distinct_transaction_ids": 1}
+{"connections": 50, "subscribed": 50, "errors": 0, "error_sample": null, "window_s": 10, "ticks_per_client_median": 5.0, "ticks_per_client_min": 5, "expected_ticks_at_2s": 5, "quote_updates_per_client_median": 50.0, "kib_per_client_per_min": 92.7}
+unbalanced_transactions      | 0
+balance_ledger_mismatches    | 0
+negative_disallowed_balances | 0
+transactions                 | 255219

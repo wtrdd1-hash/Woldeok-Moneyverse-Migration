@@ -1,0 +1,20 @@
+# before index (steady state)
+   Buffers: shared hit=4447 read=13812
+   ->  Seq Scan on virtual_stock_price_ticks (actual time=0.015..105.621 rows=1010 loops=1)
+         Rows Removed by Filter: 918583
+         Buffers: shared hit=3427 read=13812
+   Buffers: shared hit=98
+ Execution Time: 106.037 ms
+# after migration 354
+   Buffers: shared hit=1163 read=1
+   ->  Index Scan using virtual_stock_price_ticks_recorded_at_idx on virtual_stock_price_ticks (actual time=0.018..0.172 rows=1130 loops=1)
+         Index Cond: (recorded_at < (now() - '2 days'::interval))
+         Buffers: shared hit=32 read=1
+   Buffers: shared hit=116 read=4
+ Execution Time: 0.542 ms
+   Buffers: shared hit=3
+   ->  Index Scan using virtual_stock_minute_candles_bucket_at_idx on virtual_stock_minute_candles (actual time=0.014..0.014 rows=0 loops=1)
+         Index Cond: (bucket_at < (now() - '30 days'::interval))
+         Buffers: shared hit=3
+   Buffers: shared hit=57 read=4
+ Execution Time: 0.067 ms

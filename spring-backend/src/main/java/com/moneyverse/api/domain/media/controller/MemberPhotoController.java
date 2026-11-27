@@ -22,15 +22,18 @@ import java.util.*;
 @Tag(name = "Member Photo Submissions", description = "일반 회원의 갤러리 사진 제출, 철회 및 내 제출 목록 API")
 @RestController
 public class MemberPhotoController {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MemberPhotoController.class);
 
     private final ImageStorageService storageService;
     private final UserAuthService authService;
     private final JdbcTemplate jdbcTemplate;
+    private final com.moneyverse.api.domain.identity.service.MemberApiGuard memberApiGuard;
 
     public MemberPhotoController(ImageStorageService storageService, UserAuthService authService, JdbcTemplate jdbcTemplate) {
         this.storageService = storageService;
         this.authService = authService;
         this.jdbcTemplate = jdbcTemplate;
+        this.memberApiGuard = new com.moneyverse.api.domain.identity.service.MemberApiGuard(authService);
     }
 
     private Optional<UUID> resolveUserId(HttpServletRequest request) {
@@ -87,6 +90,9 @@ public class MemberPhotoController {
         }
     }
 
+    // Migrations 098/297 own submission, withdrawal and the owner list (idempotent, owner-scoped,
+    // schema-valid). The controller used to write and read the photos table itself with values
+    // the schema rejects and a response shape the web client does not accept (2026-11-26).
     @PostMapping(path = {
             "/api/v1/photos",
             "/api/photos"
@@ -95,35 +101,21 @@ public class MemberPhotoController {
     public ResponseEntity<?> submitPhoto(
             HttpServletRequest request,
             @RequestBody Map<String, Object> body) {
-
-        Optional<UUID> userId = resolveUserId(request);
-        if (userId.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("detail", "login required"));
+        UUID actor = memberApiGuard.verifiedMutationActor(request);
+        String storageKey = body.get("storageKey") instanceof String s ? s.trim() : null;
+        String altText = body.get("altText") instanceof String s ? s : null;
+        UUID key = memberApiGuard.idempotencyKey(body.get("idempotencyKey") instanceof String s ? s : null);
+        if (storageKey == null || storageKey.isEmpty() || altText == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "storageKey and altText are required"));
         }
-
-        String storageKey = (String) body.get("storageKey");
-        String altText = (String) body.getOrDefault("altText", "회원 사진");
-        if (storageKey == null || storageKey.isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "storageKey is required"));
-        }
-
-        UUID photoId = UUID.randomUUID();
-        Instant now = Instant.now();
-        String imageUrl = "/media/" + storageKey;
-
-        String sql = """
-            INSERT INTO photos (id, storage_key, alt_text, visibility, uploaded_by, content_state, image_url, created_at, updated_at)
-            VALUES (?, ?, ?, 'PRIVATE', ?, 'DRAFT', ?, ?, ?)
-            """;
         try {
-            jdbcTemplate.update(sql, photoId, storageKey, altText, userId.get(), imageUrl, Timestamp.from(now), Timestamp.from(now));
-            Map<String, Object> res = new LinkedHashMap<>();
-            res.put("photoId", photoId.toString());
-            res.put("storageKey", storageKey);
-            res.put("status", "SUBMITTED");
-            return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(res, "Photo submitted for review"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "Failed to submit photo: " + e.getMessage()));
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(
+                    "SELECT photo_id, submitted_at, replayed FROM public.member_submit_photo(?::uuid, ?::uuid, ?, ?)",
+                    actor, key, storageKey, altText);
+            if (rows.isEmpty()) return refused("PHOTO_SUBMISSION_NOT_RECORDED", null);
+            return ResponseEntity.status(HttpStatus.CREATED).body(rows.get(0));
+        } catch (org.springframework.dao.DataAccessException e) {
+            return refused("PHOTO_SUBMISSION_REFUSED", e);
         }
     }
 
@@ -135,27 +127,22 @@ public class MemberPhotoController {
     public ResponseEntity<?> withdrawPhoto(
             HttpServletRequest request,
             @RequestBody Map<String, Object> body) {
-
-        Optional<UUID> userId = resolveUserId(request);
-        if (userId.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("detail", "login required"));
-        }
-
-        String photoIdStr = (String) body.get("photoId");
-        if (photoIdStr == null || photoIdStr.isBlank()) {
+        UUID actor = memberApiGuard.verifiedMutationActor(request);
+        UUID key = memberApiGuard.idempotencyKey(body.get("idempotencyKey") instanceof String s ? s : null);
+        UUID photoId;
+        try {
+            photoId = UUID.fromString(String.valueOf(body.get("photoId")));
+        } catch (IllegalArgumentException invalid) {
             return ResponseEntity.badRequest().body(Map.of("error", "photoId is required"));
         }
-
-        UUID photoId = UUID.fromString(photoIdStr);
-        int rows = jdbcTemplate.update(
-            "DELETE FROM photos WHERE id = ? AND uploaded_by = ? AND content_state = 'DRAFT'",
-            photoId, userId.get()
-        );
-
-        if (rows > 0) {
-            return ResponseEntity.ok(ApiResponse.ok(Map.of("withdrawn", true, "photoId", photoIdStr)));
-        } else {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "게시된 사진은 직접 철회할 수 없습니다."));
+        try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(
+                    "SELECT photo_id, withdrawn_at, replayed FROM public.member_withdraw_pending_photo(?::uuid, ?::uuid, ?::uuid)",
+                    actor, photoId, key);
+            if (rows.isEmpty()) return refused("PHOTO_WITHDRAWAL_NOT_RECORDED", null);
+            return ResponseEntity.ok(rows.get(0));
+        } catch (org.springframework.dao.DataAccessException e) {
+            return refused("PHOTO_WITHDRAWAL_REFUSED", e);
         }
     }
 
@@ -165,24 +152,16 @@ public class MemberPhotoController {
     })
     @Operation(summary = "내 제출 사진 목록 조회")
     public ResponseEntity<?> mine(HttpServletRequest request) {
-        Optional<UUID> userId = resolveUserId(request);
-        if (userId.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("detail", "login required"));
-        }
+        UUID actor = memberApiGuard.actor(request);
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(
+                "SELECT photo_id, image_url, alt_text, published, submitted_at, published_at "
+                        + "FROM public.member_my_photo_submissions(?::uuid)", actor);
+        return ResponseEntity.ok(Map.of("submissions", rows));
+    }
 
-        String sql = "SELECT id, storage_key, alt_text, content_state, image_url, created_at FROM photos WHERE uploaded_by = ? ORDER BY created_at DESC";
-        List<Map<String, Object>> list = jdbcTemplate.query(sql, (rs, rowNum) -> {
-            Map<String, Object> m = new LinkedHashMap<>();
-            m.put("id", rs.getString("id"));
-            m.put("storageKey", rs.getString("storage_key"));
-            m.put("altText", rs.getString("alt_text"));
-            m.put("state", rs.getString("content_state"));
-            m.put("imageUrl", rs.getString("image_url"));
-            Timestamp cat = rs.getTimestamp("created_at");
-            m.put("createdAt", cat != null ? cat.toInstant().toString() : null);
-            return m;
-        }, userId.get());
-
-        return ResponseEntity.ok(Map.of("submissions", list));
+    // The database message names constraints and columns; return a code, log the class only.
+    private ResponseEntity<?> refused(String code, Exception cause) {
+        if (cause != null) log.warn("[MemberPhoto] {}: {}", code, cause.getClass().getSimpleName());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", code));
     }
 }

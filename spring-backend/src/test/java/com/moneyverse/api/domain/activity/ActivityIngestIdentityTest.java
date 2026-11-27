@@ -27,7 +27,7 @@ class ActivityIngestIdentityTest {
     final ActivityService service = mock(ActivityService.class);
     final UserAuthService auth = mock(UserAuthService.class);
     final HttpServletRequest request = mock(HttpServletRequest.class);
-    final ActivityController controller = new ActivityController(service, auth);
+    final ActivityController controller = new ActivityController(service, auth, org.mockito.Mockito.mock(com.moneyverse.api.domain.admin.service.AdminAuthService.class));
     static final IngestActivityEventsRequest ONE = new IngestActivityEventsRequest(List.of(new IngestEventItem("page_view", "/", null, 10, null)));
 
     @Test void aForgedHeaderWithoutASessionIsRecordedAsAnonymous() {
