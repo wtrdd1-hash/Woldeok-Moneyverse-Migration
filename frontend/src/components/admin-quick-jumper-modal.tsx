@@ -39,6 +39,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/cn';
+import { ADMIN_CHROME_COPY, quickJumperText } from '@/app/admin/admin-copy';
+import { useAdminCopy } from '@/app/admin/use-admin-copy';
+import type { Locale } from '@/lib/locale';
 
 interface AdminRouteMeta {
   readonly href: string;
@@ -97,22 +100,37 @@ export const ALL_ADMIN_ROUTES: readonly AdminRouteMeta[] = [
   { href: '/admin/logs/integrity', label: '해시체인 무결성', description: 'PostgreSQL 감사 로그의 SHA-256 체인 위변조 전수 검증', category: '감사 로그 & 무결성', icon: CheckCircle2 },
 ];
 
+function routeLabel(r: AdminRouteMeta, locale: Locale): string {
+  return quickJumperText(`label:${r.href}`, r.label, locale);
+}
+
+function routeDescription(r: AdminRouteMeta, locale: Locale): string {
+  return quickJumperText(`desc:${r.href}`, r.description, locale);
+}
+
+function categoryName(name: string, locale: Locale): string {
+  return quickJumperText(`cat:${name}`, name, locale);
+}
+
 export function AdminQuickJumperModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const pathname = usePathname();
+  const { locale, c } = useAdminCopy(ADMIN_CHROME_COPY);
+  const count = String(ALL_ADMIN_ROUTES.length);
+  const label = (r: AdminRouteMeta) => routeLabel(r, locale);
+  const description = (r: AdminRouteMeta) => routeDescription(r, locale);
+  const category = (name: string) => categoryName(name, locale);
 
+  // The Korean names still match, so a search an operator learned keeps working in any language.
   const filteredRoutes = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return ALL_ADMIN_ROUTES;
-    return ALL_ADMIN_ROUTES.filter(
-      (r) =>
-        r.label.toLowerCase().includes(q) ||
-        r.href.toLowerCase().includes(q) ||
-        r.description.toLowerCase().includes(q) ||
-        r.category.toLowerCase().includes(q),
+    return ALL_ADMIN_ROUTES.filter((r) =>
+      [r.label, r.href, r.description, r.category, routeLabel(r, locale), routeDescription(r, locale), categoryName(r.category, locale)]
+        .some((text) => text.toLowerCase().includes(q)),
     );
-  }, [search]);
+  }, [search, locale]);
 
   // Group by category
   const grouped = useMemo(() => {
@@ -132,10 +150,10 @@ export function AdminQuickJumperModal() {
         size="sm"
         onClick={() => setIsOpen(true)}
         className="group flex min-h-[44px] sm:min-h-9 shrink-0 items-center gap-1.5 rounded-xl border-dashed border-primary/40 bg-primary/5 px-3 py-1.5 text-xs font-black text-primary hover:border-primary hover:bg-primary/10 transition-all shadow-xs"
-        aria-label={`${ALL_ADMIN_ROUTES.length}개 관리자 전체 메뉴 열기`}
+        aria-label={c('jumperOpenAria', { count })}
       >
         <Compass className="size-3.5 transition-transform group-hover:rotate-45 text-primary" />
-        <span>전체 메뉴 ({ALL_ADMIN_ROUTES.length})</span>
+        <span>{c('jumperButton', { count })}</span>
       </Button>
 
       {isOpen && createPortal(
@@ -157,13 +175,13 @@ export function AdminQuickJumperModal() {
                 </span>
                 <div>
                   <h2 className="text-base font-bold text-foreground flex items-center gap-2">
-                    관리자 전체 관제 타워 네비게이터
+                    {c('jumperTitle')}
                     <Badge variant="secondary" className="text-[10px] font-mono">
-                      {ALL_ADMIN_ROUTES.length}개 전 라우트
+                      {c('jumperRouteCount', { count })}
                     </Badge>
                   </h2>
                   <p className="text-xs text-muted-foreground">
-                    URL 누락 없이 원하는 관리자 페이지로 1초 만에 즉시 이동합니다.
+                    {c('jumperSubtitle')}
                   </p>
                 </div>
               </div>
@@ -185,7 +203,7 @@ export function AdminQuickJumperModal() {
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="메뉴명, 주소(/admin/...), 설명 검색 (예: 국고, 시나리오, 크롤러, 2FA)..."
+                  placeholder={c('jumperSearchPlaceholder')}
                   className="w-full rounded-xl border border-input bg-background/80 pl-9 pr-4 py-2 text-xs font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
                   autoFocus
                 />
@@ -196,14 +214,14 @@ export function AdminQuickJumperModal() {
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {grouped.size === 0 ? (
                 <div className="py-12 text-center text-xs text-muted-foreground">
-                  검색 결과와 일치하는 관리자 라우트가 없습니다.
+                  {c('jumperEmpty')}
                 </div>
               ) : (
                 Array.from(grouped.entries()).map(([cat, routes]) => (
                   <div key={cat} className="space-y-2.5">
                     <h3 className="text-xs font-black text-muted-foreground/80 tracking-wider uppercase flex items-center gap-1.5">
                       <span className="size-1.5 rounded-full bg-primary/60 inline-block" />
-                      {cat}
+                      {category(cat)}
                       <span className="text-[10px] font-normal text-muted-foreground/60">
                         ({routes.length})
                       </span>
@@ -237,14 +255,14 @@ export function AdminQuickJumperModal() {
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center justify-between gap-1">
                                 <span className="text-xs font-bold truncate group-hover:text-primary transition-colors">
-                                  {r.label}
+                                  {label(r)}
                                 </span>
                                 <span className="text-[10px] font-mono text-muted-foreground/60 truncate">
                                   {r.href}
                                 </span>
                               </div>
                               <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
-                                {r.description}
+                                {description(r)}
                               </p>
                             </div>
                           </Link>
@@ -258,9 +276,9 @@ export function AdminQuickJumperModal() {
 
             {/* Modal Footer */}
             <div className="flex items-center justify-between border-t border-border/80 px-6 py-3 bg-muted/20 text-[11px] text-muted-foreground">
-              <span>총 31개 관리자 주소 완벽 바인딩</span>
+              <span>{c('jumperFooter')}</span>
               <Button size="sm" variant="ghost" onClick={() => setIsOpen(false)} className="h-7 text-xs">
-                닫기
+                {c('close')}
               </Button>
             </div>
           </div>

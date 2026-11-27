@@ -1,6 +1,8 @@
 import { notFound, redirect } from 'next/navigation';
 import { AdminSubNav } from '@/components/admin-sub-nav';
+import { TranslatedText } from '@/components/translated-text';
 import { currentViewer, isAdministrator } from '@/lib/viewer';
+import { ADMIN_CHROME_COPY } from './admin-copy';
 import './admin-console-theme.css';
 
 // Per-caller decision; never prerender or cache this frame.
@@ -29,7 +31,13 @@ export function AdminConsoleFrame({ children }: { children: React.ReactNode }) {
       {/* DESIGN180: no console banner — the sidebar's administrator navigation
           already marks the operator area (owner QA 2026-11-25). */}
       <p role="note" className="text-xs leading-relaxed text-[var(--g1-muted)]">
-        서비스 상태는 각 관리자 API의 실제 조회 결과를 기준으로 표시합니다.
+        <TranslatedText
+          korean={ADMIN_CHROME_COPY.layoutNote.ko}
+          english={ADMIN_CHROME_COPY.layoutNote.en}
+          japanese={ADMIN_CHROME_COPY.layoutNote.ja}
+          chinese={ADMIN_CHROME_COPY.layoutNote.zh}
+          vietnamese={ADMIN_CHROME_COPY.layoutNote.vi}
+        />
       </p>
       <div className="grid w-full max-w-full min-w-0 gap-4 overflow-hidden" data-admin-layout>
         <AdminSubNav />
