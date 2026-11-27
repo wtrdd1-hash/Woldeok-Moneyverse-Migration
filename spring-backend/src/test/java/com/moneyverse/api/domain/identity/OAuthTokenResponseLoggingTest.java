@@ -46,4 +46,9 @@ class OAuthTokenResponseLoggingTest {
         assertEquals("google", OAuthController.providerLabel("Google"));
         assertEquals("other", OAuthController.providerLabel("evil\nline"));
     }
+
+    /** Re-review (low): an unsupported provider is answered with a fixed message, not an echo. */
+    @Test void theUnsupportedProviderResponseEchoesNothing() throws Exception {
+        assertFalse(source().contains("+ provider)"));
+    }
 }

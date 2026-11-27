@@ -77,7 +77,7 @@ public class OAuthController {
         String p = provider.trim().toLowerCase();
         if (!"discord".equals(p) && !"google".equals(p)) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body(Map.of("error", "unsupported_provider", "message", "지원되지 않는 OAuth 제공자입니다: " + provider));
+                    .body(Map.of("error", "unsupported_provider", "message", "지원되지 않는 OAuth 제공자입니다."));
         }
 
         // Resolve or create prelogin session
