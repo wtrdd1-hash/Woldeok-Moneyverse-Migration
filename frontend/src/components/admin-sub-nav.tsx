@@ -34,6 +34,8 @@ import { cn } from '@/lib/cn';
 import { D180_ADMIN_NAV, isAdminItemActive } from '@/components/v10-nav';
 import { AdminQuickJumperModal } from './admin-quick-jumper-modal';
 import { AdminStepupOtpModal } from './admin/admin-stepup-otp-modal';
+import { AdminStepUpStatus } from './admin/admin-step-up-status';
+import { TranslatedText } from './translated-text';
 
 type AdminNavGroup = 'all' | 'macro' | 'treasury' | 'market' | 'security' | 'content' | 'system';
 
@@ -190,10 +192,16 @@ export function AdminSubNav() {
       <div className="w-full max-w-full min-w-0 space-y-2 mb-4">
         {/* Quick jumper and 2FA elevation; groups live in the DESIGN180 sidebar. */}
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-[var(--g1-line)] bg-[var(--g1-plum)] px-3 py-2">
-          <p className="min-w-0 text-xs text-[var(--g1-muted)]">고위험 작업 전에는 2단계 인증으로 세션을 승격하세요.</p>
+          {/* v2026.11.27.1457.1/1507.1: the server enforces recent password re-verification (step-up,
+              not an independent factor) on every administrator write; the messenger OTP elevation
+              below is kept unchanged pending the owner's decision on the independent factor. */}
+          <p className="min-w-0 text-xs text-[var(--g1-muted)]">
+            <TranslatedText korean="고위험 작업은 최근 15분 안에 비밀번호로 본인 확인을 마친 세션에서만 실행됩니다." english="High-risk actions run only from a session that re-verified its password in the last 15 minutes." japanese="高リスク操作は、直近15分以内にパスワードで本人確認を済ませたセッションでのみ実行されます。" chinese="高风险操作仅能在最近15分钟内通过密码完成身份确认的会话中执行。" vietnamese="Thao tác rủi ro cao chỉ chạy từ phiên đã xác minh lại mật khẩu trong 15 phút gần nhất." />
+          </p>
 
           <div className="flex items-center gap-2 shrink-0">
             <AdminQuickJumperModal />
+            <AdminStepUpStatus />
             {elevated ? (
               <div className="flex items-center gap-1.5 bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 rounded-lg px-2.5 py-1 text-[11px] font-mono tabular-nums font-bold tracking-tight min-h-[32px]">
                 <Unlock className="size-3.5 shrink-0" />

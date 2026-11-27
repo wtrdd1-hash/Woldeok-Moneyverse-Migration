@@ -23,6 +23,14 @@ public class AdminAuthService {
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
+    /**
+     * Administrator step-up window: the current session must have re-verified the password within
+     * this many seconds (migration 031; the same window as LocalAuthController's reauthentication
+     * and the NestJS ReauthGuard). Step-up re-authentication, not an independent second factor;
+     * the independent TOTP credential was retired by migration 197 (owner decision pending).
+     */
+    public static final int STEP_UP_WINDOW_SECONDS = 900;
+
     public AdminAuthService(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -86,6 +94,30 @@ public class AdminAuthService {
             return current.stream().anyMatch(value -> role.equalsIgnoreCase(value));
         } catch (Exception e) {
             log.warn("[AdminAuth] role assertion unavailable (fail closed)");
+            return false;
+        }
+    }
+
+    /**
+     * Step-up proof: this request's own session (by token hash), owned by the verified
+     * administrator, re-verified its password within the window. Another session's proof does not
+     * count, and anything unreadable answers false (fail closed).
+     */
+    public boolean hasRecentSessionReauthentication(HttpServletRequest request, int windowSeconds) {
+        if (request == null || windowSeconds <= 0) return false;
+        String raw = extractSessionToken(request);
+        if (raw == null || raw.isBlank()) return false;
+        Optional<UUID> actor = resolveVerifiedAdminActor(request);
+        if (actor.isEmpty()) return false;
+        try {
+            Integer n = jdbcTemplate.queryForObject(
+                "SELECT count(*)::int FROM auth_sessions WHERE token_hash = ? AND user_id = ? AND revoked_at IS NULL "
+                    + "AND expires_at > NOW() AND reauthenticated_at IS NOT NULL "
+                    + "AND reauthenticated_at > NOW() - make_interval(secs => ?)",
+                Integer.class, sha256(raw), actor.get(), windowSeconds);
+            return n != null && n == 1;
+        } catch (Exception e) {
+            log.warn("[AdminAuth] step-up proof lookup failed (fail closed)");
             return false;
         }
     }
