@@ -144,12 +144,16 @@ public class AdminGovernanceDtos {
         @JsonAlias({"createdAt", "created_at"})
         private String createdAt;
 
+        // Always present: the web parser reads an explicit null as "not restricted" and refuses a
+        // member whose restriction fields are missing, as proof the API actually read them.
         @JsonProperty("restricted_at")
         @JsonAlias({"restrictedAt", "restricted_at"})
+        @JsonInclude(JsonInclude.Include.ALWAYS)
         private String restrictedAt;
 
         @JsonProperty("restriction_reason")
         @JsonAlias({"restrictionReason", "restriction_reason"})
+        @JsonInclude(JsonInclude.Include.ALWAYS)
         private String restrictionReason;
 
         @JsonProperty("cash_balance")
