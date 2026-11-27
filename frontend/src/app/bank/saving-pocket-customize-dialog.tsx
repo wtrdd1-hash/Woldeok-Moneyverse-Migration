@@ -27,6 +27,7 @@ import { IDLE } from '@/lib/action-state';
 import { groupDigits } from '@/lib/money';
 import type { SavingPocket } from './types';
 import { customizePocketAction } from './actions';
+import { useBankCopy } from './use-bank-copy';
 
 interface SavingPocketCustomizeDialogProps {
   readonly pocket: SavingPocket | null;
@@ -36,21 +37,21 @@ interface SavingPocketCustomizeDialogProps {
 }
 
 const THEME_COLORS = [
-  { id: 'sky', label: '스카이 블루', bg: 'bg-sky-500/10', border: 'border-sky-500/30', text: 'text-sky-600 dark:text-sky-400', bar: 'bg-sky-500', hex: '#0284c7' },
-  { id: 'emerald', label: '에메랄드 그린', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-600 dark:text-emerald-400', bar: 'bg-emerald-500', hex: '#10b981' },
-  { id: 'amber', label: '앰버 골드', bg: 'bg-amber-500/10', border: 'border-amber-500/30', text: 'text-amber-600 dark:text-amber-400', bar: 'bg-amber-500', hex: '#f59e0b' },
-  { id: 'violet', label: '바이올렛 퍼플', bg: 'bg-violet-500/10', border: 'border-violet-500/30', text: 'text-violet-600 dark:text-violet-400', bar: 'bg-violet-500', hex: '#8b5cf6' },
-  { id: 'rose', label: '로즈 핑크', bg: 'bg-rose-500/10', border: 'border-rose-500/30', text: 'text-rose-600 dark:text-rose-400', bar: 'bg-rose-500', hex: '#f43f5e' },
-  { id: 'slate', label: '모노 슬레이트', bg: 'bg-slate-500/10', border: 'border-slate-500/30', text: 'text-slate-600 dark:text-slate-400', bar: 'bg-slate-500', hex: '#64748b' },
+  { id: 'sky', label: 'themeSky', bg: 'bg-sky-500/10', border: 'border-sky-500/30', text: 'text-sky-600 dark:text-sky-400', bar: 'bg-sky-500', hex: '#0284c7' },
+  { id: 'emerald', label: 'themeEmerald', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-600 dark:text-emerald-400', bar: 'bg-emerald-500', hex: '#10b981' },
+  { id: 'amber', label: 'themeAmber', bg: 'bg-amber-500/10', border: 'border-amber-500/30', text: 'text-amber-600 dark:text-amber-400', bar: 'bg-amber-500', hex: '#f59e0b' },
+  { id: 'violet', label: 'themeViolet', bg: 'bg-violet-500/10', border: 'border-violet-500/30', text: 'text-violet-600 dark:text-violet-400', bar: 'bg-violet-500', hex: '#8b5cf6' },
+  { id: 'rose', label: 'themeRose', bg: 'bg-rose-500/10', border: 'border-rose-500/30', text: 'text-rose-600 dark:text-rose-400', bar: 'bg-rose-500', hex: '#f43f5e' },
+  { id: 'slate', label: 'themeSlate', bg: 'bg-slate-500/10', border: 'border-slate-500/30', text: 'text-slate-600 dark:text-slate-400', bar: 'bg-slate-500', hex: '#64748b' },
 ] as const;
 
 const ICON_PACKS = [
-  { id: 'piggy-bank', label: '저금통', icon: PiggyBank },
-  { id: 'wallet', label: '가상 지갑', icon: Wallet },
-  { id: 'sparkles', label: '스파클', icon: Sparkles },
-  { id: 'trending-up', label: '불마켓', icon: TrendingUp },
-  { id: 'shield-check', label: '금고', icon: ShieldCheck },
-  { id: 'heart', label: '위시리스트', icon: Heart },
+  { id: 'piggy-bank', label: 'iconPiggy', icon: PiggyBank },
+  { id: 'wallet', label: 'iconWallet', icon: Wallet },
+  { id: 'sparkles', label: 'iconSparkles', icon: Sparkles },
+  { id: 'trending-up', label: 'iconTrending', icon: TrendingUp },
+  { id: 'shield-check', label: 'iconShield', icon: ShieldCheck },
+  { id: 'heart', label: 'iconHeart', icon: Heart },
 ] as const;
 
 export function SavingPocketCustomizeDialog({
@@ -63,6 +64,7 @@ export function SavingPocketCustomizeDialog({
   const [selectedIcon, setSelectedIcon] = useState<string>(pocket?.icon_code || 'piggy-bank');
   const [intentKey, setIntentKey] = useState('');
   const [state, formAction, pending] = useActionState(customizePocketAction, IDLE);
+  const { c } = useBankCopy();
 
   // 다이얼로그 열릴 때 초기화
   React.useEffect(() => {
@@ -98,17 +100,17 @@ export function SavingPocketCustomizeDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Palette className="size-5 text-primary" />
-            <span>&apos;{pocket?.name}&apos; 테마 커스텀</span>
+            <span>{c('customTitle', { name: pocket?.name ?? '' })}</span>
           </DialogTitle>
           <DialogDescription className="text-xs">
-            저축 포켓의 테마 색상과 프리미엄 아이콘을 변경합니다. (WLD 하드 싱크 규격)
+            {c('customDescription')}
           </DialogDescription>
         </DialogHeader>
 
         {/* 1. 실시간 미리보기 카드 */}
         <div className="space-y-1.5 pt-1">
           <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-            실시간 적용 미리보기
+            {c('customPreview')}
           </span>
           <div
             className={`rounded-xl border p-4 transition-all duration-200 ${activeThemeObj.bg} ${activeThemeObj.border}`}
@@ -126,7 +128,7 @@ export function SavingPocketCustomizeDialog({
                 </div>
               </div>
               <Badge variant="outline" className={`text-[10px] ${activeThemeObj.text} border-current/30`}>
-                {activeThemeObj.label}
+                {c(activeThemeObj.label)}
               </Badge>
             </div>
           </div>
@@ -142,8 +144,8 @@ export function SavingPocketCustomizeDialog({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                <span>테마 색상</span>
-                <span className="text-[10px] font-normal text-muted-foreground">(변경 시 100 WLD)</span>
+                <span>{c('themeColor')}</span>
+                <span className="text-[10px] font-normal text-muted-foreground">{c('customColorFee')}</span>
               </label>
               {isColorChanged && (
                 <Badge variant="secondary" className="text-[10px] font-mono text-primary font-bold">
@@ -171,7 +173,7 @@ export function SavingPocketCustomizeDialog({
                         : 'border-border/80 hover:border-muted-foreground'
                     }`}
                     style={{ backgroundColor: `${color.hex}20` }}
-                    title={color.label}
+                    title={c(color.label)}
                   >
                     <div
                       className="size-4 rounded-full flex items-center justify-center text-white"
@@ -189,8 +191,8 @@ export function SavingPocketCustomizeDialog({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                <span>아이콘 팩</span>
-                <span className="text-[10px] font-normal text-muted-foreground">(변경 시 300 WLD)</span>
+                <span>{c('customIconPack')}</span>
+                <span className="text-[10px] font-normal text-muted-foreground">{c('customIconFee')}</span>
               </label>
               {isIconChanged && (
                 <Badge variant="secondary" className="text-[10px] font-mono text-primary font-bold">
@@ -220,7 +222,7 @@ export function SavingPocketCustomizeDialog({
                     }`}
                   >
                     <IconComponent className="size-5" />
-                    <span className="text-[10px]">{item.label}</span>
+                    <span className="text-[10px]">{c(item.label)}</span>
                   </button>
                 );
               })}
@@ -230,13 +232,13 @@ export function SavingPocketCustomizeDialog({
           {/* 4. 결제 금액 및 보유 현금 안내 */}
           <div className="rounded-xl border border-border/80 bg-muted/20 p-3 space-y-1.5 text-xs">
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">보유 현금</span>
+              <span className="text-muted-foreground">{c('cashBalance')}</span>
               <span className="font-mono font-bold text-foreground">{groupDigits(cashBalance)} WLD</span>
             </div>
             <div className="flex items-center justify-between border-t border-border/40 pt-1.5">
               <span className="font-semibold text-foreground flex items-center gap-1">
                 <Coins className="size-3.5 text-amber-500" />
-                <span>총 적용 수수료</span>
+                <span>{c('customTotalFee')}</span>
               </span>
               <span className={`font-mono font-bold ${isInsufficient ? 'text-destructive' : 'text-primary'}`}>
                 {groupDigits(totalCost.toString())} WLD
@@ -244,7 +246,7 @@ export function SavingPocketCustomizeDialog({
             </div>
             {isInsufficient && totalCost > 0 && (
               <p className="text-[11px] text-destructive pt-0.5">
-                보유 현금이 부족하여 테마를 변경할 수 없습니다.
+                {c('customInsufficient')}
               </p>
             )}
           </div>
@@ -259,14 +261,14 @@ export function SavingPocketCustomizeDialog({
               onClick={() => onOpenChange(false)}
               disabled={pending}
             >
-              닫기
+              {c('close')}
             </Button>
             <SubmitButton
               disabled={pending || !intentKey || isInsufficient || (!isColorChanged && !isIconChanged)}
               size="sm"
               className="bg-primary text-primary-foreground font-semibold"
             >
-              {totalCost > 0 ? `${groupDigits(totalCost.toString())} WLD로 적용하기` : '변경 사항 없음'}
+              {totalCost > 0 ? c('customApply', { amount: groupDigits(totalCost.toString()) }) : c('customNoChange')}
             </SubmitButton>
           </DialogFooter>
         </form>

@@ -52,7 +52,6 @@ export const metadata: Metadata = {
 export default async function BankPage() {
   await requireMember();
   const locale = await getServerLocale();
-  const isEn = locale === 'en';
 
   const [standing, pockets, creditRating, memberIdentity] = await Promise.all([
     apiOrNull<unknown>('/api/v1/banking/standing').then(readBankStanding),
@@ -71,6 +70,7 @@ export default async function BankPage() {
             'Cannot load banking services right now.',
             '現在、銀行サービスを読み込めません。',
             '暂时无法加载银行服务。',
+            'Hiện không thể tải dịch vụ ngân hàng.',
           )}
           description={localeLabel(
             locale,
@@ -78,6 +78,7 @@ export default async function BankPage() {
             'Please try again in a few moments.',
             'しばらくしてからもう一度お試しください。',
             '请稍后重试。',
+            'Vui lòng thử lại sau ít phút.',
           )}
         />
       </div>
@@ -108,7 +109,6 @@ export default async function BankPage() {
         unclaimedInterest={unclaimed}
         dailyRatePct={standing.daily_interest_rate_pct}
         annualYieldPct={standing.annual_yield_pct}
-        isEn={isEn}
       />
 
       {/* 2. 안전 고지 가이드 (군더더기 없는 슬림 칩 형태) */}
@@ -122,11 +122,12 @@ export default async function BankPage() {
               'WLD Virtual Banking: Game simulator only. Not actual financial products.',
               'ウォルドク銀行はゲーム内の模擬金融サービスであり、実際の通貨や金融商品ではありません。',
               '月德银行仅为游戏内模拟金融服务，非真实货币或金融产品。',
+              'Woldeok Bank là dịch vụ tài chính mô phỏng trong game, không phải tiền tệ hay sản phẩm tài chính thật.',
             )}
           </span>
         </div>
         <Link href="/guide/virtual-banking" className="font-semibold text-primary hover:underline shrink-0 hidden sm:inline">
-          {localeLabel(locale, '가이드 보기', 'Guide', 'ガイドを見る', '查看指南')}
+          {localeLabel(locale, '가이드 보기', 'Guide', 'ガイドを見る', '查看指南', 'Xem hướng dẫn')}
         </Link>
       </div>
 
@@ -139,13 +140,13 @@ export default async function BankPage() {
       <Tabs defaultValue="savings" className="space-y-6">
         <TabsList className="grid grid-cols-3 max-w-md w-full min-h-[44px] h-auto p-1 bg-muted/60 rounded-xl">
           <TabsTrigger value="savings" className="min-h-[38px] min-w-0 px-2 truncate rounded-lg text-xs sm:text-sm font-semibold">
-            {localeLabel(locale, '저축 & 모으기', 'Savings & Pockets', '貯蓄＆ポケット', '储蓄与口袋')}
+            {localeLabel(locale, '저축 & 모으기', 'Savings & Pockets', '貯蓄＆ポケット', '储蓄与口袋', 'Tiết kiệm & túi')}
           </TabsTrigger>
           <TabsTrigger value="loan" className="min-h-[38px] min-w-0 px-2 truncate rounded-lg text-xs sm:text-sm font-semibold">
-            {localeLabel(locale, '대출 & 신용', 'Loans & Credit', 'ローン＆信用', '贷款与信用')}
+            {localeLabel(locale, '대출 & 신용', 'Loans & Credit', 'ローン＆信用', '贷款与信用', 'Khoản vay & tín dụng')}
           </TabsTrigger>
           <TabsTrigger value="analytics" className="min-h-[38px] min-w-0 px-2 truncate rounded-lg text-xs sm:text-sm font-semibold">
-            {localeLabel(locale, '순자산 분석', 'Net Worth', '純資産分析', '净资产分析')}
+            {localeLabel(locale, '순자산 분석', 'Net Worth', '純資産分析', '净资产分析', 'Tài sản ròng')}
           </TabsTrigger>
         </TabsList>
 
@@ -187,7 +188,7 @@ export default async function BankPage() {
           {activeLoan && (
             <div className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 text-xs space-y-1">
               <span className="font-bold text-amber-500 block">
-                {localeLabel(locale, '실행 중인 가상 대출이 있습니다', 'Active Virtual Loan in Progress', '実行中の仮想ローンがあります', '有生效中的虚拟贷款')}
+                {localeLabel(locale, '실행 중인 가상 대출이 있습니다', 'Active Virtual Loan in Progress', '実行中の仮想ローンがあります', '有生效中的虚拟贷款', 'Bạn có khoản vay ảo đang hoạt động')}
               </span>
               <p className="text-muted-foreground">
                 {canCoverMinimumRepayment
@@ -197,6 +198,7 @@ export default async function BankPage() {
                       `You have sufficient cash for minimum repayment of ${groupDigits(minimumRepayment)} WLD.`,
                       `現在の保有現金で最低返済額 ${groupDigits(minimumRepayment)} WLDを充当できます。`,
                       `当前可用现金可覆盖最低还款额 ${groupDigits(minimumRepayment)} WLD。`,
+                      `Tiền mặt hiện có đủ để trả khoản tối thiểu ${groupDigits(minimumRepayment)} WLD.`,
                     )
                   : localeLabel(
                       locale,
@@ -204,6 +206,7 @@ export default async function BankPage() {
                       `Your cash is below minimum repayment of ${groupDigits(minimumRepayment)} WLD.`,
                       `最低返済額 ${groupDigits(minimumRepayment)} WLDを充当するための現金が不足しています。`,
                       `当前现金不足以覆盖最低还款额 ${groupDigits(minimumRepayment)} WLD。`,
+                      `Tiền mặt không đủ để trả khoản tối thiểu ${groupDigits(minimumRepayment)} WLD.`,
                     )}
               </p>
             </div>
@@ -240,31 +243,31 @@ export default async function BankPage() {
           <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-4">
             <div className="toss-card p-4 space-y-1 min-w-0">
               <span className="text-xs text-muted-foreground">
-                {localeLabel(locale, '순 금융 자산', 'Net Worth', '純資産分析', '净资产总计')}
+                {localeLabel(locale, '순 금융 자산', 'Net Worth', '純資産分析', '净资产总计', 'Tài sản tài chính ròng')}
               </span>
               <div className="font-fintech text-lg sm:text-2xl font-black tabular-nums text-foreground">
                 <Amount value={netFinancialWorth} currency />
               </div>
               <span className="text-[10px] text-muted-foreground/80 block">
-                {localeLabel(locale, '현금+예금+채권-대출', 'Cash + Deposits + Bonds - Loans', '現金＋預金＋債券－ローン', '现金+存款+债券-贷款')}
+                {localeLabel(locale, '현금+예금+채권-대출', 'Cash + Deposits + Bonds - Loans', '現金＋預金＋債券－ローン', '现金+存款+债券-贷款', 'Tiền mặt + tiền gửi + trái phiếu - khoản vay')}
               </span>
             </div>
 
             <div className="toss-card p-4 space-y-1 min-w-0">
               <span className="text-xs text-muted-foreground">
-                {localeLabel(locale, '사용 가능 현금', 'Available Cash', '利用可能現金', '可用现金')}
+                {localeLabel(locale, '사용 가능 현금', 'Available Cash', '利用可能現金', '可用现金', 'Tiền mặt khả dụng')}
               </span>
               <div className="font-fintech text-lg sm:text-2xl font-black tabular-nums text-sky-400">
                 <Amount value={cash} currency />
               </div>
               <span className="text-[10px] text-muted-foreground/80 block">
-                {localeLabel(locale, '지갑 보유 잔액', 'Wallet Balance', 'ウォレット保有残高', '钱包可用余额')}
+                {localeLabel(locale, '지갑 보유 잔액', 'Wallet Balance', 'ウォレット保有残高', '钱包可用余额', 'Số dư ví')}
               </span>
             </div>
 
             <div className="toss-card p-4 space-y-1 min-w-0">
               <span className="text-xs text-muted-foreground">
-                {localeLabel(locale, '예금 잔액', 'Bank Deposits', '預金残高', '存款余额')}
+                {localeLabel(locale, '예금 잔액', 'Bank Deposits', '預金残高', '存款余额', 'Tiền gửi ngân hàng')}
               </span>
               <div className="font-fintech text-lg sm:text-2xl font-black tabular-nums text-emerald-400">
                 <Amount value={bank} currency />
@@ -276,19 +279,20 @@ export default async function BankPage() {
                   `Daily ${standing.daily_interest_rate_pct}% compound`,
                   `日次 ${standing.daily_interest_rate_pct}% 複利`,
                   `日利率 ${standing.daily_interest_rate_pct}% 复利`,
+                  `Lãi kép ${standing.daily_interest_rate_pct}% mỗi ngày`,
                 )}
               </span>
             </div>
 
             <div className="toss-card p-4 space-y-1 min-w-0">
               <span className="text-xs text-muted-foreground">
-                {localeLabel(locale, '신용 대출 한도', 'Credit Limit', '信用融資枠', '信用贷款额度')}
+                {localeLabel(locale, '신용 대출 한도', 'Credit Limit', '信用融資枠', '信用贷款额度', 'Hạn mức tín dụng')}
               </span>
               <div className="font-fintech text-lg sm:text-2xl font-black tabular-nums text-purple-400">
                 <Amount value={creditLimit} currency />
               </div>
               <span className="text-[10px] text-muted-foreground/80 block">
-                {localeLabel(locale, `등급 ${standing.credit_grade}`, `Grade ${standing.credit_grade}`, `等級 ${standing.credit_grade}`, `信用等级 ${standing.credit_grade}`)}
+                {localeLabel(locale, `등급 ${standing.credit_grade}`, `Grade ${standing.credit_grade}`, `等級 ${standing.credit_grade}`, `信用等级 ${standing.credit_grade}`, `Hạng ${standing.credit_grade}`)}
               </span>
             </div>
           </div>
@@ -299,7 +303,6 @@ export default async function BankPage() {
               bankBalance={bank}
               loanDebt={loanDebt.toString()}
               creditLimit={creditLimit}
-              isEn={isEn}
             />
           </div>
         </TabsContent>
@@ -316,18 +319,19 @@ export default async function BankPage() {
               'Diversify your virtual assets across stocks, savings, and enterprises.',
               '資産ポートフォリオを株式や事業とともにバランスよく分散させましょう。',
               '合理配置股票、储蓄与实业，保持虚拟资产组合均衡。',
+              'Hãy phân bổ danh mục tài sản cân bằng giữa cổ phiếu, tiết kiệm và doanh nghiệp.',
             )}
           </span>
         </div>
         <div className="flex items-center gap-2">
           <Button asChild variant="outline" size="sm" className="min-h-[44px] sm:min-h-[36px] text-xs font-semibold">
             <Link href="/wallet">
-              {localeLabel(locale, '내 지갑', 'Wallet', 'ウォレット', '我的钱包')}
+              {localeLabel(locale, '내 지갑', 'Wallet', 'ウォレット', '我的钱包', 'Ví của tôi')}
             </Link>
           </Button>
           <Button asChild variant="outline" size="sm" className="min-h-[44px] sm:min-h-[36px] text-xs font-semibold">
             <Link href="/stocks">
-              {localeLabel(locale, '주식 거래소', 'Stocks', '株式取引所', '股票交易所')}
+              {localeLabel(locale, '주식 거래소', 'Stocks', '株式取引所', '股票交易所', 'Sàn cổ phiếu')}
             </Link>
           </Button>
         </div>

@@ -9,7 +9,7 @@ export function BankStatementDownloadLink({ locale }: { locale: Locale }) {
       download="moneyverse-bank-statement.csv"
       className="text-sm font-semibold text-primary underline-offset-4 hover:underline focus-visible:underline"
     >
-      {localeLabel(locale, '내 은행 잔액 CSV 저장', 'Download my bank snapshot (CSV)', '銀行残高のCSVを保存', '下载我的银行余额CSV')}
+      {localeLabel(locale, '내 은행 잔액 CSV 저장', 'Download my bank snapshot (CSV)', '銀行残高のCSVを保存', '下载我的银行余额CSV', 'Tải ảnh chụp ngân hàng của tôi (CSV)')}
     </a>
   );
 }

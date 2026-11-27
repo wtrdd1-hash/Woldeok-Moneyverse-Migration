@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Amount } from '@/components/amount';
+import { useBankCopy } from './use-bank-copy';
 
 export interface CreditRatingData {
   readonly userId?: string;
@@ -37,16 +38,17 @@ type CreditScoreCardProps = {
 
 /** Bank's actual offer and this optional learning score have different authority. */
 export function CreditScoreCard(props: CreditScoreCardProps) {
+  const { c } = useBankCopy();
   if (!props.initialRating) {
     return (
       <Card className="border border-border/80 bg-background/95 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-base">게임 신용 평가 자료를 불러올 수 없습니다.</CardTitle>
-          <CardDescription>확인되지 않은 점수나 한도를 임의로 표시하지 않습니다. 잠시 후 다시 확인해 주세요.</CardDescription>
+          <CardTitle className="text-base">{c('creditUnavailableTitle')}</CardTitle>
+          <CardDescription>{c('creditUnavailableDescription')}</CardDescription>
         </CardHeader>
         {props.standingCreditLimit !== undefined && (
           <CardContent>
-            <p className="text-sm text-muted-foreground">별도 은행 창구 공시 한도: <Amount value={props.standingCreditLimit} /> WLD</p>
+            <p className="text-sm text-muted-foreground">{c('creditStandingLimit')}<Amount value={props.standingCreditLimit} /> WLD</p>
           </CardContent>
         )}
       </Card>
@@ -62,6 +64,7 @@ function CreditScoreReport({
   standingLoanInterestBps,
   standingLoanTermDays,
 }: CreditScoreCardProps & { initialRating: CreditRatingData }) {
+  const { c } = useBankCopy();
   const baseRating = initialRating;
   const candidateLimit = standingCreditLimit ? Number(standingCreditLimit) : NaN;
   const effectiveLimit = Number.isSafeInteger(candidateLimit) && candidateLimit >= 0
@@ -74,7 +77,7 @@ function CreditScoreReport({
   const rating: CreditRatingData = {
     ...baseRating,
     creditLimitWld: effectiveLimit > 0 ? effectiveLimit : baseRating.creditLimitWld,
-    tierNameKo: standingCreditGrade ? `${standingCreditGrade}등급 권위` : baseRating.tierNameKo,
+    tierNameKo: standingCreditGrade ? c('creditGradeAuthority', { grade: standingCreditGrade }) : baseRating.tierNameKo,
     interestRateBps: effectiveInterestBps,
   };
 
@@ -106,22 +109,22 @@ function CreditScoreReport({
           <div>
             <div className="flex items-center gap-2">
               <CardTitle className="text-base font-bold tracking-tight text-foreground sm:text-lg">
-                가상 신용 리포트 & 대출 플래너
+                {c('creditTitle')}
               </CardTitle>
               <Badge variant="outline" className={`font-mono text-xs ${tierColor}`}>
-                {standingCreditGrade ? `${standingCreditGrade}등급` : `${rating.tier}등급`} · {rating.tierNameKo.split(' ')[0]}
+                {c('creditGrade', { grade: standingCreditGrade ? standingCreditGrade : `${rating.tier}` })} · {rating.tierNameKo.split(' ')[0]}
               </Badge>
             </div>
             <CardDescription className="mt-1 text-xs text-muted-foreground">
               {standingCreditLimit
-                ? '게임활동 기반 참고용 신용 점수 · 실제 대출 한도는 별도 은행 창구 공시를 따릅니다.'
-                : '게임활동 기반 참고용 신용 점수 · 실제 대출 결정과 구분됩니다.'}
+                ? c('creditDescriptionStanding')
+                : c('creditDescription')}
             </CardDescription>
           </div>
           <div className="flex items-center gap-1.5 font-mono text-sm">
-            <span className="text-muted-foreground">신용점수:</span>
+            <span className="text-muted-foreground">{c('creditScoreLabel')}</span>
             <span className="font-bold text-foreground text-base">{rating.score}</span>
-            <span className="text-xs text-muted-foreground">/ 1,000점</span>
+            <span className="text-xs text-muted-foreground">{c('creditScoreMax')}</span>
           </div>
         </div>
       </CardHeader>
@@ -130,34 +133,34 @@ function CreditScoreReport({
         {/* Core Credit Indicators Grid */}
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           <div className="rounded-lg border border-border/60 bg-muted/20 p-2.5">
-            <span className="text-[11px] text-muted-foreground">최대 신용 대출 한도</span>
+            <span className="text-[11px] text-muted-foreground">{c('creditMaxLimit')}</span>
             <p className="mt-1 font-mono text-sm font-bold text-foreground truncate">
               {standingCreditLimit !== undefined ? (
                 <><Amount value={standingCreditLimit} /> WLD</>
               ) : rating.creditLimitWld > 0 ? (
-                <><Amount value={rating.creditLimitWld.toString()} /> WLD (학습 예시)</>
-              ) : ('평가/한도 확인 필요')}
+                <><Amount value={rating.creditLimitWld.toString()} /> {c('creditLearningExample')}</>
+              ) : (c('creditLimitCheck'))}
             </p>
           </div>
 
           <div className="rounded-lg border border-border/60 bg-muted/20 p-2.5">
-            <span className="text-[11px] text-muted-foreground">우대 적용 금리 (APR)</span>
+            <span className="text-[11px] text-muted-foreground">{c('creditApr')}</span>
             <p className="mt-1 font-mono text-sm font-bold text-emerald-400">
               {(rating.interestRateBps / 100).toFixed(2)}%
             </p>
           </div>
 
           <div className="rounded-lg border border-border/60 bg-muted/20 p-2.5">
-            <span className="text-[11px] text-muted-foreground">최장 분할 상환 기간</span>
+            <span className="text-[11px] text-muted-foreground">{c('creditMaxTerm')}</span>
             <p className="mt-1 font-mono text-sm font-bold text-foreground">
-              최대 {rating.maxInstallments}회차
+              {c('creditMaxInstallments', { count: `${rating.maxInstallments}` })}
             </p>
           </div>
 
           <div className="rounded-lg border border-border/60 bg-muted/20 p-2.5">
-            <span className="text-[11px] text-muted-foreground">조기 상환 수수료</span>
+            <span className="text-[11px] text-muted-foreground">{c('creditEarlyFee')}</span>
             <p className="mt-1 font-mono text-sm font-bold text-emerald-400">
-              0 WLD (면제)
+              {c('creditEarlyFeeValue')}
             </p>
           </div>
         </div>
@@ -166,26 +169,26 @@ function CreditScoreReport({
         <div className="rounded-xl border border-border/60 bg-muted/10 p-3.5 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-foreground">
-              분할 상환 시뮬레이터 (투명 상환 계획)
+              {c('creditSimulator')}
             </span>
             <span className="text-[11px] text-muted-foreground">
-              차입 희망액: <strong className="text-foreground">{simulatedLoanAmount.toLocaleString()} WLD</strong>
+              {c('creditDesired')}<strong className="text-foreground">{simulatedLoanAmount.toLocaleString()} WLD</strong>
             </span>
           </div>
 
           {/* Installment count buttons */}
           <div className="flex items-center gap-1.5">
             {[3, 6, 10, 12]
-              .filter((c) => c <= Math.max(3, rating.maxInstallments))
-              .map((c) => (
+              .filter((n) => n <= Math.max(3, rating.maxInstallments))
+              .map((n) => (
                 <Button
-                  key={c}
+                  key={n}
                   size="sm"
-                  variant={selectedInstallments === c ? 'default' : 'outline'}
-                  onClick={() => setSelectedInstallments(c)}
+                  variant={selectedInstallments === n ? 'default' : 'outline'}
+                  onClick={() => setSelectedInstallments(n)}
                   className="h-7 text-xs px-2.5"
                 >
-                  {c}회 분할
+                  {c('creditInstallmentButton', { count: `${n}` })}
                 </Button>
               ))}
           </div>
@@ -193,19 +196,19 @@ function CreditScoreReport({
           {/* Repayment Breakdown */}
           <div className="grid grid-cols-1 gap-2 pt-1 min-[420px]:grid-cols-3 text-xs">
             <div className="rounded-md border border-border/40 bg-background/60 p-2 min-w-0">
-              <span className="text-muted-foreground text-[10px]">회차별 상환액 (추정)</span>
+              <span className="text-muted-foreground text-[10px]">{c('creditPerInstallment')}</span>
               <p className="font-mono font-bold text-foreground truncate">
                 ~{monthlyRepaymentWld.toLocaleString()} WLD
               </p>
             </div>
             <div className="rounded-md border border-border/40 bg-background/60 p-2 min-w-0">
-              <span className="text-muted-foreground text-[10px]">총 이자 비용 ({count}회 합산)</span>
+              <span className="text-muted-foreground text-[10px]">{c('creditTotalInterest', { count: `${count}` })}</span>
               <p className="font-mono font-bold text-amber-400 truncate">
                 +{totalInterestWld.toLocaleString()} WLD
               </p>
             </div>
             <div className="rounded-md border border-border/40 bg-background/60 p-2 min-w-0">
-              <span className="text-muted-foreground text-[10px]">총 상환 완료액</span>
+              <span className="text-muted-foreground text-[10px]">{c('creditTotalRepayment')}</span>
               <p className="font-mono font-bold text-foreground truncate">
                 {totalRepaymentWld.toLocaleString()} WLD
               </p>
@@ -216,12 +219,12 @@ function CreditScoreReport({
         {/* Guidance and Safe Notice */}
         {rating.recoveryGuidance && (
           <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-2.5 text-xs text-amber-300 leading-relaxed">
-            💡 <strong>신용 회복 가이드:</strong> {rating.recoveryGuidance}
+            💡 <strong>{c('creditRecovery')}</strong> {rating.recoveryGuidance}
           </div>
         )}
 
         <p className="text-[11px] text-muted-foreground leading-snug">
-          🛡️ {rating.simulatedNotice ?? '본 서비스는 가상 경제 학습용 시뮬레이션이며 실제 금융 신용도에 영향을 미치지 않습니다.'}
+          🛡️ {rating.simulatedNotice ?? c('creditNotice')}
         </p>
       </CardContent>
     </Card>

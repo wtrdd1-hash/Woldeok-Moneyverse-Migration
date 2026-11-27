@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest';
+import type { ReactElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { LocaleProvider } from '@/components/locale-provider';
+import type { Locale } from '@/lib/locale';
 import { BankLiquidityCard } from './bank-liquidity-card';
 import { memberBankEvidence } from './member-bank-evidence';
+
+/** The card reads the viewer's locale; Korean assertions declare the Korean locale explicitly. */
+function markup(ui: ReactElement, locale: Locale = 'ko'): string {
+  return renderToStaticMarkup(<LocaleProvider initialLocale={locale}>{ui}</LocaleProvider>);
+}
 
 const huge = '900719925474099312345678901234567890';
 
@@ -31,7 +39,7 @@ describe('authenticated member bank evidence', () => {
   });
 
   it('renders a member-only source explanation, no invented reserve or guaranteed safety claim', () => {
-    const html = renderToStaticMarkup(<BankLiquidityCard bankBalance="1000" loanDebt="0" creditLimit="2000" />);
+    const html = markup(<BankLiquidityCard bankBalance="1000" loanDebt="0" creditLimit="2000" />);
     expect(html).toContain('내 예금·대출 조회 현황');
     expect(html).toContain('0.0%');
     expect(html).not.toContain('건전 유동성 (최적 안정 구간)');
@@ -41,11 +49,11 @@ describe('authenticated member bank evidence', () => {
   });
 
   it('announces unavailable evidence and the zero-limit case accessibly', () => {
-    const invalid = renderToStaticMarkup(<BankLiquidityCard bankBalance="bad" loanDebt="0" creditLimit="100" isEn />);
+    const invalid = markup(<BankLiquidityCard bankBalance="bad" loanDebt="0" creditLimit="100" />, 'en');
     expect(invalid).toContain('role="status"');
     expect(invalid).toContain('could not be verified');
     expect(invalid).not.toContain('35.0%');
-    const zero = renderToStaticMarkup(<BankLiquidityCard bankBalance="0" loanDebt="0" creditLimit="0" />);
+    const zero = markup(<BankLiquidityCard bankBalance="0" loanDebt="0" creditLimit="0" />);
     expect(zero).toContain('계산 불가');
     expect(zero).toContain('신용 한도가 0 WLD');
   });

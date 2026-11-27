@@ -11,6 +11,7 @@ export function BankPrivacyNotice({ locale }: { locale: Locale }) {
         'Only you can view your loan and credit information while signed in.',
         'ローンと信用情報はログインした本人のみ閲覧できます。',
         '贷款与信用信息仅供已登录的本人查看。',
+        'Chỉ bạn mới có thể xem thông tin khoản vay và tín dụng của mình khi đã đăng nhập.',
       )}
     </p>
   );

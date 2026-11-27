@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
+import { renderKo as render } from '@/testing/render-ko';
 import { RepayImpactPreview } from './repay-impact-preview';
 
 const previewMock = vi.hoisted(() => vi.fn());
