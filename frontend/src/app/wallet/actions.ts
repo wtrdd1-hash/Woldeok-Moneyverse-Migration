@@ -4,6 +4,9 @@ import { revalidatePath } from 'next/cache';
 import { ApiError } from '@/lib/api';
 import type { ActionState } from '@/lib/action-state';
 import { failure, idempotencyKey, mutate, wholeAmount } from '@/lib/mutate';
+import { pick } from '@/lib/copy';
+import { getServerLocale } from '@/lib/locale-server';
+import { ACTION_COPY } from './action-copy';
 
 /**
  * Every write the wallet can make.
@@ -17,10 +20,8 @@ import { failure, idempotencyKey, mutate, wholeAmount } from '@/lib/mutate';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const TRANSFER_PENDING_MESSAGE =
-  '송금 처리 여부를 확인할 수 없습니다. 새 송금을 시작하지 마세요. 동일한 ID·금액·요청 키로만 다시 확인할 수 있습니다.';
-
 export async function transfer(previous: ActionState, formData: FormData): Promise<ActionState> {
+  const locale = await getServerLocale();
   const recipientUserId = String(formData.get('recipientUserId') ?? '').trim();
   const amount = wholeAmount(formData.get('amount'));
   const clientKey = String(formData.get('idempotencyKey') ?? '').trim();
@@ -31,16 +32,16 @@ export async function transfer(previous: ActionState, formData: FormData): Promi
   // editing a field, even when the client fails to keep its inputs read-only.
   if (pending && (recipientUserId !== pending.recipientUserId
     || amount !== pending.amount || clientKey !== pending.idempotencyKey)) {
-    return { ...previous, status: 'error', message: TRANSFER_PENDING_MESSAGE };
+    return { ...previous, status: 'error', message: pick(locale, ACTION_COPY.transferPending) };
   }
   if (!UUID.test(recipientUserId)) {
-    return { status: 'error', message: '머니버스 ID 형식(UUID)을 입력해 주세요.' };
+    return { status: 'error', message: pick(locale, ACTION_COPY.recipientInvalid) };
   }
-  if (amount === null) return { status: 'error', message: '1 WLD 이상 정수만 보낼 수 있어요.' };
+  if (amount === null) return { status: 'error', message: pick(locale, ACTION_COPY.transferAmountInvalid) };
   // A server-generated fallback on retry would make an ambiguous transfer
   // look like a new transfer to PostgreSQL's idempotency boundary.
   if (!UUID.test(clientKey)) {
-    return { status: 'error', message: '송금 요청 식별자가 없습니다. 화면을 다시 열어 주세요.' };
+    return { status: 'error', message: pick(locale, ACTION_COPY.transferKeyMissing) };
   }
 
   const attempt = { recipientUserId, amount, idempotencyKey: clientKey };
@@ -51,29 +52,30 @@ export async function transfer(previous: ActionState, formData: FormData): Promi
       throw new Error('transfer outcome has no verifiable transaction ID');
     }
     revalidatePath('/wallet');
-    return { status: 'ok', message: '송금을 원장에 기록했어요.' };
+    return { status: 'ok', message: pick(locale, ACTION_COPY.transferDone) };
   } catch (error) {
     // Definitive validation/auth failures on a first attempt do not indicate
     // an unknown commit. Once pending, no error may silently release the hold.
     if (!pending && error instanceof ApiError && [400, 401, 403, 404, 409, 422].includes(error.status)) {
-      return failure(error, '지금은 송금을 처리할 수 없어요.');
+      return failure(error, pick(locale, ACTION_COPY.transferRefused));
     }
     return {
       status: 'error', errorCode: 'transfer_verification_pending',
-      transferAttempt: attempt, message: TRANSFER_PENDING_MESSAGE,
+      transferAttempt: attempt, message: pick(locale, ACTION_COPY.transferPending),
     };
   }
 }
 
 export async function moveBank(_previous: ActionState, formData: FormData): Promise<ActionState> {
+  const locale = await getServerLocale();
   const direction = String(formData.get('direction') ?? '');
   const amount = wholeAmount(formData.get('amount'));
   const clientKey = String(formData.get('idempotencyKey') ?? '').trim();
 
   if (direction !== 'deposit' && direction !== 'withdraw') {
-    return { status: 'error', message: '입금인지 출금인지 확인할 수 없어요.' };
+    return { status: 'error', message: pick(locale, ACTION_COPY.directionInvalid) };
   }
-  if (amount === null) return { status: 'error', message: '1 WLD 이상 정수만 입력해 주세요.' };
+  if (amount === null) return { status: 'error', message: pick(locale, ACTION_COPY.amountInvalid) };
 
   try {
     await mutate('/api/v1/bank/movements', {
@@ -82,19 +84,20 @@ export async function moveBank(_previous: ActionState, formData: FormData): Prom
     revalidatePath('/wallet');
     return {
       status: 'ok',
-      message: direction === 'deposit' ? '보관함에 넣었어요.' : '보관함에서 꺼냈어요.',
+      message: pick(locale, direction === 'deposit' ? ACTION_COPY.deposited : ACTION_COPY.withdrawn),
     };
   } catch (error) {
-    return failure(error, '은행 이동이 거절되었어요.');
+    return failure(error, pick(locale, ACTION_COPY.bankRefused));
   }
 }
 
 export async function borrow(_previous: ActionState, formData: FormData): Promise<ActionState> {
+  const locale = await getServerLocale();
   const principalAmount = wholeAmount(formData.get('principalAmount'));
   const clientKey = String(formData.get('idempotencyKey') ?? '').trim();
 
   if (principalAmount === null) {
-    return { status: 'error', message: '1 WLD 이상 정수만 신청할 수 있어요.' };
+    return { status: 'error', message: pick(locale, ACTION_COPY.loanAmountInvalid) };
   }
 
   try {
@@ -102,28 +105,29 @@ export async function borrow(_previous: ActionState, formData: FormData): Promis
       body: { principalAmount, idempotencyKey: clientKey || idempotencyKey() },
     });
     revalidatePath('/wallet');
-    return { status: 'ok', message: '대출을 실행했어요. 원금에 5% 이자가 더해집니다.' };
+    return { status: 'ok', message: pick(locale, ACTION_COPY.loanDone) };
   } catch (error) {
-    return failure(error, '대출 신청이 거절되었어요.');
+    return failure(error, pick(locale, ACTION_COPY.loanRefused));
   }
 }
 
 export async function repay(_previous: ActionState, formData: FormData): Promise<ActionState> {
+  const locale = await getServerLocale();
   const loanId = String(formData.get('loanId') ?? '');
   const amount = wholeAmount(formData.get('amount'));
   const clientKey = String(formData.get('idempotencyKey') ?? '').trim();
 
-  if (!UUID.test(loanId)) return { status: 'error', message: '상환할 대출을 확인할 수 없어요.' };
-  if (amount === null) return { status: 'error', message: '1 WLD 이상 정수만 상환할 수 있어요.' };
+  if (!UUID.test(loanId)) return { status: 'error', message: pick(locale, ACTION_COPY.loanUnknown) };
+  if (amount === null) return { status: 'error', message: pick(locale, ACTION_COPY.repayAmountInvalid) };
 
   try {
     await mutate(`/api/v1/bank/loans/${encodeURIComponent(loanId)}/repayments`, {
       body: { amount, idempotencyKey: clientKey || idempotencyKey() },
     });
     revalidatePath('/wallet');
-    return { status: 'ok', message: '상환을 기록했어요.' };
+    return { status: 'ok', message: pick(locale, ACTION_COPY.repayDone) };
   } catch (error) {
-    return failure(error, '상환이 거절되었어요.');
+    return failure(error, pick(locale, ACTION_COPY.repayRefused));
   }
 }
 
@@ -151,8 +155,9 @@ async function claimReward(
 }
 
 export async function claimDaily(_previous: ActionState): Promise<ActionState> {
+  const locale = await getServerLocale();
   return claimReward('/api/v1/rewards/daily/claims', {
-    already: '오늘은 이미 보상을 받았거나, 지금은 받을 수 없어요.',
-    granted: '오늘의 보상을 지갑에 넣었어요.',
+    already: pick(locale, ACTION_COPY.dailyAlready),
+    granted: pick(locale, ACTION_COPY.dailyGranted),
   });
 }
