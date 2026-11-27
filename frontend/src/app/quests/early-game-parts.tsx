@@ -7,7 +7,10 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { pick } from '@/lib/copy';
+import type { Locale } from '@/lib/locale';
 import { formatDay } from '@/lib/money';
+import { COPY } from './copy';
 import type { EarlyCollection, EarlyWeeklyGoal } from './early-game';
 import {
   collectionFigure,
@@ -29,22 +32,22 @@ import {
  * target in the same row as their progress, both computed by the same
  * function, so the bar is drawn from two numbers that were decided together.
  */
-export function WeeklyGoalCard({ goal }: { readonly goal: EarlyWeeklyGoal }) {
-  const caveat = goalCaveat(goal);
+export function WeeklyGoalCard({ goal, locale = 'ko' }: { readonly goal: EarlyWeeklyGoal; readonly locale?: Locale }) {
+  const caveat = goalCaveat(goal, locale);
 
   return (
     <Card className="justify-between gap-4">
       <CardHeader>
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="secondary">{goalWindowLabel(goal.goal_window)}</Badge>
-          {goal.goal_completed && <Badge>달성</Badge>}
+          <Badge variant="secondary">{goalWindowLabel(goal.goal_window, locale)}</Badge>
+          {goal.goal_completed && <Badge>{pick(locale, COPY.achieved)}</Badge>}
         </div>
         <CardTitle className="text-base">{goal.goal_label}</CardTitle>
         <CardDescription>{goal.goal_detail}</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-2 text-sm">
         <div className="flex items-baseline justify-between gap-3">
-          <span className="text-muted-foreground">진행</span>
+          <span className="text-muted-foreground">{pick(locale, COPY.progress)}</span>
           <span className="tabular">{goalFigure(goal)}</span>
         </div>
         <Progress value={goalPercent(goal.goal_progress, goal.goal_target)} />
@@ -61,7 +64,7 @@ export function WeeklyGoalCard({ goal }: { readonly goal: EarlyWeeklyGoal }) {
  * paid or the item was bought -- and not the day anything swept for it, which
  * is the only date a member would recognise.
  */
-export function CollectionCard({ collection }: { readonly collection: EarlyCollection }) {
+export function CollectionCard({ collection, locale = 'ko' }: { readonly collection: EarlyCollection; readonly locale?: Locale }) {
   return (
     <Card className="justify-between gap-4">
       <CardHeader>
@@ -70,8 +73,8 @@ export function CollectionCard({ collection }: { readonly collection: EarlyColle
       </CardHeader>
       <CardContent className="grid gap-3 text-sm">
         <div className="flex items-baseline justify-between gap-3">
-          <span className="text-muted-foreground">모은 장수</span>
-          <span className="tabular">{collectionFigure(collection)}</span>
+          <span className="text-muted-foreground">{pick(locale, COPY.pagesCollected)}</span>
+          <span className="tabular">{collectionFigure(collection, locale)}</span>
         </div>
         <Progress value={collectionPercent(collection.entry_unlocked, collection.entry_total)} />
 
@@ -80,13 +83,13 @@ export function CollectionCard({ collection }: { readonly collection: EarlyColle
             <li key={entry.code} className="flex items-baseline justify-between gap-3">
               <span className={entry.unlocked ? '' : 'text-muted-foreground'}>{entry.label}</span>
               <span className="tabular text-xs text-muted-foreground">
-                {entry.unlocked ? formatDay(entry.unlocked_at, '기록됨') : '아직'}
+                {entry.unlocked ? formatDay(entry.unlocked_at, pick(locale, COPY.recorded)) : pick(locale, COPY.notYet)}
               </span>
             </li>
           ))}
         </ul>
 
-        <p className="text-xs text-muted-foreground">{collectionRewardNote(collection)}</p>
+        <p className="text-xs text-muted-foreground">{collectionRewardNote(collection, locale)}</p>
       </CardContent>
     </Card>
   );

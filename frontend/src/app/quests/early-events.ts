@@ -1,4 +1,7 @@
+import { pick } from '@/lib/copy';
+import type { Locale } from '@/lib/locale';
 import { groupDigits } from '@/lib/money';
+import { COPY, fill } from './copy';
 
 /**
  * 16.1's daily event and its first-day flow, as the quests screen reads them.
@@ -84,24 +87,24 @@ export function rewardParts(reward: {
   readonly experience: string;
   readonly itemName: string | null;
   readonly itemQuantity: number;
-}): readonly string[] {
+}, locale: Locale = 'ko'): readonly string[] {
   const parts: string[] = [];
   if (positive(reward.amount)) parts.push(`${groupDigits(reward.amount)} WLD`);
-  if (positive(reward.experience)) parts.push(`경험치 ${groupDigits(reward.experience)}`);
+  if (positive(reward.experience)) parts.push(fill(pick(locale, COPY.rewardExperience), { n: groupDigits(reward.experience) }));
   if (reward.itemName !== null && reward.itemQuantity > 0) {
-    parts.push(`${reward.itemName} ${reward.itemQuantity}개`);
+    parts.push(fill(pick(locale, COPY.rewardItem), { item: reward.itemName, q: String(reward.itemQuantity) }));
   }
   return parts;
 }
 
 /** "40 WLD · 경험치 20", or a dash when there is nothing left to pay. */
-export function rewardLine(event: TodayEvent): string {
+export function rewardLine(event: TodayEvent, locale: Locale = 'ko'): string {
   const parts = rewardParts({
     amount: event.reward_amount,
     experience: event.reward_experience,
     itemName: event.reward_item_name,
     itemQuantity: event.reward_item_quantity,
-  });
+  }, locale);
   return parts.length === 0 ? '—' : parts.join(' · ');
 }
 
@@ -112,12 +115,12 @@ export function rewardLine(event: TodayEvent): string {
  * and a single "받을 수 없어요" would send the second member away without the
  * one thing they could do about it.
  */
-export function eventBlockMessage(event: TodayEvent): string | null {
+export function eventBlockMessage(event: TodayEvent, locale: Locale = 'ko'): string | null {
   if (event.claim_block === 'claimed') {
-    return '오늘 사건은 이미 받았어요. 내일 한국 시간 자정에 새 사건이 열려요.';
+    return pick(locale, COPY.blockClaimed);
   }
   if (event.claim_block === 'needs_work') {
-    return '이 사건은 작업 경험치만 주는 사건이라, 작업 보상을 한 번 받은 뒤부터 받을 수 있어요.';
+    return pick(locale, COPY.blockNeedsWork);
   }
   return null;
 }
@@ -127,9 +130,9 @@ export function eventBlockMessage(event: TodayEvent): string | null {
  * taking. When the experience was the whole reward the block message already
  * says it, and saying both would be telling a member twice.
  */
-export function experienceNote(event: TodayEvent): string | null {
+export function experienceNote(event: TodayEvent, locale: Locale = 'ko'): string | null {
   return event.experience_blocked && event.claim_block !== 'needs_work'
-    ? '아직 작업 보상을 받은 적이 없어서 경험치는 쌓이지 않아요. 작업을 한 번 마치면 다음 사건부터 함께 들어와요.'
+    ? pick(locale, COPY.experienceBlocked)
     : null;
 }
 
@@ -139,26 +142,26 @@ export function experienceNote(event: TodayEvent): string | null {
  * Printed rather than hidden, and without a subject particle -- the values are
  * a mix of 받침 endings and picking one would be wrong half the time.
  */
-export function pendingEffectNote(event: TodayEvent): string | null {
+export function pendingEffectNote(event: TodayEvent, locale: Locale = 'ko'): string | null {
   if (event.event_code === 'market_sale') {
-    return event.claimed
-      ? '적용 중 · 오늘 자정까지 초보 필수품 10% 할인'
-      : '받으면 적용 · 오늘 자정까지 초보 필수품 10% 할인';
+    return pick(locale, event.claimed ? COPY.saleActive : COPY.saleOnClaim);
   }
-  return event.pending_effect === null ? null : `아직 준비 중 · ${event.pending_effect}`;
+  return event.pending_effect === null ? null : fill(pick(locale, COPY.pendingEffect), { effect: event.pending_effect });
 }
 
 /** What the claim actually handed over, for the sentence under the button. */
-export function claimMessage(receipt: EventReceipt): string {
+export function claimMessage(receipt: EventReceipt, locale: Locale = 'ko'): string {
   const parts = rewardParts({
     amount: receipt.reward_amount,
     experience: receipt.experience_amount,
     itemName: receipt.item_name,
     itemQuantity: receipt.item_quantity,
-  });
-  const got = parts.length === 0 ? '기록으로 남았어요' : `${parts.join(' · ')} 받았어요`;
+  }, locale);
+  const got = parts.length === 0
+    ? pick(locale, COPY.claimRecordedOnly)
+    : fill(pick(locale, COPY.claimGot), { parts: parts.join(' · ') });
   return receipt.replayed
-    ? `이미 받은 사건이에요. ${got}`
+    ? fill(pick(locale, COPY.claimReplayed), { got })
     : `${receipt.event_label} · ${got}`;
 }
 
@@ -184,8 +187,8 @@ export function stepFigure(step: FirstDayStep): string | null {
  * seven are a member going and looking, and folding them into the same
  * fraction would claim the application knows something it does not.
  */
-export function firstDaySummary(steps: readonly FirstDayStep[]): string {
+export function firstDaySummary(steps: readonly FirstDayStep[], locale: Locale = 'ko'): string {
   const counted = steps.filter((step) => step.step_verified);
   const done = counted.filter((step) => step.step_done).length;
-  return `기록으로 확인된 단계 ${done} / ${counted.length}`;
+  return fill(pick(locale, COPY.firstDaySummary), { done: String(done), total: String(counted.length) });
 }

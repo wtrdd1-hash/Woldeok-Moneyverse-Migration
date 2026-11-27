@@ -4,7 +4,10 @@ import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
+import { pick } from '@/lib/copy';
+import { getServerLocale } from '@/lib/locale-server';
 import { requireMember } from '@/lib/session';
+import { COPY } from './copy';
 import type { FirstDayStep, TodayEvent } from './early-events';
 import { firstDaySummary } from './early-events';
 import { isEarlyGameBoard, isEngagementBoard, readFirstDaySteps, readTodayEvent } from './early-events-reader';
@@ -13,7 +16,7 @@ import type { EarlyGameBoard } from './early-game';
 import { CollectionCard, WeeklyGoalCard } from './early-game-parts';
 import { NotificationForm, NpcOrderButton } from './quest-forms';
 import { GoalCard, NextUnlock, NpcCard } from './quest-parts';
-import { NPCS } from './quests';
+import { npcs } from './quests';
 import type { EngagementBoard } from './quests';
 import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
 import { VipGoldenChestCard } from '@/components/vip-golden-chest-card';
@@ -23,33 +26,37 @@ import { parseVipChestStatus } from './vip-chest-status';
 export const dynamic = 'force-dynamic';
 
 const questsUrl = canonicalUrl('/quests');
-const questsOgImage = buildOgImageUrl({
-  title: '일일 퀘스트 & 출석 도전과제',
-  description: '디스코드 활동과 연동되는 일일 퀘스트와 연속 출석을 달성하고 WLD 게임 보상을 수령하세요.',
-  type: 'quest',
-  badge: '퀘스트 & 도전과제',
-  metric: '일일 보상 수령',
-  metricLabel: 'WLD 지급',
-});
 
-export const metadata: Metadata = {
-  title: '일일 퀘스트 및 도전과제 — 활동 보상 시스템',
-  description: '디스코드 커뮤니티 활동과 연동되는 일일 퀘스트와 연속 출석 도전과제를 달성하고 WLD 보상을 수령하세요.',
-  alternates: { canonical: questsUrl },
-  robots: { index: false, follow: false },
-  openGraph: {
-    title: '일일 퀘스트 및 도전과제 — 월덕 머니버스',
-    description: '디스코드 커뮤니티 활동과 연동되는 일일 퀘스트와 연속 출석 도전과제를 달성하고 WLD 보상을 수령하세요.',
-    url: questsUrl,
-    images: [{ url: questsOgImage, width: 1200, height: 630 }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: '일일 퀘스트 및 도전과제 — 월덕 머니버스',
-    description: '디스코드 커뮤니티 활동 연동 보상',
-    images: [questsOgImage],
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getServerLocale();
+  const t = (copy: (typeof COPY)[keyof typeof COPY]) => pick(locale, copy);
+  const questsOgImage = buildOgImageUrl({
+    title: t(COPY.ogImageTitle),
+    description: t(COPY.ogImageDescription),
+    type: 'quest',
+    badge: t(COPY.ogBadge),
+    metric: t(COPY.ogMetric),
+    metricLabel: t(COPY.ogMetricLabel),
+  });
+  return {
+    title: t(COPY.metaTitle),
+    description: t(COPY.metaDescription),
+    alternates: { canonical: questsUrl },
+    robots: { index: false, follow: false },
+    openGraph: {
+      title: t(COPY.ogTitle),
+      description: t(COPY.metaDescription),
+      url: questsUrl,
+      images: [{ url: questsOgImage, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t(COPY.ogTitle),
+      description: t(COPY.twitterDescription),
+      images: [questsOgImage],
+    },
+  };
+}
 
 
 /*
@@ -63,6 +70,8 @@ export const metadata: Metadata = {
  */
 export default async function QuestsPage() {
   await requireMember();
+  const locale = await getServerLocale();
+  const t = (copy: (typeof COPY)[keyof typeof COPY]) => pick(locale, copy);
 
   // Two requests, issued together. `member_engagement_dashboard` assembles
   // today's goals, the next unlock and the preference in one function; the
@@ -86,9 +95,8 @@ export default async function QuestsPage() {
 
   return (
     <div data-page="quests" className="mv-page mv-page--gameplay grid gap-6">
-      <PageHeader eyebrow="DAILY QUESTS" title="퀘스트와 NPC 주문">
-        퀘스트와 NPC 주문은 모두 게임 안의 활동 기록입니다. 달성하더라도 실제 현금이나 실물
-        경품은 지급되지 않습니다.
+      <PageHeader eyebrow="DAILY QUESTS" title={t(COPY.title)}>
+        {t(COPY.intro)}
       </PageHeader>
 
       {/* Moneyverse Plus VIP Daily Golden Chest */}
@@ -99,89 +107,85 @@ export default async function QuestsPage() {
           the one thing on the screen that is not. */}
       <section aria-labelledby="event-title" className="grid gap-3">
         <h2 id="event-title" className="text-lg">
-          오늘의 사건
+          {t(COPY.eventTitle)}
         </h2>
         {/* Said plainly, because a member who does not know this will try it:
             the event is a function of the member and today's Seoul date, so
             there is nothing to reroll. */}
         <p className="max-w-prose text-sm leading-[1.8] text-muted-foreground">
-          하루에 한 번, 사람마다 다른 사건이 하나씩 열려요. 새로고침하거나 다시 들어와도 오늘
-          사건은 바뀌지 않고, 한 번만 받을 수 있어요. 다음 사건은 한국 시간 자정에 열립니다.
+          {t(COPY.eventIntro)}
         </p>
 
         {today === null ? (
           <EmptyState
-            title="오늘의 사건을 불러오지 못했어요."
-            description="사건을 추측해서 보여 주지는 않습니다. 잠시 후 다시 확인해 주세요."
+            title={t(COPY.eventLoadError)}
+            description={t(COPY.eventLoadErrorHint)}
           />
         ) : today.event === null ? (
           // A different fact from the one above: the request worked and there
           // is no event open at all.
           <EmptyState
-            title="지금은 열린 사건이 없어요."
-            description="사건이 다시 열리면 이 자리에 표시돼요."
+            title={t(COPY.eventNone)}
+            description={t(COPY.eventNoneHint)}
           />
         ) : (
-          <TodayEventCard event={today.event} />
+          <TodayEventCard event={today.event} locale={locale} />
         )}
       </section>
 
       <section aria-labelledby="firstday-title" className="grid gap-3">
         <h2 id="firstday-title" className="text-lg">
-          첫날 흐름
+          {t(COPY.firstDayTitle)}
         </h2>
         <p className="max-w-prose text-sm leading-[1.8] text-muted-foreground">
-          처음 들어온 날 해 보면 좋은 순서예요. 프로필·작업·상점 단계는 실제 기록에서 자동으로
-          확인되고, 읽어 보는 단계 두 개는 기록하지 않으니 직접 확인해 주세요.
+          {t(COPY.firstDayIntro)}
           {firstDay !== null && firstDay.steps.length > 0
-            ? ` ${firstDaySummary(firstDay.steps)}.`
+            ? ` ${firstDaySummary(firstDay.steps, locale)}.`
             : ''}
         </p>
 
         {firstDay === null ? (
           <EmptyState
-            title="첫날 흐름을 불러오지 못했어요."
-            description="진행 상황을 추측해서 보여 주지는 않습니다. 잠시 후 다시 확인해 주세요."
+            title={t(COPY.firstDayLoadError)}
+            description={t(COPY.progressGuessHint)}
           />
         ) : firstDay.steps.length === 0 ? (
           <EmptyState
-            title="안내할 단계가 없어요."
-            description="단계가 열리면 이 자리에 표시돼요."
+            title={t(COPY.firstDayNone)}
+            description={t(COPY.firstDayNoneHint)}
           />
         ) : (
-          <FirstDayFlow steps={firstDay.steps} />
+          <FirstDayFlow steps={firstDay.steps} locale={locale} />
         )}
       </section>
 
       <section aria-labelledby="today-title" className="grid gap-3">
         <h2 id="today-title" className="text-lg">
-          오늘의 퀘스트
+          {t(COPY.todayTitle)}
         </h2>
         {/* Said once, at the top of the section that needs it: the count is
             the only figure the API can answer with, and how it moves is not
-            obvious from a button labelled "기록". */}
+            obvious from a button labelled "Record". */}
         <p className="max-w-prose text-sm leading-[1.8] text-muted-foreground">
-          활동을 마친 뒤 진행을 직접 기록해요. 한 번 누를 때마다 1회씩 올라가고, 전송이 끊겨 같은
-          요청이 다시 도착해도 두 번 기록되지는 않아요. 달성에 필요한 횟수는 아직 이 화면에서
-          확인할 수 없어요.
+          {t(COPY.todayIntro)}
         </p>
 
         {board === null ? (
           <EmptyState
-            title="오늘의 퀘스트를 불러오지 못했어요."
-            description="진행 상황을 추측해서 보여 주지는 않습니다. 잠시 후 다시 확인해 주세요."
+            title={t(COPY.todayLoadError)}
+            description={t(COPY.progressGuessHint)}
           />
         ) : board.today_tasks.length === 0 ? (
           // A different fact from the one above: the request worked and the
           // catalogue has nothing open for today.
           <EmptyState
-            title="오늘 진행할 퀘스트가 없어요."
-            description="새 퀘스트가 열리면 이 자리에 표시돼요."
+            title={t(COPY.todayNone)}
+            description={t(COPY.todayNoneHint)}
           />
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {board.today_tasks.map((goal) => (
-              <GoalCard key={goal.code} goal={goal} />
+              <GoalCard key={goal.code} goal={goal} locale={locale} />
             ))}
           </div>
         )}
@@ -197,27 +201,26 @@ export default async function QuestsPage() {
           postings, so each one carries a target and a real figure. */}
       <section aria-labelledby="weekly-title" className="grid gap-3">
         <h2 id="weekly-title" className="text-lg">
-          이번 주 목표
+          {t(COPY.weeklyTitle)}
         </h2>
         <p className="max-w-prose text-sm leading-[1.8] text-muted-foreground">
-          주간 목표는 월요일마다 새로 시작하고, 따로 기록하지 않아도 작업·구매·저축 기록에서
-          자동으로 계산돼요. 지난주에 쌓은 진행은 이번 주로 넘어오지 않아요.
+          {t(COPY.weeklyIntro)}
         </p>
 
         {earlyGame === null ? (
           <EmptyState
-            title="이번 주 목표를 불러오지 못했어요."
-            description="진행 상황을 추측해서 보여 주지는 않습니다. 잠시 후 다시 확인해 주세요."
+            title={t(COPY.weeklyLoadError)}
+            description={t(COPY.progressGuessHint)}
           />
         ) : earlyGame.goals.length === 0 ? (
           <EmptyState
-            title="이번 주에 열린 목표가 없어요."
-            description="새 주간 목표가 열리면 이 자리에 표시돼요."
+            title={t(COPY.weeklyNone)}
+            description={t(COPY.weeklyNoneHint)}
           />
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {earlyGame.goals.map((goal) => (
-              <WeeklyGoalCard key={goal.goal_code} goal={goal} />
+              <WeeklyGoalCard key={goal.goal_code} goal={goal} locale={locale} />
             ))}
           </div>
         )}
@@ -227,33 +230,32 @@ export default async function QuestsPage() {
           not depend on anything the failed request would have answered, and
           hiding the one thing that still works would make a slow read look
           like a broken feature. */}
-      {/* A 도감 fills itself: a page is unlocked by the work receipt or the
+      {/* A collection book fills itself: a page is unlocked by the work receipt or the
           shop purchase that earned it, and the title a finished book pays is
           granted by a trigger on that same row. There is nothing to press
           here, which is why the section carries no control. */}
       <section aria-labelledby="collection-title" className="grid gap-3">
         <h2 id="collection-title" className="text-lg">
-          초반 도감
+          {t(COPY.collectionTitle)}
         </h2>
         <p className="max-w-prose text-sm leading-[1.8] text-muted-foreground">
-          작업 보상을 받거나 상점에서 물건을 사면 도감이 저절로 채워져요. 모두 모으면 칭호를 받고,
-          칭호는 프로필에서 골라 보여줄 수 있어요. 도감 보상으로 WLD를 지급하지는 않습니다.
+          {t(COPY.collectionIntro)}
         </p>
 
         {earlyGame === null ? (
           <EmptyState
-            title="도감을 불러오지 못했어요."
-            description="모은 장수를 추측해서 보여 주지는 않습니다. 잠시 후 다시 확인해 주세요."
+            title={t(COPY.collectionLoadError)}
+            description={t(COPY.collectionLoadErrorHint)}
           />
         ) : earlyGame.collections.length === 0 ? (
           <EmptyState
-            title="아직 열린 도감이 없어요."
-            description="새 도감이 열리면 이 자리에 표시돼요."
+            title={t(COPY.collectionNone)}
+            description={t(COPY.collectionNoneHint)}
           />
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {earlyGame.collections.map((collection) => (
-              <CollectionCard key={collection.book_code} collection={collection} />
+              <CollectionCard key={collection.book_code} collection={collection} locale={locale} />
             ))}
           </div>
         )}
@@ -261,16 +263,14 @@ export default async function QuestsPage() {
 
       <section aria-labelledby="npc-title" className="grid gap-3">
         <h2 id="npc-title" className="text-lg">
-          NPC 주문
+          {t(COPY.npcTitle)}
         </h2>
         <p className="max-w-prose text-sm leading-[1.8] text-muted-foreground">
-          주문을 하나 받으면 그 NPC와의 친밀도가 오르고, ‘이웃 돕기’ 퀘스트도 함께 1회 진행돼요.
-          지금까지 쌓인 친밀도는 아직 이 화면에서 다시 불러올 수 없어요. 주문을 받으면 그 결과에
-          지금 친밀도가 표시됩니다.
+          {t(COPY.npcIntro)}
         </p>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          {NPCS.map((npc) => (
+          {npcs(locale).map((npc) => (
             <NpcCard key={npc.code} npc={npc}>
               <NpcOrderButton code={npc.code} />
             </NpcCard>
@@ -280,34 +280,34 @@ export default async function QuestsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>다음 해금 단계</CardTitle>
+          <CardTitle>{t(COPY.nextUnlockTitle)}</CardTitle>
           <CardDescription>
-            퀘스트와 주문을 이어 가면 다음 성장 단계가 열려요.
+            {t(COPY.nextUnlockDescription)}
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3">
           {board === null ? (
             <p className="text-sm text-muted-foreground">
-              다음 해금 단계를 불러오지 못했어요. 잠시 후 다시 확인해 주세요.
+              {t(COPY.nextUnlockLoadError)}
             </p>
           ) : (
-            <NextUnlock unlock={board.next_unlock} />
+            <NextUnlock unlock={board.next_unlock} locale={locale} />
           )}
           <p className="text-xs text-muted-foreground">
-            단계와 조건은{' '}
+            {t(COPY.progressionBefore)}
             <Link href="/progression" className="text-clay-ink">
-              성장 단계
-            </Link>{' '}
-            화면에서 자세히 볼 수 있어요.
+              {t(COPY.progressionLink)}
+            </Link>
+            {t(COPY.progressionAfter)}
           </p>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>알림 설정</CardTitle>
+          <CardTitle>{t(COPY.notifTitle)}</CardTitle>
           <CardDescription>
-            퀘스트와 NPC 주문 소식을 받을지 정할 수 있어요. 알림을 꺼도 진행 기록은 그대로 남아요.
+            {t(COPY.notifDescription)}
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
@@ -318,7 +318,7 @@ export default async function QuestsPage() {
               than saying so. */}
           {board === null && (
             <p className="text-sm text-muted-foreground">
-              지금 저장되어 있는 설정을 불러오지 못했어요. 아래에서 저장하면 그 값으로 바뀝니다.
+              {t(COPY.notifLoadError)}
             </p>
           )}
           <NotificationForm enabled={board === null ? null : board.notifications_enabled} />

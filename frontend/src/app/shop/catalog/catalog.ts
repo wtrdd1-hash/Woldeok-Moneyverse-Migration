@@ -1,4 +1,8 @@
 import { formatDay, groupDigits } from '@/lib/money';
+import { pick, type Copy } from '@/lib/copy';
+import { fill } from '@/lib/copy-format';
+import type { Locale } from '@/lib/locale';
+import { COPY } from './copy';
 
 /**
  * The item catalogue's vocabulary.
@@ -117,17 +121,22 @@ export interface SettlementReceipt {
  * disappearing: the page groups by category, and a group with no heading
  * would drop its items off the screen entirely.
  */
-const CATEGORY_LABELS: Readonly<Record<string, string>> = Object.freeze({
-  general: '생활',
-  job: '직업',
-  business: '사업',
-  vehicle: '이동수단과 임대',
-  season: '시즌',
-  luxury: '명품',
+const CATEGORY_LABELS: Readonly<Record<string, Copy>> = Object.freeze({
+  general: COPY.categoryGeneral,
+  job: COPY.categoryJob,
+  business: COPY.categoryBusiness,
+  vehicle: COPY.categoryVehicle,
+  season: COPY.categorySeason,
+  luxury: COPY.categoryLuxury,
 });
 
-export function categoryLabel(code: string): string {
-  return CATEGORY_LABELS[code] ?? code;
+/*
+ * Every label helper takes the reader's locale and answers in Korean when it is omitted, the
+ * convention `formatDay` already follows; page callers always pass the request locale.
+ */
+export function categoryLabel(code: string, locale: Locale = 'ko'): string {
+  const copy = CATEGORY_LABELS[code];
+  return copy === undefined ? code : pick(locale, copy);
 }
 
 /**
@@ -138,14 +147,15 @@ export function categoryLabel(code: string): string {
  * two, so '사용 가능' is the fact a member needs. Calling it 소모품 would be
  * wrong for 개량 농기구, which is a tool and is also `convenience`.
  */
-const EFFECT_LABELS: Readonly<Record<string, string>> = Object.freeze({
-  convenience: '사용 가능',
-  decoration: '장식',
-  display: '전시',
+const EFFECT_LABELS: Readonly<Record<string, Copy>> = Object.freeze({
+  convenience: COPY.effectConvenience,
+  decoration: COPY.effectDecoration,
+  display: COPY.effectDisplay,
 });
 
-export function effectLabel(kind: string): string {
-  return EFFECT_LABELS[kind] ?? kind;
+export function effectLabel(kind: string, locale: Locale = 'ko'): string {
+  const copy = EFFECT_LABELS[kind];
+  return copy === undefined ? kind : pick(locale, copy);
 }
 
 /** Only a `convenience` item may be consumed; 074 answers 22023 for the rest. */
@@ -217,15 +227,13 @@ function periodLimit(limit: string): PeriodLimit | null {
  * 수 있어요" would describe a gate that is not there, and a member who
  * believed it would skip a purchase that would in fact go through.
  */
-export function purchaseLimitLabel(limit: string): string | null {
-  if (isSingleHold(limit)) return '하나만 가질 수 있어요';
-  if (limit === 'unlimited') return '구매 횟수 제한이 없어요';
+export function purchaseLimitLabel(limit: string, locale: Locale = 'ko'): string | null {
+  if (isSingleHold(limit)) return pick(locale, COPY.limitSingle);
+  if (limit === 'unlimited') return pick(locale, COPY.limitUnlimited);
 
   const period = periodLimit(limit);
   if (period === null) return null;
-  return period.period === 'daily'
-    ? `하루에 ${period.count}개까지 살 수 있어요`
-    : `한 주에 ${period.count}개까지 살 수 있어요`;
+  return pick(locale, fill(period.period === 'daily' ? COPY.limitDaily : COPY.limitWeekly, { count: period.count }));
 }
 
 /**
@@ -274,9 +282,9 @@ export function isHeldToTheLimit(limit: string, held: number): boolean {
  * today. Printing "무제한" would be a claim about an allocation that 073
  * deliberately left unset until an administrator screen can change it.
  */
-export function stockLabel(quantity: number | null): string | null {
+export function stockLabel(quantity: number | null, locale: Locale = 'ko'): string | null {
   if (quantity === null || !Number.isInteger(quantity) || quantity < 0) return null;
-  return quantity === 0 ? '품절' : countLabel(quantity);
+  return quantity === 0 ? pick(locale, COPY.soldOut) : countLabel(quantity, locale);
 }
 
 /**
@@ -285,9 +293,9 @@ export function stockLabel(quantity: number | null): string | null {
  * Anything that is not a whole count is refused rather than rendered: a
  * missing figure printed as `NaN개` claims the member holds NaN of something.
  */
-export function countLabel(quantity: number): string {
+export function countLabel(quantity: number, locale: Locale = 'ko'): string {
   if (!Number.isInteger(quantity) || quantity < 0) return '—';
-  return `${groupDigits(String(quantity))}개`;
+  return pick(locale, fill(COPY.count, { count: groupDigits(String(quantity)) }));
 }
 
 /**
@@ -321,7 +329,7 @@ export function filterCatalogByCategory(items: readonly CatalogItem[], category:
   return category === '' ? [...items] : items.filter((item) => item.category === category);
 }
 
-export function groupByCategory(items: readonly CatalogItem[]): readonly CatalogGroup[] {
+export function groupByCategory(items: readonly CatalogItem[], locale: Locale = 'ko'): readonly CatalogGroup[] {
   const groups = new Map<string, CatalogItem[]>();
   for (const item of items) {
     const existing = groups.get(item.category);
@@ -330,7 +338,7 @@ export function groupByCategory(items: readonly CatalogItem[]): readonly Catalog
   }
   return [...groups].map(([category, grouped]) => ({
     category,
-    label: categoryLabel(category),
+    label: categoryLabel(category, locale),
     items: grouped,
   }));
 }
@@ -364,9 +372,9 @@ export function useMessage(receipt: UseReceipt): string {
 }
 
 /** A count of weeks, refused rather than rendered when it is not a count. */
-export function weeksLabel(weeks: number): string {
+export function weeksLabel(weeks: number, locale: Locale = 'ko'): string {
   if (!Number.isInteger(weeks) || weeks < 0) return '—';
-  return `${weeks}주`;
+  return pick(locale, fill(COPY.weeks, { weeks }));
 }
 
 /**
@@ -379,21 +387,19 @@ export function weeksLabel(weeks: number): string {
  * used — and the page picks between them, because the page is the only place
  * that holds both controls.
  */
-export function holdingNote(item: HeldItem): string | null {
+export function holdingNote(item: HeldItem, locale: Locale = 'ko'): string | null {
   if (owesUpkeep(item)) return null;
   if (item.durable) {
-    return hasUpkeep(item.weekly_cost)
-      ? '사용해서 소모하는 아이템이 아니에요. 주간 관리비를 내는 동안 계속 유지돼요.'
-      : '기간제 아이템이에요. 표시된 날짜까지 그대로 유지돼요.';
+    return pick(locale, hasUpkeep(item.weekly_cost) ? COPY.noteUpkeepDurable : COPY.noteFixedTerm);
   }
   if (!isConsumable(item.effect_kind)) {
-    return '장식·전시 아이템은 사용하지 않고 그대로 보유해요.';
+    return pick(locale, COPY.noteDecoration);
   }
   if (item.effect_expires_at !== null) {
     // Chapter 20's 중복 방지. 104 answers 23505 for a second use while the
     // first is still running, so the date is the thing worth saying.
-    const until = formatDay(item.effect_expires_at, '확인 중');
-    return `효과가 ${until}까지 적용 중이에요. 끝난 뒤에 다시 사용할 수 있어요.`;
+    const until = formatDay(item.effect_expires_at, pick(locale, COPY.checking), locale);
+    return pick(locale, fill(COPY.noteEffectRunning, { until }));
   }
   return null;
 }

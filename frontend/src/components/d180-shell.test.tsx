@@ -69,6 +69,24 @@ describe('DESIGN180 shell', () => {
     expect(links.map((a) => a.textContent?.trim())).toEqual(['홈', '퀘스트', '거래소', '지갑', '계정']);
   });
 
+  // ui-ux-pro-max "Compact Label Overflow": a dock label stays on one line and shrinks with an
+  // ellipsis instead of wrapping (browser QA: VI wrapped at 320 px); the link keeps the full name.
+  it('keeps dock labels on one shrinkable line', () => {
+    renderKo(<GameMobileDock />);
+    const links = within(screen.getByRole('navigation', { name: '하단 메뉴' })).getAllByRole('link');
+    for (const link of links) {
+      expect(link.className).toContain('min-w-0');
+      expect(link.querySelector('span')?.className).toMatch(/\btruncate\b/);
+    }
+  });
+
+  // Browser QA W03: the root layout already renders the skip link to #main; a second one in the
+  // shell made keyboard users tab through two identical links.
+  it('leaves the skip link to the root layout', () => {
+    const { container } = renderKo(<SiteShell><p>본문</p></SiteShell>);
+    expect(container.querySelectorAll('a[href="#main"]')).toHaveLength(0);
+  });
+
   it('no longer renders the G2 ledger strip', () => {
     renderKo(<SiteShell><p>본문</p></SiteShell>);
     expect(screen.queryByRole('region', { name: '원장 상태' })).toBeNull();

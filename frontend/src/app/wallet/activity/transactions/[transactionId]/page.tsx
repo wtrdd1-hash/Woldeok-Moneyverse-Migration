@@ -5,15 +5,22 @@ import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/page-header';
 import { api, ApiError } from '@/lib/api';
 import { requireMember } from '@/lib/session';
+import { pick } from '@/lib/copy';
+import { getServerLocale } from '@/lib/locale-server';
 import { parseWalletTransactionDetail } from '@/lib/wallet-transaction-detail';
 import { CopyTransactionId } from './copy-transaction-id';
+import { INTL_LOCALE } from '../../../copy';
+import { COPY } from '../../copy';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = {
-  title: '내 지갑 거래 상세',
-  robots: { index: false, follow: false },
-  referrer: 'no-referrer',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getServerLocale();
+  return {
+    title: pick(locale, COPY.detailMetaTitle),
+    robots: { index: false, follow: false },
+    referrer: 'no-referrer',
+  };
+}
 
 const ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const formatAmount = (amount: string) => BigInt(amount).toLocaleString('ko-KR') + ' WLD';
@@ -24,6 +31,8 @@ export default async function WalletTransactionDetailPage({
   params: Promise<{ transactionId: string }>;
 }) {
   await requireMember();
+  const locale = await getServerLocale();
+  const t = (copy: (typeof COPY)[keyof typeof COPY]) => pick(locale, copy);
   const { transactionId } = await params;
   const enabled = process.env.WALLET_TRANSACTION_DETAIL_ENABLED === 'true';
   let state: 'ok' | 'not-found' | 'unavailable' | 'disabled' = 'unavailable';
@@ -44,19 +53,18 @@ export default async function WalletTransactionDetailPage({
 
   const message =
     state === 'disabled'
-      ? '현재 거래 상세 기능을 사용할 수 없어요.'
+      ? t(COPY.detailDisabled)
       : state === 'not-found'
-        ? '거래 기록을 찾을 수 없어요.'
-        : '거래 상세를 확인할 수 없어요.';
+        ? t(COPY.detailNotFound)
+        : t(COPY.detailUnavailable);
 
   return (
     <main data-page="wallet-transaction-detail" className="mv-page mv-page--finance grid gap-5">
       <Button asChild variant="outline" className="min-h-11 w-fit">
-        <Link href="/wallet/activity">내 지갑 기록으로 돌아가기</Link>
+        <Link href="/wallet/activity">{t(COPY.detailBack)}</Link>
       </Button>
-      <PageHeader eyebrow="PRIVATE LEDGER READ" title="내 지갑 거래 상세">
-        내 현금·은행 계정에 기록된 거래 내역만 조회합니다. 상대방 정보나 지급 완료 여부를 증명하지
-        않습니다.
+      <PageHeader eyebrow="PRIVATE LEDGER READ" title={t(COPY.detailTitle)}>
+        {t(COPY.detailIntro)}
       </PageHeader>
       {state !== 'ok' || !detail ? (
         <Card>
@@ -67,7 +75,7 @@ export default async function WalletTransactionDetailPage({
             {state === 'unavailable' && (
               <Button asChild variant="outline" className="min-h-11 w-fit">
                 <Link href={`/wallet/activity/transactions/${encodeURIComponent(transactionId)}`}>
-                  다시 시도
+                  {t(COPY.detailRetry)}
                 </Link>
               </Button>
             )}
@@ -77,18 +85,18 @@ export default async function WalletTransactionDetailPage({
         <Card>
           <CardContent className="grid gap-4">
             <p role="status" aria-live="polite" className="font-medium">
-              원장 기록 조회됨 · 정산 검증서 아님
+              {t(COPY.detailReadOk)}
             </p>
-            <dl aria-label="본인 거래 원장 상세" className="grid gap-3 break-words">
+            <dl aria-label={t(COPY.detailList)} className="grid gap-3 break-words">
               <div>
-                <dt className="text-sm text-muted-foreground">거래 유형</dt>
+                <dt className="text-sm text-muted-foreground">{t(COPY.detailType)}</dt>
                 <dd>{detail.typeLabel}</dd>
               </div>
               <div>
-                <dt className="text-sm text-muted-foreground">기록 시각 (한국시간)</dt>
+                <dt className="text-sm text-muted-foreground">{t(COPY.detailRecordedAt)}</dt>
                 <dd>
                   <time dateTime={detail.occurredAtUtcMicros}>
-                    {new Intl.DateTimeFormat('ko-KR', {
+                    {new Intl.DateTimeFormat(INTL_LOCALE[locale], {
                       timeZone: 'Asia/Seoul',
                       dateStyle: 'long',
                       timeStyle: 'medium',
@@ -97,26 +105,25 @@ export default async function WalletTransactionDetailPage({
                 </dd>
               </div>
               <div>
-                <dt className="text-sm text-muted-foreground">현금 변동</dt>
+                <dt className="text-sm text-muted-foreground">{t(COPY.detailCash)}</dt>
                 <dd>{formatAmount(detail.cashDelta)}</dd>
               </div>
               <div>
-                <dt className="text-sm text-muted-foreground">은행 변동</dt>
+                <dt className="text-sm text-muted-foreground">{t(COPY.detailBank)}</dt>
                 <dd>{formatAmount(detail.bankDelta)}</dd>
               </div>
               <div>
-                <dt className="text-sm text-muted-foreground">순변동</dt>
+                <dt className="text-sm text-muted-foreground">{t(COPY.detailNet)}</dt>
                 <dd>{formatAmount(detail.netDelta)}</dd>
               </div>
               <div>
-                <dt className="text-sm text-muted-foreground">거래 ID</dt>
+                <dt className="text-sm text-muted-foreground">{t(COPY.detailId)}</dt>
                 <dd className="break-all select-text">{detail.transactionId}</dd>
               </div>
             </dl>
             <CopyTransactionId transactionId={detail.transactionId} />
             <p className="text-sm text-muted-foreground">
-              이 화면은 본인 계정의 원장 행 조회 결과입니다. 전표 전체 대사, 지급 완료, 현재 잔액 및
-              공식 증빙을 보증하지 않습니다. 순변동이 0이어도 내부 이체라고 단정할 수 없습니다.
+              {t(COPY.detailDisclaimer)}
             </p>
           </CardContent>
         </Card>

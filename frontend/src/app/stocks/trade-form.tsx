@@ -11,6 +11,9 @@ import { groupDigits } from '@/lib/money';
 import { useQuote } from '@/lib/use-market-prices';
 import { FiatBadge } from '@/components/fiat-amount';
 import { placeOrder } from './actions';
+import { pick } from '@/lib/copy';
+import { fill } from '@/lib/copy-format';
+import { COPY } from './copy';
 
 /**
  * One order form.
@@ -34,11 +37,9 @@ export function TradeForm({
   readonly idSuffix?: string;
 }) {
   const { locale } = useLocale();
-  const isEn = locale === 'en';
-
   const [state, action] = useActionState(placeOrder, IDLE);
   const quote = useQuote(stockId, { price: currentPrice, open: dayOpenPrice ?? currentPrice });
-  const label = side === 'buy' ? (isEn ? 'Buy' : '매수') : (isEn ? 'Sell' : '매도');
+  const label = pick(locale, side === 'buy' ? COPY.buy : COPY.sell);
   const fieldId = `quantity-${side}-${stockId}${idSuffix}`;
   const [quantity, setQuantity] = useState('1');
 
@@ -72,13 +73,13 @@ export function TradeForm({
       <Field className="space-y-2">
         <div className="flex items-center justify-between">
           <FieldLabel htmlFor={fieldId} className="text-xs font-semibold">
-            {isEn ? `${label} Quantity` : `${label} 수량`}
+            {pick(locale, fill(COPY.quantityLabel, { side: label }))}
           </FieldLabel>
           <span className="text-xs font-mono text-muted-foreground">
             {side === 'buy' && available !== undefined
-              ? (isEn ? `Market available: ${groupDigits(available)} sh` : `시장 유통 잔여: ${groupDigits(available)}주`)
+              ? pick(locale, fill(COPY.marketAvailable, { count: groupDigits(available) }))
               : side === 'sell' && holdingQuantity !== undefined
-              ? (isEn ? `Held: ${groupDigits(holdingQuantity)} sh` : `보유 수량: ${groupDigits(holdingQuantity)}주`)
+              ? pick(locale, fill(COPY.held, { count: groupDigits(holdingQuantity) }))
               : null}
           </span>
         </div>
@@ -96,10 +97,10 @@ export function TradeForm({
             required
             className="font-mono text-base font-bold min-h-11"
           />
-          <InputGroupAddon align="inline-end" className="text-xs font-semibold">{isEn ? 'shares' : '주'}</InputGroupAddon>
+          <InputGroupAddon align="inline-end" className="text-xs font-semibold">{pick(locale, COPY.sharesUnit)}</InputGroupAddon>
         </InputGroup>
 
-        {/* 핀테크 수량 조절 프리셋 칩 (44px 터치 가이드 준수) */}
+        {/* Quantity preset chips, each at least a 44px touch target. */}
         <div className="flex flex-wrap gap-1.5 pt-1">
           <Button
             type="button"
@@ -108,7 +109,7 @@ export function TradeForm({
             className="min-h-10 px-3 text-xs font-mono font-medium rounded-lg active:scale-95"
             onClick={() => setQuantity('1')}
           >
-            1{isEn ? 'sh' : '주'}
+            {pick(locale, COPY.oneShare)}
           </Button>
           <Button
             type="button"
@@ -138,7 +139,7 @@ export function TradeForm({
             +50
           </Button>
 
-          {/* 퍼센티지 칩 (10%, 25%, 50%, MAX) */}
+          {/* Percentage chips (10%, 25%, 50%, MAX). */}
           {maxLimit > 0 && (
             <>
               <Button
@@ -182,24 +183,24 @@ export function TradeForm({
         </div>
       </Field>
 
-      {/* 실시간 예상 결제/정산 내역 카드 */}
+      {/* Live estimate of the payment or settlement. */}
       <div className="rounded-xl border border-border/70 bg-muted/25 p-3.5 space-y-2 text-xs font-mono tabular-nums">
         <div className="flex items-center justify-between text-muted-foreground">
-          <span>{isEn ? 'Order Unit Price' : '주문 기준 단가'}</span>
+          <span>{pick(locale, COPY.unitPrice)}</span>
           <span className="font-bold text-foreground">{groupDigits(quote.price)} WLD</span>
         </div>
         <div className="flex items-center justify-between text-muted-foreground">
-          <span>{isEn ? 'Gross Total' : '주문 총액'}</span>
+          <span>{pick(locale, COPY.grossTotal)}</span>
           <span>{groupDigits(estimatedGross.toString())} WLD</span>
         </div>
         {side === 'sell' && (
           <div className="flex items-center justify-between text-muted-foreground">
-            <span>{isEn ? 'Est. Securities Tax (0.3%)' : '예상 거래세 (0.3%)'}</span>
+            <span>{pick(locale, COPY.estTax)}</span>
             <span className="text-rose-500">-{groupDigits(estimatedTax.toString())} WLD</span>
           </div>
         )}
         <div className="border-t border-border/50 pt-2 flex items-center justify-between font-bold text-sm flex-wrap gap-2">
-          <span className="text-foreground">{side === 'buy' ? (isEn ? 'Est. Payment' : '예상 결제 금액') : (isEn ? 'Est. Net Refund' : '예상 수령 금액')}</span>
+          <span className="text-foreground">{pick(locale, side === 'buy' ? COPY.estPayment : COPY.estRefund)}</span>
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className={side === 'buy' ? 'text-primary text-base' : 'text-emerald-600 dark:text-emerald-400 text-base'}>
               {groupDigits(estimatedNet.toString())} WLD
@@ -214,7 +215,7 @@ export function TradeForm({
         variant={side === 'buy' ? 'trading-buy' : 'trading-sell'}
         className="min-h-11 font-bold text-sm shadow-sm"
       >
-        {isEn ? `Confirm ${label}` : `${label} 주문 확정`}
+        {pick(locale, fill(COPY.confirmOrder, { side: label }))}
       </SubmitButton>
     </form>
   );

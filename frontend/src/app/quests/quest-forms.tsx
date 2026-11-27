@@ -4,8 +4,11 @@ import { useActionState, useState } from 'react';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { useLocale } from '@/components/locale-provider';
 import { IDLE } from '@/lib/action-state';
+import { pick } from '@/lib/copy';
 import { orderFromNpc, setNotifications } from './actions';
+import { COPY } from './copy';
 
 /**
  * The engagement loop's write surface.
@@ -20,11 +23,12 @@ import { orderFromNpc, setNotifications } from './actions';
 
 export function NpcOrderButton({ code }: { readonly code: string }) {
   const [state, action] = useActionState(orderFromNpc, IDLE);
+  const { locale } = useLocale();
   return (
     <div className="grid w-full gap-2">
       <form action={action}>
         <input type="hidden" name="npcCode" value={code} />
-        <SubmitButton>주문 받기</SubmitButton>
+        <SubmitButton>{pick(locale, COPY.takeOrder)}</SubmitButton>
       </form>
       <ActionAlert state={state} />
     </div>
@@ -47,6 +51,7 @@ export function NpcOrderButton({ code }: { readonly code: string }) {
 export function NotificationForm({ enabled }: { readonly enabled: boolean | null }) {
   const [state, action] = useActionState(setNotifications, IDLE);
   const [notify, setNotify] = useState(enabled ?? true);
+  const { locale } = useLocale();
 
   return (
     <form action={action} className="grid gap-4">
@@ -60,11 +65,11 @@ export function NotificationForm({ enabled }: { readonly enabled: boolean | null
           className="mt-1 size-5"
         />
         <Label htmlFor="engagement-notifications" className="text-sm font-normal">
-          퀘스트와 NPC 주문 알림을 받을게요.
+          {pick(locale, COPY.notifLabel)}
         </Label>
       </div>
 
-      <SubmitButton className="w-fit">알림 설정 저장</SubmitButton>
+      <SubmitButton className="w-fit">{pick(locale, COPY.notifSave)}</SubmitButton>
       <ActionAlert state={state} />
     </form>
   );

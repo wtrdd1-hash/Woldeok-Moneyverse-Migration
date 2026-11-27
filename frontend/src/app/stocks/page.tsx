@@ -8,7 +8,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { apiOrNull } from '@/lib/api';
 import { getServerLocale } from '@/lib/locale-server';
-import { localeLabel } from '@/lib/locale';
 import { getStockName } from '@/lib/i18n-dictionary';
 import { MarketPricesProvider } from '@/lib/use-market-prices';
 import dynamicImport from 'next/dynamic';
@@ -16,6 +15,9 @@ import { GlobalMacroPulseTicker } from '@/components/global-macro-pulse-ticker';
 import { normalizeStockSort, sortMarketStocks } from './stock-market-sort';
 import { canonicalUrl } from '@/lib/seo';
 import { StatRow } from '@/components/d180/primitives';
+import { pick } from '@/lib/copy';
+import { fill } from '@/lib/copy-format';
+import { COPY } from './copy';
 
 const TradeDialog = dynamicImport(
   () => import('./trade-dialog').then((mod) => mod.TradeDialog),
@@ -111,10 +113,10 @@ export default async function StocksPage({
   const decliningCount = stocks.length - advancingCount;
 
   const filterOptions = [
-    { value: 'default', label: localeLabel(locale, `전체 ${stocks.length}종목`, `All ${stocks.length}`, `全${stocks.length}銘柄`, `全部${stocks.length}只`) },
-    { value: 'change', label: localeLabel(locale, '급등·급락순', 'Top Movers', '変動率順', '涨跌幅榜') },
-    { value: 'price', label: localeLabel(locale, '가격순', 'By Price', '価格順', '价格高低') },
-    { value: 'name', label: localeLabel(locale, '이름순', 'By Name', '名前順', '名称排序') },
+    { value: 'default', label: pick(locale, fill(COPY.filterAll, { count: stocks.length })) },
+    { value: 'change', label: pick(locale, COPY.filterChange) },
+    { value: 'price', label: pick(locale, COPY.filterPrice) },
+    { value: 'name', label: pick(locale, COPY.filterName) },
   ];
 
   return (
@@ -129,11 +131,11 @@ export default async function StocksPage({
 
         {/* DESIGN180 StatRow from the exchange answer only; filler cards removed. */}
         <StatRow
-          label={localeLabel(locale, '시장 요약', 'Market summary', '市場サマリー', '市场概要')}
+          label={pick(locale, COPY.marketSummary)}
           items={[
-            { label: localeLabel(locale, '상장 종목', 'Listed', '上場銘柄', '上市标的'), value: marketData ? `${stocks.length}` : null },
-            { label: localeLabel(locale, '상승', 'Advancing', '上昇', '上涨'), value: marketData ? `${advancingCount}` : null, tone: 'rise' },
-            { label: localeLabel(locale, '하락', 'Declining', '下落', '下跌'), value: marketData ? `${decliningCount}` : null, tone: 'fall' },
+            { label: pick(locale, COPY.listed), value: marketData ? `${stocks.length}` : null },
+            { label: pick(locale, COPY.advancing), value: marketData ? `${advancingCount}` : null, tone: 'rise' },
+            { label: pick(locale, COPY.declining), value: marketData ? `${decliningCount}` : null, tone: 'fall' },
           ]}
         />
 
@@ -158,13 +160,7 @@ export default async function StocksPage({
             })}
           </div>
           <span className="text-xs font-mono text-slate-400 hidden sm:inline shrink-0">
-            {localeLabel(
-              locale,
-              `총 ${stocks.length}개 종목 상장 중`,
-              `${stocks.length} stocks listed`,
-              `計${stocks.length}銘柄上場中`,
-              `现已上市${stocks.length}只股票`,
-            )}
+            {pick(locale, fill(COPY.listedCount, { count: stocks.length }))}
           </span>
         </div>
 
@@ -172,13 +168,7 @@ export default async function StocksPage({
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
           {stocks.length === 0 ? (
             <div className="xl:col-span-2 toss-card p-10 text-center text-slate-400 text-xs bg-[#0f1422] rounded-2xl">
-              {localeLabel(
-                locale,
-                '거래 가능한 종목이 없습니다.',
-                'No tradable stocks available.',
-                '取引可能な銘柄がありません。',
-                '暂无可交易股票。',
-              )}
+              {pick(locale, COPY.noStocks)}
             </div>
           ) : (
             stocks.map((stock) => {
@@ -206,7 +196,7 @@ export default async function StocksPage({
                         </span>
                         {isHalted && (
                           <Badge variant="destructive" className="text-[9px] px-1.5 py-0 font-bold shrink-0">
-                            {localeLabel(locale, '거래정지', 'HALTED', '取引停止', '暂停交易')}
+                            {pick(locale, COPY.halted)}
                           </Badge>
                         )}
                       </div>
@@ -237,7 +227,7 @@ export default async function StocksPage({
                       name={localizedStockName}
                       currentPrice={stock.current_price}
                       side="buy"
-                      triggerLabel={localeLabel(locale, '매수', 'Buy', '買い', '买入')}
+                      triggerLabel={pick(locale, COPY.buy)}
                       triggerVariant="trading-buy"
                       triggerClassName="min-h-[44px] sm:min-h-[38px] px-4 text-xs font-bold font-mono tabular-nums active:scale-95 btn-toss rounded-xl shrink-0"
                     />
@@ -253,22 +243,10 @@ export default async function StocksPage({
           <HelpCircle className="size-4 text-emerald-400 shrink-0 mt-0.5" />
           <div className="space-y-1">
             <span className="font-bold text-slate-200">
-              {localeLabel(
-                locale,
-                '100% 안전한 가상 모의투자 안내',
-                '100% Risk-Free Trading Simulation',
-                '100%安全な仮想模擬投資ガイド',
-                '100%安全的模拟投资提示',
-              )}
+              {pick(locale, COPY.safetyTitle)}
             </span>
             <p className="leading-relaxed [word-break:keep-all]">
-              {localeLabel(
-                locale,
-                '월덕 머니버스의 모든 종목 시세와 재화(WLD)는 게임 내 알고리즘에 의해 움직이는 가상 경제이며, 실제 현금 입출금이나 실제 주식 투자 상품이 아닙니다.',
-                'All stock prices and WLD currency are algorithm-driven virtual game assets, not actual money or real financial securities.',
-                'ウォルドク・マネーバースのすべての銘柄相場と通貨(WLD)はゲーム内アルゴリズムにより動作する仮想経済であり、実際の現金や実在の株式商品ではありません。',
-                '月德Moneyverse内所有标的行情与WLD货币均为由算法驱动的虚拟游戏资产，非真实现金或真实证券。',
-              )}
+              {pick(locale, COPY.safetyBody)}
             </p>
           </div>
         </div>

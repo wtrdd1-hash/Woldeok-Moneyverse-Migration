@@ -3,16 +3,15 @@
 import { Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLocale } from '@/components/locale-provider';
+import { pick } from '@/lib/copy';
+import type { Locale } from '@/lib/locale';
+import { COPY } from './copy';
 import { isCanonicalWld, pocketBreakdown, type TransactionView } from './sides';
 
-const headersEn = [
-  'Date', 'Transaction ID', 'Direction', 'Description', 'Amount (WLD)',
-  'Cash delta (WLD)', 'Bank delta (WLD)',
-];
-const headersKo = [
-  '일시', '거래ID', '구분', '내역', '금액(WLD)',
-  '현금 증감(WLD)', '은행 증감(WLD)',
-];
+const HEADERS = [
+  COPY.csvDate, COPY.csvTransactionId, COPY.csvDirection, COPY.csvDescription, COPY.csvAmount,
+  COPY.csvCashDelta, COPY.csvBankDelta,
+] as const;
 
 /** CSV is a spreadsheet input, not a trusted data channel. */
 function csvCell(value: string): string {
@@ -34,17 +33,16 @@ function signedAmount(value: string): string {
  */
 export function ledgerCsvContent(
   transactions: readonly TransactionView[],
-  isEn: boolean,
+  locale: Locale,
 ): string {
-  const headers = isEn ? headersEn : headersKo;
+  const headers = HEADERS.map((copy) => pick(locale, copy));
   const rows = transactions.map((t) => {
     const pockets = pocketBreakdown(t);
     const timestamp = new Date(t.occurredAt);
-    const direction = t.direction === 'in'
-      ? (isEn ? 'Deposit' : '입금')
-      : t.direction === 'out'
-        ? (isEn ? 'Withdraw' : '출금')
-        : (isEn ? 'Transfer' : '이체');
+    const direction = pick(
+      locale,
+      t.direction === 'in' ? COPY.csvDeposit : t.direction === 'out' ? COPY.csvWithdraw : COPY.csvTransfer,
+    );
     return [
       Number.isNaN(timestamp.valueOf()) ? 'Unavailable' : timestamp.toISOString(),
       t.transactionId,
@@ -64,11 +62,10 @@ export function ExportLedgerCsvButton({
   readonly transactions: readonly TransactionView[];
 }) {
   const { locale } = useLocale();
-  const isEn = locale === 'en';
 
   const exportCsv = () => {
     if (transactions.length === 0) return;
-    const csvContent = ledgerCsvContent(transactions, isEn);
+    const csvContent = ledgerCsvContent(transactions, locale);
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -90,7 +87,7 @@ export function ExportLedgerCsvButton({
       className="min-h-9 flex items-center gap-1.5 text-xs"
     >
       <Download className="size-3.5" aria-hidden />
-      <span>{isEn ? 'Export recent CSV' : '최근 거래 CSV 다운로드'}</span>
+      <span>{pick(locale, COPY.exportCsv)}</span>
     </Button>
   );
 }

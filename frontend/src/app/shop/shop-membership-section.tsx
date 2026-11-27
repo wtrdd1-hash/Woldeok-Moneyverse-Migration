@@ -2,22 +2,24 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { MembershipTierCard } from '@/components/membership-tier-card';
+import { MembershipTierCard, type MembershipPass } from '@/components/membership-tier-card';
 import { subscribePlusMembership, cancelPlusMembership } from './actions';
 
 interface ShopMembershipSectionProps {
   readonly userBalance: string | null;
   readonly isPlusMember: boolean;
+  readonly pass: MembershipPass | null;
 }
 
 export function ShopMembershipSection({
   userBalance,
   isPlusMember,
+  pass,
 }: ShopMembershipSectionProps) {
   const router = useRouter();
 
-  const handleSubscribe = async (): Promise<boolean> => {
-    const res = await subscribePlusMembership();
+  const handleSubscribe = async (catalogId: string): Promise<boolean> => {
+    const res = await subscribePlusMembership(catalogId);
     if (!res.success) {
       throw new Error(res.message);
     }
@@ -26,10 +28,9 @@ export function ShopMembershipSection({
   };
 
   const handleCancel = async (): Promise<boolean> => {
+    // The card explains an unconfirmed cancellation in the member's locale.
     const res = await cancelPlusMembership();
-    if (!res.success) {
-      throw new Error(res.message);
-    }
+    if (!res.success) return false;
     router.refresh();
     return true;
   };
@@ -38,6 +39,7 @@ export function ShopMembershipSection({
     <MembershipTierCard
       userBalance={userBalance}
       isPlusMember={isPlusMember}
+      pass={pass}
       onSubscribe={handleSubscribe}
       onCancel={handleCancel}
     />
