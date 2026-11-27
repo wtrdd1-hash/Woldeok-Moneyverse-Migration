@@ -21,7 +21,7 @@ re-introduces an independent possession factor in a forward-only migration, with
   AES-256-GCM under a dedicated environment key; the schema stores ciphertext and key id only.
 - Replay prevention: a time step, once spent, can never be spent again for that credential.
 - Rate limiting: five consecutive failures lock the factor for fifteen minutes; plus a
-  per-session attempt ceiling.
+  per-session failed-attempt ceiling (successes are not counted; see revision).
 - Binding: a successful verification produces a proof bound to **actor + session + operation
   scope**, valid for five minutes, invalidated when the session is revoked, expires or logs out.
 - Defined sensitive actions require a valid proof for their scope when the actor has a confirmed
@@ -163,3 +163,6 @@ secrets, at the cost of an operator step.
   fix is a separate verifier LOGIN principal, which needs owner provisioning.
 - Rollout order: migration 366 before the application, or the fail-closed requirement lookup
   refuses scoped writes for every administrator.
+- Re-review: the session ceiling counts failures only, by design (a correct code means the factor
+  is already held); revoke now locks the credential row before proofs, the same order as
+  confirm/verify, so concurrent confirmation and revocation cannot deadlock.

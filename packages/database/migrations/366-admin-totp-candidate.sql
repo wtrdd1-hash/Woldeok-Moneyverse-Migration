@@ -130,9 +130,10 @@ AS $$
   SELECT p_actor IS NOT NULL AND EXISTS (SELECT 1 FROM public.admin_current_roles(p_actor))
 $$;
 
--- Serialises every attempt from one session and refuses the twenty-first in fifteen minutes. Taken
--- before any count so two concurrent attempts cannot both observe nineteen; applied to successes
--- as well as failures so a correct guess after the ceiling is refused too.
+-- Failed-attempt ceiling per session: after twenty failures in fifteen minutes the session may not
+-- attempt again, correct code or not. The lock is taken before the count so concurrent attempts
+-- cannot both observe nineteen. Successes are deliberately not counted: whoever presents a correct
+-- code already holds the factor, and counting them would only throttle a legitimate administrator.
 CREATE OR REPLACE FUNCTION public.admin_totp_session_gate(p_session_id uuid)
 RETURNS void
 LANGUAGE plpgsql
@@ -377,7 +378,7 @@ BEGIN
 END;
 $$;
 
--- A wrong code. Five consecutive failures lock the factor for fifteen minutes; twenty attempts in
+-- A wrong code. Five consecutive failures lock the factor for fifteen minutes; twenty failures in
 -- fifteen minutes from one session refuse further attempts from that session (session gate).
 CREATE OR REPLACE FUNCTION public.admin_totp_record_failure(p_actor uuid, p_session_id uuid)
 RETURNS TABLE(failed_attempts integer, locked_until timestamptz)
@@ -456,9 +457,12 @@ BEGIN
     END IF;
   END IF;
 
+  -- Credential row first, then proofs: the same order confirm and verify use, so a concurrent
+  -- confirmation and revocation queue on the row instead of deadlocking.
+  PERFORM 1 FROM public.admin_totp_credentials AS c WHERE c.user_id = p_target FOR UPDATE;
+  v_found := FOUND;
   DELETE FROM public.admin_totp_proofs AS p WHERE p.user_id = p_target;
   DELETE FROM public.admin_totp_credentials AS c WHERE c.user_id = p_target;
-  v_found := FOUND;
   IF v_found THEN
     PERFORM public.admin_append_audit_event(p_actor, 'admin.second_factor.revoked', p_target, NULL,
       pg_catalog.jsonb_build_object('targetUserId', p_target));
