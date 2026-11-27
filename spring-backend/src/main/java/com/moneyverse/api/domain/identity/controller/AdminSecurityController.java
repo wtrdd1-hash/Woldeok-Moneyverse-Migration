@@ -101,8 +101,14 @@ public class AdminSecurityController {
         }
 
         String rawToken = adminAuthService.extractSessionToken(request);
-        Optional<UUID> uidOpt = adminAuthService.resolveAdminUserId(request);
-        UUID userId = uidOpt.orElse(UUID.fromString("850e7583-6589-4371-bffd-e76c3e9f8d31"));
+        // Bind the console session to the verified administrator or issue nothing. It used to fall
+        // back to a fixed user id when this second lookup came back empty (a session revoked
+        // between the two reads, a transient database error).
+        Optional<UUID> verified = adminAuthService.resolveVerifiedAdminActor(request);
+        if (verified.isEmpty()) {
+            return adminAuthService.unauthorizedResponse();
+        }
+        UUID userId = verified.get();
 
         // Generate rotated console token
         String newToken = UserAuthService.generateRandomToken();

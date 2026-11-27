@@ -305,6 +305,7 @@ class NativeSessionCsrfRegressionTest {
         var admin = mock(AdminAuthService.class);
         when(admin.isAuthorizedAdmin(any())).thenReturn(true);
         when(admin.resolveAdminUserId(any())).thenReturn(java.util.Optional.of(OWNER));
+        when(admin.resolveVerifiedAdminActor(any())).thenReturn(java.util.Optional.of(OWNER));
         when(admin.extractSessionToken(any())).thenReturn(SESSION);
         var controller = new AdminSecurityController(admin, mock(JdbcTemplate.class));
         var response = new MockHttpServletResponse();
@@ -463,6 +464,7 @@ class NativeSessionCsrfRegressionTest {
         var admin = mock(AdminAuthService.class);
         when(admin.isAuthorizedAdmin(any())).thenReturn(true);
         when(admin.resolveAdminUserId(any())).thenReturn(java.util.Optional.of(OWNER));
+        when(admin.resolveVerifiedAdminActor(any())).thenReturn(java.util.Optional.of(OWNER));
         var response = new MockHttpServletResponse();
         new AdminSecurityController(admin, mock(JdbcTemplate.class)).openConsoleSession(new MockHttpServletRequest(), response);
         assertTrue(response.getHeaders("Set-Cookie").stream()
