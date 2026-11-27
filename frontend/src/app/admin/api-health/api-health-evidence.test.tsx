@@ -28,4 +28,13 @@ describe('API health dashboard evidence', () => {
     expect(html).not.toContain('100%');
     expect(html).toContain('Not measured');
   });
+
+  it('renders an unmeasured CPU load as unavailable instead of crashing or showing 0', () => {
+    const withTelemetry = { ...unknownResponse, systemTelemetry: { cpuLoad1m: null, cpuCores: 4, totalMemMb: 512,
+      freeMemMb: 256, heapUsedMb: 256, rssMb: null, activeDbConnections: null, dbCacheHitRatio: null } } as unknown as ApiHealthResponse;
+    const html = renderToStaticMarkup(<ApiHealthDashboard initialData={withTelemetry} isEn={true} />);
+    expect(html).toContain('4 Cores');
+    expect(html).not.toContain('0.00');
+    expect(html).not.toContain('(0%)');
+  });
 });

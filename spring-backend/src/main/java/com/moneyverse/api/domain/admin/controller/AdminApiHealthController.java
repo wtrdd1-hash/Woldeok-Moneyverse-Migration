@@ -52,17 +52,17 @@ public class AdminApiHealthController {
 
         OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
         Runtime runtime = Runtime.getRuntime();
-        // A negative value means the platform did not measure it; 0 is shown rather than a made-up load.
-        double cpuLoad = Math.max(0.0, osBean.getCpuLoad());
+        // A negative value means the platform did not measure it: report null, not 0 or a made-up load.
+        double cpuLoad = osBean.getCpuLoad();
         long heapUsedMb = (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024);
 
         Map<String, Object> sysTelemetry = new LinkedHashMap<>();
-        sysTelemetry.put("cpuLoad1m", Math.round(cpuLoad * 100.0) / 100.0);
+        sysTelemetry.put("cpuLoad1m", cpuLoad < 0 ? null : Math.round(cpuLoad * 100.0) / 100.0);
         sysTelemetry.put("cpuCores", runtime.availableProcessors());
         sysTelemetry.put("totalMemMb", runtime.totalMemory() / (1024 * 1024));
         sysTelemetry.put("freeMemMb", runtime.freeMemory() / (1024 * 1024));
         sysTelemetry.put("heapUsedMb", heapUsedMb);
-        sysTelemetry.put("rssMb", residentSetMb().orElse(heapUsedMb));
+        sysTelemetry.put("rssMb", residentSetMb().orElse(null));
         sysTelemetry.put("activeDbConnections", null);
         sysTelemetry.put("dbCacheHitRatio", null);
 
@@ -130,7 +130,7 @@ public class AdminApiHealthController {
                 }
             }
         } catch (Exception ignored) {
-            // Not Linux or not readable: fall back to the measured heap figure.
+            // Not Linux or not readable: unmeasured (null), never a substitute figure.
         }
         return Optional.empty();
     }
