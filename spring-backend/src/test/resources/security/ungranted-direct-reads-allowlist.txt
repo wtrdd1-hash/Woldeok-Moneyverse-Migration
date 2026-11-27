@@ -12,9 +12,6 @@ src/main/java/com/moneyverse/api/domain/admin/parity/AdminParityReadsController.
 src/main/java/com/moneyverse/api/domain/admin/parity/AdminParityReadsController.java v_economy_summary
 src/main/java/com/moneyverse/api/domain/bond/controller/AdminBondController.java treasury_bond_coupon_logs
 src/main/java/com/moneyverse/api/domain/bond/controller/AdminBondController.java treasury_bonds
-src/main/java/com/moneyverse/api/domain/bond/service/BondService.java treasury_bond_holdings
-src/main/java/com/moneyverse/api/domain/bond/service/BondService.java treasury_bond_repo_loans
-src/main/java/com/moneyverse/api/domain/bond/service/BondService.java treasury_bonds
 src/main/java/com/moneyverse/api/domain/kdic/service/KdicService.java deposit_insurance_funds
 src/main/java/com/moneyverse/api/domain/kdic/service/KdicService.java deposit_insurance_payouts
 src/main/java/com/moneyverse/api/domain/kdic/service/KdicService.java deposit_insurance_premiums
