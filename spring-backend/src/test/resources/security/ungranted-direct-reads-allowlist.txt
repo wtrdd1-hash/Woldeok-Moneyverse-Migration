@@ -1,10 +1,8 @@
 # Remaining direct reads of ungranted relations (file relation). This list may only shrink:
 # move the read behind an actor-bound SECURITY DEFINER function and delete the line.
-src/main/java/com/moneyverse/api/domain/admin/controller/AdminBlogController.java blog_verified_articles
 src/main/java/com/moneyverse/api/domain/admin/controller/AdminStocksController.java virtual_stocks
 src/main/java/com/moneyverse/api/domain/admin/controller/AdminUsersController.java virtual_stock_positions
 src/main/java/com/moneyverse/api/domain/admin/controller/AdminUsersController.java virtual_stocks
-src/main/java/com/moneyverse/api/domain/admin/controller/AuditController.java audit_logs
 src/main/java/com/moneyverse/api/domain/admin/parity/AdminParityReadsController.java private_enterprises
 src/main/java/com/moneyverse/api/domain/admin/parity/AdminParityReadsController.java state_enterprises
 src/main/java/com/moneyverse/api/domain/admin/parity/AdminParityReadsController.java v_daily_economy_stats
