@@ -48,7 +48,7 @@
 - **실서버 라이브 검증 결과**:
   ```bash
   curl -s -o /dev/null -w "HTTP Status: %{http_code}\n" \
-    -H "x-internal-token: 8e5f2a1b9c3d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f" \
+    -H "x-internal-token: <redacted-compromised-internal-token>" \
     https://easy-scraping.com/api/v1/account/me
   # 출력: HTTP Status: 401 (관리자 세션 날조 위조 완전 차단 확인)
   ```
