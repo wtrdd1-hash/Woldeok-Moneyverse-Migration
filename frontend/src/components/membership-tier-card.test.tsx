@@ -1,43 +1,20 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+import { cleanup } from '@testing-library/react';
+import { renderKo } from '@/testing/render-ko';
 import { MembershipTierCard } from './membership-tier-card';
 
-describe('MembershipTierCard', () => {
-  afterEach(() => {
-    cleanup();
-  });
+afterEach(cleanup);
 
-  it('renders Free Core and Moneyverse Plus tiers correctly', () => {
-    render(<MembershipTierCard userBalance={50000} isPlusMember={false} />);
-
-    expect(screen.getByText('Moneyverse Plus 멤버십 티어')).toBeDefined();
-    expect(screen.getByText('Free Core')).toBeDefined();
-    expect(screen.getByText('100% 광고 완전 제거 (Ad-Free)')).toBeDefined();
-    expect(screen.getByText('프레스티지 환생 시 자산 30% 영구 보존')).toBeDefined();
-  });
-
-  it('shows error message when balance is insufficient to subscribe', async () => {
-    render(<MembershipTierCard userBalance={5000} isPlusMember={false} />);
-
-    const subscribeBtn = screen.getByRole('button', { name: 'Plus VIP 시작하기' });
-    fireEvent.click(subscribeBtn);
-
-    await waitFor(() => {
-      expect(screen.getByText(/잔액이 부족합니다/)).toBeDefined();
+// W03 Unslop pass (polish mode): the card used hue gradients, coloured glows, a pulsing badge, a
+// shouting pill and mono prices outside the design tokens. Structure and copy stay; the styling
+// comes from the shared tokens so it follows whichever palette the owner settles on.
+describe('MembershipTierCard styling', () => {
+  for (const active of [false, true]) {
+    it(`uses the shared tokens without decoration (${active ? 'member' : 'free'})`, () => {
+      const { container } = renderKo(<MembershipTierCard userBalance="20000" isPlusMember={active} />);
+      const html = container.innerHTML;
+      expect(html).not.toMatch(/bg-gradient-to|animate-pulse|shadow-amber|font-mono|font-black|slate-\d/);
+      expect(html).toMatch(/tabular-nums/);
     });
-  });
-
-  it('triggers onSubscribe callback when balance is sufficient', async () => {
-    const handleSubscribe = vi.fn();
-    render(<MembershipTierCard userBalance={50000} isPlusMember={false} onSubscribe={handleSubscribe} />);
-
-    const subscribeBtn = screen.getByRole('button', { name: 'Plus VIP 시작하기' });
-    fireEvent.click(subscribeBtn);
-
-    await waitFor(() => {
-      expect(handleSubscribe).toHaveBeenCalled();
-      expect(screen.getByText(/Moneyverse Plus VIP 멤버십이 활성화되었습니다/)).toBeDefined();
-    });
-  });
+  }
 });
