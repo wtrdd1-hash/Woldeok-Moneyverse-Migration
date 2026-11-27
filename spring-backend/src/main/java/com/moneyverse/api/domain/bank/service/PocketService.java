@@ -92,16 +92,43 @@ public class PocketService {
     }
 
     @Transactional
-    public Map<String, Object> customizePocket(String userIdStr, String pocketIdStr, String themeColor, String iconCode) {
+    /**
+     * Pocket appearance. bank_saving_pockets is not writable by the application role, and the old
+     * UPDATE reported success even when it matched no row. bank_customize_pocket is journaled (it
+     * charges its fee to the sink in the same transaction), locks the idempotency key before the
+     * replay lookup and refuses another user's receipt, so the client's key is required and the
+     * receipt is the only success.
+     */
+    public Map<String, Object> customizePocket(String userIdStr, String pocketIdStr, String themeColor, String iconCode, String idempotencyKey) {
         UUID userId = UUID.fromString(userIdStr);
-        UUID pocketId = UUID.fromString(pocketIdStr);
-
-        jdbcTemplate.update(
-            "UPDATE bank_saving_pockets SET theme_color = ?, icon_code = ?, updated_at = NOW() WHERE id = ? AND user_id = ?",
-            themeColor, iconCode, pocketId, userId
-        );
-
-        return Map.of("success", true, "pocketId", pocketId.toString(), "themeColor", themeColor, "iconCode", iconCode);
+        UUID pocketId;
+        UUID key;
+        try {
+            pocketId = UUID.fromString(pocketIdStr);
+            key = UUID.fromString(idempotencyKey);
+        } catch (RuntimeException invalid) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, "pocket id and idempotency key are required");
+        }
+        try {
+            List<Map<String, Object>> receipt = jdbcTemplate.queryForList(
+                    "SELECT pocket_id::text AS pocket_id, theme_color, icon_code, cost_wld::text AS cost_wld, remaining_cash::text AS remaining_cash "
+                            + "FROM public.bank_customize_pocket(?::uuid, ?::uuid, ?::uuid, ?, ?)",
+                    key, userId, pocketId, themeColor, iconCode);
+            if (receipt.size() != 1) {
+                throw new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "POCKET_CUSTOMIZE_RECEIPT_MISSING");
+            }
+            return receipt.get(0);
+        } catch (org.springframework.dao.DataAccessException e) {
+            String state = e.getMostSpecificCause() instanceof java.sql.SQLException sql ? sql.getSQLState() : null;
+            org.springframework.http.HttpStatus status = switch (state == null ? "" : state) {
+                case "22023", "23505", "55000" -> org.springframework.http.HttpStatus.CONFLICT;
+                case "28000" -> org.springframework.http.HttpStatus.BAD_REQUEST;
+                default -> org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
+            };
+            throw new org.springframework.web.server.ResponseStatusException(status, "POCKET_CUSTOMIZE_REFUSED");
+        }
     }
 
     @Transactional
