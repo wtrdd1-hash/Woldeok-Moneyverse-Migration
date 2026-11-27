@@ -22,16 +22,18 @@ function readCachedViewer(): Viewer | null {
 }
 
 /**
- * The viewer, resolved after hydration with instant localStorage fallback
- * so hard refreshes (F5/Ctrl+F5) immediately preserve the signed-in state
- * without any UI flicker or loss of profile information.
+ * The viewer, resolved after hydration with a localStorage fallback applied in
+ * the mount effect. The first render must equal the server HTML (no viewer):
+ * reading the cache in the state initializer made cached public pages render
+ * signed-in markup during hydration (React #418), and React then re-rendered
+ * the whole root on the client, which costs more than one frame of guest UI.
  */
 export function useViewer(): Viewer | null {
-  const [viewer, setViewer] = useState<Viewer | null>(readCachedViewer);
+  const [viewer, setViewer] = useState<Viewer | null>(null);
   const pathname = usePathname();
 
   useEffect(() => {
-    // If state was empty on initial SSR pass, hydrate immediately from local cache
+    // Apply the cached viewer right after mount, before the network answer.
     const initialCache = readCachedViewer();
     if (initialCache && (!viewer || !viewer.signedIn)) {
       setViewer(initialCache);
