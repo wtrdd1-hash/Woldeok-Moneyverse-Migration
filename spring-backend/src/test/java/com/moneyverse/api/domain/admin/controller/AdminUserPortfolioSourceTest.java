@@ -43,6 +43,22 @@ class AdminUserPortfolioSourceTest {
         verify(jdbc, never()).query(contains("virtual_stock"), any(org.springframework.jdbc.core.RowMapper.class), any(Object[].class));
     }
 
+    // Independent review: the function's jsonb carries money as JSON numbers, which a JavaScript
+    // client rounds beyond 2^53. Integers leave as exact integer strings (basis points stay numbers).
+    @Test void moneyLeavesAsExactIntegerStrings() {
+        UUID actor = UUID.randomUUID();
+        UUID target = UUID.randomUUID();
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        when(jdbc.queryForObject(anyString(), eq(String.class), eq(actor), eq(target)))
+                .thenReturn("{\"userId\":\"" + target + "\",\"cashBalance\":9007199254740993,\"stocks\":[{\"evalAmount\":123456789012345678901234567890}],\"bonds\":[{\"yieldBps\":350}]}");
+        var response = new AdminUsersController(mock(AdminGovernanceService.class), admin(actor), jdbc)
+                .getUserPortfolio(new MockHttpServletRequest(), target.toString());
+        Map<?, ?> portfolio = (Map<?, ?>) ((Map<?, ?>) response.getBody()).get("portfolio");
+        assertEquals("9007199254740993", portfolio.get("cashBalance"));
+        assertEquals("123456789012345678901234567890", ((Map<?, ?>) ((java.util.List<?>) portfolio.get("stocks")).get(0)).get("evalAmount"));
+        assertEquals(350, ((Number) ((Map<?, ?>) ((java.util.List<?>) portfolio.get("bonds")).get(0)).get("yieldBps")).intValue());
+    }
+
     @Test void databaseFailureIsUnavailableNotEmpty() {
         UUID actor = UUID.randomUUID();
         JdbcTemplate jdbc = mock(JdbcTemplate.class);

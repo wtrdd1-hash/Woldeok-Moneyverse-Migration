@@ -24,7 +24,29 @@ public class AdminUsersController {
     private final AdminGovernanceService governanceService;
     private final AdminAuthService adminAuthService;
     private final JdbcTemplate jdbcTemplate;
-    private static final com.fasterxml.jackson.databind.ObjectMapper MAPPER = new com.fasterxml.jackson.databind.ObjectMapper();
+    private static final com.fasterxml.jackson.databind.ObjectMapper MAPPER = new com.fasterxml.jackson.databind.ObjectMapper()
+            .enable(com.fasterxml.jackson.databind.DeserializationFeature.USE_BIG_INTEGER_FOR_INTS)
+            .enable(com.fasterxml.jackson.databind.DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
+
+    private static Object exactIntegers(com.fasterxml.jackson.databind.JsonNode node, String key) {
+        if (node == null || node.isNull()) return null;
+        if (node.isObject()) {
+            Map<String, Object> out = new LinkedHashMap<>();
+            node.fields().forEachRemaining(e -> out.put(e.getKey(), exactIntegers(e.getValue(), e.getKey())));
+            return out;
+        }
+        if (node.isArray()) {
+            List<Object> out = new ArrayList<>();
+            node.forEach(item -> out.add(exactIntegers(item, key)));
+            return out;
+        }
+        if (node.isIntegralNumber()) {
+            return key != null && key.endsWith("Bps") ? node.numberValue() : node.bigIntegerValue().toString();
+        }
+        if (node.isNumber()) return node.decimalValue().toPlainString();
+        if (node.isBoolean()) return node.booleanValue();
+        return node.asText();
+    }
 
     public AdminUsersController(AdminGovernanceService governanceService, AdminAuthService adminAuthService, JdbcTemplate jdbcTemplate) {
         this.governanceService = governanceService;
@@ -82,7 +104,11 @@ public class AdminUsersController {
         try {
             String json = jdbcTemplate.queryForObject(
                     "SELECT public.admin_get_user_portfolio(?::uuid, ?::uuid)::text", String.class, actor, uid);
-            Map<String, Object> portfolio = MAPPER.readValue(json, new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
+            // Money in the jsonb arrives as JSON numbers; a JavaScript client rounds beyond 2^53.
+            // Every integer leaves as an exact integer string; basis-point fields stay numbers.
+            com.fasterxml.jackson.databind.JsonNode tree = MAPPER.readTree(json);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> portfolio = (Map<String, Object>) exactIntegers(tree, null);
             Map<String, Object> body = new LinkedHashMap<>();
             body.put("ok", true);
             body.put("portfolio", portfolio);
