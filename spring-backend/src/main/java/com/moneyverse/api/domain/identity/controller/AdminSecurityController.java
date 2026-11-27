@@ -121,21 +121,22 @@ public class AdminSecurityController {
         Instant expiresAt = now.plus(30, ChronoUnit.DAYS);
         Instant idleExpiresAt = now.plus(1, ChronoUnit.DAYS);
 
-        // Rotate: read the current session, insert the rotated one, then revoke the old one. The
-        // rotated session inherits the re-verification time (null when there was none): it used to
-        // stamp reauthenticated_at = now, so opening the console counted as a password check and
-        // any step-up would pass without one. A failed rotation issues no cookie.
+        // Rotate. The old session is revoked and its re-verification time read in one conditional
+        // statement, so a session already revoked or rotated by a concurrent request yields nothing
+        // (independent review). The rotated session inherits that time (null when there was none)
+        // and never mints one. If the insert then fails the old session stays revoked and the
+        // administrator signs in again: fail closed, and no cookie is issued.
         UUID newSessionId = UUID.randomUUID();
         try {
             String oldTokenHash = rawToken == null ? null : AdminAuthService.sha256(rawToken);
-            List<Map<String, Object>> current = oldTokenHash == null ? List.of() : jdbcTemplate.queryForList(
-                    "SELECT id, reauthenticated_at FROM auth_sessions WHERE token_hash = ? AND user_id = ? "
-                            + "AND revoked_at IS NULL AND expires_at > NOW()",
+            List<Map<String, Object>> revoked = oldTokenHash == null ? List.of() : jdbcTemplate.queryForList(
+                    "UPDATE auth_sessions SET revoked_at = NOW() WHERE token_hash = ? AND user_id = ? "
+                            + "AND revoked_at IS NULL AND expires_at > NOW() RETURNING reauthenticated_at",
                     oldTokenHash, userId);
-            if (current.size() != 1) {
+            if (revoked.size() != 1) {
                 return adminAuthService.unauthorizedResponse();
             }
-            Object inherited = current.get(0).get("reauthenticated_at");
+            Object inherited = revoked.get(0).get("reauthenticated_at");
             String insertSql = """
                 INSERT INTO auth_sessions (id, token_hash, csrf_hash, user_id, expires_at, created_at,
                                            admin_opened_at, admin_last_seen_at, prelogin_age_confirmed, reauthenticated_at)
@@ -144,9 +145,6 @@ public class AdminSecurityController {
             jdbcTemplate.update(insertSql, newSessionId, newTokenHash, newCsrfHash, userId,
                     java.sql.Timestamp.from(expiresAt), java.sql.Timestamp.from(now),
                     java.sql.Timestamp.from(now), java.sql.Timestamp.from(now), inherited);
-            jdbcTemplate.update(
-                    "UPDATE auth_sessions SET revoked_at = NOW() WHERE token_hash = ? AND revoked_at IS NULL",
-                    oldTokenHash);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).header("Cache-Control", "no-store")
                     .body(Map.of("ok", false, "code", "CONSOLE_SESSION_UNAVAILABLE"));
