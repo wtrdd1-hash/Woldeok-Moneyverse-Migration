@@ -570,6 +570,7 @@ class NativeSessionCsrfRegressionTest {
         row.put("id", java.util.UUID.randomUUID());
         row.put("reauthenticated_at", null);
         when(jdbc.queryForList(contains("RETURNING reauthenticated_at"), any(String.class), any(java.util.UUID.class))).thenReturn(java.util.List.of(row));
+        when(jdbc.update(contains("INSERT INTO auth_sessions"), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(1);
         return jdbc;
     }
 }

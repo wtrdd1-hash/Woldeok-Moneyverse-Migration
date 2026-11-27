@@ -142,9 +142,12 @@ public class AdminSecurityController {
                                            admin_opened_at, admin_last_seen_at, prelogin_age_confirmed, reauthenticated_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, true, ?)
                 """;
-            jdbcTemplate.update(insertSql, newSessionId, newTokenHash, newCsrfHash, userId,
+            int inserted = jdbcTemplate.update(insertSql, newSessionId, newTokenHash, newCsrfHash, userId,
                     java.sql.Timestamp.from(expiresAt), java.sql.Timestamp.from(now),
                     java.sql.Timestamp.from(now), java.sql.Timestamp.from(now), inherited);
+            if (inserted != 1) {
+                throw new IllegalStateException("rotated session row not written");
+            }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).header("Cache-Control", "no-store")
                     .body(Map.of("ok", false, "code", "CONSOLE_SESSION_UNAVAILABLE"));
