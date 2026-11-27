@@ -23,7 +23,15 @@ class AdminTotpScopesTest {
             "POST,/api/admin/controls,security.settings",
             "PUT,/api/admin/controls/feature-switches/economy_auto_policy,security.settings",
             "POST,/api/admin/operations/maintenance,security.settings",
-            "POST,/api/admin/backups/trigger,backup.restore"
+            "POST,/api/admin/backups/trigger,backup.restore",
+            // Controllers also answer on /admin/** without /api (independent review 2026-11-27).
+            "POST,/admin/backups/trigger,backup.restore",
+            "POST,/admin/operations/maintenance,security.settings",
+            "POST,/admin/controls,security.settings",
+            "POST,/admin/security/abuse/suspend-permanent,member.lifecycle",
+            "POST,/admin/fx/intervene,economy.treasury",
+            "POST,/admin/enterprises/x/privatize,economy.treasury",
+            "POST,/admin/treasury/mint-topup,economy.treasury"
     })
     void mapsHighRiskWrites(String method, String path, String scope) {
         assertEquals(Optional.of(scope), AdminTotpScopes.scopeFor(method, path));

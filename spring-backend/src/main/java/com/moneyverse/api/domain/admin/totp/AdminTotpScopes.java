@@ -41,7 +41,11 @@ public final class AdminTotpScopes {
         if (method == null || normalisedPath == null) return Optional.empty();
         String m = method.toUpperCase(Locale.ROOT);
         if (m.equals("GET") || m.equals("HEAD") || m.equals("OPTIONS")) return Optional.empty();
-        String path = normalisedPath.startsWith("/api/v1/") ? "/api/" + normalisedPath.substring("/api/v1/".length()) : normalisedPath;
+        // Three spellings reach the same controllers: /api/v1/admin, /api/admin and the older
+        // /admin JSON aliases. All are judged as /api/admin, or an alias would skip the factor.
+        String path = normalisedPath;
+        if (path.startsWith("/api/v1/")) path = "/api/" + path.substring("/api/v1/".length());
+        else if (path.startsWith("/admin/") || path.equals("/admin")) path = "/api" + path;
         for (String exempt : EXEMPT) if (under(path, exempt)) return Optional.empty();
         for (var entry : PREFIXES) if (under(path, entry.getKey())) return Optional.of(entry.getValue());
         return Optional.empty();
