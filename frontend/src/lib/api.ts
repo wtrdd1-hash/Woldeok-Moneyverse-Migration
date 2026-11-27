@@ -160,15 +160,14 @@ export async function api<T>(path: string, request: ApiRequest = {}): Promise<T>
   const userAgent = incoming.get('user-agent');
   if (userAgent) requestHeaders['user-agent'] = userAgent;
 
-  // The browser's own fetch context, unchanged. The API reveals a session's CSRF proof only to a
-  // same-origin browser context (Sec-Fetch-Site same-origin, or an Origin equal to APP_BASE_URL);
-  // this server-side fetch carries neither on its own, so without them mutate() always sent an
-  // empty token and every CSRF-protected write through the web answered 403. Relayed, never
-  // invented: a request whose browser sent neither still gets nothing.
-  const browserOrigin = incoming.get('origin');
-  if (browserOrigin) requestHeaders.origin = browserOrigin;
-  const fetchSite = incoming.get('sec-fetch-site');
-  if (fetchSite) requestHeaders['sec-fetch-site'] = fetchSite;
+  // The browser's same-origin signal. The API reveals a session's CSRF proof only to a same-origin
+  // browser context, and this server-side fetch carries none on its own, so without it mutate()
+  // always sent an empty token and every CSRF-protected write through the web answered 403.
+  // Only 'same-origin' is relayed: the API treats any other explicit context (a typed URL sends
+  // 'none') as an untrusted browser and withholds the session, and the Origin is not relayed
+  // because the API compares it with APP_BASE_URL, which differs behind a proxy. A request whose
+  // browser said nothing still gets nothing.
+  if (incoming.get('sec-fetch-site') === 'same-origin') requestHeaders['sec-fetch-site'] = 'same-origin';
 
   const forwardedHost = incoming.get('x-forwarded-host') ?? incoming.get('host');
   if (forwardedHost) {
