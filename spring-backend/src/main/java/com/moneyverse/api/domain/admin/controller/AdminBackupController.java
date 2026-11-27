@@ -26,10 +26,8 @@ public class AdminBackupController {
     }
 
     private void verifyAdmin(HttpServletRequest request) {
-        String internalToken = request.getHeader("x-internal-token");
-        if (internalToken != null && !internalToken.trim().isEmpty()) {
-            return;
-        }
+        // Security 2026-11-26: any non-empty x-internal-token header skipped this check (the value was
+        // never compared). Only a verified administrator session passes.
         Optional<UserAuthService.SessionInfo> sessionOpt = userAuthService.resolveSession(request);
         if (sessionOpt.isEmpty() || !sessionOpt.get().isSignedIn()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");

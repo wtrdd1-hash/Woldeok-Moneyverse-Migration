@@ -22,6 +22,7 @@ import java.util.*;
 @Tag(name = "Member Photo Submissions", description = "일반 회원의 갤러리 사진 제출, 철회 및 내 제출 목록 API")
 @RestController
 public class MemberPhotoController {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MemberPhotoController.class);
 
     private final ImageStorageService storageService;
     private final UserAuthService authService;
@@ -83,7 +84,8 @@ public class MemberPhotoController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+            log.warn("[MemberPhoto] upload failed: {}", e.getClass().getSimpleName());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "PHOTO_UPLOAD_FAILED"));
         }
     }
 
@@ -113,7 +115,7 @@ public class MemberPhotoController {
 
         String sql = """
             INSERT INTO photos (id, storage_key, alt_text, visibility, uploaded_by, content_state, image_url, created_at, updated_at)
-            VALUES (?, ?, ?, 'PRIVATE', ?, 'DRAFT', ?, ?, ?)
+            VALUES (?, ?, ?, 'private', ?, 'draft', ?, ?, ?)
             """;
         try {
             jdbcTemplate.update(sql, photoId, storageKey, altText, userId.get(), imageUrl, Timestamp.from(now), Timestamp.from(now));
@@ -123,7 +125,9 @@ public class MemberPhotoController {
             res.put("status", "SUBMITTED");
             return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(res, "Photo submitted for review"));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "Failed to submit photo: " + e.getMessage()));
+            // The database message names constraints and columns; log it, never return it.
+            log.warn("[MemberPhoto] submission refused: {}", e.getClass().getSimpleName());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "PHOTO_SUBMISSION_FAILED"));
         }
     }
 
@@ -148,7 +152,7 @@ public class MemberPhotoController {
 
         UUID photoId = UUID.fromString(photoIdStr);
         int rows = jdbcTemplate.update(
-            "DELETE FROM photos WHERE id = ? AND uploaded_by = ? AND content_state = 'DRAFT'",
+            "DELETE FROM photos WHERE id = ? AND uploaded_by = ? AND content_state = 'draft'",
             photoId, userId.get()
         );
 

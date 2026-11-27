@@ -73,10 +73,11 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         String origin=configuredOrigin(appBaseUrl);
         // Test must not borrow Production credentialed CORS authority or vice versa.
+        // Developer origins (localhost ports) were removed from the Production list: with
+        // credentials allowed, any page a member runs on such a port could act with their
+        // session. Local development configures its own app-base-url and gets exactly that.
         configuration.setAllowedOrigins("https://easy-scraping.com".equals(origin)
-                ? List.of(origin,"https://www.easy-scraping.com",
-                    "http://localhost:3000","http://localhost:4501","http://127.0.0.1:4501",
-                    "http://127.0.0.1:4550","http://localhost:4550") : List.of(origin));
+                ? List.of(origin,"https://www.easy-scraping.com") : List.of(origin));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

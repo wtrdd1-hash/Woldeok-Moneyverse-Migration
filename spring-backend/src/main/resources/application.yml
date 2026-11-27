@@ -29,7 +29,7 @@ spring:
 
 moneyverse:
   security:
-    internal-token: ${INTERNAL_API_TOKEN:8e5f2a1b9c3d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f}
+    internal-token: ${INTERNAL_API_TOKEN:}
     admin-role: ROLE_ADMIN
   features:
     swf-operational: ${MONEYVERSE_SWF_OPERATIONAL:true}
@@ -37,7 +37,7 @@ moneyverse:
     black-market-operational: ${MONEYVERSE_BLACK_MARKET_OPERATIONAL:true}
     pension-operational: ${MONEYVERSE_PENSION_OPERATIONAL:true}
   socket:
-    host: ${SOCKETIO_HOST:0.0.0.0}
+    host: ${SOCKETIO_HOST:127.0.0.1}
     port: ${SOCKETIO_PORT:9092}
     boss-threads: 1
     worker-threads: 4
@@ -63,3 +63,11 @@ management:
     web:
       exposure:
         include: health,info,metrics
+
+# The API description is off unless an operator opts in for a local session. Production and
+# Test never publish it: it maps every route, including ones the edge deliberately hides.
+springdoc:
+  api-docs:
+    enabled: ${MONEYVERSE_API_DOCS_ENABLED:false}
+  swagger-ui:
+    enabled: ${MONEYVERSE_API_DOCS_ENABLED:false}
