@@ -122,6 +122,59 @@ public class AdminAuthService {
         }
     }
 
+    /**
+     * Independent TOTP candidate (migration 366): whether this request's administrator must present
+     * a second-factor proof for scoped writes. Enrolled administrators are enforced; everyone once
+     * the owner enables the admin_totp_required switch. An unreadable answer counts as enforced
+     * (fail closed) -- the proof check that follows then refuses.
+     */
+    public boolean secondFactorEnforced(HttpServletRequest request) {
+        Optional<UUID> actor = resolveVerifiedAdminActor(request);
+        if (actor.isEmpty()) return true;
+        try {
+            Boolean enforced = jdbcTemplate.queryForObject(
+                    "SELECT enforced FROM public.admin_totp_requirement(?::uuid)", Boolean.class, actor.get());
+            return enforced == null || enforced;
+        } catch (Exception e) {
+            log.warn("[AdminAuth] second factor requirement unavailable (fail closed)");
+            return true;
+        }
+    }
+
+    /** A proof for this scope minted in this request's own session (by token hash); else false. */
+    public boolean hasSecondFactorProof(HttpServletRequest request, String scope) {
+        if (scope == null) return false;
+        String raw = extractSessionToken(request);
+        if (raw == null || raw.isBlank()) return false;
+        Optional<UUID> actor = resolveVerifiedAdminActor(request);
+        if (actor.isEmpty()) return false;
+        try {
+            Boolean valid = jdbcTemplate.queryForObject(
+                    "SELECT public.admin_totp_proof_valid(?::uuid, s.id, ?) FROM auth_sessions s "
+                            + "WHERE s.token_hash = ? AND s.user_id = ?::uuid AND s.revoked_at IS NULL AND s.expires_at > NOW()",
+                    Boolean.class, actor.get(), scope, sha256(raw), actor.get());
+            return Boolean.TRUE.equals(valid);
+        } catch (Exception e) {
+            log.warn("[AdminAuth] second factor proof lookup failed (fail closed)");
+            return false;
+        }
+    }
+
+    /** The id of this request's live session, owned by the given actor; empty if unreadable. */
+    public Optional<UUID> currentSessionId(HttpServletRequest request, UUID actor) {
+        String raw = extractSessionToken(request);
+        if (raw == null || raw.isBlank() || actor == null) return Optional.empty();
+        try {
+            List<String> ids = jdbcTemplate.query(
+                    "SELECT id::text FROM auth_sessions WHERE token_hash = ? AND user_id = ?::uuid AND revoked_at IS NULL AND expires_at > NOW()",
+                    (rs, n) -> rs.getString(1), sha256(raw), actor);
+            return ids.size() == 1 ? Optional.of(UUID.fromString(ids.get(0))) : Optional.empty();
+        } catch (Exception e) {
+            log.warn("[AdminAuth] session lookup failed (fail closed)");
+            return Optional.empty();
+        }
+    }
+
     public Optional<UUID> resolveVerifiedAdminActor(HttpServletRequest request) {
         Optional<UUID> actor = resolveAdminUserId(request);
         if (actor.isEmpty()) return Optional.empty();

@@ -1,6 +1,7 @@
 package com.moneyverse.api.config;
 
 import com.moneyverse.api.domain.admin.service.AdminAuthService;
+import com.moneyverse.api.domain.admin.totp.AdminTotpScopes;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Optional;
 
 /** Front-door authorization for *all* administrator APIs; controller checks are defense in depth. */
 @Component
@@ -78,7 +80,27 @@ public class AdminApiBoundaryFilter extends OncePerRequestFilter {
             fail(response, HttpServletResponse.SC_UNAUTHORIZED, "reauthentication_required");
             return;
         }
+        // Independent TOTP candidate (migration 366): a scoped high-risk write needs a proof minted
+        // in this session for this scope whenever the actor is enforced. Unscoped writes keep the
+        // rule above; the scope table is AdminTotpScopes.
+        Optional<String> scope = scopeOf(request);
+        if (scope.isPresent() && adminAuthService.secondFactorEnforced(request)
+                && !adminAuthService.hasSecondFactorProof(request, scope.get())) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"ok\":false,\"status\":401,\"code\":\"second_factor_required\",\"scope\":\""
+                    + scope.get() + "\"}");
+            return;
+        }
         chain.doFilter(request, response);
+    }
+
+    private static Optional<String> scopeOf(HttpServletRequest request) {
+        try {
+            return AdminTotpScopes.scopeFor(request.getMethod(), BoundaryPaths.of(request));
+        } catch (IllegalArgumentException malformed) {
+            return Optional.empty(); // shouldNotFilter already kept the boundary for this request
+        }
     }
 
     private static boolean isConsoleSessionPath(HttpServletRequest request) {
