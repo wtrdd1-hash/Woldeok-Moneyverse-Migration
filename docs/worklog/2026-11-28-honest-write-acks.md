@@ -19,8 +19,12 @@ Skills: security-review method (ordinary defensive review, not CVP-labelled), su
 - [x] Independent review (Codex, read-only): REQUEST_CHANGES with one Medium — profile image DELETE answered deleted=true without deleting. Fixed test-first (RED 1 → GREEN); the profile action already reads the owner settings back.
 
 ## Validation
-- Spring full suite: 940 tests / 0 failures / 0 errors / 0 skipped (local, this branch).
+- Spring full suite at 1b91bf41bb: 941 tests / 0 failures / 0 errors / 0 skipped (first commit 2e5224e445: 940/0/0/0).
+- Codex re-review of 1b91bf41bb: APPROVE. Gemini not run this round (earlier quota holds); three-family final review remains with the integration candidate.
 - Database-backed integration and browser QA not rerun for this change (no SQL or UI change); official Test (G8) and Production (G9) HOLD. Independent review pending.
+
+## Finished
+State CODE_READY on the task branch; not merged, not deployed. S04-CVP HOLD (entitlement unverified).
 
 ## Not done / follow-up
 - Fabricated *reads* (constant figures in some public/admin GET handlers) are a separate register item.
