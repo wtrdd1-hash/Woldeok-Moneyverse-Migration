@@ -71,6 +71,10 @@ export function SwfControlPanel({
       if (res.ok && data.executed) {
         toast.success('국부펀드(SWF) 포트폴리오 리밸런싱이 완결되었습니다!');
         await handleRefreshSwfData();
+      } else if (!res.ok) {
+        // The API refuses the rebalance (503) until an investment is a journaled transaction;
+        // a refusal is a failure, never a "verified" status. Same wording as the liquidation.
+        toast.error(data.error || data.message || '리밸런싱 처리에 실패했습니다.');
       } else {
         toast.info(data.message || '국부펀드 리밸런싱 상태가 정상 검증되었습니다.');
         await handleRefreshSwfData();
