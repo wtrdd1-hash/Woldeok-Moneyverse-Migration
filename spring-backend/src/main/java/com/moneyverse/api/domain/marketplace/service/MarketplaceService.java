@@ -22,29 +22,30 @@ public class MarketplaceService {
     }
 
     @Transactional(readOnly = true)
-    public List<ListingItem> listListings() {
-        String sql = """
-            SELECT * FROM marketplace_listings 
-            WHERE status = 'ACTIVE' 
-            ORDER BY created_at DESC 
-            LIMIT 50
-            """;
+    /**
+     * Active listings from marketplace_active_listings (315), shaped as the web parses them
+     * (snake_case, price as a canonical string). Unreadable is a 503, never an empty market.
+     */
+    public List<Map<String, Object>> listListings(int limit) {
+        int bounded = Math.max(1, Math.min(limit, 50));
         try {
-            return jdbcTemplate.query(sql, (rs, rowNum) -> {
-                ListingItem item = new ListingItem();
-                item.setId(rs.getString("id"));
-                item.setSellerUserId(rs.getString("seller_user_id"));
-                item.setItemType(rs.getString("item_type"));
-                item.setItemName(rs.getString("item_name"));
-                item.setPriceWld(rs.getBigDecimal("price_wld").toPlainString());
-                item.setQuantity(rs.getInt("quantity"));
-                item.setStatus(rs.getString("status"));
-                item.setCreatedAt(rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toInstant() : Instant.now());
-                return item;
-            });
-        } catch (Exception e) {
-            log.warn("[MarketplaceService] listListings fallback: {}", e.getMessage());
-            return Collections.emptyList();
+            return jdbcTemplate.query(
+                    "SELECT id, item_name, quantity, price_wld, status, created_at "
+                            + "FROM public.marketplace_active_listings(NULL, NULL, ?, 0)",
+                    (rs, rowNum) -> {
+                        Map<String, Object> row = new LinkedHashMap<>();
+                        row.put("id", rs.getString("id"));
+                        row.put("item_name", rs.getString("item_name"));
+                        row.put("quantity", rs.getInt("quantity"));
+                        row.put("price_wld", rs.getString("price_wld"));
+                        row.put("status", rs.getString("status"));
+                        row.put("created_at", rs.getTimestamp("created_at").toInstant().toString());
+                        return row;
+                    }, bounded);
+        } catch (org.springframework.dao.DataAccessException e) {
+            log.warn("[MarketplaceService] listings unavailable: {}", e.getClass().getSimpleName());
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "MARKETPLACE_UNAVAILABLE");
         }
     }
 

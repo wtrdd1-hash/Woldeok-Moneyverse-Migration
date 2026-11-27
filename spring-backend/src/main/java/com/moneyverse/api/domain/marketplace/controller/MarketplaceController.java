@@ -30,8 +30,12 @@ public class MarketplaceController {
 
     @GetMapping("/listings")
     @Operation(summary = "활성 마켓플레이스 아이템 매물 목록 조회")
-    public ApiResponse<List<ListingItem>> listListings() {
-        return ApiResponse.ok(marketplaceService.listListings());
+    public Object listListings(jakarta.servlet.http.HttpServletRequest request,
+                               @org.springframework.web.bind.annotation.RequestParam(name = "limit", defaultValue = "50") int limit) {
+        var rows = marketplaceService.listListings(limit);
+        // The web reads /api/v1 as a bare array; the legacy alias keeps its envelope.
+        String uri = request.getRequestURI();
+        return uri != null && uri.startsWith("/api/v1/") ? rows : ApiResponse.ok(rows);
     }
 
     /*

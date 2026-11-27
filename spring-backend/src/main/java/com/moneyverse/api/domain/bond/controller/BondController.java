@@ -30,13 +30,11 @@ public class BondController {
 
     @GetMapping({"", "/", "/markets"})
     @Operation(summary = "媛??援?콈 醫낅ぉ 諛??쒖옣 湲덈━ 吏??議고쉶")
-    public ApiResponse<Map<String, Object>> getMarkets() {
-        Map<String, Object> data = new LinkedHashMap<>();
-        data.put("overview", bondService.getOverview());
-        data.put("bonds", bondService.listBonds());
-        data.put("guarantor", "寃뚯엫 ??媛??WLD 梨꾧텒?대ŉ 援?? ?좎슜?깃툒 諛??먮━湲?蹂댁쬆???곸슜?섏? ?딆뒿?덈떎.");
-        data.put("disclosed_at", Instant.now().toString());
-        return ApiResponse.ok(data);
+    public Object getMarkets(HttpServletRequest request) {
+        Map<String, Object> data = bondService.marketSnapshot();
+        // The web verifies /api/v1 as the bare payload; the legacy alias keeps its envelope.
+        String uri = request.getRequestURI();
+        return uri != null && uri.startsWith("/api/v1/") ? data : ApiResponse.ok(data);
     }
 
     /*
@@ -46,8 +44,10 @@ public class BondController {
      * through journaled DB functions (bank_purchase_bond / bank_redeem_bond).
      */
     @GetMapping("/my-holdings")
-    public ApiResponse<?> myHoldings(HttpServletRequest request) {
-        return ApiResponse.ok(bondService.listUserHoldings(guard.actor(request).toString()));
+    public Object myHoldings(HttpServletRequest request) {
+        var rows = bondService.listUserHoldings(guard.actor(request).toString());
+        String uri = request.getRequestURI();
+        return uri != null && uri.startsWith("/api/v1/") ? rows : ApiResponse.ok(rows);
     }
 
     @GetMapping("/my-repo-loans")
