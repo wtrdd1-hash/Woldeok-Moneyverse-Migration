@@ -1,7 +1,5 @@
 # Remaining direct reads of ungranted relations (file relation). This list may only shrink:
 # move the read behind an actor-bound SECURITY DEFINER function and delete the line.
-src/main/java/com/moneyverse/api/domain/bond/controller/AdminBondController.java treasury_bond_coupon_logs
-src/main/java/com/moneyverse/api/domain/bond/controller/AdminBondController.java treasury_bonds
 src/main/java/com/moneyverse/api/domain/kdic/service/KdicService.java deposit_insurance_funds
 src/main/java/com/moneyverse/api/domain/kdic/service/KdicService.java deposit_insurance_payouts
 src/main/java/com/moneyverse/api/domain/kdic/service/KdicService.java deposit_insurance_premiums
