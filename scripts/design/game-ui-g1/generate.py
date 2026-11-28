@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate the "Guild Ledger" game-feel candidate mockups (G1) for all 180 routes.
 
-Each route in docs/design/CURRENT_UI_DESIGN_MANIFEST.json gets one HTML page
+Each route in docs/design/archive/v2026.11.28.2027.1/CURRENT_UI_DESIGN_MANIFEST.json gets one HTML page
 holding a desktop frame and a phone frame side by side; render.mjs screenshots
 them to PNG. Thirteen archetypes carry the layout; every route supplies its own
 title, scene and section copy, so pages differ by purpose rather than by label.
@@ -18,7 +18,7 @@ import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
-MANIFEST = ROOT / "docs/design/CURRENT_UI_DESIGN_MANIFEST.json"
+MANIFEST = ROOT / "docs/design/archive/v2026.11.28.2027.1/CURRENT_UI_DESIGN_MANIFEST.json"
 OUT = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "scripts/design/game-ui-g1/out"
 FAVICON = (ROOT / "frontend/public/favicon.ico").as_uri()
 
@@ -564,7 +564,7 @@ def page(route: str) -> str:
 
 
 def main() -> None:
-    manifest = json.loads(MANIFEST.read_text())
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8-sig"))
     routes = [r["route"] for r in manifest["routes"]]
     pages = OUT / "pages"
     pages.mkdir(parents=True, exist_ok=True)

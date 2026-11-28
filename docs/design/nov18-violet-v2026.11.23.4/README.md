@@ -1,3 +1,5 @@
+> **ARCHIVED / 역사 자료 ONLY — v2026.11.28.2027.1.** All visual content below is superseded; no implementation or acceptance use. [New frontend rebuild authority](../../planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.md).
+
 # November 18 violet-brand / 11월18일 보라색 UI visual proof — v2026.11.23.4
 
 **Offline archived HTML only, not production, financial transactions or a true interactive Next/Spring implementation.** These MiniPC Chromium 390px screenshots are from local test static assets. The **static preview** stamp is deliberate; examples such as WLD targets, savings or user lists are historical synthetic mock data, **not actual account balances or verified rates**.

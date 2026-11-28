@@ -1,3 +1,5 @@
+> **CURRENT OWNER OVERRIDE / 최신 사용자 지시 — v2026.11.28.2027.1.** [Frontend rebuild authority](planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.ko.md). All earlier visual plans, images, palettes, tokens and visual acceptance directives below are historical only, not fallback. Functional, financial, security, accessibility and release contracts remain binding. Frontend rebuild is highest ordinary priority.
+
 # 🎨 월덕 머니버스(Woldeok Moneyverse) 2026 차세대 핀테크 디자인 시스템 공식 지침서
 
 **현행 이미지 기준 v2026.11.24.1:** [11월23일 v10 갤러리](design/game-ui-v2026.11.23.10/README.ko.md)만 시각 구현 참고. [단일 기준](design/CURRENT_UI_DESIGN.ko.md)에 따라 이전 시안은 이력 보관 전용이며 기능·접근성 규칙은 유지.

@@ -1,3 +1,5 @@
+> **ARCHIVED / 역사 자료 ONLY — v2026.11.28.2027.1.** All visual content below is superseded; no implementation or acceptance use. [New frontend rebuild authority](../../planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.md).
+
 > **ARCHIVED / SUPERSEDED — NOT AN IMPLEMENTATION SOURCE.** Use only [active v10 design authority](../CURRENT_UI_DESIGN.md) and [active v10 gallery](../game-ui-v2026.11.23.10/README.md) for new UI work. Historical comparison only.
 
 # 180 new game-economy UI design example PNGs (desktop + mobile)

@@ -48,7 +48,7 @@ def layout_for(route: str, kind: str) -> str:
 
 
 def main() -> None:
-    manifest = json.loads((ROOT / "docs/design/CURRENT_UI_DESIGN_MANIFEST.json").read_text())
+    manifest = json.loads((ROOT / "docs/design/archive/v2026.11.28.2027.1/CURRENT_UI_DESIGN_MANIFEST.json").read_text(encoding="utf-8-sig"))
     (OUT / "pages").mkdir(parents=True, exist_ok=True)
     index = []
     for entry in manifest["routes"]:

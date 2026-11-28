@@ -1,3 +1,5 @@
+> **ARCHIVED / 역사 자료 ONLY — v2026.11.28.2027.1.** All visual content below is superseded; no implementation or acceptance use. [New frontend rebuild authority](../../planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.ko.md).
+
 > **보관본 / 구버전 — 구현 기준 사용 금지.** 새 UI 구현은 [현행 v10 기준](../CURRENT_UI_DESIGN.ko.md) 및 [현행 v10 갤러리](../game-ui-v2026.11.23.10/README.ko.md)만 참조. 이력 비교 전용.
 
 # 게임형 UI 신규 예시 이미지 180개 (PC + 모바일)

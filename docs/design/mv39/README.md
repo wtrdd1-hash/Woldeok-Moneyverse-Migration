@@ -1,3 +1,5 @@
+> **ARCHIVED / 역사 자료 ONLY — v2026.11.28.2027.1.** All visual content below is superseded; no implementation or acceptance use. [New frontend rebuild authority](../../planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.md).
+
 # Spring Approved Home — v2026.11.19.39.1
 
 - [English desktop, 1440px (real browser screenshot)](home-1440-en.png)

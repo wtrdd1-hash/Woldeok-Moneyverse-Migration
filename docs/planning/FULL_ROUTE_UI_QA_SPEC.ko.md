@@ -1,3 +1,5 @@
+> **CURRENT OWNER OVERRIDE / 최신 사용자 지시 — v2026.11.28.2027.1.** [Frontend rebuild authority](FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.ko.md). All earlier visual plans, images, palettes, tokens and visual acceptance directives below are historical only, not fallback. Functional, financial, security, accessibility and release contracts remain binding. Frontend rebuild is highest ordinary priority.
+
 # 월덕 머니버스 — 전 라우트 UI·기능 QA 명세
 
 > 버전: v2026.09.25.442

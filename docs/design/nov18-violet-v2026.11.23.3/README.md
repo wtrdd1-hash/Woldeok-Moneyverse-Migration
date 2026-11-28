@@ -1,3 +1,5 @@
+> **ARCHIVED / 역사 자료 ONLY — v2026.11.28.2027.1.** All visual content below is superseded; no implementation or acceptance use. [New frontend rebuild authority](../../planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.md).
+
 # v2026.11.23.3 — Nov 18 Violet UI / 보라색 UI 검증 스냅샷
 
 These **public, offline static HTML** screenshots were captured by Playwright Chromium on the MiniPC after the scoped brand CSS changes. They are **not** a logged-in screenshot, a full Spring application Test acceptance, a verified bank balance, or a production deployment.

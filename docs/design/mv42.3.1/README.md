@@ -1,3 +1,5 @@
+> **ARCHIVED / 역사 자료 ONLY — v2026.11.28.2027.1.** All visual content below is superseded; no implementation or acceptance use. [New frontend rebuild authority](../../planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.md).
+
 # v2026.11.20.42.3.1 — Actual Production member homepage after visual repair
 
 - [Actual public HTTPS mobile 390px, Korean auto locale, guest](live-home-390-ko.png)

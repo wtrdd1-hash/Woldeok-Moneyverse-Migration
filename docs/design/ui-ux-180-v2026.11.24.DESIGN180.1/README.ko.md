@@ -1,3 +1,5 @@
+> **ARCHIVED / 역사 자료 ONLY — v2026.11.28.2027.1.** All visual content below is superseded; no implementation or acceptance use. [New frontend rebuild authority](../../planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.ko.md).
+
 # 머니버스 180페이지 UI/UX 시안
 
 **검토용 디자인입니다. 실행 중인 프론트엔드나 운영 배포가 아닙니다.** 기존 승인 원본은 그대로 유지하며, 이 시안의 디자인 승인은 아직 받지 않았습니다.
