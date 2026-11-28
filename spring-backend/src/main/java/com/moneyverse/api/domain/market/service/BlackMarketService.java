@@ -102,11 +102,10 @@ public class BlackMarketService {
                     auctionId
             );
         } catch (Exception e) {
-            log.info("[BlackMarketService] Using fallback bid logs for {}: {}", auctionId, e.getMessage());
-            return List.of(
-                    new BidLog(UUID.randomUUID().toString(), auctionId, "5f7b8b44-e4aa-40b8-b93a-800ec0151d20", "비밀입찰자_948", 120000L, Instant.now().minusSeconds(120).toString()),
-                    new BidLog(UUID.randomUUID().toString(), auctionId, "5f7b8b44-e4aa-40b8-b93a-800ec0151d20", "블랙마켓VIP", 100000L, Instant.now().minusSeconds(360).toString())
-            );
+            // Never invent bids on a failed read (security review 2026-11-28).
+            log.warn("[BlackMarketService] Bid log read failed: {}", e.getClass().getSimpleName());
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "SECRET_AUCTION_BID_LOG_UNAVAILABLE");
         }
     }
 

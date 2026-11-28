@@ -96,10 +96,16 @@ public class PocketService {
         UUID userId = UUID.fromString(userIdStr);
         UUID pocketId = UUID.fromString(pocketIdStr);
 
-        jdbcTemplate.update(
+        int updated = jdbcTemplate.update(
             "UPDATE bank_saving_pockets SET theme_color = ?, icon_code = ?, updated_at = NOW() WHERE id = ? AND user_id = ?",
             themeColor, iconCode, pocketId, userId
         );
+        // The owner predicate matched nothing: not the caller's pocket (or absent). Say so rather than
+        // acknowledging a change that was refused (BOLA sweep 2026-11-28).
+        if (updated != 1) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.NOT_FOUND, "POCKET_NOT_FOUND");
+        }
 
         return Map.of("success", true, "pocketId", pocketId.toString(), "themeColor", themeColor, "iconCode", iconCode);
     }
