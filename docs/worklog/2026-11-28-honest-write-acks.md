@@ -54,3 +54,19 @@ State CODE_READY on the task branch; not merged, not deployed. S04-CVP HOLD (ent
 ### Validation (exact SHA 39dd590a9f)
 - Spring 958 / 0 failures / 0 errors / 0 skipped. No frontend change in this unit (frontend suite last run at 61076e9394: 3,261 passed).
 - Not run: database-backed integration and browser QA. G8/G9 HOLD.
+
+## Unit 4 — member object-access (BOLA/IDOR) sweep (ticket 39dd590a9f-P3-S-07)
+### Before work
+- [x] main 1df1150e97 unchanged. Static classification of 60 non-admin handlers taking an object id/key: 24 derive the actor from the session, 16 answer 503, 20 neither (each read). No handler was found acting on another member's object; ownership is enforced in the SQL functions where they are used.
+### Findings → fixes
+- [x] Unlinking a login method answered success without unlinking (Medium) → 503.
+- [x] Sealed auction bid log public and unauthenticated (bidder ids, names, amounts) and invented bids on a failed read (Medium) → not disclosed; service never invents bids. Record: migration 271 still leaves SELECT on `black_market_bid_logs` to the application role (a later forward migration should move the read behind a function).
+- [x] Pocket customisation answered success when the owner predicate matched no row (Low) → 404.
+- [x] (Codex, High) Media served any well-formed key to anyone: private chat attachments, unreviewed photo submissions with an immutable public cache, images of hidden board posts → reads ask the legacy gateway's SQL visibility functions; a refused key is never read from disk. Chat and board uploads registered ownership by direct INSERT into revoked tables (always failed, echoed the database error) → `chat_media_register` (with the required `chat_` prefix) and `member_board_register_image_upload`, removing the file when refused. The frontend's `/api/v1/board/public/images` path is now served; the board upload returns its guarded path; public board image cache 300 s as in the legacy gateway.
+- [x] (Codex, Medium) Stock alerts: creation returned a random id, deletion answered success for any id, events always empty, failed list read shown empty → ported to the owner-scoped `stock_alert_*` functions with the legacy validation.
+- Independent review: Codex REQUEST_CHANGES (media High; auction modal; stock alerts) → fixed; re-review REQUEST_CHANGES (board upload URL, board cache) → fixed; Codex APPROVE at 2206aa37b2 with the gallery-cache ruling accepted as residual risk.
+- Rulings: secret-auction modal and burn-event card are unreachable (no importer) — follow-up; published gallery photos keep the legacy 24 h immutable public cache by design — residual risk for an owner decision (unpublish does not purge caches).
+- TDD note: `MediaAccessService` was written before its test file; the controller behaviour tests and the service failure test were then written and observed failing (compile-level RED for the new API) before the controllers changed. Other tests in this unit were RED by assertion first.
+### Validation (exact SHA 2206aa37b2)
+- Spring 982 / 0 failures / 0 errors / 0 skipped. The Phase11 media integration test no longer asserts that an unreviewed upload is public (H2 has no visibility functions; their answers are mocked there).
+- Not run: database-backed integration against PostgreSQL for the new function calls (CI-only), browser QA, sandbox probes. G8/G9 HOLD.
