@@ -1,3 +1,5 @@
+> **ARCHIVED / 역사 자료 ONLY — v2026.11.28.2027.1.** All visual content below is superseded; no implementation or acceptance use. [New frontend rebuild authority](../../planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.ko.md).
+
 # 월덕 머니버스 전용 게임 UI v2026.11.24.11 공식 갤러리 (180개 전체 라우트)
 
 **버전**: `v2026.11.24.11`  

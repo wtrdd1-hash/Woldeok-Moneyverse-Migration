@@ -1,3 +1,5 @@
+> **ARCHIVED / 역사 자료 ONLY — v2026.11.28.2027.1.** All visual content below is superseded; no implementation or acceptance use. [New frontend rebuild authority](../../planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.md).
+
 # G2 "Guild Ledger Terminal" refined design — active design authority (owner-approved 2026-11-24)
 
 Per-route previews (180): [routes/README.md](routes/README.md)

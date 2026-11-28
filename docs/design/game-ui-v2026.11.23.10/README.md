@@ -1,3 +1,5 @@
+> **ARCHIVED / 역사 자료 ONLY — v2026.11.28.2027.1.** All visual content below is superseded; no implementation or acceptance use. [New frontend rebuild authority](../../planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.md).
+
 # ACTIVE ONLY: Nov 23 v10 game-economy UI images (180 routes)
 
 v2026.11.23.10 / 180 real PNG assets generated and integrity-tested / individual design approval and live functional verification OPEN.

@@ -1,3 +1,5 @@
+> **ARCHIVED / 역사 자료 ONLY — v2026.11.28.2027.1.** All visual content below is superseded; no implementation or acceptance use. [New frontend rebuild authority](../../planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.md).
+
 # Moneyverse · 180-page UI/UX proposal
 
 Status: **PROPOSED · DESIGN ARTIFACTS ONLY**. This collection does not replace the approved Nov23 v10 baseline and is not a running frontend release.

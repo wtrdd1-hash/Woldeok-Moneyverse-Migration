@@ -1,3 +1,5 @@
+> **ARCHIVED / 역사 자료 ONLY — v2026.11.28.2027.1.** All visual content below is superseded; no implementation or acceptance use. [New frontend rebuild authority](../../planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.md).
+
 # Admin Console + Global Floating Chat — Visuals and Interactive Preview
 
 Version: `v2026.11.18.13` | Status: ISOLATED DEMO ONLY | User locale: Korean design review; planned app defaults: English and Korean.

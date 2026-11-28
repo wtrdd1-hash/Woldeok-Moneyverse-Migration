@@ -1,3 +1,5 @@
+> **ARCHIVED / 역사 자료 ONLY — v2026.11.28.2027.1.** All visual content below is superseded; no implementation or acceptance use. [New frontend rebuild authority](../../planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.md).
+
 # Woldeok Moneyverse Game UI v2026.11.24.11 Official Gallery (180 Routes)
 
 **Version**: `v2026.11.24.11`  

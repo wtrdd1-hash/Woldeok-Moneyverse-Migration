@@ -1,3 +1,5 @@
+> **CURRENT OWNER OVERRIDE / 최신 사용자 지시 — v2026.11.28.2027.1.** [Frontend rebuild authority](planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.md). All earlier visual plans, images, palettes, tokens and visual acceptance directives below are historical only, not fallback. Functional, financial, security, accessibility and release contracts remain binding. Frontend rebuild is highest ordinary priority.
+
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
 > **Current rules — v2026.11.24.DOCSYNC.1:** [EN authority](DOCUMENT_AUTHORITY.md) / [한국어](DOCUMENT_AUTHORITY.ko.md). Owner-approved target: Next.js/React frontend + same-origin BFF + authoritative Spring API; Nov23 v10 design and actual favicon. Automatic image preparation is allowed; actual Production cutover needs separate approval after independent Test. Dated technology/runtime claims below are historical snapshots; business/security requirements retain their adopted scope. No whole-site implementation or runtime acceptance is implied.

@@ -1,3 +1,5 @@
+> **ARCHIVED / 역사 자료 ONLY — v2026.11.28.2027.1.** All visual content below is superseded; no implementation or acceptance use. [New frontend rebuild authority](../../../planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.md).
+
 # G2 경로별 시안 (180)
 
 모든 매니페스트 경로의 G2 화면입니다. 제목은 경로별, 본문은 해당 유형(archetype)의 G2 기준 화면을 사용합니다. 수치는 예시입니다. 생성: `python3 scripts/design/game-ui-g2/routes.py`.

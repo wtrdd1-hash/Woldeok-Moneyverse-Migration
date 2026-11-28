@@ -1,3 +1,5 @@
+> **ARCHIVED / 역사 자료 ONLY — v2026.11.28.2027.1.** All visual content below is superseded; no implementation or acceptance use. [New frontend rebuild authority](../../planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.ko.md).
+
 # 현행 단일 기준: 11월 23일 v10 게임형 UI 이미지 180개
 
 v2026.11.23.10 / 180개 새 PNG 생성·파일 검사 통과 / 개별 디자인 승인 및 실서버 기능 검증 미완료.

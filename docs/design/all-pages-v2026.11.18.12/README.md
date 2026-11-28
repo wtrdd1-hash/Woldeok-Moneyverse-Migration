@@ -1,3 +1,5 @@
+> **ARCHIVED / 역사 자료 ONLY — v2026.11.28.2027.1.** All visual content below is superseded; no implementation or acceptance use. [New frontend rebuild authority](../../planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.md).
+
 > **ARCHIVED / SUPERSEDED — NOT AN IMPLEMENTATION SOURCE.** Historical Nov18 concepts only. Sole route-by-route implementation reference is [Nov23 v10](../game-ui-v2026.11.23.10/README.md); see [authority](../CURRENT_UI_DESIGN.md).
 
 # All-Page PC + Mobile Visual Concepts / 전체 페이지 시안

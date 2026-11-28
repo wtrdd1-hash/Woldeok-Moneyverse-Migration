@@ -1,3 +1,5 @@
+> **ARCHIVED / 역사 자료 ONLY — v2026.11.28.2027.1.** All visual content below is superseded; no implementation or acceptance use. [New frontend rebuild authority](../../planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.md).
+
 # G1 "Guild Ledger" game-feel redesign — CANDIDATE (180 routes)
 
 **Status: ACTIVE — approved by the owner on 2026-11-24.** (Previously a candidate: — [CURRENT_UI_DESIGN.md](../CURRENT_UI_DESIGN.md) (v10) stays binding until the owner approves G1, at which point that file, the manifest and the galleries are updated together. Frontend implementation of G1 starts only after that approval.

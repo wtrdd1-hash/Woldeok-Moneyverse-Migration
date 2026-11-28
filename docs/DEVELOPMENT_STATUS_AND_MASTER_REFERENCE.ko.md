@@ -1,3 +1,5 @@
+> **CURRENT OWNER OVERRIDE / 최신 사용자 지시 — v2026.11.28.2027.1.** [Frontend rebuild authority](planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.ko.md). All earlier visual plans, images, palettes, tokens and visual acceptance directives below are historical only, not fallback. Functional, financial, security, accessibility and release contracts remain binding. Frontend rebuild is highest ordinary priority.
+
 # 🌐 Woldeok Moneyverse - 통합 개발 진행상황 및 마스터 레퍼런스 총서
 
 **현행 디자인 v2026.11.24.1:** [11월23일 v10 180개](design/CURRENT_UI_DESIGN.ko.md)만 새 UI 참고. [매니페스트](design/CURRENT_UI_DESIGN_MANIFEST.json) 우선, v8·11월18일은 보관. 테스트·배포 별도 승인 필요.

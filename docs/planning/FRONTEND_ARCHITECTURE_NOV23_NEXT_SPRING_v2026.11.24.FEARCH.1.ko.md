@@ -1,3 +1,5 @@
+> **CURRENT OWNER OVERRIDE / 최신 사용자 지시 — v2026.11.28.2027.1.** [Frontend rebuild authority](FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.ko.md). All earlier visual plans, images, palettes, tokens and visual acceptance directives below are historical only, not fallback. Functional, financial, security, accessibility and release contracts remain binding. Frontend rebuild is highest ordinary priority.
+
 # 11월 23일 프론트엔드 아키텍처 단일 결정 — v2026.11.24.FEARCH.1
 
 > 상태: **사용자 승인 기술 방향 / 문서 제안 / 실제 서버 전환 전**. [영어 정본](FRONTEND_ARCHITECTURE_NOV23_NEXT_SPRING_v2026.11.24.FEARCH.1.md) · [추적 #3422](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/3422). 현재 적용 순위와 원문 PR 이력은 [문서 기준](../DOCUMENT_AUTHORITY.ko.md)을 따른다. 실제 서버 전환 증거는 별도로 요구한다.

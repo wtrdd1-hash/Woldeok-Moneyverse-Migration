@@ -1,3 +1,5 @@
+> **ARCHIVED / 역사 자료 ONLY — v2026.11.28.2027.1.** All visual content below is superseded; no implementation or acceptance use. [New frontend rebuild authority](../../planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.ko.md).
+
 # G1 "길드 원장" 게임풍 리디자인 — 후보안 (180개 경로)
 
 **상태: 현재 공식 기준 — 2026-11-24 소유자 승인.** (이전 후보안 안내: 승인 전까지는 [CURRENT_UI_DESIGN.md](../CURRENT_UI_DESIGN.md)(v10)가 그대로 유효합니다. 승인되면 기준 문서·manifest·갤러리를 함께 갱신하고, 그때부터 프론트엔드 구현을 시작합니다.

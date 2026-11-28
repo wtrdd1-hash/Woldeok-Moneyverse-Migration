@@ -1,3 +1,5 @@
+> **ARCHIVED / 역사 자료 ONLY — v2026.11.28.2027.1.** All visual content below is superseded; no implementation or acceptance use. [New frontend rebuild authority](../../planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.ko.md).
+
 # G2 "길드 원장 단말기" 정밀 디자인 — 현재 디자인 기준 (2026-11-24 소유자 승인)
 
 경로별 시안 180장: [routes/README.md](routes/README.md)

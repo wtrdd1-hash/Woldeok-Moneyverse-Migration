@@ -1,3 +1,5 @@
+> **CURRENT OWNER OVERRIDE / 최신 사용자 지시 — v2026.11.28.2027.1.** [Frontend rebuild authority](planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.md). All earlier visual plans, images, palettes, tokens and visual acceptance directives below are historical only, not fallback. Functional, financial, security, accessibility and release contracts remain binding. Frontend rebuild is highest ordinary priority.
+
 # 50만+ 디자인 스케일 프론트엔드 UI 깨짐·겹침 원천 방지 마스터 가이드라인 (Frontend UI Anti-Clash Master Specification)
 
 **Current single visual baseline v2026.11.24.1:** Only [Nov23 v10](design/game-ui-v2026.11.23.10/README.md) is an active image reference. [Authority](design/CURRENT_UI_DESIGN.md); never use archived v8/Nov18 assets for implementation.

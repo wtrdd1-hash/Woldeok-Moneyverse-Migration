@@ -1,3 +1,5 @@
+> **CURRENT OWNER OVERRIDE / 최신 사용자 지시 — v2026.11.28.2027.1.** [Frontend rebuild authority](../planning/FRONTEND_REBUILD_MASTER_v2026.11.28.2027.1.ko.md). All earlier visual plans, images, palettes, tokens and visual acceptance directives below are historical only, not fallback. Functional, financial, security, accessibility and release contracts remain binding. Frontend rebuild is highest ordinary priority.
+
 # 디자인 이미지 — 현행 기준은 한 버전만
 
 **현행 이미지: [11월 23일 v10 180개 갤러리](game-ui-v2026.11.23.10/README.ko.md)**
