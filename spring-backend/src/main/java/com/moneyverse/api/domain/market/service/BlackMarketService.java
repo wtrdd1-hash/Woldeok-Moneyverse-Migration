@@ -56,5 +56,6 @@ public class BlackMarketService {
     }
 
     // The sealed-auction bid log is not read and bids are not written from the API: bidding answers
-    // 503 until settlement is journaled, and the log's SELECT grant is revoked by migration 367.
+    // 503 until settlement is journaled. The legacy gateway still reads the log, so its SELECT grant
+    // stays until that gateway is retired.
 }

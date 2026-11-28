@@ -4,15 +4,17 @@
 -- candidate the API registers chat and board images through chat_media_register (295) and
 -- member_board_register_image_upload (176), which run as their owner and also check the key shape
 -- and an active account; it no longer writes treasury_swf_events (SWF valuation answers 503) or
--- user_progression; and it no longer reads the sealed-auction bid log (260, whose DML 271 already
--- revoked), which exposed bidder ids and amounts. Each unused grant would let a compromised API
--- process write or read those rows outside the functions' checks.
+-- user_progression. Each unused grant would let a compromised API process write those rows outside
+-- the functions' checks. Not revoked here: SELECT on black_market_bid_logs, which the Spring API no
+-- longer reads but the legacy NestJS gateway still does (marketplace/black-market.repository.ts);
+-- revoke it in a later migration once that gateway is retired.
 --
--- Release order: apply ONLY after the application that uses the functions is live; an older jar
--- still writes chat_media_registry / member_board_image_uploads directly.
+-- Release order: apply ONLY after the Spring application that uses the functions is live; an older
+-- jar still writes chat_media_registry / member_board_image_uploads directly. The legacy NestJS
+-- gateway registers images through the same functions and does not execute these INSERTs.
 -- Rollback (with the old jar): GRANT INSERT ON TABLE public.chat_media_registry,
 -- public.member_board_image_uploads, public.treasury_swf_events, public.user_progression TO
--- moneyverse_app; GRANT SELECT ON TABLE public.black_market_bid_logs TO moneyverse_app.
+-- moneyverse_app.
 
 BEGIN;
 
@@ -24,8 +26,7 @@ BEGIN
         'REVOKE INSERT ON TABLE public.chat_media_registry FROM moneyverse_app',
         'REVOKE INSERT ON TABLE public.member_board_image_uploads FROM moneyverse_app',
         'REVOKE INSERT ON TABLE public.treasury_swf_events FROM moneyverse_app',
-        'REVOKE INSERT ON TABLE public.user_progression FROM moneyverse_app',
-        'REVOKE SELECT ON TABLE public.black_market_bid_logs FROM moneyverse_app'
+        'REVOKE INSERT ON TABLE public.user_progression FROM moneyverse_app'
     ] LOOP
         BEGIN
             EXECUTE stmt;
