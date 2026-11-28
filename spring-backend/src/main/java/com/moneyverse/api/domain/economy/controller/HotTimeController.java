@@ -39,6 +39,16 @@ public class HotTimeController {
     public ResponseEntity<Map<String, Object>> triggerManualBuff(
             HttpServletRequest request,
             @RequestBody(required = false) Map<String, Object> body) {
+        // Authorization before availability (review 2026-11-28): anonymous 401, non-administrator 403.
+        Optional<UserAuthService.SessionInfo> session = userAuthService.resolveSession(request);
+        if (session.isEmpty() || !session.get().isSignedIn()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        }
+        List<String> roles = session.get().getRoles();
+        boolean admin = roles != null && roles.stream().anyMatch(r -> "SUPERADMIN".equalsIgnoreCase(r) || "ADMIN".equalsIgnoreCase(r));
+        if (!admin) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Forbidden: Admin access required");
+        }
         return sourceUnavailable();
     }
 

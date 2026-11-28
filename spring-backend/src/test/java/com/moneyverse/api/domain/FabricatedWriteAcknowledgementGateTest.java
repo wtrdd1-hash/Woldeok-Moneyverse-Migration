@@ -95,11 +95,24 @@ class FabricatedWriteAcknowledgementGateTest {
         assertEquals(401, e.getStatusCode().value());
     }
 
-    @Test void memberCannotTriggerHotTime() {
-        // The 2026-11-26 gate refuses this route for everyone (503) before any role check; a member
-        // must never receive a success either way.
+    @Test void hotTimeTriggerStillChecksSessionAndRoleBeforeAvailability() {
+        when(auth.resolveSession(any())).thenReturn(Optional.empty());
+        ResponseStatusException e = assertThrows(ResponseStatusException.class,
+                () -> new HotTimeController(auth).triggerManualBuff(request, Map.of()));
+        assertEquals(401, e.getStatusCode().value());
         signedInAs();
-        unavailable(() -> new HotTimeController(auth).triggerManualBuff(request, Map.of()));
+        e = assertThrows(ResponseStatusException.class,
+                () -> new HotTimeController(auth).triggerManualBuff(request, Map.of()));
+        assertEquals(403, e.getStatusCode().value());
+    }
+
+    @Test void warfareWritesStillRequireASession() {
+        when(auth.resolveSession(any())).thenReturn(Optional.empty());
+        WarfareController c = new WarfareController(auth);
+        assertEquals(401, assertThrows(ResponseStatusException.class,
+                () -> c.declareWar(request, Map.of("targetTerritoryId", "t1"))).getStatusCode().value());
+        assertEquals(401, assertThrows(ResponseStatusException.class,
+                () -> c.reportBattleResult(request, Map.of())).getStatusCode().value());
     }
 
     @Test void adminHotTimeTriggerIsNotFaked() {

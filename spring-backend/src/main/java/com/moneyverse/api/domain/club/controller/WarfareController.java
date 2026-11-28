@@ -47,6 +47,7 @@ public class WarfareController {
     public ResponseEntity<Map<String, Object>> declareWar(
             HttpServletRequest request,
             @RequestBody(required = false) Map<String, Object> body) {
+        getUserIdOrThrow(request); // authorization before availability (review 2026-11-28)
         return sourceUnavailable();
     }
 
@@ -54,6 +55,7 @@ public class WarfareController {
     public ResponseEntity<Map<String, Object>> reportBattleResult(
             HttpServletRequest request,
             @RequestBody(required = false) Map<String, Object> body) {
+        getUserIdOrThrow(request); // authorization before availability (review 2026-11-28)
         return sourceUnavailable();
     }
 

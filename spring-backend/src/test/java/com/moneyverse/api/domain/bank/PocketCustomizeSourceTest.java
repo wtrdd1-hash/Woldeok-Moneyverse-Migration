@@ -36,4 +36,24 @@ class PocketCustomizeSourceTest {
         assertEquals(400, e.getStatusCode().value());
         verifyNoInteractions(jdbc);
     }
+
+    @Test void aForeignPocketRefusedByTheFunctionIsNeverASuccessReceipt() {
+        // Review 2026-11-28: ownership is enforced by bank_customize_pocket; its refusal (22023 for a
+        // pocket that is not the caller's or does not exist) must surface as a refusal, and an empty
+        // answer must not become a receipt.
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        UUID user = UUID.randomUUID(), pocket = UUID.randomUUID(), key = UUID.randomUUID();
+        when(jdbc.queryForList(contains("bank_customize_pocket"), eq(key), eq(user), eq(pocket), eq("sky"), isNull()))
+                .thenThrow(new org.springframework.dao.DataIntegrityViolationException("refused",
+                        new java.sql.SQLException("pocket not found", "22023")));
+        var refused = assertThrows(ResponseStatusException.class, () -> new PocketService(jdbc)
+                .customizePocket(user.toString(), pocket.toString(), "sky", null, key.toString()));
+        assertEquals(409, refused.getStatusCode().value());
+
+        JdbcTemplate empty = mock(JdbcTemplate.class);
+        when(empty.queryForList(contains("bank_customize_pocket"), eq(key), eq(user), eq(pocket), eq("sky"), isNull())).thenReturn(List.of());
+        var missing = assertThrows(ResponseStatusException.class, () -> new PocketService(empty)
+                .customizePocket(user.toString(), pocket.toString(), "sky", null, key.toString()));
+        assertEquals(503, missing.getStatusCode().value());
+    }
 }

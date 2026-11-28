@@ -27,8 +27,19 @@ class UnbackedFeatureSourceGateTest {
         assertNotEquals(Boolean.TRUE, ((Map<?, ?>) r.getBody()).get("success"));
     }
 
+    // Write routes check the session (and, for the hot-time trigger, the administrator role) before
+    // the gate (review 2026-11-28), so they are exercised with an authorised synthetic session.
+    private static UserAuthService signedIn(String... roles) {
+        UserAuthService auth = mock(UserAuthService.class);
+        UserAuthService.SessionInfo s = new UserAuthService.SessionInfo();
+        s.setUserId(java.util.UUID.randomUUID());
+        s.setRoles(List.of(roles));
+        org.mockito.Mockito.when(auth.resolveSession(org.mockito.ArgumentMatchers.any())).thenReturn(java.util.Optional.of(s));
+        return auth;
+    }
+
     @Test void hotTimeNeverFabricates() {
-        var c = new HotTimeController(mock(UserAuthService.class));
+        var c = new HotTimeController(signedIn("SUPERADMIN"));
         var req = new MockHttpServletRequest();
         for (Supplier<ResponseEntity<?>> call : List.<Supplier<ResponseEntity<?>>>of(
                 c::getActiveHotTime, c::getWeeklySchedule, () -> c.triggerManualBuff(req, Map.of("name", "x")))) {
@@ -37,7 +48,7 @@ class UnbackedFeatureSourceGateTest {
     }
 
     @Test void clubWarfareNeverFabricates() {
-        var c = new WarfareController(mock(UserAuthService.class));
+        var c = new WarfareController(signedIn());
         var req = new MockHttpServletRequest();
         for (Supplier<ResponseEntity<?>> call : List.<Supplier<ResponseEntity<?>>>of(
                 c::getCurrentSeason, c::listTerritories,
