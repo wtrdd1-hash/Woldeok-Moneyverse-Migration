@@ -80,36 +80,35 @@ public class Phase14FullSystemCompletionIntegrationTest {
     }
 
     @Test
-    @DisplayName("9. WarfareController - 클럽 대항전 시즌 현황 조회 (200 OK)")
+    @DisplayName("9. WarfareController - season is not invented (503)")
     void testWarfareCurrentSeason() throws Exception {
+        // Security review 2026-11-28: this asserted invented live state; it must answer 503 until real.
         mockMvc.perform(get("/clubs/warfare/season/current"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.seasonName").value("2026 영지 쟁탈 대전"));
+                .andExpect(status().isServiceUnavailable());
     }
 
     @Test
-    @DisplayName("10. DiscordController - 길드 상태 조회 (200 OK)")
+    @DisplayName("10. DiscordController - guild status is not invented (503)")
     void testDiscordGuildStatus() throws Exception {
+        // Security review 2026-11-28: this asserted invented live state; it must answer 503 until real.
         mockMvc.perform(get("/integrations/discord/guilds/status"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.connected").value(true))
-                .andExpect(jsonPath("$.botUsername").value("월덕봇#7601"));
+                .andExpect(status().isServiceUnavailable());
     }
 
     @Test
-    @DisplayName("11. BurnEventController - 통화 소각 드로우 현황 조회 (200 OK)")
+    @DisplayName("11. BurnEventController - burn figures are not invented (503)")
     void testBurnEventCurrent() throws Exception {
+        // Security review 2026-11-28: this asserted invented live state; it must answer 503 until real.
         mockMvc.perform(get("/economy/events/burn-draw/current"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.progressPercent").value(72.5));
+                .andExpect(status().isServiceUnavailable());
     }
 
     @Test
-    @DisplayName("12. HotTimeController - 활성 핫타임 버프 현황 조회 (200 OK)")
+    @DisplayName("12. HotTimeController - active boost is not invented (503)")
     void testHotTimeActive() throws Exception {
+        // Security review 2026-11-28: this asserted invented live state; it must answer 503 until real.
         mockMvc.perform(get("/economy/hot-time/active"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.isActive").value(true));
+                .andExpect(status().isServiceUnavailable());
     }
 
     @Test
@@ -129,11 +128,11 @@ public class Phase14FullSystemCompletionIntegrationTest {
     }
 
     @Test
-    @DisplayName("15. ContentController - 활성 팝업 배너 조회 (200 OK)")
+    @DisplayName("15. ContentController - popups are not invented (503)")
     void testContentPopups() throws Exception {
+        // Security review 2026-11-28: this asserted invented live state; it must answer 503 until real.
         mockMvc.perform(get("/content/popups"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.popups[0].id").value("popup-season-12"));
+                .andExpect(status().isServiceUnavailable());
     }
 
     @Test

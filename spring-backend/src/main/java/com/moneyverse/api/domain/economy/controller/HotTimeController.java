@@ -27,24 +27,16 @@ public class HotTimeController {
 
     @GetMapping("/active")
     public ResponseEntity<Map<String, Object>> getActiveHotTime() {
-        return ResponseEntity.ok(Map.of(
-                "isActive", true,
-                "currentBuff", Map.of(
-                        "name", "주말 골든타임 노동 보상 1.5배",
-                        "multiplier", 1.5,
-                        "type", "WORK_REWARD_BOOST",
-                        "expiresAt", new Date(System.currentTimeMillis() + 7200000L).toInstant().toString()
-                )
-        ));
+        // Security review 2026-11-28: this served invented live state (figures, standings, boosts,
+        // "verified" content). Unavailable until read from its canonical source.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "HOT_TIME_SOURCE_UNAVAILABLE");
     }
 
     @GetMapping("/schedule")
     public ResponseEntity<Map<String, Object>> getWeeklySchedule() {
-        List<Map<String, Object>> schedule = List.of(
-                Map.of("dayOfWeek", "SATURDAY", "startTime", "19:00", "endTime", "23:00", "buffType", "WORK_BOOST", "multiplier", 1.5),
-                Map.of("dayOfWeek", "SUNDAY", "startTime", "14:00", "endTime", "18:00", "buffType", "CASINO_EXP_BOOST", "multiplier", 2.0)
-        );
-        return ResponseEntity.ok(Map.of("schedule", schedule));
+        // Security review 2026-11-28: this served invented live state (figures, standings, boosts,
+        // "verified" content). Unavailable until read from its canonical source.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "HOT_TIME_SOURCE_UNAVAILABLE");
     }
 
     @PostMapping("/admin/trigger")
