@@ -58,14 +58,32 @@ class MemberObjectAccessGateTest {
         verifyNoInteractions(service);
     }
 
-    @Test void sealedAuctionBidLogServiceNeverInventsBids() {
-        JdbcTemplate jdbc = mock(JdbcTemplate.class);
-        when(jdbc.query(anyString(), any(org.springframework.jdbc.core.RowMapper.class), any(Object[].class)))
-                .thenThrow(new RuntimeException("permission denied"));
-        BlackMarketService s = new BlackMarketService(jdbc);
-        assertEquals(503, status(() -> s.listBidLogs(UUID.randomUUID().toString())));
-    }
 
     // Pocket customisation: the integration line ports it to bank_customize_pocket (owner-scoped,
     // idempotent, charged); PocketCustomizeSourceTest covers it there.
+
+    @Test void sealedAuctionListingNeverInventsItemsOnAFailedRead() {
+        // AR02 2026-11-28: a failed read answered three invented auction items with bids.
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        when(jdbc.query(anyString(), any(org.springframework.jdbc.core.RowMapper.class)))
+                .thenThrow(new RuntimeException("permission denied"));
+        assertEquals(503, status(() -> new BlackMarketService(jdbc).listAuctions()));
+    }
+
+    @Test void sealedAuctionListingDoesNotDiscloseTheHighestBidder() {
+        // A sealed auction published the highest bidder's user id and name to anonymous callers.
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        when(jdbc.query(anyString(), any(org.springframework.jdbc.core.RowMapper.class)))
+                .thenAnswer(inv -> {
+                    java.sql.ResultSet rs = mock(java.sql.ResultSet.class);
+                    when(rs.getString(anyString())).thenReturn("x");
+                    when(rs.getString("highest_bidder_id")).thenReturn(UUID.randomUUID().toString());
+                    when(rs.getString("highest_bidder_name")).thenReturn("bidder");
+                    org.springframework.jdbc.core.RowMapper<?> m = inv.getArgument(1);
+                    return List.of(m.mapRow(rs, 0));
+                });
+        var item = new BlackMarketService(jdbc).listAuctions().get(0);
+        assertNull(item.getHighestBidderId());
+        assertNull(item.getHighestBidderName());
+    }
 }
