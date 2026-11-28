@@ -175,4 +175,17 @@ class MediaAccessGateTest {
                 () -> new MediaAccessService(db).publishedPhoto(KEY));
         assertEquals(503, e.getStatusCode().value());
     }
+
+    @Test void boardUploadAnswersTheGuardedBoardPathAndPublicImagesCacheBriefly() throws Exception {
+        signedIn();
+        when(storage.save(any(byte[].class)))
+                .thenReturn(new ImageStorageService.StoredImage(KEY, "image/png", 12, "/media/" + KEY));
+        when(access.registerBoardImage(member, KEY)).thenReturn(true);
+        BoardImageController c = new BoardImageController(storage, auth, access);
+        ResponseEntity<?> r = c.uploadBoardImage(request, null, PNG);
+        assertEquals("/api/v1/board/images/" + KEY, ((Map<?, ?>) r.getBody()).get("url"));
+        when(access.boardImageForPublic(KEY)).thenReturn(true);
+        // Same lifetime as the legacy gateway, so a deleted post's image leaves shared caches quickly.
+        assertEquals("public, max-age=300", c.getPublicBoardImage(KEY).getHeaders().getCacheControl());
+    }
 }

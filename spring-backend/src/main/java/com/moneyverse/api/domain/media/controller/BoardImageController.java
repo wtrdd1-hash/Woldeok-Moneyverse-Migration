@@ -95,7 +95,8 @@ public class BoardImageController {
         res.put("storageKey", stored.getStorageKey());
         res.put("mimeType", stored.getMimeType());
         res.put("size", stored.getSize());
-        res.put("url", stored.getUrl());
+        // The storage default (/media/...) is the gallery route, which does not serve board images.
+        res.put("url", "/api/v1/board/images/" + stored.getStorageKey());
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 
@@ -127,7 +128,8 @@ public class BoardImageController {
         if (!access.boardImageForPublic(key)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        return bytes(key, "public, max-age=3600");
+        // Legacy gateway lifetime: a deleted post's image leaves shared caches within five minutes.
+        return bytes(key, "public, max-age=300");
     }
 
     private ResponseEntity<byte[]> bytes(String key, String cacheControl) {
