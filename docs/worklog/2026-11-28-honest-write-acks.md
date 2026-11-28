@@ -43,3 +43,14 @@ State CODE_READY on the task branch; not merged, not deployed. S04-CVP HOLD (ent
 ### Follow-up register
 - Real reads via existing SQL functions (audit verifications/retention/dispositions as the legacy gateway does; feature switches) — backend functional work.
 - Remaining constant reads on member/public screens (burn event, warfare season, hot-time, FX portal, quant, ventures, districts, verified blog/help seeds, newspaper poll) — next unit after triage of which are product copy versus live state.
+
+## Unit 3 — member and public invented live state (ticket 61076e9394-P3-S-06)
+### Before work
+- [x] main 1df1150e97 unchanged. Triage of the remaining constant reads: already-honest 503s (FX, quant, ventures, derivatives, weekly brief) and taxonomy/product copy (blog categories, help category names, lore) left as they are.
+### In progress → finished
+- [x] Finding (Medium): burn event totals/jackpot/participants and cumulative stats, warfare season standings and territory taxes, active 1.5x hot time and buff schedule, real-estate district prices/occupancy, a "connected" Discord guild with ids and latency, a member's own collection pieces and a collection edit that saved nothing, a popup for a non-existent season, invented terms text for any page slug, unreviewed "verified" help search/articles/counts and blog articles; then (review) the newspaper poll seeded with invented counts and unauthenticated in-memory votes.
+- [x] RED `FabricatedMemberStateGateTest` 8/9 (session-order test passed) + poll 1 → GREEN; 503 after any existing session check. Eight legacy Phase6/13/14 checks asserted the constants and now expect 503; their unrelated assertions (forged-header 401) are unchanged.
+- [x] Independent review: Codex REQUEST_CHANGES (poll — fixed; burn-event card shows zeros on 503 — ruled unreachable, the component is imported nowhere, follow-up; help article page rethrows 503 into the error boundary — honest failure, unchanged) → Codex APPROVE.
+### Validation (exact SHA 39dd590a9f)
+- Spring 958 / 0 failures / 0 errors / 0 skipped. No frontend change in this unit (frontend suite last run at 61076e9394: 3,261 passed).
+- Not run: database-backed integration and browser QA. G8/G9 HOLD.
