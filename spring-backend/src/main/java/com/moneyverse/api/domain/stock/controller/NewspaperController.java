@@ -8,11 +8,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Tag(name = "Newspaper", description = "가상 경제 신문사 펄스 및 시장 심리 지표 API")
 @RestController
@@ -20,14 +19,8 @@ public class NewspaperController {
 
     private final StockService stockService;
 
-    private final Map<String, AtomicInteger> pollVotes = new ConcurrentHashMap<>();
-
     public NewspaperController(StockService stockService) {
         this.stockService = stockService;
-        pollVotes.put("bullish", new AtomicInteger(342));
-        pollVotes.put("sideways", new AtomicInteger(215));
-        pollVotes.put("bearish", new AtomicInteger(128));
-        pollVotes.put("cash", new AtomicInteger(59));
     }
 
     @Operation(summary = "주간 경제 보고서 (검증된 지표 제공 전까지 가드)")
@@ -76,30 +69,15 @@ public class NewspaperController {
     @Operation(summary = "독자 여론조사 현황 조회")
     @GetMapping(path = { "/api/v1/newspaper/poll", "/api/newspaper/poll" })
     public ResponseEntity<NewspaperPollData> getPoll() {
-        int total = pollVotes.values().stream().mapToInt(AtomicInteger::get).sum();
-
-        List<PollOption> options = List.of(
-                new PollOption("bullish", "강세장 지속 (적극 매수)", pollVotes.get("bullish").get(), calcPct(pollVotes.get("bullish").get(), total)),
-                new PollOption("sideways", "박스권 횡보 (관망)", pollVotes.get("sideways").get(), calcPct(pollVotes.get("sideways").get(), total)),
-                new PollOption("bearish", "조정 및 하락 대비", pollVotes.get("bearish").get(), calcPct(pollVotes.get("bearish").get(), total)),
-                new PollOption("cash", "현금 확보 및 대기", pollVotes.get("cash").get(), calcPct(pollVotes.get("cash").get(), total))
-        );
-
-        return ResponseEntity.ok(new NewspaperPollData(
-                "poll-2026-w46",
-                "향후 7일간 월덱 가상 주식 시장의 방향성은 어디로 향할까요?",
-                options,
-                total
-        ));
+        // Security review 2026-11-28: results were seeded with invented counts and kept only in
+        // memory (reset on restart, unauthenticated votes). No stored poll exists, so say so.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "NEWSPAPER_POLL_SOURCE_UNAVAILABLE");
     }
 
     @Operation(summary = "독자 여론조사 투표 참여")
     @PostMapping(path = { "/api/v1/newspaper/poll/vote", "/api/newspaper/poll/vote" })
-    public ResponseEntity<?> vote(@RequestBody PollVoteRequest body) {
-        if (body.getOptionId() != null && pollVotes.containsKey(body.getOptionId())) {
-            pollVotes.get(body.getOptionId()).incrementAndGet();
-        }
-        return getPoll();
+    public ResponseEntity<?> vote(@RequestBody(required = false) PollVoteRequest body) {
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "NEWSPAPER_POLL_SOURCE_UNAVAILABLE");
     }
 
     @Operation(summary = "금융 경제 상식 로어 카탈로그 조회")
@@ -113,8 +91,4 @@ public class NewspaperController {
         return ResponseEntity.ok(lore);
     }
 
-    private int calcPct(int count, int total) {
-        if (total <= 0) return 0;
-        return (int) Math.round((count * 100.0) / total);
-    }
 }

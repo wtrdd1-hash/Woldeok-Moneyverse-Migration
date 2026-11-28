@@ -11,6 +11,8 @@ import com.moneyverse.api.domain.help.controller.HelpController;
 import com.moneyverse.api.domain.identity.service.UserAuthService;
 import com.moneyverse.api.domain.space.controller.SpaceController;
 import com.moneyverse.api.domain.space.service.SpaceService;
+import com.moneyverse.api.domain.stock.controller.NewspaperController;
+import com.moneyverse.api.domain.stock.service.StockService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -107,5 +109,11 @@ class FabricatedMemberStateGateTest {
         BlogVerifiedController blog = new BlogVerifiedController();
         unavailable(() -> blog.listArticles(null, 10));
         unavailable(() -> blog.getArticle("anything"));
+    }
+
+    @Test void newspaperPollResultsAreNotSeededOrKeptInMemory() {
+        NewspaperController c = new NewspaperController(mock(StockService.class));
+        unavailable(c::getPoll);
+        unavailable(() -> c.vote(null));
     }
 }
