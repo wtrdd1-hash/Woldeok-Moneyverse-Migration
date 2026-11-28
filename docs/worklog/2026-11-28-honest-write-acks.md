@@ -29,3 +29,17 @@ State CODE_READY on the task branch; not merged, not deployed. S04-CVP HOLD (ent
 ## Not done / follow-up
 - Fabricated *reads* (constant figures in some public/admin GET handlers) are a separate register item.
 - Real implementations (help report via support thread function, backup inventory evidence) are backend functional work.
+
+## Unit 2 — administrator evidence reads (ticket 1b91bf41bb-P3-S-05)
+### Before work
+- [x] main 1df1150e97 unchanged. Inventory of GET handlers that return literals without a canonical source: 65 candidates; administrator evidence screens first.
+### In progress → finished
+- [x] Finding (Medium): API health reported the database OPERATIONAL even when its probe query failed, with invented per-domain latency/success rates labelled ROUTE_METRICS and invented connection/cache figures. Backup inventory (second copy), storage headroom, audit verification/retention/disposition lists (always empty, which would hide a failed chain verification), financial events, chat-report queue, control flags/kill switches, abuse rules and game list answered constants.
+- [x] RED: `FabricatedOperationalEvidenceGateTest` 7/7 failed. GREEN: API health reports the real probe outcome (DEGRADED on failure, latency null), route metrics NOT_MEASURED/null, `isLiveTelemetry` false; the rest answer 503 after the existing role check. One existing test asserted the hard-coded flag and now expects 503 (canonical feature state is `feature_switches`, fail closed).
+- [x] Independent review: Codex REQUEST_CHANGES (unmeasured CPU shown as 0, heap substituted for RSS) → null in Spring, nullable in the dashboard with a frontend test (RED: TypeError on null → GREEN) → Codex APPROVE.
+### Validation (exact SHA 61076e9394)
+- Spring 948 / 0 failures / 0 errors / 0 skipped. Frontend 624 files / 3,261 tests passed; typecheck clean.
+- Not run: database-backed integration and browser QA (no SQL change; dashboard change covered by render tests). G8/G9 HOLD.
+### Follow-up register
+- Real reads via existing SQL functions (audit verifications/retention/dispositions as the legacy gateway does; feature switches) — backend functional work.
+- Remaining constant reads on member/public screens (burn event, warfare season, hot-time, FX portal, quant, ventures, districts, verified blog/help seeds, newspaper poll) — next unit after triage of which are product copy versus live state.
