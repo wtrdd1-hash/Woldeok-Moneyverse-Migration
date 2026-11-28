@@ -11,13 +11,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
+import com.moneyverse.api.domain.media.service.MediaAccessService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.*;
 
 @Tag(name = "Chat Upload", description = "실시간 채팅 및 고객지원 첨부 이미지 업로드 및 조회 API")
@@ -26,20 +24,17 @@ public class ChatUploadController {
 
     private final ImageStorageService storageService;
     private final UserAuthService authService;
-    private final JdbcTemplate jdbcTemplate;
+    private final MediaAccessService access;
 
-    public ChatUploadController(ImageStorageService storageService, UserAuthService authService, JdbcTemplate jdbcTemplate) {
+    public ChatUploadController(ImageStorageService storageService, UserAuthService authService, MediaAccessService access) {
         this.storageService = storageService;
         this.authService = authService;
-        this.jdbcTemplate = jdbcTemplate;
+        this.access = access;
     }
 
-    private Optional<UUID> resolveUserId(HttpServletRequest request) {
-        Optional<SessionInfo> session = authService.resolveSession(request);
-        if (session.isPresent() && session.get().isSignedIn() && session.get().getUserId() != null) {
-            return Optional.of(session.get().getUserId());
-        }
-        return Optional.empty();
+    private Optional<SessionInfo> signedIn(HttpServletRequest request) {
+        return authService.resolveSession(request)
+                .filter(s -> s.isSignedIn() && s.getUserId() != null);
     }
 
     @PostMapping(path = {
@@ -53,8 +48,8 @@ public class ChatUploadController {
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestBody(required = false) byte[] rawBytes) {
 
-        Optional<UUID> userId = resolveUserId(request);
-        if (userId.isEmpty()) {
+        Optional<SessionInfo> session = signedIn(request);
+        if (session.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("detail", "login required"));
         }
 
@@ -71,25 +66,34 @@ public class ChatUploadController {
             return ResponseEntity.badRequest().body(Map.of("error", "업로드할 이미지 파일이 필요합니다."));
         }
 
+        StoredImage stored;
         try {
-            StoredImage stored = storageService.save(payload);
-            Instant now = Instant.now();
-            jdbcTemplate.update(
-                "INSERT INTO chat_media_registry (storage_key, owner_user_id, created_at) VALUES (?, ?, ?)",
-                stored.getStorageKey(), userId.get(), Timestamp.from(now)
-            );
-
-            Map<String, Object> res = new LinkedHashMap<>();
-            res.put("success", true);
-            res.put("url", stored.getUrl());
-            res.put("mimeType", stored.getMimeType());
-            res.put("size", stored.getSize());
-            return ResponseEntity.ok(res);
+            stored = storageService.save(payload, "chat_");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(Map.of("code", "CHAT_MEDIA_STORAGE_UNAVAILABLE"));
         }
+        // Ownership goes through chat_media_register (295): the registry table is revoked from the
+        // application role, so the former direct INSERT always failed and echoed the database error.
+        boolean registered;
+        try {
+            registered = access.registerChatMedia(session.get().getUserId(), stored.getStorageKey());
+        } catch (RuntimeException e) {
+            registered = false;
+        }
+        if (!registered) {
+            storageService.remove(stored.getStorageKey());
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(Map.of("code", "CHAT_MEDIA_REGISTRY_UNAVAILABLE"));
+        }
+
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("success", true);
+        // The visibility function recognises a shared attachment by this exact path in a message.
+        res.put("url", "/api/v1/content/chat/media/" + stored.getStorageKey());
+        res.put("mimeType", stored.getMimeType());
+        res.put("size", stored.getSize());
+        return ResponseEntity.ok(res);
     }
 
     @GetMapping(path = {
@@ -101,6 +105,15 @@ public class ChatUploadController {
     public ResponseEntity<byte[]> getChatMedia(
             HttpServletRequest request,
             @PathVariable("key") String key) {
+        Optional<SessionInfo> session = signedIn(request);
+        if (session.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        // Owner, conversation participant, support thread owner, or an operator with an open console
+        // session (chat_media_visible, 295). One answer for "absent" and "not yours".
+        if (!access.chatMedia(session.get().getUserId(), key, session.get().getSessionId())) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
 
         Optional<byte[]> bytes = storageService.read(key);
         if (bytes.isEmpty()) {

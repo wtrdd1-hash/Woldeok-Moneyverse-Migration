@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.util.Map;
@@ -58,28 +60,9 @@ public class SpaceController {
     @GetMapping("/real-estate/districts")
     @Operation(summary = "가상 부동산 메타버스 특별 구역 목록 조회")
     public ResponseEntity<Map<String, Object>> listDistricts() {
-        return ResponseEntity.ok(Map.of(
-                "districts", List.of(
-                        Map.of(
-                                "id", "district-gangnam-teheran",
-                                "name", "강남 테헤란로 밸리",
-                                "description", "월덕 금융 및 IT 메가 벤처 본사 집중 구역 (상업용 최고 등급)",
-                                "floorPriceWld", 15000000,
-                                "totalLands", 100,
-                                "occupancyRatePercent", 88,
-                                "dailyTaxRatePercent", 0.05
-                        ),
-                        Map.of(
-                                "id", "district-yeouido-finance",
-                                "name", "여의도 국제 금융가",
-                                "description", "증권사 및 헤지펀드 집결지",
-                                "floorPriceWld", 20000000,
-                                "totalLands", 80,
-                                "occupancyRatePercent", 92,
-                                "dailyTaxRatePercent", 0.06
-                        )
-                )
-        ));
+        // Security review 2026-11-28: this served invented live state (figures, standings, boosts,
+        // "verified" content). Unavailable until read from its canonical source.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "REAL_ESTATE_DISTRICT_SOURCE_UNAVAILABLE");
     }
 
     @PostMapping("/purchase")

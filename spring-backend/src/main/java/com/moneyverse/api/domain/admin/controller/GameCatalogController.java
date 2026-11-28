@@ -40,12 +40,9 @@ public class GameCatalogController {
     @GetMapping
     public ResponseEntity<Map<String, Object>> listGames(HttpServletRequest request) {
         verifyAdmin(request);
-        List<Map<String, Object>> games = List.of(
-                Map.of("id", "game-dice", "name", "하이로우 다이스", "category", "CASINO", "status", "ACTIVE", "rtpPercent", 98.5),
-                Map.of("id", "game-slot", "name", "네오 메가 슬롯", "category", "CASINO", "status", "ACTIVE", "rtpPercent", 96.0),
-                Map.of("id", "game-pvp-arena", "name", "PVP 콜로세움 아레나", "category", "PVP", "status", "ACTIVE", "entryFeeWld", 10000)
-        );
-        return ResponseEntity.ok(Map.of("games", games, "count", games.size()));
+        // Security review 2026-11-28: this answered with constants an operator would act on.
+        // Unavailable until read from its canonical source; never invented evidence.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "GAME_CATALOG_SOURCE_UNAVAILABLE");
     }
 
     @PostMapping
@@ -53,17 +50,9 @@ public class GameCatalogController {
             HttpServletRequest request,
             @RequestBody(required = false) Map<String, Object> body) {
         verifyAdmin(request);
-        if (body == null || !body.containsKey("name") || !body.containsKey("category")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "name and category are required");
-        }
-
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("id", "game-" + UUID.randomUUID());
-        res.put("name", body.get("name"));
-        res.put("status", "INACTIVE");
-        res.put("registeredAt", new Date().toInstant().toString());
-        return ResponseEntity.status(HttpStatus.CREATED).body(res);
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "GAME_CATALOG_SOURCE_UNAVAILABLE");
     }
 
     @PatchMapping("/{id}")
@@ -72,11 +61,9 @@ public class GameCatalogController {
             @PathVariable("id") String id,
             @RequestBody(required = false) Map<String, Object> body) {
         verifyAdmin(request);
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("id", id);
-        res.put("updatedAt", new Date().toInstant().toString());
-        return ResponseEntity.ok(res);
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "GAME_CATALOG_SOURCE_UNAVAILABLE");
     }
 
     @PostMapping("/{id}/toggle")
@@ -84,11 +71,8 @@ public class GameCatalogController {
             HttpServletRequest request,
             @PathVariable("id") String id) {
         verifyAdmin(request);
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("id", id);
-        res.put("status", "ACTIVE");
-        res.put("toggledAt", new Date().toInstant().toString());
-        return ResponseEntity.ok(res);
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "GAME_CATALOG_SOURCE_UNAVAILABLE");
     }
 }

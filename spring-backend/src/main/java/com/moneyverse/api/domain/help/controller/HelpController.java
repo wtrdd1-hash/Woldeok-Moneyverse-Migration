@@ -26,62 +26,24 @@ public class HelpController {
 
     @GetMapping("/categories")
     public ResponseEntity<Map<String, Object>> categories(@RequestParam(name = "locale", required = false, defaultValue = "ko") String locale) {
-        Map<String, String> counts = new LinkedHashMap<>();
-        counts.put("account", "12");
-        counts.put("wallet", "8");
-        counts.put("shop", "6");
-        counts.put("community", "15");
-        counts.put("support", "9");
-
-        return ResponseEntity.ok()
-                .headers(noStoreHeaders())
-                .body(Map.of(
-                        "categories", CATEGORIES,
-                        "locale", locale,
-                        "counts", counts
-                ));
+        // Security review 2026-11-28: this served invented live state (figures, standings, boosts,
+        // "verified" content). Unavailable until read from its canonical source.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "HELP_SOURCE_UNAVAILABLE");
     }
 
     @PostMapping("/search")
     public ResponseEntity<Map<String, Object>> search(@RequestBody(required = false) Map<String, Object> body) {
-        String locale = body != null ? (String) body.getOrDefault("locale", "ko") : "ko";
-        String query = body != null ? (String) body.getOrDefault("query", "") : "";
-
-        List<Map<String, Object>> articles = List.of(
-                Map.of(
-                        "id", "art-01",
-                        "title", "계정 2단계 인증(2FA) 및 보안 세션 관리 가이드",
-                        "slug", "account-2fa-security-guide",
-                        "category", "account",
-                        "locale", locale
-                )
-        );
-
-        return ResponseEntity.ok()
-                .headers(noStoreHeaders())
-                .body(Map.of(
-                        "articles", articles,
-                        "requestedLocale", locale,
-                        "resultLocale", locale,
-                        "fallbackUsed", false
-                ));
+        // Security review 2026-11-28: this served invented live state (figures, standings, boosts,
+        // "verified" content). Unavailable until read from its canonical source.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "HELP_SOURCE_UNAVAILABLE");
     }
 
     @GetMapping("/articles/{locale}/{slug}")
     public ResponseEntity<Map<String, Object>> article(
             @PathVariable("locale") String locale,
             @PathVariable("slug") String slug) {
-        Map<String, Object> art = new LinkedHashMap<>();
-        art.put("id", "art-01");
-        art.put("title", "계정 2단계 인증(2FA) 및 보안 세션 관리 가이드");
-        art.put("slug", slug);
-        art.put("locale", locale);
-        art.put("published_revision_id", "rev-2026-01");
-        art.put("contentHtml", "<p>계정 보안을 위한 2FA 인증 방법 상세 안내입니다.</p>");
-        art.put("updatedAt", new Date().toInstant().toString());
-
-        return ResponseEntity.ok()
-                .headers(noStoreHeaders())
-                .body(Map.of("article", art));
+        // Security review 2026-11-28: this served invented live state (figures, standings, boosts,
+        // "verified" content). Unavailable until read from its canonical source.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "HELP_SOURCE_UNAVAILABLE");
     }
 }

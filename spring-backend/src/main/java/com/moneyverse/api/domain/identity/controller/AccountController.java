@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -138,7 +139,9 @@ public class AccountController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("detail", "login required"));
         }
 
-        return ResponseEntity.ok(Map.of("success", true, "unlinked", identityId));
+        // Security review 2026-11-28: this answered success without unlinking anything, so a member
+        // believed a provider was removed while it could still sign in. No unlink function is wired.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "IDENTITY_UNLINK_SOURCE_UNAVAILABLE");
     }
 
     @DeleteMapping(path = {

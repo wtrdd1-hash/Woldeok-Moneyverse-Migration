@@ -200,26 +200,30 @@ public class AuditController {
 
     @GetMapping("/verifications")
     public ResponseEntity<Map<String, Object>> getVerifications() {
-        return ResponseEntity.ok(Map.of("verifications", Collections.emptyList()));
+        // Security review 2026-11-28: this answered with constants an operator would act on.
+        // Unavailable until read from its canonical source; never invented evidence.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AUDIT_INTEGRITY_SOURCE_UNAVAILABLE");
     }
 
     @GetMapping("/retention")
     public ResponseEntity<Map<String, Object>> getRetention() {
-        return ResponseEntity.ok(Map.of("categories", Collections.emptyList()));
+        // Security review 2026-11-28: this answered with constants an operator would act on.
+        // Unavailable until read from its canonical source; never invented evidence.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AUDIT_INTEGRITY_SOURCE_UNAVAILABLE");
     }
 
     @GetMapping("/dispositions")
     public ResponseEntity<Map<String, Object>> getDispositions() {
-        return ResponseEntity.ok(Map.of("dispositions", Collections.emptyList()));
+        // Security review 2026-11-28: this answered with constants an operator would act on.
+        // Unavailable until read from its canonical source; never invented evidence.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AUDIT_INTEGRITY_SOURCE_UNAVAILABLE");
     }
 
     @GetMapping("/financial-events")
     public ResponseEntity<Map<String, Object>> getFinancialEvents(HttpServletRequest request) {
         verifyAdmin(request);
-        List<Map<String, Object>> events = List.of(
-                Map.of("type", "MINT", "amountWld", 1000000000L, "reason", "QUARTERLY_CENTRAL_BANK_ISSUANCE", "timestamp", new Date().toInstant().toString()),
-                Map.of("type", "BURN", "amountWld", 50000000L, "reason", "CASINO_FEE_BURN", "timestamp", new Date().toInstant().toString())
-        );
-        return ResponseEntity.ok(Map.of("events", events));
+        // Security review 2026-11-28: this answered with constants an operator would act on.
+        // Unavailable until read from its canonical source; never invented evidence.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AUDIT_FINANCIAL_EVENTS_SOURCE_UNAVAILABLE");
     }
 }

@@ -2,6 +2,8 @@ package com.moneyverse.api.domain.discord.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.util.*;
 
@@ -27,16 +29,9 @@ public class DiscordController {
 
     @GetMapping("/guilds/status")
     public ResponseEntity<Map<String, Object>> getGuildStatus() {
-        return ResponseEntity.ok(Map.of(
-                "connected", true,
-                "botUsername", "월덕봇#7601",
-                "guildCount", 2,
-                "primaryGuildId", "893480506799292527",
-                "primaryGuildName", "IT프린",
-                "syncedRolesCount", 22,
-                "syncedChannelsCount", 52,
-                "gatewayLatencyMs", 34
-        ));
+        // Security review 2026-11-28: this served invented live state (figures, standings, boosts,
+        // "verified" content). Unavailable until read from its canonical source.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "DISCORD_GUILD_STATUS_SOURCE_UNAVAILABLE");
     }
 
     @PostMapping("/interactions")
