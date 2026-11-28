@@ -34,12 +34,12 @@ export interface DomainHealthData {
 }
 
 export interface SystemTelemetry {
-  readonly cpuLoad1m: number;
+  readonly cpuLoad1m: number | null;
   readonly cpuCores: number;
   readonly totalMemMb: number;
   readonly freeMemMb: number;
   readonly heapUsedMb: number;
-  readonly rssMb: number;
+  readonly rssMb: number | null;
   readonly activeDbConnections: number | null;
   readonly dbCacheHitRatio?: number | null;
 }
@@ -144,7 +144,8 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
   const isLive = data?.isLiveTelemetry === true;
   const telemetry = data?.systemTelemetry;
 
-  const cpuPercent = telemetry ? Math.min(100, Math.round((telemetry.cpuLoad1m / Math.max(1, telemetry.cpuCores)) * 100)) : 0;
+  // null = the host did not measure it; show a dash rather than 0 (security review 2026-11-28).
+  const cpuPercent = telemetry && telemetry.cpuLoad1m !== null ? Math.min(100, Math.round((telemetry.cpuLoad1m / Math.max(1, telemetry.cpuCores)) * 100)) : null;
   const ramPercent = telemetry ? Math.min(100, Math.round((telemetry.heapUsedMb / Math.max(1, telemetry.totalMemMb)) * 100)) : 0;
   const cacheHitRatio = telemetry?.dbCacheHitRatio ?? null;
 
@@ -265,12 +266,12 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
             </CardHeader>
             <CardContent className="p-4 pt-1 space-y-2">
               <div className="flex items-baseline justify-between">
-                <span className="text-xl font-bold font-mono">{telemetry.cpuLoad1m.toFixed(2)}</span>
+                <span className="text-xl font-bold font-mono">{telemetry.cpuLoad1m === null ? '—' : telemetry.cpuLoad1m.toFixed(2)}</span>
                 <span className="text-xs text-muted-foreground font-mono">
-                  {telemetry.cpuCores} Cores ({cpuPercent}%)
+                  {telemetry.cpuCores} Cores{cpuPercent === null ? '' : ` (${cpuPercent}%)`}
                 </span>
               </div>
-              <Progress value={cpuPercent} className="h-1.5" />
+              {cpuPercent !== null && <Progress value={cpuPercent} className="h-1.5" />}
               <div className="text-[11px] text-emerald-500 font-medium">1분 호스트 부하 관측값</div>
             </CardContent>
           </Card>

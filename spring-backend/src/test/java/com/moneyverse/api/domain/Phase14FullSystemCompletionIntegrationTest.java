@@ -89,20 +89,19 @@ public class Phase14FullSystemCompletionIntegrationTest {
     }
 
     @Test
-    @DisplayName("10. DiscordController - 길드 상태 조회 (200 OK)")
+    @DisplayName("10. DiscordController - guild status is not invented (503)")
     void testDiscordGuildStatus() throws Exception {
+        // Security review 2026-11-28: this asserted invented live state; it must answer 503 until real.
         mockMvc.perform(get("/integrations/discord/guilds/status"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.connected").value(true))
-                .andExpect(jsonPath("$.botUsername").value("월덕봇#7601"));
+                .andExpect(status().isServiceUnavailable());
     }
 
     @Test
-    @DisplayName("11. BurnEventController - 통화 소각 드로우 현황 조회 (200 OK)")
+    @DisplayName("11. BurnEventController - burn figures are not invented (503)")
     void testBurnEventCurrent() throws Exception {
+        // Security review 2026-11-28: this asserted invented live state; it must answer 503 until real.
         mockMvc.perform(get("/economy/events/burn-draw/current"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.progressPercent").value(72.5));
+                .andExpect(status().isServiceUnavailable());
     }
 
     @Test
@@ -122,19 +121,20 @@ public class Phase14FullSystemCompletionIntegrationTest {
     }
 
     @Test
-    @DisplayName("14. ControlsController - 퍼블릭 피처 플래그 조회 (200 OK)")
+    @DisplayName("14. ControlsController - flags are not invented; canonical source is feature_switches (503)")
     void testControlsFlags() throws Exception {
+        // Security review 2026-11-28: this asserted a hard-coded flag. Feature state lives in
+        // feature_switches (fail closed); until this route reads it, it must not answer constants.
         mockMvc.perform(get("/controls/flags"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.flags.PVP_ARENA_ENABLED").value(true));
+                .andExpect(status().isServiceUnavailable());
     }
 
     @Test
-    @DisplayName("15. ContentController - 활성 팝업 배너 조회 (200 OK)")
+    @DisplayName("15. ContentController - popups are not invented (503)")
     void testContentPopups() throws Exception {
+        // Security review 2026-11-28: this asserted invented live state; it must answer 503 until real.
         mockMvc.perform(get("/content/popups"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.popups[0].id").value("popup-season-12"));
+                .andExpect(status().isServiceUnavailable());
     }
 
     @Test

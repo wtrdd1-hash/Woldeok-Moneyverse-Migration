@@ -38,9 +38,9 @@ class Phase6IntegrationTest {
         mockMvc.perform(get("/api/space/my")
                         .header("X-User-Id", "00000000-0000-0000-0000-000000000101"))
                 .andExpect(status().isUnauthorized());
+        // Security review 2026-11-28: this asserted invented live state; it must answer 503 until real.
         mockMvc.perform(get("/api/spaces/real-estate/districts"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.districts").isArray());
+                .andExpect(status().isServiceUnavailable());
     }
 
     @Test

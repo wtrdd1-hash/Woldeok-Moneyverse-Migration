@@ -3,6 +3,7 @@ package com.moneyverse.api.domain.safety.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -147,35 +148,24 @@ public class SafetyController {
             @RequestParam(name = "status", required = false) String status,
             @RequestParam(name = "limit", required = false, defaultValue = "50") int limit,
             @RequestParam(name = "offset", required = false, defaultValue = "0") int offset) {
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "reports", Collections.emptyList(),
-                "total", 0
-        ));
+        // Security review 2026-11-28: this answered with constants an operator would act on.
+        // Unavailable until read from its canonical source; never invented evidence.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "CHAT_REPORT_SOURCE_UNAVAILABLE");
     }
 
     @GetMapping("/admin/safety/chat-reports/{id}")
     public ResponseEntity<Map<String, Object>> adminGetChatReport(@PathVariable("id") String reportId) {
-        Map<String, Object> report = new LinkedHashMap<>();
-        report.put("id", reportId);
-        report.put("status", "PENDING");
-        report.put("reason", "inappropriate_behavior");
-        report.put("messagesSnapshot", Collections.emptyList());
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "report", report
-        ));
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "CHAT_REPORT_SOURCE_UNAVAILABLE");
     }
 
     @PostMapping("/admin/safety/chat-reports/{id}/action")
     public ResponseEntity<Map<String, Object>> adminActionChatReport(
             @PathVariable("id") String reportId,
             @RequestBody(required = false) Map<String, Object> body) {
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "reportId", reportId,
-                "action", body != null ? body.getOrDefault("action", "WARNED") : "WARNED",
-                "resolvedAt", new Date().toInstant().toString()
-        ));
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "CHAT_REPORT_SOURCE_UNAVAILABLE");
     }
 }

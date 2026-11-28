@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 
@@ -41,7 +42,10 @@ public class BlackMarketController {
             "/api/v1/market/secret-auction/{auctionId}/bid"
     })
     public ApiResponse<BidLogsResponse> listBidLogs(@PathVariable String auctionId) {
-        return ApiResponse.ok(new BidLogsResponse(blackMarketService.listBidLogs(auctionId)));
+        // Security review 2026-11-28: a sealed auction's bid log (bidder ids, names, amounts) was public
+        // and unauthenticated. Bidding itself is refused until settlement is journaled, so no log is
+        // disclosed either; a later owner-scoped read must go through a function taking the actor.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "SECRET_AUCTION_BID_LOG_NOT_DISCLOSED");
     }
 
     @Operation(summary = "비밀 옥션 신규 입찰 집행")

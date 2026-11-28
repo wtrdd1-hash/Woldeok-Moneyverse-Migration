@@ -60,10 +60,10 @@ public class ProfileImageController {
 
     @DeleteMapping
     public ResponseEntity<Map<String, Object>> deleteProfileImage(HttpServletRequest request) {
-        String userId = getUserIdOrThrow(request);
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "deleted", true
-        ));
+        getUserIdOrThrow(request);
+        // Security review 2026-11-28: this answered deleted=true without removing the image or
+        // clearing the profile. The profile action already reads the owner settings back, so an
+        // honest 503 shows "could not confirm" instead of a removal that never happened.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "PROFILE_IMAGE_DELETE_SOURCE_UNAVAILABLE");
     }
 }
