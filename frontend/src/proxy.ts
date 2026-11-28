@@ -15,9 +15,12 @@ function recordCrawlerHitAsync(request: NextRequest, botName: string, statusCode
     const path = request.nextUrl.pathname;
 
     const SEO_ORIGIN = process.env.AUTH_API_ORIGIN ?? 'http://127.0.0.1:4500';
+    // The API records a hit only with the shared server-side secret (security 2026-11-26).
+    const telemetryToken = process.env.MONEYVERSE_TELEMETRY_TOKEN;
+    if (!telemetryToken) return;
     fetch(`${SEO_ORIGIN}/api/v1/seo/log`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-Moneyverse-Telemetry-Token': telemetryToken },
       body: JSON.stringify({
         botName,
         path,
@@ -68,7 +71,11 @@ export function proxy(request: NextRequest) {
     /\.(?:svg|png|jpg|jpeg|gif|webp|woff2?|ico|css|js)$/i.test(pathname)
   ) {
     const res = NextResponse.next();
-    if (pathname.startsWith('/_next/static/') || /\.(?:woff2?|png|svg|webp)$/i.test(pathname)) {
+    // Authorised media keeps the origin's own Cache-Control (private / no-store / short public):
+    // a shared cache keys on the URL alone, so an immutable stamp here would serve one viewer's
+    // chat attachment, draft photo or members-only image to anyone (security review 2026-11-28).
+    const authorisedMedia = /^\/(?:api|app-api)\//.test(pathname) || pathname.startsWith('/media/');
+    if (!authorisedMedia && (pathname.startsWith('/_next/static/') || /\.(?:woff2?|png|svg|webp)$/i.test(pathname))) {
       res.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
     }
     return res;

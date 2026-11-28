@@ -37,7 +37,9 @@ import { apiOrNull } from '@/lib/api';
 import { formatMoment, groupDigits } from '@/lib/money';
 import { getCockpitEvidence } from './admin-cockpit-evidence';
 import { adminConsole } from '@/lib/session';
-import { ADMIN_AREAS, consoleReturnPath } from './areas';
+import { getServerLocale } from '@/lib/locale-server';
+import { ADMIN_AREAS, areaTitle, consoleReturnPath } from './areas';
+import { ADMIN_HOME_COPY, copyText, type AdminHomeCopyKey } from './admin-copy';
 import { AdminQuickUserSearch } from './admin-quick-search';
 import { CloseConsole, OpenConsole } from './console-gate';
 import { TelemetryPulse } from './components/telemetry-pulse';
@@ -54,34 +56,37 @@ import type {
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: '운영 마스터 관제탑 (Admin Cockpit) · Woldeok Admin',
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getServerLocale();
+  return {
+    title: copyText(locale, ADMIN_HOME_COPY.metaTitle),
+    robots: { index: false, follow: false },
+  };
+}
 
 const AREA_GROUPS = [
   {
     key: 'safety',
     eyebrow: 'SECURITY & MEMBERS',
-    title: '회원 보안 · 이상 거래 탐지',
-    description: '사용자 권한, 이상 거래 차단, IP 보안 및 대외 공개 소식을 통제합니다.',
     badge: '안전 통제',
+    titleKey: 'groupSafetyTitle',
+    descriptionKey: 'groupSafetyDescription',
     color: 'text-amber-400',
   },
   {
     key: 'economy',
     eyebrow: 'FINTECH & SIMULATION',
-    title: '가상 경제 · 핀테크 코어',
-    description: '가상 주식 시장, 국고 비축금, 금융 서비스, 직업/사업 카탈로그를 운영합니다.',
     badge: '경제 엔진',
+    titleKey: 'groupEconomyTitle',
+    descriptionKey: 'groupEconomyDescription',
     color: 'text-emerald-400',
   },
   {
     key: 'records',
     eyebrow: 'AUDIT & TELEMETRY',
-    title: '감사 추적 · 텔레메트리 펄스',
-    description: 'SHA-256 체인 무결성, 접속/체류 텔레메트리, 발송 기록을 실시간 추적합니다.',
     badge: '무결성 감사',
+    titleKey: 'groupRecordsTitle',
+    descriptionKey: 'groupRecordsDescription',
     color: 'text-sky-400',
   },
 ] as const;
@@ -136,13 +141,13 @@ function getAreaIcon(href: string) {
 }
 
 /** Plain names of the metrics that did not answer, so an operator knows which to check. */
-function unverifiedLabels(e: ReturnType<typeof getCockpitEvidence>): string[] {
-  const names: string[] = [];
-  if (e.members.state !== 'verified') names.push('회원');
-  if (e.ledger.state !== 'verified') names.push('원장');
-  if (e.controls.state !== 'verified') names.push('기능 스위치');
-  if (e.stocks.state !== 'verified') names.push('시장');
-  return names.length ? names : ['일부'];
+function unverifiedLabels(e: ReturnType<typeof getCockpitEvidence>): AdminHomeCopyKey[] {
+  const names: AdminHomeCopyKey[] = [];
+  if (e.members.state !== 'verified') names.push('unverifiedMembers');
+  if (e.ledger.state !== 'verified') names.push('unverifiedLedger');
+  if (e.controls.state !== 'verified') names.push('unverifiedControls');
+  if (e.stocks.state !== 'verified') names.push('unverifiedMarket');
+  return names.length ? names : ['unverifiedSome'];
 }
 
 export default async function AdminPage({
@@ -152,10 +157,13 @@ export default async function AdminPage({
 }) {
   const admin = await adminConsole();
   const params = await searchParams;
+  const locale = await getServerLocale();
+  const h = (key: AdminHomeCopyKey, values?: Readonly<Record<string, string>>) =>
+    copyText(locale, ADMIN_HOME_COPY[key], values);
   const next = consoleReturnPath(params.next);
 
   if (admin.consoleSession.state !== 'open') {
-    return <Gate next={next} />;
+    return <Gate next={next} h={h} />;
   }
 
   if (next) redirect(next);
@@ -185,7 +193,7 @@ export default async function AdminPage({
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-xl sm:text-2xl font-black text-zinc-100 tracking-tight">
-                  운영 마스터 관제탑
+                  {h('heading')}
                 </h1>
                 <Badge
                   className={`${
@@ -200,11 +208,11 @@ export default async function AdminPage({
                       evidence.allVerified ? 'bg-emerald-400' : 'bg-amber-400'
                     }`}
                   />
-                  {evidence.allVerified ? '모든 지표 정상 조회' : `${unverifiedLabels(evidence).join('·')} 지표를 불러오지 못했어요`}
+                  {evidence.allVerified ? h('allVerified') : h('unverifiedBadge', { names: unverifiedLabels(evidence).map((key) => h(key)).join('·') })}
                 </Badge>
               </div>
               <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
-                실제 관리자 API에서 조회한 지표입니다. 불러오지 못한 항목은 따로 표시합니다.</p>
+                {h('subtitle')}</p>
             </div>
           </div>
 
@@ -212,19 +220,19 @@ export default async function AdminPage({
             <Button asChild variant="stepup" size="sm" className="rounded-xl text-xs font-extrabold gap-1.5">
               <Link href="/admin/central-bank">
                 <Landmark className="size-3.5" />
-                <span>중앙은행 발의·승인</span>
+                <span>{h('btnCentralBank')}</span>
               </Link>
             </Button>
             <Button asChild variant="surface" size="sm" className="rounded-xl text-xs font-bold gap-1.5">
               <Link href="/admin/controls">
                 <Sliders className="size-3.5 text-rose-400" />
-                <span>킬스위치 제어</span>
+                <span>{h('btnKillSwitch')}</span>
               </Link>
             </Button>
             <Button asChild variant="surface" size="sm" className="rounded-xl text-xs font-bold gap-1.5">
               <Link href="/admin/money-flow">
                 <Coins className="size-3.5 text-emerald-400" />
-                <span>자금 흐름</span>
+                <span>{h('btnMoneyFlow')}</span>
               </Link>
             </Button>
             <CloseConsole />
@@ -240,10 +248,10 @@ export default async function AdminPage({
             <span role="status" className="flex items-center gap-1.5 font-semibold">
               <span className="size-2 rounded-full bg-emerald-400/80" />
               {evidence.ledger.state === 'verified'
-                ? `원장 정합성 보고 ${formatMoment(evidence.ledger.calculatedAt)} (체인 해시 별도)`
+                ? h('ledgerVerified', { at: formatMoment(evidence.ledger.calculatedAt) })
                 : evidence.ledger.state === 'mismatch'
-                  ? `원장 정합성 이상 ${formatMoment(evidence.ledger.calculatedAt)} — 조사 필요`
-                  : '원장 정합성 확인 불가 — 재조회 필요'}
+                  ? h('ledgerMismatch', { at: formatMoment(evidence.ledger.calculatedAt) })
+                  : h('ledgerUnknown')}
             </span>
           </div>
         </div>
@@ -262,7 +270,7 @@ export default async function AdminPage({
                 TREASURY & LEDGER GOVERNANCE
               </span>
               <h2 className="text-lg font-black text-zinc-100 mt-1 flex items-center gap-2">
-                <span>복식부기 원장 · 5대 금고</span>
+                <span>{h('treasuryTitle')}</span>
                 <ArrowRight className="size-4 text-zinc-500 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" />
               </h2>
             </div>
@@ -284,23 +292,23 @@ export default async function AdminPage({
                   : 'UNVERIFIED'}
             </div>
             <p className="text-xs text-zinc-400 mt-1">
-              세수 및 카지노 피구세(10%) 자동 분할 환원 정책 가동 중 (안전비축 30% 불변 가드)
+              {h('treasuryPolicy')}
             </p>
           </div>
 
           {/* 40/30/20/10 국고 5대 금고 환원 비율 스택 바 */}
           <div className="space-y-2 pt-2 border-t border-zinc-800/70">
             <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-zinc-900 border border-zinc-800">
-              <div className="w-[40%] bg-emerald-500" title="복지 40%" />
-              <div className="w-[30%] bg-zinc-500" title="국고 30%" />
-              <div className="w-[20%] bg-sky-500" title="긴급구호 20%" />
-              <div className="w-[10%] bg-amber-500" title="안전비축 10%" />
+              <div className="w-[40%] bg-emerald-500" title={h('barWelfare')} />
+              <div className="w-[30%] bg-zinc-500" title={h('barTreasury')} />
+              <div className="w-[20%] bg-sky-500" title={h('barRelief')} />
+              <div className="w-[10%] bg-amber-500" title={h('barSafety')} />
             </div>
             <div className="grid grid-cols-4 gap-1 text-[10px] font-mono tabular-nums text-zinc-400">
-              <span className="flex items-center gap-1"><i className="size-1.5 rounded-full bg-emerald-500" />복지 40%</span>
-              <span className="flex items-center gap-1"><i className="size-1.5 rounded-full bg-zinc-400" />국고 30%</span>
-              <span className="flex items-center gap-1"><i className="size-1.5 rounded-full bg-sky-500" />구호 20%</span>
-              <span className="flex items-center gap-1"><i className="size-1.5 rounded-full bg-amber-500" />안전 10%</span>
+              <span className="flex items-center gap-1"><i className="size-1.5 rounded-full bg-emerald-500" />{h('legendWelfare')}</span>
+              <span className="flex items-center gap-1"><i className="size-1.5 rounded-full bg-zinc-400" />{h('legendTreasury')}</span>
+              <span className="flex items-center gap-1"><i className="size-1.5 rounded-full bg-sky-500" />{h('legendRelief')}</span>
+              <span className="flex items-center gap-1"><i className="size-1.5 rounded-full bg-amber-500" />{h('legendSafety')}</span>
             </div>
           </div>
         </Link>
@@ -313,7 +321,7 @@ export default async function AdminPage({
             className="rounded-2xl border border-rose-500/25 bg-zinc-950/90 p-5 flex flex-col justify-between gap-3 hover:border-rose-500/60 transition-all"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-zinc-300">비상 킬스위치</span>
+              <span className="text-xs font-bold text-zinc-300">{h('killTitle')}</span>
               <div className="size-8 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 flex items-center justify-center">
                 <Sliders className="size-4" />
               </div>
@@ -321,17 +329,17 @@ export default async function AdminPage({
             <div>
               <div className="text-2xl font-black font-mono tabular-nums text-zinc-100">
                 {evidence.controls.state !== 'verified'
-                  ? '확인 불가'
+                  ? h('unavailable')
                   : evidence.controls.total === 0
-                    ? '스위치 없음'
+                    ? h('noSwitches')
                     : evidence.controls.held > 0
-                      ? `${evidence.controls.held}개 보류`
-                      : '모두 정상'}
+                      ? h('switchesHeld', { count: String(evidence.controls.held) })
+                      : h('allNormal')}
               </div>
               <p className="text-[11px] text-zinc-400 mt-1 font-mono tabular-nums">
                 {evidence.controls.state === 'verified'
-                  ? `총 ${evidence.controls.total}개 플래그 관제`
-                  : '서버 응답 미확인'}
+                  ? h('switchesTotal', { count: String(evidence.controls.total) })
+                  : h('noResponse')}
               </p>
             </div>
           </Link>
@@ -342,19 +350,19 @@ export default async function AdminPage({
             className="rounded-2xl border border-zinc-800/80 bg-zinc-950/90 p-5 flex flex-col justify-between gap-3 hover:border-sky-500/50 transition-all"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-zinc-300">가상 주식 시장</span>
+              <span className="text-xs font-bold text-zinc-300">{h('stocksTitle')}</span>
               <div className="size-8 rounded-xl bg-sky-500/15 border border-sky-500/30 text-sky-400 flex items-center justify-center">
                 <TrendingUp className="size-4" />
               </div>
             </div>
             <div>
               <div className="text-2xl font-black font-mono tabular-nums text-sky-400">
-                {evidence.stocks.state === 'verified' ? `${evidence.stocks.active}종목 상장` : '확인 불가'}
+                {evidence.stocks.state === 'verified' ? h('stocksListed', { count: String(evidence.stocks.active) }) : h('unavailable')}
               </div>
               <p className="text-[11px] text-zinc-400 mt-1 font-mono tabular-nums">
                 {evidence.stocks.state === 'verified'
-                  ? `거래 정지 ${evidence.stocks.halted}종목`
-                  : '서버 응답 미확인'}
+                  ? h('stocksHalted', { count: String(evidence.stocks.halted) })
+                  : h('noResponse')}
               </p>
             </div>
           </Link>
@@ -365,7 +373,7 @@ export default async function AdminPage({
             className="rounded-2xl border border-zinc-800/80 bg-zinc-950/90 p-5 flex flex-col justify-between gap-3 hover:border-amber-500/50 transition-all"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-zinc-300">조회된 회원</span>
+              <span className="text-xs font-bold text-zinc-300">{h('membersTitle')}</span>
               <div className="size-8 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center">
                 <Users className="size-4" />
               </div>
@@ -373,11 +381,11 @@ export default async function AdminPage({
             <div>
               <div className="text-2xl font-black font-mono tabular-nums text-amber-400">
                 {evidence.members.state === 'verified'
-                  ? `${evidence.members.sampledCount.toLocaleString()}명`
-                  : '조회 불가'}
+                  ? h('membersCount', { count: evidence.members.sampledCount.toLocaleString() })
+                  : h('membersUnavailable')}
               </div>
               <p className="text-[11px] text-zinc-400 mt-1">
-                잔액 상위 100명 기준 (전체 회원 수 아님)
+                {h('membersNote')}
               </p>
             </div>
           </Link>
@@ -388,13 +396,13 @@ export default async function AdminPage({
       <Tabs defaultValue="launcher" className="space-y-5">
         <TabsList className="grid grid-cols-3 max-w-md w-full h-11 p-1 bg-zinc-900/90 border border-zinc-800/80 rounded-xl">
           <TabsTrigger value="launcher" className="rounded-lg text-xs sm:text-sm font-bold">
-            핵심 퀵 런처
+            {h('tabLauncher')}
           </TabsTrigger>
           <TabsTrigger value="surfaces" className="rounded-lg text-xs sm:text-sm font-bold">
-            27대 서피스 맵
+            {h('tabSurfaces')}
           </TabsTrigger>
           <TabsTrigger value="telemetry" className="rounded-lg text-xs sm:text-sm font-bold">
-            텔레메트리 펄스
+            {h('tabTelemetry')}
           </TabsTrigger>
         </TabsList>
 
@@ -406,22 +414,22 @@ export default async function AdminPage({
               <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80">
                 <div className="flex items-center gap-2">
                   <Zap className="size-4 text-amber-400" />
-                  <h2 className="text-sm font-bold text-zinc-100">핵심 운영 관제 바로가기</h2>
+                  <h2 className="text-sm font-bold text-zinc-100">{h('launcherTitle')}</h2>
                 </div>
                 <span className="text-xs font-mono text-zinc-400">9 CORE STATIONS</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 {[
-                  { href: '/admin/money-flow', icon: Coins, title: '유저 자금 흐름', desc: '입출금 전수 추적', color: 'text-emerald-400' },
-                  { href: '/admin/treasury', icon: Vault, title: '국고 & 비축금', desc: '원스톱 충전 · 5대 금고', color: 'text-amber-400' },
-                  { href: '/admin/security', icon: ShieldAlert, title: '보안 · IP 차단', desc: '2FA OTP · 이상 거래', color: 'text-rose-400' },
-                  { href: '/admin/market/ai-news', icon: Radio, title: '주식 속보 제어', desc: '1시간 자동 시나리오', color: 'text-sky-400' },
-                  { href: '/admin/blog', icon: ScrollText, title: 'AI 블로그 관리', desc: '에디토리얼 자동 발행', color: 'text-emerald-400' },
-                  { href: '/admin/discord', icon: Bell, title: '디스코드 관제', desc: '관리자 1:1 DM 알림', color: 'text-amber-400' },
-                  { href: '/admin/bonds', icon: ScrollText, title: 'KTB 국채 발행', desc: '이자 쿠폰 자동 정산', color: 'text-blue-400' },
-                  { href: '/admin/pension', icon: HeartHandshake, title: '국민연금 기금', desc: '1시간 정기 지급 스윕', color: 'text-rose-400' },
-                  { href: '/admin/kdic', icon: Shield, title: '예금보험공사', desc: '보호 한도 및 대위변제', color: 'text-sky-400' },
+                  { href: '/admin/money-flow', icon: Coins, title: h('launchMoneyFlowTitle'), desc: h('launchMoneyFlowDesc'), color: 'text-emerald-400' },
+                  { href: '/admin/treasury', icon: Vault, title: h('launchTreasuryTitle'), desc: h('launchTreasuryDesc'), color: 'text-amber-400' },
+                  { href: '/admin/security', icon: ShieldAlert, title: h('launchSecurityTitle'), desc: h('launchSecurityDesc'), color: 'text-rose-400' },
+                  { href: '/admin/market/ai-news', icon: Radio, title: h('launchNewsTitle'), desc: h('launchNewsDesc'), color: 'text-sky-400' },
+                  { href: '/admin/blog', icon: ScrollText, title: h('launchBlogTitle'), desc: h('launchBlogDesc'), color: 'text-emerald-400' },
+                  { href: '/admin/discord', icon: Bell, title: h('launchDiscordTitle'), desc: h('launchDiscordDesc'), color: 'text-amber-400' },
+                  { href: '/admin/bonds', icon: ScrollText, title: h('launchBondsTitle'), desc: h('launchBondsDesc'), color: 'text-blue-400' },
+                  { href: '/admin/pension', icon: HeartHandshake, title: h('launchPensionTitle'), desc: h('launchPensionDesc'), color: 'text-rose-400' },
+                  { href: '/admin/kdic', icon: Shield, title: h('launchKdicTitle'), desc: h('launchKdicDesc'), color: 'text-sky-400' },
                 ].map((item) => {
                   const Icon = item.icon;
                   return (
@@ -446,16 +454,16 @@ export default async function AdminPage({
               <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80">
                 <div className="flex items-center gap-2">
                   <Flame className="size-4 text-rose-400" />
-                  <h2 className="text-sm font-bold text-zinc-100">조회된 회원 자산 순위</h2>
+                  <h2 className="text-sm font-bold text-zinc-100">{h('rankTitle')}</h2>
                 </div>
                 <span className="text-xs text-zinc-400 font-mono">TOP 5</span>
               </div>
 
               <div className="space-y-2">
                 {evidence.members.state === 'unavailable' ? (
-                  <p role="status" className="text-sm text-zinc-400">회원 자산 순위를 확인할 수 없습니다.</p>
+                  <p role="status" className="text-sm text-zinc-400">{h('rankUnavailable')}</p>
                 ) : topUsers.length === 0 ? (
-                  <p className="text-sm text-zinc-400">조회 범위에 표시할 회원이 없습니다.</p>
+                  <p className="text-sm text-zinc-400">{h('rankEmpty')}</p>
                 ) : null}
                 {topUsers.map((u, idx) => (
                   <Link
@@ -488,8 +496,8 @@ export default async function AdminPage({
                     <span className="text-[10px] font-mono font-bold text-zinc-400 uppercase">
                       {group.eyebrow}
                     </span>
-                    <h3 className={`text-base font-bold ${group.color}`}>{group.title}</h3>
-                    <p className="text-xs text-zinc-400 leading-relaxed">{group.description}</p>
+                    <h3 className={`text-base font-bold ${group.color}`}>{h(group.titleKey)}</h3>
+                    <p className="text-xs text-zinc-400 leading-relaxed">{h(group.descriptionKey)}</p>
                   </div>
 
                   <div className="space-y-1.5">
@@ -501,7 +509,7 @@ export default async function AdminPage({
                       >
                         <div className="flex items-center gap-2 text-xs font-semibold text-zinc-200 group-hover:text-emerald-400">
                           {getAreaIcon(area.href)}
-                          <span>{area.title}</span>
+                          <span>{areaTitle(area, locale)}</span>
                         </div>
                         <ArrowRight className="size-3.5 text-zinc-500 group-hover:translate-x-1 transition-transform" />
                       </Link>
@@ -518,10 +526,10 @@ export default async function AdminPage({
           <TelemetryPulse />
           {evidence.members.state === 'verified'
             ? <AdminTelemetryMetricsTable users={allUsers} sampled />
-            : <p role="status" className="rounded-xl border border-zinc-800 p-4 text-sm text-zinc-400">회원 텔레메트리를 확인할 수 없습니다. 서버 조회를 다시 시도하세요.</p>}
+            : <p role="status" className="rounded-xl border border-zinc-800 p-4 text-sm text-zinc-400">{h('telemetryUnavailable')}</p>}
           <div role="status" className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4 text-sm text-zinc-400">
-            전수 경제·회원 통계는 이 화면에서 검증되지 않았습니다. 한정된 회원 목록을 전체 인구·총자산으로 표시하지 않습니다.
-            <Link href="/admin/analytics" className="ml-2 inline-flex min-h-11 items-center font-semibold text-emerald-400 underline underline-offset-2">별도 통계 화면 확인</Link>
+            {h('telemetryNote')}
+            <Link href="/admin/analytics" className="ml-2 inline-flex min-h-11 items-center font-semibold text-emerald-400 underline underline-offset-2">{h('telemetryLink')}</Link>
           </div>
         </TabsContent>
       </Tabs>
@@ -531,8 +539,10 @@ export default async function AdminPage({
 
 function Gate({
   next,
+  h,
 }: {
   readonly next: string | null;
+  readonly h: (key: AdminHomeCopyKey) => string;
 }) {
   return (
     <div className="min-h-[70vh] flex items-center justify-center p-4">
@@ -541,9 +551,9 @@ function Gate({
           <ShieldAlert className="size-8" />
         </div>
         <div className="space-y-2">
-          <h1 className="text-xl font-bold text-zinc-100">운영 콘솔 게이트</h1>
+          <h1 className="text-xl font-bold text-zinc-100">{h('gateTitle')}</h1>
           <p className="text-xs text-zinc-400 leading-relaxed">
-            관리자 관제탑에 접근하려면 관리자 비밀번호 세션 잠금 해제가 필요합니다.
+            {h('gateBody')}
           </p>
         </div>
         <OpenConsole next={next} />

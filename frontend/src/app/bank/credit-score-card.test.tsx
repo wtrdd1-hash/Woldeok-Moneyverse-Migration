@@ -1,6 +1,7 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { renderKo as render } from '@/testing/render-ko';
 import { CreditScoreCard } from './credit-score-card';
 
 describe('CreditScoreCard Component', () => {

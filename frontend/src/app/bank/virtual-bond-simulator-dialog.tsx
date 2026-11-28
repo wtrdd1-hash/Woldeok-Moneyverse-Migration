@@ -23,6 +23,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { groupDigits } from '@/lib/money';
+import { useBankCopy } from './use-bank-copy';
 
 interface VirtualBondSimulatorDialogProps {
   readonly onApply?: (bondCode: 'BOND_7D' | 'BOND_30D', amount: string) => void;
@@ -32,7 +33,7 @@ interface VirtualBondSimulatorDialogProps {
 const BOND_TYPES = [
   {
     code: 'BOND_7D' as const,
-    name: '7일 만기 단기 국채',
+    name: 'bond7Name' as const,
     days: 7,
     yieldRatePct: 3.0,
     yieldBps: 300,
@@ -41,7 +42,7 @@ const BOND_TYPES = [
   },
   {
     code: 'BOND_30D' as const,
-    name: '30일 만기 프리미엄 국채',
+    name: 'bond30Name' as const,
     days: 30,
     yieldRatePct: 15.0,
     yieldBps: 1500,
@@ -57,6 +58,7 @@ export function VirtualBondSimulatorDialog({
   const [open, setOpen] = useState(false);
   const [selectedCode, setSelectedCode] = useState<'BOND_7D' | 'BOND_30D'>('BOND_7D');
   const [principal, setPrincipal] = useState<number>(50000);
+  const { c, locale } = useBankCopy();
 
   const selectedBond = BOND_TYPES.find((b) => b.code === selectedCode) || BOND_TYPES[0];
 
@@ -98,7 +100,7 @@ export function VirtualBondSimulatorDialog({
         {children || (
           <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs font-semibold">
             <Calculator className="size-3.5 text-amber-500" />
-            <span>만기 시뮬레이터</span>
+            <span>{c('bondSimTrigger')}</span>
           </Button>
         )}
       </DialogTrigger>
@@ -106,17 +108,17 @@ export function VirtualBondSimulatorDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calculator className="size-5 text-amber-500" />
-            <span>가상 국채 만기 수익 시뮬레이터</span>
+            <span>{c('bondSimTitle')}</span>
           </DialogTitle>
           <DialogDescription className="text-xs">
-            만기 보유 시의 확정 수익금 및 일반 예금 대비 초과 수익률을 실시간 비교합니다.
+            {c('bondSimDescription')}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           {/* 1. 채권 상품 선택 */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-foreground">투자 상품 선택</label>
+            <label className="text-xs font-bold text-foreground">{c('bondSimProduct')}</label>
             <div className="grid grid-cols-2 gap-2">
               {BOND_TYPES.map((bond) => {
                 const isSelected = selectedCode === bond.code;
@@ -132,13 +134,13 @@ export function VirtualBondSimulatorDialog({
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-foreground">{bond.name}</span>
+                      <span className="text-xs font-bold text-foreground">{c(bond.name)}</span>
                       <Badge variant="outline" className={`font-mono text-[10px] font-bold ${bond.badgeColor}`}>
                         +{bond.yieldRatePct}%
                       </Badge>
                     </div>
                     <p className="text-[11px] text-muted-foreground mt-1">
-                      {bond.days}일 만기 · 연환산 {bond.annualizedPct}%
+                      {c('bondSimTerm', { days: `${bond.days}`, annual: `${bond.annualizedPct}` })}
                     </p>
                   </button>
                 );
@@ -149,7 +151,7 @@ export function VirtualBondSimulatorDialog({
           {/* 2. 투자 원금 설정 (입력 + 슬라이더 + 프리셋) */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <label htmlFor="sim-principal" className="font-bold text-foreground">투자 원금</label>
+              <label htmlFor="sim-principal" className="font-bold text-foreground">{c('bondSimPrincipal')}</label>
               <span className="font-mono font-bold text-primary text-sm">
                 {groupDigits(principal.toString())} WLD
               </span>
@@ -178,7 +180,7 @@ export function VirtualBondSimulatorDialog({
               value={principal}
               onChange={(e) => setPrincipal(Number.parseInt(e.target.value, 10))}
               className="w-full h-2 rounded-lg bg-muted accent-amber-500 cursor-pointer"
-              aria-label="투자 원금 슬라이더"
+              aria-label={c('bondSimSlider')}
             />
 
             <div className="grid grid-cols-4 gap-1.5 pt-0.5">
@@ -189,7 +191,8 @@ export function VirtualBondSimulatorDialog({
                   onClick={() => handleSelectPreset(val)}
                   className="h-8 rounded-lg border border-border/70 bg-muted/30 hover:bg-muted text-[11px] font-mono font-semibold transition-all active:scale-95"
                 >
-                  {val >= 10000 ? `${val / 10000}만` : groupDigits(val.toString())}
+                  {/* Korean keeps its carried-over ten-thousand shorthand; other locales show the grouped amount. */}
+                  {locale === 'ko' && val >= 10000 ? `${val / 10000}만` : groupDigits(val.toString())}
                 </button>
               ))}
             </div>
@@ -200,7 +203,7 @@ export function VirtualBondSimulatorDialog({
             <div className="flex items-center justify-between text-xs border-b border-amber-500/20 pb-2.5">
               <span className="font-semibold text-foreground flex items-center gap-1.5">
                 <Sparkles className="size-3.5 text-amber-500" />
-                <span>만기 총 수령액 (원금+수익)</span>
+                <span>{c('bondSimMaturity')}</span>
               </span>
               <span className="font-mono text-base font-extrabold text-amber-600 dark:text-amber-400">
                 {groupDigits(maturityAmount)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
@@ -209,22 +212,22 @@ export function VirtualBondSimulatorDialog({
 
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div className="rounded-lg bg-background/80 p-2.5 border border-border/60">
-                <span className="text-[11px] text-muted-foreground block">확정 이자 수익</span>
+                <span className="text-[11px] text-muted-foreground block">{c('bondSimInterest')}</span>
                 <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm">
                   +{groupDigits(interestAmount)} WLD
                 </span>
                 <span className="text-[10px] text-muted-foreground block mt-0.5">
-                  약정 수익률 +{selectedBond.yieldRatePct}%
+                  {c('bondSimContract', { rate: `${selectedBond.yieldRatePct}` })}
                 </span>
               </div>
 
               <div className="rounded-lg bg-background/80 p-2.5 border border-border/60">
-                <span className="text-[11px] text-muted-foreground block">일반 예금 대비 초과</span>
+                <span className="text-[11px] text-muted-foreground block">{c('bondSimExcess')}</span>
                 <span className="font-mono font-bold text-primary text-sm">
                   +{groupDigits(excessProfit)} WLD
                 </span>
                 <span className="text-[10px] text-muted-foreground block mt-0.5">
-                  예금 대비 +{excessRatio}% 추가 수익
+                  {c('bondSimExcessRatio', { ratio: `${excessRatio}` })}
                 </span>
               </div>
             </div>
@@ -232,11 +235,11 @@ export function VirtualBondSimulatorDialog({
             <div className="rounded-lg bg-muted/30 p-2.5 text-[11px] text-muted-foreground flex items-center justify-between">
               <span className="flex items-center gap-1">
                 <Calendar className="size-3" />
-                <span>락업 운용 기간: {selectedBond.days}일</span>
+                <span>{c('bondSimLockup', { days: `${selectedBond.days}` })}</span>
               </span>
               <span className="flex items-center gap-1 font-semibold text-foreground">
                 <ShieldCheck className="size-3 text-emerald-500" />
-                <span>만기 도래 시 즉시 전액 지급 보장</span>
+                <span>{c('bondSimGuarantee')}</span>
               </span>
             </div>
           </div>
@@ -244,7 +247,7 @@ export function VirtualBondSimulatorDialog({
 
         <DialogFooter className="gap-2 sm:gap-0">
           <Button type="button" variant="outline" size="sm" onClick={() => setOpen(false)}>
-            닫기
+            {c('close')}
           </Button>
           {onApply && (
             <Button
@@ -253,7 +256,7 @@ export function VirtualBondSimulatorDialog({
               onClick={handleConfirmApply}
               className="bg-amber-600 hover:bg-amber-700 text-white font-semibold gap-1.5"
             >
-              <span>이 조건으로 매입창 바인딩</span>
+              <span>{c('bondSimApply')}</span>
               <ArrowRight className="size-3.5" />
             </Button>
           )}

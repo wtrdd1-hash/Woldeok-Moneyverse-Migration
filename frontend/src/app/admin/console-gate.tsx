@@ -5,6 +5,8 @@ import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { FieldDescription } from '@/components/ui/field';
 import { IDLE } from '@/lib/action-state';
 import { closeConsole, openConsole } from './security-actions';
+import { ADMIN_CHROME_COPY } from './admin-copy';
+import { useAdminCopy } from './use-admin-copy';
 
 /**
  * The door into the operations console.
@@ -23,18 +25,19 @@ export function OpenConsole({
   readonly next?: string | null;
 }) {
   const [state, action] = useActionState(openConsole, IDLE);
+  const { c } = useAdminCopy(ADMIN_CHROME_COPY);
 
   return (
     <div className="grid gap-3">
       <form action={action}>
         {next && <input type="hidden" name="next" value={next} />}
         <SubmitButton disabled={disabled} className="min-h-11">
-          관리자 페이지 열기 →
+          {c('gateOpen')}
         </SubmitButton>
       </form>
       <ActionAlert state={state} />
       <FieldDescription>
-        콘솔 세션은 최대 30일 유지되며, 24시간 사용하지 않으면 잠깁니다.
+        {c('gateSessionNote')}
       </FieldDescription>
     </div>
   );
@@ -42,12 +45,13 @@ export function OpenConsole({
 
 export function CloseConsole() {
   const [state, action] = useActionState(closeConsole, IDLE);
+  const { c } = useAdminCopy(ADMIN_CHROME_COPY);
 
   return (
     <div className="grid gap-2">
       <form action={action}>
         <SubmitButton variant="outline" size="sm" className="min-h-11">
-          콘솔 닫기
+          {c('gateClose')}
         </SubmitButton>
       </form>
       <ActionAlert state={state} />

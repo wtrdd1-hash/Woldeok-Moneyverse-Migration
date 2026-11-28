@@ -33,6 +33,8 @@ class AdminShopCanonicalTest {
         when(admin.resolveVerifiedAdminActor(any())).thenReturn(Optional.of(actor));
         when(admin.isAuthorizedAdmin(any())).thenReturn(true);
         when(admin.hasVerifiedSessionCsrf(any())).thenReturn(true);
+        // Step-up (v2026.11.27.1457.1): these cases test the controller behind a recently re-verified session.
+        when(admin.hasRecentSessionReauthentication(any(), anyInt())).thenReturn(true);
         var session=new SessionInfo();session.setUserId(actor);session.setRoles(List.of("superadmin"));
         when(sessions.resolveSession(any())).thenReturn(Optional.of(session));
         when(jdbc.query(anyString(),any(org.springframework.jdbc.core.RowMapper.class),any(Object[].class)))
@@ -84,4 +86,11 @@ class AdminShopCanonicalTest {
             .andExpect(jsonPath("$.items[0].id").value(item)).andExpect(jsonPath("$.items[0].base_price").value("9007199254740993"));
     }
 
+
+    @Test void aWriteWithoutRecentReauthenticationNeverReachesTheController() throws Exception {
+        when(admin.hasRecentSessionReauthentication(any(), anyInt())).thenReturn(false);
+        mvc.perform(delete("/api/v1/admin/shop/items/"+java.util.UUID.randomUUID()))
+            .andExpect(status().isUnauthorized()).andExpect(jsonPath("$.code").value("reauthentication_required"));
+        verifyNoInteractions(jdbc);
+    }
 }

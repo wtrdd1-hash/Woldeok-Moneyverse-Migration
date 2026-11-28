@@ -3,7 +3,6 @@
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/mutate';
 import { failure, idempotencyKey, mutate } from '@/lib/mutate';
-import { VIP_PASS_CATALOG_ID } from './shop-constants';
 
 interface PurchaseReceipt {
   readonly purchaseId: string;
@@ -64,20 +63,22 @@ export async function buyCatalogItemDirect(
 }
 
 /**
- * Subscribes user to Moneyverse Plus VIP membership (burns 10,000 WLD, adds 30-day VIP pass).
+ * Buys the Moneyverse Plus pass the catalogue returned. The id comes from the catalogue because
+ * seeded catalogue ids differ between environments; a fixed id bought nothing where it was absent.
  */
-export async function subscribePlusMembership(): Promise<PurchaseActionResult> {
-  return buyCatalogItemDirect(VIP_PASS_CATALOG_ID, 1);
+export async function subscribePlusMembership(catalogId: string): Promise<PurchaseActionResult> {
+  return buyCatalogItemDirect(catalogId, 1);
 }
 
 /**
  * Cancels auto-renewal of Moneyverse Plus VIP membership.
  */
 export async function cancelPlusMembership(): Promise<PurchaseActionResult> {
-  revalidatePath('/shop');
+  // W03 (2026-11-27): this used to answer success without calling any server. No cancellation
+  // endpoint exists (a pass simply runs until it expires), so nothing is acknowledged.
   return {
-    success: true,
-    message: 'Plus VIP 구독 취소 접수 완료. 보유 중인 패스 유효기간까지 모든 VIP 혜택이 정상 유지됩니다.',
+    success: false,
+    message: '지금은 구독 취소를 처리할 수 없어요. 보유 중인 패스는 유효기간이 끝나면 자동으로 만료됩니다.',
   };
 }
 

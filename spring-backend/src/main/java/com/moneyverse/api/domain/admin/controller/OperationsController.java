@@ -42,13 +42,9 @@ public class OperationsController {
     @GetMapping("/tasks")
     public ResponseEntity<Map<String, Object>> listTasks(HttpServletRequest request) {
         verifyAdmin(request);
-        List<Map<String, Object>> tasks = List.of(
-                Map.of("name", "BOND_MATURITY_DISPATCHER", "schedule", "0 0 * * *", "lastRunAt", new Date().toInstant().toString(), "status", "IDLE"),
-                Map.of("name", "PENSION_BENEFIT_ACCRUAL", "schedule", "0 6 * * *", "lastRunAt", new Date().toInstant().toString(), "status", "IDLE"),
-                Map.of("name", "STOCK_MARKET_SETTLEMENT", "schedule", "0 18 * * 1-5", "lastRunAt", new Date().toInstant().toString(), "status", "IDLE"),
-                Map.of("name", "SWF_PORTFOLIO_REBALANCE", "schedule", "0 3 * * 0", "lastRunAt", new Date().toInstant().toString(), "status", "IDLE")
-        );
-        return ResponseEntity.ok(Map.of("tasks", tasks));
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "OPERATIONS_SOURCE_UNAVAILABLE");
     }
 
     @PostMapping("/tasks/{name}/run")
@@ -56,13 +52,9 @@ public class OperationsController {
             HttpServletRequest request,
             @PathVariable("name") String name) {
         verifyAdmin(request);
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("taskName", name);
-        res.put("status", "TRIGGERED");
-        res.put("executionId", "exec-" + UUID.randomUUID());
-        res.put("triggeredAt", new Date().toInstant().toString());
-        return ResponseEntity.ok(res);
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "OPERATIONS_SOURCE_UNAVAILABLE");
     }
 
     @PostMapping("/maintenance")
@@ -70,14 +62,8 @@ public class OperationsController {
             HttpServletRequest request,
             @RequestBody(required = false) Map<String, Object> body) {
         verifyAdmin(request);
-        boolean enabled = body != null && Boolean.TRUE.equals(body.get("enabled"));
-        String reason = body != null ? (String) body.getOrDefault("reason", "정기 시스템 점검") : "정기 시스템 점검";
-
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("maintenanceMode", enabled);
-        res.put("reason", reason);
-        res.put("updatedAt", new Date().toInstant().toString());
-        return ResponseEntity.ok(res);
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "OPERATIONS_SOURCE_UNAVAILABLE");
     }
 }

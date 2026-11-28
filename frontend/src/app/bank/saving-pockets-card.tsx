@@ -33,7 +33,6 @@ import {
 } from '@/components/ui/dialog';
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { TranslatedText as T } from '@/components/translated-text';
 import { IDLE } from '@/lib/action-state';
 import { groupDigits } from '@/lib/money';
 import type { SavingPocket } from './types';
@@ -44,6 +43,7 @@ import {
 } from './actions';
 import { SavingGoalCertificateDialog } from './saving-goal-certificate-dialog';
 import { SavingPocketCustomizeDialog } from './saving-pocket-customize-dialog';
+import { useBankCopy } from './use-bank-copy';
 
 interface SavingPocketsCardProps {
   readonly pockets: readonly SavingPocket[];
@@ -88,6 +88,7 @@ export function SavingPocketsCard({
   const [archiveState, handleArchive] = useActionState(archivePocketAction, IDLE);
 
   const activePockets = pockets.filter((p) => !p.is_archived);
+  const { c } = useBankCopy();
 
   return (
     <Card className="border-border/80 bg-card/60 shadow-sm overflow-hidden">
@@ -95,16 +96,13 @@ export function SavingPocketsCard({
         <div>
           <CardTitle className="text-base font-bold flex items-center gap-2">
             <PiggyBank className="size-5 text-amber-500" />
-            <span><T korean="목적별 저축 포켓" english="Saving Pockets" /></span>
+            <span>{c('pocketsTitle')}</span>
             <Badge variant="outline" className="font-mono text-xs ml-1">
-              {activePockets.length}개 운영 중
+              {c('pocketsActiveCount', { count: `${activePockets.length}` })}
             </Badge>
           </CardTitle>
           <CardDescription className="text-xs mt-1">
-            <T
-              korean="비상금, 주식 시드머니, 부동산 청약 등 목적별로 자금을 분리 보관하고 목표를 달성하세요."
-              english="Segregate your funds into purpose-driven pockets to reach your goals."
-            />
+            {c('pocketsDescription')}
           </CardDescription>
         </div>
         <Button
@@ -113,7 +111,7 @@ export function SavingPocketsCard({
           className="shrink-0 text-xs font-semibold gap-1.5 h-9"
         >
           <Plus className="size-3.5" />
-          <span><T korean="새 포켓 개설" english="New Pocket" /></span>
+          <span>{c('pocketsNew')}</span>
         </Button>
       </CardHeader>
 
@@ -125,13 +123,10 @@ export function SavingPocketsCard({
             </div>
             <div className="space-y-1">
               <p className="text-sm font-semibold text-foreground">
-                <T korean="아직 개설된 저축 포켓이 없어요." english="No active saving pockets yet." />
+                {c('pocketsEmptyTitle')}
               </p>
               <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                <T
-                  korean="메인 예금과 별개로 특정 목적에 맞는 목표 금액을 설정하고 저축을 시작해 보세요."
-                  english="Set target amounts and build focused savings apart from your main bank account."
-                />
+                {c('pocketsEmptyBody')}
               </p>
             </div>
             <Button
@@ -141,7 +136,7 @@ export function SavingPocketsCard({
               className="text-xs font-medium"
             >
               <Plus className="size-3.5 mr-1" />
-              <span><T korean="첫 저축 포켓 만들기" english="Create First Pocket" /></span>
+              <span>{c('pocketsCreateFirst')}</span>
             </Button>
           </div>
         ) : (
@@ -174,7 +169,7 @@ export function SavingPocketsCard({
                           {pocket.target_date && (
                             <span className="text-[10px] text-muted-foreground flex items-center gap-1">
                               <Calendar className="size-2.5 shrink-0" />
-                              <span className="truncate">{pocket.target_date} 목표</span>
+                              <span className="truncate">{c('pocketsTargetDate', { date: pocket.target_date })}</span>
                             </span>
                           )}
                         </div>
@@ -190,11 +185,11 @@ export function SavingPocketsCard({
                               className="h-6 px-2 text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/15 hover:bg-amber-500/25 rounded-md gap-1"
                             >
                               <Sparkles className="size-3 text-amber-500" />
-                              <span>명예 증서</span>
+                              <span>{c('pocketsCertificate')}</span>
                             </Button>
                           ) : (
                             <Badge variant="outline" className={`font-mono text-[10px] ${theme.text} border-current/30`}>
-                              {progressPct}% 달성
+                              {c('pocketsProgress', { pct: `${progressPct}` })}
                             </Badge>
                           )}
                         </div>
@@ -202,7 +197,7 @@ export function SavingPocketsCard({
                     </div>
 
                     <div className="space-y-1">
-                      <span className="text-[11px] text-muted-foreground block">현재 모은 금액</span>
+                      <span className="text-[11px] text-muted-foreground block">{c('pocketsSaved')}</span>
                       <div className="flex flex-wrap items-baseline justify-between gap-1">
                         <span className="text-lg font-extrabold font-mono text-foreground">
                           {groupDigits(pocket.balance)}
@@ -233,24 +228,24 @@ export function SavingPocketsCard({
                       onClick={() => setTransferPocket(pocket)}
                     >
                       <ArrowRightLeft className="size-3 mr-1" />
-                      <span>입출금</span>
+                      <span>{c('pocketsTransfer')}</span>
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
                       className="h-8 px-2.5 text-xs font-semibold bg-background/80 hover:bg-background text-muted-foreground hover:text-foreground"
                       onClick={() => setCustomizePocket(pocket)}
-                      title="포켓 테마 커스텀 (색상/아이콘)"
+                      title={c('pocketsThemeTitle')}
                     >
                       <Palette className="size-3 mr-1 text-primary" />
-                      <span>테마</span>
+                      <span>{c('pocketsTheme')}</span>
                     </Button>
                     <Button
                       size="sm"
                       variant="ghost"
                       className="h-8 px-2 text-muted-foreground hover:text-rose-500"
                       onClick={() => setArchiveTarget(pocket)}
-                      title="포켓 해지"
+                      title={c('pocketsArchiveTitle')}
                     >
                       <Archive className="size-3.5" />
                     </Button>
@@ -268,41 +263,38 @@ export function SavingPocketsCard({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <PiggyBank className="size-5 text-amber-500" />
-              <span><T korean="새 저축 포켓 개설" english="Create Saving Pocket" /></span>
+              <span>{c('pocketsCreateTitle')}</span>
             </DialogTitle>
             <DialogDescription className="text-xs">
-              <T
-                korean="목적과 목표 금액을 설정하여 맞춤형 저축 통장을 만듭니다."
-                english="Create a tailored pocket with target amount and date."
-              />
+              {c('pocketsCreateDescription')}
             </DialogDescription>
           </DialogHeader>
 
           <form action={handleCreate} className="space-y-4 py-2">
             <FieldGroup className="gap-3">
               <Field>
-                <FieldLabel className="text-xs font-semibold">포켓 이름</FieldLabel>
+                <FieldLabel className="text-xs font-semibold">{c('pocketsName')}</FieldLabel>
                 <Input
                   name="name"
-                  placeholder="예: 유럽 여행 자금, 비상금"
+                  placeholder={c('pocketsNamePlaceholder')}
                   required
                   className="h-10 text-sm"
                 />
               </Field>
 
               <Field>
-                <FieldLabel className="text-xs font-semibold">목표 금액 (WLD, 선택)</FieldLabel>
+                <FieldLabel className="text-xs font-semibold">{c('pocketsTargetAmount')}</FieldLabel>
                 <Input
                   name="targetAmount"
                   type="number"
                   min="1"
-                  placeholder="예: 10000"
+                  placeholder={c('pocketsTargetAmountPlaceholder')}
                   className="h-10 text-sm font-mono"
                 />
               </Field>
 
               <Field>
-                <FieldLabel className="text-xs font-semibold">목표 달성일 (선택)</FieldLabel>
+                <FieldLabel className="text-xs font-semibold">{c('pocketsTargetDateLabel')}</FieldLabel>
                 <Input
                   name="targetDate"
                   type="date"
@@ -311,7 +303,7 @@ export function SavingPocketsCard({
               </Field>
 
               <Field>
-                <FieldLabel className="text-xs font-semibold">테마 색상</FieldLabel>
+                <FieldLabel className="text-xs font-semibold">{c('themeColor')}</FieldLabel>
                 <div className="flex items-center gap-3 pt-1">
                   {(['sky', 'emerald', 'amber', 'violet', 'rose'] as const).map((color) => (
                     <label key={color} className="flex items-center gap-1.5 cursor-pointer text-xs capitalize">
@@ -333,10 +325,10 @@ export function SavingPocketsCard({
 
             <DialogFooter className="pt-2">
               <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
-                취소
+                {c('cancel')}
               </Button>
               <SubmitButton className="bg-primary text-primary-foreground font-semibold">
-                포켓 개설하기
+                {c('pocketsCreateSubmit')}
               </SubmitButton>
             </DialogFooter>
           </form>
@@ -350,10 +342,10 @@ export function SavingPocketsCard({
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <ArrowRightLeft className="size-5 text-primary" />
-                <span>{transferPocket.name} 자금 이체</span>
+                <span>{c('pocketsTransferTitle', { name: transferPocket.name })}</span>
               </DialogTitle>
               <DialogDescription className="text-xs">
-                포켓 잔액: <strong className="font-mono text-foreground">{groupDigits(transferPocket.balance)} WLD</strong> · 메인 은행: <strong className="font-mono text-foreground">{groupDigits(bankBalance)} WLD</strong>
+                {c('pocketsTransferBalance')}<strong className="font-mono text-foreground">{groupDigits(transferPocket.balance)} WLD</strong>{c('pocketsTransferBank')}<strong className="font-mono text-foreground">{groupDigits(bankBalance)} WLD</strong>
               </DialogDescription>
             </DialogHeader>
 
@@ -362,26 +354,26 @@ export function SavingPocketsCard({
               
               <FieldGroup className="gap-3">
                 <Field>
-                  <FieldLabel className="text-xs font-semibold">이체 방향</FieldLabel>
+                  <FieldLabel className="text-xs font-semibold">{c('pocketsDirection')}</FieldLabel>
                   <div className="grid grid-cols-2 gap-2 pt-1">
                     <label className="flex items-center justify-center gap-2 p-3 rounded-lg border border-border/80 bg-background/60 cursor-pointer font-semibold text-xs hover:border-primary">
                       <input type="radio" name="direction" value="IN" defaultChecked className="accent-primary" />
-                      <span>메인 은행 ➔ 포켓 (입금)</span>
+                      <span>{c('pocketsDirectionIn')}</span>
                     </label>
                     <label className="flex items-center justify-center gap-2 p-3 rounded-lg border border-border/80 bg-background/60 cursor-pointer font-semibold text-xs hover:border-primary">
                       <input type="radio" name="direction" value="OUT" className="accent-primary" />
-                      <span>포켓 ➔ 메인 은행 (출금)</span>
+                      <span>{c('pocketsDirectionOut')}</span>
                     </label>
                   </div>
                 </Field>
 
                 <Field>
-                  <FieldLabel className="text-xs font-semibold">이체 금액 (WLD)</FieldLabel>
+                  <FieldLabel className="text-xs font-semibold">{c('pocketsTransferAmount')}</FieldLabel>
                   <Input
                     name="amount"
                     type="number"
                     min="1"
-                    placeholder="1 WLD 이상 입력"
+                    placeholder={c('pocketsTransferPlaceholder')}
                     required
                     className="h-10 text-sm font-mono"
                   />
@@ -392,10 +384,10 @@ export function SavingPocketsCard({
 
               <DialogFooter className="pt-2">
                 <Button type="button" variant="outline" onClick={() => setTransferPocket(null)}>
-                  취소
+                  {c('cancel')}
                 </Button>
                 <SubmitButton className="font-semibold">
-                  이체 실행
+                  {c('pocketsTransferSubmit')}
                 </SubmitButton>
               </DialogFooter>
             </form>
@@ -410,10 +402,10 @@ export function SavingPocketsCard({
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
                 <Archive className="size-5" />
-                <span>&apos;{archiveTarget.name}&apos; 저축 포켓 해지</span>
+                <span>{c('pocketsArchiveDialogTitle', { name: archiveTarget.name })}</span>
               </DialogTitle>
               <DialogDescription className="text-xs">
-                포켓을 해지하면 보관 중인 잔액 <strong className="font-mono text-foreground">{groupDigits(archiveTarget.balance)} WLD</strong>가 메인 현금 계좌로 즉시 안전하게 반환됩니다.
+                {c('pocketsArchiveBefore')}<strong className="font-mono text-foreground">{groupDigits(archiveTarget.balance)} WLD</strong>{c('pocketsArchiveAfter')}
               </DialogDescription>
             </DialogHeader>
 
@@ -422,17 +414,17 @@ export function SavingPocketsCard({
               
               <div className="rounded-lg bg-rose-500/10 border border-rose-500/30 p-3 text-xs text-rose-700 dark:text-rose-300 flex items-center gap-2">
                 <AlertCircle className="size-4 shrink-0" />
-                <span>해지된 포켓은 복구할 수 없으며 언제든 새 포켓을 개설할 수 있습니다.</span>
+                <span>{c('pocketsArchiveWarning')}</span>
               </div>
 
               <ActionAlert state={archiveState} />
 
               <DialogFooter className="pt-2">
                 <Button type="button" variant="outline" onClick={() => setArchiveTarget(null)}>
-                  취소
+                  {c('cancel')}
                 </Button>
                 <SubmitButton className="bg-rose-600 hover:bg-rose-700 text-white font-semibold">
-                  포켓 해지 및 잔액 회수
+                  {c('pocketsArchiveSubmit')}
                 </SubmitButton>
               </DialogFooter>
             </form>

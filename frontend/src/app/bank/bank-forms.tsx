@@ -16,11 +16,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field';
-import { TranslatedText as T } from '@/components/translated-text';
 import { IDLE } from '@/lib/action-state';
 import { compareAmounts, groupDigits } from '@/lib/money';
 import type { BankBond, BankLoan } from './types';
 import { RepayImpactPreview } from './repay-impact-preview';
+import { INTL_LOCALE } from './copy';
+import { useBankCopy } from './use-bank-copy';
 import {
   borrowAction,
   claimInterestAction,
@@ -68,6 +69,7 @@ export function DepositWithdrawCard({
   const [depositState, doDeposit] = useActionState(depositAction, IDLE);
   const [withdrawState, doWithdraw] = useActionState(withdrawAction, IDLE);
   const [amountStr, setAmountStr] = useState<string>('');
+  const { c } = useBankCopy();
 
   const cash = cashBalance;
   const bank = bankBalance;
@@ -94,13 +96,10 @@ export function DepositWithdrawCard({
             </div>
             <div>
               <CardTitle className="text-lg">
-                <T korean="입금 / 출금 창구" english="Deposit & Withdrawal" />
+                {c('formsDepositTitle')}
               </CardTitle>
               <CardDescription>
-                <T
-                  korean="현금과 복리 예금 계좌 간 WLD를 자유롭게 입출금하세요."
-                  english="Transfer WLD between your cash wallet and compound deposit account."
-                />
+                {c('formsDepositDescription')}
               </CardDescription>
             </div>
           </div>
@@ -115,7 +114,7 @@ export function DepositWithdrawCard({
                 setAmountStr('');
               }}
             >
-              <T korean="예금 입금" english="Deposit" />
+              {c('formsDepositTab')}
             </Button>
             <Button
               type="button"
@@ -127,7 +126,7 @@ export function DepositWithdrawCard({
                 setAmountStr('');
               }}
             >
-              <T korean="현금 출금" english="Withdraw" />
+              {c('formsWithdrawTab')}
             </Button>
           </div>
         </div>
@@ -135,13 +134,13 @@ export function DepositWithdrawCard({
       <CardContent className="grid gap-4">
         <div className="grid grid-cols-2 gap-3 rounded-xl border border-border/50 bg-muted/20 p-3 text-sm">
           <div>
-            <span className="text-xs text-muted-foreground"><T korean="보유 현금" english="Cash Balance" /></span>
+            <span className="text-xs text-muted-foreground">{c('cashBalance')}</span>
             <div className="font-bold">
               <Amount value={cash} currency />
             </div>
           </div>
           <div>
-            <span className="text-xs text-muted-foreground"><T korean="예금 잔액" english="Savings Balance" /></span>
+            <span className="text-xs text-muted-foreground">{c('formsSavingsBalance')}</span>
             <div className="font-bold text-blue-600 dark:text-blue-400">
               <Amount value={bank} currency />
             </div>
@@ -153,20 +152,17 @@ export function DepositWithdrawCard({
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="deposit-amount">
-                  <T korean="입금할 WLD 금액" english="Deposit Amount" />
+                  {c('formsDepositAmount')}
                 </FieldLabel>
                 <AmountInput
                   id="deposit-amount"
                   name="amount"
-                  placeholder="예: 10,000"
+                  placeholder={c('formsDepositPlaceholder')}
                   defaultValue={amountStr}
                   required
                 />
                 <FieldDescription>
-                  <T
-                    korean={`입금 후 잔액이 유지되는 동안 일일 ${dailyRatePct}% 기준으로 복리 이자가 누적됩니다.`}
-                    english={`Compound interest accrues at the current ${dailyRatePct}% daily rate while the balance remains unchanged.`}
-                  />
+                  {c('formsDepositHint', { rate: `${dailyRatePct}` })}
                 </FieldDescription>
               </Field>
             </FieldGroup>
@@ -182,12 +178,12 @@ export function DepositWithdrawCard({
                 +50,000
               </Button>
               <Button type="button" variant="secondary" size="sm" className="h-7 text-xs font-bold" onClick={handleMax}>
-                <T korean="최대 전액" english="MAX" />
+                {c('formsMax')}
               </Button>
             </div>
 
             <SubmitButton className="w-full font-bold">
-              <T korean="실제 WLD 예금 가입·입금하기" english="Open / Deposit WLD Savings" />
+              {c('formsDepositSubmit')}
             </SubmitButton>
             <ActionAlert state={depositState} />
           </form>
@@ -196,20 +192,17 @@ export function DepositWithdrawCard({
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="withdraw-amount">
-                  <T korean="출금할 WLD 금액" english="Withdrawal Amount" />
+                  {c('formsWithdrawAmount')}
                 </FieldLabel>
                 <AmountInput
                   id="withdraw-amount"
                   name="amount"
-                  placeholder="예: 5,000"
+                  placeholder={c('formsWithdrawPlaceholder')}
                   defaultValue={amountStr}
                   required
                 />
                 <FieldDescription>
-                  <T
-                    korean="예금에서 출금되어 즉시 사용 가능한 현금(USER_CASH)으로 전환됩니다."
-                    english="Transfers funds from savings to your spendable cash balance."
-                  />
+                  {c('formsWithdrawHint')}
                 </FieldDescription>
               </Field>
             </FieldGroup>
@@ -225,12 +218,12 @@ export function DepositWithdrawCard({
                 +50,000
               </Button>
               <Button type="button" variant="secondary" size="sm" className="h-7 text-xs font-bold" onClick={handleMax}>
-                <T korean="최대 전액" english="MAX" />
+                {c('formsMax')}
               </Button>
             </div>
 
             <SubmitButton variant="outline" className="w-full font-bold">
-              <T korean="현금으로 출금하기" english="Withdraw to Cash" />
+              {c('formsWithdrawSubmit')}
             </SubmitButton>
             <ActionAlert state={withdrawState} />
           </form>
@@ -252,6 +245,7 @@ export function CompoundInterestCard({
   readonly annualYieldPct: number;
 }) {
   const [state, doClaim] = useActionState(claimInterestAction, IDLE);
+  const { c } = useBankCopy();
   const unclaimed = unclaimedInterest;
   const bank = bankBalance;
 
@@ -265,31 +259,28 @@ export function CompoundInterestCard({
             </div>
             <div>
               <CardTitle className="text-lg">
-                <T korean="일일 복리 이자 정산소" english="Compound Interest Station" />
+                {c('formsInterestTitle')}
               </CardTitle>
               <CardDescription>
-                <T
-                  korean="예금 잔액에 비례해 온디맨드로 정산받는 고수익 복리 이자"
-                  english="Claim accrued compound interest directly into your savings balance."
-                />
+                {c('formsInterestDescription')}
               </CardDescription>
             </div>
           </div>
           <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold">
-            연 {annualYieldPct}% 복리
+            {c('formsInterestBadge', { annual: `${annualYieldPct}` })}
           </Badge>
         </div>
       </CardHeader>
       <CardContent className="grid gap-4">
         <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-center">
           <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            <T korean="현재 정산 대기 이자" english="Accrued Unclaimed Interest" />
+            {c('formsInterestPending')}
           </div>
           <div className="mt-1 text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 tabular">
             +{groupDigits(unclaimed)} <span className="text-base text-muted-foreground font-normal">WLD</span>
           </div>
           <p className="mt-1.5 text-xs text-muted-foreground">
-            일일 {dailyRatePct}% (시간당 실시간 분할 적립) · 최소 30분 예치 후 수령 가능
+            {c('formsInterestRateNote', { rate: `${dailyRatePct}` })}
           </p>
         </div>
 
@@ -299,15 +290,15 @@ export function CompoundInterestCard({
             className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold h-11 shadow-sm"
           >
             <Sparkles className="mr-2 size-4" />
-            <T korean="복리 이자 원클릭 정산 수령" english="Claim Accrued Interest" />
+            {c('formsInterestClaim')}
           </SubmitButton>
         </form>
         <ActionAlert state={state} />
 
         <div className="rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground space-y-1">
-          <p className="font-semibold text-foreground">가상 은행 복리 시스템 안내</p>
-          <p>• 수령한 이자는 예금 계좌로 즉시 재예치되어 원금에 합산되는 자동 복리 구조입니다.</p>
-          <p>• 입금·출금으로 예금 잔액이 바뀌면 새 잔액 기준으로 이자 누적 시간이 다시 시작됩니다.</p>
+          <p className="font-semibold text-foreground">{c('formsInterestGuideTitle')}</p>
+          <p>{c('formsInterestGuide1')}</p>
+          <p>{c('formsInterestGuide2')}</p>
         </div>
       </CardContent>
     </Card>
@@ -334,6 +325,7 @@ export function SmartLoanCard({
   const [borrowState, doBorrow] = useActionState(borrowAction, IDLE);
   const [repayState, doRepay] = useActionState(repayAction, IDLE);
   const [repayAmountStr, setRepayAmountStr] = useState<string>('');
+  const { c, locale } = useBankCopy();
 
   const limit = creditLimit;
   const cash = cashBalance;
@@ -354,25 +346,22 @@ export function SmartLoanCard({
             </div>
             <div>
               <CardTitle className="text-lg">
-                <T korean="등급 기반 신용 대출" english="Grade-based Credit Loan" />
+                {c('formsLoanTitle')}
               </CardTitle>
               <CardDescription>
-                <T
-                  korean="보유 직업 숙련도(Lv.1~10) 및 사업체 자산 가치를 반영한 무담보 신용 한도"
-                  english="Collateral-free credit limit dynamically evaluated by your job levels and business equity."
-                />
+                {c('formsLoanDescription')}
               </CardDescription>
             </div>
           </div>
           <Badge variant={hasActiveLoan ? 'destructive' : 'secondary'} className="font-bold">
-            {hasActiveLoan ? '대출 실행 중' : '대출 가능'}
+            {hasActiveLoan ? c('formsLoanActive') : c('formsLoanAvailable')}
           </Badge>
         </div>
       </CardHeader>
       <CardContent className="grid gap-4">
         <div className="rounded-xl border border-border/50 bg-muted/20 p-4">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">나의 평가 신용 한도</span>
+            <span className="text-muted-foreground">{c('formsLoanLimit')}</span>
             <span className="font-extrabold text-purple-600 dark:text-purple-400">
               <Amount value={limit} currency />
             </span>
@@ -386,8 +375,8 @@ export function SmartLoanCard({
             />
           </div>
           <div className="mt-1.5 flex justify-between text-xs text-muted-foreground">
-            <span>직업·사업 연동 스마트 신용평가</span>
-            <span>한도 소진율: {hasActiveLoan ? percentOf(principal, limit) : 0}%</span>
+            <span>{c('formsLoanScoring')}</span>
+            <span>{c('formsLoanUsage', { pct: `${hasActiveLoan ? percentOf(principal, limit) : 0}` })}</span>
           </div>
         </div>
 
@@ -395,23 +384,23 @@ export function SmartLoanCard({
           <div className="grid gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-bold text-destructive flex items-center gap-1.5">
-                <ShieldAlert className="size-4" /> 실행 중인 대출 명세
+                <ShieldAlert className="size-4" /> {c('formsLoanStatement')}
               </span>
               <span className="text-xs text-muted-foreground">
-                발행: {new Date(activeLoan.issued_at).toLocaleDateString('ko-KR')}
+                {c('formsLoanIssued', { date: new Date(activeLoan.issued_at).toLocaleDateString(INTL_LOCALE[locale]) })}
               </span>
             </div>
             <div className="grid grid-cols-1 gap-2 text-center text-xs py-2 border-y border-destructive/10 min-[480px]:grid-cols-3">
               <div>
-                <span className="text-muted-foreground">대출 원금</span>
+                <span className="text-muted-foreground">{c('formsLoanPrincipal')}</span>
                 <p className="font-bold mt-0.5">{groupDigits(principal)} WLD</p>
               </div>
               <div>
-                <span className="text-muted-foreground">약정 이자</span>
+                <span className="text-muted-foreground">{c('formsLoanInterest')}</span>
                 <p className="font-bold text-amber-600 mt-0.5">+{groupDigits(interest)} WLD</p>
               </div>
               <div>
-                <span className="text-muted-foreground">총 상환 잔액</span>
+                <span className="text-muted-foreground">{c('formsLoanOutstanding')}</span>
                 <p className="font-extrabold text-destructive mt-0.5">{groupDigits(outstanding)} WLD</p>
               </div>
             </div>
@@ -421,14 +410,14 @@ export function SmartLoanCard({
               <FieldGroup>
                 <Field>
                   <FieldLabel htmlFor="repay-amount">
-                    <T korean="상환할 금액 (현금 차감)" english="Repay Amount" />
+                    {c('formsRepayAmount')}
                   </FieldLabel>
                   <AmountInput
                     id="repay-amount"
                     name="amount"
                     value={repayAmountStr}
                     onChange={setRepayAmountStr}
-                    placeholder={`최대 ${groupDigits(outstanding)}`}
+                    placeholder={c('formsRepayPlaceholder', { amount: groupDigits(outstanding) })}
                     required
                   />
                 </Field>
@@ -441,7 +430,7 @@ export function SmartLoanCard({
                   className="h-7 text-xs"
                   onClick={() => setRepayAmountStr(minAmount(cash, halfAmount(outstanding)))}
                 >
-                  반액 상환
+                  {c('formsRepayHalf')}
                 </Button>
                 <Button
                   type="button"
@@ -450,7 +439,7 @@ export function SmartLoanCard({
                   className="h-7 text-xs font-bold"
                   onClick={() => setRepayAmountStr(minAmount(cash, outstanding))}
                 >
-                  전액 상환 (Full)
+                  {c('formsRepayFull')}
                 </Button>
               </div>
               <RepayImpactPreview
@@ -460,7 +449,7 @@ export function SmartLoanCard({
                 repayComplete={repayState.status === 'ok'}
               />
               <SubmitButton className="w-full font-bold">
-                <T korean="대출금 상환하기" english="Repay Loan" />
+                {c('formsRepaySubmit')}
               </SubmitButton>
               <ActionAlert state={repayState} />
             </form>
@@ -470,25 +459,27 @@ export function SmartLoanCard({
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="loan-amount">
-                  <T korean="신청할 대출 금액" english="Loan Amount" />
+                  {c('formsBorrowAmount')}
                 </FieldLabel>
                 <AmountInput
                   id="loan-amount"
                   name="amount"
-                  placeholder={`최대 ${groupDigits(limit)} WLD`}
+                  placeholder={c('formsBorrowPlaceholder', { amount: groupDigits(limit) })}
                   required
                 />
                 <FieldDescription>
-                  <T
-                    korean={`${creditGrade}등급 · ${loanTermDays}일 만기 · 총 이자 ${loanRatePct}% · 최소 상환 ${groupDigits(loanMinimumRepayment)} WLD`}
-                    english={`${creditGrade} grade · ${loanTermDays}-day term · ${loanRatePct}% total interest · minimum repayment ${groupDigits(loanMinimumRepayment)} WLD`}
-                  />
+                  {c('formsBorrowTerms', {
+                    grade: creditGrade,
+                    days: `${loanTermDays}`,
+                    rate: loanRatePct,
+                    minimum: groupDigits(loanMinimumRepayment),
+                  })}
                 </FieldDescription>
               </Field>
             </FieldGroup>
 
             <SubmitButton className="w-full bg-purple-700 hover:bg-purple-800 text-white font-bold">
-              <T korean="신용 대출 신청 및 즉시 입금" english="Apply & Receive Smart Loan" />
+              {c('formsBorrowSubmit')}
             </SubmitButton>
             <ActionAlert state={borrowState} />
           </form>
@@ -509,6 +500,7 @@ export function VirtualBondsCard({
   const [purchaseState, doPurchase] = useActionState(purchaseBondAction, IDLE);
   const [redeemState, doRedeem] = useActionState(redeemBondAction, IDLE);
   const [amountStr, setAmountStr] = useState<string>('10000');
+  const { c } = useBankCopy();
 
   const cash = cashBalance;
 
@@ -522,13 +514,10 @@ export function VirtualBondsCard({
             </div>
             <div>
               <CardTitle className="text-lg">
-                <T korean="가상 국채 / 정기 채권 투자" english="Virtual Sovereign Bonds" />
+                {c('formsBondsTitle')}
               </CardTitle>
               <CardDescription>
-                <T
-                  korean="원하는 기간 동안 WLD를 보관하고 만기에 확정 이자를 챙겨받아요."
-                  english="Lock up WLD for a fixed tenure to earn guaranteed high maturity yields."
-                />
+                {c('formsBondsDescription')}
               </CardDescription>
             </div>
           </div>
@@ -540,7 +529,7 @@ export function VirtualBondsCard({
               }}
             />
             <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold">
-              <T korean={`보유 현금 ${groupDigits(cash)} WLD`} english={`Cash ${groupDigits(cash)} WLD`} />
+              {c('formsBondsCash', { amount: groupDigits(cash) })}
             </Badge>
           </div>
         </div>
@@ -556,12 +545,12 @@ export function VirtualBondsCard({
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="font-bold text-sm"><T korean="7일 만기 단기 국채" english="7-Day Virtual Bond" /></span>
+              <span className="font-bold text-sm">{c('bond7Name')}</span>
               <Badge className="bg-amber-500 text-black font-extrabold">+3.0%</Badge>
             </div>
-            <p className="mt-1 text-xs text-muted-foreground"><T korean="만기 7일 후 원금 + 3% 확정 수익 지급" english="Principal + 3% fixed yield paid upon 7-day maturity" /></p>
+            <p className="mt-1 text-xs text-muted-foreground">{c('formsBond7Detail')}</p>
             <div className="mt-2 text-xs font-semibold text-muted-foreground">
-              <T korean="최소 매입: 1,000 WLD" english="Min: 1,000 WLD" />
+              {c('formsBond7Min')}
             </div>
           </div>
 
@@ -574,12 +563,12 @@ export function VirtualBondsCard({
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="font-bold text-sm"><T korean="30일 만기 프리미엄 국채" english="30-Day Premium Bond" /></span>
+              <span className="font-bold text-sm">{c('bond30Name')}</span>
               <Badge className="bg-amber-500 text-black font-extrabold">+15.0%</Badge>
             </div>
-            <p className="mt-1 text-xs text-muted-foreground"><T korean="만기 30일 후 원금 + 15% 확정 수익 지급" english="Principal + 15% fixed yield paid upon 30-day maturity" /></p>
+            <p className="mt-1 text-xs text-muted-foreground">{c('formsBond30Detail')}</p>
             <div className="mt-2 text-xs font-semibold text-muted-foreground">
-              <T korean="최소 매입: 5,000 WLD" english="Min: 5,000 WLD" />
+              {c('formsBond30Min')}
             </div>
           </div>
         </div>
@@ -589,25 +578,21 @@ export function VirtualBondsCard({
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="bond-amount">
-                <T
-                  korean={`${selectedBond === 'BOND_7D' ? '7일 국채 (+3%)' : '30일 국채 (+15%)'} 매입 금액`}
-                  english="Bond Purchase Amount"
-                />
+                {c('formsBondPurchaseLabel', {
+                  bond: selectedBond === 'BOND_7D' ? c('formsBond7Short') : c('formsBond30Short'),
+                })}
               </FieldLabel>
               <AmountInput
                 id="bond-amount"
                 name="amount"
                 defaultValue={amountStr}
-                placeholder="예: 50,000"
+                placeholder={c('formsBondPlaceholder')}
                 required
               />
               <FieldDescription>
-                <T
-                  korean={`만기 시 예상 수령액: ${groupDigits(
-                    bondMaturityAmount(amountStr, selectedBond === 'BOND_7D' ? 300 : 1500),
-                  )} WLD`}
-                  english="Estimated payout at maturity"
-                />
+                {c('formsBondPayout', {
+                  amount: groupDigits(bondMaturityAmount(amountStr, selectedBond === 'BOND_7D' ? 300 : 1500)),
+                })}
               </FieldDescription>
             </Field>
           </FieldGroup>
@@ -625,19 +610,19 @@ export function VirtualBondsCard({
           </div>
 
           <SubmitButton className="w-full bg-amber-700 hover:bg-amber-800 text-white font-bold">
-            <T korean="국채 투자하기" english="Purchase Virtual Bond" />
+            {c('formsBondSubmit')}
           </SubmitButton>
           <ActionAlert state={purchaseState} />
         </form>
 
         <div className="grid gap-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-bold"><T korean={`나의 보유 국채 목록 (${bonds.length}건)`} english={`My Virtual Bonds (${bonds.length})`} /></span>
+            <span className="text-sm font-bold">{c('formsBondList', { count: `${bonds.length}` })}</span>
           </div>
 
           {bonds.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border/60 p-6 text-center text-xs text-muted-foreground">
-              <T korean="아직 가입한 국채가 없어요. 위 상품으로 만기 이자를 받아보세요." english="You do not hold any virtual treasury bonds. Invest in the bonds above to earn interest." />
+              {c('formsBondEmpty')}
             </div>
           ) : (
             <div className="grid gap-2">
@@ -654,15 +639,15 @@ export function VirtualBondsCard({
                     <div className="flex items-center gap-2">
                       <span className="font-bold">{bond.bond_name}</span>
                       <Badge variant={bond.is_matured ? 'default' : 'secondary'} className="text-[11px] font-bold">
-                        {bond.is_matured ? <T korean="만기 도래 (수령 가능)" english="Matured (Claimable)" /> : <T korean="락업 운용 중" english="Locked (Active)" />}
+                        {bond.is_matured ? c('formsBondMatured') : c('formsBondLocked')}
                       </Badge>
                     </div>
                     <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                      <span><T korean="원금: " english="Principal: " />{groupDigits(bond.principal_amount)} WLD</span>
+                      <span>{c('formsBondPrincipal')}{groupDigits(bond.principal_amount)} WLD</span>
                       <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                        <T korean="만기 수령액: " english="Maturity Payout: " />{groupDigits(bond.maturity_amount)} WLD (+{bond.yield_bps / 100}%)
+                        {c('formsBondMaturityPayout')}{groupDigits(bond.maturity_amount)} WLD (+{bond.yield_bps / 100}%)
                       </span>
-                      <span><T korean="만기일: " english="Maturity Date: " />{new Date(bond.maturity_at).toLocaleDateString()}</span>
+                      <span>{c('formsBondMaturityDate')}{new Date(bond.maturity_at).toLocaleDateString()}</span>
                     </div>
                   </div>
 
@@ -671,7 +656,7 @@ export function VirtualBondsCard({
                       <input type="hidden" name="bondId" value={bond.id} />
                       <SubmitButton size="sm" className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold h-9">
                         <Coins className="mr-1.5 size-4" />
-                        <T korean="원금과 이자 챙겨받기" english="Claim Payout" />
+                        {c('formsBondClaim')}
                       </SubmitButton>
                     </form>
                   )}

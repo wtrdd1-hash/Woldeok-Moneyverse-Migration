@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Moneyverse 통합 디스코드 봇 서비스 (Spring Boot 3.3.5 단일 JAR 런타임)
+ * Moneyverse 통합 디스코드 봇 서비스 (Spring Boot 단일 JAR 런타임)
  * - Lavaplayer 2.2.3 기반 음악 재생
  * - 24/7 지정 음성 채널 상주 및 자동 복구
  * - 주식 및 음악 11대 슬래시 커맨드

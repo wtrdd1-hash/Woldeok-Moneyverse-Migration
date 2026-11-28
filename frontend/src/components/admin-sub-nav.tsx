@@ -34,6 +34,10 @@ import { cn } from '@/lib/cn';
 import { D180_ADMIN_NAV, isAdminItemActive } from '@/components/v10-nav';
 import { AdminQuickJumperModal } from './admin-quick-jumper-modal';
 import { AdminStepupOtpModal } from './admin/admin-stepup-otp-modal';
+import { AdminStepUpStatus } from './admin/admin-step-up-status';
+import { TranslatedText } from './translated-text';
+import { ADMIN_CHROME_COPY, adminTabLabel } from '@/app/admin/admin-copy';
+import { useAdminCopy } from '@/app/admin/use-admin-copy';
 
 type AdminNavGroup = 'all' | 'macro' | 'treasury' | 'market' | 'security' | 'content' | 'system';
 
@@ -106,6 +110,7 @@ export function AdminSubNav() {
   const activeItemRef = useRef<HTMLLIElement>(null);
   const isAdminPath = pathname.startsWith('/admin');
   const active = isAdminPath ? activeAdminTab(pathname) : null;
+  const { locale, c } = useAdminCopy(ADMIN_CHROME_COPY);
 
 
   // 2FA Elevation State
@@ -190,10 +195,16 @@ export function AdminSubNav() {
       <div className="w-full max-w-full min-w-0 space-y-2 mb-4">
         {/* Quick jumper and 2FA elevation; groups live in the DESIGN180 sidebar. */}
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-[var(--g1-line)] bg-[var(--g1-plum)] px-3 py-2">
-          <p className="min-w-0 text-xs text-[var(--g1-muted)]">고위험 작업 전에는 2단계 인증으로 세션을 승격하세요.</p>
+          {/* v2026.11.27.1457.1/1507.1: the server enforces recent password re-verification (step-up,
+              not an independent factor) on every administrator write; the messenger OTP elevation
+              below is kept unchanged pending the owner's decision on the independent factor. */}
+          <p className="min-w-0 text-xs text-[var(--g1-muted)]">
+            <TranslatedText korean="고위험 작업은 최근 15분 안에 비밀번호로 본인 확인을 마친 세션에서만 실행됩니다." english="High-risk actions run only from a session that re-verified its password in the last 15 minutes." japanese="高リスク操作は、直近15分以内にパスワードで本人確認を済ませたセッションでのみ実行されます。" chinese="高风险操作仅能在最近15分钟内通过密码完成身份确认的会话中执行。" vietnamese="Thao tác rủi ro cao chỉ chạy từ phiên đã xác minh lại mật khẩu trong 15 phút gần nhất." />
+          </p>
 
           <div className="flex items-center gap-2 shrink-0">
             <AdminQuickJumperModal />
+            <AdminStepUpStatus />
             {elevated ? (
               <div className="flex items-center gap-1.5 bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 rounded-lg px-2.5 py-1 text-[11px] font-mono tabular-nums font-bold tracking-tight min-h-[32px]">
                 <Unlock className="size-3.5 shrink-0" />
@@ -203,9 +214,9 @@ export function AdminSubNav() {
                   onClick={handleRevoke}
                   disabled={revoking}
                   className="ml-1 rounded bg-rose-500/20 px-1.5 py-0.5 text-[10px] font-sans font-bold text-rose-300 hover:bg-rose-500/35 hover:text-white transition-colors"
-                  title="세션 즉시 잠금"
+                  title={c('subNavLockTitle')}
                 >
-                  잠금
+                  {c('subNavLock')}
                 </button>
               </div>
             ) : (
@@ -213,10 +224,10 @@ export function AdminSubNav() {
                 type="button"
                 onClick={() => setModalOpen(true)}
                 className="flex items-center gap-1.5 bg-amber-500/15 border border-amber-500/35 hover:bg-amber-500/25 text-amber-300 rounded-lg px-2.5 py-1 text-[11px] font-bold transition-all min-h-[32px]"
-                title="텔레그램/디스코드 2FA 세션 승격 (15분)"
+                title={c('subNavElevateTitle')}
               >
                 <Lock className="size-3.5 shrink-0" />
-                <span>2FA 승격</span>
+                <span>{c('subNavElevate')}</span>
               </button>
             )}
           </div>
@@ -225,7 +236,7 @@ export function AdminSubNav() {
         {/* Pages inside the current sidebar group only. */}
         <nav
           ref={navRef}
-          aria-label="관리자 세부 내비게이션"
+          aria-label={c('subNavAria')}
           className="w-full max-w-full min-w-0 mb-4 overflow-x-auto rounded-md border border-[var(--g1-line)] bg-[var(--g1-plum)] p-1.5 scrollbar-none touch-pan-x overscroll-x-contain select-none [&::-webkit-scrollbar]:hidden"
         >
           <ul className="flex w-max items-center gap-1 px-2 sm:w-auto sm:flex-wrap sm:px-0">
@@ -252,7 +263,7 @@ export function AdminSubNav() {
                         isActive ? 'text-[var(--g1-violet)]' : 'text-[var(--g1-muted)] group-hover:text-[var(--g1-ink)]',
                       )}
                     />
-                    <span>{tab.label}</span>
+                    <span>{adminTabLabel(tab.href, tab.label, locale)}</span>
                   </Link>
                 </li>
               );
@@ -266,7 +277,7 @@ export function AdminSubNav() {
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         mode="elevate"
-        actionName="관리자 콘솔 15분 세션 승격"
+        actionName={c('subNavActionName')}
         onSuccess={() => {
           setElevated(true);
           setRemainingSeconds(900);

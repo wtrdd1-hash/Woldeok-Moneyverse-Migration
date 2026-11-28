@@ -6,6 +6,8 @@ import { usePathname } from 'next/navigation';
 import { groupDigits } from '@/lib/money';
 import type { WalletSummary } from '@/lib/wallet-summary';
 import { useMountedViewer } from '@/components/use-mounted-viewer';
+import { useLocale } from '@/components/locale-provider';
+import { t } from '@/lib/translations';
 
 /**
  * The G1 signature: the player HUD (real favicon medal, gold WLD counter).
@@ -16,6 +18,7 @@ import { useMountedViewer } from '@/components/use-mounted-viewer';
  * could not be read is told so instead of shown zero.
  */
 export function PlayerHud({ compact = false }: { readonly compact?: boolean }) {
+  const { locale } = useLocale();
   const viewer = useMountedViewer();
   const pathname = usePathname();
   const [summary, setSummary] = useState<WalletSummary | null>(null);
@@ -48,7 +51,7 @@ export function PlayerHud({ compact = false }: { readonly compact?: boolean }) {
         prefetch={false}
         className="flex min-h-10 items-center rounded-md bg-[var(--g1-violet-ink)] px-4 text-sm font-bold text-[var(--g1-ink)] transition-transform duration-150 active:scale-[0.97]"
       >
-        <span className="whitespace-nowrap">로그인</span>
+        <span className="whitespace-nowrap">{t('home.signIn', locale)}</span>
       </Link>
     );
   }
@@ -59,13 +62,13 @@ export function PlayerHud({ compact = false }: { readonly compact?: boolean }) {
     <Link
       href="/wallet"
       prefetch={false}
-      aria-label={amount ? `내 지갑, ${amount} WLD` : '내 지갑'}
+      aria-label={amount ? `${t('shell.myWallet', locale)}, ${amount} WLD` : t('shell.myWallet', locale)}
       className="flex min-h-10 items-center gap-2 rounded-md border border-[var(--g1-line)] bg-[var(--g1-plum)] py-1 pl-1.5 pr-3 transition-transform duration-150 active:scale-[0.97]"
     >
       {medal}
-      {!compact && <span className="text-sm font-semibold text-[var(--g1-ink)]">내 캐릭터</span>}
+      {!compact && <span className="min-w-0 truncate whitespace-nowrap text-sm font-semibold text-[var(--g1-ink)]">{t('shell.myCharacter', locale)}</span>}
       <span className="flex items-center gap-2" aria-live="polite">
-        <span className="text-sm font-bold tabular-nums text-[var(--g1-gold)]">{amount ?? (summary ? '확인 불가' : '…')}</span>
+        <span className="whitespace-nowrap text-sm font-bold tabular-nums text-[var(--g1-gold)]">{amount ?? (summary ? t('home.unavailable', locale) : '…')}</span>
         {!compact && <span className="text-xs text-[var(--g1-muted)]">WLD</span>}
       </span>
     </Link>

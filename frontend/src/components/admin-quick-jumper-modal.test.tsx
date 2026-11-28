@@ -1,5 +1,6 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
+import { renderKo } from '@/testing/render-ko';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AdminQuickJumperModal } from './admin-quick-jumper-modal';
 
@@ -11,7 +12,7 @@ afterEach(() => {
 
 describe('admin quick jumper overlay', () => {
   it('portals the open dialog outside the clipped, scrolling admin navigation', () => {
-    const { container } = render(
+    const { container } = renderKo(
       <nav aria-label="administrator navigation" className="overflow-x-auto backdrop-blur-xl">
         <AdminQuickJumperModal />
       </nav>,
@@ -25,7 +26,7 @@ describe('admin quick jumper overlay', () => {
   });
 
   it('closes the overlay without leaving the route list in the navigation', () => {
-    render(
+    renderKo(
       <nav>
         <AdminQuickJumperModal />
       </nav>,

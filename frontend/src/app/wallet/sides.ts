@@ -1,3 +1,7 @@
+import { pick } from '@/lib/copy';
+import type { Locale } from '@/lib/locale';
+import { COPY } from './copy';
+
 /**
  * The wallet's row shapes, and the one rule for reading a posting.
  *
@@ -68,18 +72,24 @@ export function postingAmount(entry: TransactionView): string | null {
   return entry.netAmount.startsWith('-') ? entry.netAmount.slice(1) : entry.netAmount;
 }
 
-/** Display labels describe only the owner's view, never every ledger leg. */
-export function sides(entry: TransactionView): { debit: string; credit: string } {
+/**
+ * Display labels describe only the owner's view, never every ledger leg.
+ * `locale` defaults to Korean, the carried-over copy; the pages pass the request locale.
+ */
+export function sides(entry: TransactionView, locale: Locale = 'ko'): { debit: string; credit: string } {
   const pockets = pocketBreakdown(entry);
+  const cash = pick(locale, COPY.pocketCash);
+  const bank = pick(locale, COPY.pocketBank);
+  const mine = pick(locale, COPY.pocketMine);
   if (entry.netAmount === '0' && pockets) {
     if (pockets.cashDelta.startsWith('-') && BigInt(pockets.bankDelta) > 0n) {
-      return { debit: '활동 지갑', credit: '은행 보관함' };
+      return { debit: cash, credit: bank };
     }
     if (pockets.bankDelta.startsWith('-') && BigInt(pockets.cashDelta) > 0n) {
-      return { debit: '은행 보관함', credit: '활동 지갑' };
+      return { debit: bank, credit: cash };
     }
   }
   return entry.direction === 'out'
-    ? { debit: '내 지갑', credit: entry.label }
-    : { debit: entry.label, credit: '내 지갑' };
+    ? { debit: mine, credit: entry.label }
+    : { debit: entry.label, credit: mine };
 }

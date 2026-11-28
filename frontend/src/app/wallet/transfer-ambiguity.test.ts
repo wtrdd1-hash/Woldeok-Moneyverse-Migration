@@ -11,6 +11,7 @@ vi.mock('@/lib/mutate', () => ({
   failure: (_error: unknown, fallback: string) => ({ status: 'error', message: fallback }),
 }));
 vi.mock('next/cache', () => ({ revalidatePath: revalidateMock }));
+vi.mock('@/lib/locale-server', () => ({ getServerLocale: async () => 'ko' }));
 vi.mock('@/lib/api', () => ({
   ApiError: class extends Error {
     constructor(readonly status: number) { super('backend rejected'); }

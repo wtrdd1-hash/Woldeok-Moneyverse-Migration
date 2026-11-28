@@ -35,42 +35,25 @@ public class BurnEventController {
 
     @GetMapping("/current")
     public ResponseEntity<Map<String, Object>> getCurrentBurnEvent() {
-        return ResponseEntity.ok(Map.of(
-                "eventId", "burn-round-2026-11",
-                "title", "제4회 국가 부채 감축 WLD 대량 소각 드로우",
-                "totalBurnedWld", 1450000000L,
-                "burnTargetWld", 2000000000L,
-                "progressPercent", 72.5,
-                "participantCount", 3840,
-                "jackpotPoolWld", 500000000L,
-                "drawDate", "2026-11-20T12:00:00Z"
-        ));
+        // Security review 2026-11-28: this served invented live state (figures, standings, boosts,
+        // "verified" content). Unavailable until read from its canonical source.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "BURN_DRAW_SOURCE_UNAVAILABLE");
     }
 
     @PostMapping("/participate")
     public ResponseEntity<Map<String, Object>> participateBurn(
             HttpServletRequest request,
             @RequestBody(required = false) Map<String, Object> body) {
-        String userId = getUserIdOrThrow(request);
-        if (body == null || !body.containsKey("burnAmountWld")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "burnAmountWld is required");
-        }
-
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("userId", userId);
-        res.put("burnedAmountWld", body.get("burnAmountWld"));
-        res.put("ticketCount", 10);
-        res.put("burnedAt", new Date().toInstant().toString());
-        return ResponseEntity.ok(res);
+        getUserIdOrThrow(request);
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "BURN_DRAW_SOURCE_UNAVAILABLE");
     }
 
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getCumulativeStats() {
-        return ResponseEntity.ok(Map.of(
-                "cumulativeBurnedWld", 8500000000L,
-                "totalEventsHeld", 4,
-                "deflationContributionBps", 145
-        ));
+        // Security review 2026-11-28: this served invented live state (figures, standings, boosts,
+        // "verified" content). Unavailable until read from its canonical source.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "BURN_DRAW_SOURCE_UNAVAILABLE");
     }
 }

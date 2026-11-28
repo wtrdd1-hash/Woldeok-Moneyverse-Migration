@@ -1,6 +1,7 @@
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { renderKo } from '@/testing/render-ko';
 import { AdminConsoleFrame as AdminLayout } from './layout';
 import AdminGate from './layout';
 
@@ -21,7 +22,7 @@ vi.mock('@/components/admin-sub-nav', () => ({
 
 describe('Admin layout visual transition', () => {
   it('wraps the original admin navigation and content in a scoped v2 theme', () => {
-    const { container } = render(<AdminLayout><p>Protected original content</p></AdminLayout>);
+    const { container } = renderKo(<AdminLayout><p>Protected original content</p></AdminLayout>);
     expect(container.querySelector('[data-admin-theme="g1-gm"]')).not.toBeNull();
     expect(screen.getByTestId('admin-sub-nav')).toBeDefined();
     expect(screen.getByText('Protected original content')).toBeDefined();
@@ -30,7 +31,7 @@ describe('Admin layout visual transition', () => {
   });
 
   it('has a visible non-fabricated status disclaimer rather than pretending backend is healthy', () => {
-    render(<AdminLayout><p>Protected data</p></AdminLayout>);
+    renderKo(<AdminLayout><p>Protected data</p></AdminLayout>);
     expect(screen.getByText(/서비스 상태는 각 관리자 API의 실제 조회 결과를 기준으로 표시/)).toBeDefined();
   });
 });
@@ -48,7 +49,7 @@ describe('Admin layout server gate', () => {
 
   it('renders the console frame for an administrator', async () => {
     viewerMock.current = { signedIn: true, consentCurrent: true, adminRoles: ['superadmin'] };
-    render(await AdminGate({ children: <p>Admin content</p> }));
+    renderKo(await AdminGate({ children: <p>Admin content</p> }));
     expect(screen.getByTestId('admin-sub-nav')).toBeDefined();
     expect(screen.getByText('Admin content')).toBeDefined();
   });

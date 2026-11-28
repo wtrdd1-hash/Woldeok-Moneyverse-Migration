@@ -1,6 +1,8 @@
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, waitFor } from '@testing-library/react';
+// Korean copy is asserted; the application default became English (I18N-02).
+import { renderKo as render } from '@/testing/render-ko';
 
 vi.mock('./actions', () => ({
   transfer: vi.fn(async () => ({ status: 'idle' })),

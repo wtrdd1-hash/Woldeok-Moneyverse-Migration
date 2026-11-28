@@ -35,6 +35,8 @@ import type { AdminMemberSnapshotScope } from './user-directory-evidence';
 import { AdminTelemetryMetricsTable } from '../components/admin-telemetry-metrics-table';
 import { AdminComprehensiveTelemetryMatrix } from '../components/admin-comprehensive-telemetry-matrix';
 import { AdminDirectMessageDialog } from '../admin-forms';
+import { useAdminCopy } from '../use-admin-copy';
+import { ADMIN_USERS_COPY } from './copy';
 
 type StatusFilter = 'all' | 'active' | 'restricted';
 type SortOption = 'wealth' | 'cash' | 'stock' | 'lastSeen' | 'created';
@@ -45,8 +47,8 @@ function accessEpoch(value: string | null | undefined): number {
   return Number.isNaN(parsed) ? 0 : parsed;
 }
 
-function accessTime(value: string | null | undefined): string {
-  if (!value || accessEpoch(value) === 0) return '기록 없음';
+function accessTime(value: string | null | undefined, noRecord: string): string {
+  if (!value || accessEpoch(value) === 0) return noRecord;
   return new Date(value).toLocaleString('ko-KR', {
     timeZone: 'Asia/Seoul',
     year: 'numeric',
@@ -63,6 +65,7 @@ export function UserDirectory({ users, scope = null }: { readonly users: readonl
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<StatusFilter>('all');
   const [sort, setSort] = useState<SortOption>('wealth');
+  const { c } = useAdminCopy(ADMIN_USERS_COPY);
 
   const isComplete = scope?.hasMore === false;
   const restrictedCount = users.filter((user) => user.restricted_at !== null).length;
@@ -124,8 +127,8 @@ export function UserDirectory({ users, scope = null }: { readonly users: readonl
     <div className="grid gap-6">
       <div role="status" aria-live="polite" className="rounded-lg border border-amber-500/40 bg-amber-500/5 px-4 py-3 text-sm text-foreground">
         {isComplete
-          ? `조회 시점에 추가 회원 행이 확인되지 않았습니다 (${users.length}명). 검색은 조회된 목록을 대상으로 합니다.`
-          : `정렬된 회원 최대 ${scope?.limit ?? 50}명만 표시합니다. 검색은 조회된 목록으로 제한되며, 아래 숫자는 전체 회원 통계가 아닙니다.`}
+          ? c('scopeComplete', { count: String(users.length) })
+          : c('scopePartial', { limit: String(scope?.limit ?? 50) })}
       </div>
       {/* 상단 통계 요약 카드 4종 */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -136,8 +139,8 @@ export function UserDirectory({ users, scope = null }: { readonly users: readonl
               <UsersRound className="size-5" />
             </span>
             <div className="grid gap-0.5">
-              <span className="text-xs text-muted-foreground font-medium">조회된 회원</span>
-              <strong className="text-2xl font-bold tracking-tight">{users.length}명</strong>
+              <span className="text-xs text-muted-foreground font-medium">{c('statLoaded')}</span>
+              <strong className="text-2xl font-bold tracking-tight">{c('people', { count: String(users.length) })}</strong>
             </div>
           </CardContent>
         </Card>
@@ -149,8 +152,8 @@ export function UserDirectory({ users, scope = null }: { readonly users: readonl
               <UserRoundCheck className="size-5" />
             </span>
             <div className="grid gap-0.5">
-              <span className="text-xs text-muted-foreground font-medium">조회된 정상 이용</span>
-              <strong className="text-2xl font-bold tracking-tight">{activeCount}명</strong>
+              <span className="text-xs text-muted-foreground font-medium">{c('statActive')}</span>
+              <strong className="text-2xl font-bold tracking-tight">{c('people', { count: String(activeCount) })}</strong>
             </div>
           </CardContent>
         </Card>
@@ -162,9 +165,9 @@ export function UserDirectory({ users, scope = null }: { readonly users: readonl
               <ShieldAlert className="size-5" />
             </span>
             <div className="grid gap-0.5">
-              <span className="text-xs text-muted-foreground font-medium">조회된 이용 제한</span>
+              <span className="text-xs text-muted-foreground font-medium">{c('statRestricted')}</span>
               <strong className={`text-2xl font-bold tracking-tight ${restrictedCount > 0 ? 'text-destructive' : ''}`}>
-                {restrictedCount}명
+                {c('people', { count: String(restrictedCount) })}
               </strong>
             </div>
           </CardContent>
@@ -177,7 +180,7 @@ export function UserDirectory({ users, scope = null }: { readonly users: readonl
               <Coins className="size-5" />
             </span>
             <div className="grid gap-0.5">
-              <span className="text-xs text-muted-foreground font-medium">조회된 회원 순자산 합계</span>
+              <span className="text-xs text-muted-foreground font-medium">{c('statNetWorth')}</span>
               <strong className="text-xl font-bold tracking-tight font-mono text-amber-600 dark:text-amber-400">
                 {groupDigits(totalNetWorth)}
                 <span className="text-xs font-normal text-muted-foreground ml-1">WLD</span>
@@ -201,17 +204,17 @@ export function UserDirectory({ users, scope = null }: { readonly users: readonl
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <CardTitle className="text-base font-bold flex items-center gap-2">
-                <Crown className="size-4 text-amber-500" /> 회원 부자 순위(Leaderboard) 및 자산 관리
+                <Crown className="size-4 text-amber-500" /> {c('leaderTitle')}
               </CardTitle>
               <p className="text-xs text-muted-foreground mt-1">
-                회원별 총 순자산 랭킹과 활동 상태를 확인하고, 각 행의 <span className="font-semibold text-emerald-400">[쪽지]</span> 버튼을 통해 1:1 공식 공지 및 알림을 즉시 발송할 수 있습니다.
+                {c('leaderNoteBefore')}<span className="font-semibold text-emerald-400">{c('leaderNoteTag')}</span>{c('leaderNoteAfter')}
               </p>
             </div>
 
             {/* 정렬 옵션 탭 */}
             <div className="flex flex-nowrap overflow-x-auto no-scrollbar items-center gap-1.5 bg-muted/40 p-1 rounded-lg border text-xs max-w-full">
               <span className="text-[0.7rem] font-bold text-muted-foreground px-2 flex items-center gap-1 shrink-0">
-                <SlidersHorizontal className="size-3" /> 정렬:
+                <SlidersHorizontal className="size-3" /> {c('sortLabel')}
               </span>
               <Button
                 type="button"
@@ -220,7 +223,7 @@ export function UserDirectory({ users, scope = null }: { readonly users: readonl
                 onClick={() => setSort('wealth')}
                 className="min-h-[44px] text-xs font-medium shrink-0"
               >
-                🏆 부자 순위 순
+                {c('sortWealth')}
               </Button>
               <Button
                 type="button"
@@ -229,7 +232,7 @@ export function UserDirectory({ users, scope = null }: { readonly users: readonl
                 onClick={() => setSort('cash')}
                 className="min-h-[44px] text-xs font-medium shrink-0"
               >
-                💵 현금 많은 순
+                {c('sortCash')}
               </Button>
               <Button
                 type="button"
@@ -238,7 +241,7 @@ export function UserDirectory({ users, scope = null }: { readonly users: readonl
                 onClick={() => setSort('stock')}
                 className="min-h-[44px] text-xs font-medium shrink-0"
               >
-                📈 주식 자산 순
+                {c('sortStock')}
               </Button>
               <Button
                 type="button"
@@ -247,7 +250,7 @@ export function UserDirectory({ users, scope = null }: { readonly users: readonl
                 onClick={() => setSort('lastSeen')}
                 className="min-h-[44px] text-xs font-medium shrink-0"
               >
-                최근 접속 순
+                {c('sortLastSeen')}
               </Button>
               <Button
                 type="button"
@@ -256,7 +259,7 @@ export function UserDirectory({ users, scope = null }: { readonly users: readonl
                 onClick={() => setSort('created')}
                 className="min-h-[44px] text-xs font-medium shrink-0"
               >
-                최근 가입 순
+                {c('sortCreated')}
               </Button>
             </div>
           </div>
@@ -266,21 +269,21 @@ export function UserDirectory({ users, scope = null }: { readonly users: readonl
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <label className="relative block w-full lg:max-w-md">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <span className="sr-only">사용자 검색</span>
+              <span className="sr-only">{c('searchLabel')}</span>
               <Input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="닉네임 또는 사용자 UUID 검색..."
+                placeholder={c('searchPlaceholder')}
                 className="min-h-[44px] pl-9 text-sm"
               />
             </label>
 
-            <div className="flex flex-wrap gap-1.5" role="group" aria-label="사용자 상태 필터">
+            <div className="flex flex-wrap gap-1.5" role="group" aria-label={c('statusFilter')}>
               {([
-                ['all', '전체'],
-                ['active', '정상'],
-                ['restricted', '제한됨'],
-              ] as const).map(([value, label]) => (
+                ['all', 'filterAll'],
+                ['active', 'statusActive'],
+                ['restricted', 'statusRestricted'],
+              ] as const).map(([value, labelKey]) => (
                 <Button
                   key={value}
                   type="button"
@@ -290,7 +293,7 @@ export function UserDirectory({ users, scope = null }: { readonly users: readonl
                   aria-pressed={status === value}
                   className="min-h-[44px] text-xs"
                 >
-                  {label}
+                  {c(labelKey)}
                 </Button>
               ))}
             </div>
@@ -298,31 +301,31 @@ export function UserDirectory({ users, scope = null }: { readonly users: readonl
 
           <div className="flex items-start justify-between gap-3 text-xs text-muted-foreground">
             <span>
-              조회 조건에 맞는 회원 <strong className="text-foreground">{filtered.length}명</strong>
+              {c('matching')} <strong className="text-foreground">{c('people', { count: String(filtered.length) })}</strong>
             </span>
             <span className="hidden text-right text-[0.72rem] sm:block">
-              순자산 = 지갑 현금 + 은행 예금 + 활성 국채 + 주식 실시간 평가액
+              {c('netWorthFormula')}
             </span>
           </div>
 
           {filtered.length === 0 ? (
             <div className="grid place-items-center gap-2 rounded-xl border border-dashed p-10 text-center text-muted-foreground">
               <UsersRound className="size-8 opacity-40" />
-              <p className="text-sm font-medium">{isComplete ? '검색 조건과 일치하는 회원이 없습니다.' : '조회된 목록에서는 검색 조건과 일치하는 회원이 없습니다.'}</p>
-              <p className="text-xs">검색어를 수정하거나 상태 필터를 변경해 보세요.</p>
+              <p className="text-sm font-medium">{isComplete ? c('emptyComplete') : c('emptyPartial')}</p>
+              <p className="text-xs">{c('emptyHint')}</p>
             </div>
           ) : (
             <div className="rounded-xl border border-border/70 md:overflow-x-auto">
               <Table className="block md:table">
                 <TableHeader className="hidden bg-muted/30 md:table-header-group">
                   <TableRow>
-                    <TableHead className="w-16 text-center font-bold">순위</TableHead>
-                    <TableHead>회원 정보</TableHead>
-                    <TableHead className="text-right font-bold">총 순자산</TableHead>
-                    <TableHead>자산 세부 구성</TableHead>
-                    <TableHead>최근 접속</TableHead>
-                    <TableHead className="text-center">상태</TableHead>
-                    <TableHead className="text-right">관리 조치</TableHead>
+                    <TableHead className="w-16 text-center font-bold">{c('colRank')}</TableHead>
+                    <TableHead>{c('colMember')}</TableHead>
+                    <TableHead className="text-right font-bold">{c('colNetWorth')}</TableHead>
+                    <TableHead>{c('colBreakdown')}</TableHead>
+                    <TableHead>{c('colLastSeen')}</TableHead>
+                    <TableHead className="text-center">{c('colStatus')}</TableHead>
+                    <TableHead className="text-right">{c('colActions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody className="block divide-y md:table-row-group md:divide-y-0">
@@ -369,24 +372,24 @@ export function UserDirectory({ users, scope = null }: { readonly users: readonl
                         {/* 자산 세부 구성 칩들 */}
                         <TableCell className="col-span-2 p-0 md:table-cell md:p-2">
                           <div className="flex flex-wrap gap-1.5 max-w-sm">
-                            <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 font-mono text-[0.7rem] text-foreground" title="지갑 현금">
+                            <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 font-mono text-[0.7rem] text-foreground" title={c('chipCash')}>
                               <Wallet className="size-3 text-emerald-500" />
                               {groupDigits(cash)} WLD
                             </span>
                             {compareAmounts(bank, '0') > 0 && (
-                              <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 font-mono text-[0.7rem] text-foreground" title="은행 예금">
+                              <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 font-mono text-[0.7rem] text-foreground" title={c('chipBank')}>
                                 <PiggyBank className="size-3 text-blue-500" />
                                 {groupDigits(bank)} WLD
                               </span>
                             )}
                             {compareAmounts(bond, '0') > 0 && (
-                              <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 font-mono text-[0.7rem] text-foreground" title="가상 국채">
+                              <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 font-mono text-[0.7rem] text-foreground" title={c('chipBond')}>
                                 <Landmark className="size-3 text-purple-500" />
                                 {groupDigits(bond)} WLD
                               </span>
                             )}
                             {compareAmounts(stock, '0') > 0 && (
-                              <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 font-mono text-[0.7rem] text-foreground" title="보유 주식 평가액">
+                              <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 font-mono text-[0.7rem] text-foreground" title={c('chipStock')}>
                                 <TrendingUp className="size-3 text-amber-500" />
                                 {groupDigits(stock)} WLD
                               </span>
@@ -397,10 +400,10 @@ export function UserDirectory({ users, scope = null }: { readonly users: readonl
                         {/* 최근 접속 / 로그인 시각 */}
                         <TableCell className="col-span-2 p-0 md:table-cell md:p-2">
                           <div className="grid gap-1.5 text-[0.72rem]">
-                            <AccessTimestamp label="최근 접속" value={user.last_seen_at} emphasis />
-                            <AccessTimestamp label="마지막 로그인" value={user.last_login_at} />
+                            <AccessTimestamp label={c('accessLastSeen')} noRecord={c('noRecord')} value={user.last_seen_at} emphasis />
+                            <AccessTimestamp label={c('accessLastLogin')} noRecord={c('noRecord')} value={user.last_login_at} />
                             {user.last_admin_at && (
-                              <AccessTimestamp label="관리자 접속" value={user.last_admin_at} />
+                              <AccessTimestamp label={c('accessAdmin')} noRecord={c('noRecord')} value={user.last_admin_at} />
                             )}
                           </div>
                         </TableCell>
@@ -408,7 +411,7 @@ export function UserDirectory({ users, scope = null }: { readonly users: readonl
                         {/* 이용 상태 및 제재 사유 */}
                         <TableCell className="col-span-1 p-0 text-left md:table-cell md:p-2 md:text-center">
                           <Badge variant={restricted ? 'destructive' : 'secondary'} className="text-[0.7rem]">
-                            {restricted ? '제한됨' : '정상'}
+                            {restricted ? c('statusRestricted') : c('statusActive')}
                           </Badge>
                           {restricted && user.restriction_reason && (
                             <p className="mt-1 text-[0.68rem] text-muted-foreground max-w-36 truncate mx-auto" title={user.restriction_reason}>
@@ -426,11 +429,11 @@ export function UserDirectory({ users, scope = null }: { readonly users: readonl
                               triggerVariant="outline"
                               triggerSize="xs"
                               triggerClassName="min-h-11 md:min-h-8 text-xs border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300 gap-1 font-semibold"
-                              triggerLabel="쪽지"
+                              triggerLabel={c('message')}
                             />
                             <Button asChild variant="outline" size="xs" className="min-h-11 text-xs md:min-h-8">
                               <Link href={`/admin/users/${encodeURIComponent(user.user_id)}`}>
-                                상세·로그 <ArrowRight className="size-3.5" />
+                                {c('details')} <ArrowRight className="size-3.5" />
                               </Link>
                             </Button>
                           </div>
@@ -450,14 +453,16 @@ export function UserDirectory({ users, scope = null }: { readonly users: readonl
 
 function AccessTimestamp({
   label,
+  noRecord,
   value,
   emphasis = false,
 }: {
   readonly label: string;
+  readonly noRecord: string;
   readonly value: string | null | undefined;
   readonly emphasis?: boolean;
 }) {
-  const formatted = accessTime(value);
+  const formatted = accessTime(value, noRecord);
 
   return (
     <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
@@ -471,17 +476,18 @@ function AccessTimestamp({
           {formatted}
         </time>
       ) : (
-        <span className="text-muted-foreground">기록 없음</span>
+        <span className="text-muted-foreground">{noRecord}</span>
       )}
     </div>
   );
 }
 
 function RankBadge({ rank }: { readonly rank: number | null }) {
+  const { c } = useAdminCopy(ADMIN_USERS_COPY);
   if (rank === null) {
     return (
       <span className="inline-flex items-center justify-center text-[10px] font-medium px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border">
-        제외
+        {c('rankExcluded')}
       </span>
     );
   }

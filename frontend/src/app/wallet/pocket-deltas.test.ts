@@ -52,7 +52,7 @@ describe('bounded wallet CSV export', () => {
     const csv = ledgerCsvContent([
       entry({ cashDelta: '-' + HUGE, bankDelta: HUGE }),
       entry({ netAmount: '-2500', cashDelta: '-2500', bankDelta: '0', direction: 'out' }),
-    ], true);
+    ], 'en');
     expect(csv).toContain('Cash delta (WLD)');
     expect(csv).toContain('Bank delta (WLD)');
     expect(csv).toContain(HUGE);
@@ -62,7 +62,7 @@ describe('bounded wallet CSV export', () => {
   });
 
   it('neutralizes spreadsheet formulas and newlines in untrusted descriptions', () => {
-    const csv = ledgerCsvContent([entry({ label: ' \r\n=HYPERLINK("https://example.invalid")' })], true);
+    const csv = ledgerCsvContent([entry({ label: ' \r\n=HYPERLINK("https://example.invalid")' })], 'en');
     expect(csv).not.toContain('\r\n=HYPERLINK');
     expect(csv).not.toContain('"=HYPERLINK');
     expect(csv).toContain("'=HYPERLINK");
@@ -70,18 +70,18 @@ describe('bounded wallet CSV export', () => {
 
   it('neutralizes C1 control-prefixed spreadsheet formulas', () => {
     const c1 = String.fromCharCode(0x85);
-    const csv = ledgerCsvContent([entry({ label: `${c1}=SUM(1,1)` })], true);
+    const csv = ledgerCsvContent([entry({ label: `${c1}=SUM(1,1)` })], 'en');
     expect(csv).not.toContain(c1);
     expect(csv).not.toContain('"=SUM(1,1)"');
     expect(csv).toContain("'=SUM(1,1)");
   });
 
   it('marks legacy pocket projections as unavailable, never zero', () => {
-    const csv = ledgerCsvContent([entry({ cashDelta: undefined, bankDelta: undefined })], true);
+    const csv = ledgerCsvContent([entry({ cashDelta: undefined, bankDelta: undefined })], 'en');
     expect(csv).toContain('"Unavailable"');
   });
 
   it('rejects noncanonical net amount instead of rounding', () => {
-    expect(() => ledgerCsvContent([entry({ netAmount: '01' })], true)).toThrow(/amount|canonical/i);
+    expect(() => ledgerCsvContent([entry({ netAmount: '01' })], 'en')).toThrow(/amount|canonical/i);
   });
 });

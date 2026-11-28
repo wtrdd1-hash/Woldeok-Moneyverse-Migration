@@ -30,6 +30,8 @@ import java.util.UUID;
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 11)
 public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
+    /** Set once this filter has substituted the verified actor; ActorHeaderSanitizingFilter keeps it. */
+    public static final String VERIFIED_ACTOR_ATTRIBUTE = SensitiveApiBoundaryFilter.class.getName() + ".verifiedActor";
     private final UserAuthService userAuthService;
     private final AdminAuthService adminAuthService;
 
@@ -55,6 +57,14 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
                 || normalized.matches("^/api/(v1/)?(space|spaces)(/.*)?$")
                    && !normalized.matches("^/api/(v1/)?(space|spaces)/real-estate/districts/?$")
                 || normalized.matches("^/api/(v1/)?progression(/.*)?$")
+                // Owner-scoped reads added 2026-11-25: a forged actor header is refused, not ignored.
+                || normalized.matches("^/api/(v1/)?(engagement|early-game|business-types|business-equity|rewards)(/.*)?$")
+                || normalized.matches("^/api/(v1/)?wallet/activity(/.*)?$")
+                // Security 2026-11-26: BankController writes (deposit, withdraw, movements, claim-interest,
+                // borrow, repay) checked the session but never the CSRF token.
+                || normalized.matches("^/api/(v1/)?(bank|banking)(/.*)?$")
+                || normalized.matches("^/api/(v1/)?businesses/my-v2/?$")
+                || normalized.matches("^/api/(v1/)?shop/holdings/?$")
                 || normalized.matches("^/api/(v1/)?advisor(/.*)?$")
                 // OWASP API1:2023 BOLA prevention for casino betting, inventory, work assignments and stock orders
                 || normalized.startsWith("/api/casino/play") || normalized.startsWith("/api/v1/casino/play")
@@ -64,7 +74,10 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
                 || normalized.startsWith("/api/work/") || normalized.startsWith("/api/v1/work/")
                 || normalized.startsWith("/api/stocks/orders") || normalized.startsWith("/api/v1/stocks/orders")
                 || normalized.startsWith("/api/stocks/portfolio") || normalized.startsWith("/api/v1/stocks/portfolio")
-                || normalized.startsWith("/api/arena/battles") || normalized.startsWith("/api/v1/arena/battles");
+                || normalized.startsWith("/api/arena/battles") || normalized.startsWith("/api/v1/arena/battles")
+                // Security review 2026-11-25: these writes resolved the member from a header.
+                || normalized.matches("^/api/(v1/)?stocks/league/(join|copy-trade/(subscribe|cancel))/?$")
+                || normalized.matches("^/api/(v1/)?crafting/execute/?$");
     }
 
     static boolean isAdminDiagnosticsPath(String p) {
@@ -77,8 +90,40 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String p = request.getRequestURI();
-        return !isMemberPrivatePath(p) && !isAdminDiagnosticsPath(p);
+        String p;
+        try {
+            p = BoundaryPaths.of(request);
+        } catch (IllegalArgumentException malformed) {
+            return false; // fail closed: an undecodable path gets the member boundary
+        }
+        if (isPublicGalleryRead(request.getMethod(), p)) return true;
+        return !isMemberPrivatePath(p) && !isAdminDiagnosticsPath(p)
+                && !(isWrite(request) && isSessionOnlyWritePath(p));
+    }
+
+    /**
+     * The published gallery list is a guest page (NestJS GET /photos had no session guard;
+     * 2026-11-25). Only GET/HEAD of the exact list path; submit, withdraw, mine and uploads
+     * stay member-only.
+     */
+    static boolean isPublicGalleryRead(String method, String p) {
+        return ("GET".equals(method) || "HEAD".equals(method)) && p.matches("^/(app-)?api/(v1/)?photos/?$");
+    }
+
+    /**
+     * Writes that checked the session but not the CSRF token (security review
+     * 2026-11-25). Only their writes are filtered; their public reads are not.
+     */
+    static boolean isSessionOnlyWritePath(String p) {
+        String n = p.startsWith("/app-api/") ? p.replaceFirst("^/app-api", "/api") : p;
+        if (n.matches("^/api/(v1/)?(profile/image|collections/[^/]+|stocks/alerts(/[^/]+)?|privacy/requests|board/stock-posts)/?$")) return true;
+        // 2026-11-26 caller verification: these callers already send the proof (profile via
+        // lib/mutate, uploads via apiBytes and the chat widgets, burn-draw via its BFF); the
+        // dopamine aliases have no caller.
+        if (n.matches("^/api/(v1/)?(profile|board/images/uploads|photos/uploads|content/chat/upload"
+                + "|economy/events/burn-draw/participate|dopamine/(claim-streak|streak/claim|bull-bear|dopamine/bull-bear))/?$")) return true;
+        // The same handlers are also mapped without /api; those spellings must not skip the check.
+        return n.matches("^/(profile/image|stocks/alerts(/[^/]+)?|board/stock-posts|collections/[^/]+)/?$");
     }
 
     @Override
@@ -93,7 +138,8 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (isAdminDiagnosticsPath(request.getRequestURI())) {
+        String path = boundaryPath(request);
+        if (isAdminDiagnosticsPath(path)) {
             if (adminAuthService.resolveVerifiedAdminActor(request).isEmpty()) {
                 fail(response, 401, "admin_session_required");
                 return;
@@ -126,18 +172,19 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
 
         // User-facing finance, property tax and progression writes require canonical
         // owner-scoped posting receipts, not a successful JSON response alone.
-        if (isWrite(request) && request.getRequestURI().matches("^/api/(v1/)?(space|spaces|progression|advisor)(/.*)?$")) {
+        if (isWrite(request) && path.matches("^/api/(v1/)?(space|spaces|progression|advisor)(/.*)?$")) {
             fail(response, 503, "source_receipt_not_verified");
             return;
         }
         // Legacy wallet-transfer clients supply no stable idempotency key. Block only
         // that unsafe alias. The /api/v1/wallet/transfer controller demands a
         // caller-stable UUID and a verified session + CSRF before any ledger SQL.
-        if (isWrite(request) && request.getRequestURI().equals("/api/wallet/transfer")) {
+        if (isWrite(request) && path.equals("/api/wallet/transfer")) {
             fail(response, 503, "legacy_wallet_transfer_idempotency_not_verified");
             return;
         }
 
+        request.setAttribute(VERIFIED_ACTOR_ATTRIBUTE, Boolean.TRUE);
         final String actorHeader = actor.toString();
         HttpServletRequest wrapped = new HttpServletRequestWrapper(request) {
             private boolean isActorHeader(String name) {
@@ -161,6 +208,14 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
             }
         };
         chain.doFilter(wrapped, response);
+    }
+
+    private static String boundaryPath(HttpServletRequest request) {
+        try {
+            return BoundaryPaths.of(request);
+        } catch (IllegalArgumentException malformed) {
+            return request.getRequestURI();
+        }
     }
 
     private static boolean matchesActor(String supplied, UUID actor) {

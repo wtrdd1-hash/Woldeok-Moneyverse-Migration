@@ -61,7 +61,8 @@ describe('ultra-narrow responsive guards', () => {
   });
 
   it('keeps the shop shrinkable and avoids mobile browser input zoom', () => {
-    const shop = source('shop/page.tsx');
+    // The search form moved into a client component for locale-aware placeholders (W02).
+    const shop = source('shop/page.tsx') + source('shop/shop-search-form.tsx');
 
     expect(shop).toContain('grid min-w-0 grid-cols-[minmax(0,1fr)] gap-8 pb-16');
     expect(shop).toContain('flex min-w-0 w-full max-w-2xl gap-2');
@@ -72,7 +73,8 @@ describe('ultra-narrow responsive guards', () => {
     const shell = source('../components/site-shell.tsx');
     const bottomNav = source('../components/mobile-bottom-nav.tsx');
 
-    expect(shell).toContain('pb-[calc(env(safe-area-inset-bottom)+6.25rem)]');
+    // 10rem = bottom dock (6.25rem) + the floating onboarding/support launchers, so the last row is never hidden (2026-11-25).
+    expect(shell).toContain('pb-[calc(env(safe-area-inset-bottom)+10rem)]');
     expect(bottomNav).toContain('min-h-[44px]');
     expect(bottomNav).toContain('pb-[env(safe-area-inset-bottom)]');
   });

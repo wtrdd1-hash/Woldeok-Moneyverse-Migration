@@ -5,7 +5,8 @@ describe('locale detection', () => {
   it('detects Korean for Korean traffic and uses English default for unsupported countries', () => {
     expect(detectLocale('KR', 'en-US,en;q=0.9')).toBe('ko');
     expect(detectLocale('KP', null)).toBe('ko');
-    expect(detectLocale(null, null)).toBe('ko');
+    // I18N-02: no usable signal falls back to English (Korean GeoIP still selects Korean above).
+    expect(detectLocale(null, null)).toBe('en');
   });
 
   it('uses English where no dedicated country locale exists and Vietnamese for Vietnam', () => {

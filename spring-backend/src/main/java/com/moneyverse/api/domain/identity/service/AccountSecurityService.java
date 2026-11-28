@@ -4,6 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,30 +55,30 @@ public class AccountSecurityService {
 
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getSecurityEvents(UUID userId, String category, String sort) {
-        String orderClause = "oldest".equalsIgnoreCase(sort) ? "ASC" : "DESC";
-        String catClause = ("login".equalsIgnoreCase(category) || "settings".equalsIgnoreCase(category))
-                ? " AND event_type = '" + category.toLowerCase() + "'"
-                : "";
-
-        String sql = "SELECT id, event_type, created_at, ip_address, user_agent " +
-                     "FROM auth_security_events " +
-                     "WHERE user_id = ?" + catClause + " " +
-                     "ORDER BY created_at " + orderClause + " LIMIT 20";
+        // account_recent_security_events (214) is the actor-bound read; the table itself is not granted.
+        // It returns the newest events only (type, time), which is all the account page shows. A category
+        // filter reads the function's maximum window so that up to 20 matching events remain.
+        String type = ("login".equalsIgnoreCase(category) || "settings".equalsIgnoreCase(category))
+                ? category.toLowerCase(Locale.ROOT) : null;
+        List<Map<String, Object>> events;
         try {
-            return jdbcTemplate.query(sql, (rs, rowNum) -> {
-                Map<String, Object> event = new LinkedHashMap<>();
-                event.put("id", rs.getString("id"));
-                event.put("type", rs.getString("event_type"));
-                Timestamp cat = rs.getTimestamp("created_at");
-                event.put("createdAt", cat != null ? cat.toInstant().toString() : Instant.now().toString());
-                event.put("ipAddress", rs.getString("ip_address"));
-                event.put("userAgent", rs.getString("user_agent"));
-                return event;
-            }, userId);
-        } catch (Exception e) {
-            log.debug("[AccountSecurityService] getSecurityEvents fallback: {}", e.getMessage());
-            return List.of();
+            events = jdbcTemplate.query(
+                    "SELECT event_type, created_at FROM public.account_recent_security_events(?::uuid, ?)",
+                    (rs, rowNum) -> {
+                        Map<String, Object> event = new LinkedHashMap<>();
+                        event.put("type", rs.getString("event_type"));
+                        event.put("createdAt", rs.getTimestamp("created_at").toInstant().toString());
+                        return event;
+                    }, userId, type == null ? 20 : 50);
+        } catch (DataAccessException e) {
+            // An empty list would claim "no sign-ins recorded"; say the source is unavailable instead.
+            log.warn("[AccountSecurityService] security events unavailable: {}", e.getClass().getSimpleName());
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "SECURITY_EVENTS_UNAVAILABLE");
         }
+        List<Map<String, Object>> filtered = new ArrayList<>(events.stream()
+                .filter(e -> type == null || type.equals(e.get("type"))).limit(20).toList());
+        if ("oldest".equalsIgnoreCase(sort)) Collections.reverse(filtered);
+        return filtered;
     }
 
     @Transactional

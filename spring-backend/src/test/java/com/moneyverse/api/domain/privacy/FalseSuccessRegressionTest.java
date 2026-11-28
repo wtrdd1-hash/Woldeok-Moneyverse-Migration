@@ -62,9 +62,11 @@ class FalseSuccessRegressionTest {
     }
 
     @Test void absentSeoEvidenceCannotGenerateFakeCrawlerSuccess() {
-        when(jdbc.queryForList(anyString())).thenReturn(Collections.emptyList());
-        var seo = new SeoController(jdbc);
-        var overview = seo.getAdminStatus().getBody();
+        when(jdbc.queryForList(anyString(), any(Object[].class))).thenReturn(Collections.emptyList());
+        var admin = mock(com.moneyverse.api.domain.admin.service.AdminAuthService.class);
+        when(admin.resolveVerifiedAdminActor(any())).thenReturn(java.util.Optional.of(UUID.randomUUID()));
+        var seo = new SeoController(jdbc, admin);
+        var overview = seo.getAdminStatus(new org.springframework.mock.web.MockHttpServletRequest()).getBody();
         assertNotNull(overview);
         assertEquals(0, overview.get("totalHits24h"));
         assertTrue(((java.util.List<?>) overview.get("recentLogs")).isEmpty());

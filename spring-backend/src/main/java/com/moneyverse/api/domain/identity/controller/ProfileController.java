@@ -125,10 +125,10 @@ public class ProfileController {
             HttpServletRequest request) {
 
         String userId = resolveUserId(request, headerUserId);
-        String sql = "SELECT t.code, t.name, ut.awarded_at " +
-                     "FROM public.user_titles ut " +
-                     "JOIN public.member_titles t ON ut.title_id = t.id " +
-                     "WHERE ut.user_id = ?::uuid ORDER BY ut.awarded_at ASC";
+        // member_earned_titles (217) is the actor-bound read of user_titles/member_titles, which the
+        // chain does not grant; the response keeps its oldest-first order.
+        String sql = "SELECT code, name, awarded_at FROM public.member_earned_titles(?::uuid) " +
+                     "ORDER BY awarded_at ASC, code ASC";
 
         List<Map<String, Object>> titles = jdbcTemplate.query(sql, (rs, rowNum) -> {
             Map<String, Object> item = new LinkedHashMap<>();

@@ -5,11 +5,13 @@ import { GuestQuickstart } from '@/components/guest-quickstart';
 import { PageHeader } from '@/components/page-header';
 import { StatRow } from '@/components/d180/primitives';
 import { WalletGlance } from '@/components/wallet-glance';
+import { WeeklyPassbook } from '@/components/passbook/weekly-passbook';
 import { P2PTransferModal } from '@/components/p2p-transfer-modal';
 import { PublicAdvertisement } from '@/components/public-advertisement';
 import { GuestOnly, MemberOnly } from '@/components/g1/viewer-gate';
 import { apiOrNull } from '@/lib/api';
 import { getServerLocale } from '@/lib/locale-server';
+import { t } from '@/lib/translations';
 import { getStockName } from '@/lib/i18n-dictionary';
 import { changePercent, groupDigits } from '@/lib/money';
 import { canonicalUrl } from '@/lib/seo';
@@ -102,13 +104,13 @@ function moveBasisPoints(stock: StockItem): bigint | null {
 }
 
 const QUICK_LINKS = [
-  { href: '/quests', label: '퀘스트 게시판', note: '오늘 받을 수 있는 퀘스트와 보상', icon: ScrollText },
-  { href: '/stocks', label: '거래소', note: '가상 기업 호가와 체결', icon: TrendingUp },
-  { href: '/work', label: '직업 의뢰', note: '일하고 원장에 기록되는 보상 받기', icon: Briefcase },
-  { href: '/bank', label: '은행 금고', note: '예금 계약과 대출', icon: Landmark },
-  { href: '/shop', label: '상점', note: '프레임과 꾸미기 아이템', icon: ShoppingBag },
-  { href: '/tools/compound-calculator', label: '복리 계산기', note: '원금과 이율로 미래 금액 계산', icon: Calculator },
-  { href: '/tools/stock-calculator', label: '주식 수익률 계산기', note: '매수가와 매도가로 손익 계산', icon: Calculator },
+  { href: '/quests', label: 'home.q.quests', note: 'home.q.questsNote', icon: ScrollText },
+  { href: '/stocks', label: 'home.q.exchange', note: 'home.q.exchangeNote', icon: TrendingUp },
+  { href: '/work', label: 'home.q.work', note: 'home.q.workNote', icon: Briefcase },
+  { href: '/bank', label: 'home.q.bank', note: 'home.q.bankNote', icon: Landmark },
+  { href: '/shop', label: 'home.q.shop', note: 'home.q.shopNote', icon: ShoppingBag },
+  { href: '/tools/compound-calculator', label: 'home.q.compound', note: 'home.q.compoundNote', icon: Calculator },
+  { href: '/tools/stock-calculator', label: 'home.q.stockCalc', note: 'home.q.stockCalcNote', icon: Calculator },
 ] as const;
 
 function noticeDate(value: string | null | undefined): string | null {
@@ -156,18 +158,18 @@ export default async function HomePage() {
       {/* DESIGN180 page head (no hero banner: guild-home QA GH-01). The SEO h1
           above stays; this visible title is the page name. */}
       <PageHeader
-        title="길드 홀"
+        title={t('title.guildHall', locale)}
         titleAs="h2"
         action={
           <>
-            <Link href="/quests" prefetch={false} className="inline-flex min-h-11 items-center rounded-md border border-[var(--g1-line)] px-4 text-sm font-semibold text-[var(--g1-ink)] hover:border-[var(--g1-violet)]">퀘스트 보기</Link>
-            <MemberOnly fallback={<Link href="/login" prefetch={false} className="g1-cta">로그인</Link>}>
-              <Link href="/wallet" prefetch={false} className="g1-cta">지갑 열기</Link>
+            <Link href="/quests" prefetch={false} className="inline-flex min-h-11 items-center rounded-md border border-[var(--g1-line)] px-4 text-sm font-semibold text-[var(--g1-ink)] hover:border-[var(--g1-violet)]">{t('home.viewQuests', locale)}</Link>
+            <MemberOnly fallback={<Link href="/login" prefetch={false} className="g1-cta">{t('home.signIn', locale)}</Link>}>
+              <Link href="/wallet" prefetch={false} className="g1-cta">{t('home.openWallet', locale)}</Link>
             </MemberOnly>
           </>
         }
       >
-        오늘의 월덕 시장과 길드 소식입니다.
+        {t('home.intro', locale)}
       </PageHeader>
 
       {/* QA GH-03: guests keep the no-signup entry; members never see it. */}
@@ -175,54 +177,57 @@ export default async function HomePage() {
         <GuestQuickstart locale={locale} />
       </GuestOnly>
 
+      {/* Redesign 2026-11-26: this game week as a passbook page (members; renders nothing otherwise). */}
+      <WeeklyPassbook />
+
       <section aria-labelledby="hero-balance-heading">
-        <h2 id="hero-balance-heading" className="sr-only">오늘의 요약</h2>
+        <h2 id="hero-balance-heading" className="sr-only">{t('home.todaySummary', locale)}</h2>
         <StatRow
-          label="오늘의 요약"
+          label={t('home.todaySummary', locale)}
           items={[
             {
-              label: '사용 가능 잔액',
+              label: t('home.available', locale),
               // QA GH-04: WalletGlance keeps its signed-out / unreadable / balance states.
-              value: <MemberOnly fallback={<Link href="/login" prefetch={false} className="text-base font-medium text-[var(--g1-violet)] hover:underline">로그인 후 표시</Link>}><WalletGlance /></MemberOnly>,
-              note: '원장 기준',
+              value: <MemberOnly fallback={<Link href="/login" prefetch={false} className="text-base font-medium text-[var(--g1-violet)] hover:underline">{t('home.showAfterSignIn', locale)}</Link>}><WalletGlance /></MemberOnly>,
+              note: t('home.ledgerBasis', locale),
             },
             {
-              label: '오늘 시장',
+              label: t('home.todayMarket', locale),
               value: priced.length === 0 ? null : (
                 <span>
-                  <span className="text-[var(--g1-ember)]">상승 {rising}</span>
+                  <span className="text-[var(--g1-ember)]">{t('home.rising', locale)} {rising}</span>
                   <span className="text-[var(--g1-faint)]"> / </span>
-                  <span className="text-[var(--g1-rare-rare)]">하락 {falling}</span>
+                  <span className="text-[var(--g1-rare-rare)]">{t('home.falling', locale)} {falling}</span>
                 </span>
               ),
-              note: '개장가 대비 종목 수',
+              note: t('home.vsOpen', locale),
             },
-            { label: '상장 종목', value: listed, note: '거래소에서 거래 중' },
+            { label: t('home.listed', locale), value: listed, note: t('home.trading', locale) },
           ]}
         />
       </section>
 
       <MemberOnly>
         <div className="max-w-xs">
-          <P2PTransferModal triggerText="WLD 보내기" />
+          <P2PTransferModal triggerText={t('home.sendWld', locale)} />
         </div>
       </MemberOnly>
 
       <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1.8fr)_minmax(270px,1fr)]">
         <section aria-labelledby="home-market-heading" className={`${panel} overflow-hidden`}>
           <div className={`${panelHead} px-[22px] pt-5`}>
-            <h2 id="home-market-heading" className="text-lg font-bold text-[var(--g1-ink)]">오늘 크게 움직인 종목</h2>
-            <Link href="/stocks" prefetch={false} className={link}>거래소</Link>
+            <h2 id="home-market-heading" className="text-lg font-bold text-[var(--g1-ink)]">{t('home.topMovers', locale)}</h2>
+            <Link href="/stocks" prefetch={false} className={link}>{t('home.q.exchange', locale)}</Link>
           </div>
           {movers.length === 0 ? (
-            <p className="px-[22px] py-6 text-sm text-[var(--g1-muted)]">시세 자료를 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.</p>
+            <p className="px-[22px] py-6 text-sm text-[var(--g1-muted)]">{t('home.quotesFailed', locale)}</p>
           ) : (
             <table className="mt-3 w-full text-[13px]">
               <thead>
                 <tr className="bg-[var(--g1-night-2)] text-left text-xs text-[var(--g1-muted)]">
-                  <th className="px-[22px] py-3 font-medium">종목</th>
-                  <th className="px-4 py-3 text-right font-medium">현재가</th>
-                  <th className="px-[22px] py-3 text-right font-medium">오늘 등락</th>
+                  <th className="px-[22px] py-3 font-medium">{t('home.stock', locale)}</th>
+                  <th className="px-4 py-3 text-right font-medium">{t('home.price', locale)}</th>
+                  <th className="px-[22px] py-3 text-right font-medium">{t('home.change', locale)}</th>
                 </tr>
               </thead>
               <tbody>
@@ -238,7 +243,7 @@ export default async function HomePage() {
                         </Link>
                       </td>
                       <td className="px-4 py-2 text-right font-semibold tabular-nums">{groupDigits(stock.current_price)}</td>
-                      <td className={`px-[22px] py-2 text-right font-semibold tabular-nums ${tone}`}>{pct === null ? '확인 불가' : `${pct}%`}</td>
+                      <td className={`px-[22px] py-2 text-right font-semibold tabular-nums ${tone}`}>{pct === null ? t('home.unavailable', locale) : `${pct}%`}</td>
                     </tr>
                   );
                 })}
@@ -253,12 +258,12 @@ export default async function HomePage() {
             <div className={panelHead}>
               <h2 id="home-notices-heading" className="flex items-center gap-2 text-lg font-bold text-[var(--g1-ink)]">
                 <Megaphone className="size-4 text-[var(--g1-muted)]" aria-hidden />
-                길드 공지
+                {t('home.announcements', locale)}
               </h2>
-              <Link href="/announcements" prefetch={false} className={link}>전체 보기</Link>
+              <Link href="/announcements" prefetch={false} className={link}>{t('home.viewAll', locale)}</Link>
             </div>
             {announcements.length === 0 ? (
-              <p className="py-3 text-sm text-[var(--g1-muted)]">지금 게시된 공지가 없습니다.</p>
+              <p className="py-3 text-sm text-[var(--g1-muted)]">{t('home.noNotices', locale)}</p>
             ) : (
               <ul className="divide-y divide-[var(--g1-line)]">
                 {announcements.map((notice) => (
@@ -268,7 +273,7 @@ export default async function HomePage() {
                       prefetch={false}
                       className="flex min-h-11 items-center justify-between gap-3 py-2 text-[13px] text-[var(--g1-body)] hover:text-[var(--g1-ink)]"
                     >
-                      <span className="line-clamp-1">{notice.isPinned ? '[고정] ' : ''}{notice.title}</span>
+                      <span className="line-clamp-1">{notice.isPinned ? t('home.pinned', locale) : ''}{notice.title}</span>
                       {noticeDate(notice.publishedAt) && (
                         <span className="shrink-0 text-[11px] tabular-nums text-[var(--g1-muted)]">{noticeDate(notice.publishedAt)}</span>
                       )}
@@ -280,7 +285,7 @@ export default async function HomePage() {
           </section>
 
           <section aria-labelledby="home-routes-heading" className={`${panel} px-[22px] py-5`}>
-            <h2 id="home-routes-heading" className="mb-1 text-lg font-bold text-[var(--g1-ink)]">다음 할 일</h2>
+            <h2 id="home-routes-heading" className="mb-1 text-lg font-bold text-[var(--g1-ink)]">{t('home.whatsNext', locale)}</h2>
             <ul className="divide-y divide-[var(--g1-line)]">
               {QUICK_LINKS.map(({ href, label, note, icon: Icon }) => (
                 <li key={href}>
@@ -289,8 +294,8 @@ export default async function HomePage() {
                       <Icon className="size-[18px]" aria-hidden />
                     </span>
                     <span className="min-w-0">
-                      <span className="block text-sm font-semibold text-[var(--g1-ink)] group-hover:text-[var(--g1-violet)]">{label}</span>
-                      <span className="block text-xs text-[var(--g1-muted)]">{note}</span>
+                      <span className="block text-sm font-semibold text-[var(--g1-ink)] group-hover:text-[var(--g1-violet)]">{t(label, locale)}</span>
+                      <span className="block text-xs text-[var(--g1-muted)]">{t(note, locale)}</span>
                     </span>
                   </Link>
                 </li>

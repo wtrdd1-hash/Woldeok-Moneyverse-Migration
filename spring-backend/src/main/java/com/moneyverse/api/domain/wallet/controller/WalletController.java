@@ -23,10 +23,13 @@ public class WalletController {
 
     private final WalletService walletService;
     private final UserAuthService authService;
+    private final com.moneyverse.api.domain.identity.service.MemberApiGuard memberApiGuard;
 
-    public WalletController(WalletService walletService, UserAuthService authService) {
+    public WalletController(WalletService walletService, UserAuthService authService,
+                            com.moneyverse.api.domain.identity.service.MemberApiGuard memberApiGuard) {
         this.walletService = walletService;
         this.authService = authService;
+        this.memberApiGuard = memberApiGuard;
     }
 
     /** Owner identity MUST originate from the verified server session, never from a client header. */
@@ -87,6 +90,38 @@ public class WalletController {
         String userId = resolveUserId(request, headerUserId);
         WalletOverview ov = walletService.getOverview(userId);
         return ApiResponse.ok(Map.of("balanceWld", ov.getBalanceWld(), "currency", "WLD"));
+    }
+
+    /**
+     * The NestJS route the wallet page calls (route contract 2026-11-26: missing in Spring).
+     * Session + CSRF; the key and recipient travel in the body; the same journaled
+     * economy_transfer as /transfer. Self-transfer and inactive recipients are refused.
+     */
+    @PostMapping("/transfers")
+    @Operation(summary = "Send WLD to another member (journaled; session, CSRF, idempotency key)")
+    public ApiResponse<Map<String, Object>> transfers(HttpServletRequest request, @RequestBody(required = false) Map<String, Object> body) {
+        UUID actor = memberApiGuard.verifiedMutationActor(request);
+        String recipientText = body != null && body.get("recipientUserId") instanceof String s ? s.trim() : null;
+        String amountText = body == null ? null : body.get("amount") instanceof Number n ? String.valueOf(n) : body.get("amount") instanceof String s ? s.trim() : null;
+        UUID key = memberApiGuard.idempotencyKey(body != null && body.get("idempotencyKey") instanceof String s ? s : null);
+        UUID recipient;
+        try { recipient = UUID.fromString(String.valueOf(recipientText)); }
+        catch (Exception e) { throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "RECIPIENT_INVALID"); }
+        if (amountText == null || !amountText.matches("^[1-9][0-9]{0,17}$")) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "AMOUNT_INVALID");
+        }
+        if (recipient.equals(actor)) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "SELF_TRANSFER_REFUSED");
+        }
+        if (!walletService.isActiveRecipient(recipient)) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "recipient is unavailable");
+        }
+        Map<String, Object> result = walletService.transferCanonicalWithIdempotencyKey(actor.toString(), recipient.toString(), amountText, null, key);
+        Map<String, Object> receipt = new java.util.LinkedHashMap<>();
+        receipt.put("transactionId", result.get("txId"));
+        receipt.put("recipientUserId", recipient.toString());
+        receipt.put("amount", amountText);
+        return ApiResponse.ok(receipt, (String) result.get("message"));
     }
 
     @PostMapping("/transfer")

@@ -7,7 +7,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -37,35 +39,84 @@ public class AdminSecurityController {
         if (!adminAuthService.isAuthorizedAdmin(request)) {
             return adminAuthService.unauthorizedResponse();
         }
-
+        // Answers the console front door's contract (frontend AdminConsole) from the database.
+        // It used to synthesise the session ("opened now", 30 days) and report reauthentication as
+        // active in a shape the front door does not read (2026-11-26).
         Optional<UUID> uidOpt = adminAuthService.resolveAdminUserId(request);
-        List<String> roles = uidOpt.map(adminAuthService::getAdminRolesForUser)
-                .orElse(List.of("superadmin", "operator", "approver", "server_operator"));
-        if (roles.isEmpty()) {
-            roles = List.of("superadmin", "operator", "approver", "server_operator");
+        String token = adminAuthService.extractSessionToken(request);
+        if (uidOpt.isEmpty() || token == null) return consoleUnavailable();
+        UUID actor = uidOpt.get();
+        List<String> roles = adminAuthService.getAdminRolesForUser(actor);
+        if (roles.isEmpty()) return consoleUnavailable();
+        try {
+            List<Map<String, Object>> sessions = jdbcTemplate.queryForList(
+                    "SELECT id, reauthenticated_at FROM auth_sessions WHERE token_hash = ? AND user_id = ? "
+                            + "AND revoked_at IS NULL AND expires_at > NOW()",
+                    com.moneyverse.api.domain.identity.service.UserAuthService.sha256(token), actor);
+            if (sessions.isEmpty()) return consoleUnavailable();
+            UUID sessionId = (UUID) sessions.get(0).get("id");
+            Instant reauthAt = instant(sessions.get(0).get("reauthenticated_at"));
+            // Reading the status also records console activity (admin_session_touch, 246).
+            List<Map<String, Object>> touch = jdbcTemplate.queryForList(
+                    "SELECT state, expires_at, idle_expires_at FROM public.admin_session_touch(?::uuid, ?::uuid)",
+                    sessionId, actor);
+            if (touch.isEmpty()) return consoleUnavailable();
+            Map<String, Object> console = new LinkedHashMap<>();
+            console.put("state", String.valueOf(touch.get(0).get("state")));
+            console.put("expiresAt", iso(touch.get(0).get("expires_at")));
+            console.put("idleExpiresAt", iso(touch.get(0).get("idle_expires_at")));
+            // Five minutes: what the console SQL functions enforce for sensitive writes.
+            Instant freshUntil = reauthAt == null ? null : reauthAt.plusSeconds(300);
+            Map<String, Object> reauth = new LinkedHashMap<>();
+            reauth.put("at", reauthAt == null ? null : reauthAt.toString());
+            reauth.put("freshUntil", freshUntil == null ? null : freshUntil.toString());
+            reauth.put("fresh", freshUntil != null && Instant.now().isBefore(freshUntil));
+            List<Map<String, Object>> policy = new ArrayList<>();
+            // admin_login_policy is superadmin-only; other administrators see no policy list
+            // rather than losing the whole console status.
+            boolean superadmin = roles.stream().anyMatch("superadmin"::equalsIgnoreCase);
+            for (Map<String, Object> row : !superadmin ? List.<Map<String, Object>>of() : jdbcTemplate.queryForList(
+                    "SELECT kind, value, label, recorded_at FROM public.admin_login_policy(?::uuid, ?::uuid)", actor, actor)) {
+                Map<String, Object> item = new LinkedHashMap<>();
+                item.put("kind", row.get("kind"));
+                item.put("value", row.get("value"));
+                item.put("label", row.get("label"));
+                item.put("recorded_at", iso(row.get("recorded_at")));
+                policy.add(item);
+            }
+            Map<String, Object> res = new LinkedHashMap<>();
+            res.put("available", true);
+            res.put("roles", roles);
+            // TOTP was retired by migration 246; no second factor is enrolled.
+            Map<String, Object> secondFactor = new LinkedHashMap<>();
+            secondFactor.put("enrolled", false);
+            secondFactor.put("confirmed", false);
+            secondFactor.put("lockedUntil", null);
+            res.put("secondFactor", secondFactor);
+            res.put("consoleSession", console);
+            res.put("reauthentication", reauth);
+            res.put("loginPolicy", policy);
+            return ResponseEntity.ok().header("Cache-Control", "no-store").body(res);
+        } catch (org.springframework.dao.DataAccessException failure) {
+            return consoleUnavailable();
         }
+    }
 
-        Instant now = Instant.now();
-        Instant expiresAt = now.plus(30, ChronoUnit.DAYS);
-        Instant idleExpiresAt = now.plus(1, ChronoUnit.DAYS);
+    private static ResponseEntity<?> consoleUnavailable() {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).header("Cache-Control", "no-store")
+                .body(Map.of("ok", false, "available", false, "code", "ADMIN_CONSOLE_STATUS_UNAVAILABLE"));
+    }
 
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("roles", roles);
-        res.put("consoleSession", Map.of(
-                "state", "open",
-                "openedAt", now.toString(),
-                "expiresAt", expiresAt.toString(),
-                "idleExpiresAt", idleExpiresAt.toString(),
-                "lastActivityAt", now.toString()
-        ));
-        res.put("loginPolicy", Map.of(
-                "allowlist", List.of()
-        ));
-        res.put("reauthentication", Map.of(
-                "active", true,
-                "secondsRemaining", 900
-        ));
-        return ResponseEntity.ok(res);
+    private static Instant instant(Object value) {
+        if (value instanceof java.sql.Timestamp ts) return ts.toInstant();
+        if (value instanceof java.time.OffsetDateTime odt) return odt.toInstant();
+        if (value instanceof Instant i) return i;
+        return null;
+    }
+
+    private static String iso(Object value) {
+        Instant i = instant(value);
+        return i == null ? null : i.toString();
     }
 
     @Operation(summary = "관리자 권한 조회")
@@ -79,10 +130,12 @@ public class AdminSecurityController {
         }
 
         Optional<UUID> uidOpt = adminAuthService.resolveAdminUserId(request);
-        List<String> roles = uidOpt.map(adminAuthService::getAdminRolesForUser)
-                .orElse(List.of("superadmin", "operator", "approver", "server_operator"));
+        // Only the roles admin_current_roles reports; never a default list (it used to answer every
+        // role, superadmin included, whenever the real ones could not be read).
+        List<String> roles = uidOpt.map(adminAuthService::getAdminRolesForUser).orElse(List.of());
         if (roles.isEmpty()) {
-            roles = List.of("superadmin", "operator", "approver", "server_operator");
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).header("Cache-Control", "no-store")
+                    .body(Map.of("ok", false, "code", "ADMIN_ROLES_UNAVAILABLE"));
         }
 
         Map<String, Object> res = new LinkedHashMap<>();
@@ -101,8 +154,14 @@ public class AdminSecurityController {
         }
 
         String rawToken = adminAuthService.extractSessionToken(request);
-        Optional<UUID> uidOpt = adminAuthService.resolveAdminUserId(request);
-        UUID userId = uidOpt.orElse(UUID.fromString("850e7583-6589-4371-bffd-e76c3e9f8d31"));
+        // Bind the console session to the verified administrator or issue nothing. It used to fall
+        // back to a fixed user id when this second lookup came back empty (a session revoked
+        // between the two reads, a transient database error).
+        Optional<UUID> verified = adminAuthService.resolveVerifiedAdminActor(request);
+        if (verified.isEmpty()) {
+            return adminAuthService.unauthorizedResponse();
+        }
+        UUID userId = verified.get();
 
         // Generate rotated console token
         String newToken = UserAuthService.generateRandomToken();
@@ -114,26 +173,36 @@ public class AdminSecurityController {
         Instant expiresAt = now.plus(30, ChronoUnit.DAYS);
         Instant idleExpiresAt = now.plus(1, ChronoUnit.DAYS);
 
-        // Update current session or insert new rotated session
+        // Rotate. The old session is revoked and its re-verification time read in one conditional
+        // statement, so a session already revoked or rotated by a concurrent request yields nothing
+        // (independent review). The rotated session inherits that time (null when there was none)
+        // and never mints one. If the insert then fails the old session stays revoked and the
+        // administrator signs in again: fail closed, and no cookie is issued.
         UUID newSessionId = UUID.randomUUID();
         try {
-            if (rawToken != null) {
-                String oldTokenHash = AdminAuthService.sha256(rawToken);
-                jdbcTemplate.update(
-                    "UPDATE auth_sessions SET revoked_at = NOW() WHERE token_hash = ? AND revoked_at IS NULL",
-                    oldTokenHash
-                );
+            String oldTokenHash = rawToken == null ? null : AdminAuthService.sha256(rawToken);
+            List<Map<String, Object>> revoked = oldTokenHash == null ? List.of() : jdbcTemplate.queryForList(
+                    "UPDATE auth_sessions SET revoked_at = NOW() WHERE token_hash = ? AND user_id = ? "
+                            + "AND revoked_at IS NULL AND expires_at > NOW() RETURNING reauthenticated_at",
+                    oldTokenHash, userId);
+            if (revoked.size() != 1) {
+                return adminAuthService.unauthorizedResponse();
             }
+            Object inherited = revoked.get(0).get("reauthenticated_at");
             String insertSql = """
                 INSERT INTO auth_sessions (id, token_hash, csrf_hash, user_id, expires_at, created_at,
                                            admin_opened_at, admin_last_seen_at, prelogin_age_confirmed, reauthenticated_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, true, ?)
                 """;
-            jdbcTemplate.update(insertSql, newSessionId, newTokenHash, newCsrfHash, userId,
+            int inserted = jdbcTemplate.update(insertSql, newSessionId, newTokenHash, newCsrfHash, userId,
                     java.sql.Timestamp.from(expiresAt), java.sql.Timestamp.from(now),
-                    java.sql.Timestamp.from(now), java.sql.Timestamp.from(now), java.sql.Timestamp.from(now));
+                    java.sql.Timestamp.from(now), java.sql.Timestamp.from(now), inherited);
+            if (inserted != 1) {
+                throw new IllegalStateException("rotated session row not written");
+            }
         } catch (Exception e) {
-            // fallback update
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).header("Cache-Control", "no-store")
+                    .body(Map.of("ok", false, "code", "CONSOLE_SESSION_UNAVAILABLE"));
         }
 
         // Emit exact single __Host-mv_session cookie matching verifiedConsoleOpen contract

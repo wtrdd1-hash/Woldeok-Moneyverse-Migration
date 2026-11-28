@@ -34,32 +34,13 @@ public class SeasonService {
     }
 
     @Transactional
-    public Map<String, Object> claimReward(String userId, String seasonId) {
-        long rewardAmountWld = 10000L;
-        String txId = UUID.randomUUID().toString();
-
-        // 유저 지갑에 시즌 랭크 보상 지급
-        try {
-            jdbcTemplate.update("""
-                INSERT INTO wallets (id, user_id, balance_wld, created_at, updated_at)
-                VALUES (gen_random_uuid(), ?::uuid, ?, NOW(), NOW())
-                ON CONFLICT (user_id)
-                DO UPDATE SET balance_wld = wallets.balance_wld + EXCLUDED.balance_wld,
-                              updated_at = NOW()
-                """, userId, rewardAmountWld);
-        } catch (Exception e) {
-            log.warn("[SeasonService] wallet reward update: {}", e.getMessage());
-        }
-
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("ok", true);
-        res.put("txId", txId);
-        res.put("ledgerTransactionId", txId);
-        res.put("userId", userId);
-        res.put("seasonId", seasonId);
-        res.put("rewardAmountWld", rewardAmountWld);
-        res.put("message", "시즌 티어 랭크 보상이 복식부기 원장 검증을 통과하여 정상 지급되었습니다.");
-        return res;
+    /** Active season events from season_active_events; failures surface, never an empty list. */
+    public java.util.List<Map<String, Object>> activeEvents() {
+        return jdbcTemplate.queryForList("""
+            SELECT event_id::text AS event_id, season_id::text AS season_id, season_name, title, description,
+                   cost_wld::text AS cost_wld, points_per_entry,
+                   to_char(ends_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') AS ends_at
+            FROM public.season_active_events()
+            """);
     }
 }

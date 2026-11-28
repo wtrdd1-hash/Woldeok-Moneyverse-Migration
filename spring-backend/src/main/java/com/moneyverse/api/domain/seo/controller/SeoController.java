@@ -1,5 +1,7 @@
 package com.moneyverse.api.domain.seo.controller;
 
+import com.moneyverse.api.domain.admin.service.AdminAuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,10 +51,12 @@ public class SeoController {
     );
 
     private final JdbcTemplate jdbcTemplate;
+    private final AdminAuthService adminAuthService;
 
     @Autowired
-    public SeoController(JdbcTemplate jdbcTemplate) {
+    public SeoController(JdbcTemplate jdbcTemplate, AdminAuthService adminAuthService) {
         this.jdbcTemplate = jdbcTemplate;
+        this.adminAuthService = adminAuthService;
     }
 
     @GetMapping(path = {
@@ -63,24 +67,23 @@ public class SeoController {
             "/api/seo/status",
             "/seo/status"
     })
-    public ResponseEntity<Map<String, Object>> getAdminStatus() {
-        return ResponseEntity.ok(buildSeoObservation());
+    public ResponseEntity<Map<String, Object>> getAdminStatus(HttpServletRequest request) {
+        UUID actor = adminAuthService.resolveVerifiedAdminActor(request)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "admin_session_required"));
+        return ResponseEntity.ok(buildSeoObservation(actor));
     }
 
-    private Map<String, Object> buildSeoObservation() {
+    private Map<String, Object> buildSeoObservation(UUID actor) {
         Instant now = Instant.now();
         Instant oneDayAgo = now.minus(24, ChronoUnit.HOURS);
         Instant sevenDaysAgo = now.minus(7, ChronoUnit.DAYS);
 
         List<Map<String, Object>> rawLogs = new ArrayList<>();
         try {
-            String sql = """
-                SELECT id::text, bot_name, path, status_code, duration_ms, ip_address, user_agent, created_at
-                FROM seo_crawler_logs
-                ORDER BY created_at DESC
-                LIMIT 300
-                """;
-            rawLogs = jdbcTemplate.queryForList(sql);
+            // seo_crawler_logs is not granted to the application role and carries crawler IPs;
+            // 364 reads it with the administrator checked inside the function.
+            rawLogs = jdbcTemplate.queryForList(
+                    "SELECT * FROM public.admin_seo_crawler_logs_read(?::uuid, ?::integer)", actor, 300);
         } catch (Exception e) {
             log.warn("[SeoController] crawler source unavailable (fail closed)");
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Crawler observations unavailable");
@@ -200,7 +203,7 @@ public class SeoController {
         res.put("indexNowKey", DEFAULT_INDEXNOW_KEY);
         res.put("sitemapUrl", BASE_URL + "/sitemap.xml");
         res.put("coverageSourceVerified", false);
-        res.put("observationSource", "seo_crawler_logs");
+        res.put("observationSource", "admin_seo_crawler_logs_read");
 
         return res;
     }
@@ -225,50 +228,36 @@ public class SeoController {
 
     @GetMapping(path = { "/api/v1/seo/gsc/analytics", "/api/seo/gsc/analytics", "/seo/gsc/analytics" })
     public ResponseEntity<Map<String, Object>> getGscAnalytics() {
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("status", 200);
-        res.put("totalClicks", 14280);
-        res.put("totalImpressions", 289400);
-        res.put("averageCtrPct", 4.93);
-        res.put("averagePosition", 12.4);
-        res.put("topQueries", List.of(
-            Map.of("query", "월덕 머니버스", "clicks", 5420, "impressions", 41200, "ctrPct", 13.15, "position", 1.2),
-            Map.of("query", "가상 주식 모의투자", "clicks", 3210, "impressions", 89000, "ctrPct", 3.61, "position", 3.4),
-            Map.of("query", "복리 계산기", "clicks", 2840, "impressions", 67400, "ctrPct", 4.21, "position", 4.1),
-            Map.of("query", "대출이자 상환 시뮬레이터", "clicks", 1890, "impressions", 52100, "ctrPct", 3.63, "position", 5.8)
-        ));
-        res.put("updatedAt", Instant.now().toString());
-        return ResponseEntity.ok(res);
+        // Security/QA 2026-11-26: the old body returned invented Search Console figures
+        // (14,280 clicks, top queries). No Search Console credential is connected.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "GSC_SOURCE_UNAVAILABLE");
     }
 
     @PostMapping(path = { "/api/v1/seo/submit", "/api/seo/submit", "/seo/submit" })
-    public ResponseEntity<Map<String, Object>> submitUrls(@RequestBody(required = false) Map<String, Object> body) {
-        int count = body != null && body.containsKey("urls") ? ((List<?>) body.get("urls")).size() : 18;
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "status", 200,
-                "submittedCount", count,
-                "timestamp", Instant.now().toString()
-        ));
+    public ResponseEntity<Map<String, Object>> submitUrls() {
+        // Security/QA 2026-11-26: answered "submitted 18" to anyone, guests included, and
+        // submitted nothing. No IndexNow/Search Console submission client exists here.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "SEO_SUBMISSION_NOT_CONFIGURED");
     }
 
     @PostMapping(path = { "/api/v1/seo/log", "/api/seo/log", "/seo/log" })
-    public ResponseEntity<Map<String, Object>> logCrawlerHit(@RequestBody(required = false) Map<String, Object> body) {
-        if (body != null && body.containsKey("botName") && body.containsKey("path")) {
-            try {
-                jdbcTemplate.update("""
-                    INSERT INTO seo_crawler_logs (id, bot_name, path, status_code, duration_ms, ip_address, user_agent, created_at)
-                    VALUES (gen_random_uuid(), ?, ?, ?, ?, ?, ?, NOW())
-                    """,
-                        body.get("botName"),
-                        body.get("path"),
-                        body.getOrDefault("statusCode", 200),
-                        body.getOrDefault("durationMs", 25),
-                        body.getOrDefault("ipAddress", "127.0.0.1"),
-                        body.getOrDefault("userAgent", "Crawler")
-                );
-            } catch (Exception ignored) {}
+    public ResponseEntity<Map<String, Object>> logCrawlerHit(
+            @RequestHeader(value = "X-Moneyverse-Telemetry-Token", required = false) String token,
+            @RequestBody(required = false) Map<String, Object> body) {
+        // Security 2026-11-26: this INSERT was open to the internet through the public /api
+        // route, so anyone could write any bot, path, IP and user agent into seo_crawler_logs.
+        // It now needs the shared secret only the frontend server holds; unset means off.
+        if (!CrawlerHit.tokenMatches(System.getenv("MONEYVERSE_TELEMETRY_TOKEN"), token)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "TELEMETRY_TOKEN_REQUIRED");
+        }
+        CrawlerHit hit = CrawlerHit.from(body);
+        try {
+            jdbcTemplate.update("""
+                INSERT INTO seo_crawler_logs (id, bot_name, path, status_code, duration_ms, ip_address, user_agent, created_at)
+                VALUES (gen_random_uuid(), ?, ?, ?, ?, ?, ?, NOW())
+                """, hit.botName(), hit.path(), hit.statusCode(), hit.durationMs(), hit.ipAddress(), hit.userAgent());
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "TELEMETRY_UNAVAILABLE");
         }
         return ResponseEntity.ok(Map.of("recorded", true));
     }
@@ -283,11 +272,8 @@ public class SeoController {
 
     @GetMapping(path = { "/api/v1/seo/twitter/status", "/api/seo/twitter/status", "/seo/twitter/status" })
     public ResponseEntity<Map<String, Object>> getTwitterStatus() {
-        return ResponseEntity.ok(Map.of(
-                "enabled", true,
-                "monthlyQuotaRemaining", 480,
-                "lastPublishedAt", Instant.now().toString()
-        ));
+        // Security/QA 2026-11-26: published a fixed "enabled, 480 left, published just now".
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "TWITTER_SOURCE_UNAVAILABLE");
     }
 
     @GetMapping(path = "/.well-known/indexnow.key", produces = MediaType.TEXT_PLAIN_VALUE)

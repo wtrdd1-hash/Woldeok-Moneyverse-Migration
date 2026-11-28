@@ -47,15 +47,9 @@ public class HelpReportController {
             @PathVariable("locale") String locale,
             @PathVariable("slug") String slug,
             @RequestBody(required = false) Map<String, Object> body) {
-        String userId = getUserIdOrThrow(request);
-        String threadId = UUID.randomUUID().toString();
-
-        return ResponseEntity.ok()
-                .headers(securityHeaders())
-                .body(Map.of(
-                        "threadId", threadId,
-                        "status", "open",
-                        "verified", true
-                ));
+        getUserIdOrThrow(request);
+        // Security review 2026-11-28: this answered with invented data or acknowledged a write never stored.
+        // Unavailable until backed by a canonical source; never a fabricated receipt.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "HELP_REPORT_SOURCE_UNAVAILABLE");
     }
 }

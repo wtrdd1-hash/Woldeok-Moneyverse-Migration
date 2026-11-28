@@ -77,7 +77,7 @@ public class OAuthController {
         String p = provider.trim().toLowerCase();
         if (!"discord".equals(p) && !"google".equals(p)) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body(Map.of("error", "unsupported_provider", "message", "지원되지 않는 OAuth 제공자입니다: " + provider));
+                    .body(Map.of("error", "unsupported_provider", "message", "지원되지 않는 OAuth 제공자입니다."));
         }
 
         // Resolve or create prelogin session
@@ -138,7 +138,7 @@ public class OAuthController {
         boolean wantsJson = "json".equalsIgnoreCase(request.getParameter("format"));
 
         if (error != null && !error.isBlank()) {
-            log.warn("[OAuth] Provider reported error: provider={}, error={}", p, error);
+            log.warn("[OAuth] Provider reported error: provider={}, error={}", providerLabel(p), oauthErrorParam(error));
             if (!wantsJson) {
                 return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_cancelled")).build();
             }
@@ -146,7 +146,7 @@ public class OAuthController {
         }
 
         if (code == null || code.isBlank()) {
-            log.warn("[OAuth] No authorization code received for provider={}", p);
+            log.warn("[OAuth] No authorization code received for provider={}", providerLabel(p));
             if (!wantsJson) {
                 return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_response")).build();
             }
@@ -175,7 +175,7 @@ public class OAuthController {
         }
         UUID browserSession = authService.resolveSession(request).map(SessionInfo::getSessionId).orElse(null);
         if (claimedSession == null || !claimedSession.equals(browserSession)) {
-            log.warn("[OAuth] State does not match the browser session: provider={}", p);
+            log.warn("[OAuth] State does not match the browser session: provider={}", providerLabel(p));
             if (!wantsJson) {
                 return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_session")).build();
             }
@@ -206,7 +206,7 @@ public class OAuthController {
 
                 HttpResponse<String> tokenResponse = httpClient.send(tokenRequest, HttpResponse.BodyHandlers.ofString());
                 if (tokenResponse.statusCode() < 200 || tokenResponse.statusCode() >= 300) {
-                    log.error("[OAuth] Discord token exchange failed: status={}, body={}", tokenResponse.statusCode(), tokenResponse.body());
+                    log.error("[OAuth] Discord token exchange failed: status={}, error={}", tokenResponse.statusCode(), oauthErrorCode(tokenResponse.body()));
                     if (!wantsJson) {
                         return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_verification")).build();
                     }
@@ -216,7 +216,7 @@ public class OAuthController {
                 JsonNode tokenJson = objectMapper.readTree(tokenResponse.body());
                 String accessToken = tokenJson.path("access_token").asText(null);
                 if (accessToken == null || accessToken.isBlank()) {
-                    log.error("[OAuth] Invalid Discord access token in response: {}", tokenResponse.body());
+                    log.error("[OAuth] Discord token response carried no access token: error={}", oauthErrorCode(tokenResponse.body()));
                     if (!wantsJson) {
                         return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_verification")).build();
                     }
@@ -234,7 +234,7 @@ public class OAuthController {
 
                 HttpResponse<String> userResponse = httpClient.send(userRequest, HttpResponse.BodyHandlers.ofString());
                 if (userResponse.statusCode() < 200 || userResponse.statusCode() >= 300) {
-                    log.error("[OAuth] Discord user profile fetch failed: status={}, body={}", userResponse.statusCode(), userResponse.body());
+                    log.error("[OAuth] Discord user profile fetch failed: status={}", userResponse.statusCode());
                     if (!wantsJson) {
                         return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_profile")).build();
                     }
@@ -267,7 +267,7 @@ public class OAuthController {
 
                 HttpResponse<String> tokenResponse = httpClient.send(tokenRequest, HttpResponse.BodyHandlers.ofString());
                 if (tokenResponse.statusCode() < 200 || tokenResponse.statusCode() >= 300) {
-                    log.error("[OAuth] Google token exchange failed: status={}, body={}", tokenResponse.statusCode(), tokenResponse.body());
+                    log.error("[OAuth] Google token exchange failed: status={}, error={}", tokenResponse.statusCode(), oauthErrorCode(tokenResponse.body()));
                     if (!wantsJson) {
                         return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_verification")).build();
                     }
@@ -277,7 +277,7 @@ public class OAuthController {
                 JsonNode tokenJson = objectMapper.readTree(tokenResponse.body());
                 String accessToken = tokenJson.path("access_token").asText(null);
                 if (accessToken == null || accessToken.isBlank()) {
-                    log.error("[OAuth] Invalid Google access token in response: {}", tokenResponse.body());
+                    log.error("[OAuth] Google token response carried no access token: error={}", oauthErrorCode(tokenResponse.body()));
                     if (!wantsJson) {
                         return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_verification")).build();
                     }
@@ -295,7 +295,7 @@ public class OAuthController {
 
                 HttpResponse<String> userResponse = httpClient.send(userRequest, HttpResponse.BodyHandlers.ofString());
                 if (userResponse.statusCode() < 200 || userResponse.statusCode() >= 300) {
-                    log.error("[OAuth] Google user profile fetch failed: status={}, body={}", userResponse.statusCode(), userResponse.body());
+                    log.error("[OAuth] Google user profile fetch failed: status={}", userResponse.statusCode());
                     if (!wantsJson) {
                         return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_profile")).build();
                     }
@@ -310,7 +310,7 @@ public class OAuthController {
             }
 
             if (providerSubjectId == null || providerSubjectId.isBlank()) {
-                log.error("[OAuth] No user identifier in {} response", p);
+                log.error("[OAuth] No user identifier in {} response", providerLabel(p));
                 if (!wantsJson) {
                     return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_profile")).build();
                 }
@@ -338,8 +338,7 @@ public class OAuthController {
                     response
             );
 
-            log.info("[OAuth] Successfully logged in user via {}: userId={}, displayName={}, isNew={}",
-                    p, result.userId(), result.displayName(), result.isNew());
+            log.info("[OAuth] Signed in via {}: userId={}, isNew={}", providerLabel(p), result.userId(), result.isNew());
 
             if (!wantsJson) {
                 return ResponseEntity.status(HttpStatus.FOUND)
@@ -354,12 +353,40 @@ public class OAuthController {
             return ResponseEntity.ok(res);
 
         } catch (Exception e) {
-            log.error("[OAuth] Unexpected callback error for provider=" + p, e);
+            log.error("[OAuth] Unexpected callback error: provider={}, type={}", providerLabel(p), e.getClass().getSimpleName());
             if (!wantsJson) {
                 return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=server_error")).build();
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("outcome", "error", "error", "oauth_login", "message", e.getMessage()));
+                    .body(Map.of("outcome", "error", "error", "oauth_login"));
         }
+    }
+
+    /** RFC 6749 error codes; anything else is logged as "other" (it may be a token or forged text). */
+    private static final java.util.Set<String> OAUTH_ERRORS = java.util.Set.of(
+            "invalid_request", "invalid_client", "invalid_grant", "unauthorized_client",
+            "unsupported_grant_type", "invalid_scope", "access_denied", "unsupported_response_type",
+            "server_error", "temporarily_unavailable", "interaction_required", "login_required",
+            "consent_required", "account_selection_required");
+    private static final com.fasterxml.jackson.databind.ObjectMapper ERROR_READER = new com.fasterxml.jackson.databind.ObjectMapper();
+
+    /** The provider error code from a token response body, allowlisted (S04 + independent review). */
+    public static String oauthErrorCode(String body) {
+        try {
+            return oauthErrorParam(ERROR_READER.readTree(body == null ? "" : body).path("error").asText(null));
+        } catch (Exception e) {
+            return "other";
+        }
+    }
+
+    /** An attacker-controllable error value reduced to an allowlisted code. */
+    public static String oauthErrorParam(String value) {
+        return value != null && OAUTH_ERRORS.contains(value) ? value : "other";
+    }
+
+    /** A log-safe provider label. */
+    public static String providerLabel(String provider) {
+        String p = provider == null ? "" : provider.trim().toLowerCase(java.util.Locale.ROOT);
+        return "discord".equals(p) || "google".equals(p) ? p : "other";
     }
 }

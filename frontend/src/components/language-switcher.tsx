@@ -16,8 +16,8 @@ import { type Locale } from '@/lib/locale';
 import { ALL_CURRENCIES, CURRENCY_CONFIG, type Currency } from '@/lib/currency';
 
 export const LANGUAGE_OPTIONS: Array<{ value: Locale; label: string; shortLabel: string }> = [
-  { value: 'ko', label: '한국어 (Korean)', shortLabel: 'KO' },
   { value: 'en', label: 'English (US)', shortLabel: 'EN' },
+  { value: 'ko', label: '한국어 (Korean)', shortLabel: 'KO' },
   { value: 'ja', label: '日本語 (Japanese)', shortLabel: 'JA' },
   { value: 'zh', label: '简体中文 (Chinese)', shortLabel: 'ZH' },
   { value: 'vi', label: 'Tiếng Việt (Vietnamese)', shortLabel: 'VI' },

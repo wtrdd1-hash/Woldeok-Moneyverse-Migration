@@ -1,12 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { VIP_PASS_CATALOG_ID } from './shop-constants';
 import type { CatalogItem } from './shop-store-view';
 
 describe('Shop & VIP Membership Integrity Tests', () => {
-  it('defines the correct standard VIP Lounge Pass catalog UUID', () => {
-    expect(VIP_PASS_CATALOG_ID).toBe('a3360608-1b8c-49c9-bba7-a799cd936fb4');
-    expect(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(VIP_PASS_CATALOG_ID)).toBe(true);
-  });
+  // The fixed catalogue id this pinned is gone: seeded ids differ between environments, so the
+  // pass is bought by the id the catalogue returns (see membership-truth.test.tsx).
 
   it('correctly determines isPlusMember from catalog items', () => {
     const mockFreeItems: Partial<CatalogItem>[] = [

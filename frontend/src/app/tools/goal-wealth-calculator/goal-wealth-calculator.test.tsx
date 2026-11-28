@@ -1,6 +1,7 @@
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { screen, fireEvent, cleanup } from '@testing-library/react';
 import { describe, it, expect, afterEach } from 'vitest';
 import GoalWealthCalculatorPage from './page';
+import { renderKo } from '@/testing/render-ko';
 
 describe('GoalWealthCalculatorPage', () => {
   afterEach(() => {
@@ -8,7 +9,7 @@ describe('GoalWealthCalculatorPage', () => {
   });
 
   it('renders title and essential calculation controls properly', () => {
-    render(<GoalWealthCalculatorPage />);
+    renderKo(<GoalWealthCalculatorPage />);
 
     expect(screen.getByText('목표 자산·은퇴·FIRE 달성 계산기')).toBeDefined();
     expect(screen.getByText('자산 축적 및 투자 조건')).toBeDefined();
@@ -18,7 +19,7 @@ describe('GoalWealthCalculatorPage', () => {
   });
 
   it('applies preset when preset button is clicked', () => {
-    render(<GoalWealthCalculatorPage />);
+    renderKo(<GoalWealthCalculatorPage />);
 
     const youthPresetBtn = screen.getByText('사회초년생 1억 모으기');
     fireEvent.click(youthPresetBtn);
@@ -29,7 +30,7 @@ describe('GoalWealthCalculatorPage', () => {
   });
 
   it('calculates 4% rule safe withdrawal correctly', () => {
-    render(<GoalWealthCalculatorPage />);
+    renderKo(<GoalWealthCalculatorPage />);
 
     // 10억 목표 시 연 4,000만 원 (월 약 333만 원) 안전 인출액
     expect(screen.getByText(/월 3,333,333/)).toBeDefined();

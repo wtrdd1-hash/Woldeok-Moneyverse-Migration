@@ -5,8 +5,8 @@ import { PensionPortalClient, PENSION_LEDGER_SETTLEMENT_PAUSED } from './pension
 
 afterEach(() => cleanup());
 
-describe('P0 national pension ledger certified operational state', () => {
-  it('unpauses settlement controls and enables financial mutation buttons', () => {
+describe('legacy pension account actions follow the backend hold (QA 2026-11-25)', () => {
+  it('pauses legacy account writes, says so honestly and points to the certified panel', () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
       return new Response(JSON.stringify({ success: true, account: {} }), { status: 200 });
     });
@@ -40,10 +40,12 @@ describe('P0 national pension ledger certified operational state', () => {
       />,
     );
 
-    expect(PENSION_LEDGER_SETTLEMENT_PAUSED).toBe(false);
-    expect((screen.getByRole('button', { name: /국민연금 기여금 즉시 납입/ }) as HTMLButtonElement).disabled).toBe(false);
-    expect((screen.getByRole('button', { name: /연금 수령 일시정지/ }) as HTMLButtonElement).disabled).toBe(false);
-    expect((screen.getByRole('button', { name: /중도 해지/ }) as HTMLButtonElement).disabled).toBe(false);
+    expect(PENSION_LEDGER_SETTLEMENT_PAUSED).toBe(true);
+    expect(document.body.textContent).not.toMatch(/검증이 완료|실시간 가동|정상 운영 중/);
+    expect(document.body.textContent).toMatch(/정식 원장 납입·환급/);
+    expect((screen.getByRole('button', { name: /국민연금 기여금 즉시 납입/ }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: /연금 수령 일시정지/ }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: /중도 해지/ }) as HTMLButtonElement).disabled).toBe(true);
 
     fetchSpy.mockRestore();
   });

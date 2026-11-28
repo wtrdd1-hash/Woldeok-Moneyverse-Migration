@@ -77,6 +77,8 @@ class NativeSessionCsrfRegressionTest {
                 CREATE TABLE auth_local_credentials (
                     user_id UUID, email TEXT, email_hash TEXT, password_verifier TEXT, disabled_at TIMESTAMP)
                 """);
+        // Sign-in reads credentials through 180's function (2026-11-26); same H2 alias as schema-test.sql.
+        jdbc.execute("CREATE ALIAS auth_local_credential_for_login FOR 'com.moneyverse.testing.H2AuthFunctionAliases.credentialForLogin'");
         jdbc.update("INSERT INTO auth_sessions (id, token_hash, csrf_hash, user_id, expires_at) VALUES (?, ?, ?, ?, ?)",
                 SESSION_ID, UserAuthService.sha256(SESSION), UserAuthService.sha256(PROOF), OWNER,
                 Timestamp.from(Instant.now().plusSeconds(3600)));
@@ -208,9 +210,20 @@ class NativeSessionCsrfRegressionTest {
         }
     }
 
-    @ParameterizedTest @ValueSource(strings = {"https://www.easy-scraping.com", "http://localhost:3000"})
+    @ParameterizedTest @ValueSource(strings = {"https://www.easy-scraping.com"})
     void CorsAllowedCrossOriginCannotReadRawProof(String origin) throws Exception {
         assertBootstrapDenied(bootstrap().header("Origin", origin).cookie(new Cookie(HOST_PROOF, PROOF)));
+    }
+
+    // Developer origins are no longer CORS-allowed in Production, so the CORS layer refuses them
+    // before the bootstrap handler runs. The proof must still never appear in the response.
+    @ParameterizedTest @ValueSource(strings = {"http://localhost:3000", "http://127.0.0.1:4550"})
+    void DeveloperOriginIsRefusedBeforeBootstrap(String origin) throws Exception {
+        var result = mvc.perform(bootstrap().header("Origin", origin).cookie(new Cookie(HOST_PROOF, PROOF)))
+                .andExpect(status().isForbidden()).andReturn();
+        assertFalse(result.getResponse().getContentAsString().contains(PROOF), "Refused origin must not see the proof");
+        assertNull(result.getResponse().getHeader("Access-Control-Allow-Origin"), "Refused origin must not be granted CORS");
+        authenticatedWithoutProof(perform(bootstrap()));
     }
 
     @ParameterizedTest @ValueSource(strings = {"same-site", "cross-site", "none", "ci_invalid"})
@@ -294,8 +307,9 @@ class NativeSessionCsrfRegressionTest {
         var admin = mock(AdminAuthService.class);
         when(admin.isAuthorizedAdmin(any())).thenReturn(true);
         when(admin.resolveAdminUserId(any())).thenReturn(java.util.Optional.of(OWNER));
+        when(admin.resolveVerifiedAdminActor(any())).thenReturn(java.util.Optional.of(OWNER));
         when(admin.extractSessionToken(any())).thenReturn(SESSION);
-        var controller = new AdminSecurityController(admin, mock(JdbcTemplate.class));
+        var controller = new AdminSecurityController(admin, consoleJdbc());
         var response = new MockHttpServletResponse();
         var opened = controller.openConsoleSession(new MockHttpServletRequest(), response);
         var payload = (Map<?, ?>) opened.getBody();
@@ -452,8 +466,10 @@ class NativeSessionCsrfRegressionTest {
         var admin = mock(AdminAuthService.class);
         when(admin.isAuthorizedAdmin(any())).thenReturn(true);
         when(admin.resolveAdminUserId(any())).thenReturn(java.util.Optional.of(OWNER));
+        when(admin.resolveVerifiedAdminActor(any())).thenReturn(java.util.Optional.of(OWNER));
+        when(admin.extractSessionToken(any())).thenReturn(SESSION);
         var response = new MockHttpServletResponse();
-        new AdminSecurityController(admin, mock(JdbcTemplate.class)).openConsoleSession(new MockHttpServletRequest(), response);
+        new AdminSecurityController(admin, consoleJdbc()).openConsoleSession(new MockHttpServletRequest(), response);
         assertTrue(response.getHeaders("Set-Cookie").stream()
                 .anyMatch(value -> value.startsWith("mv_session=;") && value.contains("Max-Age=0")),
                 "Admin rotation must remove the stale legacy session cookie");
@@ -547,5 +563,16 @@ class NativeSessionCsrfRegressionTest {
             assertTrue(cookie.contains(flag), "Proof cookie must retain security flags and session lifetime");
         }
         assertFalse(cookie.toLowerCase().contains("domain="), "Host prefix must not permit a domain cookie");
+    }
+
+    /** Console rotation reads the current session first (inheriting its re-verification time). */
+    private static JdbcTemplate consoleJdbc() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        java.util.Map<String, Object> row = new java.util.HashMap<>();
+        row.put("id", java.util.UUID.randomUUID());
+        row.put("reauthenticated_at", null);
+        when(jdbc.queryForList(contains("RETURNING reauthenticated_at"), any(String.class), any(java.util.UUID.class))).thenReturn(java.util.List.of(row));
+        when(jdbc.update(contains("INSERT INTO auth_sessions"), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(1);
+        return jdbc;
     }
 }

@@ -23,9 +23,10 @@ class Phase6IntegrationTest {
     @Test
     @DisplayName("가상 세계 일/주차 시계 동기화 조회 테스트")
     void testGameClockEndpoints() throws Exception {
+        // The test database has no server_game_clock(): the API must say so (503), never
+        // invent a calendar (it used to answer ok:true with day 42 / week 6; QA 2026-11-26).
         mockMvc.perform(get("/api/game-clock"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
+                .andExpect(status().isServiceUnavailable());
     }
 
     @Test
@@ -37,9 +38,9 @@ class Phase6IntegrationTest {
         mockMvc.perform(get("/api/space/my")
                         .header("X-User-Id", "00000000-0000-0000-0000-000000000101"))
                 .andExpect(status().isUnauthorized());
+        // Security review 2026-11-28: this asserted invented live state; it must answer 503 until real.
         mockMvc.perform(get("/api/spaces/real-estate/districts"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.districts").isArray());
+                .andExpect(status().isServiceUnavailable());
     }
 
     @Test

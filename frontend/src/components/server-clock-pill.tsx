@@ -3,49 +3,36 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Clock3 } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { useLocale } from '@/components/locale-provider';
+import { gameWeekLabel, gameYearLabel, parseGameClock, type GameClock } from '@/lib/game-calendar';
 
-interface ClockPayload {
-  readonly dayIndex?: string;
-  readonly day_index?: string;
-  readonly weekIndex?: string;
-  readonly week_index?: string;
-  readonly dayOfWeek?: number;
-  readonly day_of_week?: number;
-  readonly dayEndsAt?: string;
-  readonly day_ends_at?: string;
-}
+// GAMEYEAR.4: the year and day-of-year come from the API (365 server days per year). The Korean
+// sentence keeps the existing product copy and appends the year rule from the approved spec.
+const TITLE: Record<string, string> = {
+  en: '10 real minutes = 1 server day · 7 server days = 1 week · 365 server days = 1 year',
+  ko: '현실 10분 = 서버 1일, 서버 7일 = 1주, 서버 365일 = 1년',
+  ja: '現実の10分 = サーバー1日、7日 = 1週、365日 = 1年',
+  zh: '现实10分钟 = 服务器1天，7天 = 1周，365天 = 1年',
+  vi: '10 phút thực = 1 ngày máy chủ · 7 ngày = 1 tuần · 365 ngày = 1 năm',
+};
 
-interface ClockView {
-  readonly day: number;
-  readonly week: number;
-  readonly dayOfWeek: number;
-  readonly dayEndsAt: string | null;
-}
-
-function normalize(payload: ClockPayload): ClockView | null {
-  const dayRaw = payload.dayIndex ?? payload.day_index;
-  const weekRaw = payload.weekIndex ?? payload.week_index;
-  const dayOfWeek = payload.dayOfWeek ?? payload.day_of_week;
-  if (dayRaw === undefined || weekRaw === undefined || dayOfWeek === undefined) return null;
-  const day = Number(dayRaw);
-  const week = Number(weekRaw);
-  if (!Number.isSafeInteger(day) || !Number.isSafeInteger(week) || !Number.isSafeInteger(dayOfWeek)) return null;
+/** Year text, or null when the API did not certify a year (the week is still shown). */
+export function serverClockText(locale: string, clock: GameClock): { readonly year: string | null; readonly week: string } {
   return {
-    day: day + 1,
-    week: week + 1,
-    dayOfWeek,
-    dayEndsAt: payload.dayEndsAt ?? payload.day_ends_at ?? null,
+    year: clock.year ? gameYearLabel(locale, clock.year, true) : null,
+    week: gameWeekLabel(locale, clock.weekIndex + 1, clock.dayOfWeek),
   };
 }
 
 export function ServerClockPill({ className }: { readonly className?: string }) {
-  const [clock, setClock] = useState<ClockView | null>(null);
+  const { locale } = useLocale();
+  const [clock, setClock] = useState<GameClock | null>(null);
 
   const refresh = useCallback(async () => {
     try {
       const response = await fetch('/app-api/v1/game-clock', { cache: 'no-store' });
       if (!response.ok) return;
-      const next = normalize((await response.json()) as ClockPayload);
+      const next = parseGameClock(await response.json());
       if (next) setClock(next);
     } catch {
       // Time display is supplemental; navigation must stay usable offline.
@@ -64,6 +51,7 @@ export function ServerClockPill({ className }: { readonly className?: string }) 
   }, [clock?.dayEndsAt, refresh]);
 
   if (!clock) return null;
+  const text = serverClockText(locale, clock);
 
   return (
     <div
@@ -71,11 +59,14 @@ export function ServerClockPill({ className }: { readonly className?: string }) 
         'inline-flex min-h-9 items-center gap-2 rounded-xl border bg-muted/45 px-2.5 text-[11px] font-bold text-muted-foreground',
         className,
       )}
-      title="현실 10분 = 서버 1일, 서버 7일 = 1주"
+      title={TITLE[locale] ?? TITLE.en}
+      data-testid="server-clock"
     >
-      <Clock3 className="size-3.5 text-primary" aria-hidden="true" />
-      <span className="whitespace-nowrap">
-        서버 {clock.day}일 · {clock.week}주차 {clock.dayOfWeek}일차
+      <Clock3 className="size-3.5 shrink-0 text-primary" aria-hidden="true" />
+      {/* Wraps instead of overflowing in narrow places (mobile menu sheet at 320 px, browser QA). */}
+      <span className="text-center">
+        {text.year ? <>{text.year} · </> : null}
+        {text.week}
       </span>
     </div>
   );

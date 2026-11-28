@@ -34,8 +34,7 @@ public class UserAuthService {
     private final JdbcTemplate jdbcTemplate;
     private final Argon2PasswordEncoder passwordEncoder;
 
-    @org.springframework.beans.factory.annotation.Value("${moneyverse.internal-api-token:${INTERNAL_API_TOKEN:8e5f2a1b9c3d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f}}")
-    private String internalToken = "8e5f2a1b9c3d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f";
+    // Security 2026-11-26: an unused field carried a hard-coded internal token literal; removed.
 
     @Autowired
     public UserAuthService(JdbcTemplate jdbcTemplate) {
@@ -149,10 +148,10 @@ public class UserAuthService {
                     info.setDisplayName("시민");
                 }
 
-                // 2) email from auth_local_credentials
+                // 2) email through auth_local_email_for_actor (356)
                 try {
                     String em = jdbcTemplate.queryForObject(
-                        "SELECT email FROM auth_local_credentials WHERE user_id = ? AND disabled_at IS NULL LIMIT 1",
+                        "SELECT public.auth_local_email_for_actor(?::uuid)",
                         String.class, uid
                     );
                     info.setEmail(em);
@@ -285,31 +284,9 @@ public class UserAuthService {
             }
         } catch (Exception ignored) {}
 
-        // 2. Check user_roles table
-        try {
-            List<String> ur = jdbcTemplate.query(
-                "SELECT role::text FROM user_roles WHERE user_id = ?",
-                (rs, rowNum) -> rs.getString(1),
-                userId
-            );
-            for (String r : ur) {
-                roles.add(r.toLowerCase());
-                roles.add(r.toUpperCase());
-            }
-        } catch (Exception ignored) {}
-
-        // 3. Check admin_role_designations
-        try {
-            List<String> ar = jdbcTemplate.query(
-                "SELECT role::text FROM admin_role_designations WHERE target_user_id = ? AND operation = 'GRANT'",
-                (rs, rowNum) -> rs.getString(1),
-                userId
-            );
-            for (String r : ar) {
-                roles.add(r.toLowerCase());
-                roles.add(r.toUpperCase());
-            }
-        } catch (Exception ignored) {}
+        // Only admin_current_roles is authoritative. The former fallbacks read user_roles and
+        // every GRANT row in admin_role_designations, so a revoked or never-approved designation
+        // still produced an admin role in the session. Removed 2026-11-26.
 
         // Map superadmin / server_operator / approver / operator to ADMIN and SUPERADMIN
         if (roles.contains("superadmin") || roles.contains("SUPERADMIN")) {
@@ -361,7 +338,9 @@ public class UserAuthService {
         String email = normalizeEmail(rawEmail);
         String emailH = sha256(email);
 
-        String credSql = "SELECT user_id, password_verifier FROM auth_local_credentials WHERE email_hash = ? AND disabled_at IS NULL";
+        // Through 180's function: it also refuses accounts that are not active, which the former
+        // direct read did not check, and needs no table grant (the chain grants none).
+        String credSql = "SELECT user_id, password_verifier FROM public.auth_local_credential_for_login(?)";
         Map<String, Object> cred;
         try {
             cred = jdbcTemplate.queryForMap(credSql, emailH);
@@ -406,8 +385,8 @@ public class UserAuthService {
         String displayName = "시민";
         try {
             String dname = jdbcTemplate.queryForObject(
-                "SELECT display_name FROM member_profiles WHERE user_id = ?",
-                String.class, userId
+                "SELECT profile.display_name FROM public.member_profile_view(?::uuid, ?::uuid) AS profile",
+                String.class, userId, userId
             );
             if (dname != null && !dname.isBlank()) displayName = dname;
         } catch (Exception ignored) {}
@@ -443,25 +422,46 @@ public class UserAuthService {
      * Re-authenticates the current user's password.
      */
     @Transactional
-    public boolean reauthenticate(UUID userId, String password) {
-        String credSql = "SELECT password_verifier FROM auth_local_credentials WHERE user_id = ? AND disabled_at IS NULL";
+    /** Password check for one session; on success only that session is marked (security 2026-11-26). */
+    public boolean reauthenticateSession(UUID sessionId, UUID userId, String password) {
+        // 356: the verifier is returned only for this user's own live session.
+        String credSql = "SELECT public.auth_local_verifier_for_actor(?::uuid, ?::uuid)";
         try {
-            String verifier = jdbcTemplate.queryForObject(credSql, String.class, userId);
-            if (verifier == null) return false;
-            boolean matched = passwordEncoder.matches(password, verifier);
-            if (matched) {
-                jdbcTemplate.update("UPDATE auth_sessions SET reauthenticated_at = NOW() WHERE user_id = ? AND revoked_at IS NULL", userId);
-            }
-            return matched;
+            String verifier = jdbcTemplate.queryForObject(credSql, String.class, userId, sessionId);
+            if (verifier == null || !passwordEncoder.matches(password, verifier)) return false;
+            return jdbcTemplate.update("UPDATE auth_sessions SET reauthenticated_at = NOW() WHERE id = ? AND user_id = ? AND revoked_at IS NULL AND expires_at > NOW()",
+                    sessionId, userId) == 1;
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /** NestJS ReauthGuard: this session confirmed the password within the window. */
+    public boolean hasRecentReauthentication(UUID sessionId, UUID userId, int windowSeconds) {
+        Integer n = jdbcTemplate.queryForObject("SELECT count(*)::int FROM auth_sessions WHERE id = ? AND user_id = ? AND revoked_at IS NULL "
+                + "AND expires_at > NOW() AND reauthenticated_at > NOW() - make_interval(secs => ?)", Integer.class, sessionId, userId, windowSeconds);
+        return n != null && n == 1;
+    }
+
+    /** Replaces the local password and signs out every other session of the member. False when no local credential exists. */
+    @Transactional
+    public boolean changePasswordForSession(UUID sessionId, UUID userId, String newPassword) {
+        int changed = jdbcTemplate.update("UPDATE auth_local_credentials SET password_verifier = ?, changed_at = ? WHERE user_id = ? AND disabled_at IS NULL",
+                passwordEncoder.encode(newPassword), Timestamp.from(Instant.now()), userId);
+        if (changed != 1) return false;
+        jdbcTemplate.update("UPDATE auth_sessions SET revoked_at = NOW() WHERE user_id = ? AND id <> ? AND revoked_at IS NULL", userId, sessionId);
+        return true;
     }
 
     /**
      * Changes password.
      */
     @Transactional
+    /** The same Argon2id parameters every stored verifier uses. */
+    public String encodePassword(String raw) {
+        return passwordEncoder.encode(raw);
+    }
+
     public void changePassword(UUID userId, String newPassword) {
         String encoded = passwordEncoder.encode(newPassword);
         Instant now = Instant.now();
@@ -473,12 +473,10 @@ public class UserAuthService {
 
     public void setSessionCookie(HttpServletResponse response, String rawToken) {
         if (response == null) return;
-        Cookie cookie = new Cookie("mv_session", rawToken);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(30 * 24 * 60 * 60); // 30 days
-        response.addCookie(cookie);
+        // SameSite=Lax on the legacy cookie too (security review 2026-11-25): resolveSession
+        // falls back to it, so without SameSite a cross-site POST could ride on it.
+        response.addHeader("Set-Cookie",
+            "mv_session=" + rawToken + "; Path=/; Max-Age=" + (30 * 24 * 60 * 60) + "; HttpOnly; Secure; SameSite=Lax");
 
         response.addHeader("Set-Cookie",
             "__Host-mv_session=" + rawToken + "; Path=/; Max-Age=" + (30 * 24 * 60 * 60) + "; HttpOnly; Secure; SameSite=Lax");
@@ -496,20 +494,6 @@ public class UserAuthService {
 
         response.addHeader("Set-Cookie",
             "__Host-mv_session=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax");
-    }
-
-    public boolean bindExistingSessionByToken(String rawToken, HttpServletResponse response) {
-        if (rawToken == null || rawToken.isBlank()) return false;
-        String tokenHash = sha256(rawToken);
-        String sql = "SELECT COUNT(*) FROM auth_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > NOW()";
-        try {
-            Integer count = jdbcTemplate.queryForObject(sql, Integer.class, tokenHash);
-            if (count != null && count > 0) {
-                setSessionCookie(response, rawToken);
-                return true;
-            }
-        } catch (Exception ignored) {}
-        return false;
     }
 
     public Long getUserCashBalance(UUID userId) {

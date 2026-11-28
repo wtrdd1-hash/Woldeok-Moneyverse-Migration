@@ -25,6 +25,10 @@ import { FiatBadge } from '@/components/fiat-amount';
 import { AvatarWithCosmetics, NameplateWithTitle, type UserCosmetics } from '@/components/profile-cosmetics';
 import { buyCatalogItemDirect } from './actions';
 import { ShopComparePanel } from './shop-compare-panel';
+import { useLocale } from '@/components/locale-provider';
+import { pick } from '@/lib/copy';
+import { fill } from '@/lib/copy-format';
+import { COPY } from './copy';
 
 export interface CatalogItem {
   readonly catalog_id: string;
@@ -57,27 +61,29 @@ interface ShopStoreViewProps {
 }
 
 const CATEGORIES = [
-  { id: 'all', label: '전체', icon: Layers },
-  { id: 'frame', label: '프레임', icon: Shield },
-  { id: 'background', label: '배경', icon: Layers },
-  { id: 'effect', label: '이펙트', icon: Sparkles },
-  { id: 'nameplate', label: '네임플레이트', icon: Tag },
-  { id: 'title', label: '칭호', icon: Crown },
-  { id: 'badge', label: '배지', icon: Award },
-  { id: 'season', label: '시즌 1', icon: Clock },
-  { id: 'limited', label: '한정판', icon: Sparkles },
-  { id: 'business', label: '사업', icon: Building },
-  { id: 'convenience', label: '편의', icon: Zap },
+  { id: 'all', label: COPY.categoryAll, icon: Layers },
+  { id: 'frame', label: COPY.categoryFrame, icon: Shield },
+  { id: 'background', label: COPY.categoryBackground, icon: Layers },
+  { id: 'effect', label: COPY.categoryEffect, icon: Sparkles },
+  { id: 'nameplate', label: COPY.categoryNameplate, icon: Tag },
+  { id: 'title', label: COPY.categoryTitle, icon: Crown },
+  { id: 'badge', label: COPY.categoryBadge, icon: Award },
+  { id: 'season', label: COPY.categorySeason, icon: Clock },
+  { id: 'limited', label: COPY.categoryLimited, icon: Sparkles },
+  { id: 'business', label: COPY.categoryBusiness, icon: Building },
+  { id: 'convenience', label: COPY.categoryConvenience, icon: Zap },
 ] as const;
 
 export function ShopStoreView({
   items,
   allowCompare = false,
   userBalance,
-  currentUsername = '모험가',
+  currentUsername: givenUsername,
   userAvatarUrl,
 }: ShopStoreViewProps) {
   const router = useRouter();
+  const { locale } = useLocale();
+  const currentUsername = givenUsername ?? pick(locale, COPY.adventurer);
   const [mounted, setMounted] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [comparisonIds, setComparisonIds] = useState<string[]>([]);
@@ -115,7 +121,7 @@ export function ShopStoreView({
   };
 
   const handleBuy = async (item: CatalogItem) => {
-    setBuyStatus('구매 처리 중...');
+    setBuyStatus(pick(locale, COPY.buyProcessing));
     try {
       const result = await buyCatalogItemDirect(item.catalog_id, buyQuantity);
       if (!result.success) {
@@ -131,8 +137,8 @@ export function ShopStoreView({
         });
       }, 1200);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : '오류가 발생했습니다.';
-      setBuyStatus(`실패: ${msg}`);
+      const msg = err instanceof Error ? err.message : pick(locale, COPY.genericError);
+      setBuyStatus(pick(locale, fill(COPY.buyFailed, { message: msg })));
     }
   };
 
@@ -171,7 +177,7 @@ export function ShopStoreView({
               )}
             >
               <Icon className="size-3.5" />
-              <span>{cat.label}</span>
+              <span>{pick(locale, cat.label)}</span>
               <span
                 className={cn(
                   'text-[10px] px-1.5 py-0.2 rounded-full font-semibold',
@@ -221,7 +227,7 @@ export function ShopStoreView({
                   {isLimited && (
                     <span className="flex items-center gap-1 rounded-md border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-800 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-200">
                       <Sparkles className="size-3" />
-                      LIMITED {item.quantity !== null ? `${item.quantity}개` : ''}
+                      LIMITED {item.quantity !== null ? pick(locale, fill(COPY.limitedCount, { count: item.quantity })) : ''}
                     </span>
                   )}
                 </div>
@@ -286,7 +292,7 @@ export function ShopStoreView({
               {/* Bottom: Price & Action */}
               <div className="pt-3 border-t border-border/40">
                 <div className="flex items-center justify-between mb-3 flex-wrap gap-1">
-                  <span className="text-xs text-muted-foreground">가격</span>
+                  <span className="text-xs text-muted-foreground">{pick(locale, COPY.price)}</span>
                   <div className="flex items-center gap-1.5 font-extrabold text-sm text-amber-700 dark:text-amber-300 flex-wrap">
                     <Coins className="size-4 text-amber-700 dark:text-amber-300" />
                     <span>{groupDigits(item.price)} WLD</span>
@@ -301,7 +307,7 @@ export function ShopStoreView({
                     onClick={() => toggleComparison(item.catalog_id)}
                     className="mb-2 w-full min-h-[44px] sm:min-h-[36px] rounded-xl border border-border px-3 py-2 text-xs font-semibold hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2"
                   >
-                    {comparisonIds.includes(item.catalog_id) ? '비교 선택 해제' : '비교에 추가'}
+                    {comparisonIds.includes(item.catalog_id) ? pick(locale, COPY.compareRemove) : pick(locale, COPY.compareAdd)}
                   </button>
                 ) : null}
                 <div className="flex items-center gap-2">
@@ -310,7 +316,7 @@ export function ShopStoreView({
                     className="flex-1 min-h-[44px] sm:min-h-[38px] py-2 rounded-xl text-xs font-bold bg-surface hover:bg-muted text-muted-foreground hover:text-foreground border border-border/50 flex items-center justify-center gap-1 transition-all"
                   >
                     <Eye className="size-3.5" />
-                    <span>미리보기</span>
+                    <span>{pick(locale, COPY.preview)}</span>
                   </button>
 
                   {isOwned && item.purchase_limit === 'account_one' ? (
@@ -319,7 +325,7 @@ export function ShopStoreView({
                       className="flex flex-1 min-h-[44px] sm:min-h-[38px] items-center justify-center gap-1 rounded-xl border border-emerald-300 bg-emerald-50 py-2 text-xs font-bold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
                     >
                       <Check className="size-3.5" />
-                      <span>보유 중</span>
+                      <span>{pick(locale, COPY.owned)}</span>
                     </button>
                   ) : (
                     <button
@@ -336,7 +342,7 @@ export function ShopStoreView({
                       )}
                     >
                       <ShoppingBag className="size-3.5" />
-                      <span>구매</span>
+                      <span>{pick(locale, COPY.buy)}</span>
                     </button>
                   )}
                 </div>
@@ -353,7 +359,7 @@ export function ShopStoreView({
           <div
             role="dialog"
             aria-modal="true"
-            aria-label="피팅룸 실시간 착용 미리보기"
+            aria-label={pick(locale, COPY.fittingDialogLabel)}
             onClick={() => setPreviewItem(null)}
             className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto"
           >
@@ -364,13 +370,13 @@ export function ShopStoreView({
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Sparkles className="size-5 text-amber-700 dark:text-amber-300" />
-                  <h3 className="text-base font-bold text-foreground">피팅룸 · 실시간 착용 미리보기</h3>
+                  <h3 className="text-base font-bold text-foreground">{pick(locale, COPY.fittingTitle)}</h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setPreviewItem(null)}
                   className="rounded-lg p-1 text-muted-foreground hover:bg-surface hover:text-foreground transition-colors"
-                  aria-label="닫기"
+                  aria-label={pick(locale, COPY.close)}
                 >
                   <X className="size-4" />
                 </button>
@@ -410,7 +416,7 @@ export function ShopStoreView({
                   onClick={() => setPreviewItem(null)}
                   className="flex-1 py-2.5 rounded-xl border border-border/50 text-xs font-bold text-muted-foreground hover:bg-surface transition-colors"
                 >
-                  닫기
+                  {pick(locale, COPY.close)}
                 </button>
                 <button
                   type="button"
@@ -420,7 +426,7 @@ export function ShopStoreView({
                   }}
                   className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold shadow-md shadow-amber-500/20 transition-all"
                 >
-                  이 아이템 구매하기
+                  {pick(locale, COPY.buyThisItem)}
                 </button>
               </div>
             </div>
@@ -435,7 +441,7 @@ export function ShopStoreView({
           <div
             role="dialog"
             aria-modal="true"
-            aria-label="아이템 구매 확인 다이얼로그"
+            aria-label={pick(locale, COPY.buyDialogLabel)}
             onClick={() => !buyStatus && setBuyingItem(null)}
             className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto"
           >
@@ -444,19 +450,19 @@ export function ShopStoreView({
               className="relative w-full max-w-md my-auto rounded-3xl border border-border bg-card p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200"
             >
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-base font-bold text-foreground">아이템 구매 확인</h3>
+                <h3 className="text-base font-bold text-foreground">{pick(locale, COPY.buyDialogTitle)}</h3>
                 <button
                   type="button"
                   disabled={Boolean(buyStatus)}
                   onClick={() => setBuyingItem(null)}
                   className="rounded-lg p-1 text-muted-foreground hover:bg-surface hover:text-foreground disabled:opacity-30 transition-colors"
-                  aria-label="닫기"
+                  aria-label={pick(locale, COPY.close)}
                 >
                   <X className="size-4" />
                 </button>
               </div>
               <p className="text-xs text-muted-foreground mb-4">
-                구매 금액은 시스템 소각 계정(SYSTEM_SINK)으로 100% 영구 소각 처리됩니다.
+                {pick(locale, COPY.buyDialogSink)}
               </p>
 
               <div className="rounded-2xl border border-border/50 bg-surface/50 p-4 mb-4 flex items-center justify-between">
@@ -468,7 +474,7 @@ export function ShopStoreView({
                   <p className="font-extrabold text-sm text-amber-700 dark:text-amber-300">
                     {groupDigits(buyingItem.price)} WLD
                   </p>
-                  <p className="text-[11px] text-muted-foreground">내 잔액: {userBalance === null ? '확인 불가' : `${groupDigits(userBalance)} WLD`}</p>
+                  <p className="text-[11px] text-muted-foreground">{pick(locale, fill(COPY.myBalance, { balance: userBalance === null ? pick(locale, COPY.unknown) : `${groupDigits(userBalance)} WLD` }))}</p>
                 </div>
               </div>
 
@@ -485,7 +491,7 @@ export function ShopStoreView({
                   onClick={() => setBuyingItem(null)}
                   className="flex-1 py-2.5 rounded-xl border border-border/50 text-xs font-bold text-muted-foreground hover:bg-surface disabled:opacity-50 transition-colors"
                 >
-                  취소
+                  {pick(locale, COPY.cancel)}
                 </button>
                 <button
                   type="button"
@@ -493,7 +499,7 @@ export function ShopStoreView({
                   onClick={() => handleBuy(buyingItem)}
                   className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold shadow-md shadow-amber-500/20 disabled:opacity-50 transition-all"
                 >
-                  {userBalance === null ? '잔액 확인 불가' : compareAmounts(userBalance, buyingItem.price) < 0 ? '잔액 부족' : '확인 및 결제'}
+                  {userBalance === null ? pick(locale, COPY.balanceUnknown) : compareAmounts(userBalance, buyingItem.price) < 0 ? pick(locale, COPY.balanceShort) : pick(locale, COPY.confirmPay)}
                 </button>
               </div>
             </div>

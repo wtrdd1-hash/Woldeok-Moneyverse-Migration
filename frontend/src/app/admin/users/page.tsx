@@ -5,7 +5,10 @@ import { PageHeader } from '@/components/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { requireAdminConsole } from '@/lib/session';
-import { adminArea } from '../areas';
+import { getServerLocale } from '@/lib/locale-server';
+import { adminArea, areaSummary, areaTitle } from '../areas';
+import { copyText } from '../admin-copy';
+import { ADMIN_USERS_COPY } from './copy';
 import { parseAdminUserSnapshot } from './user-directory-evidence';
 import { UserDirectory } from './user-directory';
 
@@ -13,34 +16,38 @@ export const dynamic = 'force-dynamic';
 
 const AREA = adminArea('/admin/users');
 
-export const metadata: Metadata = {
-  title: AREA.title,
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: areaTitle(AREA, await getServerLocale()),
+    robots: { index: false, follow: false },
+  };
+}
 
 export default async function AdminUsersPage() {
   await requireAdminConsole(AREA.href);
   const users = parseAdminUserSnapshot(await apiOrNull<unknown>('/api/v1/admin/users'));
+  const locale = await getServerLocale();
+  const t = (key: keyof typeof ADMIN_USERS_COPY) => copyText(locale, ADMIN_USERS_COPY[key]);
 
   return (
     <div data-page="admin-users" className="mv-page mv-page--admin grid gap-5">
       <AdminBack />
-      <PageHeader eyebrow={AREA.eyebrow} title={AREA.title}>
-        {AREA.summary}
+      <PageHeader eyebrow={AREA.eyebrow} title={areaTitle(AREA, locale)}>
+        {areaSummary(AREA, locale)}
       </PageHeader>
       <p className="text-sm text-muted-foreground">
-        사용자를 검색해 상세 화면에서 활동 로그, 이용 제한, 로그인 세션을 함께 관리할 수 있습니다.
+        {t('pageIntro')}
       </p>
       {users === null ? (
         <Card>
           <CardContent className="pt-6">
-            <EmptyState title="사용자 목록을 불러오지 못했어요." />
+            <EmptyState title={t('pageUnavailable')} />
           </CardContent>
         </Card>
       ) : users.users.length === 0 ? (
         <Card>
           <CardContent className="pt-6">
-            <EmptyState title="표시할 사용자가 없습니다." />
+            <EmptyState title={t('pageEmpty')} />
           </CardContent>
         </Card>
       ) : (

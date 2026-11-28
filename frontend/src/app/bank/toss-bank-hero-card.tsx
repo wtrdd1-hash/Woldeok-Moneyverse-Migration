@@ -11,6 +11,7 @@ import { claimInterestAction, depositAction, withdrawAction } from './actions';
 import { IDLE } from '@/lib/action-state';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { AmountInput } from '@/components/amount-input';
+import { useBankCopy } from './use-bank-copy';
 
 interface TossBankHeroCardProps {
   readonly bankBalance: string;
@@ -18,7 +19,6 @@ interface TossBankHeroCardProps {
   readonly unclaimedInterest: string;
   readonly dailyRatePct: number;
   readonly annualYieldPct: number;
-  readonly isEn?: boolean;
 }
 
 export function TossBankHeroCard({
@@ -27,8 +27,13 @@ export function TossBankHeroCard({
   unclaimedInterest,
   dailyRatePct,
   annualYieldPct,
-  isEn = false,
 }: TossBankHeroCardProps) {
+  const { c, locale } = useBankCopy();
+  // Korean keeps its carried-over ten-thousand/thousand shorthand; other locales show the grouped amount itself.
+  const presetLabel = (preset: string) =>
+    locale === 'ko'
+      ? `+${Number(preset) >= 10000 ? `${Number(preset) / 10000}만` : `${Number(preset) / 1000}천`}`
+      : `+${groupDigits(preset)}`;
   // 실시간 라이브 이자 카운팅 애니메이션 상태
   const baseUnclaimed = Number.parseFloat(unclaimedInterest) || 0;
   const bankNum = Number.parseFloat(bankBalance) || 0;
@@ -85,26 +90,26 @@ export function TossBankHeroCard({
           </div>
           <div>
             <h2 className="text-sm sm:text-base font-extrabold tracking-tight text-white flex items-center gap-1.5">
-              <span>{isEn ? 'Woldeok Bank Daily Savings' : '월덕뱅크 매일 이자 통장'}</span>
+              <span>{c('heroTitle')}</span>
               <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-white/10 text-sky-300">
                 WLD-805
               </span>
             </h2>
             <p className="text-xs text-sky-200/60 font-mono">
-              {isEn ? 'Compound yield accrued in real-time' : '초 단위로 복리 이자가 붙는 통장'}
+              {c('heroSubtitle')}
             </p>
           </div>
         </div>
 
         <Badge className="bg-sky-500/20 text-sky-300 border-sky-500/30 font-bold px-3 py-1 text-xs">
-          {isEn ? `Daily ${dailyRatePct}% (APY ${annualYieldPct}%)` : `매일 ${dailyRatePct}% 복리 (연 ${annualYieldPct}%)`}
+          {c('heroRateBadge', { daily: `${dailyRatePct}`, annual: `${annualYieldPct}` })}
         </Badge>
       </div>
 
       {/* 중앙: 압도적으로 큼직한 내 통장 잔액 */}
       <div className="relative z-10 space-y-1.5 pt-2">
         <span className="text-xs sm:text-sm font-medium text-sky-200/70">
-          {isEn ? 'Current Savings Balance' : '내 예금 잔액'}
+          {c('heroBalance')}
         </span>
         <div className="flex flex-wrap items-baseline gap-2">
           <span className="font-fintech text-4xl sm:text-5xl font-black tracking-tight text-white">
@@ -119,16 +124,14 @@ export function TossBankHeroCard({
         <div className="space-y-1">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
             <Sparkles className="size-3.5 animate-pulse" />
-            <span>{isEn ? 'Accruing Interest Right Now' : '지금 실시간으로 쌓이는 이자'}</span>
+            <span>{c('heroAccruing')}</span>
           </div>
           <div className="font-fintech text-2xl sm:text-3xl font-extrabold text-emerald-400 tabular-nums">
             +{liveInterest.toFixed(2)}{' '}
             <span className="text-sm font-semibold text-emerald-300/70">WLD</span>
           </div>
           <p className="text-[11px] text-white/50">
-            {isEn
-              ? 'Minimum 1 WLD to claim. Added instantly to savings.'
-              : '1 WLD 이상 쌓이면 즉시 받아 복리 효과를 극대화할 수 있어요.'}
+            {c('heroMinimum')}
           </p>
         </div>
 
@@ -143,9 +146,7 @@ export function TossBankHeroCard({
             }`}
           >
             <Sparkles className="size-4 mr-1.5" />
-            {isClaimPending
-              ? (isEn ? 'Claiming...' : '정산 중...')
-              : (isEn ? 'Claim Interest Now' : '지금 이자 받기')}
+            {isClaimPending ? c('heroClaiming') : c('heroClaim')}
           </Button>
         </form>
       </div>
@@ -154,7 +155,7 @@ export function TossBankHeroCard({
       {interestPopped && (
         <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-2 animate-bounce">
           <CheckCircle2 className="size-4" />
-          <span>{isEn ? 'Interest claimed directly to your balance!' : '이자가 성공적으로 입금되었습니다!'}</span>
+          <span>{c('heroClaimed')}</span>
         </div>
       )}
 
@@ -175,7 +176,7 @@ export function TossBankHeroCard({
           className="h-14 rounded-2xl bg-sky-500 hover:bg-sky-400 text-zinc-950 font-black text-sm sm:text-base shadow-lg shadow-sky-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
         >
           <ArrowDownToLine className="size-4 sm:size-5" />
-          <span>{isEn ? 'Deposit' : '채우기 (입금)'}</span>
+          <span>{c('heroDepositButton')}</span>
         </Button>
 
         <Button
@@ -187,7 +188,7 @@ export function TossBankHeroCard({
           className="h-14 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-black text-sm sm:text-base border border-white/15 backdrop-blur-md active:scale-95 transition-all flex items-center justify-center gap-2"
         >
           <ArrowUpFromLine className="size-4 sm:size-5" />
-          <span>{isEn ? 'Withdraw' : '보내기 (출금)'}</span>
+          <span>{c('heroWithdrawButton')}</span>
         </Button>
       </div>
 
@@ -196,19 +197,17 @@ export function TossBankHeroCard({
         <DialogContent className="max-w-md p-6 rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold">
-              {isEn ? 'Deposit WLD to Bank' : '예금 계좌에 WLD 채우기'}
+              {c('heroDepositTitle')}
             </DialogTitle>
             <DialogDescription className="text-xs">
-              {isEn
-                ? `Available spendable cash: ${groupDigits(cashBalance)} WLD`
-                : `현재 보유 현금: ${groupDigits(cashBalance)} WLD`}
+              {c('heroDepositCash', { amount: groupDigits(cashBalance) })}
             </DialogDescription>
           </DialogHeader>
 
           <form action={doDeposit} className="space-y-4 pt-2">
             <div className="space-y-2">
               <label htmlFor="deposit-input" className="text-xs font-semibold text-muted-foreground block">
-                {isEn ? 'Deposit Amount' : '입금할 금액 (WLD)'}
+                {c('heroDepositAmount')}
               </label>
               <AmountInput
                 id="deposit-input"
@@ -234,7 +233,7 @@ export function TossBankHeroCard({
                   }}
                   className="h-9 text-xs font-mono font-bold"
                 >
-                  +{Number(preset) >= 10000 ? `${Number(preset) / 10000}만` : `${Number(preset) / 1000}천`}
+                  {presetLabel(preset)}
                 </Button>
               ))}
               <Button
@@ -247,12 +246,12 @@ export function TossBankHeroCard({
                 }}
                 className="h-9 text-xs font-bold"
               >
-                {isEn ? 'MAX' : '전액'}
+                {c('heroMax')}
               </Button>
             </div>
 
             <SubmitButton className="w-full h-12 rounded-2xl btn-toss font-bold text-sm mt-4">
-              {isEn ? 'Complete Deposit' : '예금 채우기 완료'}
+              {c('heroDepositSubmit')}
             </SubmitButton>
             <ActionAlert state={depositState} />
           </form>
@@ -264,19 +263,17 @@ export function TossBankHeroCard({
         <DialogContent className="max-w-md p-6 rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold">
-              {isEn ? 'Withdraw WLD to Cash' : '현금으로 WLD 출금하기'}
+              {c('heroWithdrawTitle')}
             </DialogTitle>
             <DialogDescription className="text-xs">
-              {isEn
-                ? `Current bank balance: ${groupDigits(bankBalance)} WLD`
-                : `현재 예금 잔액: ${groupDigits(bankBalance)} WLD`}
+              {c('heroWithdrawBalance', { amount: groupDigits(bankBalance) })}
             </DialogDescription>
           </DialogHeader>
 
           <form action={doWithdraw} className="space-y-4 pt-2">
             <div className="space-y-2">
               <label htmlFor="withdraw-input" className="text-xs font-semibold text-muted-foreground block">
-                {isEn ? 'Withdrawal Amount' : '출금할 금액 (WLD)'}
+                {c('heroWithdrawAmount')}
               </label>
               <AmountInput
                 id="withdraw-input"
@@ -302,7 +299,7 @@ export function TossBankHeroCard({
                   }}
                   className="h-9 text-xs font-mono font-bold"
                 >
-                  +{Number(preset) >= 10000 ? `${Number(preset) / 10000}만` : `${Number(preset) / 1000}천`}
+                  {presetLabel(preset)}
                 </Button>
               ))}
               <Button
@@ -315,12 +312,12 @@ export function TossBankHeroCard({
                 }}
                 className="h-9 text-xs font-bold"
               >
-                {isEn ? 'MAX' : '전액'}
+                {c('heroMax')}
               </Button>
             </div>
 
             <SubmitButton variant="outline" className="w-full h-12 rounded-2xl font-bold text-sm mt-4">
-              {isEn ? 'Withdraw to Cash' : '현금으로 꺼내기'}
+              {c('heroWithdrawSubmit')}
             </SubmitButton>
             <ActionAlert state={withdrawState} />
           </form>

@@ -11,6 +11,9 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { TradeForm } from './trade-form';
+import { pick } from '@/lib/copy';
+import { fill } from '@/lib/copy-format';
+import { COPY } from './copy';
 
 /**
  * Buy or sell, with the quantity asked for in a dialog.
@@ -45,9 +48,7 @@ export function TradeDialog({
   readonly triggerClassName?: string;
 }) {
   const { locale } = useLocale();
-  const isEn = locale === 'en';
-
-  const defaultLabel = side === 'buy' ? (isEn ? 'Buy' : '매수') : (isEn ? 'Sell' : '매도');
+  const defaultLabel = pick(locale, side === 'buy' ? COPY.buy : COPY.sell);
   const defaultVariant = side === 'buy' ? 'default' : 'outline';
 
   return (
@@ -63,12 +64,10 @@ export function TradeDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {symbol} · {name} {defaultLabel}
+            {pick(locale, fill(COPY.dialogTitle, { symbol, name, side: defaultLabel }))}
           </DialogTitle>
           <DialogDescription>
-            {isEn
-              ? 'Execution price is re-evaluated by the server at the moment of order.'
-              : '체결가는 주문 시점에 서버가 다시 읽습니다.'}
+            {pick(locale, COPY.dialogNote)}
           </DialogDescription>
         </DialogHeader>
         <TradeForm

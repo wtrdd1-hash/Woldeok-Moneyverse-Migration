@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
+// Korean copy is asserted; the application default became English (I18N-02).
+import { LocaleProvider } from '@/components/locale-provider';
 
 /**
  * Production regression 2026-11-25 (digest 3319858667): the signed-in wallet
@@ -14,6 +16,8 @@ vi.mock('@/lib/api', () => ({
   },
 }));
 vi.mock('@/lib/session', () => ({ requireMember: async () => ({ signedIn: true }) }));
+// Korean copy is asserted, so the request locale is Korean.
+vi.mock('@/lib/locale-server', () => ({ getServerLocale: async () => 'ko' }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }), usePathname: () => '/wallet', useSearchParams: () => new URLSearchParams() }));
 
 const { default: WalletPage } = await import('./page');
@@ -24,7 +28,7 @@ describe('wallet page against the Spring API', () => {
       success: true,
       data: { balanceWld: '1500', pendingBalanceWld: '1000', lockedBalanceWld: '500', currency: 'WLD', userId: '6f1c1d36-8d0a-4a39-9d65-1a2b3c4d5e6f', recentTransactions: [] },
     };
-    const html = renderToStaticMarkup(await WalletPage());
+    const html = renderToStaticMarkup(<LocaleProvider initialLocale="ko">{await WalletPage()}</LocaleProvider>);
     expect(html).toContain('1,000');
     expect(html).toContain('500');
     expect(html).toContain('확인 불가');
@@ -33,7 +37,7 @@ describe('wallet page against the Spring API', () => {
 
   it('shows the unavailable state, not a crash, for an unknown body', async () => {
     responses['/api/v1/wallet'] = { status: 503 };
-    const html = renderToStaticMarkup(await WalletPage());
+    const html = renderToStaticMarkup(<LocaleProvider initialLocale="ko">{await WalletPage()}</LocaleProvider>);
     expect(html).toContain('지금은 지갑을 불러올 수 없어요');
   });
 });

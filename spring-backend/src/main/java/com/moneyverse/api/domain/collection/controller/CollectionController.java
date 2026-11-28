@@ -35,16 +35,10 @@ public class CollectionController {
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> listCollections(HttpServletRequest request) {
-        String userId = getUserIdOrThrow(request);
-        List<Map<String, Object>> items = List.of(
-                Map.of("id", "piece-01", "name", "전설의 월덱 골드 코인", "rarity", "LEGENDARY", "isFavorite", true),
-                Map.of("id", "piece-02", "name", "초기 중앙은행 기념주화", "rarity", "EPIC", "isFavorite", false)
-        );
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "pieces", items,
-                "totalCount", items.size()
-        ));
+        getUserIdOrThrow(request);
+        // Security review 2026-11-28: this served invented live state (figures, standings, boosts,
+        // "verified" content). Unavailable until read from its canonical source.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "COLLECTION_SOURCE_UNAVAILABLE");
     }
 
     @PutMapping("/{id}")
@@ -52,7 +46,9 @@ public class CollectionController {
             HttpServletRequest request,
             @PathVariable("id") String pieceId,
             @RequestBody(required = false) Map<String, Object> body) {
-        String userId = getUserIdOrThrow(request);
-        return ResponseEntity.ok(Map.of("ok", true));
+        getUserIdOrThrow(request);
+        // Security review 2026-11-28: this served invented live state (figures, standings, boosts,
+        // "verified" content). Unavailable until read from its canonical source.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "COLLECTION_SOURCE_UNAVAILABLE");
     }
 }

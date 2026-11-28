@@ -20,6 +20,10 @@ import {
   weeksLabel,
 } from './catalog';
 import type { CatalogItem, HeldItem } from './catalog';
+import { pick } from '@/lib/copy';
+import { fill } from '@/lib/copy-format';
+import type { Locale } from '@/lib/locale';
+import { COPY } from './copy';
 
 /**
  * The two cards the catalogue is made of.
@@ -67,14 +71,17 @@ function FactLine({ term, value }: { readonly term: string; readonly value: stri
 export function CatalogCard({
   item,
   held = 0,
+  locale = 'ko',
   children,
 }: {
   readonly item: CatalogItem;
   readonly held?: number;
+  /** The reader's locale; Korean when omitted, as with `formatDay`. The page always passes it. */
+  readonly locale?: Locale;
   readonly children?: React.ReactNode;
 }) {
-  const stock = stockLabel(item.quantity);
-  const limit = purchaseLimitLabel(item.purchase_limit);
+  const stock = stockLabel(item.quantity, locale);
+  const limit = purchaseLimitLabel(item.purchase_limit, locale);
 
   return (
     <Card className="justify-between gap-4">
@@ -84,11 +91,11 @@ export function CatalogCard({
             {item.code}
           </Badge>
           <Badge variant="outline" className="font-normal">
-            {effectLabel(item.effect_kind)}
+            {effectLabel(item.effect_kind, locale)}
           </Badge>
           {held > 0 && (
             <Badge variant="outline" className="font-normal">
-              {countLabel(held)} 보유 중
+              {pick(locale, fill(COPY.heldBadge, { count: countLabel(held, locale) }))}
             </Badge>
           )}
         </div>
@@ -97,17 +104,17 @@ export function CatalogCard({
       </CardHeader>
 
       <CardContent className="grid gap-1 text-sm">
-        <MoneyLine term="가격" value={item.price} />
+        <MoneyLine term={pick(locale, COPY.price)} value={item.price} />
         {/* Shown because a member choosing between a scooter and a van should
             see what each costs every week before buying either. Since 104 it
             is a charge and not a note: the weekly job takes it every Monday,
             and the section above says what happens when it cannot be paid. */}
         {hasUpkeep(item.maintenance_cost) && (
-          <MoneyLine term="주간 관리비" value={item.maintenance_cost} />
+          <MoneyLine term={pick(locale, COPY.weeklyUpkeep)} value={item.maintenance_cost} />
         )}
-        {stock !== null && <FactLine term="재고" value={stock} />}
+        {stock !== null && <FactLine term={pick(locale, COPY.stock)} value={stock} />}
         {item.sale_ends_at !== null && (
-          <FactLine term="판매 종료" value={formatDay(item.sale_ends_at, '확인 중')} />
+          <FactLine term={pick(locale, COPY.saleEnds)} value={formatDay(item.sale_ends_at, pick(locale, COPY.checking), locale)} />
         )}
         {limit !== null && <p className="pt-1 text-xs text-muted-foreground">{limit}</p>}
       </CardContent>
@@ -126,14 +133,17 @@ export function CatalogCard({
  */
 export function HoldingCard({
   item,
+  locale = 'ko',
   children,
 }: {
   readonly item: HeldItem;
+  /** The reader's locale; Korean when omitted, as with `formatDay`. The page always passes it. */
+  readonly locale?: Locale;
   readonly children?: React.ReactNode;
 }) {
   // Every refusal 104 would make, decided once. A non-null note means the
   // control could only be answered with a conflict, so it is not drawn.
-  const note = holdingNote(item);
+  const note = holdingNote(item, locale);
 
   return (
     <Card className="justify-between gap-4">
@@ -143,7 +153,7 @@ export function HoldingCard({
             {item.code}
           </Badge>
           <Badge variant="outline" className="font-normal">
-            {effectLabel(item.effect_kind)}
+            {effectLabel(item.effect_kind, locale)}
           </Badge>
           {/* States the debt, not a consequence. The arrears are real -- the
               weekly job charged them and stopped at the cap -- but nothing is
@@ -152,34 +162,34 @@ export function HoldingCard({
               claim a lock this build does not keep, which is what 101's
               `enforced` flag exists to avoid on the ladder. When an effect
               starts changing what work or 정산 pays, this becomes 정지. */}
-          {item.suspended && <Badge variant="destructive">관리비 {item.unpaid_weeks}주 밀림</Badge>}
+          {item.suspended && <Badge variant="destructive">{pick(locale, fill(COPY.suspendedBadge, { weeks: item.unpaid_weeks }))}</Badge>}
           {item.effect_expires_at !== null && (
             <Badge variant="outline" className="font-normal">
-              효과 적용 중
+              {pick(locale, COPY.effectActive)}
             </Badge>
           )}
         </div>
         <CardTitle className="text-base">{item.name}</CardTitle>
         <CardDescription>
-          {formatDay(item.acquired_at, '받은 날짜 확인 중')}에 받았어요
-          {item.expires_at !== null && ` · ${formatDay(item.expires_at, '확인 중')}까지`}
+          {pick(locale, fill(COPY.acquiredOn, { date: formatDay(item.acquired_at, pick(locale, COPY.acquiredChecking), locale) }))}
+          {item.expires_at !== null && pick(locale, fill(COPY.expiresUntil, { date: formatDay(item.expires_at, pick(locale, COPY.checking), locale) }))}
         </CardDescription>
       </CardHeader>
 
       <CardContent className="grid gap-1 text-sm">
-        <FactLine term="보유 수량" value={countLabel(item.quantity)} />
-        {hasUpkeep(item.weekly_cost) && <MoneyLine term="주간 관리비" value={item.weekly_cost} />}
+        <FactLine term={pick(locale, COPY.quantityHeld)} value={countLabel(item.quantity, locale)} />
+        {hasUpkeep(item.weekly_cost) && <MoneyLine term={pick(locale, COPY.weeklyUpkeep)} value={item.weekly_cost} />}
         {/* The debt and how long it has run, together. A figure on its own
             cannot be told apart from one week of an expensive lease and four
             of a cheap one, and only the second is about to be suspended. */}
         {owesUpkeep(item) && (
           <>
-            <MoneyLine term="밀린 관리비" value={item.arrears_due} />
-            <FactLine term="미납 기간" value={weeksLabel(item.unpaid_weeks)} />
+            <MoneyLine term={pick(locale, COPY.arrears)} value={item.arrears_due} />
+            <FactLine term={pick(locale, COPY.unpaidPeriod)} value={weeksLabel(item.unpaid_weeks, locale)} />
           </>
         )}
         {item.effect_expires_at !== null && (
-          <FactLine term="효과 종료" value={formatDay(item.effect_expires_at, '확인 중')} />
+          <FactLine term={pick(locale, COPY.effectEnds)} value={formatDay(item.effect_expires_at, pick(locale, COPY.checking), locale)} />
         )}
       </CardContent>
 
