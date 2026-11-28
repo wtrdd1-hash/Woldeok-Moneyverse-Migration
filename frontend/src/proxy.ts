@@ -71,7 +71,11 @@ export function proxy(request: NextRequest) {
     /\.(?:svg|png|jpg|jpeg|gif|webp|woff2?|ico|css|js)$/i.test(pathname)
   ) {
     const res = NextResponse.next();
-    if (pathname.startsWith('/_next/static/') || /\.(?:woff2?|png|svg|webp)$/i.test(pathname)) {
+    // Authorised media keeps the origin's own Cache-Control (private / no-store / short public):
+    // a shared cache keys on the URL alone, so an immutable stamp here would serve one viewer's
+    // chat attachment, draft photo or members-only image to anyone (security review 2026-11-28).
+    const authorisedMedia = /^\/(?:api|app-api)\//.test(pathname) || pathname.startsWith('/media/');
+    if (!authorisedMedia && (pathname.startsWith('/_next/static/') || /\.(?:woff2?|png|svg|webp)$/i.test(pathname))) {
       res.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
     }
     return res;

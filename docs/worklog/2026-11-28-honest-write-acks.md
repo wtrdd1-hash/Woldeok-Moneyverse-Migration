@@ -70,3 +70,7 @@ State CODE_READY on the task branch; not merged, not deployed. S04-CVP HOLD (ent
 ### Validation (exact SHA 2206aa37b2)
 - Spring 982 / 0 failures / 0 errors / 0 skipped. The Phase11 media integration test no longer asserts that an unreviewed upload is public (H2 has no visibility functions; their answers are mocked there).
 - Not run: database-backed integration against PostgreSQL for the new function calls (CI-only), browser QA, sandbox probes. G8/G9 HOLD.
+
+## Correction 2026-11-28 10:45 KST (from the integration sandbox run)
+- The old Spring chat upload failed because its key lacked the `chat_` prefix required by the registry CHECK (reproduced on the owned sandbox: SQLSTATE 23514), not because the role lacked a grant. Migration 350 keeps INSERT on `chat_media_registry` and `member_board_image_uploads` for the former direct path, so board uploads did work. The commit messages of 35acdb12e4 overstate this; this entry is the record. Registration now goes through `chat_media_register` / `member_board_register_image_upload`; a later forward migration can revoke those two 350 grants.
+- Integrated as candidate 78c9399123 (integration branch): Spring 1157/0/0/0, sandbox SQL probes as `moneyverse_app` all as expected, ledger invariants 0/0/0; Codex APPROVE, Gemini APPROVE.
