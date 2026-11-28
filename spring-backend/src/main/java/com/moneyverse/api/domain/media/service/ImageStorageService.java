@@ -98,8 +98,14 @@ public class ImageStorageService {
     }
 
     public StoredImage save(byte[] bytes) throws IOException {
+        return save(bytes, "");
+    }
+
+    /** Chat attachments carry the {@code chat_} prefix the 295 registry requires. */
+    public StoredImage save(byte[] bytes, String prefix) throws IOException {
+        if (!"".equals(prefix) && !"chat_".equals(prefix)) throw new IllegalArgumentException("unsupported key prefix");
         ValidatedImage img = validateImage(bytes);
-        String storageKey = UUID.randomUUID() + "." + img.getExtension();
+        String storageKey = prefix + UUID.randomUUID() + "." + img.getExtension();
         Path targetPath = storageDirectory.resolve(storageKey);
 
         Files.createDirectories(storageDirectory);

@@ -1,5 +1,8 @@
 package com.moneyverse.api.domain.media;
 
+import com.moneyverse.api.domain.media.service.MediaAccessService;
+import org.springframework.boot.test.mock.mockito.MockBean;
+
 import com.moneyverse.api.domain.identity.service.UserAuthService;
 import com.moneyverse.api.domain.identity.service.UserAuthService.LoginResult;
 import jakarta.servlet.http.Cookie;
@@ -36,6 +39,11 @@ public class Phase11MediaAndUploadIntegrationTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    // The H2 test schema has no PostgreSQL visibility functions (028/112, 122); stand in for their
+    // answers. Nothing here is published, so the gallery function answers false.
+    @MockBean
+    private MediaAccessService mediaAccess;
 
 
     @Autowired
@@ -131,7 +139,13 @@ public class Phase11MediaAndUploadIntegrationTest {
         String responseBody = uploadResult.getResponse().getContentAsString();
         String storageKey = responseBody.split("\"storageKey\":\"")[1].split("\"")[0];
 
-        // Retrieve bytes via /media/{key}
+        // Security review 2026-11-28: an unreviewed upload must not be publicly served. Before that
+        // review this asserted 200 with an immutable public cache for anyone holding the key.
+        mockMvc.perform(get("/media/" + storageKey))
+                .andExpect(status().isNotFound());
+
+        // Once the publication function says the key is published, the bytes are served and cached.
+        org.mockito.Mockito.when(mediaAccess.publishedPhoto(storageKey)).thenReturn(true);
         mockMvc.perform(get("/media/" + storageKey))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", is("image/png")))
